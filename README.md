@@ -55,11 +55,11 @@ If you would like us to include your company’s name and/or logo in the README 
 * [CPQi (Exadel Financial Services)](https://cpqi.com/)
 * [CloudZero](https://www.cloudzero.com/)
 * [CyberArk](https://www.cyberark.com/)
+* [globaldatanet](https://globaldatanet.com/)
 * [IMS](https://ims.tech/)
 * [Propellor.ai](https://www.propellor.ai/)
 * [TopSport](https://www.topsport.com.au/)
 * [Trek10](https://www.trek10.com/)
-* [globaldatanet](https://globaldatanet.com/)
 
 ### Sharing your work
 
