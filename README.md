@@ -45,6 +45,30 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
 * [Serverless GraphQL Nanny Booking Api](https://github.com/trey-rosius/babysitter_api)
 
+## How to support AWS Lambda Powertools for Python?
+
+### Becoming a reference customers
+
+Knowing which companies are using this library is important to help prioritize the project internally.
+If you would like us to include your company’s name and/or logo in the README file to indicate that your company is using the AWS Lambda Powertools for Python, please raise a "[Support Lambda Powertools (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E)" issue. If you would like us to display your company’s logo, please raise a linked pull request to provide an image file for the logo. The following companies, among others, use Powertools:
+
+* [CPQi (Exadel Financial Services)](https://cpqi.com/)
+* [CloudZero](https://www.cloudzero.com/)
+* [CyberArk](https://www.cyberark.com/)
+* [IMS](https://ims.tech/)
+* [Propellor.ai](https://www.propellor.ai/)
+* [TopSport](https://www.topsport.com.au/)
+* [Trek10](https://www.trek10.com/)
+* [globaldatanet](https://globaldatanet.com/)
+
+### Sharing your work
+
+Share what you did with Powertools 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/).
+
+### Using Lambda Layer or SAR
+
+This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages. When using Layers, you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+
 ## Credits
 
 * Structured logging initial implementation from [aws-lambda-logging](https://gitlab.com/hadrien/aws_lambda_logging)
