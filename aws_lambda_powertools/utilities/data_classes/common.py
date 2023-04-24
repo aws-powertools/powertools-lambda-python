@@ -55,14 +55,16 @@ class DictWrapper(Mapping):
                     property_value = getattr(self, property_key)
                     result[property_key] = property_value
 
+                    # Checks whether the class is a subclass of the parent class to perform a recursive operation.
                     if issubclass(property_value.__class__, DictWrapper):
                         result[property_key] = property_value._str_helper()
+                    # Checks if the key is a list and if it is a subclass of the parent class
                     elif isinstance(property_value, list):
                         for seq, item in enumerate(property_value):
                             if issubclass(item.__class__, DictWrapper):
                                 result[property_key][seq] = item._str_helper()
-                except Exception as e:
-                    result[property_key] = f"[EXCEPTION {type(e)}]"
+                except Exception:
+                    result[property_key] = "[Cannot be deserialized]"
 
         return result
 

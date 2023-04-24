@@ -136,11 +136,10 @@ def test_dict_wrapper_str_no_property():
     class DataClassSample(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
     event_source = DataClassSample({})
-    assert event_source._properties() == ["raw_event"]
     assert str(event_source) == "{'raw_event': '[SENSITIVE]'}"
 
 
@@ -154,16 +153,14 @@ def test_dict_wrapper_str_single_property():
     class DataClassSample(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         @property
-        def data_property(self):
+        def data_property(self) -> str:
             return "value"
 
     event_source = DataClassSample({})
-    assert event_source._properties() == ["data_property", "raw_event"]
-    assert event_source._str_helper() == {"data_property": "value", "raw_event": "[SENSITIVE]"}
     assert str(event_source) == "{'data_property': 'value', 'raw_event': '[SENSITIVE]'}"
 
 
@@ -176,7 +173,7 @@ def test_dict_wrapper_str_property_exception():
     class DataClassSample(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         @property
@@ -184,11 +181,7 @@ def test_dict_wrapper_str_property_exception():
             raise Exception()
 
     event_source = DataClassSample({})
-    assert event_source._str_helper() == {
-        "data_property": "[EXCEPTION <class 'Exception'>]",
-        "raw_event": "[SENSITIVE]",
-    }
-    assert str(event_source) == "{'data_property': \"[EXCEPTION <class 'Exception'>]\", 'raw_event': '[SENSITIVE]'}"
+    assert str(event_source) == "{'data_property': '[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}"
 
 
 def test_dict_wrapper_str_property_list_exception():
@@ -206,27 +199,17 @@ def test_dict_wrapper_str_property_list_exception():
     class DataClassSample(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         @property
-        def data_property(self):
+        def data_property(self) -> list:
             return ["string", 0, 0.0, BrokenDataClass({})]
 
     event_source = DataClassSample({})
-    assert event_source._properties() == ["data_property", "raw_event"]
-    assert event_source._str_helper() == {
-        "data_property": [
-            "string",
-            0,
-            0.0,
-            {"broken_data_property": "[EXCEPTION <class 'Exception'>]", "raw_event": "[SENSITIVE]"},
-        ],
-        "raw_event": "[SENSITIVE]",
-    }
     event_str = (
         "{'data_property': ['string', 0, 0.0, {'broken_data_property': "
-        + "\"[EXCEPTION <class 'Exception'>]\", 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
+        + "'[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
     )
     assert str(event_source) == event_str
 
@@ -240,29 +223,24 @@ def test_dict_wrapper_str_recursive_property():
     class DataClassTerminal(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         @property
-        def terminal_property(self):
+        def terminal_property(self) -> str:
             return "end-recursion"
 
     class DataClassRecursive(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         @property
-        def data_property(self):
+        def data_property(self) -> DataClassTerminal:
             return DataClassTerminal({})
 
     event_source = DataClassRecursive({})
-    assert event_source._properties() == ["data_property", "raw_event"]
-    assert event_source._str_helper() == {
-        "data_property": {"raw_event": "[SENSITIVE]", "terminal_property": "end-recursion"},
-        "raw_event": "[SENSITIVE]",
-    }
     assert (
         str(event_source)
         == "{'data_property': {'raw_event': '[SENSITIVE]', 'terminal_property': 'end-recursion'},"
@@ -279,18 +257,16 @@ def test_dict_wrapper_sensitive_properties_property():
     class DataClassSample(DictWrapper):
         attribute = None
 
-        def function(self):
+        def function(self) -> None:
             pass
 
         _sensitive_properties = ["data_property"]
 
         @property
-        def data_property(self):
+        def data_property(self) -> str:
             return "value"
 
     event_source = DataClassSample({})
-    assert event_source._properties() == ["data_property", "raw_event"]
-    assert event_source._str_helper() == {"data_property": "[SENSITIVE]", "raw_event": "[SENSITIVE]"}
     assert str(event_source) == "{'data_property': '[SENSITIVE]', 'raw_event': '[SENSITIVE]'}"
 
 

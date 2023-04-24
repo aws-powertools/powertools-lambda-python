@@ -12,7 +12,6 @@ Event Source Data Classes utility provides classes self-describing Lambda event 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
 * Docstrings for fields contained in event schemas
-* Implement str() to recursively inspect contents
 
 **Background**
 
@@ -1120,4 +1119,29 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         # Multiple records can be delivered in a single event
         for record in event.records:
             do_something_with(record.body)
+    ```
+
+## Advanced
+
+### Debugging
+
+Alternatively, you can print out the fields to obtain more information. All classes come with a `__str__` method that generates a dictionary string which can be quite useful for debugging.
+
+However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as sensitive to prevent any accidental disclosure of confidential information.
+
+!!! warning "Some fields, like JSON dictionaries, can't be processed and will display as "[Cannot be deserialized]""
+
+=== "debugging.py"
+    ```python hl_lines="5"
+    --8<-- "examples/event_sources/src/debugging.py"
+    ```
+
+=== "debugging_event.json"
+    ```json hl_lines="28 29"
+    --8<-- "examples/event_sources/src/debugging_event.json"
+    ```
+=== "debugging_output.json"
+    ```json hl_lines="16 17 18"
+    --8<-- "examples/event_sources/src/debugging_output.json"
+    ```
     ```
