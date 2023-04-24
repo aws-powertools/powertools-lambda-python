@@ -50,7 +50,9 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 ### Becoming a reference customer
 
 Knowing which companies are using this library is important to help prioritize the project internally.
-If you would like us to include your company’s name and/or logo in the README file to indicate that your company is using the AWS Lambda Powertools for Python, please raise a "[Support Lambda Powertools (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E)" issue. If you would like us to display your company’s logo, please raise a linked pull request to provide an image file for the logo. The following companies, among others, use Powertools:
+If you would like us to include your company’s name and/or logo in the README file to indicate that your company is using the AWS Lambda Powertools for Python, please raise a "[Support Lambda Powertools (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E)" issue.
+
+The following companies, among others, uses Powertools:
 
 * [CPQi (Exadel Financial Services)](https://cpqi.com/)
 * [CloudZero](https://www.cloudzero.com/)
