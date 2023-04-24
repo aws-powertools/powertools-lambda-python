@@ -67,7 +67,7 @@ Share what you did with Powertools 💞💞. Blog post, workshops, presentation,
 
 ### Using Lambda Layer or SAR
 
-This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages. When using Layers, you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages. When [using Layers](https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer), you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
 
 ## Credits
 
