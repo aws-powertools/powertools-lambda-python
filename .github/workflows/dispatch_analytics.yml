@@ -1,4 +1,4 @@
-name: Reusable dispatch analytics
+name: Dispatch analytics
 
 on:
   workflow_dispatch:
@@ -26,6 +26,7 @@ jobs:
     concurrency:
       group: analytics
     runs-on: ubuntu-latest
+    environment: analytics
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
