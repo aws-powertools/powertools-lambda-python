@@ -25,6 +25,9 @@ module.exports = Object.freeze({
     "LABEL_BLOCK_REASON": "need-issue",
 
     /** @type {string} */
+    "LABEL_BLOCK_MISSING_LICENSE_AGREEMENT": "need-license-agreement-acknowledge",
+
+    /** @type {string} */
     "LABEL_PENDING_RELEASE": "pending-release",
 
     /** @type {string} */

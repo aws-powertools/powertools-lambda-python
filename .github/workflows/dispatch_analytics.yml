@@ -1,0 +1,43 @@
+name: Dispatch analytics
+
+on:
+  workflow_dispatch:
+
+  schedule:
+    - cron: '0 * * * *'
+
+permissions:
+  id-token: write
+  actions: read
+  checks: read
+  contents: read
+  deployments: read
+  issues: read
+  discussions: read
+  packages: read
+  pages: read
+  pull-requests: read
+  repository-projects: read
+  security-events: read
+  statuses: read
+
+jobs:
+  dispatch_token:
+    concurrency:
+      group: analytics
+    runs-on: ubuntu-latest
+    environment: analytics
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        with:
+          aws-region: eu-central-1
+          role-to-assume: ${{ secrets.AWS_ANALYTICS_ROLE_ARN }}
+
+      - name: Invoke Lambda function
+        run: |
+          payload=$(echo -n '{"githubToken": "${{ secrets.GITHUB_TOKEN }}"}' | base64)
+          aws lambda invoke \
+            --function-name ${{ secrets.AWS_ANALYTICS_DISPATCHER_ARN }} \
+            --payload "$payload" response.json
+          cat response.json

@@ -95,12 +95,12 @@ class BaseInfrastructure(InfrastructureProvider):
         self.create_lambda_functions()
         ```
 
-        Creating Lambda functions and override runtime to Python 3.7
+        Creating Lambda functions and override runtime to Python 3.10
 
         ```python
         from aws_cdk.aws_lambda import Runtime
 
-        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_7)
+        self.create_lambda_functions(function_props={"runtime": Runtime.PYTHON_3_10)
         ```
         """
         if not self._handlers_dir.exists():
@@ -115,6 +115,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 Runtime.PYTHON_3_7,
                 Runtime.PYTHON_3_8,
                 Runtime.PYTHON_3_9,
+                Runtime.PYTHON_3_10,
             ],
             compatible_architectures=[architecture],
             code=Code.from_asset(path=layer_build),
@@ -138,7 +139,7 @@ class BaseInfrastructure(InfrastructureProvider):
                 "code": source,
                 "handler": f"{fn_name}.lambda_handler",
                 "tracing": Tracing.ACTIVE,
-                "runtime": Runtime.PYTHON_3_9,
+                "runtime": self._determine_runtime_version(),
                 "layers": [layer],
                 "architecture": architecture,
                 **function_settings_override,
@@ -242,6 +243,20 @@ class BaseInfrastructure(InfrastructureProvider):
         # allow CDK to read/execute file for stack deployment
         temp_file.chmod(0o755)
         return temp_file
+
+    def _determine_runtime_version(self) -> Runtime:
+        """Determine Python runtime version based on the current Python interpreter"""
+        version = sys.version_info
+        if version.major == 3 and version.minor == 7:
+            return Runtime.PYTHON_3_7
+        elif version.major == 3 and version.minor == 8:
+            return Runtime.PYTHON_3_8
+        elif version.major == 3 and version.minor == 9:
+            return Runtime.PYTHON_3_9
+        elif version.major == 3 and version.minor == 10:
+            return Runtime.PYTHON_3_10
+        else:
+            raise Exception(f"Unsupported Python version: {version}")
 
     def create_resources(self) -> None:
         """Create any necessary CDK resources. It'll be called before deploy

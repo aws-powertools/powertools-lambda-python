@@ -26,7 +26,6 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -496,9 +495,15 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
                 result = self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
-        except ValidationError:
-            return self._register_model_validation_error_record(record)
-        except Exception:
+        except Exception as exc:
+            # NOTE: Pydantic is an optional dependency, but when used and a poison pill scenario happens
+            # we need to handle that exception differently.
+            # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
+            # and we compare if it's coming from the same model that trigger the exception in the first place
+            model = getattr(exc, "model", None)
+            if model == self.model:
+                return self._register_model_validation_error_record(record)
+
             return self.failure_handler(record=data, exception=sys.exc_info())
 
 
@@ -634,7 +639,13 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
                 result = await self.handler(record=data)
 
             return self.success_handler(record=record, result=result)
-        except ValidationError:
-            return self._register_model_validation_error_record(record)
-        except Exception:
+        except Exception as exc:
+            # NOTE: Pydantic is an optional dependency, but when used and a poison pill scenario happens
+            # we need to handle that exception differently.
+            # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
+            # and we compare if it's coming from the same model that trigger the exception in the first place
+            model = getattr(exc, "model", None)
+            if model == self.model:
+                return self._register_model_validation_error_record(record)
+
             return self.failure_handler(record=data, exception=sys.exc_info())

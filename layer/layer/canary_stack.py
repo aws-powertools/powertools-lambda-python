@@ -1,7 +1,24 @@
 import uuid
 
-from aws_cdk import CfnParameter, CustomResource, Duration, Stack
-from aws_cdk.aws_iam import Effect, ManagedPolicy, PolicyStatement, Role, ServicePrincipal
+import jsii
+from aws_cdk import (
+    Aspects,
+    CfnCondition,
+    CfnParameter,
+    CfnResource,
+    CustomResource,
+    Duration,
+    Fn,
+    IAspect,
+    Stack,
+)
+from aws_cdk.aws_iam import (
+    Effect,
+    ManagedPolicy,
+    PolicyStatement,
+    Role,
+    ServicePrincipal,
+)
 from aws_cdk.aws_lambda import Architecture, Code, Function, LayerVersion, Runtime
 from aws_cdk.aws_logs import RetentionDays
 from aws_cdk.aws_ssm import StringParameter
@@ -11,6 +28,16 @@ from constructs import Construct
 VERSION_TRACKING_EVENT_BUS_ARN: str = (
     "arn:aws:events:eu-central-1:027876851704:event-bus/VersionTrackingEventBus"
 )
+
+
+@jsii.implements(IAspect)
+class ApplyCondition:
+    def __init__(self, condition: CfnCondition):
+        self.condition = condition
+
+    def visit(self, node):
+        if isinstance(node, CfnResource):
+            node.cfn_options.condition = self.condition
 
 
 class CanaryStack(Stack):
@@ -29,6 +56,20 @@ class CanaryStack(Stack):
             self, "DeployStage", description="Deployment stage for canary"
         ).value_as_string
 
+        has_arm64_support = CfnParameter(
+            self,
+            "HasARM64Support",
+            description="Has ARM64 Support Condition",
+            type="String",
+            allowed_values=["true", "false"],
+        )
+
+        has_arm64_condition = CfnCondition(
+            self,
+            "HasARM64SupportCondition",
+            expression=Fn.condition_equals(has_arm64_support, "true"),
+        )
+
         layer_arn = StringParameter.from_string_parameter_attributes(
             self, "LayerVersionArnParam", parameter_name=ssm_paramter_layer_arn
         ).string_value
@@ -46,7 +87,8 @@ class CanaryStack(Stack):
             "LayerArm64VersionArnParam",
             parameter_name=ssm_parameter_layer_arm64_arn,
         ).string_value
-        Canary(
+
+        arm64_canary = Canary(
             self,
             "Canary-arm64",
             layer_arn=layer_arm64_arn,
@@ -54,6 +96,7 @@ class CanaryStack(Stack):
             architecture=Architecture.ARM_64,
             stage=deploy_stage,
         )
+        Aspects.of(arm64_canary).add(ApplyCondition(has_arm64_condition))
 
 
 class Canary(Construct):

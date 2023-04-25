@@ -50,7 +50,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
@@ -71,11 +71,12 @@ jobs:
           driver: docker
           platforms: linux/amd64,linux/arm64
       - name: install cdk and deps
+        working-directory: ./
         run: |
-          npm install -g aws-cdk@2.47.0
-          cdk --version
+          npm install
+          npx cdk --version
       - name: CDK build
-        run: cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out
+        run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
