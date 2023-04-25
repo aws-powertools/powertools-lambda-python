@@ -737,6 +737,31 @@ As a best practice for libraries, Powertools module logging statements are suppr
 
 When necessary, you can use `POWERTOOLS_DEBUG` environment variable to enable debugging. This will provide additional information on every internal operation.
 
+## How to support AWS Lambda Powertools for Python?
+
+### Becoming a reference customer
+
+Knowing which companies are using this library is important to help prioritize the project internally. If your company is using AWS Lambda Powertools for Python, you can request to have your name and logo added to the README file by raising a [Support Lambda Powertools (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"} issue.
+
+The following companies, among others, use Powertools:
+
+* [CPQi (Exadel Financial Services)](https://cpqi.com/){target="_blank"}
+* [CloudZero](https://www.cloudzero.com/){target="_blank"}
+* [CyberArk](https://www.cyberark.com/){target="_blank"}
+* [globaldatanet](https://globaldatanet.com/){target="_blank"}
+* [IMS](https://ims.tech/){target="_blank"}
+* [Propellor.ai](https://www.propellor.ai/){target="_blank"}
+* [TopSport](https://www.topsport.com.au/){target="_blank"}
+* [Trek10](https://www.trek10.com/){target="_blank"}
+
+### Sharing your work
+
+Share what you did with Powertools 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/).
+
+### Using Lambda Layer or SAR
+
+This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages. When [using Layers](https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer), you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
+
 ## Tenets
 
 These are our core principles to guide our decision making.
