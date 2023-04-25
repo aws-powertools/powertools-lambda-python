@@ -1127,12 +1127,12 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 Alternatively, you can print out the fields to obtain more information. All classes come with a `__str__` method that generates a dictionary string which can be quite useful for debugging.
 
-However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as sensitive to prevent any accidental disclosure of confidential information.
+However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as `[SENSITIVE]` to prevent any accidental disclosure of confidential information.
 
-!!! warning "Some fields, like JSON dictionaries, can't be processed and will display as "[Cannot be deserialized]""
+!!! warning "Some fields contain user-supplied data, which can be plain text or JSON. If deserialization of this field fails, it will appear as [Cannot be deserialized]"
 
 === "debugging.py"
-    ```python hl_lines="5"
+    ```python hl_lines="9"
     --8<-- "examples/event_sources/src/debugging.py"
     ```
 
