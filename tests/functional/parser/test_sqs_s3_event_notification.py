@@ -18,7 +18,9 @@ def test_handle_sqs_json_body_containing_s3_notifications():
     for record in sqs_event_dict["Records"]:
         record["body"] = json_serialize(s3_event_notification_dict)
 
-    parsed_event: SqsS3EventNotificationModel = handle_sqs_json_body_containing_s3_notifications(sqs_event_dict, LambdaContext())
+    parsed_event: SqsS3EventNotificationModel = handle_sqs_json_body_containing_s3_notifications(
+        sqs_event_dict, LambdaContext()
+    )
 
     assert len(parsed_event.Records) == 2
     for parsed_sqs_record in parsed_event.Records:

@@ -3,7 +3,7 @@ from typing import List
 from pydantic import Json
 
 from aws_lambda_powertools.utilities.parser.models.s3 import S3Model
-from aws_lambda_powertools.utilities.parser.models.sqs import SqsRecordModel, SqsModel
+from aws_lambda_powertools.utilities.parser.models.sqs import SqsModel, SqsRecordModel
 
 
 class SqsS3EventNotificationRecordModel(SqsRecordModel):

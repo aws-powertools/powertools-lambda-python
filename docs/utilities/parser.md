@@ -175,6 +175,7 @@ Parser comes with the following built-in models:
 | **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                  |
 | **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                   |
 | **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                              |
+| **SqsS3EventNotificationModel**         | Lambda Event Source payload for SQS-wrapped S3 event notifications           |
 
 #### Extending built-in models
 

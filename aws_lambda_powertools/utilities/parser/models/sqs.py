@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Sequence, Type, Union
 
 from pydantic import BaseModel
 
@@ -63,4 +63,4 @@ class SqsRecordModel(BaseModel):
 
 
 class SqsModel(BaseModel):
-    Records: List[SqsRecordModel]
+    Records: Sequence[SqsRecordModel]
