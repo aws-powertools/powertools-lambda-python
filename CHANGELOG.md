@@ -15,10 +15,12 @@
 ## Features
 
 * **ci:** dispatch GitHub analytics action ([#2161](https://github.com/awslabs/aws-lambda-powertools-python/issues/2161))
+* **event_sources:** Add __str__ to Data Classes base DictWrapper ([#2129](https://github.com/awslabs/aws-lambda-powertools-python/issues/2129))
 
 ## Maintenance
 
 * add dummy reusable dispatch analytics job
+* **deps-dev:** bump cfn-lint from 0.77.2 to 0.77.3 ([#2165](https://github.com/awslabs/aws-lambda-powertools-python/issues/2165))
 * **deps-dev:** bump mkdocs-material from 9.1.6 to 9.1.8 ([#2162](https://github.com/awslabs/aws-lambda-powertools-python/issues/2162))
 * **deps-dev:** bump importlib-metadata from 6.5.0 to 6.6.0 ([#2163](https://github.com/awslabs/aws-lambda-powertools-python/issues/2163))
 
