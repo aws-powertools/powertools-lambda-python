@@ -64,16 +64,24 @@ We provide built-in envelopes for popular AWS Lambda event sources to easily dec
 
 These are all built-in envelopes you can use along with their expression as a reference:
 
-| Envelope                          | JMESPath expression                                           |
-| --------------------------------- | ------------------------------------------------------------- |
-| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                       |
-| **`API_GATEWAY_HTTP`**            | `API_GATEWAY_REST`                                            |
-| **`SQS`**                         | `Records[*].powertools_json(body)`                            |
-| **`SNS`**                         | `Records[0].Sns.Message                                       | powertools_json(@)`              |
-| **`EVENTBRIDGE`**                 | `detail`                                                      |
-| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `EVENTBRIDGE`                                                 |
-| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))` |
-| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]` |
+| Envelope                          | JMESPath expression                                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                                    |
+| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                                    |
+| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                                   |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]`                   |
+| **`EVENTBRIDGE`**                 | `detail`                                                                                   |
+| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`                              |
+| **`S3_EVENTBRIDGE_SQS`**          | `Records[*].powertools_json(body).detail`                                                  |
+| **`S3_RAWSNS_KINESIS_FIREHOSE`**  | `records[*].powertools_json(powertools_base64(data)).Records[0]`                           |
+| **`S3_RAWSNS_SQS`**               | `Records[*].powertools_json(body).Records[0]`                                              |
+| **`S3_SNS_KINESIS_FIREHOSE`**     | `records[*].powertools_json(powertools_base64(data)).powertools_json(Message).Records[0]`  |
+| **`S3_SNS_SQS`**                  | `Records[*].powertools_json(body).powertools_json(Message).Records[0]`                     |
+| **`SNS`**                         | `Records[0].Sns.Message | powertools_json(@)`                                              |
+| **`SQS`**                         | `Records[*].powertools_json(body)`                                                         |
+
+???+ tip
+    If you're using architectures that involve sending event notifications from S3 to SNS and then to SQS or Kinesis Data Firehose, consider enabling [Raw Delivery option](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"} in Amazon SNS. This can help reduce the payload by stripping the SNS metadata.
 
 ## Advanced
 
