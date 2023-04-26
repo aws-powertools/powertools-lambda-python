@@ -80,6 +80,8 @@ class CodePipelineArtifact(DictWrapper):
 
 
 class CodePipelineArtifactCredentials(DictWrapper):
+    _sensitive_properties = ["secret_access_key", "session_token"]
+
     @property
     def access_key_id(self) -> str:
         return self["accessKeyId"]

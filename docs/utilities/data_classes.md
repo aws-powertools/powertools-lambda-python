@@ -52,6 +52,22 @@ Same example as above, but using the `event_source` decorator
         if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
+
+Log Data Event for Troubleshooting
+
+=== "app.py"
+
+    ```python hl_lines="4 8"
+    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+    from aws_lambda_powertools.logging.logger import Logger
+
+    logger = Logger(service="hello_logs", level="DEBUG")
+
+    @event_source(data_class=APIGatewayProxyEvent)
+    def lambda_handler(event: APIGatewayProxyEvent, context):
+        logger.debug(event)
+    ```
+
 **Autocomplete with self-documented properties and methods**
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
@@ -1103,4 +1119,29 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         # Multiple records can be delivered in a single event
         for record in event.records:
             do_something_with(record.body)
+    ```
+
+## Advanced
+
+### Debugging
+
+Alternatively, you can print out the fields to obtain more information. All classes come with a `__str__` method that generates a dictionary string which can be quite useful for debugging.
+
+However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as `[SENSITIVE]` to prevent any accidental disclosure of confidential information.
+
+!!! warning "If we fail to deserialize a field value (e.g., JSON), they will appear as `[Cannot be deserialized]`"
+
+=== "debugging.py"
+    ```python hl_lines="9"
+    --8<-- "examples/event_sources/src/debugging.py"
+    ```
+
+=== "debugging_event.json"
+    ```json hl_lines="28 29"
+    --8<-- "examples/event_sources/src/debugging_event.json"
+    ```
+=== "debugging_output.json"
+    ```json hl_lines="16 17 18"
+    --8<-- "examples/event_sources/src/debugging_output.json"
+    ```
     ```
