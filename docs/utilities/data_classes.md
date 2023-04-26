@@ -1129,7 +1129,7 @@ Alternatively, you can print out the fields to obtain more information. All clas
 
 However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as `[SENSITIVE]` to prevent any accidental disclosure of confidential information.
 
-!!! warning "Some fields contain user-supplied data, which can be plain text or JSON. If deserialization of this field fails, it will appear as [Cannot be deserialized]"
+!!! warning "If we fail to deserialize a field value (e.g., JSON), they will appear as `[Cannot be deserialized]`"
 
 === "debugging.py"
     ```python hl_lines="9"
