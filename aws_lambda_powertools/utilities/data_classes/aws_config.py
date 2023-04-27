@@ -6,17 +6,22 @@ from typing import Dict, List
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-def get_invoke_event(invoking_event: dict) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification:
+def get_invoke_event(
+    invoking_event: dict,
+) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration | None:
     message_type = invoking_event.get("messageType")
 
     if message_type == "ConfigurationItemChangeNotification":
-        return AWSConfigConfigurationItemChanged(invoking_event)
+        return AWSConfigConfigurationChanged(invoking_event)
 
     if message_type == "ScheduledNotification":
         return AWSConfigScheduledNotification(invoking_event)
 
     if message_type == "OversizedConfigurationItemChangeNotification":
         return AWSConfigOversizedConfiguration(invoking_event)
+
+    # In case of a unknown event
+    return None
 
 
 class AWSConfigConfigurationItemChanged(DictWrapper):
@@ -186,7 +191,7 @@ class AWSConfigEvent(DictWrapper):
     @property
     def invoking_event(
         self,
-    ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
+    ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration | None:
         """The version of the event."""
         return get_invoke_event(json.loads(self["invokingEvent"]))
 
