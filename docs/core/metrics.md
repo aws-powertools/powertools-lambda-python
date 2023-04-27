@@ -256,9 +256,17 @@ If you prefer not to use `log_metrics` because you might want to encapsulate add
 ???+ warning
 	Metrics, dimensions and namespace validation still applies
 
-```python hl_lines="11-14" title="Manually flushing and clearing metrics from memory"
---8<-- "examples/metrics/src/single_metric.py"
-```
+=== "Regular Metrics"
+
+    ```python hl_lines="10"
+    --8<-- "examples/metrics/src/flush_metrics.py"
+    ```
+
+=== "Single Metrics"
+
+    ```python hl_lines="11-14"
+    --8<-- "examples/metrics/src/single_metric.py"
+    ```
 
 ### Metrics isolation
 
