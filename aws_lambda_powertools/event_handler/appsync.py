@@ -287,8 +287,7 @@ class AppSyncResolver(Router):
         )
 
         return [
-            resolver(event=appconfig_event, **appconfig_event.arguments)
-            for appconfig_event in self.current_batch_event
+            resolver(event=appconfig_event, **appconfig_event.arguments) for appconfig_event in self.current_batch_event
         ]
 
     def __call__(
