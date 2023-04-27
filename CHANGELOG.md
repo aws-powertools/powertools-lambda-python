@@ -11,6 +11,7 @@
 ## Documentation
 
 * **homepage:** add customer references section ([#2159](https://github.com/awslabs/aws-lambda-powertools-python/issues/2159))
+* **tutorial:** use newer sam cli template; update to py3.10 ([#2167](https://github.com/awslabs/aws-lambda-powertools-python/issues/2167))
 
 ## Features
 
