@@ -126,6 +126,150 @@ def test_dict_wrapper_implements_mapping():
     assert event_source.items() == data.items()
 
 
+def test_dict_wrapper_str_no_property():
+    """
+    Checks that the _properties function returns
+    only the "raw_event", and the resulting string
+    notes it as sensitive.
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+    event_source = DataClassSample({})
+    assert str(event_source) == "{'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_single_property():
+    """
+    Checks that the _properties function returns
+    the defined property "data_property", and
+    resulting string includes the property value.
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        @property
+        def data_property(self) -> str:
+            return "value"
+
+    event_source = DataClassSample({})
+    assert str(event_source) == "{'data_property': 'value', 'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_property_exception():
+    """
+    Check the recursive _str_helper function handles
+    exceptions that may occur when accessing properties
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        @property
+        def data_property(self):
+            raise Exception()
+
+    event_source = DataClassSample({})
+    assert str(event_source) == "{'data_property': '[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}"
+
+
+def test_dict_wrapper_str_property_list_exception():
+    """
+    Check that _str_helper properly handles exceptions
+    that occur when recursively working through items
+    in a list property.
+    """
+
+    class BrokenDataClass(DictWrapper):
+        @property
+        def broken_data_property(self):
+            raise Exception()
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        @property
+        def data_property(self) -> list:
+            return ["string", 0, 0.0, BrokenDataClass({})]
+
+    event_source = DataClassSample({})
+    event_str = (
+        "{'data_property': ['string', 0, 0.0, {'broken_data_property': "
+        + "'[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
+    )
+    assert str(event_source) == event_str
+
+
+def test_dict_wrapper_str_recursive_property():
+    """
+    Check that the _str_helper function recursively
+    handles Data Classes within Data Classes
+    """
+
+    class DataClassTerminal(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        @property
+        def terminal_property(self) -> str:
+            return "end-recursion"
+
+    class DataClassRecursive(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        @property
+        def data_property(self) -> DataClassTerminal:
+            return DataClassTerminal({})
+
+    event_source = DataClassRecursive({})
+    assert (
+        str(event_source)
+        == "{'data_property': {'raw_event': '[SENSITIVE]', 'terminal_property': 'end-recursion'},"
+        + " 'raw_event': '[SENSITIVE]'}"
+    )
+
+
+def test_dict_wrapper_sensitive_properties_property():
+    """
+    Checks that the _str_helper function correctly
+    handles _sensitive_properties
+    """
+
+    class DataClassSample(DictWrapper):
+        attribute = None
+
+        def function(self) -> None:
+            pass
+
+        _sensitive_properties = ["data_property"]
+
+        @property
+        def data_property(self) -> str:
+            return "value"
+
+    event_source = DataClassSample({})
+    assert str(event_source) == "{'data_property': '[SENSITIVE]', 'raw_event': '[SENSITIVE]'}"
+
+
 def test_cloud_watch_dashboard_event():
     event = CloudWatchDashboardCustomWidgetEvent(load_event("cloudWatchDashboardEvent.json"))
     assert event.describe is False
@@ -779,6 +923,7 @@ def test_seq_trigger_event():
     assert record.md5_of_body == "e4e68fb7bd0e697a0ae8f1bb342846b3"
     assert record.event_source == "aws:sqs"
     assert record.event_source_arn == "arn:aws:sqs:us-east-2:123456789012:my-queue"
+    assert record.queue_url == "https://sqs.us-east-2.amazonaws.com/123456789012/my-queue"
     assert record.aws_region == "us-east-2"
 
 

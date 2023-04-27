@@ -1,7 +1,7 @@
 import base64
 import json
 from collections.abc import Mapping
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
@@ -27,6 +27,49 @@ class DictWrapper(Mapping):
 
     def __len__(self) -> int:
         return len(self._data)
+
+    def __str__(self) -> str:
+        return str(self._str_helper())
+
+    def _str_helper(self) -> Dict[str, Any]:
+        """
+        Recursively get a Dictionary of DictWrapper properties primarily
+        for use by __str__ for debugging purposes.
+
+        Will remove "raw_event" properties, and any defined by the Data Class
+        `_sensitive_properties` list field.
+        This should be used in case where secrets, such as access keys, are
+        stored in the Data Class but should not be logged out.
+        """
+        properties = self._properties()
+        sensitive_properties = ["raw_event"]
+        if hasattr(self, "_sensitive_properties"):
+            sensitive_properties.extend(self._sensitive_properties)  # pyright: ignore
+
+        result: Dict[str, Any] = {}
+        for property_key in properties:
+            if property_key in sensitive_properties:
+                result[property_key] = "[SENSITIVE]"
+            else:
+                try:
+                    property_value = getattr(self, property_key)
+                    result[property_key] = property_value
+
+                    # Checks whether the class is a subclass of the parent class to perform a recursive operation.
+                    if issubclass(property_value.__class__, DictWrapper):
+                        result[property_key] = property_value._str_helper()
+                    # Checks if the key is a list and if it is a subclass of the parent class
+                    elif isinstance(property_value, list):
+                        for seq, item in enumerate(property_value):
+                            if issubclass(item.__class__, DictWrapper):
+                                result[property_key][seq] = item._str_helper()
+                except Exception:
+                    result[property_key] = "[Cannot be deserialized]"
+
+        return result
+
+    def _properties(self) -> List[str]:
+        return [p for p in dir(self.__class__) if isinstance(getattr(self.__class__, p), property)]
 
     def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
         return self._data.get(key, default)

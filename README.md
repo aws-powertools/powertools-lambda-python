@@ -3,7 +3,7 @@
 
 [![Build](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml/badge.svg)](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml)
 [![codecov.io](https://codecov.io/github/awslabs/aws-lambda-powertools-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/awslabs/aws-lambda-powertools-python)
-![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
+![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9|%203.10&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
 
 Powertools is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://awslabs.github.io/aws-lambda-powertools-python/latest/#features).
 
@@ -44,6 +44,31 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 * [Serverless Airline](https://github.com/aws-samples/aws-serverless-airline-booking)
 * [Serverless E-commerce platform](https://github.com/aws-samples/aws-serverless-ecommerce-platform)
 * [Serverless GraphQL Nanny Booking Api](https://github.com/trey-rosius/babysitter_api)
+
+## How to support AWS Lambda Powertools for Python?
+
+### Becoming a reference customer
+
+Knowing which companies are using this library is important to help prioritize the project internally. If your company is using AWS Lambda Powertools for Python, you can request to have your name and logo added to the README file by raising a [Support Lambda Powertools (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E) issue.
+
+The following companies, among others, use Powertools:
+
+* [CPQi (Exadel Financial Services)](https://cpqi.com/)
+* [CloudZero](https://www.cloudzero.com/)
+* [CyberArk](https://www.cyberark.com/)
+* [globaldatanet](https://globaldatanet.com/)
+* [IMS](https://ims.tech/)
+* [Propellor.ai](https://www.propellor.ai/)
+* [TopSport](https://www.topsport.com.au/)
+* [Trek10](https://www.trek10.com/)
+
+### Sharing your work
+
+Share what you did with Powertools 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/).
+
+### Using Lambda Layer or SAR
+
+This helps us understand who uses Powertools in a non-intrusive way, and helps us gain future investments for other Powertools languages. When [using Layers](https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer), you can add Powertools as a dev dependency (or as part of your virtual env) to not impact the development process.
 
 ## Credits
 

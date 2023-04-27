@@ -1,14 +1,11 @@
-name: Maintenance
-description: Suggest an activity to help address governance and anything internal
-title: "Maintenance: TITLE"
-labels: ["internal", "triage"]
+name: Technical debt
+description: Suggest an activity to help address technical debt.
+title: "Tech debt: TITLE"
+labels: ["tech-debt", "triage"]
 body:
   - type: markdown
     attributes:
-      value: |
-        Thank you for taking the time to help us improve operational excellence.
-
-        *Future readers*: Please react with 👍 and your use case to help us understand customer demand.
+      value: Thank you for taking the time to help us proactively improve delivery velocity, safely.
   - type: textarea
     id: importance
     attributes:
@@ -44,7 +41,7 @@ body:
   - type: textarea
     id: suggestion
     attributes:
-      label: Solution
+      label: Suggestion
       description: If available, please share what a good solution would look like
     validations:
       required: false

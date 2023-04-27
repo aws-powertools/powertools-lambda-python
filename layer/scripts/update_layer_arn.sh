@@ -7,6 +7,7 @@
 # see .github/workflows/reusable_deploy_v2_layer_stack.yml
 
 set -eo pipefail
+set -x
 
 if [[ $# -ne 1 ]]; then
   cat <<EOM
@@ -68,9 +69,9 @@ for file in $files; do
         sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/index.md
 
         # The same strings can also be found in examples on Logger, Tracer and Metrics
-        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/logger.md
-        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/metrics.md
-        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" docs/core/tracer.md
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" examples/logger/sam/template.yaml
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" examples/metrics/sam/template.yaml
+        sed -i -e "s/$prefix_pseudo_region:[[:digit:]][[:digit:]]*/$line_pseudo_region/g" examples/tracer/sam/template.yaml
       done
     fi
   done
