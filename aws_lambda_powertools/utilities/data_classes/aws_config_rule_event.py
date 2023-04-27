@@ -27,48 +27,48 @@ def get_invoke_event(
 class AWSConfigConfigurationChanged(DictWrapper):
     @property
     def configuration_item_diff(self) -> Dict:
-        """The version of the event."""
+        """The configuration item diff of the ConfigurationItemChangeNotification event."""
         return self["configurationItemDiff"]
 
     @property
     def configuration_item(self) -> AWSConfigConfigurationItemChanged:
-        """The version of the event."""
+        """The configuration item of the ConfigurationItemChangeNotification event."""
         return AWSConfigConfigurationItemChanged(self["configurationItem"])
 
     def raw_configuration_item(self) -> Dict:
-        """The version of the event."""
+        """The raw configuration item diff of the ConfigurationItemChangeNotification event."""
         return self["configurationItem"]
 
     @property
     def record_version(self) -> str:
-        """The version of the event."""
+        """The record version of the ConfigurationItemChangeNotification event."""
         return self["recordVersion"]
 
     @property
     def message_type(self) -> str:
-        """The version of the event."""
+        """The message type of the ConfigurationItemChangeNotification event."""
         return self["messageType"]
 
     @property
     def notification_creation_time(self) -> str:
-        """The version of the event."""
+        """The notification creation time of the ConfigurationItemChangeNotification event."""
         return self["notificationCreationTime"]
 
 
 class AWSConfigConfigurationItemChanged(DictWrapper):
     @property
     def related_events(self) -> List:
-        """The version of the event."""
+        """The related events of the ConfigurationItemChangeNotification event."""
         return self["relatedEvents"]
 
     @property
     def relationships(self) -> List:
-        """The version of the event."""
+        """The relationships of the ConfigurationItemChangeNotification event."""
         return self["relationships"]
 
     @property
     def configuration(self) -> Dict:
-        """The version of the event."""
+        """The configuration of the ConfigurationItemChangeNotification event."""
         return self["configuration"]
 
     @property
@@ -284,12 +284,12 @@ class AWSConfigRuleEvent(DictWrapper):
     def invoking_event(
         self,
     ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration | None:
-        """The version of the event."""
+        """The invoking payload of the event."""
         return get_invoke_event(json.loads(self["invokingEvent"]))
 
     @property
     def raw_invoking_event(self) -> str:
-        """The version of the event."""
+        """The raw invoking payload of the event."""
         return self["invokingEvent"]
 
     @property
@@ -299,7 +299,7 @@ class AWSConfigRuleEvent(DictWrapper):
 
     @property
     def result_token(self) -> str:
-        """The token of the event."""
+        """The result token of the event."""
         return self["resultToken"]
 
     @property
