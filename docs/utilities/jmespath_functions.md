@@ -81,7 +81,7 @@ These are all built-in envelopes you can use along with their expression as a re
 | **`SQS`**                         | `Records[*].powertools_json(body)`                                                         |
 
 ???+ tip
-    If you're using architectures that involve sending event notifications from S3 to SNS and then to SQS or Kinesis Data Firehose, consider enabling [Raw Delivery option](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"} in Amazon SNS. This can help reduce the payload by stripping the SNS metadata.
+    If you're using architectures that involve sending event notifications from S3 to SNS and then to SQS or Kinesis Data Firehose, consider enabling [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"} option in Amazon SNS. This can help reduce the payload by stripping the SNS metadata.
 
 ## Advanced
 
