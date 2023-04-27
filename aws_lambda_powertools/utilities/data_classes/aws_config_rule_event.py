@@ -24,6 +24,37 @@ def get_invoke_event(
     return None
 
 
+class AWSConfigConfigurationChanged(DictWrapper):
+    @property
+    def configuration_item_diff(self) -> Dict:
+        """The version of the event."""
+        return self["configurationItemDiff"]
+
+    @property
+    def configuration_item(self) -> AWSConfigConfigurationItemChanged:
+        """The version of the event."""
+        return AWSConfigConfigurationItemChanged(self["configurationItem"])
+
+    def raw_configuration_item(self) -> Dict:
+        """The version of the event."""
+        return self["configurationItem"]
+
+    @property
+    def record_version(self) -> str:
+        """The version of the event."""
+        return self["recordVersion"]
+
+    @property
+    def message_type(self) -> str:
+        """The version of the event."""
+        return self["messageType"]
+
+    @property
+    def notification_creation_time(self) -> str:
+        """The version of the event."""
+        return self["notificationCreationTime"]
+
+
 class AWSConfigConfigurationItemChanged(DictWrapper):
     @property
     def related_events(self) -> List:
@@ -116,37 +147,6 @@ class AWSConfigConfigurationItemChanged(DictWrapper):
         return self["resourceCreationTime"]
 
 
-class AWSConfigConfigurationChanged(DictWrapper):
-    @property
-    def configuration_item_diff(self) -> Dict:
-        """The version of the event."""
-        return self["configurationItemDiff"]
-
-    @property
-    def configuration_item(self) -> AWSConfigConfigurationItemChanged:
-        """The version of the event."""
-        return AWSConfigConfigurationItemChanged(self["configurationItem"])
-
-    def raw_configuration_item(self) -> Dict:
-        """The version of the event."""
-        return self["configurationItem"]
-
-    @property
-    def record_version(self) -> str:
-        """The version of the event."""
-        return self["recordVersion"]
-
-    @property
-    def message_type(self) -> str:
-        """The version of the event."""
-        return self["messageType"]
-
-    @property
-    def notification_creation_time(self) -> str:
-        """The version of the event."""
-        return self["notificationCreationTime"]
-
-
 class AWSConfigScheduledNotification(DictWrapper):
     @property
     def accountid(self) -> str:
@@ -171,12 +171,104 @@ class AWSConfigScheduledNotification(DictWrapper):
 
 class AWSConfigOversizedConfiguration(DictWrapper):
     @property
+    def configuration_item_summary(self) -> AWSConfigOversizedConfigurationItemSummary:
+        """The version of the event."""
+        return AWSConfigOversizedConfigurationItemSummary(self["configurationItemSummary"])
+
+    @property
+    def raw_configuration_item_summary(self) -> str:
+        """The version of the event."""
+        return self["configurationItemSummary"]
+
+    @property
+    def message_type(self) -> str:
+        """The version of the event."""
+        return self["messageType"]
+
+    @property
+    def notification_creation_time(self) -> str:
+        """The version of the event."""
+        return self["notificationCreationTime"]
+
+    @property
+    def record_version(self) -> str:
+        """The version of the event."""
+        return self["recordVersion"]
+
+
+class AWSConfigOversizedConfigurationItemSummary(DictWrapper):
+    @property
+    def change_type(self) -> str:
+        """The version of the event."""
+        return self["changeType"]
+
+    @property
+    def configuration_item_version(self) -> str:
+        """The version of the event."""
+        return self["configurationItemVersion"]
+
+    @property
+    def configuration_item_capture_time(self) -> str:
+        """The version of the event."""
+        return self["configurationItemCaptureTime"]
+
+    @property
+    def configuration_state_id(self) -> str:
+        """The version of the event."""
+        return self["configurationStateId"]
+
+    @property
     def accountid(self) -> str:
         """The version of the event."""
         return self["awsAccountId"]
 
+    @property
+    def configuration_item_status(self) -> str:
+        """The version of the event."""
+        return self["configurationItemStatus"]
 
-class AWSConfigEvent(DictWrapper):
+    @property
+    def resource_type(self) -> str:
+        """The version of the event."""
+        return self["resourceType"]
+
+    @property
+    def resource_id(self) -> str:
+        """The version of the event."""
+        return self["resourceId"]
+
+    @property
+    def resource_name(self) -> str:
+        """The version of the event."""
+        return self["resourceName"]
+
+    @property
+    def resource_arn(self) -> str:
+        """The version of the event."""
+        return self["ARN"]
+
+    @property
+    def region(self) -> str:
+        """The version of the event."""
+        return self["awsRegion"]
+
+    @property
+    def availability_zone(self) -> str:
+        """The version of the event."""
+        return self["availabilityZone"]
+
+    @property
+    def configuration_state_md5_hash(self) -> str:
+        """The version of the event."""
+        return self["configurationStateMd5Hash"]
+
+    @property
+    def resource_creation_time(self) -> str:
+        """The version of the event."""
+        return self["resourceCreationTime"]
+
+
+class AWSConfigRuleEvent(DictWrapper):
     """Events for AWS Config Rules
     Documentation:
     --------------

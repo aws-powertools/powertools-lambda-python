@@ -84,6 +84,7 @@ Log Data Event for Troubleshooting
 | [Application Load Balancer](#application-load-balancer)                   | `ALBEvent`                                         |
 | [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
+| [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -459,6 +460,26 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
         "function_request_id":"6735a29c-c000-4ae3-94e6-1f1c934f7f94",
         "correlation_id":"Root=1-60488877-0b0c4e6727ab2a1c545babd0"
     }
+    ```
+
+### AWS Config Rule
+
+=== "aws_config_rule.py"
+    ```python hl_lines="1 7"
+    --8<-- "examples/event_sources/src/aws_config_rule.py"
+    ```
+
+=== "Event - ItemChanged"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_item_changed.json"
+    ```
+=== "Event - Oversized"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_oversized.json"
+    ```
+=== "Event - ScheduledNotification"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
     ```
 
 ### CloudWatch Dashboard Custom Widget
