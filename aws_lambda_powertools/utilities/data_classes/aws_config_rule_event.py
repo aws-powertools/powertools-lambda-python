@@ -32,8 +32,9 @@ class AWSConfigConfigurationChanged(DictWrapper):
         """The configuration item of the ConfigurationItemChangeNotification event."""
         return AWSConfigConfigurationItemChanged(self["configurationItem"])
 
+    @property
     def raw_configuration_item(self) -> Dict:
-        """The raw configuration item diff of the ConfigurationItemChangeNotification event."""
+        """The raw configuration item of the ConfigurationItemChangeNotification event."""
         return self["configurationItem"]
 
     @property
@@ -317,7 +318,7 @@ class AWSConfigRuleEvent(DictWrapper):
     @property
     def config_rule_name(self) -> str:
         """The name of the rule of the event."""
-        return self["configRuleArn"]
+        return self["configRuleName"]
 
     @property
     def config_rule_id(self) -> str:
