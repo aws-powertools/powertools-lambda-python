@@ -371,7 +371,7 @@ class APIGatewayAuthorizerResponse:
         stage: str,
         context: Optional[Dict] = None,
         usage_identifier_key: Optional[str] = None,
-        partition: str = "aws"
+        partition: str = "aws",
     ):
         """
         Parameters
@@ -405,8 +405,8 @@ class APIGatewayAuthorizerResponse:
             must return one of the usage plan's API keys as the usageIdentifierKey property value.
             > **Note:** This only applies for REST APIs.
         partition: str, optional
-            Default is aws,
-            But it is "aws-cn" in China.
+            Optional, arn partition.
+            See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
         """
         self.principal_id = principal_id
         self.region = region
