@@ -8,11 +8,8 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 def get_invoke_event(
     invoking_event: dict,
-) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration | None:
+) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
     message_type = invoking_event.get("messageType")
-
-    if message_type == "ConfigurationItemChangeNotification":
-        return AWSConfigConfigurationChanged(invoking_event)
 
     if message_type == "ScheduledNotification":
         return AWSConfigScheduledNotification(invoking_event)
@@ -20,8 +17,8 @@ def get_invoke_event(
     if message_type == "OversizedConfigurationItemChangeNotification":
         return AWSConfigOversizedConfiguration(invoking_event)
 
-    # In case of a unknown event
-    return None
+    # Default return is ConfigurationChanged
+    return AWSConfigConfigurationChanged(invoking_event)
 
 
 class AWSConfigConfigurationChanged(DictWrapper):
@@ -73,198 +70,198 @@ class AWSConfigConfigurationItemChanged(DictWrapper):
 
     @property
     def supplementary_configuration(self) -> Dict:
-        """The version of the event."""
+        """The supplementary configuration of the ConfigurationItemChangeNotification event."""
         return self["supplementaryConfiguration"]
 
     @property
     def tags(self) -> Dict:
-        """The version of the event."""
+        """The tags of the ConfigurationItemChangeNotification event."""
         return self["tags"]
 
     @property
     def configuration_item_version(self) -> str:
-        """The version of the event."""
+        """The configuration item version of the ConfigurationItemChangeNotification event."""
         return self["configurationItemVersion"]
 
     @property
     def configuration_item_capture_time(self) -> str:
-        """The version of the event."""
+        """The configuration item capture time of the ConfigurationItemChangeNotification event."""
         return self["configurationItemCaptureTime"]
 
     @property
     def configuration_state_id(self) -> str:
-        """The version of the event."""
+        """The configuration state id of the ConfigurationItemChangeNotification event."""
         return self["configurationStateId"]
 
     @property
     def accountid(self) -> str:
-        """The version of the event."""
+        """The accountid of the ConfigurationItemChangeNotification event."""
         return self["awsAccountId"]
 
     @property
     def configuration_item_status(self) -> str:
-        """The version of the event."""
+        """The configuration item status of the ConfigurationItemChangeNotification event."""
         return self["configurationItemStatus"]
 
     @property
     def resource_type(self) -> str:
-        """The version of the event."""
+        """The resource type of the ConfigurationItemChangeNotification event."""
         return self["resourceType"]
 
     @property
     def resource_id(self) -> str:
-        """The version of the event."""
+        """The resource id of the ConfigurationItemChangeNotification event."""
         return self["resourceId"]
 
     @property
     def resource_name(self) -> str:
-        """The version of the event."""
+        """The resource name of the ConfigurationItemChangeNotification event."""
         return self["resourceName"]
 
     @property
     def resource_arn(self) -> str:
-        """The version of the event."""
+        """The resource arn of the ConfigurationItemChangeNotification event."""
         return self["ARN"]
 
     @property
     def region(self) -> str:
-        """The version of the event."""
+        """The region of the ConfigurationItemChangeNotification event."""
         return self["awsRegion"]
 
     @property
     def availability_zone(self) -> str:
-        """The version of the event."""
+        """The availability zone of the ConfigurationItemChangeNotification event."""
         return self["availabilityZone"]
 
     @property
     def configuration_state_md5_hash(self) -> str:
-        """The version of the event."""
+        """The md5 hash of the state of the ConfigurationItemChangeNotification event."""
         return self["configurationStateMd5Hash"]
 
     @property
     def resource_creation_time(self) -> str:
-        """The version of the event."""
+        """The resource creation time of the ConfigurationItemChangeNotification event."""
         return self["resourceCreationTime"]
 
 
 class AWSConfigScheduledNotification(DictWrapper):
     @property
     def accountid(self) -> str:
-        """The version of the event."""
+        """The accountid of the ScheduledNotification event."""
         return self["awsAccountId"]
 
     @property
     def notification_creation_time(self) -> str:
-        """The version of the event."""
+        """The notification creation time of the ScheduledNotification event."""
         return self["notificationCreationTime"]
 
     @property
     def record_version(self) -> str:
-        """The version of the event."""
+        """The record version of the ScheduledNotification event."""
         return self["recordVersion"]
 
     @property
     def message_type(self) -> str:
-        """The version of the event."""
+        """The message type of the ScheduledNotification event."""
         return self["messageType"]
 
 
 class AWSConfigOversizedConfiguration(DictWrapper):
     @property
     def configuration_item_summary(self) -> AWSConfigOversizedConfigurationItemSummary:
-        """The version of the event."""
+        """The configuration item summary of the OversizedConfiguration event."""
         return AWSConfigOversizedConfigurationItemSummary(self["configurationItemSummary"])
 
     @property
     def raw_configuration_item_summary(self) -> str:
-        """The version of the event."""
+        """The raw configuration item summary of the OversizedConfiguration event."""
         return self["configurationItemSummary"]
 
     @property
     def message_type(self) -> str:
-        """The version of the event."""
+        """The message type of the OversizedConfiguration event."""
         return self["messageType"]
 
     @property
     def notification_creation_time(self) -> str:
-        """The version of the event."""
+        """The notification creation time of the OversizedConfiguration event."""
         return self["notificationCreationTime"]
 
     @property
     def record_version(self) -> str:
-        """The version of the event."""
+        """The record version of the OversizedConfiguration event."""
         return self["recordVersion"]
 
 
 class AWSConfigOversizedConfigurationItemSummary(DictWrapper):
     @property
     def change_type(self) -> str:
-        """The version of the event."""
+        """The change type of the OversizedConfiguration event."""
         return self["changeType"]
 
     @property
     def configuration_item_version(self) -> str:
-        """The version of the event."""
+        """The configuration item version of the OversizedConfiguration event."""
         return self["configurationItemVersion"]
 
     @property
     def configuration_item_capture_time(self) -> str:
-        """The version of the event."""
+        """The configuration item capture time of the OversizedConfiguration event."""
         return self["configurationItemCaptureTime"]
 
     @property
     def configuration_state_id(self) -> str:
-        """The version of the event."""
+        """The configuration state id of the OversizedConfiguration event."""
         return self["configurationStateId"]
 
     @property
     def accountid(self) -> str:
-        """The version of the event."""
+        """The accountid of the OversizedConfiguration event."""
         return self["awsAccountId"]
 
     @property
     def configuration_item_status(self) -> str:
-        """The version of the event."""
+        """The configuration item status of the OversizedConfiguration event."""
         return self["configurationItemStatus"]
 
     @property
     def resource_type(self) -> str:
-        """The version of the event."""
+        """The resource type of the OversizedConfiguration event."""
         return self["resourceType"]
 
     @property
     def resource_id(self) -> str:
-        """The version of the event."""
+        """The resource id of the OversizedConfiguration event."""
         return self["resourceId"]
 
     @property
     def resource_name(self) -> str:
-        """The version of the event."""
+        """The resource name of the OversizedConfiguration event."""
         return self["resourceName"]
 
     @property
     def resource_arn(self) -> str:
-        """The version of the event."""
+        """The resource arn of the OversizedConfiguration event."""
         return self["ARN"]
 
     @property
     def region(self) -> str:
-        """The version of the event."""
+        """The region of the OversizedConfiguration event."""
         return self["awsRegion"]
 
     @property
     def availability_zone(self) -> str:
-        """The version of the event."""
+        """The availability zone of the OversizedConfiguration event."""
         return self["availabilityZone"]
 
     @property
     def configuration_state_md5_hash(self) -> str:
-        """The version of the event."""
+        """The state md5 hash  of the OversizedConfiguration event."""
         return self["configurationStateMd5Hash"]
 
     @property
     def resource_creation_time(self) -> str:
-        """The version of the event."""
+        """The resource creation time of the OversizedConfiguration event."""
         return self["resourceCreationTime"]
 
 
@@ -283,7 +280,7 @@ class AWSConfigRuleEvent(DictWrapper):
     @property
     def invoking_event(
         self,
-    ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration | None:
+    ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
         """The invoking payload of the event."""
         return get_invoke_event(json.loads(self["invokingEvent"]))
 

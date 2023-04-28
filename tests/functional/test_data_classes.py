@@ -2001,7 +2001,7 @@ def test_api_gateway_route_arn_parser():
 
 
 def test_aws_config_rule_configuration_changed():
-    """Check API Gateway authorizer token event"""
+    """Check AWS Config ConfigurationItemChangeNotification event"""
     event = AWSConfigRuleEvent(load_event("awsConfigRuleConfigurationChanged.json"))
 
     invoking_event = json.loads(event["invokingEvent"])
@@ -2016,7 +2016,7 @@ def test_aws_config_rule_configuration_changed():
 
 
 def test_aws_config_rule_oversized_configuration():
-    """Check API Gateway authorizer token event"""
+    """Check AWS Config OversizedConfigurationItemChangeNotification event"""
     event = AWSConfigRuleEvent(load_event("awsConfigRuleOversizedConfiguration.json"))
 
     invoking_event = json.loads(event["invokingEvent"])
@@ -2030,8 +2030,8 @@ def test_aws_config_rule_oversized_configuration():
 
 
 def test_aws_config_rule_scheduled():
-    """Check API Gateway authorizer token event"""
-    event = AWSConfigRuleEvent(load_event("awsConfigRuleOversizedConfiguration.json"))
+    """Check AWS Config ScheduledNotification event"""
+    event = AWSConfigRuleEvent(load_event("awsConfigRuleScheduled.json"))
 
     invoking_event = json.loads(event["invokingEvent"])
 
