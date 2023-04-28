@@ -14,6 +14,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
     AppSyncResolverEvent,
+    AWSConfigRuleEvent,
     CloudWatchDashboardCustomWidgetEvent,
     CloudWatchLogsEvent,
     CodePipelineJobEvent,
@@ -1997,3 +1998,44 @@ def test_api_gateway_route_arn_parser():
     details = parse_api_gateway_arn(arn)
     assert details.resource == ""
     assert details.arn == arn + "/"
+
+
+def test_aws_config_rule_configuration_changed():
+    """Check API Gateway authorizer token event"""
+    event = AWSConfigRuleEvent(load_event("awsConfigRuleConfigurationChanged.json"))
+
+    invoking_event = json.loads(event["invokingEvent"])
+
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.accountid == event["accountId"]
+    assert event.version == event["version"]
+    assert event.execution_role_arn == event["executionRoleArn"]
+    assert hasattr(event.invoking_event, "configuration_item_diff")
+    assert hasattr(event.invoking_event, "configuration_item")
+    assert hasattr(event.invoking_event.configuration_item, "configuration")
+
+
+def test_aws_config_rule_oversized_configuration():
+    """Check API Gateway authorizer token event"""
+    event = AWSConfigRuleEvent(load_event("awsConfigRuleOversizedConfiguration.json"))
+
+    invoking_event = json.loads(event["invokingEvent"])
+
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.accountid == event["accountId"]
+    assert event.version == event["version"]
+    assert event.execution_role_arn == event["executionRoleArn"]
+    assert hasattr(event.invoking_event, "configuration_item_summary")
+    assert hasattr(event.invoking_event.configuration_item_summary, "change_type")
+
+
+def test_aws_config_rule_scheduled():
+    """Check API Gateway authorizer token event"""
+    event = AWSConfigRuleEvent(load_event("awsConfigRuleOversizedConfiguration.json"))
+
+    invoking_event = json.loads(event["invokingEvent"])
+
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.accountid == event["accountId"]
+    assert event.version == event["version"]
+    assert event.execution_role_arn == event["executionRoleArn"]
