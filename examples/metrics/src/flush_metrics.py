@@ -13,6 +13,6 @@ def book_flight(flight_id: str, **kwargs):
 
 def lambda_handler(event: dict, context: LambdaContext):
     try:
-        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+        book_flight(flight_id=event.get("flight_id", ""))
     finally:
         metrics.flush_metrics()
