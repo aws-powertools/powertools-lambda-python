@@ -73,15 +73,15 @@ These are all built-in envelopes you can use along with their expression as a re
 | **`EVENTBRIDGE`**                 | `detail`                                                                                   |
 | **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`                              |
 | **`S3_EVENTBRIDGE_SQS`**          | `Records[*].powertools_json(body).detail`                                                  |
-| **`S3_RAWSNS_KINESIS_FIREHOSE`**  | `records[*].powertools_json(powertools_base64(data)).Records[0]`                           |
-| **`S3_RAWSNS_SQS`**               | `Records[*].powertools_json(body).Records[0]`                                              |
+| **`S3_KINESIS_FIREHOSE`**         | `records[*].powertools_json(powertools_base64(data)).Records[0]`                           |
 | **`S3_SNS_KINESIS_FIREHOSE`**     | `records[*].powertools_json(powertools_base64(data)).powertools_json(Message).Records[0]`  |
 | **`S3_SNS_SQS`**                  | `Records[*].powertools_json(body).powertools_json(Message).Records[0]`                     |
+| **`S3_SQS`**                      | `Records[*].powertools_json(body).Records[0]`                                              |
 | **`SNS`**                         | `Records[0].Sns.Message | powertools_json(@)`                                              |
 | **`SQS`**                         | `Records[*].powertools_json(body)`                                                         |
 
-???+ tip
-    If you're using architectures that involve sending event notifications from S3 to SNS and then to SQS or Kinesis Data Firehose, consider enabling the [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"} option in Amazon SNS. This can help reduce the payload by stripping the SNS metadata.
+???+ tip "Using SNS?"
+    Consider reducing the payload size by enabling the [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"} option in Amazon SNS if you're utilizing architectures that require sending event notifications from S3 to SNS and then to SQS or Kinesis Data Firehose, but do not require the SNS metadata.
 
 ## Advanced
 
