@@ -2013,9 +2013,9 @@ def test_aws_config_rule_configuration_changed():
     assert event.execution_role_arn == event["executionRoleArn"]
     assert event.config_rule_arn == event["configRuleArn"]
     assert event.config_rule_id == event["configRuleId"]
-    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
+    assert event.evalution_mode == event["evaluationMode"]
     assert event.invoking_event.message_type == invoking_event["messageType"]
 
     assert hasattr(event.invoking_event, "configuration_item_diff")
@@ -2036,12 +2036,66 @@ def test_aws_config_rule_oversized_configuration():
     assert event.execution_role_arn == event["executionRoleArn"]
     assert event.config_rule_arn == event["configRuleArn"]
     assert event.config_rule_id == event["configRuleId"]
-    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
     assert event.invoking_event.message_type == invoking_event["messageType"]
-    assert hasattr(event.invoking_event, "configuration_item_summary")
-    assert hasattr(event.invoking_event.configuration_item_summary, "change_type")
+    assert event.invoking_event.raw_configuration_item_summary == invoking_event["configurationItemSummary"]
+    assert (
+        event.invoking_event.configuration_item_summary.change_type
+        == invoking_event["configurationItemSummary"]["changeType"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.configuration_item_version
+        == invoking_event["configurationItemSummary"]["configurationItemVersion"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.configuration_item_capture_time
+        == invoking_event["configurationItemSummary"]["configurationItemCaptureTime"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.configuration_state_id
+        == invoking_event["configurationItemSummary"]["configurationStateId"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.accountid
+        == invoking_event["configurationItemSummary"]["awsAccountId"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.configuration_item_status
+        == invoking_event["configurationItemSummary"]["configurationItemStatus"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.resource_type
+        == invoking_event["configurationItemSummary"]["resourceType"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.resource_id
+        == invoking_event["configurationItemSummary"]["resourceId"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.resource_name
+        == invoking_event["configurationItemSummary"]["resourceName"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.resource_arn
+        == invoking_event["configurationItemSummary"]["ARN"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.region
+        == invoking_event["configurationItemSummary"]["awsRegion"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.availability_zone
+        == invoking_event["configurationItemSummary"]["availabilityZone"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.configuration_state_md5_hash
+        == invoking_event["configurationItemSummary"]["configurationStateMd5Hash"]
+    )
+    assert (
+        event.invoking_event.configuration_item_summary.resource_creation_time
+        == invoking_event["configurationItemSummary"]["resourceCreationTime"]
+    )
 
 
 def test_aws_config_rule_scheduled():
@@ -2057,9 +2111,9 @@ def test_aws_config_rule_scheduled():
     assert event.execution_role_arn == event["executionRoleArn"]
     assert event.config_rule_arn == event["configRuleArn"]
     assert event.config_rule_id == event["configRuleId"]
-    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
+    assert event.evalution_mode == event["evaluationMode"]
     assert event.invoking_event.message_type == invoking_event["messageType"]
     assert event.invoking_event.accountid == invoking_event["awsAccountId"]
     assert event.invoking_event.notification_creation_time == invoking_event["notificationCreationTime"]

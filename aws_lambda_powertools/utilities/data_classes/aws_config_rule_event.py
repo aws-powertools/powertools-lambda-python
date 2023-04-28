@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -330,6 +330,6 @@ class AWSConfigRuleEvent(DictWrapper):
         return self["accountId"]
 
     @property
-    def evalution_mode(self) -> str:
+    def evalution_mode(self) -> Optional[str]:
         """The evalution mode of the event."""
-        return self["evaluationMode"]
+        return self.get("evaluationMode")
