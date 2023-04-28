@@ -2006,10 +2006,18 @@ def test_aws_config_rule_configuration_changed():
 
     invoking_event = json.loads(event["invokingEvent"])
 
-    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.rule_parameters == json.loads(event["ruleParameters"])
+    assert event.raw_invoking_event == event["invokingEvent"]
+    assert event.result_token == event["resultToken"]
+    assert event.event_left_scope == event["eventLeftScope"]
+    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.config_rule_arn == event["configRuleArn"]
+    assert event.config_rule_id == event["configRuleId"]
+    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
-    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+
     assert hasattr(event.invoking_event, "configuration_item_diff")
     assert hasattr(event.invoking_event, "configuration_item")
     assert hasattr(event.invoking_event.configuration_item, "configuration")
@@ -2021,10 +2029,17 @@ def test_aws_config_rule_oversized_configuration():
 
     invoking_event = json.loads(event["invokingEvent"])
 
-    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.rule_parameters == json.loads(event["ruleParameters"])
+    assert event.raw_invoking_event == event["invokingEvent"]
+    assert event.result_token == event["resultToken"]
+    assert event.event_left_scope == event["eventLeftScope"]
+    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.config_rule_arn == event["configRuleArn"]
+    assert event.config_rule_id == event["configRuleId"]
+    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
-    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.invoking_event.message_type == invoking_event["messageType"]
     assert hasattr(event.invoking_event, "configuration_item_summary")
     assert hasattr(event.invoking_event.configuration_item_summary, "change_type")
 
@@ -2035,7 +2050,18 @@ def test_aws_config_rule_scheduled():
 
     invoking_event = json.loads(event["invokingEvent"])
 
-    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.rule_parameters == json.loads(event["ruleParameters"])
+    assert event.raw_invoking_event == event["invokingEvent"]
+    assert event.result_token == event["resultToken"]
+    assert event.event_left_scope == event["eventLeftScope"]
+    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.config_rule_arn == event["configRuleArn"]
+    assert event.config_rule_id == event["configRuleId"]
+    assert event.config_rule_arn == event["configRuleArn"]
     assert event.accountid == event["accountId"]
     assert event.version == event["version"]
-    assert event.execution_role_arn == event["executionRoleArn"]
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.invoking_event.accountid == invoking_event["awsAccountId"]
+    assert event.invoking_event.notification_creation_time == invoking_event["notificationCreationTime"]
+    assert event.invoking_event.message_type == invoking_event["messageType"]
+    assert event.invoking_event.record_version == invoking_event["recordVersion"]
