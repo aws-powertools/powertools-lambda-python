@@ -6,5 +6,7 @@ metrics = Metrics()
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-    metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
-    metrics.flush_metrics()
+    try:
+        metrics.add_metric(name="SuccessfulBooking", unit=MetricUnit.Count, value=1)
+    finally:
+        metrics.flush_metrics()
