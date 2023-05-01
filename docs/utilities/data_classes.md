@@ -465,7 +465,7 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 ### AWS Config Rule
 
 === "aws_config_rule.py"
-    ```python hl_lines="1 7"
+    ```python hl_lines="3 11"
     --8<-- "examples/event_sources/src/aws_config_rule.py"
     ```
 
