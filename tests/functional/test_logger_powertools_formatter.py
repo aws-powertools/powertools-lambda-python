@@ -10,7 +10,7 @@ import time
 import pytest
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging.formatters import DatadogLogFormatter
+from aws_lambda_powertools.logging.formatters.datadog import DatadogLogFormatter
 
 
 @pytest.fixture
