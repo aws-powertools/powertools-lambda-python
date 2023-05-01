@@ -19,6 +19,7 @@
 * **event_source:** add support for dynamic partitions in the Api Gateway Authorizer event ([#2176](https://github.com/awslabs/aws-lambda-powertools-python/issues/2176))
 * **event_sources:** Add __str__ to Data Classes base DictWrapper ([#2129](https://github.com/awslabs/aws-lambda-powertools-python/issues/2129))
 * **jmespath:** new built-in envelopes to unwrap S3 events ([#2169](https://github.com/awslabs/aws-lambda-powertools-python/issues/2169))
+* **logger:** add DatadogLogFormatter and observability provider ([#2183](https://github.com/awslabs/aws-lambda-powertools-python/issues/2183))
 * **metrics:** add flush_metrics() method to allow manual flushing of metrics ([#2171](https://github.com/awslabs/aws-lambda-powertools-python/issues/2171))
 
 ## Maintenance
