@@ -251,13 +251,15 @@ By default it will skip all previously defined dimensions including default dime
 
 ### Flushing metrics manually
 
-If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
+If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
 
 ???+ warning
-	Metrics, dimensions and namespace validation still applies
+    This does not capture Cold Start metrics, and metric data validation still applies.
 
-```python hl_lines="11-14" title="Manually flushing and clearing metrics from memory"
---8<-- "examples/metrics/src/single_metric.py"
+Contrary to the `log_metrics` decorator, you are now also responsible to flush metrics in the event of an exception.
+
+```python hl_lines="18" title="Manually flushing and clearing metrics from memory"
+--8<-- "examples/metrics/src/flush_metrics.py"
 ```
 
 ### Metrics isolation

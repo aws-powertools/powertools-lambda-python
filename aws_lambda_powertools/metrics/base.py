@@ -328,6 +328,28 @@ class MetricManager:
         self.dimension_set.clear()
         self.metadata_set.clear()
 
+    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
+        """Manually flushes the metrics. This is normally not necessary,
+        unless you're running on other runtimes besides Lambda, where the @log_metrics
+        decorator already handles things for you.
+
+        Parameters
+        ----------
+        raise_on_empty_metrics : bool, optional
+            raise exception if no metrics are emitted, by default False
+        """
+        if not raise_on_empty_metrics and not self.metric_set:
+            warnings.warn(
+                "No application metrics to publish. The cold-start metric may be published if enabled. "
+                "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
+                stacklevel=2,
+            )
+        else:
+            logger.debug("Flushing existing metrics")
+            metrics = self.serialize_metric_set()
+            print(json.dumps(metrics, separators=(",", ":")))
+            self.clear_metrics()
+
     def log_metrics(
         self,
         lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
@@ -390,16 +412,7 @@ class MetricManager:
                 if capture_cold_start_metric:
                     self._add_cold_start_metric(context=context)
             finally:
-                if not raise_on_empty_metrics and not self.metric_set:
-                    warnings.warn(
-                        "No application metrics to publish. The cold-start metric may be published if enabled. "
-                        "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
-                        stacklevel=2,
-                    )
-                else:
-                    metrics = self.serialize_metric_set()
-                    self.clear_metrics()
-                    print(json.dumps(metrics, separators=(",", ":")))
+                self.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
 
             return response
 

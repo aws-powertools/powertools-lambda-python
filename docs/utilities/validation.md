@@ -141,16 +141,16 @@ We provide built-in envelopes to easily extract the payload from popular event s
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
-| Envelope name                   | JMESPath expression                                           |
-| ------------------------------- | ------------------------------------------------------------- |
-| **API_GATEWAY_REST**            | "powertools_json(body)"                                       |
-| **API_GATEWAY_HTTP**            | "powertools_json(body)"                                       |
-| **SQS**                         | "Records[*].powertools_json(body)"                            |
-| **SNS**                         | "Records[0].Sns.Message                                       | powertools_json(@)"              |
-| **EVENTBRIDGE**                 | "detail"                                                      |
-| **CLOUDWATCH_EVENTS_SCHEDULED** | "detail"                                                      |
-| **KINESIS_DATA_STREAM**         | "Records[*].kinesis.powertools_json(powertools_base64(data))" |
-| **CLOUDWATCH_LOGS**             | "awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]" |
+| Envelope                          | JMESPath expression                                                      |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                  |
+| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                  |
+| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                 |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]` |
+| **`EVENTBRIDGE`**                 | `detail`                                                                 |
+| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`            |
+| **`SNS`**                         | `Records[0].Sns.Message | powertools_json(@)`                            |
+| **`SQS`**                         | `Records[*].powertools_json(body)`                                       |
 
 ## Advanced
 
