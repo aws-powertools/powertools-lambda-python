@@ -1,3 +1,5 @@
-from aws_lambda_powertools.logging.formatters.datadog import DatadogLogFormatter
+"""Built-in Logger formatters for Observability Providers that require custom config."""
 
-__all__ = ["DatadogLogFormatter"]
+# NOTE: we don't expose formatters directly (barrel import)
+# as we cannot know if they'll need additional dependencies in the future
+# so we isolate to avoid a performance hit and workarounds like lazy imports
