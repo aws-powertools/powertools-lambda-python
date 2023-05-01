@@ -139,10 +139,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         if self.utc:
             self.converter = time.gmtime
 
-        super(LambdaPowertoolsFormatter, self).__init__(datefmt=self.datefmt)
-
         self.keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**self.keys_combined)
+
+        super().__init__(datefmt=self.datefmt)
 
     def serialize(self, log: Dict) -> str:
         """Serialize structured log dict to JSON str"""
