@@ -445,6 +445,26 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
 
+### Observability providers
+
+!!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank"} offering a platform for logging, metrics, traces, etc."
+
+You can send logs to the observability provider of your choice via [Lambda Extensions](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/){target="_blank"}. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.
+
+#### Built-in formatters
+
+In rare circumstances where JSON logs are not parsed correctly by your provider, we offer built-in formatters to make this transition easier.
+
+| Provider | Formatter             | Notes                                                |
+| -------- | --------------------- | ---------------------------------------------------- |
+| Datadog  | `DatadogLogFormatter` | Modifies default timestamp to use RFC3339 by default |
+
+You can use import and use them as any other Logger formatter via `logger_formatter` parameter:
+
+```python hl_lines="2 4" title="Using built-in Logger Formatters"
+--8<-- "examples/logger/src/observability_provider_builtin_formatters.py"
+```
+
 ### Migrating from other Loggers
 
 If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Inheriting Loggers](#inheriting-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
