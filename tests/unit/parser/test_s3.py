@@ -113,7 +113,7 @@ def test_s3_eventbridge_notification_object_restore_completed_event():
 
 
 def test_s3_sqs_event_notification():
-    raw_event = load_event("sqsS3Event.json")
+    raw_event = load_event("s3SqsEvent.json")
     model = S3SqsEventNotificationModel(**raw_event)
 
     body = json.loads(raw_event["Records"][0]["body"])
@@ -127,14 +127,17 @@ def test_s3_sqs_event_notification():
 
 
 def test_s3_sqs_event_notification_body_invalid_json():
-    raw_event = load_event("s3Event.json")
+    raw_event = load_event("s3SqsEvent.json")
+
+    for record in raw_event["Records"]:
+        record["body"] = "invalid body"
 
     with pytest.raises(ValidationError):
         S3SqsEventNotificationModel(**raw_event)
 
 
 def test_s3_sqs_event_notification_body_containing_arbitrary_json():
-    raw_event = load_event("sqsS3Event.json")
+    raw_event = load_event("s3SqsEvent.json")
     for record in raw_event["Records"]:
         record["body"] = {"foo": "bar"}
 
