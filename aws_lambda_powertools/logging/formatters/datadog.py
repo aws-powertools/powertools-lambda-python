@@ -65,13 +65,13 @@ class DatadogLogFormatter(LambdaPowertoolsFormatter):
             Key-value to persist in all log messages
         """
         super().__init__(
-            json_serializer,
-            json_deserializer,
-            json_default,
-            datefmt,
-            use_datetime_directive,
-            log_record_order,
-            utc,
-            use_rfc3339,
+            json_serializer=json_serializer,
+            json_deserializer=json_deserializer,
+            json_default=json_default,
+            datefmt=datefmt,
+            use_datetime_directive=use_datetime_directive,
+            log_record_order=log_record_order,
+            utc=utc,
+            use_rfc3339=use_rfc3339,
             **kwargs,
         )
