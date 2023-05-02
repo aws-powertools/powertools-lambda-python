@@ -13,6 +13,7 @@
 * **batch:** fixed typo in DynamoDB Streams section ([#2189](https://github.com/awslabs/aws-lambda-powertools-python/issues/2189))
 * **homepage:** add customer references section ([#2159](https://github.com/awslabs/aws-lambda-powertools-python/issues/2159))
 * **tutorial:** use newer sam cli template; update to py3.10 ([#2167](https://github.com/awslabs/aws-lambda-powertools-python/issues/2167))
+* **we-made-this:** add serverless transactional message app ([#2182](https://github.com/awslabs/aws-lambda-powertools-python/issues/2182))
 
 ## Features
 
