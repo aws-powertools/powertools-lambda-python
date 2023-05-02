@@ -1,7 +1,12 @@
+import json
 from datetime import datetime
 
+import pytest
+
+from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.parser.models import (
     S3EventNotificationEventBridgeModel,
+    S3SqsEventNotificationModel,
 )
 from tests.functional.utils import load_event
 
@@ -105,3 +110,36 @@ def test_s3_eventbridge_notification_object_restore_completed_event():
     assert model.detail.requester == raw_event["detail"]["requester"]
     assert model.detail.restore_expiry_time == raw_event["detail"]["restore-expiry-time"]
     assert model.detail.source_storage_class == raw_event["detail"]["source-storage-class"]
+
+
+def test_s3_sqs_event_notification():
+    raw_event = load_event("s3SqsEvent.json")
+    model = S3SqsEventNotificationModel(**raw_event)
+
+    body = json.loads(raw_event["Records"][0]["body"])
+
+    assert model.Records[0].body.Records[0].eventVersion == body["Records"][0]["eventVersion"]
+    assert model.Records[0].body.Records[0].eventSource == body["Records"][0]["eventSource"]
+    assert model.Records[0].body.Records[0].eventTime == datetime.fromisoformat(
+        body["Records"][0]["eventTime"].replace("Z", "+00:00")
+    )
+    assert model.Records[0].body.Records[0].eventName == body["Records"][0]["eventName"]
+
+
+def test_s3_sqs_event_notification_body_invalid_json():
+    raw_event = load_event("s3SqsEvent.json")
+
+    for record in raw_event["Records"]:
+        record["body"] = "invalid body"
+
+    with pytest.raises(ValidationError):
+        S3SqsEventNotificationModel(**raw_event)
+
+
+def test_s3_sqs_event_notification_body_containing_arbitrary_json():
+    raw_event = load_event("s3SqsEvent.json")
+    for record in raw_event["Records"]:
+        record["body"] = {"foo": "bar"}
+
+    with pytest.raises(ValidationError):
+        S3SqsEventNotificationModel(**raw_event)

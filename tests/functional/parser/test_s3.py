@@ -6,8 +6,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 
 
-@event_parser(model=S3Model)
-def handle_s3(event: S3Model, _: LambdaContext):
+def assert_s3(event: S3Model):
     records = list(event.Records)
     assert len(records) == 1
     record: S3RecordModel = records[0]
@@ -39,6 +38,11 @@ def handle_s3(event: S3Model, _: LambdaContext):
     assert s3.object.versionId is None
     assert s3.object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacierEventData is None
+
+
+@event_parser(model=S3Model)
+def handle_s3(event: S3Model, _: LambdaContext):
+    assert_s3(event)
 
 
 @event_parser(model=S3Model)
