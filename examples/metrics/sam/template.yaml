@@ -5,7 +5,7 @@ Description: AWS Lambda Powertools Metrics doc examples
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.10
     Tracing: Active
     Environment:
       Variables:

@@ -24,7 +24,7 @@ def fetch_payment_report(payment_id: str) -> StreamingBody:
 
 
 @tracer.capture_lambda_handler(capture_response=False)
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     payment_id = event.get("payment_id", "")
     report = fetch_payment_report(payment_id=payment_id)
     return report.read().decode()

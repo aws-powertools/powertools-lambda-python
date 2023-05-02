@@ -5,7 +5,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context(clear_state=True)
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     if event.get("special_key"):
         # Should only be available in the first request log
         # as the second request doesn't contain `special_key`

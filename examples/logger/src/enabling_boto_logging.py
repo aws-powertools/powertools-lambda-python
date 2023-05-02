@@ -12,7 +12,7 @@ logger = Logger()
 client = boto3.client("s3")
 
 
-def handler(event: Dict, context: LambdaContext) -> List:
+def lambda_handler(event: Dict, context: LambdaContext) -> List:
     response = client.list_buckets()
 
     return response.get("Buckets", [])

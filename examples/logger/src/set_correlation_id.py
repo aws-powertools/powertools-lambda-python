@@ -5,7 +5,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context(correlation_id_path="headers.my_request_id_header")
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     logger.debug(f"Correlation ID => {logger.get_correlation_id()}")
     logger.info("Collecting payment")
 
