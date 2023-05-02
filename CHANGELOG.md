@@ -24,6 +24,7 @@
 * **jmespath:** new built-in envelopes to unwrap S3 events ([#2169](https://github.com/awslabs/aws-lambda-powertools-python/issues/2169))
 * **logger:** add DatadogLogFormatter and observability provider ([#2183](https://github.com/awslabs/aws-lambda-powertools-python/issues/2183))
 * **metrics:** add flush_metrics() method to allow manual flushing of metrics ([#2171](https://github.com/awslabs/aws-lambda-powertools-python/issues/2171))
+* **parser:** add support for SQS-wrapped S3 event notifications ([#2108](https://github.com/awslabs/aws-lambda-powertools-python/issues/2108))
 
 ## Maintenance
 
