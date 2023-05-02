@@ -6,6 +6,44 @@
 
 ## Bug Fixes
 
+* typo
+
+## Documentation
+
+* **batch:** fixed typo in DynamoDB Streams section ([#2189](https://github.com/awslabs/aws-lambda-powertools-python/issues/2189))
+* **homepage:** add customer references section ([#2159](https://github.com/awslabs/aws-lambda-powertools-python/issues/2159))
+* **jmespath:** fix MD037/no-space-in-emphasis
+* **tutorial:** use newer sam cli template; update to py3.10 ([#2167](https://github.com/awslabs/aws-lambda-powertools-python/issues/2167))
+* **we-made-this:** add serverless transactional message app ([#2182](https://github.com/awslabs/aws-lambda-powertools-python/issues/2182))
+
+## Features
+
+* **ci:** dispatch GitHub analytics action ([#2161](https://github.com/awslabs/aws-lambda-powertools-python/issues/2161))
+* **event_source:** add support for dynamic partitions in the Api Gateway Authorizer event ([#2176](https://github.com/awslabs/aws-lambda-powertools-python/issues/2176))
+* **event_sources:** Add __str__ to Data Classes base DictWrapper ([#2129](https://github.com/awslabs/aws-lambda-powertools-python/issues/2129))
+* **jmespath:** new built-in envelopes to unwrap S3 events ([#2169](https://github.com/awslabs/aws-lambda-powertools-python/issues/2169))
+* **logger:** add DatadogLogFormatter and observability provider ([#2183](https://github.com/awslabs/aws-lambda-powertools-python/issues/2183))
+* **metrics:** add flush_metrics() method to allow manual flushing of metrics ([#2171](https://github.com/awslabs/aws-lambda-powertools-python/issues/2171))
+
+## Maintenance
+
+* add dummy reusable dispatch analytics job
+* **deps-dev:** bump types-requests from 2.28.11.17 to 2.29.0.0 ([#2187](https://github.com/awslabs/aws-lambda-powertools-python/issues/2187))
+* **deps-dev:** bump coverage from 7.2.4 to 7.2.5 ([#2186](https://github.com/awslabs/aws-lambda-powertools-python/issues/2186))
+* **deps-dev:** bump coverage from 7.2.3 to 7.2.4 ([#2179](https://github.com/awslabs/aws-lambda-powertools-python/issues/2179))
+* **deps-dev:** bump cfn-lint from 0.77.3 to 0.77.4 ([#2178](https://github.com/awslabs/aws-lambda-powertools-python/issues/2178))
+* **deps-dev:** bump aws-cdk from 2.76.0 to 2.77.0 ([#2174](https://github.com/awslabs/aws-lambda-powertools-python/issues/2174))
+* **deps-dev:** bump mypy-boto3-lambda from 1.26.115 to 1.26.122 ([#2172](https://github.com/awslabs/aws-lambda-powertools-python/issues/2172))
+* **deps-dev:** bump cfn-lint from 0.77.2 to 0.77.3 ([#2165](https://github.com/awslabs/aws-lambda-powertools-python/issues/2165))
+* **deps-dev:** bump mkdocs-material from 9.1.6 to 9.1.8 ([#2162](https://github.com/awslabs/aws-lambda-powertools-python/issues/2162))
+* **deps-dev:** bump importlib-metadata from 6.5.0 to 6.6.0 ([#2163](https://github.com/awslabs/aws-lambda-powertools-python/issues/2163))
+* **deps-dev:** bump mypy-boto3-xray from 1.26.11.post1 to 1.26.122 ([#2173](https://github.com/awslabs/aws-lambda-powertools-python/issues/2173))
+
+
+<a name="v2.14.1"></a>
+## [v2.14.1] - 2023-04-21
+## Bug Fixes
+
 * **batch:** resolve use of ValidationError in batch ([#2157](https://github.com/awslabs/aws-lambda-powertools-python/issues/2157))
 * **e2e:** fix test brittleness ([#2152](https://github.com/awslabs/aws-lambda-powertools-python/issues/2152))
 
@@ -19,14 +57,15 @@
 
 ## Maintenance
 
+* update v2 layer ARN on documentation
 * add Python 3.10 PyPi language classifier ([#2144](https://github.com/awslabs/aws-lambda-powertools-python/issues/2144))
 * update v2 layer ARN on documentation
 * **batch:** safeguard custom use of BatchProcessingError exception ([#2155](https://github.com/awslabs/aws-lambda-powertools-python/issues/2155))
 * **deps:** bump codecov/codecov-action from 3.1.2 to 3.1.3 ([#2153](https://github.com/awslabs/aws-lambda-powertools-python/issues/2153))
 * **deps:** bump dependabot/fetch-metadata from 1.3.6 to 1.4.0 ([#2140](https://github.com/awslabs/aws-lambda-powertools-python/issues/2140))
 * **deps-dev:** bump aws-cdk from 2.75.0 to 2.75.1 ([#2150](https://github.com/awslabs/aws-lambda-powertools-python/issues/2150))
-* **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.89 to 1.26.116 ([#2147](https://github.com/awslabs/aws-lambda-powertools-python/issues/2147))
 * **deps-dev:** bump aws-cdk from 2.75.1 to 2.76.0 ([#2154](https://github.com/awslabs/aws-lambda-powertools-python/issues/2154))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.26.89 to 1.26.116 ([#2147](https://github.com/awslabs/aws-lambda-powertools-python/issues/2147))
 * **deps-dev:** bump importlib-metadata from 6.4.1 to 6.5.0 ([#2141](https://github.com/awslabs/aws-lambda-powertools-python/issues/2141))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.104 to 1.26.116 ([#2149](https://github.com/awslabs/aws-lambda-powertools-python/issues/2149))
 * **deps-dev:** bump filelock from 3.11.0 to 3.12.0 ([#2142](https://github.com/awslabs/aws-lambda-powertools-python/issues/2142))
@@ -3164,7 +3203,8 @@
 * Merge pull request [#5](https://github.com/awslabs/aws-lambda-powertools-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.1...HEAD
+[v2.14.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.0...v2.14.1
 [v2.14.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.13.0...v2.14.0
 [v2.13.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.12.0...v2.13.0
 [v2.12.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.11.0...v2.12.0

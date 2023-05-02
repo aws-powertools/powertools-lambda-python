@@ -1,0 +1,50 @@
+{
+    "account_id":"111111111111",
+    "data":{
+       "action_configuration":{
+          "configuration":{
+             "decoded_user_parameters":"[Cannot be deserialized]",
+             "function_name":"MyLambdaFunctionForAWSCodePipeline",
+             "raw_event":"[SENSITIVE]",
+             "user_parameters":"some-input-such-as-a-URL"
+          },
+          "raw_event":"[SENSITIVE]"
+       },
+       "artifact_credentials":{
+          "access_key_id":"AKIAIOSFODNN7EXAMPLE",
+          "expiration_time":"None",
+          "raw_event":"[SENSITIVE]",
+          "secret_access_key":"[SENSITIVE]",
+          "session_token":"[SENSITIVE]"
+       },
+       "continuation_token":"A continuation token if continuing job",
+       "encryption_key":"None",
+       "input_artifacts":[
+          {
+             "location":{
+                "get_type":"S3",
+                "raw_event":"[SENSITIVE]",
+                "s3_location":{
+                   "bucket_name":"the name of the bucket configured as the pipeline artifact store in Amazon S3, for example codepipeline-us-east-2-1234567890",
+                   "key":"the name of the application, for example CodePipelineDemoApplication.zip",
+                   "object_key":"the name of the application, for example CodePipelineDemoApplication.zip",
+                   "raw_event":"[SENSITIVE]"
+                }
+             },
+             "name":"ArtifactName",
+             "raw_event":"[SENSITIVE]",
+             "revision":"None"
+          }
+       ],
+       "output_artifacts":[
+
+       ],
+       "raw_event":"[SENSITIVE]"
+    },
+    "decoded_user_parameters":"[Cannot be deserialized]",
+    "get_id":"11111111-abcd-1111-abcd-111111abcdef",
+    "input_bucket_name":"the name of the bucket configured as the pipeline artifact store in Amazon S3, for example codepipeline-us-east-2-1234567890",
+    "input_object_key":"the name of the application, for example CodePipelineDemoApplication.zip",
+    "raw_event":"[SENSITIVE]",
+    "user_parameters":"some-input-such-as-a-URL"
+ }
