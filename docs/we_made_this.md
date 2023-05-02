@@ -133,3 +133,13 @@ This repository provides a working, deployable, open source based, AWS Lambda ha
 This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the AWS Lambda Powertools utilities for Python.
 
 :material-github: [github.com/ran-isenberg/aws-lambda-handler-cookbook](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
+
+### Serverless Transactional Message App
+
+> **Author: [Santiago Garcia Arango](mailto:san99tiago@gmail.com) [:material-web:](https://san99tiago.com/){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/san99tiago/){target="_blank"}**
+
+This repository contains a well documented example of a Transactional Messages App that illustrates how to use Lambda PowerTools to process SQS  messages in batches (with IaC on top of CDK).
+
+It uses LambdaPowerTools Logger, Tracing, DataClasses and includes unit tests.
+
+:material-github: [github.com/san99tiago/aws-cdk-transactional-messages](https://github.com/san99tiago/aws-cdk-transactional-messages){:target="_blank"}
