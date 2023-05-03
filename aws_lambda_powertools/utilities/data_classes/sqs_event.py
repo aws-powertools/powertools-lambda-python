@@ -104,6 +104,16 @@ class SQSRecord(DictWrapper):
         return self["body"]
 
     @property
+    def json_body(self) -> Dict:
+        """Parses the submitted body as json"""
+        try:
+            if self._json_data is None:
+                self._json_data = self._json_deserializer(self["body"])
+            return self._json_data
+        except Exception:
+            return self["body"]
+
+    @property
     def attributes(self) -> SQSRecordAttributes:
         """A map of the attributes requested in ReceiveMessage to their respective values."""
         return SQSRecordAttributes(self["attributes"])
@@ -157,4 +167,4 @@ class SQSEvent(DictWrapper):
     @property
     def records(self) -> Iterator[SQSRecord]:
         for record in self["Records"]:
-            yield SQSRecord(record)
+            yield SQSRecord(data=record, json_deserializer=self._json_deserializer)

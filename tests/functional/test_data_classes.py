@@ -113,6 +113,46 @@ def test_dict_wrapper_equals():
     assert DataClassSample(data1).raw_event is data1
 
 
+def test_dict_wrapper_with_default_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    data = {"body": '{"message": "foo1"}'}
+    event = DataClassSample(data=data)
+    assert (event.json_body) == {"message": "foo1"}
+
+
+def test_dict_wrapper_with_valid_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    def fake_json_deserializer(record: dict):
+        return json.loads(record)
+
+    data = {"body": '{"message": "foo1"}'}
+    event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
+    assert (event.json_body) == {"message": "foo1"}
+
+
+def test_dict_wrapper_with_wrong_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    def fake_json_deserializer() -> None:
+        pass
+
+    data = {"body": {"message": "foo1"}}
+    with pytest.raises(TypeError):
+        event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
+        assert (event.json_body) == {"message": "foo1"}
+
+
 def test_dict_wrapper_implements_mapping():
     class DataClassSample(DictWrapper):
         pass
