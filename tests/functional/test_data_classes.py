@@ -966,6 +966,9 @@ def test_seq_trigger_event():
     assert record.queue_url == "https://sqs.us-east-2.amazonaws.com/123456789012/my-queue"
     assert record.aws_region == "us-east-2"
 
+    record_2 = records[1]
+    assert record_2.json_body == {"message": "foo1"}
+
 
 def test_default_api_gateway_proxy_event():
     event = APIGatewayProxyEvent(load_event("apiGatewayProxyEvent_noVersionAuth.json"))
