@@ -7,7 +7,7 @@ ENDPOINT = "http://httpbin.org/status/500"
 logger = Logger()
 
 
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     try:
         ret = requests.get(ENDPOINT)
         ret.raise_for_status()
