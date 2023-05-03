@@ -131,7 +131,7 @@ jobs:
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
           path: dist/
-          key: ${{ runner.os}}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock')}}
+          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
