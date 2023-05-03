@@ -104,7 +104,7 @@ jobs:
           # the reason we don't add pyproject.toml here is to avoid racing conditions
           # where git checkout might happen too fast and doesn't pick up the latest
           # and also future-proof for when we switch to protected branch and update via PR
-          key: ${{ runner.os}}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock')}}
+          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
       - name: Update version in trunk
         if: steps.versioning.outcome == 'success'
