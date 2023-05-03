@@ -42,179 +42,20 @@ The remaining sections of the documentation will rely on these samples. For comp
 
 === "SQS"
 
-    ```yaml title="template.yaml" hl_lines="31-32"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: partial batch response sample
-
-    Globals:
-        Function:
-            Timeout: 5
-            MemorySize: 256
-            Runtime: python3.9
-            Tracing: Active
-            Environment:
-                Variables:
-                    LOG_LEVEL: INFO
-                    POWERTOOLS_SERVICE_NAME: hello
-
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                Handler: app.lambda_handler
-                CodeUri: hello_world
-                Policies:
-                    - SQSPollerPolicy:
-                        QueueName: !GetAtt SampleQueue.QueueName
-                Events:
-                    Batch:
-                        Type: SQS
-                        Properties:
-                            Queue: !GetAtt SampleQueue.Arn
-                            FunctionResponseTypes:
-                                - ReportBatchItemFailures
-
-        SampleDLQ:
-            Type: AWS::SQS::Queue
-
-        SampleQueue:
-            Type: AWS::SQS::Queue
-            Properties:
-                VisibilityTimeout: 30 # Fn timeout * 6
-                RedrivePolicy:
-                    maxReceiveCount: 2
-                    deadLetterTargetArn: !GetAtt SampleDLQ.Arn
+    ```yaml title="template.yaml" hl_lines="30-31"
+    --8<-- "examples/batch_processing/sam/sqs_batch_processing.yaml"
     ```
 
 === "Kinesis Data Streams"
 
     ```yaml title="template.yaml" hl_lines="44-45"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: partial batch response sample
-
-    Globals:
-        Function:
-            Timeout: 5
-            MemorySize: 256
-            Runtime: python3.9
-            Tracing: Active
-            Environment:
-                Variables:
-                    LOG_LEVEL: INFO
-                    POWERTOOLS_SERVICE_NAME: hello
-
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                Handler: app.lambda_handler
-                CodeUri: hello_world
-                Policies:
-                    # Lambda Destinations require additional permissions
-                    # to send failure records to DLQ from Kinesis/DynamoDB
-                    - Version: "2012-10-17"
-                      Statement:
-                        Effect: "Allow"
-                        Action:
-                            - sqs:GetQueueAttributes
-                            - sqs:GetQueueUrl
-                            - sqs:SendMessage
-                        Resource: !GetAtt SampleDLQ.Arn
-                Events:
-                    KinesisStream:
-                        Type: Kinesis
-                        Properties:
-                            Stream: !GetAtt SampleStream.Arn
-                            BatchSize: 100
-                            StartingPosition: LATEST
-                            MaximumRetryAttempts: 2
-                            DestinationConfig:
-                                OnFailure:
-                                    Destination: !GetAtt SampleDLQ.Arn
-                            FunctionResponseTypes:
-                                - ReportBatchItemFailures
-
-        SampleDLQ:
-            Type: AWS::SQS::Queue
-
-        SampleStream:
-            Type: AWS::Kinesis::Stream
-            Properties:
-                ShardCount: 1
+    --8<-- "examples/batch_processing/sam/kinesis_batch_processing.yaml"
     ```
 
 === "DynamoDB Streams"
 
     ```yaml title="template.yaml" hl_lines="43-44"
-    AWSTemplateFormatVersion: '2010-09-09'
-    Transform: AWS::Serverless-2016-10-31
-    Description: partial batch response sample
-
-    Globals:
-        Function:
-            Timeout: 5
-            MemorySize: 256
-            Runtime: python3.9
-            Tracing: Active
-            Environment:
-                Variables:
-                    LOG_LEVEL: INFO
-                    POWERTOOLS_SERVICE_NAME: hello
-
-    Resources:
-        HelloWorldFunction:
-            Type: AWS::Serverless::Function
-            Properties:
-                Handler: app.lambda_handler
-                CodeUri: hello_world
-                Policies:
-                    # Lambda Destinations require additional permissions
-                    # to send failure records from Kinesis/DynamoDB
-                    - Version: "2012-10-17"
-                      Statement:
-                        Effect: "Allow"
-                        Action:
-                            - sqs:GetQueueAttributes
-                            - sqs:GetQueueUrl
-                            - sqs:SendMessage
-                        Resource: !GetAtt SampleDLQ.Arn
-                Events:
-                    DynamoDBStream:
-                        Type: DynamoDB
-                        Properties:
-                            Stream: !GetAtt SampleTable.StreamArn
-                            StartingPosition: LATEST
-                            MaximumRetryAttempts: 2
-                            DestinationConfig:
-                                OnFailure:
-                                    Destination: !GetAtt SampleDLQ.Arn
-                            FunctionResponseTypes:
-                                - ReportBatchItemFailures
-
-        SampleDLQ:
-            Type: AWS::SQS::Queue
-
-        SampleTable:
-            Type: AWS::DynamoDB::Table
-            Properties:
-                BillingMode: PAY_PER_REQUEST
-                AttributeDefinitions:
-                    - AttributeName: pk
-                      AttributeType: S
-                    - AttributeName: sk
-                      AttributeType: S
-                KeySchema:
-                    - AttributeName: pk
-                      KeyType: HASH
-                    - AttributeName: sk
-                      KeyType: RANGE
-                SSESpecification:
-                    SSEEnabled: yes
-                StreamSpecification:
-                    StreamViewType: NEW_AND_OLD_IMAGES
-
+    --8<-- "examples/batch_processing/sam/dynamodb_batch_processing.yaml"
     ```
 
 ### Processing messages from SQS
@@ -230,126 +71,34 @@ Processing batches from SQS works in three stages:
 
 === "Recommended"
 
-    ```python hl_lines="4 9 12 18 29"
+    ```python hl_lines="4-9 12 18 28"
     --8<-- "examples/batch_processing/src/getting_started_sqs.py"
     ```
 
 === "As a context manager"
 
-    ```python hl_lines="4-5 9 15 24-26 28"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, handler=record_handler):
-            processed_messages = processor.process() # kick off processing, return list[tuple]
-
-        return processor.response()
+    ```python hl_lines="4-5 8 14 25-26 29"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_context_manager.py"
     ```
 
 === "As a decorator (legacy)"
 
-    ```python hl_lines="4-5 9 15 23 25"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: SQSRecord):
-        payload: str = record.body
-        if payload:
-            item: dict = json.loads(payload)
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="4-9 12 18 27 29"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_decorator.py"
     ```
 
 === "Sample response"
 
     The second record failed to be processed, therefore the processor added its message ID in the response.
 
-    ```python
-    {
-        'batchItemFailures': [
-            {
-                'itemIdentifier': '244fc6b4-87a3-44ab-83d2-361172410c3a'
-            }
-        ]
-    }
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_response.json"
     ```
 
 === "Sample event"
 
     ```json
-    {
-        "Records": [
-            {
-                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
-                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
-                "body": "{\"Message\": \"success\"}",
-                "attributes": {
-                    "ApproximateReceiveCount": "1",
-                    "SentTimestamp": "1545082649183",
-                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
-                    "ApproximateFirstReceiveTimestamp": "1545082649185"
-                },
-                "messageAttributes": {},
-                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
-                "eventSource": "aws:sqs",
-                "eventSourceARN": "arn:aws:sqs:us-east-2: 123456789012:my-queue",
-                "awsRegion": "us-east-1"
-            },
-            {
-                "messageId": "244fc6b4-87a3-44ab-83d2-361172410c3a",
-                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
-                "body": "SGVsbG8sIHRoaXMgaXMgYSB0ZXN0Lg==",
-                "attributes": {
-                    "ApproximateReceiveCount": "1",
-                    "SentTimestamp": "1545082649183",
-                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
-                    "ApproximateFirstReceiveTimestamp": "1545082649185"
-                },
-                "messageAttributes": {},
-                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
-                "eventSource": "aws:sqs",
-                "eventSourceARN": "arn:aws:sqs:us-east-2: 123456789012:my-queue",
-                "awsRegion": "us-east-1"
-            }
-        ]
-    }
+    --8<-- "examples/batch_processing/src/getting_started_event.json"
     ```
 
 #### FIFO queues
