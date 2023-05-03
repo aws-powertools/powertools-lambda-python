@@ -108,19 +108,19 @@ This helps preserve the ordering of messages in your queue.
 
 === "Recommended"
 
-    ```python hl_lines="3 9"
+    ```python hl_lines="5-6 11 27"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo.py"
     ```
 
 === "As a context manager"
 
-    ```python hl_lines="2 6"
+    ```python hl_lines="4 8"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_context_manager.py"
     ```
 
 === "As a decorator (legacy)"
 
-    ```python hl_lines="3 9"
+    ```python hl_lines="5-6 11 26"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_decorator.py"
     ```
 
@@ -137,122 +137,34 @@ Processing batches from Kinesis works in three stages:
 
 === "Recommended"
 
-    ```python hl_lines="2 7 12 18 28"
+    ```python hl_lines="2-9 12 18 27"
     --8<-- "examples/batch_processing/src/getting_started_kinesis.py"
     ```
 
 === "As a context manager"
 
-    ```python hl_lines="4-5 9 15 23-25 27"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: KinesisStreamRecord):
-        logger.info(record.kinesis.data_as_text)
-        payload: dict = record.kinesis.data_as_json()
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, handler=record_handler):
-            processed_messages = processor.process() # kick off processing, return list[tuple]
-
-        return processor.response()
+    ```python hl_lines="3-5 8 14 23-25 28"
+    --8<-- "examples/batch_processing/src/getting_started_kinesis_context_manager.py"
     ```
 
 === "As a decorator (legacy)"
 
-    ```python hl_lines="2-3 7 20 22"
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import KinesisStreamRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: KinesisStreamRecord):
-        logger.info(record.kinesis.data_as_text)
-        payload: dict = record.kinesis.data_as_json()
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="2-9 12 18 26"
+    --8<-- "examples/batch_processing/src/getting_started_kinesis_decorator.py"
     ```
 
 === "Sample response"
 
     The second record failed to be processed, therefore the processor added its sequence number in the response.
 
-    ```python
-    {
-        'batchItemFailures': [
-            {
-                'itemIdentifier': '6006958808509702859251049540584488075644979031228738'
-            }
-        ]
-    }
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_kinesis_response.json"
     ```
 
 === "Sample event"
 
     ```json
-    {
-        "Records": [
-            {
-                "kinesis": {
-                    "kinesisSchemaVersion": "1.0",
-                    "partitionKey": "1",
-                    "sequenceNumber": "4107859083838847772757075850904226111829882106684065",
-                    "data": "eyJNZXNzYWdlIjogInN1Y2Nlc3MifQ==",
-                    "approximateArrivalTimestamp": 1545084650.987
-                },
-                "eventSource": "aws:kinesis",
-                "eventVersion": "1.0",
-                "eventID": "shardId-000000000006:4107859083838847772757075850904226111829882106684065",
-                "eventName": "aws:kinesis:record",
-                "invokeIdentityArn": "arn:aws:iam::123456789012:role/lambda-role",
-                "awsRegion": "us-east-2",
-                "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream"
-            },
-            {
-                "kinesis": {
-                    "kinesisSchemaVersion": "1.0",
-                    "partitionKey": "1",
-                    "sequenceNumber": "6006958808509702859251049540584488075644979031228738",
-                    "data": "c3VjY2Vzcw==",
-                    "approximateArrivalTimestamp": 1545084650.987
-                },
-                "eventSource": "aws:kinesis",
-                "eventVersion": "1.0",
-                "eventID": "shardId-000000000006:6006958808509702859251049540584488075644979031228738",
-                "eventName": "aws:kinesis:record",
-                "invokeIdentityArn": "arn:aws:iam::123456789012:role/lambda-role",
-                "awsRegion": "us-east-2",
-                "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream"
-            }
-        ]
-    }
+    --8<-- "examples/batch_processing/src/getting_started_kinesis_event.json"
     ```
 
 ### Processing messages from DynamoDB
