@@ -11,6 +11,7 @@
 ## Documentation
 
 * **batch:** fixed typo in DynamoDB Streams section ([#2189](https://github.com/awslabs/aws-lambda-powertools-python/issues/2189))
+* **examples:** standardize lambda handler function name ([#2192](https://github.com/awslabs/aws-lambda-powertools-python/issues/2192))
 * **homepage:** add customer references section ([#2159](https://github.com/awslabs/aws-lambda-powertools-python/issues/2159))
 * **jmespath:** fix MD037/no-space-in-emphasis
 * **tutorial:** use newer sam cli template; update to py3.10 ([#2167](https://github.com/awslabs/aws-lambda-powertools-python/issues/2167))
@@ -29,16 +30,18 @@
 ## Maintenance
 
 * add dummy reusable dispatch analytics job
+* **deps-dev:** bump mypy-boto3-xray from 1.26.11.post1 to 1.26.122 ([#2173](https://github.com/awslabs/aws-lambda-powertools-python/issues/2173))
 * **deps-dev:** bump types-requests from 2.28.11.17 to 2.29.0.0 ([#2187](https://github.com/awslabs/aws-lambda-powertools-python/issues/2187))
 * **deps-dev:** bump coverage from 7.2.4 to 7.2.5 ([#2186](https://github.com/awslabs/aws-lambda-powertools-python/issues/2186))
 * **deps-dev:** bump coverage from 7.2.3 to 7.2.4 ([#2179](https://github.com/awslabs/aws-lambda-powertools-python/issues/2179))
 * **deps-dev:** bump cfn-lint from 0.77.3 to 0.77.4 ([#2178](https://github.com/awslabs/aws-lambda-powertools-python/issues/2178))
+* **deps-dev:** bump mkdocs-material from 9.1.8 to 9.1.9 ([#2190](https://github.com/awslabs/aws-lambda-powertools-python/issues/2190))
 * **deps-dev:** bump aws-cdk from 2.76.0 to 2.77.0 ([#2174](https://github.com/awslabs/aws-lambda-powertools-python/issues/2174))
 * **deps-dev:** bump mypy-boto3-lambda from 1.26.115 to 1.26.122 ([#2172](https://github.com/awslabs/aws-lambda-powertools-python/issues/2172))
 * **deps-dev:** bump cfn-lint from 0.77.2 to 0.77.3 ([#2165](https://github.com/awslabs/aws-lambda-powertools-python/issues/2165))
 * **deps-dev:** bump mkdocs-material from 9.1.6 to 9.1.8 ([#2162](https://github.com/awslabs/aws-lambda-powertools-python/issues/2162))
 * **deps-dev:** bump importlib-metadata from 6.5.0 to 6.6.0 ([#2163](https://github.com/awslabs/aws-lambda-powertools-python/issues/2163))
-* **deps-dev:** bump mypy-boto3-xray from 1.26.11.post1 to 1.26.122 ([#2173](https://github.com/awslabs/aws-lambda-powertools-python/issues/2173))
+* **governance:** add Lambda Powertools for .NET in issue templates ([#2196](https://github.com/awslabs/aws-lambda-powertools-python/issues/2196))
 
 
 <a name="v2.14.1"></a>
