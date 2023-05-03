@@ -100,9 +100,9 @@ jobs:
           path: dist/
           # NOTE: cache key uses a hash of (Runner OS + Version to be released + Deps)
           # since a new release might not change a dependency but version
-          # otherwise we might accidentally reuse a previously cached artifact for a newer release
-          # the reason we don't add pyproject.toml here is to avoid racing conditions
-          # where git checkout might happen too fast and doesn't pick up the latest
+          # otherwise we might accidentally reuse a previously cached artifact for a newer release.
+          # The reason we don't add pyproject.toml here is to avoid racing conditions
+          # where git checkout might happen too fast and doesn't pick up the latest version
           # and also future-proof for when we switch to protected branch and update via PR
           key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
