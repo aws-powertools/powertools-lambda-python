@@ -47,12 +47,11 @@ on:
         required: false
 
 jobs:
-  release:
+  build:
     environment: release
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
       contents: write
-      id-token: write # OIDC for PyPi Trusted Publisher feature
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     env:
@@ -91,18 +90,15 @@ jobs:
         id: versioning
         run: poetry version "${RELEASE_VERSION}"
       - name: Build python package and wheel
-        if: ${{ !inputs.skip_pypi }}
         run: poetry build
-      # March 1st: PyPi test is under maintenance....
-      # - name: Upload to PyPi test
-      #   if: ${{ !inputs.skip_pypi }}
-      #   uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
-      #   with:
-      #     repository-url: https://test.pypi.org/legacy/
 
-      - name: Upload to PyPi prod
-        if: ${{ !inputs.skip_pypi }}
-        uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
+      - name: Cache release artifact
+        id: cache-release-build
+        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: dist/
+          key: ${{ runner.os}}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock')}}
+
       - name: Update version in trunk
         if: steps.versioning.outcome == 'success'
         run: |
@@ -113,6 +109,36 @@ jobs:
           git pull origin "${BRANCH}" # prevents concurrent branch update failing push
           git push origin HEAD:refs/heads/"${BRANCH}"
 
+  release:
+    needs: build
+    environment: release
+    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
+    permissions:
+      id-token: write # OIDC for PyPi Trusted Publisher feature
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Restore release artifact from cache
+        id: restore-release-build
+        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: dist/
+          key: ${{ runner.os}}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock')}}
+
+      - name: Upload to PyPi prod
+        if: ${{ !inputs.skip_pypi }}
+        uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+      # March 1st: PyPi test is under maintenance....
+      # - name: Upload to PyPi test
+      #   if: ${{ !inputs.skip_pypi }}
+      #   uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
+      #   with:
+      #     repository-url: https://test.pypi.org/legacy/
+
   changelog:
     needs: release
     permissions:
@@ -122,7 +148,7 @@ jobs:
   # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
   publish_layer:
-    needs: release
+    needs: [build, release]
     secrets: inherit
     permissions:
       id-token: write
@@ -130,11 +156,11 @@ jobs:
       pages: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
-      latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
+      latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
 
   post_release:
-    needs: [release, publish_layer]
+    needs: [build, release, publish_layer]
     permissions:
       contents: read
       issues: write
@@ -142,7 +168,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@v3
       - name: Close issues related to this release
