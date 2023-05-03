@@ -52,6 +52,7 @@ jobs:
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
       contents: write
+      id-token: write # OIDC for PyPi Trusted Publisher feature
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     env:
@@ -95,16 +96,13 @@ jobs:
       # March 1st: PyPi test is under maintenance....
       # - name: Upload to PyPi test
       #   if: ${{ !inputs.skip_pypi }}
-      #   run: make release-test
-      #   env:
-      #     PYPI_USERNAME: __token__
-      #     PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
+      #   uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
+      #   with:
+      #     repository-url: https://test.pypi.org/legacy/
+
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
-        run: make release-prod
-        env:
-          PYPI_USERNAME: __token__
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+        uses: pypa/gh-action-pypi-publish@0bf742be3ebe032c25dd15117957dc15d0cfc38d # v1.8.5
       - name: Update version in trunk
         if: steps.versioning.outcome == 'success'
         run: |
