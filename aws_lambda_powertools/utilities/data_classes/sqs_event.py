@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -104,8 +104,30 @@ class SQSRecord(DictWrapper):
         return self["body"]
 
     @property
-    def json_body(self) -> Dict:
-        """Parses the submitted body as json"""
+    def json_body(self) -> Any:
+        """Deserializes JSON string available in 'body' property
+
+        Notes
+        -----
+
+        **Strict typing**
+
+        Caller controls the type as we can't use recursive generics here.
+
+        JSON Union types would force caller to have to cast a type. Instead,
+        we choose Any to ease ergonomics and other tools receiving this data.
+
+        Examples
+        --------
+
+        **Type deserialized data from JSON string**
+
+        ```python
+        data: dict = record.json_body  # {"telemetry": [], ...}
+        # or
+        data: list = record.json_body  # ["telemetry_values"]
+        ```
+        """
         if self._json_data is None:
             self._json_data = self._json_deserializer(self["body"])
         return self._json_data
