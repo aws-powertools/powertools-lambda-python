@@ -10,6 +10,15 @@ class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
 
     def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
+        """
+        Parameters
+        ----------
+        data : Dict[str, Any]
+            Lambda Event Source Event payload
+        json_deserializer : Callable, optional
+            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            by default json.loads
+        """
         self._data = data
         self._json_data: Optional[Any] = None
         self._json_deserializer = json_deserializer or json.loads
