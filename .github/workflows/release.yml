@@ -49,7 +49,6 @@ on:
 
 jobs:
   build:
-    environment: release
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
       contents: write
