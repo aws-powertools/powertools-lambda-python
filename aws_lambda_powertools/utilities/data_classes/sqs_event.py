@@ -106,12 +106,9 @@ class SQSRecord(DictWrapper):
     @property
     def json_body(self) -> Dict:
         """Parses the submitted body as json"""
-        try:
-            if self._json_data is None:
-                self._json_data = self._json_deserializer(self["body"])
-            return self._json_data
-        except Exception:
-            return self["body"]
+        if self._json_data is None:
+            self._json_data = self._json_deserializer(self["body"])
+        return self._json_data
 
     @property
     def attributes(self) -> SQSRecordAttributes:
