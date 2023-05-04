@@ -121,7 +121,7 @@ def test_dict_wrapper_with_default_custom_json_deserializer():
 
     data = {"body": '{"message": "foo1"}'}
     event = DataClassSample(data=data)
-    assert (event.json_body) == {"message": "foo1"}
+    assert event.json_body == json.loads(data["body"])
 
 
 def test_dict_wrapper_with_valid_custom_json_deserializer():
@@ -135,22 +135,23 @@ def test_dict_wrapper_with_valid_custom_json_deserializer():
 
     data = {"body": '{"message": "foo1"}'}
     event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
-    assert (event.json_body) == {"message": "foo1"}
+    assert event.json_body == json.loads(data["body"])
 
 
-def test_dict_wrapper_with_wrong_custom_json_deserializer():
+def test_dict_wrapper_with_invalid_custom_json_deserializer():
     class DataClassSample(DictWrapper):
         @property
         def json_body(self) -> dict:
             return self._json_deserializer(self["body"])
 
     def fake_json_deserializer() -> None:
+        # invalid fn signature should raise TypeError
         pass
 
     data = {"body": {"message": "foo1"}}
     with pytest.raises(TypeError):
         event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
-        assert (event.json_body) == {"message": "foo1"}
+        assert event.json_body == {"message": "foo1"}
 
 
 def test_dict_wrapper_implements_mapping():
