@@ -745,6 +745,7 @@ Knowing which companies are using this library is important to help prioritize t
 
 The following companies, among others, use Powertools:
 
+* [Capital One](https://www.capitalone.com/){target="_blank"}
 * [CPQi (Exadel Financial Services)](https://cpqi.com/){target="_blank"}
 * [CloudZero](https://www.cloudzero.com/){target="_blank"}
 * [CyberArk](https://www.cyberark.com/){target="_blank"}
