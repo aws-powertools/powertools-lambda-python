@@ -93,20 +93,20 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
         with:
           python-version: "3.10"
           cache: "pip"
@@ -124,7 +124,7 @@ jobs:
       - name: install deps
         run: poetry install
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: ${{ inputs.artefact-name }}
           path: layer
@@ -141,7 +141,7 @@ jobs:
           cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: cdk-layer-stack
           path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.

@@ -1,5 +1,4 @@
 import base64
-import json
 from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -55,7 +54,7 @@ class KafkaEventRecord(DictWrapper):
     def json_value(self) -> Any:
         """Decodes the text encoded data as JSON."""
         if self._json_data is None:
-            self._json_data = json.loads(self.decoded_value.decode("utf-8"))
+            self._json_data = self._json_deserializer(self.decoded_value.decode("utf-8"))
         return self._json_data
 
     @property
@@ -117,7 +116,7 @@ class KafkaEvent(DictWrapper):
         """The Kafka records."""
         for chunk in self["records"].values():
             for record in chunk:
-                yield KafkaEventRecord(record)
+                yield KafkaEventRecord(data=record, json_deserializer=self._json_deserializer)
 
     @property
     def record(self) -> KafkaEventRecord:

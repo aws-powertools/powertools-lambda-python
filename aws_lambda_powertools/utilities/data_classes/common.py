@@ -1,7 +1,7 @@
 import base64
 import json
 from collections.abc import Mapping
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 
@@ -9,9 +9,19 @@ from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerialize
 class DictWrapper(Mapping):
     """Provides a single read only access to a wrapper dict"""
 
-    def __init__(self, data: Dict[str, Any]):
+    def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
+        """
+        Parameters
+        ----------
+        data : Dict[str, Any]
+            Lambda Event Source Event payload
+        json_deserializer : Callable, optional
+            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            by default json.loads
+        """
         self._data = data
         self._json_data: Optional[Any] = None
+        self._json_deserializer = json_deserializer or json.loads
 
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
@@ -122,7 +132,7 @@ class BaseProxyEvent(DictWrapper):
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
         if self._json_data is None:
-            self._json_data = json.loads(self.decoded_body)
+            self._json_data = self._json_deserializer(self.decoded_body)
         return self._json_data
 
     @property

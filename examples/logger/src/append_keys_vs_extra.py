@@ -12,7 +12,7 @@ class PaymentError(Exception):
     ...
 
 
-def handler(event, context):
+def lambda_handler(event, context):
     logger.append_keys(payment_id="123456789")
     charge_id = event.get("charge_id", "")
 
