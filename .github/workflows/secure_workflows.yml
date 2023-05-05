@@ -21,6 +21,4 @@ jobs:
           # Trusted GitHub Actions and/or organizations
           allowlist: |
             aws-actions/
-            github/codeql-action/init
-            github/codeql-action/analyze
             dependabot/fetch-metadata
