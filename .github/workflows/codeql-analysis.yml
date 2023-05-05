@@ -36,4 +36,4 @@ jobs:
           # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@f31a31c052207cc13b328d6295c5b728bb49568c # v2.13.1@v2
+        uses: github/codeql-action/analyze@f31a31c052207cc13b328d6295c5b728bb49568c # v2.13.1
