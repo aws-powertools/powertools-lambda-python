@@ -21,7 +21,6 @@ jobs:
           # Trusted GitHub Actions and/or organizations
           allowlist: |
             aws-actions/
-            actions/upload-artifact
             actions/download-artifact
             github/codeql-action/init
             github/codeql-action/analyze
