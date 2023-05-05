@@ -33,7 +33,7 @@ jobs:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           fetch-depth: 0
       - name: Install poetry

@@ -57,7 +57,7 @@ jobs:
     env:
       RELEASE_TAG_VERSION: ${{ inputs.version_to_publish }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           fetch-depth: 0
       - name: Install poetry
@@ -124,7 +124,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Restore release artifact from cache
         id: restore-release-build
         uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
@@ -174,7 +174,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Close issues related to this release
         uses: actions/github-script@v6
         with:
