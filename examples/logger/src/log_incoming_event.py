@@ -5,5 +5,5 @@ logger = Logger()
 
 
 @logger.inject_lambda_context(log_event=True)
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     return "hello world"

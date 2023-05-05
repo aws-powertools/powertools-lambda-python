@@ -21,8 +21,9 @@ class APIGatewayRouteArn:
         stage: str,
         http_method: str,
         resource: str,
+        partition: str = "aws",
     ):
-        self.partition = "aws"
+        self.partition = partition
         self.region = region
         self.aws_account_id = aws_account_id
         self.api_id = api_id
@@ -55,6 +56,7 @@ def parse_api_gateway_arn(arn: str) -> APIGatewayRouteArn:
     arn_parts = arn.split(":")
     api_gateway_arn_parts = arn_parts[5].split("/")
     return APIGatewayRouteArn(
+        partition=arn_parts[1],
         region=arn_parts[3],
         aws_account_id=arn_parts[4],
         api_id=api_gateway_arn_parts[0],
@@ -369,6 +371,7 @@ class APIGatewayAuthorizerResponse:
         stage: str,
         context: Optional[Dict] = None,
         usage_identifier_key: Optional[str] = None,
+        partition: str = "aws",
     ):
         """
         Parameters
@@ -401,6 +404,9 @@ class APIGatewayAuthorizerResponse:
             If the API uses a usage plan (the apiKeySource is set to `AUTHORIZER`), the Lambda authorizer function
             must return one of the usage plan's API keys as the usageIdentifierKey property value.
             > **Note:** This only applies for REST APIs.
+        partition: str, optional
+            Optional, arn partition.
+            See https://docs.aws.amazon.com/IAM/latest/UserGuide/reference-arns.html
         """
         self.principal_id = principal_id
         self.region = region
@@ -412,6 +418,7 @@ class APIGatewayAuthorizerResponse:
         self._allow_routes: List[Dict] = []
         self._deny_routes: List[Dict] = []
         self._resource_pattern = re.compile(self.path_regex)
+        self.partition = partition
 
     @staticmethod
     def from_route_arn(
@@ -443,7 +450,7 @@ class APIGatewayAuthorizerResponse:
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         resource_arn = APIGatewayRouteArn(
-            self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource
+            self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource, self.partition
         ).arn
 
         route = {"resourceArn": resource_arn, "conditions": conditions}

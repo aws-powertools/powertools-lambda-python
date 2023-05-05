@@ -191,7 +191,7 @@ Reword through rebase and push with `--force-with-lease` once you're confident. 
 
 **Looks good, what's next?**
 
-The only step is to draft and publish a good release notes, everything else is automated.
+Kickoff the `Release` workflow with the intended version. Once complete, update the draft release notes within the `<human readable>` section summarizing why customers should care about this release.
 
 #### Drafting release notes
 

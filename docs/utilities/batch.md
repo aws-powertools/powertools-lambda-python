@@ -508,7 +508,7 @@ Processing batches from Kinesis works in three stages:
 
 ### Processing messages from DynamoDB
 
-Processing batches from Kinesis works in three stages:
+Processing batches from DynamoDB Streams works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
 2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion

@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     request = APIGatewayProxyEvent(event)
 
     logger.set_correlation_id(request.request_context.request_id)

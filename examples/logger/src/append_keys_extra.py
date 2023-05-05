@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     fields = {"request_id": "1123"}
     logger.info("Collecting payment", extra=fields)
 

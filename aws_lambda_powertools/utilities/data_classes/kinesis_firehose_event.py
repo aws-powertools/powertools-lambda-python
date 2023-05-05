@@ -1,5 +1,4 @@
 import base64
-import json
 from typing import Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -75,7 +74,7 @@ class KinesisFirehoseRecord(DictWrapper):
     def data_as_json(self) -> dict:
         """Decoded base64-encoded data loaded to json"""
         if self._json_data is None:
-            self._json_data = json.loads(self.data_as_text)
+            self._json_data = self._json_deserializer(self.data_as_text)
         return self._json_data
 
 
@@ -110,4 +109,4 @@ class KinesisFirehoseEvent(DictWrapper):
     @property
     def records(self) -> Iterator[KinesisFirehoseRecord]:
         for record in self["records"]:
-            yield KinesisFirehoseRecord(record)
+            yield KinesisFirehoseRecord(data=record, json_deserializer=self._json_deserializer)
