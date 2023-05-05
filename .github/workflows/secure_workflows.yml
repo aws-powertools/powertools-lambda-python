@@ -21,7 +21,6 @@ jobs:
           # Trusted GitHub Actions and/or organizations
           allowlist: |
             aws-actions/
-            actions/github-script
             actions/setup-node
             actions/setup-python
             actions/upload-artifact
