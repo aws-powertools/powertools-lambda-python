@@ -15,13 +15,7 @@ on:
         required: true
 
 jobs:
-  changelog:
-    permissions:
-      contents: write
-    uses: ./.github/workflows/reusable_publish_changelog.yml
-
   release-docs:
-    needs: changelog
     permissions:
       contents: write
       pages: write
