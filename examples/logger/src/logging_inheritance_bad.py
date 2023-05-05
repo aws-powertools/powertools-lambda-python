@@ -10,7 +10,7 @@ logger = Logger(service="payment")
 
 
 @logger.inject_lambda_context
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     inject_payment_id(context=event)
 
     return "hello world"

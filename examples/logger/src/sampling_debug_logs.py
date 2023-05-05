@@ -6,7 +6,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger(service="payment", sample_rate=0.1)
 
 
-def handler(event: dict, context: LambdaContext):
+def lambda_handler(event: dict, context: LambdaContext):
     logger.debug("Verifying whether order_id is present")
     logger.info("Collecting payment")
 

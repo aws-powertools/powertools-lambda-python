@@ -5,17 +5,18 @@ name: Release
 # === Automated activities ===
 #
 # 1. Run tests, linting, security and complexity base line
-# 2. Bump package version and generate latest Changelog
-# 3. Publish package to PyPi test and prod repository
-# 4. Kick off SAR App pipeline to publish latest version with minimal and extra dependencies
-# 5. Builds and publish latest changelog from tip of the branch
+# 2. Bump package version, build release artifact, and generate latest Changelog
+# 3. Publish package to PyPi prod repository using cached artifact
+# 4. Kick off Layers pipeline to compile and publish latest version
+# 5. Updates documentation to use the latest Layer ARN for all commercial regions
 # 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
 # 7. Close all issues labeled "pending-release" and notify customers about the release
 #
 # === Manual activities ===
 #
-# 1. Edit the current draft release notes
-# 2. If not already set, use `v<new version>` as a tag, e.g., v1.26.4, and select develop as target branch
+# 1. Kick off this workflow with the intended version
+# 2. Update draft release notes after this workflow completes
+# 3. If not already set, use `v<new version>` as a tag, e.g., v1.26.4, and select develop as target branch
 
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
@@ -47,8 +48,7 @@ on:
         required: false
 
 jobs:
-  release:
-    environment: release
+  build:
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
       contents: write
@@ -57,13 +57,13 @@ jobs:
     env:
       RELEASE_TAG_VERSION: ${{ inputs.version_to_publish }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           fetch-depth: 0
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
         with:
           python-version: "3.10"
           cache: "poetry"
@@ -90,21 +90,21 @@ jobs:
         id: versioning
         run: poetry version "${RELEASE_VERSION}"
       - name: Build python package and wheel
-        if: ${{ !inputs.skip_pypi }}
         run: poetry build
-      # March 1st: PyPi test is under maintenance....
-      # - name: Upload to PyPi test
-      #   if: ${{ !inputs.skip_pypi }}
-      #   run: make release-test
-      #   env:
-      #     PYPI_USERNAME: __token__
-      #     PYPI_TEST_TOKEN: ${{ secrets.PYPI_TEST_TOKEN }}
-      - name: Upload to PyPi prod
-        if: ${{ !inputs.skip_pypi }}
-        run: make release-prod
-        env:
-          PYPI_USERNAME: __token__
-          PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+      - name: Cache release artifact
+        id: cache-release-build
+        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: dist/
+          # NOTE: cache key uses a hash of (Runner OS + Version to be released + Deps)
+          # since a new release might not change a dependency but version
+          # otherwise we might accidentally reuse a previously cached artifact for a newer release.
+          # The reason we don't add pyproject.toml here is to avoid racing conditions
+          # where git checkout might happen too fast and doesn't pick up the latest version
+          # and also future-proof for when we switch to protected branch and update via PR
+          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Update version in trunk
         if: steps.versioning.outcome == 'success'
         run: |
@@ -115,6 +115,34 @@ jobs:
           git pull origin "${BRANCH}" # prevents concurrent branch update failing push
           git push origin HEAD:refs/heads/"${BRANCH}"
 
+  release:
+    needs: build
+    environment: release
+    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
+    permissions:
+      id-token: write # OIDC for PyPi Trusted Publisher feature
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - name: Restore release artifact from cache
+        id: restore-release-build
+        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+        with:
+          path: dist/
+          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+
+      - name: Upload to PyPi prod
+        if: ${{ !inputs.skip_pypi }}
+        uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598 # v1.8.6
+
+      # March 1st: PyPi test is under maintenance....
+      # - name: Upload to PyPi test
+      #   if: ${{ !inputs.skip_pypi }}
+      #   uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598 # v1.8.6
+      #   with:
+      #     repository-url: https://test.pypi.org/legacy/
+
   changelog:
     needs: release
     permissions:
@@ -124,7 +152,7 @@ jobs:
   # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
   publish_layer:
-    needs: release
+    needs: [build, release]
     secrets: inherit
     permissions:
       id-token: write
@@ -132,11 +160,11 @@ jobs:
       pages: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
-      latest_published_version: ${{ needs.release.outputs.RELEASE_VERSION }}
+      latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
 
   post_release:
-    needs: [release, publish_layer]
+    needs: [build, release, publish_layer]
     permissions:
       contents: read
       issues: write
@@ -144,11 +172,11 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      RELEASE_VERSION: ${{ needs.release.outputs.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Close issues related to this release
-        uses: actions/github-script@v6
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
