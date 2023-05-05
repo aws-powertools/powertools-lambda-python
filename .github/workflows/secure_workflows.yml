@@ -21,4 +21,3 @@ jobs:
           # Trusted GitHub Actions and/or organizations
           allowlist: |
             aws-actions/
-            dependabot/fetch-metadata
