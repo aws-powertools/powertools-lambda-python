@@ -140,10 +140,10 @@ The `evaluate` method supports two optional parameters:
     ```json hl_lines="3"
     --8<-- "examples/feature_flags/src/getting_started_single_feature_flag_payload.json"
     ```
-=== "getting_started_single_feature_flag_configuration.json"
+=== "getting_started_single_feature_flag_features.json"
 
     ```json hl_lines="2 6 9-11"
-    --8<-- "examples/feature_flags/src/getting_started_single_feature_flag_configuration.json"
+    --8<-- "examples/feature_flags/src/getting_started_single_feature_flag_features.json"
     ```
 
 #### Static flags
@@ -152,36 +152,21 @@ We have a static flag named `ten_percent_off_campaign`. Meaning, there are no co
 
 In this case, we could omit the `context` parameter and simply evaluate whether we should apply the 10% discount.
 
-=== "app.py"
+=== "getting_started_static_flag.py"
 
     ```python hl_lines="12-13"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        apply_discount: bool = feature_flags.evaluate(name="ten_percent_off_campaign",
-                                                                default=False)
-
-        if apply_discount:
-            # apply 10% discount to product
-            ...
+    --8<-- "examples/feature_flags/src/getting_started_static_flag.py"
     ```
-
-=== "features.json"
+=== "getting_started_static_flag_payload.json"
 
     ```json hl_lines="2-3"
-    {
-        "ten_percent_off_campaign": {
-            "default": false
-        }
-    }
+    --8<-- "examples/feature_flags/src/getting_started_static_flag_payload.json"
+    ```
+
+=== "getting_started_static_flag_features.json"
+
+    ```json hl_lines="2-3"
+    --8<-- "examples/feature_flags/src/getting_started_static_flag_features.json"
     ```
 
 ### Getting all enabled features

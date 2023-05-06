@@ -1,11 +1,12 @@
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app_config = AppConfigStore(environment="dev", application="product-catalogue", name="features")
 
 feature_flags = FeatureFlags(store=app_config)
 
 
-def lambda_handler(event, context):
+def lambda_handler(event: dict, context: LambdaContext):
     # Get customer's tier from incoming request
     ctx = {"tier": event.get("tier", "standard")}
 
