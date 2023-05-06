@@ -6,7 +6,7 @@ description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
 ???+ info
-    We currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations).
+    We currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
 ## Terminology
 
@@ -24,18 +24,19 @@ Feature flags are used to modify behaviour without changing the application's co
 
 If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
-* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html)
-* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233)
-* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide)
+* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html){target="_blank"}
+* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233){target="_blank"}
+* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank"}
 
 ???+ note
-    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html).
+    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}  .
 
 ## Key features
 
 * Define simple feature flags to dynamically decide when to enable a feature
 * Fetch one or all feature flags enabled for a given application context
 * Support for static feature flags to simply turn on/off a feature without rules
+* Support for time based feature flags
 
 ## Getting started
 
@@ -45,73 +46,14 @@ Your Lambda function IAM Role must have `appconfig:GetLatestConfiguration` and `
 
 ### Required resources
 
-By default, this utility provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html) as a configuration store.
+By default, this utility provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html){target="_blank"} as a configuration store.
 
 The following sample infrastructure will be used throughout this documentation:
 
 === "template.yaml"
 
     ```yaml hl_lines="5 11 18 25 31-50 54"
-    AWSTemplateFormatVersion: "2010-09-09"
-    Description: Lambda Powertools for Python Feature flags sample template
-    Resources:
-      FeatureStoreApp:
-        Type: AWS::AppConfig::Application
-        Properties:
-          Description: "AppConfig Application for feature toggles"
-          Name: product-catalogue
-
-      FeatureStoreDevEnv:
-        Type: AWS::AppConfig::Environment
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          Description: "Development Environment for the App Config Store"
-          Name: dev
-
-      FeatureStoreConfigProfile:
-        Type: AWS::AppConfig::ConfigurationProfile
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          Name: features
-          LocationUri: "hosted"
-
-      HostedConfigVersion:
-        Type: AWS::AppConfig::HostedConfigurationVersion
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-          Description: 'A sample hosted configuration version'
-          Content: |
-            {
-                  "premium_features": {
-                    "default": false,
-                    "rules": {
-                      "customer tier equals premium": {
-                        "when_match": true,
-                        "conditions": [
-                          {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                          }
-                        ]
-                      }
-                    }
-                  },
-                  "ten_percent_off_campaign": {
-                    "default": false
-                  }
-              }
-          ContentType: 'application/json'
-
-      ConfigDeployment:
-        Type: AWS::AppConfig::Deployment
-        Properties:
-          ApplicationId: !Ref FeatureStoreApp
-          ConfigurationProfileId: !Ref FeatureStoreConfigProfile
-          ConfigurationVersion: !Ref HostedConfigVersion
-          DeploymentStrategyId: "AppConfig.AllAtOnce"
-          EnvironmentId: !Ref FeatureStoreDevEnv
+    --8<-- "examples/feature_flags/sam/template.yaml"
     ```
 
 === "CDK"
@@ -187,64 +129,21 @@ The `evaluate` method supports two optional parameters:
 * **context**: Value to be evaluated against each rule defined for the given feature
 * **default**: Sentinel value to use in case we experience any issues with our store, or feature doesn't exist
 
-=== "app.py"
+=== "getting_started_single_feature_flag.py"
 
     ```python hl_lines="3 9 13 17-19"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        # Get customer's tier from incoming request
-        ctx = { "tier": event.get("tier", "standard") }
-
-        # Evaluate whether customer's tier has access to premium features
-        # based on `has_premium_features` rules
-        has_premium_features: bool = feature_flags.evaluate(name="premium_features",
-                                                            context=ctx, default=False)
-        if has_premium_features:
-            # enable premium features
-            ...
+    --8<-- "examples/feature_flags/src/getting_started_single_feature_flag.py"
     ```
 
-=== "event.json"
+=== "getting_started_single_feature_flag_payload.json"
 
     ```json hl_lines="3"
-    {
-        "username": "lessa",
-        "tier": "premium",
-        "basked_id": "random_id"
-    }
+    --8<-- "examples/feature_flags/src/getting_started_single_feature_flag_payload.json"
     ```
-=== "features.json"
+=== "getting_started_single_feature_flag_configuration.json"
 
     ```json hl_lines="2 6 9-11"
-    {
-        "premium_features": {
-            "default": false,
-            "rules": {
-                "customer tier equals premium": {
-                    "when_match": true,
-                    "conditions": [
-                        {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                        }
-                    ]
-                }
-            }
-        },
-        "ten_percent_off_campaign": {
-            "default": false
-        }
-    }
+    --8<-- "examples/feature_flags/src/getting_started_single_feature_flag_configuration.json"
     ```
 
 #### Static flags
