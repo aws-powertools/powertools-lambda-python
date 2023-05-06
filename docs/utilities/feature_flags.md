@@ -175,96 +175,22 @@ As you might have noticed, each `evaluate` call means an API call to the Store a
 
 You can use `get_enabled_features` method for scenarios where you need a list of all enabled features according to the input context.
 
-=== "app.py"
+=== "getting_all_enabled_features.py"
 
-    ```python hl_lines="17-20 23"
-    from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app = APIGatewayRestResolver()
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    @app.get("/products")
-    def list_products():
-        ctx = {
-            **app.current_event.headers,
-            **app.current_event.json_body
-        }
-
-        # all_features is evaluated to ["geo_customer_campaign", "ten_percent_off_campaign"]
-        all_features: list[str] = feature_flags.get_enabled_features(context=ctx)
-
-        if "geo_customer_campaign" in all_features:
-            # apply discounts based on geo
-            ...
-
-        if "ten_percent_off_campaign" in all_features:
-            # apply additional 10% for all customers
-            ...
-
-    def lambda_handler(event, context):
-        return app.resolve(event, context)
+    ```python hl_lines="12-13"
+    --8<-- "examples/feature_flags/src/getting_all_enabled_features.py"
     ```
 
-=== "event.json"
+=== "getting_all_enabled_features_payload.json"
 
     ```json hl_lines="2 8"
-    {
-        "body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\"}",
-        "resource": "/products",
-        "path": "/products",
-        "httpMethod": "GET",
-        "isBase64Encoded": false,
-        "headers": {
-            "CloudFront-Viewer-Country": "NL"
-        }
-    }
+    --8<-- "examples/feature_flags/src/getting_all_enabled_features_payload.json"
     ```
-=== "features.json"
+
+=== "getting_all_enabled_features_features.json"
 
     ```json hl_lines="17-18 20 27-29"
-    {
-        "premium_features": {
-            "default": false,
-            "rules": {
-                "customer tier equals premium": {
-                    "when_match": true,
-                    "conditions": [
-                        {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                        }
-                    ]
-                }
-            }
-        },
-        "ten_percent_off_campaign": {
-            "default": true
-        },
-        "geo_customer_campaign": {
-            "default": false,
-            "rules": {
-                "customer in temporary discount geo": {
-                    "when_match": true,
-                    "conditions": [
-                        {
-                            "action": "KEY_IN_VALUE",
-                            "key": "CloudFront-Viewer-Country",
-                            "value": ["NL", "IE", "UK", "PL", "PT"]
-                        }
-                    ]
-                }
-            }
-        }
-    }
+    --8<-- "examples/feature_flags/src/getting_all_enabled_features_features.json"
     ```
 
 ### Beyond boolean feature flags

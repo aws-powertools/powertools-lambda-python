@@ -1,3 +1,5 @@
+from typing import Any
+
 from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -12,7 +14,7 @@ def lambda_handler(event: dict, context: LambdaContext):
 
     # Evaluate whether customer's tier has access to premium features
     # based on `has_premium_features` rules
-    has_premium_features: bool = feature_flags.evaluate(name="premium_features", context=ctx, default=False)
+    has_premium_features: Any = feature_flags.evaluate(name="premium_features", context=ctx, default=False)
     if has_premium_features:
         # enable premium features
         ...
