@@ -29,7 +29,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank"}
 
 ???+ note
-    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}  .
+    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
 
 ## Key features
 
@@ -483,11 +483,11 @@ The `action` configuration can have the following values, where the expressions 
 
     For time based keys, we provide a list of predefined keys. These will automatically get converted to the corresponding timestamp on each invocation of your Lambda function.
 
-    | Key                 | Meaning                                                                  |
-    | ------------------- | ------------------------------------------------------------------------ |
-    | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                 |
-    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601)) |
-    | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                              |
+    | Key                 | Meaning                                                                                   |
+    | ------------------- | ----------------------------------------------------------------------------------------- |
+    | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                                  |
+    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601){target="_blank"}) |
+    | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                                               |
 
     If not specified, the timezone used for calculations will be UTC.
 
@@ -662,19 +662,10 @@ def test_flags_condition_match(mocker):
 	assert flag == expected_value
 ```
 
-## Feature flags vs Parameters vs env vars
+## Feature flags vs Parameters vs Env vars
 
 | Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
 | **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
 | **[Parameters utility](parameters.md)**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
 | **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |
-
-## Deprecation list when GA
-
-| Breaking change        | Recommendation                                                                                                                                                                                                                                       |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `IN` RuleAction        | Use `KEY_IN_VALUE` instead                                                                                                                                                                                                                           |
-| `NOT_IN` RuleAction    | Use `KEY_NOT_IN_VALUE` instead                                                                                                                                                                                                                       |
-| `get_enabled_features` | Return type changes from `List[str]` to `Dict[str, Any]`. New return will contain a list of features enabled and their values. List of enabled features will be in `enabled_features` key to keep ease of assertion we have in Beta.                 |
-| `boolean_type` Schema  | This **might** not be necessary anymore before we go GA. We will return either the `default` value when there are no rules as well as `when_match` value. This will simplify on-boarding if we can keep the same set of validations already offered. |
