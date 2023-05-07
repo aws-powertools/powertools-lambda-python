@@ -6,7 +6,7 @@ description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
 ???+ info
-    We currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
+    When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
 ## Terminology
 
@@ -37,12 +37,13 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * Fetch one or all feature flags enabled for a given application context
 * Support for static feature flags to simply turn on/off a feature without rules
 * Support for time based feature flags
+* Bring Your Own Feature Flags Store Provider
 
 ## Getting started
 
 ### IAM Permissions
 
-Your Lambda function IAM Role must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions before using this feature.
+When using the default store `AppConfigStore`, your Lambda function IAM Role must have `appconfig:GetLatestConfiguration` and `appconfig:StartConfigurationSession` IAM permissions before using this feature.
 
 ### Required resources
 
@@ -131,7 +132,7 @@ The `evaluate` method supports two optional parameters:
 
 === "getting_started_single_feature_flag.py"
 
-    ```python hl_lines="3 9 13 17-19"
+    ```python hl_lines="3 8 27 31"
     --8<-- "examples/feature_flags/src/getting_started_single_feature_flag.py"
     ```
 
@@ -154,7 +155,7 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 
 === "getting_started_static_flag.py"
 
-    ```python hl_lines="12-13"
+    ```python hl_lines="3 8 16"
     --8<-- "examples/feature_flags/src/getting_started_static_flag.py"
     ```
 === "getting_started_static_flag_payload.json"
@@ -165,7 +166,7 @@ In this case, we could omit the `context` parameter and simply evaluate whether 
 
 === "getting_started_static_flag_features.json"
 
-    ```json hl_lines="2-3"
+    ```json hl_lines="2-4"
     --8<-- "examples/feature_flags/src/getting_started_static_flag_features.json"
     ```
 
@@ -177,7 +178,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 === "getting_all_enabled_features.py"
 
-    ```python hl_lines="12-13"
+    ```python hl_lines="2 9 26"
     --8<-- "examples/feature_flags/src/getting_all_enabled_features.py"
     ```
 
@@ -189,7 +190,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 === "getting_all_enabled_features_features.json"
 
-    ```json hl_lines="17-18 20 27-29"
+    ```json hl_lines="2 8-12 17-18 20 27-28 30"
     --8<-- "examples/feature_flags/src/getting_all_enabled_features_features.json"
     ```
 
@@ -209,7 +210,7 @@ You can also have features enabled only at certain times of the day for premium 
 
 === "timebased_feature.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="1 6 40"
     --8<-- "examples/feature_flags/src/timebased_feature.py"
     ```
 
@@ -229,13 +230,13 @@ You can also have features enabled only at certain times of the day.
 
 === "timebased_happyhour_feature.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="1 6 29"
     --8<-- "examples/feature_flags/src/timebased_happyhour_feature.py"
     ```
 
 === "timebased_happyhour_features.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="9-14"
     --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
     ```
 
@@ -243,7 +244,7 @@ You can also have features enabled only at specific days, for example: enable ch
 
 === "datetime_feature.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="1 6 31"
     --8<-- "examples/feature_flags/src/datetime_feature.py"
     ```
 
@@ -270,7 +271,7 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
 
 === "beyond_boolean.py"
 
-    ```python hl_lines="12"
+    ```python hl_lines="3 8 16"
     --8<-- "examples/feature_flags/src/beyond_boolean.py"
     ```
 
@@ -282,7 +283,7 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
 
 === "beyond_boolean_features.json"
 
-    ```json hl_lines="9-11 14-21"
+    ```json hl_lines="7-11 14-16"
     --8<-- "examples/feature_flags/src/beyond_boolean_features.json"
     ```
 
@@ -296,7 +297,7 @@ You can override `max_age` parameter when instantiating the store.
 
 === "getting_started_with_cache.py"
 
-    ```python hl_lines="12-13"
+    ```python hl_lines="6"
     --8<-- "examples/feature_flags/src/getting_started_with_cache.py"
     ```
 === "getting_started_with_cache_payload.json"
@@ -307,7 +308,7 @@ You can override `max_age` parameter when instantiating the store.
 
 === "getting_started_with_cache_features.json"
 
-    ```json hl_lines="2-3"
+    ```json hl_lines="2-4"
     --8<-- "examples/feature_flags/src/getting_started_with_cache_features.json"
     ```
 
@@ -322,7 +323,7 @@ You can access the configuration fetched from the store via `get_raw_configurati
 
 === "getting_stored_features.py"
 
-    ```python hl_lines="12-13"
+    ```python hl_lines="9"
     --8<-- "examples/feature_flags/src/getting_stored_features.py"
     ```
 
@@ -419,19 +420,19 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 
 === "extracting_envelope.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="7"
     --8<-- "examples/feature_flags/src/extracting_envelope.py"
     ```
 
 === "extracting_envelope_payload.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="2-3"
     --8<-- "examples/feature_flags/src/extracting_envelope_payload.json"
     ```
 
 === "extracting_envelope_features.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="6"
     --8<-- "examples/feature_flags/src/extracting_envelope_features.json"
     ```
 
@@ -446,25 +447,25 @@ Here are an example of implementing a custom store provider using Amazon S3, a p
 
 === "working_with_own_s3_store_provider.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="3 8 10"
     --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider.py"
     ```
 
 === "custom_s3_store_provider.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="33 37"
     --8<-- "examples/feature_flags/src/custom_s3_store_provider.py"
     ```
 
 === "working_with_own_s3_store_provider_payload.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="2 3"
     --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_payload.json"
     ```
 
 === "working_with_own_s3_store_provider_features.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="2-4"
     --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_features.json"
     ```
 
@@ -487,19 +488,19 @@ These are the available options for further customization.
 
 === "appconfig_provider_options.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="9 13-17 20 28-30"
     --8<-- "examples/feature_flags/src/appconfig_provider_options.py"
     ```
 
 === "appconfig_provider_options_payload.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="2 3"
     --8<-- "examples/feature_flags/src/appconfig_provider_options_payload.json"
     ```
 
 === "appconfig_provider_options_features.json"
 
-    ```json hl_lines="9-15"
+    ```json hl_lines="6-9"
     --8<-- "examples/feature_flags/src/appconfig_provider_options_features.json"
     ```
 
@@ -514,7 +515,7 @@ You can unit test your feature flags locally and independently without setting u
 
 === "Testing your code"
 
-    ```python hl_lines="7-9"
+    ```python hl_lines="11-13"
     --8<-- "examples/feature_flags/src/getting_started_with_tests.py"
     ```
 
