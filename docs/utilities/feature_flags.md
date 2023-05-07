@@ -571,36 +571,17 @@ These are the available options for further customization.
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
 | **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
 
-```python hl_lines="21-27" title="AppConfigStore sample"
-from botocore.config import Config
+=== "appconfig_provider_options.py"
 
-import jmespath
+    ```python hl_lines="9"
+    --8<-- "examples/feature_flags/src/appconfig_provider_options.py"
+    ```
 
-from aws_lambda_powertools.utilities.feature_flags import AppConfigStore
+=== "appconfig_provider_options_features.json"
 
-boto_config = Config(read_timeout=10, retries={"total_max_attempts": 2})
-
-# Custom JMESPath functions
-class CustomFunctions(jmespath.functions.Functions):
-
-	@jmespath.functions.signature({'types': ['string']})
-	def _func_special_decoder(self, s):
-		return my_custom_decoder_logic(s)
-
-
-custom_jmespath_options = {"custom_functions": CustomFunctions()}
-
-
-app_config = AppConfigStore(
-	environment="dev",
-	application="product-catalogue",
-	name="configuration",
-	max_age=120,
-	envelope = "features",
-	sdk_config=boto_config,
-	jmespath_options=custom_jmespath_options
-)
-```
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/appconfig_provider_options_features.json"
+    ```
 
 ## Testing your code
 
