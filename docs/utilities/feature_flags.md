@@ -268,61 +268,22 @@ You can also have features enabled only at specific days, for example: enable ch
 
 Feature flags can return any JSON values when `boolean_type` parameter is set to `false`. These can be dictionaries, list, string, integers, etc.
 
-=== "app.py"
+=== "beyond_boolean.py"
 
-    ```python hl_lines="3 9 13 16 18"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features"
-    )
-
-    feature_flags = FeatureFlags(store=app_config)
-
-    def lambda_handler(event, context):
-        # Get customer's tier from incoming request
-        ctx = { "tier": event.get("tier", "standard") }
-
-        # Evaluate `has_premium_features` base don customer's tier
-        premium_features: list[str] = feature_flags.evaluate(name="premium_features",
-                                                            context=ctx, default=False)
-        for feature in premium_features:
-            # enable premium features
-            ...
+    ```python hl_lines="12"
+    --8<-- "examples/feature_flags/src/beyond_boolean.py"
     ```
 
-=== "event.json"
+=== "beyond_boolean_payload.json"
 
     ```json hl_lines="3"
-    {
-        "username": "lessa",
-        "tier": "premium",
-        "basked_id": "random_id"
-    }
+    --8<-- "examples/feature_flags/src/beyond_boolean_payload.json"
     ```
-=== "features.json"
 
-    ```json hl_lines="3-4 7"
-    {
-        "premium_features": {
-            "boolean_type": false,
-            "default": [],
-            "rules": {
-                "customer tier equals premium": {
-                    "when_match": ["no_ads", "no_limits", "chat"],
-                    "conditions": [
-                        {
-                            "action": "EQUALS",
-                            "key": "tier",
-                            "value": "premium"
-                        }
-                    ]
-                }
-            }
-        }
-    }
+=== "beyond_boolean_features.json"
+
+    ```json hl_lines="9-11 14-21"
+    --8<-- "examples/feature_flags/src/beyond_boolean_features.json"
     ```
 
 ## Advanced
@@ -384,17 +345,11 @@ This utility expects a certain schema to be stored as JSON within AWS AppConfig.
 
 A feature can simply have its name and a `default` value. This is either on or off, also known as a [static flag](#static-flags).
 
-```json hl_lines="2-3 5-7" title="minimal_schema.json"
-{
-    "global_feature": {
-        "default": true
-    },
-    "non_boolean_global_feature": {
-        "default": {"group": "read-only"},
-        "boolean_type": false
-    },
-}
-```
+=== "minimal_schema.json"
+
+    ```json hl_lines="2-3 5-7"
+    --8<-- "examples/feature_flags/src/minimal_schema.json"
+    ```
 
 If you need more control and want to provide context such as user group, permissions, location, etc., you need to add rules to your feature flag configuration.
 
@@ -406,40 +361,11 @@ When adding `rules` to a feature, they must contain:
 2. `when_match` boolean or JSON value that should be used when conditions match
 3. A list of `conditions` for evaluation
 
- ```json hl_lines="4-11 19-26" title="feature_with_rules.json"
- {
-     "premium_feature": {
-         "default": false,
-         "rules": {
-             "customer tier equals premium": {
-                 "when_match": true,
-                 "conditions": [
-                     {
-                         "action": "EQUALS",
-                         "key": "tier",
-                         "value": "premium"
-                     }
-                 ]
-             }
-         }
-     },
-     "non_boolean_premium_feature": {
-         "default": [],
-         "rules": {
-             "customer tier equals premium": {
-                 "when_match": ["remove_limits", "remove_ads"],
-                 "conditions": [
-                     {
-                         "action": "EQUALS",
-                         "key": "tier",
-                         "value": "premium"
-                     }
-                 ]
-             }
-         }
-     }
- }
- ```
+=== "feature_with_rules.json"
+
+    ```json hl_lines="4-11 19-26"
+    --8<-- "examples/feature_flags/src/feature_with_rules.json"
+    ```
 
 You can have multiple rules with different names. The rule engine will return the first result `when_match` of the matching rule configuration, or `default` value when none of the rules apply.
 
@@ -447,18 +373,11 @@ You can have multiple rules with different names. The rule engine will return th
 
 The `conditions` block is a list of conditions that contain `action`, `key`, and `value` keys:
 
-```json  hl_lines="5-7" title="conditions.json"
-{
-	...
-	"conditions": [
-		{
-			"action": "EQUALS",
-			"key": "tier",
-			"value": "premium"
-		}
-	]
-}
-```
+=== "conditions.json"
+
+    ```json hl_lines="5-7"
+    --8<-- "examples/feature_flags/src/conditions.json"
+    ```
 
 The `action` configuration can have the following values, where the expressions **`a`** is the `key` and **`b`** is the `value` above:
 
