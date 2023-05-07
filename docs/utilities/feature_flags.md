@@ -320,21 +320,10 @@ You can override `max_age` parameter when instantiating the store.
 
 You can access the configuration fetched from the store via `get_raw_configuration` property within the store instance.
 
-=== "app.py"
+=== "getting_stored_features.py"
 
-    ```python hl_lines="12"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
-
-	feature_flags = FeatureFlags(store=app_config)
-
-	config = app_config.get_raw_configuration
+    ```python hl_lines="12-13"
+    --8<-- "examples/feature_flags/src/getting_stored_features.py"
     ```
 
 ### Schema
