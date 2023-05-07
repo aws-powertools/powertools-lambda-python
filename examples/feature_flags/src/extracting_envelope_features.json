@@ -1,0 +1,11 @@
+{
+	"logging": {
+		  "level": "INFO",
+		  "sampling_rate": 0.1
+	 },
+	"features": {
+	  "ten_percent_off_campaign": {
+		"default": true
+	  }
+	}
+  }

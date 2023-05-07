@@ -428,48 +428,22 @@ There are scenarios where you might want to include feature flags as part of an 
 
 For this to work, you need to use a JMESPath expression via the `envelope` parameter to extract that key as the feature flags configuration.
 
-=== "app.py"
+=== "extracting_envelope.py"
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
-
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="configuration",
-        envelope = "feature_flags"
-    )
+    ```python hl_lines="9"
+    --8<-- "examples/feature_flags/src/extracting_envelope.py"
     ```
 
-=== "configuration.json"
+=== "extracting_envelope_payload.json"
 
-    ```json hl_lines="6"
-    {
-        "logging": {
-            "level": "INFO",
-            "sampling_rate": 0.1
-        },
-        "feature_flags": {
-            "premium_feature": {
-                "default": false,
-                "rules": {
-                    "customer tier equals premium": {
-                        "when_match": true,
-                        "conditions": [
-                            {
-                                "action": "EQUALS",
-                                "key": "tier",
-                                "value": "premium"
-                            }
-                        ]
-                    }
-                }
-            },
-            "feature2": {
-                "default": false
-            }
-        }
-    }
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/extracting_envelope_payload.json"
+    ```
+
+=== "extracting_envelope_features.json"
+
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/extracting_envelope_features.json"
     ```
 
 ### Built-in store provider
@@ -498,6 +472,12 @@ These are the available options for further customization.
 
     ```python hl_lines="9"
     --8<-- "examples/feature_flags/src/appconfig_provider_options.py"
+    ```
+
+=== "appconfig_provider_options_payload.json"
+
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/appconfig_provider_options_payload.json"
     ```
 
 === "appconfig_provider_options_features.json"
