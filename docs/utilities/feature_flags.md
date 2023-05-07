@@ -257,7 +257,7 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
     }
     ```
 
-#### Time based feature flags
+### Time based feature flags
 
 Feature flags can also return enabled features based on time or datetime ranges.
 This allows you to have features that are only enabled on certain days of the week, certain time
@@ -318,8 +318,8 @@ You can also have features enabled only at specific days, for example: enable ch
     ```
 
 ???+ info "How should I use timezones?"
-    You can use any [IANA time zone](https://www.iana.org/time-zones) (as originally specified
-    in [PEP 615](https://peps.python.org/pep-0615/)) as part of your rules definition.
+    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
     Powertools takes care of converting and calculate the correct timestamps for you.
 
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and

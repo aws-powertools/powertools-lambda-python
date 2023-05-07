@@ -9,6 +9,20 @@ feature_flags = FeatureFlags(store=app_config)
 
 
 def lambda_handler(event: dict, context: LambdaContext):
+    """
+    This feature flag is enabled under the following conditions:
+    - The request payload contains a field 'tier' with the value 'premium'.
+
+    Rule condition to be evaluated:
+        "conditions": [
+            {
+                "action": "EQUALS",
+                "key": "tier",
+                "value": "premium"
+            }
+        ]
+    """
+
     # Get customer's tier from incoming request
     ctx = {"tier": event.get("tier", "standard")}
 

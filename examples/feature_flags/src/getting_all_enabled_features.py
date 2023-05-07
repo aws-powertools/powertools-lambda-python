@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 app = APIGatewayRestResolver()
 
-app_config = AppConfigStore(environment="dev", application="comments", name="config")
+app_config = AppConfigStore(environment="dev", application="product-catalogue", name="features")
 
 feature_flags = FeatureFlags(store=app_config)
 

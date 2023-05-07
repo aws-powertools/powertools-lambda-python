@@ -9,6 +9,10 @@ feature_flags = FeatureFlags(store=app_config)
 
 
 def lambda_handler(event: dict, context: LambdaContext):
+    """
+    This feature flag is enabled by default for all requests.
+    """
+
     apply_discount: Any = feature_flags.evaluate(name="ten_percent_off_campaign", default=False)
 
     price: Any = event.get("price")
