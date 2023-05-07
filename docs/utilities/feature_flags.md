@@ -193,6 +193,74 @@ You can use `get_enabled_features` method for scenarios where you need a list of
     --8<-- "examples/feature_flags/src/getting_all_enabled_features_features.json"
     ```
 
+### Time based feature flags
+
+Feature flags can also return enabled features based on time or datetime ranges.
+This allows you to have features that are only enabled on certain days of the week, certain time
+intervals or between certain calendar dates.
+
+Use cases:
+
+* Enable maintenance mode during a weekend
+* Disable support/chat feature after working hours
+* Launch a new feature on a specific date and time
+
+You can also have features enabled only at certain times of the day for premium tier customers
+
+=== "timebased_feature.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/feature_flags/src/timebased_feature.py"
+    ```
+
+=== "timebased_feature_event.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/feature_flags/src/timebased_feature_event.json"
+    ```
+
+=== "timebased_features.json"
+
+    ```json hl_lines="9-11 14-21"
+    --8<-- "examples/feature_flags/src/timebased_features.json"
+    ```
+
+You can also have features enabled only at certain times of the day.
+
+=== "timebased_happyhour_feature.py"
+
+    ```python hl_lines="9"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_feature.py"
+    ```
+
+=== "timebased_happyhour_features.json"
+
+    ```json hl_lines="9-15"
+    --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
+    ```
+
+You can also have features enabled only at specific days, for example: enable christmas sale discount during specific dates.
+
+=== "datetime_feature.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/feature_flags/src/datetime_feature.py"
+    ```
+
+=== "datetime_features.json"
+
+    ```json hl_lines="9-14"
+    --8<-- "examples/feature_flags/src/datetime_features.json"
+    ```
+
+???+ info "How should I use timezones?"
+    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
+    Powertools takes care of converting and calculate the correct timestamps for you.
+
+    When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
+    specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
+
 ### Beyond boolean feature flags
 
 ???+ info "When is this useful?"
@@ -256,74 +324,6 @@ Feature flags can return any JSON values when `boolean_type` parameter is set to
         }
     }
     ```
-
-### Time based feature flags
-
-Feature flags can also return enabled features based on time or datetime ranges.
-This allows you to have features that are only enabled on certain days of the week, certain time
-intervals or between certain calendar dates.
-
-Use cases:
-
-* Enable maintenance mode during a weekend
-* Disable support/chat feature after working hours
-* Launch a new feature on a specific date and time
-
-You can also have features enabled only at certain times of the day for premium tier customers
-
-=== "app.py"
-
-    ```python hl_lines="12"
-    --8<-- "examples/feature_flags/src/timebased_feature.py"
-    ```
-
-=== "event.json"
-
-    ```json hl_lines="3"
-    --8<-- "examples/feature_flags/src/timebased_feature_event.json"
-    ```
-
-=== "features.json"
-
-    ```json hl_lines="9-11 14-21"
-    --8<-- "examples/feature_flags/src/timebased_features.json"
-    ```
-
-You can also have features enabled only at certain times of the day.
-
-=== "app.py"
-
-    ```python hl_lines="9"
-    --8<-- "examples/feature_flags/src/timebased_happyhour_feature.py"
-    ```
-
-=== "features.json"
-
-    ```json hl_lines="9-15"
-    --8<-- "examples/feature_flags/src/timebased_happyhour_features.json"
-    ```
-
-You can also have features enabled only at specific days, for example: enable christmas sale discount during specific dates.
-
-=== "app.py"
-
-    ```python hl_lines="10"
-    --8<-- "examples/feature_flags/src/datetime_feature.py"
-    ```
-
-=== "features.json"
-
-    ```json hl_lines="9-14"
-    --8<-- "examples/feature_flags/src/datetime_feature.json"
-    ```
-
-???+ info "How should I use timezones?"
-    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
-    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
-    Powertools takes care of converting and calculate the correct timestamps for you.
-
-    When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
-    specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
 
 ## Advanced
 
@@ -477,7 +477,7 @@ The `action` configuration can have the following values, where the expressions 
 | **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
 
 ???+ info
-    The `**key**` and `**value**` will be compared to the input from the `**context**` parameter.
+    The `key` and `value` will be compared to the input from the `context` parameter.
 
 ???+ "Time based keys"
 
@@ -562,9 +562,9 @@ These are the available options for further customization.
 
 | Parameter            | Default          | Description                                                                                                                                            |
 | -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **environment**      | `""`             | AWS AppConfig Environment, e.g. `test`                                                                                                                 |
-| **application**      | `""`             | AWS AppConfig Application                                                                                                                              |
-| **name**             | `""`             | AWS AppConfig Configuration name                                                                                                                       |
+| **environment**      | `""`             | AWS AppConfig Environment, e.g. `dev`                                                                                                                  |
+| **application**      | `""`             | AWS AppConfig Application, e.g. `product-catalogue`                                                                                                    |
+| **name**             | `""`             | AWS AppConfig Configuration name, e.g `features`                                                                                                       |
 | **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
@@ -611,56 +611,11 @@ You can unit test your feature flags locally and independently without setting u
 ???+ warning
     This excerpt relies on `pytest` and `pytest-mock` dependencies.
 
-```python hl_lines="7-9" title="Unit testing feature flags"
-from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore, RuleAction
+=== "Testing your code"
 
-
-def init_feature_flags(mocker, mock_schema, envelope="") -> FeatureFlags:
-	"""Mock AppConfig Store get_configuration method to use mock schema instead"""
-
-	method_to_mock = "aws_lambda_powertools.utilities.feature_flags.AppConfigStore.get_configuration"
-	mocked_get_conf = mocker.patch(method_to_mock)
-	mocked_get_conf.return_value = mock_schema
-
-	app_conf_store = AppConfigStore(
-		environment="test_env",
-		application="test_app",
-		name="test_conf_name",
-		envelope=envelope,
-	)
-
-	return FeatureFlags(store=app_conf_store)
-
-
-def test_flags_condition_match(mocker):
-	# GIVEN
-	expected_value = True
-	mocked_app_config_schema = {
-		"my_feature": {
-			"default": False,
-			"rules": {
-				"tenant id equals 12345": {
-					"when_match": expected_value,
-					"conditions": [
-						{
-							"action": RuleAction.EQUALS.value,
-							"key": "tenant_id",
-							"value": "12345",
-						}
-					],
-				}
-			},
-			}
-	}
-
-	# WHEN
-	ctx = {"tenant_id": "12345", "username": "a"}
-	feature_flags = init_feature_flags(mocker=mocker, mock_schema=mocked_app_config_schema)
-	flag = feature_flags.evaluate(name="my_feature", context=ctx, default=False)
-
-	# THEN
-	assert flag == expected_value
-```
+    ```python hl_lines="7-9"
+    --8<-- "examples/feature_flags/src/getting_started_with_tests.py"
+    ```
 
 ## Feature flags vs Parameters vs Env vars
 
