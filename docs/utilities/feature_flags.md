@@ -333,17 +333,21 @@ By default, we cache configuration retrieved from the Store for 5 seconds for pe
 
 You can override `max_age` parameter when instantiating the store.
 
-=== "app.py"
+=== "getting_started_with_cache.py"
 
-    ```python hl_lines="7"
-    from aws_lambda_powertools.utilities.feature_flags import FeatureFlags, AppConfigStore
+    ```python hl_lines="12-13"
+    --8<-- "examples/feature_flags/src/getting_started_with_cache.py"
+    ```
+=== "getting_started_with_cache_payload.json"
 
-    app_config = AppConfigStore(
-        environment="dev",
-        application="product-catalogue",
-        name="features",
-        max_age=300
-    )
+    ```json hl_lines="2-3"
+    --8<-- "examples/feature_flags/src/getting_started_with_cache_payload.json"
+    ```
+
+=== "getting_started_with_cache_features.json"
+
+    ```json hl_lines="2-3"
+    --8<-- "examples/feature_flags/src/getting_started_with_cache_features.json"
     ```
 
 ### Getting fetched configuration

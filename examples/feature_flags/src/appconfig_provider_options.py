@@ -22,8 +22,8 @@ custom_jmespath_options = {"custom_functions": CustomFunctions()}
 
 app_config = AppConfigStore(
     environment="dev",
-    application="comments",
-    name="config",
+    application="product-catalogue",
+    name="features",
     max_age=120,
     envelope="special_decoder(features)",  # using a custom function defined in CustomFunctions Class
     sdk_config=boto_config,
