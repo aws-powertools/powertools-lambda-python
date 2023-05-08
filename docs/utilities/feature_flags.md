@@ -436,38 +436,7 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
     --8<-- "examples/feature_flags/src/extracting_envelope_features.json"
     ```
 
-### Create your own store provider
-
-You can create your own custom FeatureFlags store provider by inheriting the `StoreProvider` class, and implementing both `get_raw_configuration()` and `get_configuration()` methods to retrieve the configuration from your custom store.
-
-Here are an example of implementing a custom store provider using Amazon S3, a popular object storage.
-
-???+ note
-    This is just one example of how you can create your own store provider. Before creating a custom store provider, carefully evaluate your requirements and consider factors such as performance, scalability, and ease of maintenance.
-
-=== "working_with_own_s3_store_provider.py"
-
-    ```python hl_lines="3 8 10"
-    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider.py"
-    ```
-
-=== "custom_s3_store_provider.py"
-
-    ```python hl_lines="33 37"
-    --8<-- "examples/feature_flags/src/custom_s3_store_provider.py"
-    ```
-
-=== "working_with_own_s3_store_provider_payload.json"
-
-    ```json hl_lines="2 3"
-    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_payload.json"
-    ```
-
-=== "working_with_own_s3_store_provider_features.json"
-
-    ```json hl_lines="2-4"
-    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_features.json"
-    ```
+### Built-in store provider
 
 #### AppConfig
 
@@ -502,6 +471,39 @@ These are the available options for further customization.
 
     ```json hl_lines="6-9"
     --8<-- "examples/feature_flags/src/appconfig_provider_options_features.json"
+    ```
+
+### Create your own store provider
+
+You can create your own custom FeatureFlags store provider by inheriting the `StoreProvider` class, and implementing both `get_raw_configuration()` and `get_configuration()` methods to retrieve the configuration from your custom store.
+
+Here are an example of implementing a custom store provider using Amazon S3, a popular object storage.
+
+???+ note
+    This is just one example of how you can create your own store provider. Before creating a custom store provider, carefully evaluate your requirements and consider factors such as performance, scalability, and ease of maintenance.
+
+=== "working_with_own_s3_store_provider.py"
+
+    ```python hl_lines="3 8 10"
+    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider.py"
+    ```
+
+=== "custom_s3_store_provider.py"
+
+    ```python hl_lines="33 37"
+    --8<-- "examples/feature_flags/src/custom_s3_store_provider.py"
+    ```
+
+=== "working_with_own_s3_store_provider_payload.json"
+
+    ```json hl_lines="2 3"
+    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_payload.json"
+    ```
+
+=== "working_with_own_s3_store_provider_features.json"
+
+    ```json hl_lines="2-4"
+    --8<-- "examples/feature_flags/src/working_with_own_s3_store_provider_features.json"
     ```
 
 ## Testing your code
