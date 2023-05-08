@@ -23,6 +23,7 @@ permissions:
 
 jobs:
   dispatch_token:
+    if: github.repository == 'awslabs/aws-lambda-powertools-python'
     concurrency:
       group: analytics
     runs-on: ubuntu-latest
