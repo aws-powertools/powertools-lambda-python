@@ -3,9 +3,6 @@ name: Build and publish latest changelog
 on:
   workflow_call:
 
-permissions:
-  contents: write
-
 env:
   BRANCH: develop
 
@@ -16,6 +13,9 @@ jobs:
     concurrency:
       group: changelog-build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
@@ -30,11 +30,16 @@ jobs:
           git pull origin "${BRANCH}"
       - name: "Generate latest changelog"
         run: make changelog
-      - name: Update Changelog in trunk
-        run: |
-          HAS_CHANGE=$(git status --porcelain)
-          test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
-          git add CHANGELOG.md
-          git commit -m "update changelog with latest changes"
-          git pull origin "${BRANCH}" # prevents concurrent branch update failing push
-          git push origin HEAD:refs/heads/"${BRANCH}"
+      - name: Create PR
+        run: bash .github/scripts/create_pr_for_staged_changes.sh CHANGELOG.md
+        env:
+          COMMIT_MSG: "chore(ci): update changelog with latest changes"
+          PR_TITLE: "chore(ci): changelog rebuild"
+          TEMP_BRANCH_PREFIX: "ci-changelog"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup orphaned branch
+        if: failure()
+        run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
+        env:
+          TEMP_BRANCH_PREFIX: "ci-changelog"
+          GITHUB_RUN_ID: ${{ github.run_id }}
