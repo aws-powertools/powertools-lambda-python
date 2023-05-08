@@ -33,8 +33,7 @@ jobs:
       - name: Create PR
         run: bash .github/scripts/create_pr_for_staged_changes.sh CHANGELOG.md
         env:
-          COMMIT_MSG: "chore(ci): update changelog with latest changes"
-          PR_TITLE: "chore(ci): changelog rebuild"
+          PR_TITLE: "chore(ci): changelog rebuild with latest changes"
           TEMP_BRANCH_PREFIX: "ci-changelog"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cleanup orphaned branch

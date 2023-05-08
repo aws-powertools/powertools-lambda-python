@@ -10,7 +10,7 @@ set -uxo pipefail # enable debugging, prevent accessing unset env vars, prevent 
 #usage		    :bash create_pr_for_staged_changes.sh {git_staged_files_or_directories_separated_by_space}
 #notes              :Meant to use in GitHub Actions only. Temporary branch will be named $TEMP_BRANCH_PREFIX-$GITHUB_RUN_ID
 #os_version         :Ubuntu 22.04.2 LTS
-#required_env_vars  :COMMIT_MSG, PR_TITLE, TEMP_BRANCH_PREFIX, GH_TOKEN, GITHUB_RUN_ID, GITHUB_SERVER_URL, GITHUB_REPOSITORY
+#required_env_vars  :PR_TITLE, TEMP_BRANCH_PREFIX, GH_TOKEN, GITHUB_RUN_ID, GITHUB_SERVER_URL, GITHUB_REPOSITORY
 #==============================================================================
 
 PR_BODY="This is an automated PR created from the following workflow"
@@ -37,7 +37,6 @@ function has_required_config() {
     debug "Do we have required environment variables?"
     test -z "${TEMP_BRANCH_PREFIX}" && raise_validation_error "TEMP_BRANCH_PREFIX env must be set to create a PR"
     test -z "${GH_TOKEN}" && raise_validation_error "GH_TOKEN env must be set for GitHub CLI"
-    test -z "${COMMIT_MSG}" && raise_validation_error "COMMIT_MSG env must be set"
     test -z "${PR_TITLE}" && raise_validation_error "PR_TITLE env must be set"
     test -z "${GITHUB_RUN_ID}" && raise_validation_error "GITHUB_RUN_ID env must be set to trace Workflow Run ID back to PR"
     test -z "${GITHUB_SERVER_URL}" && raise_validation_error "GITHUB_SERVER_URL env must be set to trace Workflow Run ID back to PR"
@@ -67,7 +66,7 @@ function create_temporary_branch_with_changes() {
 
     debug "Committing staged files: $*"
     git add "$@"
-    git commit -m "${COMMIT_MSG}"
+    git commit -m "${PR_TITLE}"
 
     debug "Creating branch remotely"
     git push origin "${TEMP_BRANCH}"
