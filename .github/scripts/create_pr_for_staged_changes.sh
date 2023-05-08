@@ -4,10 +4,10 @@ set -uxo pipefail # enable debugging, prevent accessing unset env vars, prevent 
 #docs
 #title              :create_pr_for_staged_changes.sh
 #description        :This script will create a PR for staged changes and detect and close duplicate PRs.
-#author		        :@heitorlessa
+#author		    :@heitorlessa
 #date               :May 8th 2023
 #version            :0.1
-#usage		        :bash create_pr_for_staged_changes.sh {git_staged_files_or_directories_separated_by_space}
+#usage		    :bash create_pr_for_staged_changes.sh {git_staged_files_or_directories_separated_by_space}
 #notes              :Meant to use in GitHub Actions only. Temporary branch will be named $TEMP_BRANCH_PREFIX-$GITHUB_RUN_ID
 #os_version         :Ubuntu 22.04.2 LTS
 #required_env_vars  :COMMIT_MSG, PR_TITLE, TEMP_BRANCH_PREFIX, GH_TOKEN, GITHUB_RUN_ID, GITHUB_SERVER_URL, GITHUB_REPOSITORY
