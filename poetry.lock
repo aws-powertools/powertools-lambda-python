@@ -1720,14 +1720,14 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.26.99"
-description = "Type annotations for boto3.CloudWatch 1.26.99 service generated with mypy-boto3-builder 7.14.2"
+version = "1.26.127"
+description = "Type annotations for boto3.CloudWatch 1.26.127 service generated with mypy-boto3-builder 7.14.5"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudwatch-1.26.99.tar.gz", hash = "sha256:ada2b942a88cc6fd307fef0fcb40d0765d3971e33e0c6f92a127d5abcfea1fdb"},
-    {file = "mypy_boto3_cloudwatch-1.26.99-py3-none-any.whl", hash = "sha256:98b4b2d6363c17ab5a4c1dee2ee1da2d4b52333f0cae999b8145a0c28a86e61e"},
+    {file = "mypy-boto3-cloudwatch-1.26.127.tar.gz", hash = "sha256:08281b75414293f112135eaaa9937ab2621e1db0762285a1face66ab937b4e0f"},
+    {file = "mypy_boto3_cloudwatch-1.26.127-py3-none-any.whl", hash = "sha256:e2da3e956b1c67a3bc4374ced3331fff97172f98d63e56efea805dc1e5fa28e9"},
 ]
 
 [package.dependencies]
@@ -1780,14 +1780,14 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.26.116"
-description = "Type annotations for boto3.S3 1.26.116 service generated with mypy-boto3-builder 7.14.5"
+version = "1.26.127"
+description = "Type annotations for boto3.S3 1.26.127 service generated with mypy-boto3-builder 7.14.5"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.26.116.tar.gz", hash = "sha256:597aac58bb2c962d166403d0bdc10cdfa62ac82c61b02faf69a461c5a5107087"},
-    {file = "mypy_boto3_s3-1.26.116-py3-none-any.whl", hash = "sha256:dcdab86eae381c15b872c020e6b0d01ecaee4092190b60e313fac180b243e66a"},
+    {file = "mypy-boto3-s3-1.26.127.tar.gz", hash = "sha256:0e548b97c6a2589f7bff5d26a1ca101622749771379226e3ad0822629d0613c5"},
+    {file = "mypy_boto3_s3-1.26.127-py3-none-any.whl", hash = "sha256:21e647caa18d98dbbc706597c9b27d41674f18850f42b2cfdb9a39b39820e470"},
 ]
 
 [package.dependencies]
@@ -2798,18 +2798,18 @@ files = [
 
 [[package]]
 name = "types-requests"
-version = "2.29.0.0"
+version = "2.30.0.0"
 description = "Typing stubs for requests"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-requests-2.29.0.0.tar.gz", hash = "sha256:c86f4a955d943d2457120dbe719df24ef0924e11177164d10a0373cf311d7b4d"},
-    {file = "types_requests-2.29.0.0-py3-none-any.whl", hash = "sha256:4cf6e323e856c779fbe8815bb977a5bf5d6c5034713e4c17ff2a9a20610f5b27"},
+    {file = "types-requests-2.30.0.0.tar.gz", hash = "sha256:dec781054324a70ba64430ae9e62e7e9c8e4618c185a5cb3f87a6738251b5a31"},
+    {file = "types_requests-2.30.0.0-py3-none-any.whl", hash = "sha256:c6cf08e120ca9f0dc4fa4e32c3f953c3fba222bcc1db6b97695bce8da1ba9864"},
 ]
 
 [package.dependencies]
-types-urllib3 = "<1.27"
+types-urllib3 = "*"
 
 [[package]]
 name = "types-urllib3"
@@ -3035,4 +3035,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "302a00b68b6e28a6fd1258bb3c093daca2547a71586b0b44a5e162351b39bfe2"
+content-hash = "72cae7a8316616aa14416d3fdee9a39e6822d161d508ed869da0b345de388402"

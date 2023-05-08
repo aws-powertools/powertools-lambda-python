@@ -6,6 +6,12 @@
 
 ## Maintenance
 
+* **ci:** schedule changelog to rebuild daily at 8am, and on release only ([#2216](https://github.com/awslabs/aws-lambda-powertools-python/issues/2216))
+* **ci:** remove auto-merge workflow ([#2214](https://github.com/awslabs/aws-lambda-powertools-python/issues/2214))
+* **ci:** enforce zero trust for third party workflows ([#2215](https://github.com/awslabs/aws-lambda-powertools-python/issues/2215))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.99 to 1.26.127 ([#2219](https://github.com/awslabs/aws-lambda-powertools-python/issues/2219))
+* **deps-dev:** bump types-requests from 2.29.0.0 to 2.30.0.0 ([#2220](https://github.com/awslabs/aws-lambda-powertools-python/issues/2220))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.116 to 1.26.127 ([#2218](https://github.com/awslabs/aws-lambda-powertools-python/issues/2218))
 * **deps-dev:** bump aws-cdk from 2.77.0 to 2.78.0 ([#2202](https://github.com/awslabs/aws-lambda-powertools-python/issues/2202))
 
 
