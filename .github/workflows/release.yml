@@ -158,6 +158,7 @@ jobs:
       id-token: write
       contents: write
       pages: write
+      pull-requests: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
       latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}

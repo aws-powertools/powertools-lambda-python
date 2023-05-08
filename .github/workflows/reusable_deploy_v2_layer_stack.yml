@@ -1,8 +1,5 @@
 name: Deploy CDK Layer v2 stack
 
-permissions:
-  id-token: write
-  contents: write
 
 on:
   workflow_call:
@@ -28,6 +25,12 @@ jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    permissions:
+      id-token: write
+      pull-requests: none
+      contents: read
+      pages: none
     defaults:
       run:
         working-directory: ./layer
@@ -153,6 +156,12 @@ jobs:
   update_v2_layer_arn_docs:
     needs: deploy-cdk-stack
     if: ${{ inputs.stage == 'PROD' }}
+    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    permissions:
+      contents: write
+      pull-requests: write
+      pages: none
+      id-token: none
     uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
     with:
       latest_published_version: ${{ inputs.latest_published_version }}

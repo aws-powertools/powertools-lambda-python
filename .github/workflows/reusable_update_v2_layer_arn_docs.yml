@@ -9,7 +9,11 @@ on:
         required: true
 
 permissions:
+  # lower privilege propagated from parent workflow (reusable_deploy_v2_layer_stack.yml)
   contents: write
+  pull-requests: write
+  pages: none
+  id-token: none
 
 env:
   BRANCH: develop
@@ -42,11 +46,15 @@ jobs:
         run: |
           ls -la cdk-layer-stack/
           ./layer/scripts/update_layer_arn.sh cdk-layer-stack
-      - name: Update documentation in trunk
-        run: |
-          HAS_CHANGE=$(git status --porcelain)
-          test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
-          git add docs/index.md examples
-          git commit -m "chore: update v2 layer ARN on documentation"
-          git pull origin "${BRANCH}" # prevents concurrent branch update failing push
-          git push origin HEAD:refs/heads/"${BRANCH}"
+      - name: Create PR
+        run: bash .github/scripts/create_pr_for_staged_changes.sh docs/index.md examples
+        env:
+          PR_TITLE: "docs(layers): update v2 layer ARN on documentation"
+          TEMP_BRANCH_PREFIX: "ci-docs"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup orphaned branch
+        if: failure()
+        run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
+        env:
+          TEMP_BRANCH_PREFIX: "ci-docs"
+          GITHUB_RUN_ID: ${{ github.run_id }}

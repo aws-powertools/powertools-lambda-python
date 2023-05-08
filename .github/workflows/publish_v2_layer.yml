@@ -1,10 +1,5 @@
 name: Deploy v2 layer to all regions
 
-permissions:
-  id-token: write
-  contents: write
-  pages: write
-
 on:
   workflow_dispatch:
     inputs:
@@ -32,6 +27,9 @@ jobs:
   build-layer:
     permissions:
       contents: read
+      id-token: none
+      pages: none
+      pull-requests: none
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core
     defaults:
       run:
@@ -87,6 +85,12 @@ jobs:
 
   beta:
     needs: build-layer
+    # lower privilege propagated from parent workflow (release.yml)
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      pages: none
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -97,6 +101,12 @@ jobs:
 
   prod:
     needs: beta
+    # lower privilege propagated from parent workflow (release.yml)
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      pages: none
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -107,6 +117,12 @@ jobs:
 
   sar-beta:
     needs: build-layer
+    permissions:
+      # lower privilege propagated from parent workflow (release.yml)
+      id-token: write
+      contents: read
+      pull-requests: none
+      pages: none
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
     with:
@@ -117,6 +133,12 @@ jobs:
 
   sar-prod:
     needs: [build-layer, sar-beta]
+    permissions:
+      # lower privilege propagated from parent workflow (release.yml)
+      id-token: write
+      contents: read
+      pull-requests: none
+      pages: none
     uses: ./.github/workflows/reusable_deploy_v2_sar.yml
     secrets: inherit
     with:
@@ -128,7 +150,11 @@ jobs:
   prepare_docs_alias:
     runs-on: ubuntu-latest
     permissions:
+      # lower privilege propagated from parent workflow (release.yml)
       contents: read
+      pages: none
+      id-token: none
+      pull-requests: none
     outputs:
       DOCS_ALIAS: ${{ steps.set-alias.outputs.DOCS_ALIAS }}
     steps:
@@ -144,8 +170,11 @@ jobs:
   release-docs:
     needs: [prod, prepare_docs_alias]
     permissions:
+      # lower privilege propagated from parent workflow (release.yml)
       contents: write
       pages: write
+      id-token: write
+      pull-requests: none
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}
