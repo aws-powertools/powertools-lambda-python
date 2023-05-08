@@ -148,26 +148,16 @@ jobs:
       latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
 
-  post_release:
-    needs: [build, release, publish_layer]
+  bump_version:
+    needs: [build, release]
     permissions:
-      contents: read
-      issues: write
-      discussions: write
+      contents: write
       pull-requests: write
     runs-on: ubuntu-latest
     env:
       RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
-      - name: Close issues related to this release
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const post_release = require('.github/scripts/post_release.js')
-            await post_release({github, context, core})
-
       - name: Git client setup and refresh tip
         run: |
           git config user.name "Release bot"
@@ -191,3 +181,23 @@ jobs:
         env:
           TEMP_BRANCH_PREFIX: "ci-bump"
           GITHUB_RUN_ID: ${{ github.run_id }}
+
+  notify_version:
+    needs: [build, release, publish_layer]
+    permissions:
+      contents: read
+      issues: write
+      discussions: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - name: Close issues related to this release
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const post_release = require('.github/scripts/post_release.js')
+            await post_release({github, context, core})
