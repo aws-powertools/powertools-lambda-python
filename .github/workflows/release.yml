@@ -105,16 +105,6 @@ jobs:
           # and also future-proof for when we switch to protected branch and update via PR
           key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
-      - name: Update version in trunk
-        if: steps.versioning.outcome == 'success'
-        run: |
-          HAS_CHANGE=$(git status --porcelain)
-          test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
-          git add pyproject.toml
-          git commit -m "bump version to ${RELEASE_VERSION}" --no-verify
-          git pull origin "${BRANCH}" # prevents concurrent branch update failing push
-          git push origin HEAD:refs/heads/"${BRANCH}"
-
   release:
     needs: build
     environment: release
@@ -142,12 +132,6 @@ jobs:
       #   uses: pypa/gh-action-pypi-publish@a56da0b891b3dc519c7ee3284aff1fad93cc8598 # v1.8.6
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
-
-  changelog:
-    needs: release
-    permissions:
-      contents: write
-    uses: ./.github/workflows/reusable_publish_changelog.yml
 
   # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
@@ -183,3 +167,27 @@ jobs:
           script: |
             const post_release = require('.github/scripts/post_release.js')
             await post_release({github, context, core})
+
+      - name: Git client setup and refresh tip
+        run: |
+          git config user.name "Release bot"
+          git config user.email "aws-devax-open-source@amazon.com"
+          git config pull.rebase true
+          git config remote.origin.url >&-
+          git pull origin "${BRANCH}"
+
+      - name: Bump package version
+        id: versioning
+        run: poetry version "${RELEASE_VERSION}"
+      - name: Create PR
+        run: bash .github/scripts/create_pr_for_staged_changes.sh pyproject.toml
+        env:
+          PR_TITLE: "chore(ci): bump version to ${{ env.RELEASE_VERSION }}"
+          TEMP_BRANCH_PREFIX: "ci-bump"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cleanup orphaned branch
+        if: failure()
+        run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
+        env:
+          TEMP_BRANCH_PREFIX: "ci-bump"
+          GITHUB_RUN_ID: ${{ github.run_id }}
