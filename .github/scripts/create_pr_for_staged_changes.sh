@@ -37,6 +37,8 @@ function has_required_config() {
     debug "Do we have required environment variables?"
     test -z "${TEMP_BRANCH_PREFIX}" && raise_validation_error "TEMP_BRANCH_PREFIX env must be set to create a PR"
     test -z "${GH_TOKEN}" && raise_validation_error "GH_TOKEN env must be set for GitHub CLI"
+    test -z "${COMMIT_MSG}" && raise_validation_error "COMMIT_MSG env must be set"
+    test -z "${PR_TITLE}" && raise_validation_error "PR_TITLE env must be set"
     test -z "${GITHUB_RUN_ID}" && raise_validation_error "GITHUB_RUN_ID env must be set to trace Workflow Run ID back to PR"
     test -z "${GITHUB_SERVER_URL}" && raise_validation_error "GITHUB_SERVER_URL env must be set to trace Workflow Run ID back to PR"
     test -z "${GITHUB_REPOSITORY}" && raise_validation_error "GITHUB_REPOSITORY env must be set to trace Workflow Run ID back to PR"
