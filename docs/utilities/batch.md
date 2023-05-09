@@ -250,130 +250,20 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="5 14 23 29"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
-    from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-    from aws_lambda_powertools.utilities.parser import BaseModel
-    from aws_lambda_powertools.utilities.parser.types import Json
-
-
-    class Order(BaseModel):
-        item: dict
-
-    class OrderSqsRecord(SqsRecordModel):
-        body: Json[Order]  # deserialize order data from JSON string
-
-    processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqsRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderSqsRecord):
-        return record.body.item
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
+    ```python hl_lines="8 17 27 34"
+    --8<-- "examples/batch_processing/src/pydantic_sqs.py"
     ```
 
 === "Kinesis Data Streams"
 
-    ```python hl_lines="5 15 19 23 29 36"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
-    from aws_lambda_powertools.utilities.parser.models import KinesisDataStreamRecordPayload, KinesisDataStreamRecord
-    from aws_lambda_powertools.utilities.parser import BaseModel, validator
-    from aws_lambda_powertools.utilities.parser.types import Json
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    class Order(BaseModel):
-        item: dict
-
-
-    class OrderKinesisPayloadRecord(KinesisDataStreamRecordPayload):
-        data: Json[Order]
-
-
-    class OrderKinesisRecord(KinesisDataStreamRecord):
-        kinesis: OrderKinesisPayloadRecord
-
-
-    processor = BatchProcessor(event_type=EventType.KinesisDataStreams, model=OrderKinesisRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderKinesisRecord):
-        return record.kinesis.data.item
-
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
+    ```python hl_lines="9 10 20 28 34 41"
+    --8<-- "examples/batch_processing/src/pydantic_kinesis.py"
     ```
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="7 16 26 31 35 41"
-    import json
-
-    from typing import Dict, Literal, Optional
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, process_partial_response
-    from aws_lambda_powertools.utilities.parser.models import DynamoDBStreamChangedRecordModel, DynamoDBStreamRecordModel
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-    from aws_lambda_powertools.utilities.parser import BaseModel, validator
-
-
-    class Order(BaseModel):
-        item: dict
-
-
-    class OrderDynamoDB(BaseModel):
-        Message: Order
-
-        # auto transform json string
-        # so Pydantic can auto-initialize nested Order model
-        @validator("Message", pre=True)
-        def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
-            return json.loads(value["S"])
-
-
-    class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB]
-        OldImage: Optional[OrderDynamoDB]
-
-
-    class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
-        dynamodb: OrderDynamoDBChangeRecord
-
-
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams, model=OrderDynamoDBRecord)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: OrderDynamoDBRecord):
-        return record.dynamodb.NewImage.Message.item
-
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)
+    ```python hl_lines="12 13 22 32 37 41 47 55"
+    --8<-- "examples/batch_processing/src/pydantic_dynamodb.py"
     ```
 
 ### Accessing processed messages
@@ -384,45 +274,7 @@ Use the context manager to access a list of all returned values from your `recor
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
 ```python hl_lines="30-36" title="Accessing processed messages via context manager"
-import json
-
-from typing import Any, List, Literal, Union
-
-from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.utilities.batch import (BatchProcessor,
-												   EventType,
-												   FailureResponse,
-												   SuccessResponse)
-from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-processor = BatchProcessor(event_type=EventType.SQS)
-tracer = Tracer()
-logger = Logger()
-
-
-@tracer.capture_method
-def record_handler(record: SQSRecord):
-	payload: str = record.body
-	if payload:
-		item: dict = json.loads(payload)
-	...
-
-@logger.inject_lambda_context
-@tracer.capture_lambda_handler
-def lambda_handler(event, context: LambdaContext):
-	batch = event["Records"]
-	with processor(records=batch, handler=record_handler):
-		processed_messages: List[Union[SuccessResponse, FailureResponse]] = processor.process()
-
-	for message in processed_messages:
-        status: Union[Literal["success"], Literal["fail"]] = message[0]
-        result: Any = message[1]
-        record: SQSRecord = message[2]
-
-
-	return processor.response()
+--8<-- "examples/batch_processing/src/context_manager_access.py"
 ```
 
 ### Accessing Lambda Context
