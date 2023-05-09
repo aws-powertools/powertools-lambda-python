@@ -319,15 +319,16 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 
 ### Create your own partial processor
 
-You can create your own partial batch processor from scratch by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()` and `_process_record()`.
+You can create your own partial batch processor from scratch by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()`, `_process_record()` and `_async_process_record()`.
 
 * **`_process_record()`** – handles all processing logic for each individual message of a batch, including calling the `record_handler` (self.handler)
 * **`_prepare()`** – called once as part of the processor initialization
-* **`clean()`** – teardown logic called once after `_process_record` completes
+* **`_clean()`** – teardown logic called once after `_process_record` completes
+* **`_async_process_record()`** – If you need to implement asynchronous logic, use this method, otherwise define it in your class with empty logic
 
 You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
-```python hl_lines="9 16 31 37 44 55 68" title="Creating a custom batch processor"
+```python hl_lines="9 16 31 37 44 55 60 68" title="Creating a custom batch processor"
 --8<-- "examples/batch_processing/src/custom_partial_processor.py"
 ```
 
@@ -371,7 +372,7 @@ Given a SQS batch where the first batch record succeeds and the second fails pro
 
 ## FAQ
 
-### Choosing between decorator and context manager
+### Choosing between method and context manager
 
 Use context manager when you want access to the processed messages or handle `BatchProcessingError` exception when all records within the batch fail to be processed.
 
