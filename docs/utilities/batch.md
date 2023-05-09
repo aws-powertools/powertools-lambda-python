@@ -387,15 +387,6 @@ When using Sentry.io for error monitoring, you can override `failure_handler` to
 
 > Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
 
-```python hl_lines="4 7-8" title="Integrating error tracking with Sentry.io"
-from typing import Tuple
-
-from aws_lambda_powertools.utilities.batch import BatchProcessor, FailureResponse
-from sentry_sdk import capture_exception
-
-
-class MyProcessor(BatchProcessor):
-	def failure_handler(self, record, exception) -> FailureResponse:
-		capture_exception()  # send exception to Sentry
-		return super().failure_handler(record, exception)
+```python hl_lines="1 7-8" title="Integrating error tracking with Sentry.io"
+--8<-- "examples/batch_processing/src/sentry_error_tracking.py"
 ```
