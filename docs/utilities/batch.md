@@ -21,7 +21,7 @@ If your function fails to process any message from the batch, the entire batch r
 With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:
 
 1. `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
-2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#sqs-batchfailurereporting-syntax){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
+2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
 
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
@@ -32,7 +32,7 @@ With this utility, batch records are processed individually – only messages th
 
 ## Getting started
 
-Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use ``ReportBatchItemFailures`.
+Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use `ReportBatchItemFailures`.
 
 You do not need any additional IAM permissions to use this utility, except for what each event source requires.
 
@@ -231,14 +231,14 @@ You can use `AsyncBatchProcessor` class and `async_process_partial_response` fun
 
     The reason this is not the default behaviour is that not all use cases can handle concurrency safely (e.g., loyalty points must be updated in order).
 
-```python hl_lines="3 11 14 24" title="High-concurrency with AsyncBatchProcessor"
+```python hl_lines="3 11 14 24-26" title="High-concurrency with AsyncBatchProcessor"
 --8<-- "examples/batch_processing/src/getting_started_async.py"
 ```
 
 ???+ warning "Using tracer?"
     `AsyncBatchProcessor` uses `asyncio.gather` which can cause side effects and reach trace limits at high concurrency.
 
-    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions).
+    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions){target="_blank"}.
 
 ## Advanced
 
@@ -385,7 +385,7 @@ As 2.12.0, `process_partial_response` and `async_process_partial_response` are t
 
 When using Sentry.io for error monitoring, you can override `failure_handler` to capture each processing exception with Sentry SDK:
 
-> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732)
+> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732){target="_blank"}
 
 ```python hl_lines="1 7-8" title="Integrating error tracking with Sentry.io"
 --8<-- "examples/batch_processing/src/sentry_error_tracking.py"
