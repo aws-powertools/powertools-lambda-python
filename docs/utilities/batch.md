@@ -180,138 +180,34 @@ Processing batches from DynamoDB Streams works in three stages:
 
 === "Recommended"
 
-    ```python hl_lines="4 9 14 20 30"
+    ```python hl_lines="4-11 14 20 32"
     --8<-- "examples/batch_processing/src/getting_started_dynamodb.py"
     ```
 
 === "As a context manager"
 
-    ```python hl_lines="4-5 9 15 23-27"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: DynamoDBRecord):
-        logger.info(record.dynamodb.new_image)
-        payload: dict = json.loads(record.dynamodb.new_image.get("Message"))
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    def lambda_handler(event, context: LambdaContext):
-        batch = event["Records"]
-        with processor(records=batch, handler=record_handler):
-            processed_messages = processor.process() # kick off processing, return list[tuple]
-
-        return processor.response()
+    ```python hl_lines="5-7 10 16 28-30 33"
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_context_manager.py"
     ```
 
 === "As a decorator (legacy)"
 
-    ```python hl_lines="4-5 9 15 22 24"
-    import json
-
-    from aws_lambda_powertools import Logger, Tracer
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, batch_processor
-    from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import DynamoDBRecord
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-    processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
-    tracer = Tracer()
-    logger = Logger()
-
-
-    @tracer.capture_method
-    def record_handler(record: DynamoDBRecord):
-        logger.info(record.dynamodb.new_image)
-        payload: dict = json.loads(record.dynamodb.new_image.get("Message"))
-        ...
-
-    @logger.inject_lambda_context
-    @tracer.capture_lambda_handler
-    @batch_processor(record_handler=record_handler, processor=processor)
-    def lambda_handler(event, context: LambdaContext):
-        return processor.response()
+    ```python hl_lines="4-11 14 20 31"
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_decorator.py"
     ```
 
 === "Sample response"
 
     The second record failed to be processed, therefore the processor added its sequence number in the response.
 
-    ```python
-    {
-        'batchItemFailures': [
-            {
-                'itemIdentifier': '8640712661'
-            }
-        ]
-    }
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_event.json"
     ```
 
 === "Sample event"
 
     ```json
-    {
-        "Records": [
-            {
-                "eventID": "1",
-                "eventVersion": "1.0",
-                "dynamodb": {
-                    "Keys": {
-                        "Id": {
-                            "N": "101"
-                        }
-                    },
-                    "NewImage": {
-                        "Message": {
-                            "S": "failure"
-                        }
-                    },
-                    "StreamViewType": "NEW_AND_OLD_IMAGES",
-                    "SequenceNumber": "3275880929",
-                    "SizeBytes": 26
-                },
-                "awsRegion": "us-west-2",
-                "eventName": "INSERT",
-                "eventSourceARN": "eventsource_arn",
-                "eventSource": "aws:dynamodb"
-            },
-            {
-                "eventID": "1",
-                "eventVersion": "1.0",
-                "dynamodb": {
-                    "Keys": {
-                        "Id": {
-                            "N": "101"
-                        }
-                    },
-                    "NewImage": {
-                        "SomethingElse": {
-                            "S": "success"
-                        }
-                    },
-                    "StreamViewType": "NEW_AND_OLD_IMAGES",
-                    "SequenceNumber": "8640712661",
-                    "SizeBytes": 26
-                },
-                "awsRegion": "us-west-2",
-                "eventName": "INSERT",
-                "eventSourceARN": "eventsource_arn",
-                "eventSource": "aws:dynamodb"
-            }
-        ]
-    }
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_response.json"
     ```
 
 ### Partial failure mechanics
