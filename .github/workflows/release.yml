@@ -8,7 +8,7 @@ name: Release
 # 2. Bump package version, build release artifact, and generate latest Changelog
 # 3. Publish package to PyPi prod repository using cached artifact
 # 4. Kick off Layers pipeline to compile and publish latest version
-# 5. Updates documentation to use the latest Layer ARN for all commercial regions
+# 5. Create PR to updates documentation to use the latest Layer ARN for all commercial regions
 # 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
 # 7. Close all issues labeled "pending-release" and notify customers about the release
 #
@@ -51,7 +51,7 @@ jobs:
   build:
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
-      contents: write
+      contents: read
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     env:
