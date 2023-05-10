@@ -285,7 +285,7 @@ We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lam
 
 === "Recommended"
 
-    ```python hl_lines="19"
+    ```python hl_lines="18"
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context.py"
     ```
 
