@@ -25,6 +25,7 @@ logger = Logger()
 
 @tracer.capture_method
 def record_handler(record: OrderSqsRecord):
+    logger.info(record.body.item)
     return record.body.item
 
 

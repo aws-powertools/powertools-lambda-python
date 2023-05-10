@@ -92,13 +92,13 @@ Processing batches from SQS works in three stages:
     The second record failed to be processed, therefore the processor added its message ID in the response.
 
     ```json
-    --8<-- "examples/batch_processing/src/getting_started_response.json"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_response.json"
     ```
 
 === "Sample event"
 
     ```json
-    --8<-- "examples/batch_processing/src/getting_started_event.json"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_event.json"
     ```
 
 #### FIFO queues
@@ -201,13 +201,13 @@ Processing batches from DynamoDB Streams works in three stages:
     The second record failed to be processed, therefore the processor added its sequence number in the response.
 
     ```json
-    --8<-- "examples/batch_processing/src/getting_started_dynamodb_event.json"
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_response.json"
     ```
 
 === "Sample event"
 
     ```json
-    --8<-- "examples/batch_processing/src/getting_started_dynamodb_response.json"
+    --8<-- "examples/batch_processing/src/getting_started_dynamodb_event.json"
     ```
 
 ### Partial failure mechanics
@@ -250,20 +250,38 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="8 17 27 34"
+    ```python hl_lines="8 17 27 35"
     --8<-- "examples/batch_processing/src/pydantic_sqs.py"
+    ```
+
+=== "SQS - Sample Event "
+
+    ```json hl_lines="6 22"
+    --8<-- "examples/batch_processing/src/pydantic_sqs_event.json"
     ```
 
 === "Kinesis Data Streams"
 
-    ```python hl_lines="9 10 20 28 34 41"
+    ```python hl_lines="9 10 20 28 34 42"
     --8<-- "examples/batch_processing/src/pydantic_kinesis.py"
+    ```
+
+=== "Kinesis - Sample Event "
+
+    ```json hl_lines="8 24"
+    --8<-- "examples/batch_processing/src/pydantic_kinesis_event.json"
     ```
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="12 13 22 32 37 41 47 55"
+    ```python hl_lines="12 13 22 32 37 41 47 56"
     --8<-- "examples/batch_processing/src/pydantic_dynamodb.py"
+    ```
+
+=== "DynamoDB - Sample Event "
+
+    ```json hl_lines="13-15 36-38"
+    --8<-- "examples/batch_processing/src/pydantic_dynamodb_event.json"
     ```
 
 ### Accessing processed messages
@@ -273,7 +291,7 @@ Use the context manager to access a list of all returned values from your `recor
 * **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
 * **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
 
-```python hl_lines="26-34" title="Accessing processed messages via context manager"
+```python hl_lines="28-33" title="Accessing processed messages via context manager"
 --8<-- "examples/batch_processing/src/context_manager_access.py"
 ```
 
@@ -285,13 +303,13 @@ We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lam
 
 === "Recommended"
 
-    ```python hl_lines="18"
+    ```python hl_lines="18 27"
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context.py"
     ```
 
 === "As a decorator (legacy)"
 
-    ```python hl_lines="18"
+    ```python hl_lines="18 26"
     --8<-- "examples/batch_processing/src/advanced_accessing_lambda_context_decorator.py"
     ```
 
@@ -352,22 +370,22 @@ As there is no external calls, you can unit test your code with `BatchProcessor`
 
 Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.
 
-=== "test_app.py"
+=== "getting_started_with_test.py"
 
     ```python
-    --8<-- "examples/batch_processing/testing/test_app.py"
+    --8<-- "examples/batch_processing/src/getting_started_with_test.py"
     ```
 
-=== "src/app.py"
+=== "getting_started_with_test_app.py"
 
     ```python
-    --8<-- "examples/batch_processing/testing/src/app.py"
+    --8<-- "examples/batch_processing/src/getting_started_with_test_app.py"
     ```
 
 === "Sample SQS event"
 
     ```json title="events/sqs_event.json"
-    --8<-- "examples/batch_processing/testing/events/sqs_event.json"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_event.json"
     ```
 
 ## FAQ

@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import json
-from typing import Any, List, Literal, Tuple, Union
+from typing import List, Literal, Tuple
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
@@ -27,10 +29,9 @@ def lambda_handler(event, context: LambdaContext):
         processed_messages: List[Tuple] = processor.process()
 
     for message in processed_messages:
-        status: Union[Literal["success"], Literal["fail"]] = message[0]
-        result: Any = message[1]
+        status: Literal["success"] | Literal["fail"] = message[0]
         record: SQSRecord = message[2]
 
-        logger.info(status, result, record)
+        logger.info(status, record=record)
 
     return processor.response()

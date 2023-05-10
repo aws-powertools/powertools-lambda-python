@@ -32,6 +32,7 @@ logger = Logger()
 
 @tracer.capture_method
 def record_handler(record: OrderKinesisRecord):
+    logger.info(record.kinesis.data.item)
     return record.kinesis.data.item
 
 

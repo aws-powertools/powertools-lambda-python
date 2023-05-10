@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
-
-from examples.batch_processing.testing.src import app
+from getting_started_with_test_app import lambda_handler, processor
 
 
 def load_event(path: Path):
@@ -32,15 +31,15 @@ def sqs_event():
 
 def test_app_batch_partial_response(sqs_event, lambda_context):
     # GIVEN
-    processor = app.processor  # access processor for additional assertions
+    processor_result = processor  # access processor for additional assertions
     successful_record = sqs_event["Records"][0]
     failed_record = sqs_event["Records"][1]
     expected_response = {"batchItemFailures": [{"itemIdentifier": failed_record["messageId"]}]}
 
     # WHEN
-    ret = app.lambda_handler(sqs_event, lambda_context)
+    ret = lambda_handler(sqs_event, lambda_context)
 
     # THEN
     assert ret == expected_response
-    assert len(processor.fail_messages) == 1
-    assert processor.success_messages[0] == successful_record
+    assert len(processor_result.fail_messages) == 1
+    assert processor_result.success_messages[0] == successful_record

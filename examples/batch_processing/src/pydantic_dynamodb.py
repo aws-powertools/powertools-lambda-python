@@ -25,7 +25,7 @@ class OrderDynamoDB(BaseModel):
     # auto transform json string
     # so Pydantic can auto-initialize nested Order model
     @validator("Message", pre=True)
-    def transform_message_to_dict(self, value: Dict[Literal["S"], str]):
+    def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
         return json.loads(value["S"])
 
 
@@ -46,6 +46,7 @@ logger = Logger()
 @tracer.capture_method
 def record_handler(record: OrderDynamoDBRecord):
     if record.dynamodb.NewImage and record.dynamodb.NewImage.Message:
+        logger.info(record.dynamodb.NewImage.Message.item)
         return record.dynamodb.NewImage.Message.item
 
 
