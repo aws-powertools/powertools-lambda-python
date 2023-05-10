@@ -8,9 +8,10 @@ name: Release
 # 2. Bump package version, build release artifact, and generate latest Changelog
 # 3. Publish package to PyPi prod repository using cached artifact
 # 4. Kick off Layers pipeline to compile and publish latest version
-# 5. Create PR to updates documentation to use the latest Layer ARN for all commercial regions
-# 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
-# 7. Close all issues labeled "pending-release" and notify customers about the release
+# 5. Updates latest document with latest Layer ARN for all commercial regions
+# 6. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 8. Close all issues labeled "pending-release" and notify customers about the release
 #
 # === Manual activities ===
 #
@@ -158,29 +159,17 @@ jobs:
       RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
-      - name: Git client setup and refresh tip
-        run: |
-          git config user.name "Release bot"
-          git config user.email "aws-devax-open-source@amazon.com"
-          git config pull.rebase true
-          git config remote.origin.url >&-
-          git pull origin "${BRANCH}"
-
       - name: Bump package version
         id: versioning
         run: poetry version "${RELEASE_VERSION}"
       - name: Create PR
-        run: bash .github/scripts/create_pr_for_staged_changes.sh pyproject.toml
-        env:
-          PR_TITLE: "chore(ci): bump version to ${{ env.RELEASE_VERSION }}"
-          TEMP_BRANCH_PREFIX: "ci-bump"
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cleanup orphaned branch
-        if: failure()
-        run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
-        env:
-          TEMP_BRANCH_PREFIX: "ci-bump"
-          GITHUB_RUN_ID: ${{ github.run_id }}
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "pyproject.toml"
+          temp_branch_prefix: "ci-bump"
+          pull_request_title: "chore(ci): bump version to ${{ env.RELEASE_VERSION }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   notify_version:
     needs: [build, release, publish_layer]
