@@ -90,7 +90,7 @@ jobs:
       id-token: write
       contents: write
       pull-requests: write
-      pages: none
+      pages: write
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -106,7 +106,7 @@ jobs:
       id-token: write
       contents: write
       pull-requests: write
-      pages: none
+      pages: write
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -167,11 +167,8 @@ jobs:
           fi
           echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
 
-  # TODO: Versioned docs won't have Layer releases on them
-  # since there will be a PR with them
-  # so we either need to rethink this entirely
-  # OR pause, merge PR and then approve this step
-  release-docs:
+  # Update the latest documentation version
+  release_docs:
     needs: [prod, prepare_docs_alias]
     permissions:
       # lower privilege propagated from parent workflow (release.yml)

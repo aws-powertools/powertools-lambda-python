@@ -153,15 +153,56 @@ jobs:
       - name: CDK Deploy Canary
         run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose
 
-  update_v2_layer_arn_docs:
+  update_v2_layer_arn_references:
     needs: deploy-cdk-stack
     if: ${{ inputs.stage == 'PROD' }}
-    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    outputs:
+      temp_branch: ${{ steps.create-pr.outputs.temp_branch }}
+    runs-on: ubuntu-latest
     permissions:
+      # lower privilege propagated from parent workflow (publish_v2_layer.yml)
       contents: write
       pull-requests: write
-      pages: none
       id-token: none
-    uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
+      pages: none
+    steps:
+      - name: Checkout repository # reusable workflows start clean, so we need to checkout again
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          fetch-depth: 0
+      - name: Download CDK layer artifact
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: cdk-layer-stack
+          path: cdk-layer-stack/
+      - name: Replace layer versions in documentation
+        run: |
+          ls -la cdk-layer-stack/
+          ./layer/scripts/update_layer_arn.sh cdk-layer-stack
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "docs/index.md examples"
+          temp_branch_prefix: "ci-layer-docs"
+          pull_request_title: "chore(ci): layer docs update"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # separate job to keep permissions tight
+  # so we create a PR with the latest layer changes to a temp branch
+  # then deploy docs from the temp branch
+  # otherwise we could have a release for 2.16.0 docs with Layer ARN pointing to 2.15.0
+  # because we haven't merged the PR yet
+  publish_v2_layer_arn_docs:
+    needs: update_v2_layer_arn_references
+    permissions:
+      # lower privilege propagated from parent workflow (reusable_deploy_v2_layer_stack.yml)
+      contents: write
+      pages: write
+      pull-requests: none
+      id-token: none
+    uses: ./.github/workflows/reusable_publish_docs.yml
     with:
-      latest_published_version: ${{ inputs.latest_published_version }}
+      version: develop
+      alias: stage
+      git_ref: ${{ needs.update_v2_layer_arn_references.outputs.temp_branch }}
