@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
-from typing import List, Literal, Tuple
+from typing import List, Tuple
+
+from typing_extensions import Literal
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType

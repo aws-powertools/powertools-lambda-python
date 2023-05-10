@@ -1,5 +1,7 @@
 import json
-from typing import Dict, Literal, Optional
+from typing import Dict, Optional
+
+from typing_extensions import Literal
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import (
