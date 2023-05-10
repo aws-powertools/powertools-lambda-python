@@ -6,14 +6,18 @@ from typing import Any
 import boto3
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.batch import BasePartialProcessor, batch_processor
+from aws_lambda_powertools.utilities.batch import (
+    BasePartialBatchProcessor,
+    EventType,
+    process_partial_response,
+)
 
 table_name = os.getenv("TABLE_NAME", "table_not_found")
 
 logger = Logger()
 
 
-class MyPartialProcessor(BasePartialProcessor):
+class MyPartialProcessor(BasePartialBatchProcessor):
     """
     Process a record and stores successful results at a Amazon DynamoDB Table
 
@@ -26,7 +30,7 @@ class MyPartialProcessor(BasePartialProcessor):
     def __init__(self, table_name: str):
         self.table_name = table_name
 
-        super().__init__()
+        super().__init__(event_type=EventType.SQS)
 
     def _prepare(self):
         # It's called once, *before* processing
@@ -61,10 +65,12 @@ class MyPartialProcessor(BasePartialProcessor):
         raise NotImplementedError()
 
 
+processor = MyPartialProcessor(table_name)
+
+
 def record_handler(record):
     return randint(0, 100)
 
 
-@batch_processor(record_handler=record_handler, processor=MyPartialProcessor(table_name))
 def lambda_handler(event, context):
-    return {"statusCode": 200}
+    return process_partial_response(event=event, record_handler=record_handler, processor=processor, context=context)

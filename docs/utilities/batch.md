@@ -313,7 +313,7 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 ???+ example
 	Let's suppose you'd like to add a metric named `BatchRecordFailures` for each batch record that failed processing
 
-```python title="Extending failure handling mechanism in BatchProcessor"
+```python hl_lines="8 9 16-19 22 38" title="Extending failure handling mechanism in BatchProcessor"
 --8<-- "examples/batch_processing/src/extending_failure.py"
 ```
 
@@ -328,7 +328,7 @@ You can create your own partial batch processor from scratch by inheriting the `
 
 You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
-```python hl_lines="9 16 31 37 44 55 60 68" title="Creating a custom batch processor"
+```python hl_lines="9-12 20 35 41 48 59 64 68 76" title="Creating a custom batch processor"
 --8<-- "examples/batch_processing/src/custom_partial_processor.py"
 ```
 
