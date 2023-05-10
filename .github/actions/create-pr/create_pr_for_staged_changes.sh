@@ -114,7 +114,7 @@ function close_duplicate_prs() {
 
 function report_job_output() {
     start_span "Updating job outputs"
-    echo "pull_request_id="${NEW_PR_ID}"" >>"$GITHUB_OUTPUT"
+    echo pull_request_id="${NEW_PR_ID}" >>"$GITHUB_OUTPUT"
     echo temp_branch="${TEMP_BRANCH}" >>"$GITHUB_OUTPUT"
     end_span
 }

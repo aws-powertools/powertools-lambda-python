@@ -3,9 +3,6 @@ name: Build and publish latest changelog
 on:
   workflow_call:
 
-env:
-  BRANCH: develop
-
 jobs:
   publish_changelog:
     # Force Github action to run only a single job at a time (based on the group name)
@@ -21,24 +18,12 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           fetch-depth: 0
-      - name: Git client setup and refresh tip
-        run: |
-          git config user.name "Release bot"
-          git config user.email "aws-devax-open-source@amazon.com"
-          git config pull.rebase true
-          git config remote.origin.url >&- || git remote add origin https://github.com/"${origin}" # Git Detached mode (release notes) doesn't have origin
-          git pull origin "${BRANCH}"
       - name: "Generate latest changelog"
         run: make changelog
       - name: Create PR
-        run: bash .github/scripts/create_pr_for_staged_changes.sh CHANGELOG.md
-        env:
-          PR_TITLE: "chore(ci): changelog rebuild with latest changes"
-          TEMP_BRANCH_PREFIX: "ci-changelog"
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Cleanup orphaned branch
-        if: failure()
-        run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
-        env:
-          TEMP_BRANCH_PREFIX: "ci-changelog"
-          GITHUB_RUN_ID: ${{ github.run_id }}
+        uses: ./.github/actions/create-pr
+        with:
+          files: "CHANGELOG.md"
+          temp_branch_prefix: "ci-changelog"
+          pull_request_title: "chore(ci): changelog rebuild"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
