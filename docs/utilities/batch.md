@@ -274,7 +274,7 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "DynamoDB Streams"
 
-    ```python hl_lines="12 13 22 32 37 41 47 56"
+    ```python hl_lines="14-15 24 34 39 43 49 58"
     --8<-- "examples/batch_processing/src/pydantic_dynamodb.py"
     ```
 
