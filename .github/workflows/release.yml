@@ -133,7 +133,7 @@ jobs:
     uses: ./.github/workflows/reusable_publish_changelog.yml
 
   # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
-  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
+  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack
   publish_layer:
     needs: [build, release]
     secrets: inherit
