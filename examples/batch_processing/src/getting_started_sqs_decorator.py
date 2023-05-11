@@ -2,13 +2,14 @@ import json
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import (
-    SqsFifoPartialProcessor,
+    BatchProcessor,
+    EventType,
     batch_processor,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = SqsFifoPartialProcessor()
+processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
 
