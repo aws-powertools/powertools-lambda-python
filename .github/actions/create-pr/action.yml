@@ -41,6 +41,11 @@ inputs:
   github_token:
     description: "GitHub token for GitHub CLI"
     required: true
+  target_branch:
+    description: "Branch to target when creating a PR against (develop, by default)"
+    required: false
+    default: develop
+
 outputs:
   pull_request_id:
     description: "Pull request ID created"
@@ -48,6 +53,7 @@ outputs:
   temp_branch:
     description: "Temporary branch created with staged changed"
     value: ${{ steps.create-pr.outputs.temp_branch }}
+
 runs:
   using: "composite"
   steps:
@@ -68,8 +74,9 @@ runs:
       env:
         FILES: ${{ inputs.files }}
         TEMP_BRANCH_PREFIX: ${{ inputs.temp_branch_prefix }}
-        GH_TOKEN: ${{ inputs.github_token }}
         PR_TITLE: ${{ inputs.pull_request_title }}
+        BASE_BRANCH: ${{ inputs.target_branch }}
+        GH_TOKEN: ${{ inputs.github_token }}
       shell: bash
     - id: cleanup
       name: Cleanup orphaned branch
