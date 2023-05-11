@@ -132,7 +132,7 @@ The `evaluate` method supports two optional parameters:
 
 === "getting_started_single_feature_flag.py"
 
-    ```python hl_lines="3 8 27 31"
+    ```python hl_lines="3 6 8 27 31"
     --8<-- "examples/feature_flags/src/getting_started_single_feature_flag.py"
     ```
 

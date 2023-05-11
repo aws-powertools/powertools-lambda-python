@@ -12,7 +12,7 @@ def lambda_handler(event: dict, context: LambdaContext):
     # Get customer's tier from incoming request
     ctx = {"tier": event.get("tier", "standard")}
 
-    # Evaluate `has_premium_features` base don customer's tier
+    # Evaluate `has_premium_features` based on customer's tier
     premium_features: Any = feature_flags.evaluate(name="premium_features", context=ctx, default=[])
 
     return {"Premium features enabled": premium_features}
