@@ -1,0 +1,56 @@
+name: "Create PR custom action"
+description: "Create a PR and a temporary branch, close duplicates"
+
+# This custom action
+
+inputs:
+  files:
+    description: "Files to add"
+    required: true
+  temp_branch_prefix:
+    description: "Prefix for temporary git branch to be created, e.g, ci-docs"
+    required: true
+  pull_request_title:
+    description: "Pull Request title to use"
+    required: true
+  github_token:
+    description: "GitHub token for GitHub CLI"
+    required: true
+outputs:
+  pull_request_id:
+    description: "Pull request ID created"
+    value: ${{ steps.create-pr.outputs.pull_request_id }}
+  temp_branch:
+    description: "Temporary branch created with staged changed"
+    value: ${{ steps.create-pr.outputs.temp_branch }}
+runs:
+  using: "composite"
+  steps:
+    - id: adjust-path
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+    - id: setup-git
+      name: Git client setup and refresh tip
+      run: |
+        git config user.name "Powertools bot"
+        git config user.email "aws-lambda-powertools-feedback@amazon.com"
+        git config pull.rebase true
+        git config remote.origin.url >&-
+      shell: bash
+    - id: create-pr
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: create_pr_for_staged_changes.sh "${FILES}"
+      env:
+        FILES: ${{ inputs.files }}
+        TEMP_BRANCH_PREFIX: ${{ inputs.temp_branch_prefix }}
+        GH_TOKEN: ${{ inputs.github_token }}
+        PR_TITLE: ${{ inputs.pull_request_title }}
+      shell: bash
+    - id: cleanup
+      name: Cleanup orphaned branch
+      if: failure()
+      run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
+      env:
+        TEMP_BRANCH_PREFIX: ${{ inputs.temp_branch_prefix }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
+      shell: bash
