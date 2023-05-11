@@ -26,6 +26,7 @@ on:
 jobs:
   build-layer:
     permissions:
+      # lower privilege propagated from parent workflow (release.yml)
       contents: read
       id-token: none
       pages: none
@@ -88,9 +89,7 @@ jobs:
     # lower privilege propagated from parent workflow (release.yml)
     permissions:
       id-token: write
-      contents: write
-      pull-requests: write
-      pages: write
+      contents: read
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -104,9 +103,7 @@ jobs:
     # lower privilege propagated from parent workflow (release.yml)
     permissions:
       id-token: write
-      contents: write
-      pull-requests: write
-      pages: write
+      contents: read
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -147,6 +144,50 @@ jobs:
       environment: "layer-prod"
       package-version: ${{ inputs.latest_published_version }}
 
+  # Updating the documentation with the latest Layer ARNs is a two-phase process
+  #
+  # 1. Update layer ARNs with latest deployed locally and create a PR with these changes
+  # 2. Pull from temporary branch with these changes and update the docs we're releasing
+  #
+  # This keeps our permissions tight and we don't run into a conflict,
+  # where a new release creates a new doc (2.16.0) while layers are still pointing to 2.15
+  # because the PR has to be merged while release process is running
+
+  update_v2_layer_arn_docs:
+    needs: prod
+    outputs:
+      temp_branch: ${{ steps.create-pr.outputs.temp_branch }}
+    runs-on: ubuntu-latest
+    permissions:
+      # lower privilege propagated from parent workflow (release.yml)
+      contents: write
+      pull-requests: write
+      id-token: none
+      pages: none
+    steps:
+      - name: Checkout repository # reusable workflows start clean, so we need to checkout again
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          fetch-depth: 0
+      - name: Download CDK layer artifact
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+        with:
+          name: cdk-layer-stack
+          path: cdk-layer-stack/
+      - name: Replace layer versions in documentation
+        run: |
+          ls -la cdk-layer-stack/
+          ./layer/scripts/update_layer_arn.sh cdk-layer-stack
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "docs/index.md examples"
+          temp_branch_prefix: "ci-layer-docs"
+          pull_request_title: "chore(ci): layer docs update"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+
   prepare_docs_alias:
     runs-on: ubuntu-latest
     permissions:
@@ -167,16 +208,16 @@ jobs:
           fi
           echo DOCS_ALIAS="$DOCS_ALIAS" >> "$GITHUB_OUTPUT"
 
-  release-docs:
-    needs: [prod, prepare_docs_alias]
+  release_docs:
+    needs: [update_v2_layer_arn_docs, prepare_docs_alias]
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       contents: write
       pages: write
-      id-token: write
       pull-requests: none
+      id-token: none
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}
       alias: ${{ needs.prepare_docs_alias.outputs.DOCS_ALIAS }}
-      detached_mode: true
+      git_ref: ${{ needs.update_v2_layer_arn_docs.outputs.temp_branch }}
