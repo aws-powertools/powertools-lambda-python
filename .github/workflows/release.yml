@@ -79,13 +79,6 @@ jobs:
       - name: Run all tests, linting and baselines
         if: ${{ !inputs.skip_code_quality }}
         run: make pr
-      - name: Git client setup and refresh tip
-        run: |
-          git config user.name "Release bot"
-          git config user.email "aws-devax-open-source@amazon.com"
-          git config pull.rebase true
-          git config remote.origin.url >&- || git remote add origin https://github.com/"${ORIGIN}" # Git Detached mode (release notes) doesn't have origin
-          git pull origin "${BRANCH}"
       - name: Bump package version
         id: versioning
         run: poetry version "${RELEASE_VERSION}"
@@ -104,16 +97,6 @@ jobs:
           # where git checkout might happen too fast and doesn't pick up the latest version
           # and also future-proof for when we switch to protected branch and update via PR
           key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Update version in trunk
-        if: steps.versioning.outcome == 'success'
-        run: |
-          HAS_CHANGE=$(git status --porcelain)
-          test -z "${HAS_CHANGE}" && echo "Nothing to update" && exit 0
-          git add pyproject.toml
-          git commit -m "bump version to ${RELEASE_VERSION}" --no-verify
-          git pull origin "${BRANCH}" # prevents concurrent branch update failing push
-          git push origin HEAD:refs/heads/"${BRANCH}"
 
   release:
     needs: build
@@ -162,6 +145,28 @@ jobs:
     with:
       latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
+
+  bump_version:
+    needs: [build, release]
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - name: Bump package version
+        id: versioning
+        run: poetry version "${RELEASE_VERSION}"
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "pyproject.toml"
+          temp_branch_prefix: "ci-bump"
+          pull_request_title: "chore(ci): bump version to ${{ env.RELEASE_VERSION }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   post_release:
     needs: [build, release, publish_layer]
