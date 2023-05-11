@@ -37,7 +37,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * Fetch one or all feature flags enabled for a given application context
 * Support for static feature flags to simply turn on/off a feature without rules
 * Support for time based feature flags
-* Bring Your Own Feature Flags Store Provider
+* Bring your own Feature Flags Store Provider
 
 ## Getting started
 
@@ -476,6 +476,9 @@ These are the available options for further customization.
 ### Create your own store provider
 
 You can create your own custom FeatureFlags store provider by inheriting the `StoreProvider` class, and implementing both `get_raw_configuration()` and `get_configuration()` methods to retrieve the configuration from your custom store.
+
+* **`get_raw_configuration()`** – get the raw configuration from the store provider and return the parsed JSON dictionary
+* **`get_configuration()`** – get the configuration from the store provider, parsing it as a JSON dictionary. If an envelope is set, extract the envelope data
 
 Here are an example of implementing a custom store provider using Amazon S3, a popular object storage.
 
