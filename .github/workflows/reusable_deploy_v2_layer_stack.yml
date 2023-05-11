@@ -1,9 +1,5 @@
 name: Deploy CDK Layer v2 stack
 
-permissions:
-  id-token: write
-  contents: write
-
 on:
   workflow_call:
     inputs:
@@ -28,6 +24,12 @@ jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    permissions:
+      id-token: write
+      pull-requests: none
+      contents: read
+      pages: none
     defaults:
       run:
         working-directory: ./layer
