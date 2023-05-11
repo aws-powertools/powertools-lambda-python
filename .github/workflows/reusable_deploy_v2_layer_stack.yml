@@ -151,10 +151,3 @@ jobs:
           retention-days: 1
       - name: CDK Deploy Canary
         run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose
-
-  update_v2_layer_arn_docs:
-    needs: deploy-cdk-stack
-    if: ${{ inputs.stage == 'PROD' }}
-    uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
-    with:
-      latest_published_version: ${{ inputs.latest_published_version }}
