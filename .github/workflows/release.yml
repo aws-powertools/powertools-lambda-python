@@ -51,7 +51,7 @@ jobs:
   build:
     runs-on: aws-lambda-powertools_ubuntu-latest_4-core
     permissions:
-      contents: write
+      contents: read
     outputs:
       RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     env:
