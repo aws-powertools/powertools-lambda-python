@@ -15,18 +15,14 @@
 * **ci:** update layer ARN docs and create PR during release ([#2240](https://github.com/awslabs/aws-lambda-powertools-python/issues/2240))
 * **ci:** bump package version after release via pull request ([#2239](https://github.com/awslabs/aws-lambda-powertools-python/issues/2239))
 * **ci:** convert create-pr steps into composite action ([#2238](https://github.com/awslabs/aws-lambda-powertools-python/issues/2238))
-* **ci:** changelog rebuild ([#2241](https://github.com/awslabs/aws-lambda-powertools-python/issues/2241))
 * **ci:** enforce zero trust for third party workflows ([#2215](https://github.com/awslabs/aws-lambda-powertools-python/issues/2215))
 * **ci:** remove auto-merge workflow ([#2214](https://github.com/awslabs/aws-lambda-powertools-python/issues/2214))
-* **ci:** changelog rebuild ([#2236](https://github.com/awslabs/aws-lambda-powertools-python/issues/2236))
 * **ci:** schedule changelog to rebuild daily at 8am, and on release only ([#2216](https://github.com/awslabs/aws-lambda-powertools-python/issues/2216))
-* **ci:** changelog rebuild ([#2232](https://github.com/awslabs/aws-lambda-powertools-python/issues/2232))
-* **ci:** changelog rebuild ([#2230](https://github.com/awslabs/aws-lambda-powertools-python/issues/2230))
-* **ci:** changelog rebuild ([#2245](https://github.com/awslabs/aws-lambda-powertools-python/issues/2245))
 * **ci:** create pull request on changelog update ([#2224](https://github.com/awslabs/aws-lambda-powertools-python/issues/2224))
+* **ci:** filter out bot commits from CHANGELOG
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.2 to 2.1.3 ([#2227](https://github.com/awslabs/aws-lambda-powertools-python/issues/2227))
-* **deps-dev:** bump mkdocs-material from 9.1.9 to 9.1.11 ([#2229](https://github.com/awslabs/aws-lambda-powertools-python/issues/2229))
 * **deps-dev:** bump cfn-lint from 0.77.4 to 0.77.5 ([#2228](https://github.com/awslabs/aws-lambda-powertools-python/issues/2228))
+* **deps-dev:** bump mkdocs-material from 9.1.9 to 9.1.11 ([#2229](https://github.com/awslabs/aws-lambda-powertools-python/issues/2229))
 * **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.99 to 1.26.127 ([#2219](https://github.com/awslabs/aws-lambda-powertools-python/issues/2219))
 * **deps-dev:** bump types-requests from 2.29.0.0 to 2.30.0.0 ([#2220](https://github.com/awslabs/aws-lambda-powertools-python/issues/2220))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.116 to 1.26.127 ([#2218](https://github.com/awslabs/aws-lambda-powertools-python/issues/2218))
@@ -2203,7 +2199,6 @@
 * fix dependabot commit messages prefix
 * fix dependabot unique set config
 * bump mkdocs-material from 7.1.5 to 7.1.6 ([#451](https://github.com/awslabs/aws-lambda-powertools-python/issues/451))
-* bump version to 1.17.0
 * bump boto3 from 1.17.78 to 1.17.84 ([#449](https://github.com/awslabs/aws-lambda-powertools-python/issues/449))
 * update mergify to require approval on dependabot ([#456](https://github.com/awslabs/aws-lambda-powertools-python/issues/456))
 * bump actions/setup-python from 1 to 2.2.2 ([#445](https://github.com/awslabs/aws-lambda-powertools-python/issues/445))
@@ -2602,7 +2597,6 @@
 
 ## Maintenance
 
-* bump version to 1.9.0
 
 ## Pull Requests
 
@@ -2714,7 +2708,6 @@
 ## Maintenance
 
 * fix repository URL
-* bump version to 1.7.0
 * spacing
 * typo in list
 * typo on code generation tool
@@ -2883,7 +2876,6 @@
 
 ## Maintenance
 
-* bump version to 1.5.0 ([#158](https://github.com/awslabs/aws-lambda-powertools-python/issues/158))
 * tiny changes for readability
 * add debug logging for sqs batch processing
 * remove middlewares module, moving decorator functionality to base and sqs
@@ -2980,7 +2972,6 @@
 
 ## Maintenance
 
-* bump version to 1.3.0 ([#122](https://github.com/awslabs/aws-lambda-powertools-python/issues/122))
 
 
 <a name="v1.2.0"></a>
@@ -2991,7 +2982,6 @@
 
 ## Maintenance
 
-* bump version to 1.2.0 ([#119](https://github.com/awslabs/aws-lambda-powertools-python/issues/119))
 
 
 <a name="v1.1.3"></a>
@@ -3022,7 +3012,6 @@
 
 ## Maintenance
 
-* bump version to 1.1.2
 * suppress LGTM alert
 * add autocomplete as unreleased
 * remove unused stdout fixture
@@ -3127,7 +3116,6 @@
 ## Maintenance
 
 * update CHANGELOG
-* bump version to 0.11.0 ([#76](https://github.com/awslabs/aws-lambda-powertools-python/issues/76))
 
 
 <a name="v0.10.1"></a>
