@@ -82,7 +82,7 @@ function create_temporary_branch_with_changes() {
     echo "$@" | xargs -n1 git add || error "Failed to add staged changes: "$@""
     git commit -m "${PR_TITLE}"
 
-    git push origin "${TEMP_BRANCH}"
+    git push origin "${TEMP_BRANCH}" || error "Failed to create new temporary branch"
     end_span
 }
 
