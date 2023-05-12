@@ -10,23 +10,25 @@
 
 ## Maintenance
 
-* **ci:** skip analytics on forks ([#2225](https://github.com/awslabs/aws-lambda-powertools-python/issues/2225))
+* **ci:** convert create-pr steps into composite action ([#2238](https://github.com/awslabs/aws-lambda-powertools-python/issues/2238))
+* **ci:** changelog rebuild ([#2241](https://github.com/awslabs/aws-lambda-powertools-python/issues/2241))
 * **ci:** enforce zero trust for third party workflows ([#2215](https://github.com/awslabs/aws-lambda-powertools-python/issues/2215))
-* **ci:** changelog rebuild ([#2236](https://github.com/awslabs/aws-lambda-powertools-python/issues/2236))
 * **ci:** remove auto-merge workflow ([#2214](https://github.com/awslabs/aws-lambda-powertools-python/issues/2214))
+* **ci:** changelog rebuild ([#2236](https://github.com/awslabs/aws-lambda-powertools-python/issues/2236))
+* **ci:** schedule changelog to rebuild daily at 8am, and on release only ([#2216](https://github.com/awslabs/aws-lambda-powertools-python/issues/2216))
 * **ci:** changelog rebuild ([#2232](https://github.com/awslabs/aws-lambda-powertools-python/issues/2232))
 * **ci:** changelog rebuild ([#2230](https://github.com/awslabs/aws-lambda-powertools-python/issues/2230))
-* **ci:** schedule changelog to rebuild daily at 8am, and on release only ([#2216](https://github.com/awslabs/aws-lambda-powertools-python/issues/2216))
 * **ci:** create pull request on changelog update ([#2224](https://github.com/awslabs/aws-lambda-powertools-python/issues/2224))
+* **ci:** skip analytics on forks ([#2225](https://github.com/awslabs/aws-lambda-powertools-python/issues/2225))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.2 to 2.1.3 ([#2227](https://github.com/awslabs/aws-lambda-powertools-python/issues/2227))
-* **deps-dev:** bump aws-cdk from 2.78.0 to 2.79.0 ([#2235](https://github.com/awslabs/aws-lambda-powertools-python/issues/2235))
 * **deps-dev:** bump cfn-lint from 0.77.4 to 0.77.5 ([#2228](https://github.com/awslabs/aws-lambda-powertools-python/issues/2228))
+* **deps-dev:** bump mkdocs-material from 9.1.9 to 9.1.11 ([#2229](https://github.com/awslabs/aws-lambda-powertools-python/issues/2229))
 * **deps-dev:** bump mypy-boto3-cloudwatch from 1.26.99 to 1.26.127 ([#2219](https://github.com/awslabs/aws-lambda-powertools-python/issues/2219))
 * **deps-dev:** bump types-requests from 2.29.0.0 to 2.30.0.0 ([#2220](https://github.com/awslabs/aws-lambda-powertools-python/issues/2220))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.116 to 1.26.127 ([#2218](https://github.com/awslabs/aws-lambda-powertools-python/issues/2218))
-* **deps-dev:** bump mkdocs-material from 9.1.9 to 9.1.11 ([#2229](https://github.com/awslabs/aws-lambda-powertools-python/issues/2229))
 * **deps-dev:** bump types-python-dateutil from 2.8.19.12 to 2.8.19.13 ([#2234](https://github.com/awslabs/aws-lambda-powertools-python/issues/2234))
 * **deps-dev:** bump mypy from 1.2.0 to 1.3.0 ([#2233](https://github.com/awslabs/aws-lambda-powertools-python/issues/2233))
+* **deps-dev:** bump aws-cdk from 2.78.0 to 2.79.0 ([#2235](https://github.com/awslabs/aws-lambda-powertools-python/issues/2235))
 * **deps-dev:** bump aws-cdk from 2.77.0 to 2.78.0 ([#2202](https://github.com/awslabs/aws-lambda-powertools-python/issues/2202))
 
 
