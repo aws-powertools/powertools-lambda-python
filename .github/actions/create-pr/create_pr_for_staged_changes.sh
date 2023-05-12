@@ -3,7 +3,7 @@ set -uo pipefail # prevent accessing unset env vars, prevent masking pipeline er
 
 #docs
 #title              :create_pr_for_staged_changes.sh
-#description        :This script will create a PR for staged changes, detect and close duplicate PRs.
+#description        :This script will create a PR for staged changes, detect and close duplicate PRs. All PRs will be omitted from Release Notes and Changelogs
 #author		    :@heitorlessa
 #date               :May 8th 2023
 #version            :0.1
@@ -61,6 +61,8 @@ function set_environment_variables() {
     export readonly PR_BODY="This is an automated PR created from the following workflow"
     export readonly FILENAME=".github/scripts/$(basename "$0")"
     export readonly NO_DUPLICATES_MESSAGE="No duplicated PRs found"
+    export readonly SKIP_LABEL="skip-changelog"
+
     end_span
 }
 
@@ -86,7 +88,8 @@ function create_temporary_branch_with_changes() {
 
 function create_pr() {
     start_span "Creating PR against ${TEMP_BRANCH} branch"
-    NEW_PR_URL=$(gh pr create --title "${PR_TITLE}" --body "${PR_BODY}: ${WORKFLOW_URL}" --base "${BASE_BRANCH}" || error "Failed to create PR") # e.g, https://github.com/awslabs/aws-lambda-powertools/pull/13
+    # TODO: create label
+    NEW_PR_URL=$(gh pr create --title "${PR_TITLE}" --body "${PR_BODY}: ${WORKFLOW_URL}" --base "${BASE_BRANCH}" --label "${SKIP_LABEL}" || error "Failed to create PR") # e.g, https://github.com/awslabs/aws-lambda-powertools/pull/13
 
     # greedy remove any string until the last URL path, including the last '/'. https://opensource.com/article/17/6/bash-parameter-expansion
     debug "Extracing PR Number from PR URL: "${NEW_PR_URL}""
