@@ -11,6 +11,7 @@
 ## Maintenance
 
 * **ci:** skip analytics on forks ([#2225](https://github.com/awslabs/aws-lambda-powertools-python/issues/2225))
+* **ci:** fail create-pr when branch cannot be created or behind tip
 * **ci:** update layer ARN docs and create PR during release ([#2240](https://github.com/awslabs/aws-lambda-powertools-python/issues/2240))
 * **ci:** bump package version after release via pull request ([#2239](https://github.com/awslabs/aws-lambda-powertools-python/issues/2239))
 * **ci:** convert create-pr steps into composite action ([#2238](https://github.com/awslabs/aws-lambda-powertools-python/issues/2238))
@@ -21,7 +22,7 @@
 * **ci:** schedule changelog to rebuild daily at 8am, and on release only ([#2216](https://github.com/awslabs/aws-lambda-powertools-python/issues/2216))
 * **ci:** changelog rebuild ([#2232](https://github.com/awslabs/aws-lambda-powertools-python/issues/2232))
 * **ci:** changelog rebuild ([#2230](https://github.com/awslabs/aws-lambda-powertools-python/issues/2230))
-* **ci:** fail create-pr when branch cannot be created or behind tip
+* **ci:** changelog rebuild ([#2245](https://github.com/awslabs/aws-lambda-powertools-python/issues/2245))
 * **ci:** create pull request on changelog update ([#2224](https://github.com/awslabs/aws-lambda-powertools-python/issues/2224))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 2.1.2 to 2.1.3 ([#2227](https://github.com/awslabs/aws-lambda-powertools-python/issues/2227))
 * **deps-dev:** bump mkdocs-material from 9.1.9 to 9.1.11 ([#2229](https://github.com/awslabs/aws-lambda-powertools-python/issues/2229))
