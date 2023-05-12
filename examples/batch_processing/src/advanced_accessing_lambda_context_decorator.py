@@ -1,24 +1,24 @@
-import json
+from typing import Optional
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import (
-    SqsFifoPartialProcessor,
+    BatchProcessor,
+    EventType,
     batch_processor,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = SqsFifoPartialProcessor()
+processor = BatchProcessor(event_type=EventType.SQS)
 tracer = Tracer()
 logger = Logger()
 
 
 @tracer.capture_method
-def record_handler(record: SQSRecord):
-    payload: str = record.body
-    if payload:
-        item: dict = json.loads(payload)
-        logger.info(item)
+def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
+    if lambda_context is not None:
+        remaining_time = lambda_context.get_remaining_time_in_millis()
+        logger.info(remaining_time)
 
 
 @logger.inject_lambda_context
