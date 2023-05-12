@@ -128,10 +128,30 @@ jobs:
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
+  create_tag:
+    needs: [build, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - id: setup-git
+        name: Git client setup and refresh tip
+        run: |
+          git config user.name "Powertools bot"
+          git config user.email "aws-lambda-powertools-feedback@amazon.com"
+          git config remote.origin.url >&-
+      - name: Create Git Tag
+        run: |
+          git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
+          git push origin v"${RELEASE_VERSION}"
+
   # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack
   publish_layer:
-    needs: [build, release]
+    needs: [build, release, create_tag]
     secrets: inherit
     permissions:
       id-token: write
