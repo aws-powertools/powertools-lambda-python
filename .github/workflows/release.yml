@@ -5,12 +5,14 @@ name: Release
 # === Automated activities ===
 #
 # 1. Run tests, linting, security and complexity base line
-# 2. Bump package version, build release artifact, and generate latest Changelog
+# 2. Bump package version and build release artifact
 # 3. Publish package to PyPi prod repository using cached artifact
-# 4. Kick off Layers pipeline to compile and publish latest version
-# 5. Updates documentation to use the latest Layer ARN for all commercial regions
-# 6. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
-# 7. Close all issues labeled "pending-release" and notify customers about the release
+# 4. Compile Layer and kick off pipeline for beta, prod, and canary releases
+# 5. Update docs with latest Layer ARNs and Changelog
+# 6. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 8. Create PR to update package version on trunk
+# 9. Close all issues labeled "pending-release" and notify customers about the release
 #
 # === Manual activities ===
 #
@@ -126,15 +128,36 @@ jobs:
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
-  # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
-  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack -> reusable_update_v2_layer_arn_docs
-  publish_layer:
+  create_tag:
     needs: [build, release]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+    steps:
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - id: setup-git
+        name: Git client setup and refresh tip
+        run: |
+          git config user.name "Powertools bot"
+          git config user.email "aws-lambda-powertools-feedback@amazon.com"
+          git config remote.origin.url >&-
+      - name: Create Git Tag
+        run: |
+          git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
+          git push origin v"${RELEASE_VERSION}"
+
+  # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
+  # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack
+  publish_layer:
+    needs: [build, release, create_tag]
     secrets: inherit
     permissions:
       id-token: write
       contents: write
       pages: write
+      pull-requests: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
       latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}

@@ -1,9 +1,5 @@
 name: Deploy CDK Layer v2 stack
 
-permissions:
-  id-token: write
-  contents: write
-
 on:
   workflow_call:
     inputs:
@@ -28,6 +24,12 @@ jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    permissions:
+      id-token: write
+      pull-requests: none
+      contents: read
+      pages: none
     defaults:
       run:
         working-directory: ./layer
@@ -149,10 +151,3 @@ jobs:
           retention-days: 1
       - name: CDK Deploy Canary
         run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose
-
-  update_v2_layer_arn_docs:
-    needs: deploy-cdk-stack
-    if: ${{ inputs.stage == 'PROD' }}
-    uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
-    with:
-      latest_published_version: ${{ inputs.latest_published_version }}
