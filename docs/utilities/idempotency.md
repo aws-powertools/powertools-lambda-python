@@ -77,31 +77,11 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
 
-```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
-Resources:
-  IdempotencyTable:
-	Type: AWS::DynamoDB::Table
-	Properties:
-	  AttributeDefinitions:
-		-   AttributeName: id
-			AttributeType: S
-	  KeySchema:
-		-   AttributeName: id
-			KeyType: HASH
-	  TimeToLiveSpecification:
-		AttributeName: expiration
-		Enabled: true
-	  BillingMode: PAY_PER_REQUEST
+=== "AWS Serverless Application Model (SAM) example"
 
-  HelloWorldFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-	Runtime: python3.9
-	...
-	Policies:
-	  - DynamoDBCrudPolicy:
-		  TableName: !Ref IdempotencyTable
-```
+    ```yaml hl_lines="20-28 36-38"
+    --8<-- "examples/idempotency/sam/template.yaml"
+    ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
@@ -123,36 +103,16 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 !!! tip "See [Choosing a payload subset for idempotency](#choosing-a-payload-subset-for-idempotency) for more elaborate use cases."
 
-=== "app.py"
+=== "Idempotent decorator"
 
-    ```python hl_lines="1-3 5 7 14"
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        payment = create_subscription_payment(
-            user=event['user'],
-            product=event['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200,
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency.py"
     ```
 
-=== "Example event"
+=== "Sample event"
 
     ```json
-    {
-      "username": "xyz",
-      "product_id": "123456789"
-    }
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
     ```
 
 After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
@@ -1341,4 +1301,4 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
-[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank"}.
+[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank" rel="noopener"}.
