@@ -20,6 +20,6 @@ async def collect_payment(charge_id: str) -> dict:
 
 
 @tracer.capture_lambda_handler
-def handler(event: dict, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     charge_id = event.get("charge_id", "")
     return asyncio.run(collect_payment(charge_id=charge_id))

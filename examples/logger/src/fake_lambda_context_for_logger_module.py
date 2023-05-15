@@ -5,7 +5,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     logger.info("Collecting payment")
 
     return "hello world"
