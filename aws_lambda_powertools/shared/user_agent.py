@@ -5,10 +5,10 @@ from importlib_metadata import version
 pt_version = version("aws-lambda-powertools")
 
 try:
-    import botocore.handlers
+    from botocore import handlers
 except ImportError:
     # if botocore failed to import, user might be using custom runtime. We can ignore here
-    botocore = None
+    handlers = None
 
 
 ENV_KEY = "AWS_EXECUTION_ENV"
@@ -65,6 +65,6 @@ def register_feature_to_client(client, feature):
 
 # register add_pt_version for all AWS SDK in runtime
 def inject_user_agent():
-    if botocore:
+    if handlers:
         # register add_user_agent to BUILTIN_HANDLERS so every aws sdk session will have this event registered
-        botocore.handlers.BUILTIN_HANDLERS.append((target_sdk_event, _add_pt_version))
+        handlers.BUILTIN_HANDLERS.append((target_sdk_event, _add_pt_version))
