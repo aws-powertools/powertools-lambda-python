@@ -9,7 +9,7 @@ tracer = Tracer(patch_modules=MODULES)
 
 
 @tracer.capture_lambda_handler
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     ret = requests.get("https://httpbin.org/get")
     ret.raise_for_status()
 

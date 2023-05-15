@@ -1,3 +1,5 @@
+import json
+
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.utilities.batch import SqsFifoPartialProcessor
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
@@ -10,7 +12,10 @@ logger = Logger()
 
 @tracer.capture_method
 def record_handler(record: SQSRecord):
-    ...
+    payload: str = record.body
+    if payload:
+        item: dict = json.loads(payload)
+        logger.info(item)
 
 
 @logger.inject_lambda_context

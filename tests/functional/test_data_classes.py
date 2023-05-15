@@ -113,6 +113,47 @@ def test_dict_wrapper_equals():
     assert DataClassSample(data1).raw_event is data1
 
 
+def test_dict_wrapper_with_default_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    data = {"body": '{"message": "foo1"}'}
+    event = DataClassSample(data=data)
+    assert event.json_body == json.loads(data["body"])
+
+
+def test_dict_wrapper_with_valid_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    def fake_json_deserializer(record: dict):
+        return json.loads(record)
+
+    data = {"body": '{"message": "foo1"}'}
+    event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
+    assert event.json_body == json.loads(data["body"])
+
+
+def test_dict_wrapper_with_invalid_custom_json_deserializer():
+    class DataClassSample(DictWrapper):
+        @property
+        def json_body(self) -> dict:
+            return self._json_deserializer(self["body"])
+
+    def fake_json_deserializer() -> None:
+        # invalid fn signature should raise TypeError
+        pass
+
+    data = {"body": {"message": "foo1"}}
+    with pytest.raises(TypeError):
+        event = DataClassSample(data=data, json_deserializer=fake_json_deserializer)
+        assert event.json_body == {"message": "foo1"}
+
+
 def test_dict_wrapper_implements_mapping():
     class DataClassSample(DictWrapper):
         pass
@@ -925,6 +966,9 @@ def test_seq_trigger_event():
     assert record.event_source_arn == "arn:aws:sqs:us-east-2:123456789012:my-queue"
     assert record.queue_url == "https://sqs.us-east-2.amazonaws.com/123456789012/my-queue"
     assert record.aws_region == "us-east-2"
+
+    record_2 = records[1]
+    assert record_2.json_body == {"message": "foo1"}
 
 
 def test_default_api_gateway_proxy_event():

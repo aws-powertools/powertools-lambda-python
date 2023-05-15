@@ -34,17 +34,17 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
           cache: "poetry"
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version: "16.12"
       - name: Install CDK CLI
@@ -54,7 +54,7 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
         with:
           role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
