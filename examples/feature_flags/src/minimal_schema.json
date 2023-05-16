@@ -1,0 +1,9 @@
+{
+    "global_feature": {
+        "default": true
+    },
+    "non_boolean_global_feature": {
+        "default": {"group": "read-only"},
+        "boolean_type": false
+    }
+}
