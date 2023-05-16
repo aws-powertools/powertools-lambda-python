@@ -280,7 +280,8 @@ To address this API Gateway behavior, we use `strip_prefixes` parameter to accou
 
 You can configure CORS at the `APIGatewayRestResolver` constructor via `cors` parameter using the `CORSConfig` class.
 
-This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
+This will ensure that CORS headers are returned as part of the response when your functions match the path invoked and the `Origin`
+matches one of the allowed values.
 
 ???+ tip
     Optionally disable CORS on a per path basis with `cors=False` parameter.
@@ -310,6 +311,9 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ warning
     Always configure `allow_origin` when using in production.
 
+???+ tip "Multiple allowed origins?"
+    If you require multiple allowed origins, pass the additional origins using the `extra_origins` key.
+
 | Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
@@ -331,7 +335,7 @@ You can use the `Response` class to have full control over the response. For exa
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="9 28-32"
+    ```python hl_lines="9 29-35"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
