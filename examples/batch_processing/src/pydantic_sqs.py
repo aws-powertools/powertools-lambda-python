@@ -4,21 +4,29 @@ from aws_lambda_powertools.utilities.batch import (
     EventType,
     process_partial_response,
 )
-from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
-    KinesisStreamRecord,
-)
+from aws_lambda_powertools.utilities.parser import BaseModel
+from aws_lambda_powertools.utilities.parser.models import SqsRecordModel
+from aws_lambda_powertools.utilities.parser.types import Json
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+
+class Order(BaseModel):
+    item: dict
+
+
+class OrderSqsRecord(SqsRecordModel):
+    body: Json[Order]  # deserialize order data from JSON string
+
+
+processor = BatchProcessor(event_type=EventType.SQS, model=OrderSqsRecord)
 tracer = Tracer()
 logger = Logger()
 
 
 @tracer.capture_method
-def record_handler(record: KinesisStreamRecord):
-    logger.info(record.kinesis.data_as_text)
-    payload: dict = record.kinesis.data_as_json()
-    logger.info(payload)
+def record_handler(record: OrderSqsRecord):
+    logger.info(record.body.item)
+    return record.body.item
 
 
 @logger.inject_lambda_context
