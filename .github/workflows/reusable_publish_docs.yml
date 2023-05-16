@@ -26,6 +26,7 @@ on:
         default: develop
 
 permissions:
+  id-token: write
   contents: write
   pages: write
 
@@ -36,6 +37,7 @@ jobs:
     concurrency:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
+    environment: Docs
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
@@ -88,3 +90,27 @@ jobs:
           publish_dir: ./api
           keep_files: true
           destination_dir: latest/api
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+      - name: Copy API Docs
+        run: |
+          cp -r api site/
+      - name: Deploy Docs (Version)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-test/${{ env.VERSION }}/
+      - name: Deploy Docs (Alias)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-test/${{ env.ALIAS }}/
