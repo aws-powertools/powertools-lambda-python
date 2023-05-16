@@ -1,0 +1,41 @@
+{
+    "premium_features": {
+      "default": false,
+      "rules": {
+        "customer tier equals premium": {
+          "when_match": true,
+          "conditions": [
+            {
+              "action": "EQUALS",
+              "key": "tier",
+              "value": "premium"
+            }
+          ]
+        }
+      }
+    },
+    "ten_percent_off_campaign": {
+      "default": true
+    },
+    "geo_customer_campaign": {
+      "default": false,
+      "rules": {
+        "customer in temporary discount geo": {
+          "when_match": true,
+          "conditions": [
+            {
+              "action": "KEY_IN_VALUE",
+              "key": "CloudFront-Viewer-Country",
+              "value": [
+                "NL",
+                "IE",
+                "UK",
+                "PL",
+                "PT"
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }

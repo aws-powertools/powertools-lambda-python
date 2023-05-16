@@ -1,0 +1,9 @@
+{
+	"conditions": [
+		{
+			"action": "EQUALS",
+			"key": "tier",
+			"value": "premium"
+		}
+	]
+}
