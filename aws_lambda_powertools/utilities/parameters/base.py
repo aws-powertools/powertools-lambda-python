@@ -291,13 +291,13 @@ class BaseProvider(ABC):
             Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
         """
         if client is not None:
-            user_agent.register_feature_to_client(client, "parameters")
+            user_agent.register_feature_to_resource(client, "parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
         client_to_return = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
-        user_agent.register_feature_to_client(client_to_return, "parameters")
+        user_agent.register_feature_to_resource(client_to_return, "parameters")
         return client_to_return
 
 
