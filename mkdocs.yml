@@ -75,6 +75,7 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: "."
       check_paths: true
+      restrict_base_path: false
   - meta
   - toc:
       permalink: true
