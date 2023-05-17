@@ -84,7 +84,7 @@ class CORSConfig:
 
     cors_config = CORSConfig(
         allow_origin="https://wwww.example.com/",
-        extra_origins=["https://www1.example.com/"],
+        extra_origins=["https://dev.example.com/"],
         expose_headers=["x-exposed-response-header"],
         allow_headers=["x-custom-request-header"],
         max_age=100,
@@ -132,9 +132,9 @@ class CORSConfig:
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
-        self.allowed_origins = [allow_origin]
+        self._allowed_origins = [allow_origin]
         if extra_origins:
-            self.allowed_origins.extend(extra_origins)
+            self._allowed_origins.extend(extra_origins)
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
@@ -149,7 +149,7 @@ class CORSConfig:
 
         # If the origin doesn't match any of the allowed origins, and we don't allow all origins ("*"),
         # don't add any CORS headers
-        if origin not in self.allowed_origins and "*" not in self.allowed_origins:
+        if origin not in self._allowed_origins and "*" not in self._allowed_origins:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers

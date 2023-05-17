@@ -547,7 +547,6 @@ def test_cors_multi_origin():
     result = app(event, None)
 
     # THEN routes by default return the custom cors headers
-    assert "multiValueHeaders" in result
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
     assert headers["Access-Control-Allow-Origin"] == ["https://origin3"]
@@ -557,7 +556,6 @@ def test_cors_multi_origin():
     result = app(event, None)
 
     # THEN routes by default return the custom cors headers
-    assert "multiValueHeaders" in result
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
     assert "Access-Control-Allow-Origin" not in headers
@@ -591,7 +589,7 @@ def test_custom_cors_config():
     assert "multiValueHeaders" in result
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert headers["Access-Control-Allow-Origin"] == [cors_config.allowed_origins[0]]
+    assert headers["Access-Control-Allow-Origin"] == ["https://foo1"]
     expected_allows_headers = [",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))]
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
     assert headers["Access-Control-Expose-Headers"] == [",".join(cors_config.expose_headers)]
@@ -689,8 +687,11 @@ def test_custom_preflight_response():
     def custom_method():
         ...
 
+    # AND the request includes an origin
+    headers = {"Origin": "https://example.org"}
+
     # WHEN calling the handler
-    result = app({"path": "/some-call", "httpMethod": "OPTIONS", "headers": {"Origin": "https://example.org"}}, None)
+    result = app({"path": "/some-call", "httpMethod": "OPTIONS", "headers": headers}, None)
 
     # THEN return the custom preflight response
     assert result["statusCode"] == 200
