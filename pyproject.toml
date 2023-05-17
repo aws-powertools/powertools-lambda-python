@@ -33,6 +33,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.4.0"
+importlib-metadata = "^6.6.0"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
@@ -86,7 +87,6 @@ mkdocs-material = "^9.1.12"
 filelock = "^3.12.0"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
-importlib-metadata = "^6.6"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
 hvac = "^1.1.0"
