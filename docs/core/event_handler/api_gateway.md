@@ -298,6 +298,18 @@ matches one of the allowed values.
     --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
     ```
 
+=== "setting_cors_extra_origins.py"
+
+    ```python hl_lines="5 11-12 34"
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins.py"
+    ```
+
+=== "setting_cors_extra_origins_output.json"
+
+    ```json
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins_output.json"
+    ```
+
 #### Pre-flight
 
 Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration is necessary. However, ALB expects you to handle pre-flight requests.
