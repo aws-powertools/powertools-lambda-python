@@ -12,6 +12,6 @@ def collect_payment(charge_id: str) -> Generator[str, None, None]:
 
 
 @tracer.capture_lambda_handler
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     charge_id = event.get("charge_id", "")
     return next(collect_payment(charge_id=charge_id))

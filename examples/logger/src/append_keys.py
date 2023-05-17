@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 
 
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     order_id = event.get("order_id")
 
     # this will ensure order_id key always has the latest value before logging

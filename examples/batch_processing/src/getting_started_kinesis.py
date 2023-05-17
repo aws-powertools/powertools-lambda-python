@@ -19,7 +19,6 @@ def record_handler(record: KinesisStreamRecord):
     logger.info(record.kinesis.data_as_text)
     payload: dict = record.kinesis.data_as_json()
     logger.info(payload)
-    ...
 
 
 @logger.inject_lambda_context

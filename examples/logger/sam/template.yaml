@@ -5,7 +5,7 @@ Description: AWS Lambda Powertools Tracer doc examples
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.10
     Tracing: Active
     Environment:
       Variables:
@@ -14,7 +14,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:31
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:32
 
 Resources:
   LoggerLambdaHandlerExample:

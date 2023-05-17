@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: partial batch response sample
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 256
+    Runtime: python3.10
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+        POWERTOOLS_SERVICE_NAME: hello
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: hello_world
+      Policies:
+        # Lambda Destinations require additional permissions
+        # to send failure records from Kinesis/DynamoDB
+        - Version: "2012-10-17"
+          Statement:
+            Effect: "Allow"
+            Action:
+              - sqs:GetQueueAttributes
+              - sqs:GetQueueUrl
+              - sqs:SendMessage
+            Resource: !GetAtt SampleDLQ.Arn
+      Events:
+        DynamoDBStream:
+          Type: DynamoDB
+          Properties:
+            Stream: !GetAtt SampleTable.StreamArn
+            StartingPosition: LATEST
+            MaximumRetryAttempts: 2
+            DestinationConfig:
+              OnFailure:
+                Destination: !GetAtt SampleDLQ.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  SampleDLQ:
+    Type: AWS::SQS::Queue
+
+  SampleTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+      SSESpecification:
+        SSEEnabled: true
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES

@@ -10,7 +10,9 @@
 ## {{ .Title }}
 
 {{ range .Commits -}}
+{{ if and (not (hasPrefix .Subject "changelog rebuild")) (not (hasPrefix .Subject "layer docs update")) (not (hasPrefix .Subject "bump version to")) -}}
 * {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}
+{{ end -}}
 {{ end }}
 {{ end -}}
 {{ end -}}
@@ -24,7 +26,9 @@
 ## {{ .Title }}
 
 {{ range .Commits -}}
+{{ if and (not (hasPrefix .Subject "changelog rebuild")) (not (hasPrefix .Subject "layer docs update")) (not (hasPrefix .Subject "bump version to")) -}}
 * {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}
+{{ end -}}
 {{ end }}
 {{ end -}}
 
