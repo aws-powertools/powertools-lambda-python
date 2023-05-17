@@ -5,9 +5,9 @@ from sys import version_info
 # Since Python 3.8 there is a built-in. Remove this when support for Python3.7 is dropped
 # See https://docs.python.org/3/library/importlib.metadata.html
 if version_info.major == 3 and version_info.minor == 7:
-    from importlib_metadata import version
+    from importlib_metadata import version  # type: ignore
 else:
-    from importlib.metadata import version
+    from importlib.metadata import version  # type: ignore
 
 powertools_version = version("aws-lambda-powertools")
 
