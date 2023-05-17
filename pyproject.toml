@@ -33,7 +33,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.4.0"
-importlib-metadata = "^6.6.0"
+importlib-metadata = {version = "^6.6.0", python = "<3.8"}
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
