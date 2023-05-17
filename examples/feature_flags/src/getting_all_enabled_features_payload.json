@@ -1,0 +1,10 @@
+{
+    "body": "{\"username\": \"lessa\", \"tier\": \"premium\", \"basked_id\": \"random_id\", \"price\": 1000}",
+    "resource": "/products",
+    "path": "/products",
+    "httpMethod": "GET",
+    "isBase64Encoded": false,
+    "headers": {
+        "CloudFront-Viewer-Country": "NL"
+    }
+}
