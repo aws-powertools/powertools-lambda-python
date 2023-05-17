@@ -2,15 +2,13 @@ import base64
 from typing import Any, Optional, Union
 
 import botocore
+from aws_lambda_powertools.utilities.data_masking.provider import Provider
 from aws_encryption_sdk import (
     CachingCryptoMaterialsManager,
     EncryptionSDKClient,
     LocalCryptoMaterialsCache,
     StrictAwsKmsMasterKeyProvider,
 )
-
-from aws_lambda_powertools.utilities.data_masking.provider import Provider
-
 
 class SingletonMeta(type):
     """Metaclass to cache class instances to optimize encryption"""
