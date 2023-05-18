@@ -343,7 +343,7 @@ def test_cors():
     assert "multiValueHeaders" in result
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.TEXT_HTML]
-    assert headers["Access-Control-Allow-Origin"] == ["*"]
+    assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
     assert "Access-Control-Allow-Credentials" not in headers
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
@@ -533,6 +533,34 @@ def test_handling_response_type():
     assert result["body"] == "Not found"
 
 
+def test_cors_multi_origin():
+    # GIVEN a custom cors configuration with multiple origins
+    cors_config = CORSConfig(allow_origin="https://origin1", extra_origins=["https://origin2", "https://origin3"])
+    app = ApiGatewayResolver(cors=cors_config)
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with the correct Origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://origin3"}}
+    result = app(event, None)
+
+    # THEN routes by default return the custom cors headers
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert headers["Access-Control-Allow-Origin"] == ["https://origin3"]
+
+    # WHEN calling the event handler with the wrong origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://wrong.origin"}}
+    result = app(event, None)
+
+    # THEN routes by default return the custom cors headers
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert "Access-Control-Allow-Origin" not in headers
+
+
 def test_custom_cors_config():
     # GIVEN a custom cors configuration
     allow_header = ["foo2"]
@@ -544,7 +572,7 @@ def test_custom_cors_config():
         allow_credentials=True,
     )
     app = ApiGatewayResolver(cors=cors_config)
-    event = {"path": "/cors", "httpMethod": "GET"}
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://foo1"}}
 
     @app.get("/cors")
     def get_with_cors():
@@ -561,7 +589,7 @@ def test_custom_cors_config():
     assert "multiValueHeaders" in result
     headers = result["multiValueHeaders"]
     assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert headers["Access-Control-Allow-Origin"] == [cors_config.allow_origin]
+    assert headers["Access-Control-Allow-Origin"] == ["https://foo1"]
     expected_allows_headers = [",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))]
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
     assert headers["Access-Control-Expose-Headers"] == [",".join(cors_config.expose_headers)]
@@ -604,9 +632,9 @@ def test_no_matches_with_cors():
     result = app({"path": "/another-one", "httpMethod": "GET"}, None)
 
     # THEN return a 404
-    # AND cors headers are returned
+    # AND cors headers are NOT returned (because no Origin header was passed in)
     assert result["statusCode"] == 404
-    assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
     assert "Not found" in result["body"]
 
 
@@ -628,7 +656,7 @@ def test_cors_preflight():
         ...
 
     # WHEN calling the handler
-    result = app({"path": "/foo", "httpMethod": "OPTIONS"}, None)
+    result = app({"path": "/foo", "httpMethod": "OPTIONS", "headers": {"Origin": "http://example.org"}}, None)
 
     # THEN return no content
     # AND include Access-Control-Allow-Methods of the cors methods used
@@ -659,8 +687,11 @@ def test_custom_preflight_response():
     def custom_method():
         ...
 
+    # AND the request includes an origin
+    headers = {"Origin": "https://example.org"}
+
     # WHEN calling the handler
-    result = app({"path": "/some-call", "httpMethod": "OPTIONS"}, None)
+    result = app({"path": "/some-call", "httpMethod": "OPTIONS", "headers": headers}, None)
 
     # THEN return the custom preflight response
     assert result["statusCode"] == 200
@@ -747,7 +778,8 @@ def test_service_error_responses(json_dump):
     # AND status code equals 502
     assert result["statusCode"] == 502
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
+    # Because no Origin was passed in, there is not Allow-Origin on the output
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
     expected = {"statusCode": 502, "message": "Something went wrong!"}
     assert result["body"] == json_dump(expected)
 
