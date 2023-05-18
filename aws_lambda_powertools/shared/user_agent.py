@@ -1,13 +1,13 @@
 import logging
 import os
-from sys import version_info
+import sys
 
 # Since Python 3.8 there is a built-in. Remove this when support for Python3.7 is dropped
 # See https://docs.python.org/3/library/importlib.metadata.html
-if version_info.major == 3 and version_info.minor == 7:
-    from importlib_metadata import version
-else:
+if sys.version_info >= (3, 8):
     from importlib.metadata import version
+else:
+    from importlib_metadata import version
 
 powertools_version = version("aws-lambda-powertools")
 
@@ -19,7 +19,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-EXEC_ENV = os.environ.get("AWS_EXECUTION_ENV", "NA")
+EXEC_ENV = os.getenv("AWS_EXECUTION_ENV", "NA")
 TARGET_SDK_EVENT = "request-created"
 FEATURE_PREFIX = "PT"
 
