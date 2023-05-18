@@ -8,14 +8,14 @@ class ItsDangerousProvider(Provider):
         self.keys = keys
         self.salt = salt
 
-    def encrypt(self, data, **kwargs) -> str:
+    def encrypt(self, data, **kwargs):
         if data is None:
             return data
 
         serialized = URLSafeSerializer(self.keys, salt=self.salt, **kwargs)
         return serialized.dumps(data)
 
-    def decrypt(self, data, **kwargs) -> str:
+    def decrypt(self, data, **kwargs):
         if data is None:
             return data
 
