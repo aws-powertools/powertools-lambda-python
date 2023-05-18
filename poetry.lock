@@ -1944,14 +1944,14 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.26.116"
-description = "Type annotations for boto3.SecretsManager 1.26.116 service generated with mypy-boto3-builder 7.14.5"
+version = "1.26.135"
+description = "Type annotations for boto3.SecretsManager 1.26.135 service generated with mypy-boto3-builder 7.14.5"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.26.116.tar.gz", hash = "sha256:d95bbef7fdd39876fe42799ed15abd83eee80b612734bd83513b8ce720e7ceec"},
-    {file = "mypy_boto3_secretsmanager-1.26.116-py3-none-any.whl", hash = "sha256:3d2f4c42945447e6abdd18289c159a8d5b0e45ccc32067915863e93e38cd9c49"},
+    {file = "mypy-boto3-secretsmanager-1.26.135.tar.gz", hash = "sha256:cf523d3e4f6729e244e24d97c692855883e69fa270d11f5021a293fb2aa483e8"},
+    {file = "mypy_boto3_secretsmanager-1.26.135-py3-none-any.whl", hash = "sha256:15cf8d8a16eb0a49984ef9f19821a1d2b97bf1e6b56c703f27973a27b32aef4c"},
 ]
 
 [package.dependencies]
@@ -2818,14 +2818,14 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.23.0"
+version = "1.23.1"
 description = "Python client for Sentry (https://sentry.io)"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.23.0.tar.gz", hash = "sha256:58f4ff9e76c21bc7172eeec9f1bccb3ff2247c74c71d5590438ce36c803f46ea"},
-    {file = "sentry_sdk-1.23.0-py2.py3-none-any.whl", hash = "sha256:01b56a276642d31cf9b4aaf0b55938677265d7006be4785a10ef6330d0f5bba9"},
+    {file = "sentry-sdk-1.23.1.tar.gz", hash = "sha256:0300fbe7a07b3865b3885929fb863a68ff01f59e3bcfb4e7953d0bf7fd19c67f"},
+    {file = "sentry_sdk-1.23.1-py2.py3-none-any.whl", hash = "sha256:a884e2478e0b055776ea2b9234d5de9339b4bae0b3a5e74ae43d131db8ded27e"},
 ]
 
 [package.dependencies]
@@ -3239,4 +3239,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "dfc9c92c89b3408bdb822fe64cb28eb5a91eaa332a08f952cfdc38733727caef"
+content-hash = "a67272cfe964ac20cbf1c84a87f40fb883a474327322218e1390662d8c528639"

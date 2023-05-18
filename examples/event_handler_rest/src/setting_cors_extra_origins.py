@@ -8,8 +8,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
-# CORS will match when Origin is only https://www.example.com
-cors_config = CORSConfig(allow_origin="https://www.example.com", max_age=300)
+# CORS will match when Origin is https://www.example.com OR https://dev.example.com
+cors_config = CORSConfig(allow_origin="https://www.example.com", extra_origins=["https://dev.example.com"], max_age=300)
 app = APIGatewayRestResolver(cors=cors_config)
 
 
