@@ -1,53 +1,54 @@
 import logging
 import os
-import sys
 
-# Since Python 3.8 there is a built-in. Remove this when support for Python3.7 is dropped
-# See https://docs.python.org/3/library/importlib.metadata.html
-if sys.version_info >= (3, 8):
-    from importlib.metadata import version
-else:
-    from importlib_metadata import version
+from aws_lambda_powertools.shared.version import VERSION
 
-powertools_version = version("aws-lambda-powertools")
+powertools_version = VERSION
+inject_header = True
 
 try:
-    from botocore import handlers
+    import botocore
 except ImportError:
-    # if botocore failed to import, user might be using custom runtime. We can ignore here
-    handlers = None
+    # if botocore failed to import, user might be using custom runtime and we can't inject header
+    inject_header = False
 
 logger = logging.getLogger(__name__)
 
-EXEC_ENV = os.getenv("AWS_EXECUTION_ENV", "NA")
-TARGET_SDK_EVENT = "request-created"
-FEATURE_PREFIX = "PT"
+EXEC_ENV: str = os.environ.get("AWS_EXECUTION_ENV", "NA")
+TARGET_SDK_EVENT: str = "request-created"
+FEATURE_PREFIX: str = "PT"
+HEADER_NO_OP: str = f"{FEATURE_PREFIX}/no-op/{powertools_version} PTEnv/{EXEC_ENV}"
 
 
-# In case of no Powertools utility: PT/no-op/2.15.0 PTEnv/AWS_Lambda_python3.9
-def _add_powertools_version(request, **kwargs):
+def _initializer_botocore_session(session):
     try:
-        headers = request.headers
-        headers["User-Agent"] = f"{headers['User-Agent']} {FEATURE_PREFIX}/no-op/{powertools_version} PTEnv/{EXEC_ENV}"
+        session.user_agent_extra = HEADER_NO_OP
     except Exception:
-        logger.debug("Missing header User-Agent")
+        logger.debug("Can't add extra header User-Agent")
 
 
-# creates the `add_feature_string` function with given feature parameter
 def _create_feature_function(feature):
     def add_powertools_feature(request, **kwargs):
-        headers = request.headers
-        # Actually, only one handler can be registered, registering a new one will replace the prev handler
-        # We don't need to replace/detect previous registered user-agent
-        headers[
-            "User-Agent"
-        ] = f"{headers['User-Agent']} {FEATURE_PREFIX}/{feature}/{powertools_version} PTEnv/{EXEC_ENV}"
+        try:
+            headers = request.headers
+            header_user_agent: str = (
+                f"{headers['User-Agent']} {FEATURE_PREFIX}/{feature}/{powertools_version} PTEnv/{EXEC_ENV}"
+            )
 
-    # return created function
+            # This function is exclusive to client and resources objects created in Powertools
+            # and must remove the no-op header, if present
+            if HEADER_NO_OP in headers["User-Agent"]:
+                # Remove HEADER_NO_OP + space
+                header_user_agent = header_user_agent.replace(f"{HEADER_NO_OP} ", "")
+
+            headers["User-Agent"] = f"{header_user_agent}"
+        except Exception:
+            logger.debug("Can't find User-Agent header")
+
     return add_powertools_feature
 
 
-# add feature user-agent to given sdk boto3.session
+# Add feature user-agent to given sdk boto3.session
 def register_feature_to_session(session, feature):
     try:
         session.events.register(TARGET_SDK_EVENT, _create_feature_function(feature))
@@ -55,7 +56,7 @@ def register_feature_to_session(session, feature):
         logger.debug(f"session passed in doesn't have a event system:{e}")
 
 
-# add feature user-agent to given sdk boto3.client
+# Add feature user-agent to given sdk boto3.client
 def register_feature_to_client(client, feature):
     try:
         client.meta.events.register(TARGET_SDK_EVENT, _create_feature_function(feature))
@@ -63,7 +64,7 @@ def register_feature_to_client(client, feature):
         logger.debug(f"session passed in doesn't have a event system:{e}")
 
 
-# add feature user-agent to given sdk boto3.resource
+# Add feature user-agent to given sdk boto3.resource
 def register_feature_to_resource(resource, feature):
     try:
         resource.meta.client.meta.events.register(TARGET_SDK_EVENT, _create_feature_function(feature))
@@ -71,8 +72,8 @@ def register_feature_to_resource(resource, feature):
         logger.debug(f"resource passed in doesn't have a event system:{e}")
 
 
-# register add_pt_version for all AWS SDK in runtime
 def inject_user_agent():
-    if handlers:
-        # register add_user_agent to BUILTIN_HANDLERS so every aws sdk session will have this event registered
-        handlers.BUILTIN_HANDLERS.append((TARGET_SDK_EVENT, _add_powertools_version))
+    if inject_header:
+        # Customize botocore session to inject Powertools header
+        # See: https://github.com/boto/botocore/pull/2682
+        botocore.register_initializer(_initializer_botocore_session)
