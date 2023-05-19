@@ -113,7 +113,7 @@ def get_header_value(
 class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
-        return self["headers"]
+        return self.get("headers") or {}
 
     @property
     def query_string_parameters(self) -> Optional[Dict[str, str]]:

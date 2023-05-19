@@ -5,7 +5,8 @@
   "httpMethod": "GET",
   "headers": {
     "Header1": "value1",
-    "Header2": "value2"
+    "Header2": "value2",
+    "Origin": "https://aws.amazon.com"
   },
   "multiValueHeaders": {
     "Header1": [

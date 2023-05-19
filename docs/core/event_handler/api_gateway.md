@@ -280,7 +280,8 @@ To address this API Gateway behavior, we use `strip_prefixes` parameter to accou
 
 You can configure CORS at the `APIGatewayRestResolver` constructor via `cors` parameter using the `CORSConfig` class.
 
-This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
+This will ensure that CORS headers are returned as part of the response when your functions match the path invoked and the `Origin`
+matches one of the allowed values.
 
 ???+ tip
     Optionally disable CORS on a per path basis with `cors=False` parameter.
@@ -297,6 +298,18 @@ This will ensure that CORS headers are always returned as part of the response w
     --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
     ```
 
+=== "setting_cors_extra_origins.py"
+
+    ```python hl_lines="5 11-12 34"
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins.py"
+    ```
+
+=== "setting_cors_extra_origins_output.json"
+
+    ```json
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins_output.json"
+    ```
+
 #### Pre-flight
 
 Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration is necessary. However, ALB expects you to handle pre-flight requests.
@@ -310,9 +323,13 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ warning
     Always configure `allow_origin` when using in production.
 
+???+ tip "Multiple origins?"
+    If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
+
 | Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|----------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
 | **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
 | **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}. |
 | **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
@@ -331,7 +348,7 @@ You can use the `Response` class to have full control over the response. For exa
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="9 28-32"
+    ```python hl_lines="9 29-35"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
