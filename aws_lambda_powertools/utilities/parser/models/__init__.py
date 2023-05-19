@@ -42,6 +42,7 @@ from .kinesis_firehose import (
     KinesisFirehoseRecord,
     KinesisFirehoseRecordMetadata,
 )
+from .kinesis_firehose_sqs import KinesisFirehoseSQSModel, KinesisFirehoseSQSRecord
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import (
     S3EventNotificationEventBridgeDetailModel,
@@ -144,4 +145,6 @@ __all__ = [
     "KafkaRecordModel",
     "KafkaMskEventModel",
     "KafkaBaseEventModel",
+    "KinesisFirehoseSQSModel",
+    "KinesisFirehoseSQSRecord",
 ]

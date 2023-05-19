@@ -1,0 +1,29 @@
+import json
+from typing import List, Optional
+
+from pydantic import BaseModel, PositiveInt, validator
+
+from aws_lambda_powertools.shared.functions import base64_decode
+from aws_lambda_powertools.utilities.parser.models import KinesisFirehoseRecordMetadata
+
+from .sqs import SqsRecordModel
+
+
+class KinesisFirehoseSQSRecord(BaseModel):
+    data: SqsRecordModel
+    recordId: str
+    approximateArrivalTimestamp: PositiveInt
+    kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata]
+
+    @validator("data", pre=True, allow_reuse=True)
+    def data_base64_decode(cls, value):
+        # Firehose payload is encoded twice
+        return json.loads(base64_decode(base64_decode(value)))
+
+
+class KinesisFirehoseSQSModel(BaseModel):
+    invocationId: str
+    deliveryStreamArn: str
+    region: str
+    sourceKinesisStreamArn: Optional[str]
+    records: List[KinesisFirehoseSQSRecord]
