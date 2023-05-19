@@ -11,8 +11,8 @@ from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseModel,
     KinesisFirehoseRecord,
     KinesisFirehoseRecordMetadata,
-    KinesisFirehoseSQSModel,
-    KinesisFirehoseSQSRecord,
+    KinesisFirehoseSqsModel,
+    KinesisFirehoseSqsRecord,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.parser.schemas import MyKinesisFirehoseBusiness
@@ -79,8 +79,8 @@ def handle_firehose_no_envelope_put(event: KinesisFirehoseModel, _: LambdaContex
     assert record_02.data == b'{"Hello": "World"}'
 
 
-@event_parser(model=KinesisFirehoseSQSModel)
-def handle_firehose_sqs_wrapped_message(event: KinesisFirehoseSQSModel, _: LambdaContext):
+@event_parser(model=KinesisFirehoseSqsModel)
+def handle_firehose_sqs_wrapped_message(event: KinesisFirehoseSqsModel, _: LambdaContext):
     assert event.region == "us-east-1"
     assert event.invocationId == "556b67a3-48fc-4385-af49-e133aade9cb9"
     assert event.deliveryStreamArn == "arn:aws:firehose:us-east-1:123456789012:deliverystream/PUT-S3-tdyyE"
@@ -88,7 +88,7 @@ def handle_firehose_sqs_wrapped_message(event: KinesisFirehoseSQSModel, _: Lambd
     records = list(event.records)
     assert len(records) == 1
 
-    record_01: KinesisFirehoseSQSRecord = records[0]
+    record_01: KinesisFirehoseSqsRecord = records[0]
     assert record_01.data.messageId == "059f36b4-87a3-44ab-83d2-661975830a7d"
     assert record_01.data.receiptHandle == "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a..."
     assert record_01.data.body == "Test message."

@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.parser.models import KinesisFirehoseRecordM
 from .sqs import SqsRecordModel
 
 
-class KinesisFirehoseSQSRecord(BaseModel):
+class KinesisFirehoseSqsRecord(BaseModel):
     data: SqsRecordModel
     recordId: str
     approximateArrivalTimestamp: PositiveInt
@@ -21,9 +21,9 @@ class KinesisFirehoseSQSRecord(BaseModel):
         return json.loads(base64_decode(base64_decode(value)))
 
 
-class KinesisFirehoseSQSModel(BaseModel):
+class KinesisFirehoseSqsModel(BaseModel):
     invocationId: str
     deliveryStreamArn: str
     region: str
     sourceKinesisStreamArn: Optional[str]
-    records: List[KinesisFirehoseSQSRecord]
+    records: List[KinesisFirehoseSqsRecord]
