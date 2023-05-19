@@ -17,12 +17,13 @@ logger = logging.getLogger(__name__)
 EXEC_ENV: str = os.environ.get("AWS_EXECUTION_ENV", "NA")
 TARGET_SDK_EVENT: str = "request-created"
 FEATURE_PREFIX: str = "PT"
-HEADER_NO_OP: str = f"{FEATURE_PREFIX}/no-op/{powertools_version} PTEnv/{EXEC_ENV}"
+DEFAULT_FEATURE: str = "no-op"
+HEADER_NO_OP: str = f"{FEATURE_PREFIX}/{DEFAULT_FEATURE}/{powertools_version} PTEnv/{EXEC_ENV}"
 
 
 def _initializer_botocore_session(session):
     try:
-        session.user_agent_extra = HEADER_NO_OP
+        session.register(TARGET_SDK_EVENT, _create_feature_function(DEFAULT_FEATURE))
     except Exception:
         logger.debug("Can't add extra header User-Agent")
 
@@ -37,7 +38,7 @@ def _create_feature_function(feature):
 
             # This function is exclusive to client and resources objects created in Powertools
             # and must remove the no-op header, if present
-            if HEADER_NO_OP in headers["User-Agent"]:
+            if HEADER_NO_OP in headers["User-Agent"] and feature != DEFAULT_FEATURE:
                 # Remove HEADER_NO_OP + space
                 header_user_agent = header_user_agent.replace(f"{HEADER_NO_OP} ", "")
 
