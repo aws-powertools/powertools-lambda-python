@@ -28,7 +28,7 @@ jobs:
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       contents: read
-      id-token: none
+      id-token: write
       pages: none
       pull-requests: none
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core
@@ -223,7 +223,7 @@ jobs:
       contents: write
       pages: write
       pull-requests: none
-      id-token: none
+      id-token: write
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}
