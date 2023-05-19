@@ -1,6 +1,6 @@
 import json
 from collections.abc import Iterable
-from typing import Optional, Union
+from typing import Union
 
 from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING as MASK
 from aws_lambda_powertools.utilities.data_masking.provider import Provider
@@ -13,18 +13,20 @@ class DataMasking:
         else:
             self.provider = provider
 
-    def encrypt(self, data, *args, fields=None, context: Optional[dict] = None, **kwargs):
-        return self._apply_action(data, fields, action=self.provider.encrypt, *args, *context, **kwargs)
+    # def encrypt(self, data, *args, fields=None, context: Optional[dict] = None, **kwargs):
+    # think was after *args (*context) bc how else to get this param through when itsdangeorus doesn't have it?
+    def encrypt(self, data, *args, fields=None, **kwargs):
+        return self._apply_action(data, fields, action=self.provider.encrypt, *args, **kwargs)
 
-    def decrypt(self, data, *args, fields=None, context: Optional[dict] = None, **kwargs):
-        return self._apply_action(data, fields, action=self.provider.decrypt, *args, *context, **kwargs)
+    def decrypt(self, data, *args, fields=None, **kwargs):
+        return self._apply_action(data, fields, action=self.provider.decrypt, *args, **kwargs)
 
     def mask(self, data, *args, fields=None, **kwargs):
         return self._apply_action(data, fields, action=self.provider.mask, *args, **kwargs)
 
     def _apply_action(self, data, fields, action, *args, **kwargs):
         if fields is not None:
-            return self._use_ast(data, fields, action=action, *args, **kwargs)
+            return self._use_ast(data, fields, action, *args, **kwargs)
         else:
             return action(data, *args, **kwargs)
 
