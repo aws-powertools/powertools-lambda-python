@@ -3,7 +3,7 @@ description: Wrapper around GitHub's official action, with additional archiving 
 
 # PROCESS
 #
-# 1. Creates tarball excluding .git and *.pyc files
+# 1. Creates tarball excluding .git files
 # 2. Uploads tarball using actions/upload-artifact action, fail CI job if no file is found
 # 3. Remove archive after uploading it.
 
@@ -61,7 +61,6 @@ runs:
     - name: Archive artifacts
       run: |
         tar --exclude-vcs \
-            --exclude "*.pyc" \
             -cvf "${ARCHIVE}" "${PATH_TO_ARCHIVE}"
       env:
         ARCHIVE: ${{ inputs.name }}.tar
