@@ -111,7 +111,7 @@ jobs:
   #
   # NOTE
   #
-  # we don't upload the artifact after tested to prevent no dependencies tamper our source code
+  # we don't upload the artifact after testing to prevent any tampering of our source code dependencies
   quality_check:
     needs: seal
     runs-on: ubuntu-latest
