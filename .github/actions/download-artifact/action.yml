@@ -1,0 +1,58 @@
+name: Download artifact
+description: Wrapper around GitHub's official action, with additional extraction before download
+
+# PROCESS
+#
+# 1. Downloads artifact using actions/download-artifact action
+# 2. Extracts and overwrites tarball previously uploaded
+# 3. Remove archive after extraction
+
+# NOTES
+#
+# Upload-artifact and download-artifact takes ~2m40s to upload 8MB
+# so this is custom action cuts down the entire operation to 1s
+# by uploading/extracting a tarball while relying on the official upload-artifact/download-artifact actions
+#
+
+# USAGE
+#
+# NOTE: Meant to be used with ./.github/actions/upload-artifact
+#
+# - name: Restore sealed source code
+# uses: ./.github/actions/download-artifact
+# with:
+#   name: ${{ needs.seal.outputs.INTEGRITY_HASH }}
+#   path: .
+
+# https://github.com/actions/download-artifact/blob/main/action.yml
+inputs:
+  name:
+    description: Artifact name
+    required: true
+  path:
+    description: Destination path. By default, it will download to the current working directory.
+    required: false
+    default: .
+
+runs:
+  using: composite
+  steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@cbed621e49e4c01b044d60f6c80ea4ed6328b281 # v2.1.1
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ inputs.path }}
+
+    - name: Extract artifacts
+      run: tar -xvf "${ARCHIVE}"
+      env:
+        ARCHIVE: ${{ inputs.name }}.tar
+      shell: bash
+      working-directory: ${{ inputs.path }}
+
+    - name: Remove archive
+      run: rm -f "${ARCHIVE}"
+      env:
+        ARCHIVE: ${{ inputs.name }}.tar
+      shell: bash
+      working-directory: ${{ inputs.path }}
