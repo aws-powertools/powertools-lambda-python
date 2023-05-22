@@ -4,15 +4,17 @@ name: Release
 #
 # === Automated activities ===
 #
-# 1. Run tests, linting, security and complexity base line
-# 2. Bump package version and build release artifact
-# 3. Publish package to PyPi prod repository using cached artifact
-# 4. Compile Layer and kick off pipeline for beta, prod, and canary releases
-# 5. Update docs with latest Layer ARNs and Changelog
-# 6. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
-# 7. Builds a new user guide and API docs with release version; update /latest pointing to newly released version
-# 8. Create PR to update package version on trunk
-# 9. Close all issues labeled "pending-release" and notify customers about the release
+# 1.  [Seal] Bump to release version and export source code with integrity hash
+# 2.  [Quality check] Restore sealed source code, run tests, linting, security and complexity base line
+# 3.  [Build] Restore sealed source code, create and export hashed build artifact for PyPi release (wheel, tarball)
+# 4.  [Release] Restore built artifact, and publish package to PyPi prod repository
+# 5.  [Create Tag] Restore sealed source code, and create a new git tag using released version
+# 6.  [PR to bump version] Restore sealed source code, and create a PR to update trunk with latest released project metadata
+# 7.  [Publish Layer] Compile Layer and kick off pipeline for beta, prod, and canary releases
+# 8.  [Publish Layer] Update docs with latest Layer ARNs and Changelog
+# 9.  [Publish Layer] Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 10. [Publish Layer] Builds a new user guide and API docs with release version; update /latest pointing to newly released version
+# 11. [Post release] Close all issues labeled "pending-release" and notify customers about the release
 #
 # === Manual activities ===
 #
@@ -196,11 +198,12 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
+      # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
-      - name: Restore sealed source code
+      - name: Restore sealed built artifact
         uses: ./.github/actions/download-artifact
         with:
           name: release-${{ needs.seal.outputs.INTEGRITY_HASH }}
