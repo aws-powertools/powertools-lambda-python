@@ -255,7 +255,7 @@ class TestDataMasking(unittest.TestCase):
 
         self.encrypted_list = []
         for data_type in self.list_of_data_types:
-            if isinstance(data_type, str) or isinstance(data_type, bytes):
+            if isinstance(data_type, (str, bytes)):
                 encrypted_data = data_masker.encrypt(data_type)
                 self.encrypted_list.append(encrypted_data)
 
