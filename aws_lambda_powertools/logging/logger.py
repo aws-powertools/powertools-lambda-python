@@ -91,7 +91,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
     level : str, int optional
-        logging.level, by default "INFO"
+        The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
     sample_rate: float, optional
@@ -442,6 +444,18 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
+
+    def setLevel(self, level: Union[str, int]):
+        """
+        Set the logging level for the logger.
+
+        Parameters:
+        -----------
+        level str | int
+            The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+            or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        """
+        self._logger.setLevel(level)
 
     def info(
         self,
