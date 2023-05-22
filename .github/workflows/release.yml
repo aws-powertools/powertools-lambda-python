@@ -23,8 +23,8 @@ name: Release
 # See MAINTAINERS.md "Releasing a new version" for release mechanisms
 
 env:
-  BRANCH: develop
-  ORIGIN: awslabs/aws-lambda-powertools-python
+  RELEASE_COMMIT: ${{ github.sha }}
+  RELEASE_TAG_VERSION: ${{ inputs.version_to_publish }}
 
 on:
   workflow_dispatch:
@@ -50,72 +50,161 @@ on:
         required: false
 
 jobs:
-  build:
-    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
+
+  # This job bumps the package version to the release version
+  # creates an integrity hash from the source code
+  # uploads the artifact with the integrity hash as the key name
+  # so subsequent jobs can restore from a trusted point in time to prevent tampering
+  seal:
+    runs-on: ubuntu-latest
     permissions:
       contents: read
     outputs:
-      RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
-    env:
-      RELEASE_TAG_VERSION: ${{ inputs.version_to_publish }}
+        INTEGRITY_HASH: ${{ steps.integrity.outputs.INTEGRITY_HASH }}
+        RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     steps:
+      - name: Export release version
+        id: release_version
+        # transform tag format `v<version` to `<version>`
+        run: |
+          RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
-          fetch-depth: 0
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+
+      - name: Bump package version
+        id: versioning
+        run: poetry version "${RELEASE_VERSION}"
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
+
+      - name: Create integrity hash
+        id: integrity
+        run: echo "INTEGRITY_HASH=${SOURCE_CODE_HASH}" >> "$GITHUB_OUTPUT"
+        env:
+          # paths to hash and why they're important to protect
+          #
+          # aws_lambda_powertools/  - source code
+          # pyproject.toml          - project metadata
+          # poetry.lock             - project dependencies
+          # layer/                  - layer infrastructure and pipeline
+          # .github/                - github scripts and actions used in the release
+          # docs/                   - user guide documentation
+          # examples/               - user guide code snippets
+          SOURCE_CODE_HASH: ${{ hashFiles('aws_lambda_powertools/**', 'pyproject.toml', 'poetry.lock', 'layer/**', '.github/**', 'docs/**', 'examples/**')}}
+
+      - name: Upload sealed source code
+        uses: ./.github/actions/upload-artifact
+        with:
+          name: ${{ steps.integrity.outputs.INTEGRITY_HASH }}
+          path: .
+
+
+  # This job runs our automated test suite, complexity and security baselines
+  # it ensures previously merged have been tested as part of the pull request process
+  #
+  # NOTE
+  #
+  # we don't upload the artifact after tested to prevent no dependencies tamper our source code
+  quality_check:
+    needs: seal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/download-artifact
+        with:
+          name: ${{ needs.seal.outputs.INTEGRITY_HASH }}
+          path: .
+
+      - name: Debug cache restore
+        run: cat pyproject.toml
+
+      - name: Install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Set up Python
         uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
         with:
           python-version: "3.10"
           cache: "poetry"
-      - name: Set release notes tag
-        id: release_version
-        # transform tag format `v<version` to `<version`
-        run: |
-          RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_ENV"
-          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
       - name: Install dependencies
         run: make dev
       - name: Run all tests, linting and baselines
-        if: ${{ !inputs.skip_code_quality }}
         run: make pr
-      - name: Bump package version
-        id: versioning
-        run: poetry version "${RELEASE_VERSION}"
+
+  # This job creates a release artifact (tar.gz, wheel)
+  # it checks out code from release commit for custom actions to work
+  # then restores the sealed source code (overwrites any potential tampering)
+  # it's done separately from release job to enforce least privilege.
+  # We export just the final build artifact for release (release-<integrity-hash>)
+  build:
+    runs-on: ubuntu-latest
+    needs: [quality_check, seal]
+    permissions:
+      contents: read
+    steps:
+      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/download-artifact
+        with:
+          name: ${{ needs.seal.outputs.INTEGRITY_HASH }}
+          path: .
+
+      - name: Install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+      - name: Set up Python
+        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        with:
+          python-version: "3.10"
+          cache: "poetry"
+
       - name: Build python package and wheel
         run: poetry build
 
-      - name: Cache release artifact
-        id: cache-release-build
-        uses: actions/cache/save@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
+      - name: Upload build artifact
+        uses: ./.github/actions/upload-artifact
         with:
+          name: release-${{ needs.seal.outputs.INTEGRITY_HASH }}
           path: dist/
-          # NOTE: cache key uses a hash of (Runner OS + Version to be released + Deps)
-          # since a new release might not change a dependency but version
-          # otherwise we might accidentally reuse a previously cached artifact for a newer release.
-          # The reason we don't add pyproject.toml here is to avoid racing conditions
-          # where git checkout might happen too fast and doesn't pick up the latest version
-          # and also future-proof for when we switch to protected branch and update via PR
-          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
 
+  # This job uses release artifact to publish to PyPi
+  # it exchanges JWT tokens with GitHub to obtain PyPi credentials
+  # since it's already registered as a Trusted Publisher.
+  # It uses the sealed build artifact (.whl, .tar.gz) to release it
   release:
-    needs: build
+    needs: [build, seal]
     environment: release
-    runs-on: aws-lambda-powertools_ubuntu-latest_4-core
+    runs-on: ubuntu-latest
     permissions:
       id-token: write # OIDC for PyPi Trusted Publisher feature
     env:
-      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
-      - name: Restore release artifact from cache
-        id: restore-release-build
-        uses: actions/cache/restore@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8 # v3.3.1
         with:
-          path: dist/
-          key: ${{ runner.os }}-${{ env.RELEASE_VERSION }}-${{ hashFiles('**/poetry.lock') }}
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/download-artifact
+        with:
+          name: release-${{ needs.seal.outputs.INTEGRITY_HASH }}
+          path: .
 
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
@@ -128,30 +217,85 @@ jobs:
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 
+  # We create a Git Tag using our release version (e.g., v2.16.0)
+  # using our sealed source code we created earlier.
+  # Because we bumped version of our project as part of CI
+  # we need to add this into git before pushing the tag
+  # otherwise the release commit will be used as the basis for the tag.
+  # Later, we create a PR to update trunk with our newest release version (e.g., bump_version job)
   create_tag:
-    needs: [build, release]
+    needs: [release, seal]
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    env:
-      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
     steps:
+      # NOTE: we need actions/checkout to authenticate and configure git first
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/download-artifact
+        with:
+          name: ${{ needs.seal.outputs.INTEGRITY_HASH }}
+          path: .
+
       - id: setup-git
         name: Git client setup and refresh tip
         run: |
           git config user.name "Powertools bot"
           git config user.email "aws-lambda-powertools-feedback@amazon.com"
           git config remote.origin.url >&-
+
       - name: Create Git Tag
         run: |
+          git add pyproject.toml
+          git commit -m "chore: version bump"
           git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
           git push origin v"${RELEASE_VERSION}"
+        env:
+          RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
 
-  # NOTE: Watch out for the depth limit of 4 nested workflow_calls.
+  # Creates a PR with the latest version we've just released
+  # since our trunk is protected against any direct pushes from automation
+  bump_version:
+    needs: [release, seal]
+    permissions:
+      contents: write  # create-pr action creates a temporary branch
+      pull-requests: write # create-pr action creates a PR using the temporary branch
+    runs-on: ubuntu-latest
+    steps:
+      # NOTE: we need actions/checkout to authenticate and configure git first
+      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/download-artifact
+        with:
+          name: ${{ needs.seal.outputs.INTEGRITY_HASH }}
+          path: .
+
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "pyproject.toml"
+          temp_branch_prefix: "ci-bump"
+          pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  # This job compiles a Lambda Layer optimized for space and speed (e.g., Cython)
+  # It then deploys to Layer's Beta and Prod account, including SAR Beta and Prod account.
+  # It uses canaries to attest Layers can be used and imported between stages.
+  # Lastly, it updates our documentation with the latest Layer ARN for all regions
+  #
+  # NOTE
+  #
+  # Watch out for the depth limit of 4 nested workflow_calls.
   # publish_layer -> publish_v2_layer -> reusable_deploy_v2_layer_stack
   publish_layer:
-    needs: [build, release, create_tag]
+    needs: [seal, release, create_tag]
     secrets: inherit
     permissions:
       id-token: write
@@ -160,33 +304,11 @@ jobs:
       pull-requests: write
     uses: ./.github/workflows/publish_v2_layer.yml
     with:
-      latest_published_version: ${{ needs.build.outputs.RELEASE_VERSION }}
+      latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
 
-  bump_version:
-    needs: [build, release]
-    permissions:
-      contents: write  # create-pr action creates a temporary branch
-      pull-requests: write # create-pr action creates a PR using the temporary branch
-    runs-on: ubuntu-latest
-    env:
-      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
-    steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
-      - name: Bump package version
-        id: versioning
-        run: poetry version "${RELEASE_VERSION}"
-      - name: Create PR
-        id: create-pr
-        uses: ./.github/actions/create-pr
-        with:
-          files: "pyproject.toml"
-          temp_branch_prefix: "ci-bump"
-          pull_request_title: "chore(ci): bump version to ${{ env.RELEASE_VERSION }}"
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
   post_release:
-    needs: [build, release, publish_layer]
+    needs: [seal, release, publish_layer]
     permissions:
       contents: read
       issues: write
@@ -194,7 +316,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     env:
-      RELEASE_VERSION: ${{ needs.build.outputs.RELEASE_VERSION }}
+      RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Close issues related to this release
