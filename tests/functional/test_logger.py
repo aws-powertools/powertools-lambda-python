@@ -885,7 +885,7 @@ def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkey
     logger = logging.getLogger("aws_lambda_powertools")
 
     # WHEN set_package_logger is used at initialization
-    # and any Powertools operation is used (e.g., Tracer)
+    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Tracer)
     set_package_logger_handler(stream=stdout)
     Tracer(disabled=True)
 

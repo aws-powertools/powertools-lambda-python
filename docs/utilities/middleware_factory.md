@@ -109,9 +109,9 @@ When executed, your middleware name will [appear in AWS X-Ray Trace details as](
 
 ![Middleware simple Tracer](../media/middleware_factory_tracer_1.png)
 
-### Combining Powertools utilities
+### Combining Powertools for AWS Lambda (Python) utilities
 
-You can create your own middleware and combine many features of Lambda Powertools such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
+You can create your own middleware and combine many features of Powertools for AWS Lambda (Python) such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
 
 In the example below, we create a Middleware with the following features:
 

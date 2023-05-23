@@ -598,7 +598,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         formatter_options = formatter_options or {}
 
         # There are 3 operational modes for this method
-        ## 1. Register a Powertools Formatter for the first time
+        ## 1. Register a Powertools for AWS Lambda (Python) Formatter for the first time
         ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
         ## 3. Add new keys and discard existing to the registered formatter
 
@@ -609,9 +609,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
             self.registered_handler.setFormatter(formatter)
 
-            # when using a custom Lambda Powertools Formatter
-            # standard and custom keys that are not Powertools Formatter parameters should be appended
-            # and custom keys that might happen to be Powertools Formatter parameters should be discarded
+            # when using a custom Powertools for AWS Lambda (Python) Formatter
+            # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters should be appended
+            # and custom keys that might happen to be Powertools for AWS Lambda (Python) Formatter parameters should be discarded
             # this prevents adding them as custom keys, for example, `json_default=<callable>`
             # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
             custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
@@ -718,7 +718,7 @@ def set_package_logger(
 
     Example
     -------
-    **Enables debug logging for AWS Lambda Powertools package**
+    **Enables debug logging for Powertools for AWS Lambda (Python) package**
 
         >>> aws_lambda_powertools.logging.logger import set_package_logger
         >>> set_package_logger()

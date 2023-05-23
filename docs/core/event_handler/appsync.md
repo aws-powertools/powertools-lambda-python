@@ -156,7 +156,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 ???+ note
     Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
 
-Within your function's folder, add Powertools as a dependency with `pipenv install aws-lambda-powertools`.
+Within your function's folder, add Powertools for AWS Lambda (Python) as a dependency with `pipenv install aws-lambda-powertools`.
 
 Use the following code for `merchantInfo` and `searchMerchant` functions respectively.
 

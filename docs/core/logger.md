@@ -441,7 +441,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 ???+ info
     When `POWERTOOLS_DEV` env var is present and set to `"true"`, Logger's default serializer (`json.dumps`) will pretty-print log messages for easier readability.
 
-```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
+```python hl_lines="2 7-8" title="Pre-configuring Powertools for AWS Lambda (Python) Formatter"
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
 
@@ -618,7 +618,7 @@ The `log` argument is the final log record containing [our standard keys](#stand
 For exceptional cases where you want to completely replace our formatter logic, you can subclass `BasePowertoolsFormatter`.
 
 ???+ warning
-    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
+    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means keeping state of logging keys added.
 
 === "bring_your_own_formatter_from_scratch.py"
 
@@ -688,7 +688,7 @@ for the given name and level to the logging module. By default, this logs all bo
 ---8<-- "examples/logger/src/enabling_boto_logging.py"
 ```
 
-### How can I enable Powertools logging for imported libraries?
+### How can I enable Powertools for AWS Lambda (Python) logging for imported libraries?
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
@@ -703,7 +703,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 
@@ -721,7 +721,7 @@ You can also add them later anywhere in your code with `append_keys`, or remove 
     ---8<-- "examples/logger/src/append_and_remove_keys_output.json"
     ```
 
-For log records originating from Powertools Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+For log records originating from Powertools for AWS Lambda (Python) Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
 
 ### What's the difference between `append_keys` and `extra`?
 
@@ -741,6 +741,6 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
     ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
     ```
 
-### How do I aggregate and search Powertools logs across accounts?
+### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
 As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460)
