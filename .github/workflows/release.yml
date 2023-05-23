@@ -205,7 +205,7 @@ jobs:
       - name: Upload build artifact
         uses: ./.github/actions/upload-artifact
         with:
-          name: build-${{ steps.integrity.outputs.INTEGRITY_HASH}}
+          name: build-${{ steps.integrity.outputs.BUILD_INTEGRITY_HASH}}
           path: dist/
 
   # This job uses release artifact to publish to PyPi
