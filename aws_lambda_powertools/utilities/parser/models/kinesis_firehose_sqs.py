@@ -17,8 +17,8 @@ class KinesisFirehoseSqsRecord(BaseModel):
 
     @validator("data", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
-        # Firehose payload is encoded twice
-        return json.loads(base64_decode(base64_decode(value)))
+        # Firehose payload is encoded
+        return json.loads(base64_decode(value))
 
 
 class KinesisFirehoseSqsModel(BaseModel):
