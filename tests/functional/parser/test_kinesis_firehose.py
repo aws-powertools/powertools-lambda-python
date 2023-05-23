@@ -89,7 +89,7 @@ def handle_firehose_sqs_wrapped_message(event: KinesisFirehoseSqsModel, _: Lambd
     assert len(records) == 1
 
     record_01: KinesisFirehoseSqsRecord = records[0]
-    assert record_01.data.messageId == "059f36b4-87a3-44ab-83d2-661975830a7d"
+    assert record_01.data.messageId == "5ab807d4-5644-4c55-97a3-47396635ac74"
     assert record_01.data.receiptHandle == "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a..."
     assert record_01.data.body == "Test message."
     assert record_01.data.attributes.ApproximateReceiveCount == "1"
