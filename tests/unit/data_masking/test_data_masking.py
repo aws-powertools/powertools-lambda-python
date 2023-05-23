@@ -1,6 +1,7 @@
 import json
 import unittest
 
+import pytest
 from itsdangerous.url_safe import URLSafeSerializer
 
 from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING as MASK
@@ -115,19 +116,19 @@ class TestDataMasking(unittest.TestCase):
         # mask different data types fully
         for i, data_type in enumerate(self.list_of_data_types):
             masked_string = data_masker.mask(data_type)
-            self.assertEqual(masked_string, self.list_of_data_types_masked[i])
+            assert masked_string == self.list_of_data_types_masked[i]
 
         # mask dict fully
         masked_string = data_masker.mask(self.python_dict)
-        self.assertEqual(masked_string, MASK)
+        assert masked_string == MASK
         masked_string = data_masker.mask(self.json_dict)
-        self.assertEqual(masked_string, MASK)
+        assert masked_string == MASK
 
         # mask dict with fields
         masked_string = data_masker.mask(self.python_dict, self.fields)
-        self.assertEqual(masked_string, self.masked_with_fields)
+        assert masked_string == self.masked_with_fields
         masked_string = data_masker.mask(self.json_dict, self.fields)
-        self.assertEqual(masked_string, self.masked_with_fields)
+        assert masked_string == self.masked_with_fields
 
     def general_encrypt_test(self, data_masker):
         """Method to encrypt several different data types fully,
@@ -157,22 +158,22 @@ class TestDataMasking(unittest.TestCase):
             # ie itsdangerous encrypts & decrypts tuples into type lists
             if decrypted_data == [55, 66, 88]:
                 continue
-            self.assertEqual(decrypted_data, self.list_of_data_types[i])
+            assert decrypted_data == self.list_of_data_types[i]
 
         # decrypt dict fully
         decrypted_data_python_dict = data_masker.decrypt(self.encrypted_data_python_dict)
-        self.assertEqual(decrypted_data_python_dict, self.python_dict)
+        assert decrypted_data_python_dict == self.python_dict
         decrypted_data_json_dict = data_masker.decrypt(self.encrypted_data_json_dict)
-        self.assertEqual(decrypted_data_json_dict, self.json_dict)
+        assert decrypted_data_json_dict == self.json_dict
 
         # decrypt dict with fields
         decrypted_data_python_dict_fields = data_masker.decrypt(self.encrypted_data_python_dict_fields, self.fields)
-        self.assertEqual(decrypted_data_python_dict_fields, self.python_dict)
+        assert decrypted_data_python_dict_fields == self.python_dict
         decrypted_data_json_dict_fields = data_masker.decrypt(self.encrypted_data_json_dict_fields, self.fields)
-        self.assertEqual(decrypted_data_json_dict_fields, json.loads(self.json_dict))
+        assert decrypted_data_json_dict_fields == json.loads(self.json_dict)
 
         decrypted_json_blob = data_masker.decrypt(self.encrypted_json_blob, self.json_blob_fields)
-        self.assertEqual(decrypted_json_blob, self.json_blob)
+        assert decrypted_json_blob == self.json_blob
 
     def test_mask(self):
         """Test masking with no Provider"""
@@ -182,13 +183,13 @@ class TestDataMasking(unittest.TestCase):
     def test_encrypt_not_implemented(self):
         """Test encrypting with no Provider"""
         data_masker = DataMasking()
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             data_masker.encrypt("hello world")
 
     def test_decrypt_not_implemented(self):
         """Test decrypting with no Provider"""
         data_masker = DataMasking()
-        with self.assertRaises(NotImplementedError):
+        with pytest.raises(NotImplementedError):
             data_masker.decrypt("hello world")
 
     def test_itsdangerous_mask(self):
@@ -279,19 +280,19 @@ class TestDataMasking(unittest.TestCase):
 
         for i, encrypted_data in enumerate(self.encrypted_list):
             decrypted_data = data_masker.decrypt(encrypted_data)
-            self.assertEqual(decrypted_data, self.list_of_data_types[i])
+            assert decrypted_data == self.list_of_data_types[i]
 
         decrypted_data_json_dict = data_masker.decrypt(self.encrypted_data_json_dict)
-        self.assertEqual(decrypted_data_json_dict, bytes(self.json_dict, "utf-8"))
+        assert decrypted_data_json_dict == bytes(self.json_dict, "utf-8")
 
         # AWS SDK encrypt method returning the individual fields decrypted as bytes
         decrypted_data_python_dict_fields = data_masker.decrypt(self.encrypted_data_python_dict_fields, self.fields)
-        self.assertEqual(decrypted_data_python_dict_fields, self.python_dict)
+        assert decrypted_data_python_dict_fields == self.python_dict
 
         # AWS SDK encrypt method returning the individual fields decrypted as bytes
         decrypted_data_json_dict_fields = data_masker.decrypt(self.encrypted_data_json_dict_fields, self.fields)
-        self.assertEqual(decrypted_data_json_dict_fields, json.loads(self.json_dict))
+        assert decrypted_data_json_dict_fields == json.loads(self.json_dict)
 
         # AWS SDK encrypt method returning the individual fields decrypted as bytes
         decrypted_json_blob = data_masker.decrypt(self.encrypted_json_blob, self.json_blob_fields)
-        self.assertEqual(decrypted_json_blob, self.json_blob)
+        assert decrypted_json_blob == self.json_blob

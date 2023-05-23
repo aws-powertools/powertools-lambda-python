@@ -1,5 +1,5 @@
 import base64
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import botocore
 from aws_encryption_sdk import (
@@ -15,7 +15,7 @@ from aws_lambda_powertools.utilities.data_masking.provider import Provider
 class SingletonMeta(type):
     """Metaclass to cache class instances to optimize encryption"""
 
-    _instances: dict["AwsEncryptionSdkProvider", Any] = {}
+    _instances: Dict["AwsEncryptionSdkProvider", Any] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
@@ -33,7 +33,7 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
     cache = LocalCryptoMaterialsCache(CACHE_CAPACITY)
     session = botocore.session.Session()
 
-    def __init__(self, keys: list[str], client: Optional[EncryptionSDKClient] = None) -> None:
+    def __init__(self, keys: List[str], client: Optional[EncryptionSDKClient] = None) -> None:
         self.client = client or EncryptionSDKClient()
         self.keys = keys
         self.key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=self.session)
