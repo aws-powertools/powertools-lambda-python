@@ -610,10 +610,10 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             self.registered_handler.setFormatter(formatter)
 
             # when using a custom Powertools for AWS Lambda (Python) Formatter
-            # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters should be appended
-            # and custom keys that might happen to be Powertools for AWS Lambda (Python) Formatter parameters should be discarded
-            # this prevents adding them as custom keys, for example, `json_default=<callable>`
-            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
+            # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters
+            # should be appended and custom keys that might happen to be Powertools for AWS Lambda (Python)
+            # Formatter parameters should be discarded this prevents adding them as custom keys, for example,
+            # `json_default=<callable>` see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
             custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
             return self.registered_formatter.append_keys(**custom_keys)
 
