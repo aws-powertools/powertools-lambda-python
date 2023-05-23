@@ -14,11 +14,15 @@ on:
         default: "2.0.0"
         required: true
 
+permissions:
+  id-token: write
+
 jobs:
   release-docs:
     permissions:
       contents: write
       pages: write
+      id-token: write
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}
