@@ -455,6 +455,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
             or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
         """
+        self.log_level = level
         self._logger.setLevel(level)
 
     def info(
