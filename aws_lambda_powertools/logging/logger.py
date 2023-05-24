@@ -329,7 +329,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
-                self.log_level = logging.DEBUG
+                self.setLevel(logging.DEBUG)
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
