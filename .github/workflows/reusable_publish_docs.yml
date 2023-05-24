@@ -5,6 +5,13 @@ env:
 
 on:
   workflow_call:
+    secrets:
+      AWS_DOCS_ROLE_ARN:
+        description: Docs IAM Role
+        required: false
+      AWS_DOCS_BUCKET:
+        description: Docs S3 Bucket
+        required: false
     inputs:
       version:
         description: "Version to build and publish docs (1.28.0, develop)"

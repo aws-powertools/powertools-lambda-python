@@ -27,3 +27,6 @@ jobs:
     with:
       version: ${{ inputs.latest_published_version }}
       alias: latest
+    secrets:
+      AWS_DOCS_ROLE_ARN: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+      AWS_DOCS_BUCKET: ${{ secrets.AWS_DOCS_BUCKET }}

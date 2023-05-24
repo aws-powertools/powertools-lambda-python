@@ -23,3 +23,6 @@ jobs:
     with:
       version: develop
       alias: stage
+    secrets:
+      AWS_DOCS_ROLE_ARN: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+      AWS_DOCS_BUCKET: ${{ secrets.AWS_DOCS_BUCKET }}
