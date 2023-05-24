@@ -24,10 +24,6 @@ on:
         required: false
         type: string
         default: develop
-      environment:
-        description: "GitHub Environment to use for encrypted secrets"
-        required: true
-        type: string
 
 permissions:
   id-token: write

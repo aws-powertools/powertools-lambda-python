@@ -24,4 +24,3 @@ jobs:
     with:
       version: develop
       alias: stage
-      environment: "Docs"

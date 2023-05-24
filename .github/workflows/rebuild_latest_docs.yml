@@ -28,4 +28,3 @@ jobs:
     with:
       version: ${{ inputs.latest_published_version }}
       alias: latest
-      environment: "Docs"
