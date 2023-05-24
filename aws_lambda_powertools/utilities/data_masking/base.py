@@ -1,8 +1,6 @@
 import json
-from collections.abc import Iterable
 from typing import Union
 
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING as MASK
 from aws_lambda_powertools.utilities.data_masking.provider import Provider
 
 
@@ -13,8 +11,6 @@ class DataMasking:
         else:
             self.provider = provider
 
-    # def encrypt(self, data, *args, fields=None, context: Optional[dict] = None, **kwargs):
-    # think was after *args (*context) bc how else to get this param through when itsdangeorus doesn't have it?
     def encrypt(self, data, *args, fields=None, **kwargs):
         return self._apply_action(data, fields, action=self.provider.encrypt, *args, **kwargs)
 
@@ -30,14 +26,7 @@ class DataMasking:
         else:
             return action(data, *args, **kwargs)
 
-    def _default_mask(self, data):
-        if isinstance(data, (str, dict, bytes)):
-            return MASK
-        elif isinstance(data, Iterable):
-            return type(data)([MASK] * len(data))
-        return MASK
-
-    def _use_ast(self, data: Union[dict, str], fields, action) -> str:
+    def _use_ast(self, data: Union[dict, str], fields, action, *args, **kwargs) -> str:
         if fields is None:
             raise ValueError("No fields specified.")
         if isinstance(data, str):
@@ -64,6 +53,6 @@ class DataMasking:
             for key in keys[:-1]:
                 curr_dict = curr_dict[key]
             valtochange = curr_dict[(keys[-1])]
-            curr_dict[keys[-1]] = action(valtochange)
+            curr_dict[keys[-1]] = action(valtochange, *args, **kwargs)
 
         return my_dict_parsed

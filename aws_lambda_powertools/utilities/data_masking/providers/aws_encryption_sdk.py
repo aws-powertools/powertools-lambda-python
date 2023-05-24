@@ -45,18 +45,19 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
         )
         self.encryption_context = None
 
-    def encrypt(self, data: Union[bytes, str], context: Optional[dict] = None, **kwargs) -> str:
+    def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
+        context = kwargs["context"]
         ciphertext, header = self.client.encrypt(
-            source=data, encryption_context=context, materials_manager=self.cache_cmm, **kwargs
+            source=data, encryption_context=context, materials_manager=self.cache_cmm, *args, **kwargs
         )
         ciphertext = base64.b64encode(ciphertext).decode()
         self.encryption_context = header.encryption_context
         return ciphertext
 
-    def decrypt(self, data: str, **kwargs) -> bytes:
+    def decrypt(self, data: str, *args, **kwargs) -> bytes:
         ciphertext_decoded = base64.b64decode(data)
         ciphertext, decrypted_header = self.client.decrypt(
-            source=ciphertext_decoded, key_provider=self.key_provider, **kwargs
+            source=ciphertext_decoded, key_provider=self.key_provider, *args, **kwargs
         )
 
         if self.encryption_context != decrypted_header.encryption_context:
