@@ -5,13 +5,6 @@ env:
 
 on:
   workflow_call:
-    secrets:
-      AWS_DOCS_ROLE_ARN:
-        description: Docs IAM Role
-        required: false
-      AWS_DOCS_BUCKET:
-        description: Docs S3 Bucket
-        required: false
     inputs:
       version:
         description: "Version to build and publish docs (1.28.0, develop)"
@@ -31,6 +24,10 @@ on:
         required: false
         type: string
         default: develop
+      environment:
+        description: "GitHub Environment to use for encrypted secrets"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -44,7 +41,7 @@ jobs:
     concurrency:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
-    environment: Docs
+    environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
