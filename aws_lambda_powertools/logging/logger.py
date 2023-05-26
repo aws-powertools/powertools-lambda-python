@@ -233,7 +233,6 @@ class Logger:
         self.logger_handler = logger_handler or logging.StreamHandler(stream)
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
-        self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
             env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
         )
@@ -253,7 +252,7 @@ class Logger:
             "use_rfc3339": use_rfc3339,
         }
 
-        self._init_logger(formatter_options=formatter_options, **kwargs)
+        self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
 
         if self.log_uncaught_exceptions:
             logger.debug("Replacing exception hook")
@@ -276,7 +275,7 @@ class Logger:
 
         return logging.getLogger(logger_name)
 
-    def _init_logger(self, formatter_options: Optional[Dict] = None, **kwargs):
+    def _init_logger(self, formatter_options: Optional[Dict] = None, log_level: Union[str, int, None] = None, **kwargs):
         """Configures new logger"""
 
         # Skip configuration if it's a child logger or a pre-configured logger
@@ -288,8 +287,8 @@ class Logger:
         if self.child or is_logger_preconfigured:
             return
 
+        self._logger.setLevel(self._determine_log_level(log_level))
         self._configure_sampling()
-        self._logger.setLevel(self.log_level)
         self._logger.addHandler(self.logger_handler)
         self.structure_logs(formatter_options=formatter_options, **kwargs)
 
@@ -324,7 +323,7 @@ class Logger:
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
-                self.setLevel(logging.DEBUG)
+                self._logger.setLevel(logging.DEBUG)
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
@@ -439,19 +438,6 @@ class Logger:
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
-
-    def setLevel(self, level: Union[str, int]):
-        """
-        Set the logging level for the logger.
-
-        Parameters:
-        -----------
-        level str | int
-            The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
-            or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
-        """
-        self.log_level = level
-        self._logger.setLevel(level)
 
     def info(
         self,
@@ -658,8 +644,12 @@ class Logger:
             return self.registered_formatter.log_format.get("correlation_id")
         return None
 
+    @property
+    def log_level(self):
+        return self._logger.level
+
     @staticmethod
-    def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
+    def _determine_log_level(level: Union[str, int, None]) -> Union[str, int]:
         """Returns preferred log level set by the customer in upper case"""
         if isinstance(level, int):
             return level
