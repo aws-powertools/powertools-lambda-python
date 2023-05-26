@@ -43,15 +43,16 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
             max_age=self.MAX_ENTRY_AGE_SECONDS,
             max_messages_encrypted=self.MAX_MESSAGES,
         )
-        self.encryption_context = None
+        self.encryption_context = {}
 
     def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
-        context = kwargs["context"]
+        if kwargs["context"]:
+            self.encryption_context = kwargs["context"]
         ciphertext, header = self.client.encrypt(
             # Turn all data into string? bc we’re turning everything into a dict
             # in order to get the key values even if they pass in a json str of a dict
             source=str(data),
-            encryption_context=context,
+            encryption_context=self.encryption_context,
             materials_manager=self.cache_cmm,
             *args,
             **kwargs
