@@ -565,17 +565,6 @@ class Logger:
     def remove_keys(self, keys: Iterable[str]):
         self.registered_formatter.remove_keys(keys)
 
-    @property
-    def registered_handler(self) -> logging.Handler:
-        """Convenience property to access the first logger handler"""
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
-        return handlers[0]
-
-    @property
-    def registered_formatter(self) -> BasePowertoolsFormatter:
-        """Convenience property to access the first logger formatter"""
-        return self.registered_handler.formatter  # type: ignore
-
     def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys):
         """Sets logging formatting to JSON.
 
@@ -643,6 +632,17 @@ class Logger:
         if isinstance(self.registered_formatter, LambdaPowertoolsFormatter):
             return self.registered_formatter.log_format.get("correlation_id")
         return None
+
+    @property
+    def registered_handler(self) -> logging.Handler:
+        """Convenience property to access the first logger handler"""
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        return handlers[0]
+
+    @property
+    def registered_formatter(self) -> BasePowertoolsFormatter:
+        """Convenience property to access the first logger formatter"""
+        return self.registered_handler.formatter  # type: ignore[return-value]
 
     @property
     def log_level(self) -> int:
