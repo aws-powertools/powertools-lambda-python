@@ -77,18 +77,18 @@ json_blob_fields = ["address.street", "job_history.company"]
 
 list_of_data_types = [
     # simple data types
-    (42, MASK),
-    (4.22, MASK),
-    (True, MASK),
-    (None, MASK),
-    ("this is a string", MASK),
+    [42, MASK],
+    [4.22, MASK],
+    [True, MASK],
+    [None, MASK],
+    ["this is a string", MASK],
     # iterables
-    ([1, 2, 3, 4], [MASK, MASK, MASK, MASK]),
-    (["hello", 1, 2, 3, "world"], [MASK, MASK, MASK, MASK, MASK]),
-    ((55, 66, 88), (MASK, MASK, MASK)),
+    [[1, 2, 3, 4], [MASK, MASK, MASK, MASK]],
+    [["hello", 1, 2, 3, "world"], [MASK, MASK, MASK, MASK, MASK]],
+    [(55, 66, 88), (MASK, MASK, MASK)],
     # dictionaries
-    (python_dict, MASK),
-    (json_dict, MASK),
+    [python_dict, MASK],
+    [json_dict, MASK],
 ]
 
 list_of_data_maskers = [
@@ -121,6 +121,8 @@ def test_mask_with_fields(data_masker):
 def test_encrypt_decrypt(data_masker, value):
     """Method to encrypt several different data types fully,
     and specific values in nested dicts"""
+    if data_masker == DataMasking():
+        assert pytest.raises(NotImplementedError)
 
     # should raise error for no provider
     encrypted_data = data_masker.encrypt(value)
