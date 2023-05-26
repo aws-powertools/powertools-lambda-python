@@ -645,8 +645,23 @@ class Logger:
         return None
 
     @property
-    def log_level(self):
+    def log_level(self) -> int:
         return self._logger.level
+
+    @property
+    def name(self) -> str:
+        return self._logger.name
+
+    @property
+    def handlers(self) -> List[logging.Handler]:
+        """List of registered logging handlers
+
+        Notes
+        -----
+
+        Looking for the first configured handler? Use registered_handler property instead.
+        """
+        return self._logger.handlers
 
     @staticmethod
     def _determine_log_level(level: Union[str, int, None]) -> Union[str, int]:
