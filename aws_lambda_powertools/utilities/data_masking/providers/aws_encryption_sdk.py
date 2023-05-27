@@ -43,10 +43,10 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
             max_age=self.MAX_ENTRY_AGE_SECONDS,
             max_messages_encrypted=self.MAX_MESSAGES,
         )
-        self.encryption_context = {}
+        self.encryption_context: Dict[str, str] = {}
 
     def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
-        if kwargs["context"]:
+        if kwargs["context"] is not None:
             self.encryption_context = kwargs["context"]
         ciphertext, header = self.client.encrypt(
             # Turn all data into string? bc we’re turning everything into a dict

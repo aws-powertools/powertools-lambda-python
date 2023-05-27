@@ -108,7 +108,7 @@ def test_mask_types(data_masker, value, value_masked):
 
 
 @pytest.mark.parametrize("data_masker", list_of_data_maskers)
-def test_mask_with_fields(data_masker): #all failing
+def test_mask_with_fields(data_masker):  # all failing
     # mask dict with fields
     masked_string = data_masker.mask(python_dict, fields)
     assert masked_string == masked_with_fields
@@ -137,12 +137,10 @@ def test_encrypt_decrypt(data_masker, value):
 @pytest.mark.parametrize("data_masker", list_of_data_maskers)
 @pytest.mark.parametrize("value", [python_dict, json_dict])
 def test_encrypt_decrypt_with_fields(data_masker, value):
-
     if data_masker == DataMasking():
         with pytest.raises(NotImplementedError):
             encrypted_data = data_masker.encrypt(value)
             raise NotImplementedError("Subclasses must implement encrypt()")
-
 
     encrypted_data = data_masker.encrypt(value, fields)
     decrypted_data = data_masker.decrypt(encrypted_data, fields)
