@@ -46,7 +46,7 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
         self.encryption_context: Dict[str, str] = {}
 
     def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
-        if kwargs["context"] is not None:
+        if "context" in kwargs:
             self.encryption_context = kwargs["context"]
         ciphertext, header = self.client.encrypt(
             # Turn all data into string? bc we’re turning everything into a dict

@@ -111,8 +111,10 @@ def test_mask_types(data_masker, value, value_masked):
 def test_mask_with_fields(data_masker):  # all failing
     # mask dict with fields
     masked_string = data_masker.mask(python_dict, fields)
+    print("masked_string in mask with fields: ", masked_string)
     assert masked_string == masked_with_fields
     masked_string = data_masker.mask(json_dict, fields)
+    print("masked_string in mask with fields json: ", masked_string)
     assert masked_string == masked_with_fields
 
 
