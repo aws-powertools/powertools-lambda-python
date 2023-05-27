@@ -20,6 +20,12 @@ from .cloudwatch import (
     CloudWatchLogsLogEvent,
     CloudWatchLogsModel,
 )
+from .custom_resource import (
+    CustomResourceBaseModel,
+    CustomResourceCreateModel,
+    CustomResourceDeleteModel,
+    CustomResourceUpdateModel,
+)
 from .dynamodb import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamModel,
@@ -147,4 +153,8 @@ __all__ = [
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",
+    "CustomResourceUpdateModel",
+    "CustomResourceDeleteModel",
+    "CustomResourceCreateModel",
+    "CustomResourceBaseModel",
 ]

@@ -177,6 +177,9 @@ Parser comes with the following built-in models:
 | **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                           |
 | **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                            |
+| **CustomResourceCreateModel**           | Lambda Event Source payload for AWS CloudFormation 'create' custom resource           |
+| **CustomResourceUpdateModel**           | Lambda Event Source payload for AWS CloudFormation 'update' custom resource           |
+| **CustomResourceDeleteModel**           | Lambda Event Source payload for AWS CloudFormation 'delete' custom resource           |
 
 #### Extending built-in models
 
