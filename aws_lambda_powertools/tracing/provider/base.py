@@ -2,7 +2,7 @@ import abc
 import numbers
 import traceback
 from contextlib import contextmanager
-from typing import Any, Generator, List, Optional, Sequence, Union
+from typing import Any, Callable, Generator, List, Optional, Sequence, Union
 
 
 class BaseSegment(abc.ABC):
@@ -72,11 +72,30 @@ class BaseSegment(abc.ABC):
             Whether it's a client error (False) or downstream service error (True), by default False
         """
 
+    # new function below
+    @abc.abstractmethod
+    def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
+        """To ignore the endpoints you don't want requests to be traced,
+        perhaps due to the volume of calls or sensitive URLs."""
+
+    @abc.abstractmethod
+    def inject_context(self, context):
+        """To inject missing context/information like service name"""
+
+    @abc.abstractmethod
+    def capture_method_async(
+        self,
+        method: Callable,
+        capture_response: Optional[Union[bool, str]] = None,
+        capture_error: Optional[Union[bool, str]] = None,
+    ):
+        """To capture async method"""
+
 
 class BaseProvider(abc.ABC):
     @abc.abstractmethod
     @contextmanager
-    def in_subsegment(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
+    def trace(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment context manger.
 
         Parameters
@@ -89,7 +108,7 @@ class BaseProvider(abc.ABC):
 
     @abc.abstractmethod
     @contextmanager
-    def in_subsegment_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
+    def trace_async(self, name=None, **kwargs) -> Generator[BaseSegment, None, None]:
         """Return a subsegment async context manger.
 
         Parameters
@@ -99,6 +118,18 @@ class BaseProvider(abc.ABC):
         kwargs: Optional[dict]
             Optional parameters to be propagated to segment
         """
+
+    @abc.abstractmethod
+    def start_span(self, name=None) -> Generator[BaseSegment, None, None]:
+        """This method is proposed as a solution as it exists for other providers
+        This method is responsible for starting the trace. This might involve initializing some data structures,
+        connecting to an external service, or performing some other setup work"""
+
+    @abc.abstractmethod
+    def end_span(self, span: BaseSegment):
+        """This method is proposed as a solution as it exists for other providers.
+        This method is responsible for ending the tracing of a span. This might involve finalizing data structures,
+        sending data to an external service, or performing some other cleanup work"""
 
     @abc.abstractmethod
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]) -> None:
@@ -129,6 +160,10 @@ class BaseProvider(abc.ABC):
         namespace: Set[str]
             Metadata namespace, by default 'default'
         """
+
+    @abc.abstractmethod
+    def put_exception(self, *args, **kwargs) -> None:
+        """Add exception to the current active trace entity."""
 
     @abc.abstractmethod
     def patch(self, modules: Sequence[str]) -> None:
