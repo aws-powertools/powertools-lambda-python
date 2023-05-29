@@ -1,6 +1,8 @@
-from typing import Any, Dict, Literal, Type, Union
+from typing import Any, Dict, Type, Union
 
 from pydantic import BaseModel, Field, HttpUrl
+
+from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class CustomResourceBaseModel(BaseModel):
