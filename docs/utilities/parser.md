@@ -168,6 +168,7 @@ Parser comes with the following built-in models:
 | **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                            |
 | **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
 | **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                               |
+| **KinesisFirehoseSqsModel**             | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
 | **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                           |
 | **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
 | **S3Model**                             | Lambda Event Source payload for Amazon S3                                             |
