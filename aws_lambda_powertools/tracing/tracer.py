@@ -167,6 +167,7 @@ class Tracer:
             self.patch(modules=patch_modules)
 
         if self._is_xray_provider():
+            # TO why?
             self._disable_xray_trace_batching()
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
