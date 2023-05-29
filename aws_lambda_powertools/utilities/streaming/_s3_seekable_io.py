@@ -68,7 +68,7 @@ class _S3SeekableIO(IO[bytes]):
         self._sdk_options = sdk_options
         self._sdk_options["Bucket"] = bucket
         self._sdk_options["Key"] = key
-        self._user_agent_added = False
+        self._has_user_agent = False
         if version_id is not None:
             self._sdk_options["VersionId"] = version_id
 
@@ -79,9 +79,9 @@ class _S3SeekableIO(IO[bytes]):
         """
         if self._s3_client is None:
             self._s3_client = boto3.client("s3")
-        if not self._user_agent_added:
-            user_agent.register_feature_to_client(self._s3_client, "streaming")
-            self._user_agent_added = True
+        if not self._has_user_agent:
+            user_agent.register_feature_to_client(client=self._s3_client, feature="streaming")
+            self._has_user_agent = True
         return self._s3_client
 
     @property

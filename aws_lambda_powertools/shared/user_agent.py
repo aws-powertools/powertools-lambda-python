@@ -14,11 +14,11 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-EXEC_ENV: str = os.environ.get("AWS_EXECUTION_ENV", "NA")
-TARGET_SDK_EVENT: str = "request-created"
-FEATURE_PREFIX: str = "PT"
-DEFAULT_FEATURE: str = "no-op"
-HEADER_NO_OP: str = f"{FEATURE_PREFIX}/{DEFAULT_FEATURE}/{powertools_version} PTEnv/{EXEC_ENV}"
+EXEC_ENV = os.environ.get("AWS_EXECUTION_ENV", "NA")
+TARGET_SDK_EVENT = "request-created"
+FEATURE_PREFIX = "PT"
+DEFAULT_FEATURE = "no-op"
+HEADER_NO_OP = f"{FEATURE_PREFIX}/{DEFAULT_FEATURE}/{powertools_version} PTEnv/{EXEC_ENV}"
 
 
 def _initializer_botocore_session(session):
@@ -43,8 +43,8 @@ def _initializer_botocore_session(session):
 
 def _create_feature_function(feature):
     """
-    Create a add_powertools_feature function using the given feature paramter
-    add_powertools_feature will be returned and to be regiestered in boto3's event system
+    Create a add_powertools_feature function using the given feature parameter
+    add_powertools_feature will be returned and to be registered in boto3's event system
     once registered, add_powertools_feature will append the given feature string to user-agent of AWS SDK's request
 
     Parameters
@@ -65,7 +65,7 @@ def _create_feature_function(feature):
         """
         try:
             headers = request.headers
-            header_user_agent: str = (
+            header_user_agent = (
                 f"{headers['User-Agent']} {FEATURE_PREFIX}/{feature}/{powertools_version} PTEnv/{EXEC_ENV}"
             )
 

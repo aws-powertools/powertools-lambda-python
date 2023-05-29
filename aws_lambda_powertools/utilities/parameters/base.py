@@ -254,14 +254,14 @@ class BaseProvider(ABC):
             Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
         """
         if client is not None:
-            user_agent.register_feature_to_client(client, "parameters")
+            user_agent.register_feature_to_client(client=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        client_to_return = session.client(service_name=service_name, config=config)
-        user_agent.register_feature_to_client(client_to_return, "parameters")
-        return client_to_return
+        client = session.client(service_name=service_name, config=config)
+        user_agent.register_feature_to_client(client=client, feature="parameters")
+        return client
 
     # maintenance: change DynamoDBServiceResource type to ParameterResourceClients when we expand
     @staticmethod
@@ -291,14 +291,14 @@ class BaseProvider(ABC):
             Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
         """
         if client is not None:
-            user_agent.register_feature_to_resource(client, "parameters")
+            user_agent.register_feature_to_resource(resource=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        client_to_return = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
-        user_agent.register_feature_to_resource(client_to_return, "parameters")
-        return client_to_return
+        client = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
+        user_agent.register_feature_to_resource(resource=client, feature="parameters")
+        return client
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:

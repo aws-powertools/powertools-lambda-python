@@ -94,7 +94,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         else:
             self.client = boto3_client
 
-        user_agent.register_feature_to_client(self.client, "idempotency")
+        user_agent.register_feature_to_client(client=self.client, feature="idempotency")
 
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
