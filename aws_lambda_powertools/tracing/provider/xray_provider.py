@@ -1,3 +1,4 @@
+import logging
 from contextlib import contextmanager
 from typing import Generator, Optional
 
@@ -5,12 +6,13 @@ from ...shared import constants
 from ...shared.lazy_import import LazyLoader
 from .base import BaseProvider, BaseSegment
 
+logger = logging.getLogger(__name__)
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
 
 
 class Xray_provider(BaseProvider):
     def __init__(self):
-        from aws_xray_sdk.core import xray_recorder
+        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
         self.recorder = xray_recorder
         self.patch = aws_xray_sdk.core.patch
@@ -63,7 +65,7 @@ class Xray_provider(BaseProvider):
         error: Exception,
         subsegment: BaseSegment,
         capture_error: Optional[bool] = None,
-        namespace: str = None,
+        namespace: str = "default",
     ):
         if not capture_error:
             return
