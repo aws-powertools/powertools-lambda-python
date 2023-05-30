@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Check if using layer
 try:
-    from datadog_lambda.metric import lambda_metric
+    from datadog_lambda.metric import lambda_metric  # type: ignore
 except ImportError:
     lambda_metric = None
 
