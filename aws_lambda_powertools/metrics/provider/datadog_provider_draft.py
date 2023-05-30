@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 # Check if using layer
 try:
-    from datadog import lambda_metric
+    from datadog_lambda.metric import lambda_metric
 except ImportError:
     lambda_metric = None
 
@@ -28,7 +28,7 @@ class DataDogProvider(MetricsProviderBase):
         super().__init__()
 
     #  adding timestamp, tags. unit, resolution, name will not be used
-    def add_metric(self, name, value, timestamp, tag: List = None):
+    def add_metric(self, name: str, value: float, timestamp: float, tag: List):
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
         if not timestamp:
@@ -38,8 +38,8 @@ class DataDogProvider(MetricsProviderBase):
     # serialize for flushing
     def serialize(self) -> Dict:
         # logic here is to add dimension and metadata to each metric's tag with "key:value" format
-        extra_tags = []
-        output_list = []
+        extra_tags: List = []
+        output_list: List = []
 
         for single_metric in self.metrics:
             output_list.append(
@@ -81,7 +81,7 @@ class DataDogMetrics(MetricsBase):
         self.provider = provider
         super().__init__()
 
-    def add_metric(self, name: str, value: float, timestamp: time, tags: List = None):
+    def add_metric(self, name: str, value: float, timestamp: float, tags: List):
         self.provider.add_metric(name, value, timestamp, tags)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:

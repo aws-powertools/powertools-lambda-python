@@ -5,6 +5,8 @@ from typing import Any, Callable, Dict, Optional, Union
 
 logger = logging.getLogger(__name__)
 
+is_cold_start = True
+
 
 class MetricsProviderBase(ABC):
     """Class for metric provider template
