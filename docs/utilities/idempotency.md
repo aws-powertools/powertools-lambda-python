@@ -410,7 +410,7 @@ Imagine the function executes successfully, but the client never receives the re
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools calculates and includes the remaining invocation available time as part of the idempotency record.
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
 ???+ example
     If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
@@ -1156,7 +1156,7 @@ def lambda_handler(event, context):
 	return {"message": event['message'], "statusCode": 200}
 ```
 
-???+ tip "Tip: JMESPath Powertools functions are also available"
+???+ tip "Tip: JMESPath Powertools for AWS Lambda (Python) functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
 
 ## Testing your code

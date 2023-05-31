@@ -48,7 +48,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: AWS Lambda Powertools for Python version
+      label: Powertools for AWS Lambda (Python) version
       placeholder: "latest, 1.25.6"
       value: latest
     validations:
