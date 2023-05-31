@@ -191,7 +191,7 @@ If it's a cold start invocation, this feature will:
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
 ???+ info
-    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
+    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you'd prefer a flag to override it.
 
 ## Advanced
 
@@ -374,4 +374,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/lambda-python/blob/develop/tests/functional/test_metrics.py)

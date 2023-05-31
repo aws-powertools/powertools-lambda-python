@@ -20,7 +20,11 @@ Some Lambda Event Sources require clusters (e.g., MSK) leading to additional del
 
 ### Observability providers
 
+<<<<<<< HEAD
 We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/awslabs/aws-lambda-powertools-python/issues/1433){target="_blank"}. We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
+=======
+We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/aws-powertools/lambda-python/issues/1433). We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
+>>>>>>> b322ecf8 (chore: Change repo URL to the new location)
 
 ### Lambda Layer in release notes
 
@@ -37,8 +41,13 @@ We want to enable MyPy strict mode against the code base. We need a RFC to ident
 This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc){target="_blank"} to compile less performing parts of the code base as a C-Extension.
 
 ### New utilities
+<<<<<<< HEAD
 <!-- markdownlint-disable MD013 -->
 With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/awslabs/aws-lambda-powertools-python/issues/1173){target="_blank"}, **(2)** [Integration/End-to-end Testing](https://github.com/awslabs/aws-lambda-powertools-python/issues/1169){target="_blank"}, and **(3)** [Event Bridge](https://github.com/awslabs/aws-lambda-powertools-python/issues/1168){target="_blank"}.
+=======
+
+With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/aws-powertools/lambda-python/issues/1173), **(2)** [Integration/End-to-end Testing](https://github.com/aws-powertools/lambda-python/issues/1169), and **(3)** [Event Bridge](https://github.com/aws-powertools/lambda-python/issues/1168).
+>>>>>>> b322ecf8 (chore: Change repo URL to the new location)
 
 ### Open iteration planning
 
@@ -89,7 +98,11 @@ Our end-to-end mechanism follows four major steps:
 * **Decision**. After carefully reviewing and discussing them, maintainers make a final decision on whether to start implementation, defer or reject it, and update everyone with the next steps.
 * **Implementation**. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.
 
+<<<<<<< HEAD
 ???+ info "See [Maintainers](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md){target="_blank"} document to understand how we triage issues and pull requests, labels and governance."
+=======
+???+ info "See [Maintainers](https://github.com/aws-powertools/lambda-python/blob/develop/MAINTAINERS.md) document to understand how we triage issues and pull requests, labels and governance."
+>>>>>>> b322ecf8 (chore: Change repo URL to the new location)
 
 ## Disclaimer
 

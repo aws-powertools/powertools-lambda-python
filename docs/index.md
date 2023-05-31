@@ -14,9 +14,9 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 
     You can choose to support us in three ways:
 
-    1) [**Become a reference customer**](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
+    1) [**Become a reference customer**](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E). This gives us permission to list your company in our documentation.
 
-    2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
+    2) [**Share your work**](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
 
     3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
 
