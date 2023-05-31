@@ -935,7 +935,7 @@ def test_sns_trigger_event():
     assert event.sns_message == "Hello from SNS!"
 
 
-def test_seq_trigger_event():
+def test_sqs_trigger_event():
     event = SQSEvent(load_event("sqsEvent.json"))
 
     records = list(event.records)
