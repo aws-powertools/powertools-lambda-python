@@ -22,7 +22,7 @@ class SchemaValidationError(Exception):
         Parameters
         ----------
         message : str, optional
-            Powertools formatted error message
+            Powertools for AWS Lambda (Python) formatted error message
         validation_message : str, optional
             Containing human-readable information what is wrong
             (e.g. `data.property[index] must be smaller than or equal to 42`)

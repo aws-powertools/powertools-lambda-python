@@ -257,7 +257,7 @@ You can also have features enabled only at specific days, for example: enable ch
 ???+ info "How should I use timezones?"
     You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
     in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
-    Powertools takes care of converting and calculate the correct timestamps for you.
+    Powertools for AWS Lambda (Python) takes care of converting and calculate the correct timestamps for you.
 
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
     specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
@@ -453,7 +453,7 @@ These are the available options for further customization.
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
-| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                                                  |
 
 === "appconfig_provider_options.py"
 
