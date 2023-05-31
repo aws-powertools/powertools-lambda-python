@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     DictWrapper,
 )
 
-class VpcLatticeEvent(DictWrapper):
+class VPCLatticeEvent(DictWrapper):
     @property
     def body(self) -> str:
         """The VPC Lattice body."""
