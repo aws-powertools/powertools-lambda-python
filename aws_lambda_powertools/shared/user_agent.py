@@ -23,16 +23,18 @@ HEADER_NO_OP = f"{FEATURE_PREFIX}/{DEFAULT_FEATURE}/{powertools_version} PTEnv/{
 
 def _initializer_botocore_session(session):
     """
-    Pass in Botocore session and register _create_feature_function to append user-agent, for more details see
-    https://github.com/boto/botocore/pull/2682
-
-    session.register:
-    https://github.com/boto/botocore/blob/develop/botocore/session.py#L703
+    This function is used to add an extra header for the User-Agent in the Botocore session,
+    as described in the pull request: https://github.com/boto/botocore/pull/2682
 
     Parameters
     ----------
-    session: Botocore.session.Session
-        A botocore session passed in to register user-agent function
+    session : botocore.session.Session
+        The Botocore session to which the user-agent function will be registered.
+
+    Raises
+    ------
+    Exception
+        If there is an issue while adding the extra header for the User-Agent.
 
     """
     try:
@@ -43,26 +45,25 @@ def _initializer_botocore_session(session):
 
 def _create_feature_function(feature):
     """
-    Create a add_powertools_feature function using the given feature parameter
-    add_powertools_feature will be returned and to be registered in boto3's event system
-    once registered, add_powertools_feature will append the given feature string to user-agent of AWS SDK's request
+    Create and return the `add_powertools_feature` function.
+
+    The `add_powertools_feature` function is designed to be registered in boto3's event system.
+    When registered, it appends the given feature string to the User-Agent header of AWS SDK requests.
 
     Parameters
     ----------
-    feature: str
+    feature : str
+        The feature string to be appended to the User-Agent header.
 
-    Returns:
+    Returns
     -------
-    add_powertools_feature: Callable
+    add_powertools_feature : Callable
+        The `add_powertools_feature` function that modifies the User-Agent header.
+
 
     """
 
     def add_powertools_feature(request, **kwargs):
-        """
-        Signiture of this function is required at Boto3's event system. See:
-        https://boto3.amazonaws.com/v1/documentation/api/latest/guide/events.html
-
-        """
         try:
             headers = request.headers
             header_user_agent = (
@@ -85,15 +86,20 @@ def _create_feature_function(feature):
 # Add feature user-agent to given sdk boto3.session
 def register_feature_to_session(session, feature):
     """
-    Register the given feature string given session's event system
-    When this session makes an api request, the given feature will be appended to request's user-agent
+    Register the given feature string to the event system of the provided boto3 session
+    and append the feature to the User-Agent header of the request
 
     Parameters
     ----------
-    session: boto3.session.Session
-        session to register
-    feature: str
-        the feature string in Powertools, e.g.:streaming
+    session : boto3.session.Session
+        The boto3 session to which the feature will be registered.
+    feature : str
+        The feature string to be appended to the User-Agent header, e.g., "streaming" in Powertools.
+
+    Raises
+    ------
+    AttributeError
+        If the provided session does not have an event system.
 
     """
     try:
@@ -105,15 +111,20 @@ def register_feature_to_session(session, feature):
 # Add feature user-agent to given sdk boto3.client
 def register_feature_to_client(client, feature):
     """
-    Register the given feature string given client's event system
-    When this client makes an api request, the given feature will be appended to request's user-agent
+    Register the given feature string to the event system of the provided boto3 client
+    and append the feature to the User-Agent header of the request
 
     Parameters
     ----------
-    client: boto3.session.Session.client
-        client to register
-    feature: str
-        the feature string in Powertools, e.g.:streaming
+    session : boto3.session.Session.client
+        The boto3 client to which the feature will be registered.
+    feature : str
+        The feature string to be appended to the User-Agent header, e.g., "streaming" in Powertools.
+
+    Raises
+    ------
+    AttributeError
+        If the provided client does not have an event system.
 
     """
     try:
@@ -125,15 +136,20 @@ def register_feature_to_client(client, feature):
 # Add feature user-agent to given sdk boto3.resource
 def register_feature_to_resource(resource, feature):
     """
-    Register the given feature string given resource's event system
-    When this resource makes an api request, the given feature will be appended to request's user-agent
+    Register the given feature string to the event system of the provided boto3 resource
+    and append the feature to the User-Agent header of the request
 
     Parameters
     ----------
-    resource: boto3.session.Session.resource
-        resource to register
-    feature: str
-        the feature string in Powertools, e.g.:streaming
+    session : boto3.session.Session.resource
+        The boto3 client to which the feature will be registered.
+    feature : str
+        The feature string to be appended to the User-Agent header, e.g., "streaming" in Powertools.
+
+    Raises
+    ------
+    AttributeError
+        If the provided resource does not have an event system.
 
     """
     try:
