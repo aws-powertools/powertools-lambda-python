@@ -1,8 +1,8 @@
 <!-- markdownlint-disable MD013 MD041 MD043  -->
 # Powertools for AWS Lambda (Python)
 
-[![Build](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml/badge.svg)](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml)
-[![codecov.io](https://codecov.io/github/awslabs/aws-lambda-powertools-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/awslabs/aws-lambda-powertools-python)
+[![Build](https://github.com/aws-powertools/lambda-python/actions/workflows/python_build.yml/badge.svg)](https://github.com/aws-powertools/lambda-python/actions/workflows/python_build.yml)
+[![codecov.io](https://codecov.io/github/aws-powertools/lambda-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/aws-powertools/lambda-python)
 ![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9|%203.10&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://awslabs.github.io/aws-lambda-powertools-python/latest/#features).
@@ -49,7 +49,7 @@ With [pip](https://pip.pypa.io/en/latest/index.html) installed, run: ``pip insta
 
 ### Becoming a reference customer
 
-Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E) issue.
+Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E) issue.
 
 The following companies, among others, use Powertools:
 

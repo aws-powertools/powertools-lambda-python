@@ -14,7 +14,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/lambda-python/tree/develop/examples){target="_blank"}.
 
 ### Required resources
 

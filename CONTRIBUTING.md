@@ -37,13 +37,13 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an [issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+3. You open an [issue](https://github.com/aws-powertools/lambda-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
 
 ### Dev setup
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
 
-Firstly, [fork the repository](https://github.com/awslabs/aws-lambda-powertools-python/fork).
+Firstly, [fork the repository](https://github.com/aws-powertools/lambda-python/fork).
 
 To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
 
@@ -55,7 +55,7 @@ To send us a pull request, please follow these steps:
 2. Run all tests, and code baseline checks: `make pr`
     - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
 3. Commit to your fork using clear commit messages.
-4. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
+4. Send us a pull request with a [conventional semantic title](https://github.com/aws-powertools/lambda-python/pull/67), and answering any default questions in the pull request interface.
 5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and

@@ -1,7 +1,7 @@
 name: Reusable publish documentation
 
 env:
-  ORIGIN: awslabs/aws-lambda-powertools-python
+  ORIGIN: aws-powertools/lambda-python
 
 on:
   workflow_call:
