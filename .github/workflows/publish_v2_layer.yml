@@ -28,7 +28,7 @@ jobs:
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       contents: read
-      id-token: none
+      id-token: write
       pages: none
       pull-requests: none
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core
@@ -47,7 +47,7 @@ jobs:
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
           python-version: "3.10"
           cache: "pip"
@@ -223,7 +223,8 @@ jobs:
       contents: write
       pages: write
       pull-requests: none
-      id-token: none
+      id-token: write
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}

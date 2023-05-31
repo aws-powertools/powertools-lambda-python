@@ -10,11 +10,16 @@ on:
       - "examples/**"
       - "CHANGELOG.md"
 
+permissions:
+  id-token: write
+
 jobs:
   release-docs:
     permissions:
       contents: write
       pages: write
+      id-token: write
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: develop

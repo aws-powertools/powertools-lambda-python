@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
 
   schedule:
-    - cron: '0 * * * *'
+    - cron: "0 * * * *"
 
 permissions:
   id-token: write
   actions: read
   checks: read
-  contents: read
+  contents: write
   deployments: read
   issues: read
   discussions: read

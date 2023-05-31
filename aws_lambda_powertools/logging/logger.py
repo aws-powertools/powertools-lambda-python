@@ -91,7 +91,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
     level : str, int optional
-        logging.level, by default "INFO"
+        The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
     sample_rate: float, optional
@@ -327,7 +329,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
-                self.log_level = logging.DEBUG
+                self.setLevel(logging.DEBUG)
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
@@ -442,6 +444,19 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return lambda_handler(event, context, *args, **kwargs)
 
         return decorate
+
+    def setLevel(self, level: Union[str, int]):
+        """
+        Set the logging level for the logger.
+
+        Parameters:
+        -----------
+        level str | int
+            The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+            or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        """
+        self.log_level = level
+        self._logger.setLevel(level)
 
     def info(
         self,
@@ -598,7 +613,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         formatter_options = formatter_options or {}
 
         # There are 3 operational modes for this method
-        ## 1. Register a Powertools Formatter for the first time
+        ## 1. Register a Powertools for AWS Lambda (Python) Formatter for the first time
         ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
         ## 3. Add new keys and discard existing to the registered formatter
 
@@ -609,11 +624,11 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
             self.registered_handler.setFormatter(formatter)
 
-            # when using a custom Lambda Powertools Formatter
-            # standard and custom keys that are not Powertools Formatter parameters should be appended
-            # and custom keys that might happen to be Powertools Formatter parameters should be discarded
-            # this prevents adding them as custom keys, for example, `json_default=<callable>`
-            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
+            # when using a custom Powertools for AWS Lambda (Python) Formatter
+            # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters
+            # should be appended and custom keys that might happen to be Powertools for AWS Lambda (Python)
+            # Formatter parameters should be discarded this prevents adding them as custom keys, for example,
+            # `json_default=<callable>` see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
             custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
             return self.registered_formatter.append_keys(**custom_keys)
 
@@ -718,7 +733,7 @@ def set_package_logger(
 
     Example
     -------
-    **Enables debug logging for AWS Lambda Powertools package**
+    **Enables debug logging for Powertools for AWS Lambda (Python) package**
 
         >>> aws_lambda_powertools.logging.logger import set_package_logger
         >>> set_package_logger()
