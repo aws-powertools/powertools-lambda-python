@@ -116,7 +116,7 @@ def register_feature_to_client(client, feature):
 
     Parameters
     ----------
-    session : boto3.session.Session.client
+    client : boto3.session.Session.client
         The boto3 client to which the feature will be registered.
     feature : str
         The feature string to be appended to the User-Agent header, e.g., "streaming" in Powertools.
@@ -141,8 +141,8 @@ def register_feature_to_resource(resource, feature):
 
     Parameters
     ----------
-    session : boto3.session.Session.resource
-        The boto3 client to which the feature will be registered.
+    resource : boto3.session.Session.resource
+        The boto3 resource to which the feature will be registered.
     feature : str
         The feature string to be appended to the User-Agent header, e.g., "streaming" in Powertools.
 
