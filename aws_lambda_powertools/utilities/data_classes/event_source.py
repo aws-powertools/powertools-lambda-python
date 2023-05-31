@@ -9,7 +9,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 def event_source(
     handler: Callable[[Any, LambdaContext], Any],
     event: Dict[str, Any],
-    # optional property: original_event_source ??? (what if s3 -> sns -> sqs? should this be recursive?)
     context: LambdaContext,
     data_class: Type[DictWrapper],
 ):
