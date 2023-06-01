@@ -102,6 +102,7 @@ Log Data Event for Troubleshooting
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
+| [VPC Lattice](#vpc-lattice)                                               | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
