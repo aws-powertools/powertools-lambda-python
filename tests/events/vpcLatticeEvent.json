@@ -1,0 +1,13 @@
+{
+  "raw_path": "/testpath",
+  "method": "GET",
+  "headers": {
+    "user_agent": "curl/7.64.1",
+    "x-forwarded-for": "10.213.229.10",
+    "host": "test.execute-api.us-east-1.amazonaws.com",
+    "accept": "*/*"
+  },
+  "query_string_parameters": {},
+  "body": "",
+  "is_base64_encoded": false
+}

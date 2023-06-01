@@ -25,6 +25,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SESEvent,
     SNSEvent,
     SQSEvent,
+    VPCLatticeEvent
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     APIGatewayAuthorizerEventV2,
@@ -2041,3 +2042,14 @@ def test_api_gateway_route_arn_parser():
     details = parse_api_gateway_arn(arn)
     assert details.resource == ""
     assert details.arn == arn + "/"
+
+
+def test_vpc_lattice_event():
+    event = VPCLatticeEvent(load_event("vpcLatticeEvent.json"))
+
+    assert event.raw_path == event["raw_path"]
+    assert event.method == event["method"]
+    assert event.headers == event["headers"]
+    assert event.query_string_parameters == event["query_string_parameters"]
+    assert event.body == event["body"]
+    assert event.is_base64_encoded == event["is_base64_encoded"]
