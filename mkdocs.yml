@@ -1,5 +1,5 @@
-site_name: AWS Lambda Powertools for Python
-site_description: AWS Lambda Powertools for Python
+site_name: Powertools for AWS Lambda (Python)
+site_description: Powertools for AWS Lambda (Python)
 site_author: Amazon Web Services
 repo_url: https://github.com/awslabs/aws-lambda-powertools-python
 edit_uri: edit/develop/docs

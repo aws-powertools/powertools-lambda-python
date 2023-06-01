@@ -54,7 +54,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
 
 
 class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
-    """AWS Lambda Powertools Logging formatter.
+    """Powertools for AWS Lambda (Python) Logging formatter.
 
     Formats the log message as a JSON encoded string. If the message is a
     dict it will be used directly.

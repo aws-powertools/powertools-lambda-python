@@ -96,7 +96,7 @@ These are the most common labels used by maintainers to triage issues, pull requ
 | size/XL                | PRs between 500-999 LOC, often PRs that grown with feedback      | PR automation                                                   |
 | size/XXL               | PRs with 1K+ LOC, largely documentation related                  | PR automation                                                   |
 | tests                  | PRs that add or change tests                                     | PR automation                                                   |
-| `<utility>`            | PRs related to a Powertools utility, e.g. `parameters`, `tracer` | PR automation                                                   |
+| `<utility>`            | PRs related to a Powertools for AWS Lambda (Python) utility, e.g. `parameters`, `tracer` | PR automation                                                   |
 | feature                | New features or minor changes                                    | PR/Release automation                                           |
 | dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.           | PR/ automation                                                  |
 | github-actions         | Changes in GitHub workflows                                      | PR automation                                                   |
@@ -231,7 +231,7 @@ To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/
 
 ### Releasing a documentation hotfix
 
-You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
+You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools for AWS Lambda (Python) version available.
 
 This workflow will update both user guide and API documentation.
 

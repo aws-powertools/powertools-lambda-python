@@ -340,7 +340,7 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
 
 ???+ info
-    Powertools serializes headers and cookies according to the type of input event.
+    Powertools for AWS Lambda (Python) serializes headers and cookies according to the type of input event.
     Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
 
 ???+ warning "Using multiple values for HTTP headers in ALB?"

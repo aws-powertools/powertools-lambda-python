@@ -80,7 +80,7 @@
 * **deps-dev:** bump cfn-lint from 0.77.2 to 0.77.3 ([#2165](https://github.com/awslabs/aws-lambda-powertools-python/issues/2165))
 * **deps-dev:** bump mkdocs-material from 9.1.6 to 9.1.8 ([#2162](https://github.com/awslabs/aws-lambda-powertools-python/issues/2162))
 * **deps-dev:** bump coverage from 7.2.3 to 7.2.4 ([#2179](https://github.com/awslabs/aws-lambda-powertools-python/issues/2179))
-* **governance:** add Lambda Powertools for .NET in issue templates ([#2196](https://github.com/awslabs/aws-lambda-powertools-python/issues/2196))
+* **governance:** add Powertools for AWS Lambda (.NET) in issue templates ([#2196](https://github.com/awslabs/aws-lambda-powertools-python/issues/2196))
 
 
 <a name="v2.14.1"></a>
@@ -368,7 +368,7 @@
 ## Documentation
 
 * **event_handlers:** Fix REST API - HTTP Methods documentation ([#1936](https://github.com/awslabs/aws-lambda-powertools-python/issues/1936))
-* **home:** update powertools definition
+* **home:** update Powertools for AWS Lambda (Python) definition
 * **we-made-this:** add CI/CD using Feature Flags video   ([#1940](https://github.com/awslabs/aws-lambda-powertools-python/issues/1940))
 * **we-made-this:** add Feature Flags post ([#1939](https://github.com/awslabs/aws-lambda-powertools-python/issues/1939))
 
@@ -1249,7 +1249,7 @@
 
 * **event-handler:** snippets split, improved, and lint ([#1279](https://github.com/awslabs/aws-lambda-powertools-python/issues/1279))
 * **graphql:** snippets split, improved, and lint ([#1287](https://github.com/awslabs/aws-lambda-powertools-python/issues/1287))
-* **homepage:** emphasize additional powertools languages ([#1292](https://github.com/awslabs/aws-lambda-powertools-python/issues/1292))
+* **homepage:** emphasize additional Powertools for AWS Lambda languages ([#1292](https://github.com/awslabs/aws-lambda-powertools-python/issues/1292))
 * **metrics:** snippets split, improved, and lint
 
 ## Maintenance
@@ -1720,7 +1720,7 @@
 ## Features
 
 * **ci:** auto-notify & close issues on release
-* **logger:** clone powertools logger config to any Python logger ([#927](https://github.com/awslabs/aws-lambda-powertools-python/issues/927))
+* **logger:** clone Powertools for AWS Lambda (Python) logger config to any Python logger ([#927](https://github.com/awslabs/aws-lambda-powertools-python/issues/927))
 
 ## Maintenance
 
@@ -1936,7 +1936,7 @@
 
 ## Features
 
-* expose jmespath powertools functions ([#736](https://github.com/awslabs/aws-lambda-powertools-python/issues/736))
+* expose jmespath Powertools for AWS Lambda (Python) functions ([#736](https://github.com/awslabs/aws-lambda-powertools-python/issues/736))
 * add get_raw_configuration property in store; expose store
 * boto3 sessions in batch, parameters & idempotency ([#717](https://github.com/awslabs/aws-lambda-powertools-python/issues/717))
 * **feature-flags:** Bring your own logger for debug ([#709](https://github.com/awslabs/aws-lambda-powertools-python/issues/709))
