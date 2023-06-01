@@ -741,6 +741,7 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
     ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
     ```
 
+<!-- markdownlint-disable MD013 -->
 ### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
 As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/aws-powertools/lambda-python/issues/460)
