@@ -205,12 +205,16 @@ class CodePipelineJobEvent(DictWrapper):
         # it only when we explicitly want it for better performance.
         import boto3
 
-        return boto3.client(
+        from aws_lambda_powertools.shared import user_agent
+
+        s3 = boto3.client(
             "s3",
             aws_access_key_id=self.data.artifact_credentials.access_key_id,
             aws_secret_access_key=self.data.artifact_credentials.secret_access_key,
             aws_session_token=self.data.artifact_credentials.session_token,
         )
+        user_agent.register_feature_to_client(client=s3, feature="data_classes")
+        return s3
 
     def find_input_artifact(self, artifact_name: str) -> Optional[CodePipelineArtifact]:
         """Find an input artifact by artifact name
