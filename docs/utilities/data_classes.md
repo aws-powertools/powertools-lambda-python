@@ -1145,7 +1145,7 @@ If the content-encoding header is not present, Base64 encoding depends on the co
 
     ```
 
-=== "Lattice Excample Event"
+=== "Lattice Example Event"
 
     ```json
     {
@@ -1172,7 +1172,7 @@ If the content-encoding header is not present, Base64 encoding depends on the co
         "isBase64Encoded": False,
         "statusCode": 200,
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type": "application/text"
         },
         body: "Event Response to VPC Lattice 🔥🚀🔥"
     }
