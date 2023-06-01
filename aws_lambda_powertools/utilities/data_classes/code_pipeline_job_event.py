@@ -4,8 +4,6 @@ import zipfile
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote_plus
 
-import boto3
-
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
@@ -203,6 +201,10 @@ class CodePipelineJobEvent(DictWrapper):
         BaseClient
             An S3 client with the appropriate credentials
         """
+        # IMPORTING boto3 within the FUNCTION and not at the top level to get
+        # it only when we explicitly want it for better performance.
+        import boto3
+
         return boto3.client(
             "s3",
             aws_access_key_id=self.data.artifact_credentials.access_key_id,
