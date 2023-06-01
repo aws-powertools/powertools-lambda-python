@@ -32,6 +32,7 @@ aws-xray-sdk = { version = "^2.8.0", optional = true }
 fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
+importlib-metadata = {version = "^6.6.0", python = "<3.8"}
 typing-extensions = "^4.6.2"
 
 [tool.poetry.dev-dependencies]
@@ -86,7 +87,6 @@ mkdocs-material = "^9.1.15"
 filelock = "^3.12.0"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
-importlib-metadata = "^6.6"
 ijson = "^3.2.0"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
 hvac = "^1.1.0"
