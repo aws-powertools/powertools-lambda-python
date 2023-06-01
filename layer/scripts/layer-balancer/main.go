@@ -32,12 +32,12 @@ type LayerInfo struct {
 var canonicalLayers = []LayerInfo{
 	{
 		Name:         "AWSLambdaPowertoolsPythonV2",
-		Description:  "Lambda Powertools for Python [x86_64] with extra dependencies version bump",
+		Description:  "Powertools for AWS Lambda (Python) [x86_64] with extra dependencies version bump",
 		Architecture: types.ArchitectureX8664,
 	},
 	{
 		Name:         "AWSLambdaPowertoolsPythonV2-Arm64",
-		Description:  "Lambda Powertools for Python [arm64] with extra dependencies version bump",
+		Description:  "Powertools for AWS Lambda (Python) [arm64] with extra dependencies version bump",
 		Architecture: types.ArchitectureArm64,
 	},
 }

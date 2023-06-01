@@ -1,11 +1,11 @@
 ---
 title: Tutorial
-description: Powertools introduction
+description: Powertools for AWS Lambda (Python) introduction
 ---
 
 <!-- markdownlint-disable MD043 MD041 -->
 
-This tutorial progressively introduces Lambda Powertools core utilities by using one feature at a time.
+This tutorial progressively introduces Powertools for AWS Lambda (Python) core utilities by using one feature at a time.
 
 ## Requirements
 
@@ -323,7 +323,7 @@ We can massively simplify cross-cutting concerns while keeping it lightweight by
 ???+ tip
     This is available for both [REST API (API Gateway, ALB)](../core/event_handler/api_gateway.md){target="_blank"} and [GraphQL API (AppSync)](../core/event_handler/appsync.md){target="_blank"}.
 
-Let's include Lambda Powertools as a dependency in `requirement.txt`, and use Event Handler to refactor our previous example.
+Let's include Powertools for AWS Lambda (Python) as a dependency in `requirement.txt`, and use Event Handler to refactor our previous example.
 
 === "app.py"
 
@@ -452,11 +452,11 @@ We could start by creating a dictionary with Lambda context information or somet
 ### Simplifying with Logger
 
 ???+ question "Surely this could be easier, right?"
-    Yes! Powertools Logger to the rescue :-)
+    Yes! Powertools for AWS Lambda (Python) Logger to the rescue :-)
 
-As we already have Lambda Powertools as a dependency, we can simply import [Logger](../core/logger.md){target="_blank"}.
+As we already have Powertools for AWS Lambda (Python) as a dependency, we can simply import [Logger](../core/logger.md){target="_blank"}.
 
-```python title="Refactoring with Lambda Powertools Logger" hl_lines="1 3 5 12 18 22"
+```python title="Refactoring with Powertools for AWS Lambda (Python) Logger" hl_lines="1 3 5 12 18 22"
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
@@ -485,7 +485,7 @@ def lambda_handler(event, context):
 
 Let's break this down:
 
-* **L5**: We add Lambda Powertools Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
+* **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
 * **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method) automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
@@ -535,7 +535,7 @@ It's a [two-step process](https://docs.aws.amazon.com/lambda/latest/dg/services-
 1. Enable tracing in your Lambda function.
 2. Instrument your application code.
 
-Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Lambda Powertools Tracer](../core/tracer.md){target="_blank"} feature.
+Let's explore how we can instrument our code with [AWS X-Ray SDK](https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html){target="_blank"}, and then simplify it with [Powertools for AWS Lambda (Python) Tracer](../core/tracer.md){target="_blank"} feature.
 
 === "app.py"
 
@@ -725,12 +725,12 @@ If you choose any of the traces available, try opening the `handler` subsegment 
 
 Cross-cutting concerns like filtering traces by Cold Start, including response as well as exceptions as tracing metadata can take a considerable amount of boilerplate.
 
-We can simplify our previous patterns by using [Lambda Powertools Tracer](../core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
+We can simplify our previous patterns by using [Powertools for AWS Lambda (Python) Tracer](../core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
 
 ???+ note
     You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
 
-```python title="Refactoring with Lambda Powertools Tracer" hl_lines="1 6 11 13 19 21 27"
+```python title="Refactoring with Powertools for AWS Lambda (Python) Tracer" hl_lines="1 6 11 13 19 21 27"
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
@@ -771,14 +771,14 @@ Decorators, annotations and metadata are largely the same, except we now have a 
 
 Another subtle difference is that you can now run your Lambda functions and unit test them locally without having to explicitly disable Tracer.
 
-Lambda Powertools optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
+Powertools for AWS Lambda (Python) optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
 
 ???+ tip
     You can [opt-out some of these behaviours](../core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
-![AWS X-Ray Console trace view using Lambda Powertools Tracer](../media/tracer_utility_showcase_2.png)
+![AWS X-Ray Console trace view using Powertools for AWS Lambda (Python) Tracer](../media/tracer_utility_showcase_2.png)
 
 ???+ tip
     Consider using [Amazon CloudWatch ServiceLens view](https://console.aws.amazon.com/cloudwatch/home#servicelens:service-map/map){target="_blank"} as it aggregates AWS X-Ray traces and CloudWatch metrics and logs in one view.
@@ -801,7 +801,7 @@ By default, AWS Lambda adds [invocation and performance metrics](https://docs.aw
 ???+ tip
     You can [optionally enable detailed metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metricdimensions){target="_blank"} per each API route, stage, and method in API Gateway.
 
-Let's expand our application with custom metrics using AWS SDK to see how it works, then let's upgrade it with Lambda Powertools :-)
+Let's expand our application with custom metrics using AWS SDK to see how it works, then let's upgrade it with Powertools for AWS Lambda (Python) :-)
 
 === "app.py"
 
@@ -936,7 +936,7 @@ Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amaz
 
 ### Simplifying with Metrics
 
-[Lambda Powertools Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics **asynchronously** via a native integration with Lambda.
+[Powertools for AWS Lambda (Python) Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics **asynchronously** via a native integration with Lambda.
 
 In general terms, EMF is a specification that expects metrics in a JSON payload within CloudWatch Logs. Lambda ingests all logs emitted by a given function into CloudWatch Logs. CloudWatch automatically looks up for log entries that follow the EMF format and transforms them into a CloudWatch metric.
 
@@ -945,7 +945,7 @@ In general terms, EMF is a specification that expects metrics in a JSON payload 
 
 Let's implement that using [Metrics](../core/metrics.md){target="_blank}:
 
-```python title="Refactoring with Lambda Powertools Metrics" hl_lines="1 4 9 18 27 33"
+```python title="Refactoring with Powertools for AWS Lambda (Python) Metrics" hl_lines="1 4 9 18 27 33"
 from aws_lambda_powertools import Logger, Tracer, Metrics
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
@@ -1034,7 +1034,7 @@ If you're curious about how the EMF portion of your function logs look like, you
 
 ## Final considerations
 
-We covered a lot of ground here and we only scratched the surface of the feature set available within Lambda Powertools.
+We covered a lot of ground here and we only scratched the surface of the feature set available within Powertools for AWS Lambda (Python).
 
 When it comes to the observability features ([Tracer](../core/tracer.md){target="_blank"}, [Metrics](../core/metrics.md){target="_blank"}, [Logging](../core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
 
@@ -1043,7 +1043,7 @@ This requires a change in mindset to ensure operational excellence is part of th
 ???+ tip
     You can find more details on other leading practices described in the [Well-Architected Serverless Lens](https://aws.amazon.com/blogs/aws/new-serverless-lens-in-aws-well-architected-tool/).
 
-    Lambda Powertools is largely designed to make some of these practices easier to adopt from day 1.
+    Powertools for AWS Lambda (Python) is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
     You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).

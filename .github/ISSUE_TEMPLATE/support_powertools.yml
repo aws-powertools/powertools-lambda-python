@@ -1,6 +1,6 @@
-name: Support Lambda Powertools (become a reference)
-description: Add your organization's name or logo to the Lambda Powertools documentation
-title: "[Support Lambda Powertools]: <your organization name>"
+name: Support Powertools for AWS Lambda (Python) (become a reference)
+description: Add your organization's name or logo to the Powertools for AWS Lambda (Python) documentation
+title: "[Support Powertools for AWS Lambda (Python)]: <your organization name>"
 labels: ["customer-reference"]
 body:
   - type: markdown
@@ -42,13 +42,13 @@ body:
     id: use_case
     attributes:
       label: (Optional) Use case
-      description: How are you using Lambda Powertools today? *features, etc.*
+      description: How are you using Powertools for AWS Lambda (Python) today? *features, etc.*
     validations:
       required: false
   - type: checkboxes
     id: other_languages
     attributes:
-      label: Also using other Lambda Powertools languages?
+      label: Also using other Powertools for AWS Lambda languages?
       options:
         - label: Java
           required: false
@@ -59,6 +59,6 @@ body:
   - type: markdown
     attributes:
       value: |
-        *By raising a Support Lambda Powertools issue, you are granting AWS permission to use your company's name (and/or logo) for the limited purpose described here. You are also confirming that you have authority to grant such permission.*
+        *By raising a Support Powertools for AWS Lambda (Python) issue, you are granting AWS permission to use your company's name (and/or logo) for the limited purpose described here. You are also confirming that you have authority to grant such permission.*
 
         *You can opt-out at any time by commenting or reopening this issue.*

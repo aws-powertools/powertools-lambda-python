@@ -1,5 +1,5 @@
 name: I Made This (showcase your work)
-description: Share what you did with Powertools 💞💞. Blog post, workshops, presentation, sample apps, etc.
+description: Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps, etc.
 title: "[I Made This]: <TITLE>"
 labels: ["community-content"]
 body:
@@ -13,7 +13,7 @@ body:
       description: |
         Please share the original link to your material.
 
-        *Note: Short links will be expanded when added to Powertools documentation*
+        *Note: Short links will be expanded when added to Powertools for AWS Lambda (Python) documentation*
     validations:
       required: true
   - type: textarea
@@ -44,7 +44,7 @@ body:
       description: |
         Any notes you might want to share with us related to this material.
 
-        *Note: These notes are explicitly to Powertools maintainers. It will not be added to the community resources page.*
+        *Note: These notes are explicitly to Powertools for AWS Lambda (Python) maintainers. It will not be added to the community resources page.*
     validations:
       required: false
   - type: checkboxes
@@ -52,5 +52,5 @@ body:
     attributes:
       label: Acknowledgment
       options:
-        - label: I understand this content may be removed from Powertools documentation if it doesn't conform with the [Code of Conduct](https://aws.github.io/code-of-conduct)
+        - label: I understand this content may be removed from Powertools for AWS Lambda (Python) documentation if it doesn't conform with the [Code of Conduct](https://aws.github.io/code-of-conduct)
           required: true
