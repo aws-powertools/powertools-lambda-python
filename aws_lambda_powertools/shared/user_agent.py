@@ -160,6 +160,10 @@ def register_feature_to_resource(resource, feature):
 
 def inject_user_agent():
     if inject_header:
+        # Some older botocore versions doesn't support register_initializer. In those cases, we disable the feature.
+        if not hasattr(botocore, "register_initializer"):
+            return
+
         # Customize botocore session to inject Powertools header
         # See: https://github.com/boto/botocore/pull/2682
         botocore.register_initializer(_initializer_botocore_session)
