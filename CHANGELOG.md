@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps-dev:** bump aws-cdk from 2.81.0 to 2.82.0 ([#2373](https://github.com/awslabs/aws-lambda-powertools-python/issues/2373))
+
 
 <a name="v2.16.1"></a>
 ## [v2.16.1] - 2023-06-02
