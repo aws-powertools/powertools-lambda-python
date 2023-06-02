@@ -4,8 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.16.1"></a>
+## [v2.16.1] - 2023-06-02
+## Bug Fixes
+
+* **shared:** skip user agent on much older botocore versions ([#2366](https://github.com/awslabs/aws-lambda-powertools-python/issues/2366))
+
 ## Maintenance
 
+* version bump
 
 
 <a name="v2.16.0"></a>
@@ -3294,7 +3302,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.0...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.1...HEAD
+[v2.16.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.0...v2.16.1
 [v2.16.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.15.0...v2.16.0
 [v2.15.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.1...v2.15.0
 [v2.14.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.14.0...v2.14.1
