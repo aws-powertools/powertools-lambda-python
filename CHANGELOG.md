@@ -4,6 +4,10 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **shared:** skip user agent on much older botocore versions ([#2366](https://github.com/awslabs/aws-lambda-powertools-python/issues/2366))
+
 ## Maintenance
 
 
