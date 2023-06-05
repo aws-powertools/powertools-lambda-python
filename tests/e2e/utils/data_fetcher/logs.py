@@ -31,7 +31,7 @@ class LogFetcher:
         filter_expression: Optional[str] = None,
         minimum_log_entries: int = 1,
     ):
-        """Fetch and expose Powertools Logger logs from CloudWatch Logs
+        """Fetch and expose Powertools for AWS Lambda (Python) Logger logs from CloudWatch Logs
 
         Parameters
         ----------
