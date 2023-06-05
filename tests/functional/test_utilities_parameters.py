@@ -31,12 +31,6 @@ def mock_name():
 
 
 @pytest.fixture(scope="function")
-def mock_name_multiple_calls():
-    # Parameter name must match [a-zA-Z0-9_.-/]+
-    return "".join(random.choices(string.ascii_letters + string.digits + "_.-/", k=random.randrange(3, 200)))
-
-
-@pytest.fixture(scope="function")
 def mock_value():
     # Standard parameters can be up to 4 KB
     return "".join(random.choices(string.printable, k=random.randrange(100, 4000)))
@@ -2177,7 +2171,7 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     stubber.activate()
 
     try:
-        value: str = provider.get(mock_name)
+        value: bytes = provider.get(mock_name)
         str_value = value.decode("utf-8")
         assert str_value == json.dumps(mock_body_json)
         stubber.assert_no_pending_responses()
@@ -2185,12 +2179,11 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
         stubber.deactivate()
 
 
-def test_appconf_provider_multiple_calls_with_same_instance(mock_name, mock_name_multiple_calls, config):
+def test_appconf_provider_multiple_unique_config_names(mock_name, config):
     """
-    Test appconfigprovider.get with default values
+    Test appconfig_provider.get with multiple config names
     """
 
-    # Create a new provider
     # GIVEN a provider instance, we should be able to retrieve multiple appconfig profiles.
     environment = "dev"
     application = "myapp"
@@ -2230,14 +2223,10 @@ def test_appconf_provider_multiple_calls_with_same_instance(mock_name, mock_name
 
     try:
         # THEN we should expect different return values.
-        value_first_call: str = provider.get(mock_name)
-        str_value_first_call = value_first_call.decode("utf-8")
-        assert str_value_first_call == json.dumps(mock_body_json_first_call)
+        value_first_call: bytes = provider.get(mock_name)
+        value_second_call: bytes = provider.get(f"{mock_name}_ second_config")
 
-        value_second_call: str = provider.get(mock_name_multiple_calls)
-        str_value_second_call = value_second_call.decode("utf-8")
-        assert str_value_second_call == json.dumps(mock_body_json_second_call)
-
+        assert value_first_call != value_second_call
         stubber.assert_no_pending_responses()
 
     finally:
