@@ -4,6 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **parameters:** AppConfigProvider when retrieving multiple unique configuration names ([#2378](https://github.com/awslabs/aws-lambda-powertools-python/issues/2378))
+
+## Maintenance
+
+* **deps-dev:** bump sentry-sdk from 1.24.0 to 1.25.0 ([#2374](https://github.com/awslabs/aws-lambda-powertools-python/issues/2374))
+* **deps-dev:** bump aws-cdk from 2.81.0 to 2.82.0 ([#2373](https://github.com/awslabs/aws-lambda-powertools-python/issues/2373))
+
 
 <a name="v2.16.1"></a>
 ## [v2.16.1] - 2023-06-02
