@@ -94,7 +94,7 @@ class AppConfigProvider(BaseProvider):
         self.environment = environment
         self.current_version = ""
 
-        self._next_token = ""  # nosec - token for get_latest_configuration executions
+        self._next_token: Dict[str, str] = {}  # nosec - token for get_latest_configuration executions
         self.last_returned_value = ""
 
     def _get(self, name: str, **sdk_options) -> str:
@@ -108,19 +108,19 @@ class AppConfigProvider(BaseProvider):
         sdk_options: dict, optional
             SDK options to propagate to `start_configuration_session` API call
         """
-        if not self._next_token:
+        if name not in self._next_token:
             sdk_options["ConfigurationProfileIdentifier"] = name
             sdk_options["ApplicationIdentifier"] = self.application
             sdk_options["EnvironmentIdentifier"] = self.environment
             response_configuration = self.client.start_configuration_session(**sdk_options)
-            self._next_token = response_configuration["InitialConfigurationToken"]
+            self._next_token[name] = response_configuration["InitialConfigurationToken"]
 
         # The new AppConfig APIs require two API calls to return the configuration
         # First we start the session and after that we retrieve the configuration
         # We need to store the token to use in the next execution
-        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token)
+        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
         return_value = response["Configuration"].read()
-        self._next_token = response["NextPollConfigurationToken"]
+        self._next_token[name] = response["NextPollConfigurationToken"]
 
         if return_value:
             self.last_returned_value = return_value
