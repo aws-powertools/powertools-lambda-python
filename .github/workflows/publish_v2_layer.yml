@@ -133,7 +133,7 @@ jobs:
       package-version: ${{ inputs.latest_published_version }}
 
   sar-prod:
-    needs: [build-layer, sar-beta]
+    needs: [build-layer, beta, sar-beta]
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write
