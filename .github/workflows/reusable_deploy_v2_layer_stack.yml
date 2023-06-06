@@ -2,9 +2,10 @@ name: Deploy CDK Layer v2 stack
 
 # PROCESS
 #
-# 1. Deploy previously built layer for each AWS commercial region
-# 2. Conditionally honour each commercial region that might have ARM support but not in AWS Lambda
-# 3.
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. Deploy previously built layer for each AWS commercial region
+# 3. Export all published Layers as JSON
+# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
 
 # USAGE
 #
