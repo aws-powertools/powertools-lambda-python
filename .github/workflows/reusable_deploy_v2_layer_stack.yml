@@ -1,5 +1,31 @@
 name: Deploy CDK Layer v2 stack
 
+# PROCESS
+#
+# 1. Deploy previously built layer for each AWS commercial region
+# 2. Conditionally honour each commercial region that might have ARM support but not in AWS Lambda
+# 3.
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     latest_published_version: ${{ inputs.latest_published_version }}
+
 on:
   workflow_call:
     inputs:
