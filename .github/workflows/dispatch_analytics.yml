@@ -1,5 +1,15 @@
 name: Dispatch analytics
 
+# PROCESS
+#
+# 1. Trade GitHub JWT token with AWS credentials for the analytics account
+# 2. Invoke a Lambda function dispatcher synchronously with the read-only scoped JWT token
+# 3. The dispatcher function will call GitHub APIs to read data from the last hour and aggregate for operational analytics
+
+# USAGE
+#
+# NOTE: meant to use as a scheduled task only (or manually for debugging purposes).
+
 on:
   workflow_dispatch:
 
