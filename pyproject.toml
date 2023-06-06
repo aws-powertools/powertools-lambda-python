@@ -182,6 +182,10 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.build]
 generate-setup-file = true
 
+[tool.poetry_bumpversion.file."aws_lambda_powertools/shared/version.py"]
+search = 'VERSION = "{current_version}"'
+replace = 'VERSION = "{new_version}"'
+
 # NOTE
 # As of now, Feb 2020, flake8 don't support pyproject
 # For latest: https://github.com/flying-sheep/awesome-python-packaging
