@@ -1,5 +1,7 @@
 name: Build and publish latest changelog
 
+# see ./.github/workflows/build_changelog.yml for docs
+
 on:
   workflow_call:
 
@@ -16,7 +18,7 @@ jobs:
       group: changelog-build
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write       # create temporary branch with changelog
       pull-requests: write
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
