@@ -42,6 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write  # make a comment in PR if unable to find related issue
+      issues: write         # label issue with pending-release
     if: needs.get_pr_details.outputs.prIsMerged == 'true'
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
