@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **ci:** fix PR labeling permission scope ([#2396](https://github.com/awslabs/aws-lambda-powertools-python/issues/2396))
+* **ci:** document all github action workflows and enforce least-privilege ([#2395](https://github.com/awslabs/aws-lambda-powertools-python/issues/2395))
+
 
 <a name="v2.16.2"></a>
 ## [v2.16.2] - 2023-06-06
