@@ -43,7 +43,7 @@ jobs:
     needs: get_pr_details
     runs-on: ubuntu-latest
     permissions:
-      issues: write  # label respective PR
+      pull-requests: write  # label respective PR
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
