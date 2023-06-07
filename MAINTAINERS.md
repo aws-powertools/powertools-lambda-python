@@ -241,10 +241,10 @@ section Layer release
 Layer release : milestone, m3, 10:26,1s
 
 section SAR release
-    Deploy Beta                 : active, sar_beta, after layer_build, 2.2m
+    Deploy Beta                 : active, sar_beta, after layer_beta, 2.2m
     Deploy Prod                 : active, sar_prod, after sar_beta, 2.2m
 
-SAR release : milestone, m4, 10:18,1s
+SAR release : milestone, m4, 10:25,1s
 
 section Docs
     Create PR (Layer ARN)       : active, after layer_prod, 8s
