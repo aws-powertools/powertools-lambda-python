@@ -15,6 +15,7 @@ from typing import (
 
 import boto3
 
+from aws_lambda_powertools.shared import user_agent
 from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 if TYPE_CHECKING:
@@ -67,6 +68,7 @@ class _S3SeekableIO(IO[bytes]):
         self._sdk_options = sdk_options
         self._sdk_options["Bucket"] = bucket
         self._sdk_options["Key"] = key
+        self._has_user_agent = False
         if version_id is not None:
             self._sdk_options["VersionId"] = version_id
 
@@ -77,6 +79,9 @@ class _S3SeekableIO(IO[bytes]):
         """
         if self._s3_client is None:
             self._s3_client = boto3.client("s3")
+        if not self._has_user_agent:
+            user_agent.register_feature_to_client(client=self._s3_client, feature="streaming")
+            self._has_user_agent = True
         return self._s3_client
 
     @property
