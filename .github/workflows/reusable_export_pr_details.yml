@@ -1,5 +1,19 @@
 name: Export previously recorded PR
 
+# PROCESS
+#
+# 1. Fetch PR details previously saved from untrusted location
+# 2. Parse details for safety
+# 3. Export only what's needed for automation, e.g., PR number, title, body, author, action, whether is merged
+
+# USAGE
+#
+# see .github/workflows/on_merged_pr.yml and related for full example.
+#
+# NOTE: meant to be used with workflows that react to a given PR state (labeling, new, merged, etc.)
+#       done separately to isolate security practices and make it reusable.
+
+
 on:
   workflow_call:
     inputs:
@@ -38,6 +52,8 @@ on:
 
 jobs:
   export_pr_details:
+    permissions:
+      actions: read  # download PR artifact
     # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
     if: inputs.workflow_origin == 'awslabs/aws-lambda-powertools-python'
     runs-on: ubuntu-latest
