@@ -1,5 +1,31 @@
 name: Deploy v2 layer to all regions
 
+# PROCESS
+#
+# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for x86 and ARM (uses custom runner as it's CPU heavy)
+# 2. Kick off pipeline for beta, prod, and canary releases
+# 3. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 4. Builds and publishes docs with latest Layer ARN using given version (generally coming from release)
+
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/release.yml
+#
+# publish_layer:
+#   needs: [seal, release, create_tag]
+#   secrets: inherit
+#   permissions:
+#     id-token: write
+#     contents: write
+#     pages: write
+#     pull-requests: write
+#   uses: ./.github/workflows/publish_v2_layer.yml
+#   with:
+#     latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+#     pre_release: ${{ inputs.pre_release }}
+
+
 on:
   workflow_dispatch:
     inputs:
@@ -91,7 +117,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -107,7 +133,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -133,7 +159,7 @@ jobs:
       package-version: ${{ inputs.latest_published_version }}
 
   sar-prod:
-    needs: [build-layer, sar-beta]
+    needs: [build-layer, beta, sar-beta]
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write

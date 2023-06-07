@@ -1,5 +1,38 @@
 name: Record PR details
 
+# PROCESS
+#
+# 1. Runs in fork location upon PR creation or changes
+# 2. Saves GitHub Pull Request Webhook payload
+# 3. Uploads as a temporary GitHub Action Artifact with shortest retention
+
+# USAGE
+#
+# see .github/workflows/on_merged_pr.yml and related for full example.
+#
+# on:
+#   workflow_run:
+#     workflows: ["Record PR details"]
+#     types:
+#       - completed
+#
+# Security Note:
+#
+#   For security, this is intended to be a 2-step process: (1) collect PR, (2) act on PR.
+#   Do not ever use `pull_request_target` to "simplify", as it sends a write-token to the fork. Our linter should catch it.
+#
+#   The first step runs in untrusted location (fork), therefore we limit permissions to only check out code.
+#
+#   The second step will be workflows that want to act on a given PR, this time with intended permissions, and
+#   it runs on its base location (this repo!).
+#
+#   This enforces zero trust where this workflow always runs on fork with zero permissions on GH_TOKEN.
+#   When this workflow completes, X workflows run in our repository with the appropriate permissions and sanitize inputs.
+#
+#   Coupled with "Approve GitHub Action to run on forks", we have confidence no privilege can be escalated,
+#   since any malicious change would need to be approved, and upon social engineering, it'll have zero permissions.
+
+
 on:
   pull_request:
     types: [opened, edited, closed, labeled]
@@ -7,7 +40,8 @@ on:
 jobs:
   record_pr:
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read  # NOTE: treat as untrusted location
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: "Extract PR details"
@@ -20,3 +54,4 @@ jobs:
         with:
           name: pr
           path: pr.txt
+          retention-days: 1
