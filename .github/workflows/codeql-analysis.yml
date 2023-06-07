@@ -1,5 +1,15 @@
 name: "CodeQL"
 
+# PROCESS
+#
+# 1. Static code analysis with CodeQL
+
+# USAGE
+#
+# NOTE: This is our slowest workflow hence it only runs on code merged.
+#
+# Always triggered on PR merge when source code changes.
+
 on:
   push:
     paths:
