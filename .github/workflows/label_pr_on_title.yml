@@ -1,5 +1,16 @@
 name: Label PR based on title
 
+# PROCESS
+#
+# 1. Fetch PR details previously saved from untrusted location
+# 2. Parse details for safety and label PR based on semantic title (e.g., area, change type)
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/record_pr.yml
+#
+
+
 on:
   workflow_run:
     workflows: ["Record PR details"]
@@ -20,6 +31,8 @@ jobs:
   label_pr:
     needs: get_pr_details
     runs-on: ubuntu-latest
+    permissions:
+      issues: write  # label respective PR
     steps:
       - name: Checkout repository
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
