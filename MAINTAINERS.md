@@ -210,48 +210,48 @@ axisFormat %H:%M
 Release commit   : milestone, m1, 10:00,2m
 
 section Seal
-    Bump release version        : active, 8s
-    Prevent source tampering    : active, 43s
+    Bump release version        : crit, 8s
+    Prevent source tampering    : crit, 43s
 section QA
-    Quality checks              : active, 2.2m
+    Quality checks              : crit, 2.2m
 section Build
-    Checksum                    : active, 8s
-    Build release artifact      : active, 39s
-    Seal                        : active, 8s
+    Checksum                    : crit, 8s
+    Build release artifact      : crit, 39s
+    Seal                        : crit, 8s
 section Release
-    Checksum                    : active, 8s
-    PyPi temp credentials       : active, 8s
-    Publish PyPi                : active, pypi, 10:06, 29s
+    Checksum                    : crit, 8s
+    PyPi temp credentials       : crit, 8s
+    Publish PyPi                : crit, pypi, 10:06, 29s
 
 PyPi release : milestone, m2, 10:06,1s
 
 section Git release
-    Checksum                    : active, after pypi, 8s
-    Git Tag                     : active, 8s
-    Bump package version        : active, 8s
-    Create PR                   : active, 8s
+    Checksum                    : crit, after pypi, 8s
+    Git Tag                     : crit, 8s
+    Bump package version        : crit, 8s
+    Create PR                   : crit, 8s
 
 section Layer release
-    Build (x86+ARM)             : active, layer_build, 10:08, 6m
-    Deploy Beta                 : active, layer_beta, after layer_build, 6.3m
-    Deploy Prod                 : active, layer_prod, after layer_beta, 6.3m
+    Build (x86+ARM)             : crit, layer_build, 10:08, 6m
+    Deploy Beta                 : crit, layer_beta, after layer_build, 6.3m
+    Deploy Prod                 : crit, layer_prod, after layer_beta, 6.3m
 
 Layer release : milestone, m3, 10:26,1s
 
 section SAR release
-    Deploy Beta                 : active, sar_beta, after layer_build, 2.2m
-    Deploy Prod                 : active, sar_prod, after sar_beta, 2.2m
+    Deploy Beta                 : crit, sar_beta, after layer_build, 2.2m
+    Deploy Prod                 : crit, sar_prod, after sar_beta, 2.2m
 
 SAR release : milestone, m4, 10:18,1s
 
 section Docs
-    Create PR (Layer ARN)       : active, after layer_prod, 8s
-    Release versioned docs      : active, 2.2m
+    Create PR (Layer ARN)       : crit, after layer_prod, 8s
+    Release versioned docs      : crit, 2.2m
 
 Documentation release : milestone, m4, 10:28,1m
 
 section Post-release
-    Close pending issues        : active, 8s
+    Close pending issues        : crit, 8s
 
 Release complete : milestone, m6, 10:31,2m
 ```
