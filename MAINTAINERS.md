@@ -201,7 +201,6 @@ Every release makes hundreds of checks, security scans, canaries and deployments
 This is a close visual representation of the main steps (GitHub Actions UI should be the source of truth).
 
 ```mermaid
-%% use 8s to graph steps faster than 8s like seal/checksum that actually takes 0s
 gantt
 
 title      Release process
