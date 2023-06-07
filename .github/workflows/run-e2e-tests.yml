@@ -1,10 +1,24 @@
 name: Run end-to-end tests
 
+# PROCESS
+#
+# 1. Install all dependencies and spin off containers for all supported Python versions
+# 2. Install pinned CDK version
+# 3. Trade JWT token for AWS credentials to Test account
+# 4. Run E2E in parallel for each feature
+
+# USAGE
+#
+# see MAINTAINERS.md#internals for full details on mechanics.
+#
+# Always triggered on new PR merge.
+
 on:
   workflow_dispatch:
 
   push:
-    branches: [develop, v2]
+    branches:
+      - develop
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
@@ -26,7 +40,7 @@ jobs:
     runs-on: aws-lambda-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
-      contents: read
+      contents: read  # checkout code
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:

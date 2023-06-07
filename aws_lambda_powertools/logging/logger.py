@@ -287,9 +287,9 @@ class Logger:
         if self.child or is_logger_preconfigured:
             return
 
-        self._logger.setLevel(self._determine_log_level(log_level))
+        self.setLevel(self._determine_log_level(log_level))
         self._configure_sampling()
-        self._logger.addHandler(self.logger_handler)
+        self.addHandler(self.logger_handler)
         self.structure_logs(formatter_options=formatter_options, **kwargs)
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
@@ -632,6 +632,12 @@ class Logger:
         if isinstance(self.registered_formatter, LambdaPowertoolsFormatter):
             return self.registered_formatter.log_format.get("correlation_id")
         return None
+
+    def setLevel(self, level: Union[str, int]) -> None:
+        return self._logger.setLevel(level)
+
+    def addHandler(self, handler: logging.Handler) -> None:
+        return self._logger.addHandler(handler)
 
     @property
     def registered_handler(self) -> logging.Handler:
