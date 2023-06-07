@@ -3,12 +3,21 @@ name: Label PR based on title
 # PROCESS
 #
 # 1. Fetch PR details previously saved from untrusted location
-# 2. Parse details for safety and label PR based on semantic title (e.g., area, change type)
+# 2. Parse details for safety
+# 3. Label PR based on semantic title (e.g., area, change type)
 
 # USAGE
 #
 # NOTE: meant to be used with ./.github/workflows/record_pr.yml
 #
+# Security Note:
+#
+#   This workflow depends on "Record PR" workflow that runs in an untrusted location (forks) instead of `pull_request_target`.
+#   This enforces zero trust where "Record PR" workflow always runs on fork with zero permissions on GH_TOKEN.
+#   When "Record PR" completes, this workflow runs in our repository with the appropriate permissions and sanitize inputs.
+#
+#   Coupled with "Approve GitHub Action to run on forks", we have confidence no privilege can be escalated,
+#   since any malicious change would need to be approved, and upon social engineering, it'll have zero permissions.
 
 
 on:
@@ -19,6 +28,8 @@ on:
 
 jobs:
   get_pr_details:
+    permissions:
+      actions: read  # download PR artifact
     # Guardrails to only ever run if PR recording workflow was indeed
     # run in a PR event and ran successfully
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
