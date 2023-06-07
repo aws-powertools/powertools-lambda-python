@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD013 MD041 MD043  -->
 # Powertools for AWS Lambda (Python)
 
-[![Build](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml/badge.svg)](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml)
+[![Build](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/quality_check.yml/badge.svg)](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/python_build.yml)
 [![codecov.io](https://codecov.io/github/awslabs/aws-lambda-powertools-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/awslabs/aws-lambda-powertools-python)
 ![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9|%203.10&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
 
