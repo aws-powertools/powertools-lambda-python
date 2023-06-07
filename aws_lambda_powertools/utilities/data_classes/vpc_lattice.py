@@ -89,3 +89,4 @@ class VPCLatticeEvent(DictWrapper):
             Header value
         """
         return get_header_value(self.headers, name, default_value, case_sensitive)
+
