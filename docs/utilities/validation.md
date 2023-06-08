@@ -194,7 +194,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.
 
-You can use our built-in [JMESPath functions](./jmespath_functions.md) within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function), [decode base64](./jmespath_functions.md#powertools_base64-function), and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function).
+You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank"}.
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.

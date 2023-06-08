@@ -420,7 +420,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables).
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank"}.
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 

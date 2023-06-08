@@ -487,8 +487,8 @@ Let's break this down:
 
 * **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
-* **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method) automatically.
-* **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
+* **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method){target="_blank"} automatically.
+* **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}{target="_blank"}.
 
 This is how the logs would look like now:
 

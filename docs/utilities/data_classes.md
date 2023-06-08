@@ -538,7 +538,7 @@ decompress and parse json data from the event.
         return "nothing to be processed"
     ```
 
-Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md) for more robust log processing.
+Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md){target="_blank"} for more robust log processing.
 
 === "app.py"
 

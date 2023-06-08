@@ -96,6 +96,7 @@ copyright: Copyright &copy; 2022 Amazon Web Services
 plugins:
   - git-revision-date
   - search
+  - open-in-new-tab
 
 extra_css:
   - stylesheets/extra.css
