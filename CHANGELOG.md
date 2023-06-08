@@ -4,6 +4,24 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **maintainers:** visual representation of release process ([#2399](https://github.com/awslabs/aws-lambda-powertools-python/issues/2399))
+* **navigation:** standardize link targets to enhance customer experience ([#2420](https://github.com/awslabs/aws-lambda-powertools-python/issues/2420))
+
+## Maintenance
+
+* **ci:** fix PR labeling permission scope ([#2396](https://github.com/awslabs/aws-lambda-powertools-python/issues/2396))
+* **ci:** document all github action workflows and enforce least-privilege ([#2395](https://github.com/awslabs/aws-lambda-powertools-python/issues/2395))
+* **deps:** bump docker/setup-qemu-action from 2.1.0 to 2.2.0 ([#2404](https://github.com/awslabs/aws-lambda-powertools-python/issues/2404))
+* **deps:** bump pydantic from 1.10.8 to 1.10.9 ([#2405](https://github.com/awslabs/aws-lambda-powertools-python/issues/2405))
+* **deps:** bump docker/setup-buildx-action from 2.5.0 to 2.6.0 ([#2403](https://github.com/awslabs/aws-lambda-powertools-python/issues/2403))
+* **deps-dev:** bump cfn-lint from 0.77.6 to 0.77.7 ([#2414](https://github.com/awslabs/aws-lambda-powertools-python/issues/2414))
+* **deps-dev:** bump sentry-sdk from 1.25.0 to 1.25.1 ([#2408](https://github.com/awslabs/aws-lambda-powertools-python/issues/2408))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.26.147 to 1.26.149 ([#2410](https://github.com/awslabs/aws-lambda-powertools-python/issues/2410))
+* **deps-dev:** bump aws-cdk from 2.82.0 to 2.83.0 ([#2406](https://github.com/awslabs/aws-lambda-powertools-python/issues/2406))
+* **deps-dev:** bump mypy-boto3-logs from 1.26.53 to 1.26.149 ([#2409](https://github.com/awslabs/aws-lambda-powertools-python/issues/2409))
+
 
 <a name="v2.16.2"></a>
 ## [v2.16.2] - 2023-06-06
