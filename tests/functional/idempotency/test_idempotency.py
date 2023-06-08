@@ -1058,7 +1058,7 @@ def test_custom_jmespath_function_overrides_builtin_functions(
     config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
 ):
     # GIVEN a persistence store with a custom jmespath_options
-    # AND use a builtin powertools custom function
+    # AND use a builtin Powertools for AWS Lambda (Python) custom function
     persistence_store.configure(config_with_jmespath_options)
 
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):

@@ -1,5 +1,32 @@
 name: Deploy CDK Layer v2 stack
 
+# PROCESS
+#
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. Deploy previously built layer for each AWS commercial region
+# 3. Export all published Layers as JSON
+# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     latest_published_version: ${{ inputs.latest_published_version }}
+
 on:
   workflow_call:
     inputs:
@@ -99,7 +126,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f # v2.1.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
