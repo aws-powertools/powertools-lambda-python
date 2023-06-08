@@ -81,7 +81,7 @@ These are all built-in envelopes you can use along with their expression as a re
 | **`SQS`**                         | `Records[*].powertools_json(body)`                                                        |
 
 ???+ tip "Using SNS?"
-    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"}. It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
+    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html). It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
 
 ## Advanced
 
