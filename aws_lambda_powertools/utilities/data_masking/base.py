@@ -11,14 +11,14 @@ class DataMasking:
         else:
             self.provider = provider
 
-    def encrypt(self, data, *args, fields=None, **kwargs):
-        return self._apply_action(data, fields, action=self.provider.encrypt, *args, **kwargs)
+    def encrypt(self, data, fields=None, **kwargs):
+        return self._apply_action(data, fields, self.provider.encrypt, **kwargs)
 
-    def decrypt(self, data, *args, fields=None, **kwargs):
-        return self._apply_action(data, fields, action=self.provider.decrypt, *args, **kwargs)
+    def decrypt(self, data, fields=None, **kwargs):
+        return self._apply_action(data, fields, self.provider.decrypt, **kwargs)
 
-    def mask(self, data, *args, fields=None, **kwargs):
-        return self._apply_action(data, fields, action=self.provider.mask, *args, **kwargs)
+    def mask(self, data, fields=None, **kwargs):
+        return self._apply_action(data, fields, self.provider.mask, **kwargs)
 
     def _apply_action(self, data, fields, action, *args, **kwargs):
         if fields is not None:

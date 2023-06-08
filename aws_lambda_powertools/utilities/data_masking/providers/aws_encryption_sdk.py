@@ -43,30 +43,13 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
             max_age=self.MAX_ENTRY_AGE_SECONDS,
             max_messages_encrypted=self.MAX_MESSAGES,
         )
-        self.encryption_context: Dict[str, str] = {}
 
     def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
-        if "context" in kwargs:
-            self.encryption_context = kwargs["context"]
-        ciphertext, header = self.client.encrypt(
-            # Turn all data into string? bc we’re turning everything into a dict
-            # in order to get the key values even if they pass in a json str of a dict
-            source=str(data),
-            encryption_context=self.encryption_context,
-            materials_manager=self.cache_cmm,
-            *args,
-            **kwargs
-        )
+        ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, *args, **kwargs)
         ciphertext = base64.b64encode(ciphertext).decode()
-        self.encryption_context = header.encryption_context
         return ciphertext
 
     def decrypt(self, data: str, *args, **kwargs) -> bytes:
         ciphertext_decoded = base64.b64decode(data)
-        ciphertext, decrypted_header = self.client.decrypt(
-            source=ciphertext_decoded, key_provider=self.key_provider, *args, **kwargs
-        )
-
-        if self.encryption_context != decrypted_header.encryption_context:
-            raise ValueError("Encryption context mismatch")
+        ciphertext, _ = self.client.decrypt(source=ciphertext_decoded, key_provider=self.key_provider, *args, **kwargs)
         return ciphertext
