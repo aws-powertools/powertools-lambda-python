@@ -1,5 +1,20 @@
 name: Code quality
 
+# PROCESS
+#
+# 1. Install all dependencies and spin off containers for all supported Python versions
+# 2. Run code formatters and linters (various checks) for code standard
+# 3. Run static typing checker for potential bugs
+# 4. Run entire test suite for regressions except end-to-end (unit, functional, performance)
+# 5. Run static analysis (in addition to CodeQL) for common insecure code practices
+# 6. Run complexity baseline to avoid error-prone bugs and keep maintenance lower
+# 7. Collect and report on test coverage
+
+# USAGE
+#
+# Always triggered on new PRs, PR changes and PR merge.
+
+
 on:
   pull_request:
     paths:
@@ -10,7 +25,6 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - v2
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -20,10 +34,9 @@ on:
       - "mypy.ini"
     branches:
       - develop
-      - v2
 
 jobs:
-  build:
+  quality_check:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -31,6 +44,8 @@ jobs:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
     env:
       PYTHON: "${{ matrix.python-version }}"
+    permissions:
+      contents: read  # checkout code only
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: Install poetry

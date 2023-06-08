@@ -14,9 +14,9 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 
     You can choose to support us in three ways:
 
-    1) [**Become a reference customer**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E). This gives us permission to list your company in our documentation.
+    1) [**Become a reference customer**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
 
-    2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
+    2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
 
     3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
 
@@ -462,8 +462,8 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
 | App                                                                                                                                                            | ARN                                                                                                                            | Description                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
-| [aws-lambda-powertools-python-layer-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
+| [aws-lambda-powertools-python-layer-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
 
 ??? note "Click to expand and copy SAR code snippets for popular frameworks"
 
@@ -547,7 +547,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
     === "Terraform"
 
-    	> Credits to [Dani Comnea](https://github.com/DanyC97) for providing the Terraform equivalent.
+    	> Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank"} for providing the Terraform equivalent.
 
         ```terraform hl_lines="12-13 15-20 23-25 40"
         terraform {
@@ -595,7 +595,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
 ??? example "Example: Least-privileged IAM permissions to deploy Layer"
 
-    > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
+    > Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank"} for providing the scoped down IAM permissions.
 
     The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
 
@@ -679,21 +679,21 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 
 | Utility                                                                                                                                                      | Description                                                                                                                                               |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**Tracing**](./core/tracer.md)                                                                                                                              | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
-| [**Logger**](./core/logger.md)                                                                                                                               | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
-| [**Metrics**](./core/metrics.md)                                                                                                                             | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
-| [**Event handler: AppSync**](./core/event_handler/appsync.md)                                                                                                | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
+| [**Tracing**](./core/tracer.md){target="_blank"}                                                                                                                              | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
+| [**Logger**](./core/logger.md){target="_blank"}                                                                                                                               | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
+| [**Metrics**](./core/metrics.md){target="_blank"}                                                                                                                             | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
+| [**Event handler: AppSync**](./core/event_handler/appsync.md){target="_blank"}                                                                                                | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
 | [**Event handler: API Gateway, ALB and Lambda Function URL**](https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL                      |
-| [**Middleware factory**](./utilities/middleware_factory.md)                                                                                                  | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
-| [**Parameters**](./utilities/parameters.md)                                                                                                                  | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
-| [**Batch processing**](./utilities/batch.md)                                                                                                                 | Handle partial failures for AWS SQS batch processing                                                                                                      |
-| [**Typing**](./utilities/typing.md)                                                                                                                          | Static typing classes to speedup development in your IDE                                                                                                  |
-| [**Validation**](./utilities/validation.md)                                                                                                                  | JSON Schema validator for inbound events and responses                                                                                                    |
-| [**Event source data classes**](./utilities/data_classes.md)                                                                                                 | Data classes describing the schema of common Lambda event triggers                                                                                        |
-| [**Parser**](./utilities/parser.md)                                                                                                                          | Data parsing and deep validation using Pydantic                                                                                                           |
-| [**Idempotency**](./utilities/idempotency.md)                                                                                                                | Idempotent Lambda handler                                                                                                                                 |
-| [**Feature Flags**](./utilities/feature_flags.md)                                                                                                            | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
-| [**Streaming**](./utilities/streaming.md)                                                                                                                    | Streams datasets larger than the available memory as streaming data.                                                                                      |
+| [**Middleware factory**](./utilities/middleware_factory.md){target="_blank"}                                                                                                  | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
+| [**Parameters**](./utilities/parameters.md){target="_blank"}                                                                                                                  | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
+| [**Batch processing**](./utilities/batch.md){target="_blank"}                                                                                                                 | Handle partial failures for AWS SQS batch processing                                                                                                      |
+| [**Typing**](./utilities/typing.md){target="_blank"}                                                                                                                          | Static typing classes to speedup development in your IDE                                                                                                  |
+| [**Validation**](./utilities/validation.md){target="_blank"}                                                                                                                  | JSON Schema validator for inbound events and responses                                                                                                    |
+| [**Event source data classes**](./utilities/data_classes.md){target="_blank"}                                                                                                 | Data classes describing the schema of common Lambda event triggers                                                                                        |
+| [**Parser**](./utilities/parser.md){target="_blank"}                                                                                                                          | Data parsing and deep validation using Pydantic                                                                                                           |
+| [**Idempotency**](./utilities/idempotency.md){target="_blank"}                                                                                                                | Idempotent Lambda handler                                                                                                                                 |
+| [**Feature Flags**](./utilities/feature_flags.md){target="_blank"}                                                                                                            | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
+| [**Streaming**](./utilities/streaming.md){target="_blank"}                                                                                                                    | Streams datasets larger than the available memory as streaming data.                                                                                      |
 
 ## Environment variables
 
@@ -703,18 +703,18 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | Environment variable                      | Description                                                                            | Utility                                                                             | Default               |
 | ----------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | --------------------- |
 | **POWERTOOLS_SERVICE_NAME**               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                                                 | `"service_undefined"` |
-| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics)                                                           | `None`                |
-| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer)                                                            | `false`               |
-| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer)                                                            | `true`                |
-| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer)                                                            | `true`                |
-| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory)                                | `false`               |
-| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger)                                                            | `false`               |
-| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger)                                                            | `0`                   |
-| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger)                                                            | `false`               |
-| **POWERTOOLS_PARAMETERS_MAX_AGE**         | Adjust how long values are kept in cache (in seconds)                                  | [Parameters](./utilities/parameters/#adjusting-cache-ttl)                           | `5`                   |
-| **POWERTOOLS_PARAMETERS_SSM_DECRYPT**     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters/#ssmprovider)                                   | `false`               |
+| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics){target="_blank"}                                                           | `None`                |
+| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer){target="_blank"}                                                            | `false`               |
+| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer){target="_blank"}                                                            | `true`                |
+| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer){target="_blank"}                                                            | `true`                |
+| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory){target="_blank"}                                | `false`               |
+| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger){target="_blank"}                                                            | `false`               |
+| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger){target="_blank"}                                                            | `0`                   |
+| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger){target="_blank"}                                                            | `false`               |
+| **POWERTOOLS_PARAMETERS_MAX_AGE**         | Adjust how long values are kept in cache (in seconds)                                  | [Parameters](./utilities/parameters/#adjusting-cache-ttl){target="_blank"}                           | `5`                   |
+| **POWERTOOLS_PARAMETERS_SSM_DECRYPT**     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters/#ssmprovider){target="_blank"}                                   | `false`               |
 | **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#increasing-verbosity-across-utilities) | `false`               |
-| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger)                                                            | `INFO`                |
+| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger){target="_blank"}                                                            | `INFO`                |
 
 ### Optimizing for non-production environments
 
@@ -757,7 +757,7 @@ The following companies, among others, use Powertools:
 
 ### Sharing your work
 
-Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/).
+Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/){target="_blank"}.
 
 ### Using Lambda Layer or SAR
 

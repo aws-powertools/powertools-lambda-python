@@ -108,7 +108,7 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 #### set_correlation_id method
 
-You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md) to easily access events properties.
+You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md){target="_blank"} to easily access events properties.
 
 === "set_correlation_id_method.py"
 
@@ -242,7 +242,7 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 #### Clearing all state
 
-Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
+Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html){target="_blank"}, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
 ???+ tip "Tip: When is this useful?"
     It is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
@@ -360,7 +360,7 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
 
 Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 
@@ -407,7 +407,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
 ???+ note
-	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation
+	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
 
 === "sampling_debug_logs.py"
 
@@ -744,4 +744,4 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 <!-- markdownlint-disable MD013 -->
 ### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
-As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460)
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460){target="_blank"}
