@@ -81,17 +81,17 @@ def check_envs():
 
 def verify_powertools_version() -> None:
     """
-    fetches the version that we import from the powertools layer and compares
+    fetches the version that we import from the Powertools for AWS Lambda (Python) layer and compares
     it with expected version set in environment variable, which we pass during deployment.
     :raise ValueError if the expected version is not the same as the version we get from the layer
     """
-    logger.info("Checking Powertools version in library...")
+    logger.info("Checking Powertools for AWS Lambda (Python) version in library...")
     current_version = version("aws_lambda_powertools")
     if powertools_version != current_version:
         raise ValueError(
-            f'Expected Powertools version is "{powertools_version}", but layer contains version "{current_version}"'
+            f'Expected Powertools for AWS Lambda (Python) version is "{powertools_version}", but layer contains version "{current_version}"'
         )
-    logger.info(f"Current Powertools version is: {current_version} [{_get_architecture()}]")
+    logger.info(f"Current Powertools for AWS Lambda (Python) version is: {current_version} [{_get_architecture()}]")
 
 
 def send_notification():

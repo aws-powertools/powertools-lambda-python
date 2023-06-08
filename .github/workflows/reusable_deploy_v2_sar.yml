@@ -1,6 +1,6 @@
 name: Deploy V2 SAR
 
-# SAR deployment process
+# PROCESS
 #
 # 1. This workflow starts after the layer artifact is produced on `publish_v2_layer`
 # 2. We use the same layer artifact to ensure the SAR app is consistent with the published Lambda Layer
@@ -8,6 +8,26 @@ name: Deploy V2 SAR
 # 4. We use `sam package` and `sam publish` to publish the SAR app
 # 5. We remove the previous Canary stack (if present) and deploy a new one to test the SAR App. We retain the Canary in the account for debugging purposes
 # 6. Finally the published SAR app is made public on the PROD environment
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# sar-beta:
+#   needs: build-layer
+#   permissions:
+#     # lower privilege propagated from parent workflow (release.yml)
+#     id-token: write
+#     contents: read
+#     pull-requests: none
+#     pages: none
+#   uses: ./.github/workflows/reusable_deploy_v2_sar.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     package-version: ${{ inputs.latest_published_version }}
 
 permissions:
   id-token: write
@@ -50,12 +70,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
       - name: AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f # v2.1.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: AWS credentials SAR role
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f # v2.1.0
         id: aws-credentials-sar-role
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}

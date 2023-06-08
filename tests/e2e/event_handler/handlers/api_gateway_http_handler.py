@@ -1,10 +1,12 @@
 from aws_lambda_powertools.event_handler import (
     APIGatewayHttpResolver,
+    CORSConfig,
     Response,
     content_types,
 )
 
-app = APIGatewayHttpResolver()
+cors_config = CORSConfig(allow_origin="https://www.example.org", extra_origins=["https://dev.example.org"])
+app = APIGatewayHttpResolver(cors=cors_config)
 
 # The reason we use post is that whoever is writing tests can easily assert on the
 # content being sent (body, headers, cookies, content-type) to reduce cognitive load.

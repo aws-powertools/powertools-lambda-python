@@ -1,7 +1,8 @@
 name: Reusable publish documentation
 
+# see .github/workflows/on_push_docs.yml for docs
+
 env:
-  BRANCH: develop
   ORIGIN: awslabs/aws-lambda-powertools-python
 
 on:
@@ -20,10 +21,16 @@ on:
         required: false
         default: false
         type: boolean
+      git_ref:
+        description: "Branch or commit ID to checkout from"
+        required: false
+        type: string
+        default: develop
 
 permissions:
-  contents: write
-  pages: write
+  id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+  contents: write  # push to gh-pages
+  pages: write     # deploy gh-pages website
 
 jobs:
   publish_docs:
@@ -32,14 +39,16 @@ jobs:
     concurrency:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
+    environment: "Docs"
     steps:
       - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
         with:
           fetch-depth: 0
+          ref: ${{ inputs.git_ref }}
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
           python-version: "3.10"
           cache: "poetry"
@@ -56,6 +65,8 @@ jobs:
           git config pull.rebase true
           git config remote.origin.url >&- || git remote add origin https://github.com/"$ORIGIN"
           git pull origin "$BRANCH"
+        env:
+          BRANCH: ${{ inputs.git_ref }}
       - name: Build docs website and API reference
         env:
           VERSION: ${{ inputs.version }}
@@ -81,3 +92,27 @@ jobs:
           publish_dir: ./api
           keep_files: true
           destination_dir: latest/api
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+      - name: Copy API Docs
+        run: |
+          cp -r api site/
+      - name: Deploy Docs (Version)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.VERSION }}/
+      - name: Deploy Docs (Alias)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.ALIAS }}/

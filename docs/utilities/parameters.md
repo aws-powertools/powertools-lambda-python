@@ -91,6 +91,9 @@ You can fetch application configurations in AWS AppConfig using `get_app_config`
 
 The following will retrieve the latest version and store it in the cache.
 
+???+ warning
+	We make two API calls to fetch each unique configuration name during the first time. This is by design in AppConfig. Please consider adjusting `max_age` parameter to enhance performance.
+
 === "getting_started_appconfig.py"
     ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/getting_started_appconfig.py"

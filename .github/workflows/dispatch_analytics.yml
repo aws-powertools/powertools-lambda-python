@@ -1,16 +1,26 @@
 name: Dispatch analytics
 
+# PROCESS
+#
+# 1. Trade GitHub JWT token with AWS credentials for the analytics account
+# 2. Invoke a Lambda function dispatcher synchronously with the read-only scoped JWT token
+# 3. The dispatcher function will call GitHub APIs to read data from the last hour and aggregate for operational analytics
+
+# USAGE
+#
+# NOTE: meant to use as a scheduled task only (or manually for debugging purposes).
+
 on:
   workflow_dispatch:
 
   schedule:
-    - cron: '0 * * * *'
+    - cron: "0 * * * *"
 
 permissions:
   id-token: write
   actions: read
   checks: read
-  contents: read
+  contents: write
   deployments: read
   issues: read
   discussions: read
@@ -23,13 +33,14 @@ permissions:
 
 jobs:
   dispatch_token:
+    if: github.repository == 'awslabs/aws-lambda-powertools-python'
     concurrency:
       group: analytics
     runs-on: ubuntu-latest
     environment: analytics
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f # v2.1.0
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ANALYTICS_ROLE_ARN }}

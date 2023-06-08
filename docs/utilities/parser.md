@@ -16,7 +16,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
 
@@ -168,6 +168,7 @@ Parser comes with the following built-in models:
 | **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                            |
 | **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
 | **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                               |
+| **KinesisFirehoseSqsModel**             | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
 | **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                           |
 | **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
 | **S3Model**                             | Lambda Event Source payload for Amazon S3                                             |

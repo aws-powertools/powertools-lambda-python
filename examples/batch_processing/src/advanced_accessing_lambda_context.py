@@ -1,4 +1,3 @@
-import json
 from typing import Optional
 
 from aws_lambda_powertools import Logger, Tracer
@@ -17,11 +16,9 @@ logger = Logger()
 
 @tracer.capture_method
 def record_handler(record: SQSRecord, lambda_context: Optional[LambdaContext] = None):
-    payload: str = record.body
-    if payload:
-        item: dict = json.loads(payload)
-        logger.info(item)
-    ...
+    if lambda_context is not None:
+        remaining_time = lambda_context.get_remaining_time_in_millis()
+        logger.info(remaining_time)
 
 
 @logger.inject_lambda_context
