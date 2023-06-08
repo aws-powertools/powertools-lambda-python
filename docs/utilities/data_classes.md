@@ -1130,13 +1130,13 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
 
 === "app.py"
 
-    ```python
+    ```python hl_lines="2 8"
     --8<-- "examples/event_sources/src/vpc_lattice.py"
     ```
 
 === "Lattice Example Event"
 
-    ```python
+    ```json
     --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
     ```
 
