@@ -3,16 +3,16 @@ from pydantic import BaseModel, Field
 
 from aws_lambda_powertools.utilities.parser import ValidationError, event_parser
 from aws_lambda_powertools.utilities.parser.models import (
-    CustomResourceCreateModel,
-    CustomResourceDeleteModel,
-    CustomResourceUpdateModel,
+    CloudFormationCustomResourceCreateModel,
+    CloudFormationCustomResourceDeleteModel,
+    CloudFormationCustomResourceUpdateModel,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 
 
-@event_parser(model=CustomResourceCreateModel)
-def handle_create_custom_resource(event: CustomResourceCreateModel, _: LambdaContext):
+@event_parser(model=CloudFormationCustomResourceCreateModel)
+def handle_create_custom_resource(event: CloudFormationCustomResourceCreateModel, _: LambdaContext):
     assert event.request_type == "Create"
     assert event.request_id == "xxxxx-d2a0-4dfb-ab1f-xxxxxx"
     assert event.service_token == "arn:aws:lambda:us-east-1:xxx:function:xxxx-CrbuiltinfunctionidProvi-2vKAalSppmKe"
@@ -29,8 +29,8 @@ def handle_create_custom_resource(event: CustomResourceCreateModel, _: LambdaCon
     }
 
 
-@event_parser(model=CustomResourceUpdateModel)
-def handle_update_custom_resource(event: CustomResourceUpdateModel, _: LambdaContext):
+@event_parser(model=CloudFormationCustomResourceUpdateModel)
+def handle_update_custom_resource(event: CloudFormationCustomResourceUpdateModel, _: LambdaContext):
     assert event.request_type == "Update"
     assert event.request_id == "xxxxx-d2a0-4dfb-ab1f-xxxxxx"
     assert event.service_token == "arn:aws:lambda:us-east-1:xxx:function:xxxx-CrbuiltinfunctionidProvi-2vKAalSppmKe"
@@ -51,8 +51,8 @@ def handle_update_custom_resource(event: CustomResourceUpdateModel, _: LambdaCon
     }
 
 
-@event_parser(model=CustomResourceDeleteModel)
-def handle_delete_custom_resource(event: CustomResourceDeleteModel, _: LambdaContext):
+@event_parser(model=CloudFormationCustomResourceDeleteModel)
+def handle_delete_custom_resource(event: CloudFormationCustomResourceDeleteModel, _: LambdaContext):
     assert event.request_type == "Delete"
     assert event.request_id == "xxxxx-d2a0-4dfb-ab1f-xxxxxx"
     assert event.service_token == "arn:aws:lambda:us-east-1:xxx:function:xxxx-CrbuiltinfunctionidProvi-2vKAalSppmKe"
@@ -106,7 +106,7 @@ class MyModel(BaseModel):
     MyProps: str
 
 
-class MyCustomResource(CustomResourceCreateModel):
+class MyCustomResource(CloudFormationCustomResourceCreateModel):
     resource_properties: MyModel = Field(..., alias="ResourceProperties")
 
 

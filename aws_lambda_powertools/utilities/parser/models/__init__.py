@@ -14,17 +14,17 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .cloudformation_custom_resource import (
+    CloudFormationCustomResourceBaseModel,
+    CloudFormationCustomResourceCreateModel,
+    CloudFormationCustomResourceDeleteModel,
+    CloudFormationCustomResourceUpdateModel,
+)
 from .cloudwatch import (
     CloudWatchLogsData,
     CloudWatchLogsDecode,
     CloudWatchLogsLogEvent,
     CloudWatchLogsModel,
-)
-from .custom_resource import (
-    CustomResourceBaseModel,
-    CustomResourceCreateModel,
-    CustomResourceDeleteModel,
-    CustomResourceUpdateModel,
 )
 from .dynamodb import (
     DynamoDBStreamChangedRecordModel,
@@ -153,8 +153,8 @@ __all__ = [
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",
-    "CustomResourceUpdateModel",
-    "CustomResourceDeleteModel",
-    "CustomResourceCreateModel",
-    "CustomResourceBaseModel",
+    "CloudFormationCustomResourceUpdateModel",
+    "CloudFormationCustomResourceDeleteModel",
+    "CloudFormationCustomResourceCreateModel",
+    "CloudFormationCustomResourceBaseModel",
 ]

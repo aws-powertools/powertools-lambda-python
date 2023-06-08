@@ -156,30 +156,30 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                              | Description                                                                           |
-| --------------------------------------- | ------------------------------------------------------------------------------------- |
-| **AlbModel**                            | Lambda Event Source payload for Amazon Application Load Balancer                      |
-| **APIGatewayProxyEventModel**           | Lambda Event Source payload for Amazon API Gateway                                    |
-| **APIGatewayProxyEventV2Model**         | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
-| **CloudwatchLogsModel**                 | Lambda Event Source payload for Amazon CloudWatch Logs                                |
-| **DynamoDBStreamModel**                 | Lambda Event Source payload for Amazon DynamoDB Streams                               |
-| **EventBridgeModel**                    | Lambda Event Source payload for Amazon EventBridge                                    |
-| **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                                       |
-| **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                            |
-| **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
-| **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                               |
-| **KinesisFirehoseSqsModel**             | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
-| **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                           |
-| **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
-| **S3Model**                             | Lambda Event Source payload for Amazon S3                                             |
-| **S3ObjectLambdaEvent**                 | Lambda Event Source payload for Amazon S3 Object Lambda                               |
-| **S3SqsEventNotificationModel**         | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS) |
-| **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                           |
-| **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service                    |
-| **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                            |
-| **CustomResourceCreateModel**           | Lambda Event Source payload for AWS CloudFormation 'create' custom resource           |
-| **CustomResourceUpdateModel**           | Lambda Event Source payload for AWS CloudFormation 'update' custom resource           |
-| **CustomResourceDeleteModel**           | Lambda Event Source payload for AWS CloudFormation 'delete' custom resource           |
+| Model name                                  | Description                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
+| **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
+| **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
+| **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                |
+| **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                               |
+| **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                    |
+| **KafkaMskEventModel**                      | Lambda Event Source payload for AWS MSK payload                                       |
+| **KafkaSelfManagedEventModel**              | Lambda Event Source payload for self managed Kafka payload                            |
+| **KinesisDataStreamModel**                  | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
+| **KinesisFirehoseModel**                    | Lambda Event Source payload for Amazon Kinesis Firehose                               |
+| **KinesisFirehoseSqsModel**                 | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
+| **LambdaFunctionUrlModel**                  | Lambda Event Source payload for Lambda Function URL payload                           |
+| **S3EventNotificationEventBridgeModel**     | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
+| **S3Model**                                 | Lambda Event Source payload for Amazon S3                                             |
+| **S3ObjectLambdaEvent**                     | Lambda Event Source payload for Amazon S3 Object Lambda                               |
+| **S3SqsEventNotificationModel**             | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS) |
+| **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
+| **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
+| **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
+| **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation 'create' custom resource           |
+| **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation 'update' custom resource           |
+| **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation 'delete' custom resource           |
 
 #### Extending built-in models
 
