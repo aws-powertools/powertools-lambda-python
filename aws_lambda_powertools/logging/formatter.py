@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import json
 import logging
@@ -6,10 +8,11 @@ import time
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from functools import partial
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterable, List, Mapping, Optional, Tuple, Union
 
 from ..shared import constants
 from ..shared.functions import powertools_dev_is_set
+from .types import PowertoolsLogRecord
 
 RESERVED_LOG_ATTRS = (
     "name",
@@ -66,7 +69,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def __init__(
         self,
-        json_serializer: Optional[Callable[[Dict], str]] = None,
+        json_serializer: Optional[Callable[[Mapping], str]] = None,
         json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
         json_default: Optional[Callable[[Any], Any]] = None,
         datefmt: Optional[str] = None,
@@ -144,7 +147,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         super().__init__(datefmt=self.datefmt)
 
-    def serialize(self, log: Dict) -> str:
+    def serialize(self, log: PowertoolsLogRecord | Mapping) -> str:
         """Serialize structured log dict to JSON str"""
         return self.json_serializer(log)
 
