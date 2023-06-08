@@ -102,6 +102,7 @@ Log Data Event for Troubleshooting
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
+| [VPC Lattice](#vpc-lattice)                                               | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
@@ -1119,6 +1120,24 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         # Multiple records can be delivered in a single event
         for record in event.records:
             do_something_with(record.body)
+    ```
+
+### VPC Lattice
+
+You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.
+
+[Click here](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"} for more information about using AWS Lambda with Amazon VPC Lattice.
+
+=== "app.py"
+
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/vpc_lattice.py"
+    ```
+
+=== "Lattice Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
     ```
 
 ## Advanced
