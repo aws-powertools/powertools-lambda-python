@@ -23,7 +23,7 @@ Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily 
 
 You might have events that contains encoded JSON payloads as string, base64, or even in compressed format. It is a common use case to decode and extract them partially or fully as part of your Lambda function invocation.
 
-Powertools for AWS Lambda (Python) also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
+Powertools for AWS Lambda (Python) also have utilities like [validation](validation.md){target="_blank"}, [idempotency](idempotency.md){target="_blank"}, or [feature flags](feature_flags.md){target="_blank"} where you might need to extract a portion of your data before using them.
 
 ???+ info "Terminology"
     **Envelope** is the terminology we use for the **JMESPath expression** to extract your JSON object from your data input. We might use those two terms interchangeably.
@@ -81,7 +81,7 @@ These are all built-in envelopes you can use along with their expression as a re
 | **`SQS`**                         | `Records[*].powertools_json(body)`                                                        |
 
 ???+ tip "Using SNS?"
-    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"}. It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
+    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html). It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
 
 ## Advanced
 
