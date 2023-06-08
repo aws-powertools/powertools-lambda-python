@@ -154,7 +154,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
     * Maximum of 29 user-defined dimensions
     * Namespace is set, and no more than one
-    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
+    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"}
 
 #### Raising SchemaValidationError on empty metrics
 
@@ -191,7 +191,7 @@ If it's a cold start invocation, this feature will:
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
 ???+ info
-    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you'd prefer a flag to override it.
+    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
 ## Advanced
 
@@ -219,7 +219,7 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
 
 ???+ info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing). Keep the following formula in mind:
+    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}. Keep the following formula in mind:
 
     **unique metric = (metric_name + dimension_name + dimension_value)**
 
@@ -292,7 +292,7 @@ The former creates metrics asynchronously via CloudWatch Logs, and the latter us
 !!! important "Key concept"
     CloudWatch [considers a metric unique](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric){target="_blank"} by a combination of metric **name**, metric **namespace**, and zero or more metric **dimensions**.
 
-With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html) defining one or more metrics with distinct dimensions.
+With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"} defining one or more metrics with distinct dimensions.
 
 This is a subtle yet important distinction. Imagine you had the following metrics to emit:
 
@@ -329,7 +329,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/).
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
 --8<-- "examples/metrics/src/run_tests_env_var.sh"
@@ -374,4 +374,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py)
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}

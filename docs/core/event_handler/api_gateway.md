@@ -102,7 +102,7 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 
 #### Lambda Function URL
 
-When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), you can use `LambdaFunctionUrlResolver`.
+When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html){target="_blank"}, you can use `LambdaFunctionUrlResolver`.
 
 === "getting_started_lambda_function_url_resolver.py"
 
@@ -253,7 +253,7 @@ When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apig
 
 **Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/awslabs/aws-lambda-powertools-roadmap/issues/34).
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/awslabs/aws-lambda-powertools-roadmap/issues/34){target="_blank"}.
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
@@ -344,7 +344,7 @@ You can use the `Response` class to have full control over the response. For exa
     Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
 
 ???+ warning "Using multiple values for HTTP headers in ALB?"
-    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) to serialize response headers correctly.
+    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers){target="_blank"} to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 

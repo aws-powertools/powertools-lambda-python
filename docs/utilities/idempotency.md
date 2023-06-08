@@ -75,7 +75,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 | TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
 
 ???+ tip "Tip: You can share a single state table for all functions"
-    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/) in addition to the idempotency key as a hash key.
+    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
 
 ```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
 Resources:
@@ -104,14 +104,14 @@ Resources:
 ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
-    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items).
+    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
     Larger items cannot be written to DynamoDB and will cause exceptions.
 
 ???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
     result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/) to
+    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
     estimate the cost.
 
 ### Idempotent decorator
@@ -410,7 +410,7 @@ Imagine the function executes successfully, but the client never receives the re
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/), Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"}, Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
 ???+ example
     If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
@@ -706,7 +706,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 | **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                             |
 | **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                         |
 | **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                          |
-| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html) in the standard library.            |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank"} in the standard library. |
 
 ### Handling concurrent executions with the same payload
 
@@ -912,7 +912,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 
-The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html) when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"} when constructing the persistence store.
 
 === "Custom session"
 
@@ -1166,7 +1166,7 @@ The idempotency utility provides several routes to test your code.
 ### Disabling the idempotency utility
 
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
-with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html) fixture:
+with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html){target="_blank"} fixture:
 
 === "tests.py"
 
@@ -1221,7 +1221,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html), you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "tests.py"
 
@@ -1281,7 +1281,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 ### How do I mock all DynamoDB I/O operations
 
-The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table) which it uses to access DynamoDB.
+The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"} which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.
 
 === "tests.py"
@@ -1341,4 +1341,4 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
-[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/).
+[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank"}.

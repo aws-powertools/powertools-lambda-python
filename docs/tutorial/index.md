@@ -111,7 +111,7 @@ As a result, a local API endpoint will be exposed and you can invoke it using yo
 ```
 
 ???+ info
-    To learn more about local testing, please visit the [AWS SAM CLI local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html) documentation.
+    To learn more about local testing, please visit the [AWS SAM CLI local testing](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-local-start-api.html){target="_blank"} documentation.
 
 #### Live test
 
@@ -147,7 +147,7 @@ At the end of the deployment, you will find the API endpoint URL within `Outputs
 ```
 
 ???+ Info
-    For more details on AWS SAM deployment mechanism, see [SAM Deploy reference docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html).
+    For more details on AWS SAM deployment mechanism, see [SAM Deploy reference docs](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-cli-command-reference-sam-deploy.html){target="_blank"}.
 
 ## Routing
 
@@ -364,13 +364,13 @@ Lastly, we used `return app.resolve(event, context)` so Event Handler can resolv
 From here, we could handle [404 routes](../core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](../core/event_handler/api_gateway.md#exception-handling){target="_blank"}, [access query strings, payload](../core/event_handler/api_gateway.md#accessing-request-details){target="_blank"}, etc.
 
 ???+ tip
-    If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/)'s article.
+    If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/){target="_blank"}'s article.
 
 ## Structured Logging
 
 Over time, you realize that searching logs as text results in poor observability, it's hard to create metrics from, enumerate common exceptions, etc.
 
-Then, you decided to propose production quality logging capabilities to your Lambda code. You found out that by having logs as `JSON` you can [structure them](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html), so that you can use any Log Analytics tool out there to quickly analyze them.
+Then, you decided to propose production quality logging capabilities to your Lambda code. You found out that by having logs as `JSON` you can [structure them](https://docs.aws.amazon.com/lambda/latest/operatorguide/parse-logs.html){target="_blank"}, so that you can use any Log Analytics tool out there to quickly analyze them.
 
 This helps not only in searching, but produces consistent logs containing enough context and data to ask arbitrary questions on the status of your system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.
 
@@ -709,7 +709,7 @@ Let's break it down:
 * **L45**: We include the final response under `response` key as part of the `handler` subsegment.
 
 ???+ info
-    If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/).
+    If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/){target="_blank"}.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint.
 
@@ -788,7 +788,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 ![CloudWatch ServiceLens View](../media/tracer_utility_showcase_3.png)
 
 ???+ info
-    For more information on Amazon CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html).
+    For more information on Amazon CloudWatch ServiceLens, please visit [link](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/ServiceLens.html){target="_blank"}.
 
 ## Custom Metrics
 
@@ -796,7 +796,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 
 Let's add custom metrics to better understand our application and business behavior (e.g. number of reservations, etc.).
 
-By default, AWS Lambda adds [invocation and performance metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}, and Amazon API Gateway adds [latency and some HTTP metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics).
+By default, AWS Lambda adds [invocation and performance metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}, and Amazon API Gateway adds [latency and some HTTP metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics){target="_blank"}.
 
 ???+ tip
     You can [optionally enable detailed metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metricdimensions){target="_blank"} per each API route, stage, and method in API Gateway.
@@ -927,7 +927,7 @@ There's a lot going on, let's break this down:
 ???+ question
     But what permissions do I need to send metrics to CloudWatch?
 
-Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html#cloudwatch-put-metric-policy){target="_blank"} policy in SAM.
+Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html#cloudwatch-put-metric-policy){target="_blank"}{target="_blank"} policy in SAM.
 
 ???+ note "Adding metrics via AWS SDK gives a lot of flexibility at a cost"
     `put_metric_data` is a synchronous call to CloudWatch Metrics API. This means establishing a connection to CloudWatch endpoint, sending metrics payload, and waiting from a response.
@@ -936,7 +936,7 @@ Within `template.yaml`, we add [CloudWatchPutMetricPolicy](https://docs.aws.amaz
 
 ### Simplifying with Metrics
 
-[Powertools for AWS Lambda (Python) Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html) to create custom metrics **asynchronously** via a native integration with Lambda.
+[Powertools for AWS Lambda (Python) Metrics](../core/metrics.md){target="_blank} uses [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"} to create custom metrics **asynchronously** via a native integration with Lambda.
 
 In general terms, EMF is a specification that expects metrics in a JSON payload within CloudWatch Logs. Lambda ingests all logs emitted by a given function into CloudWatch Logs. CloudWatch automatically looks up for log entries that follow the EMF format and transforms them into a CloudWatch metric.
 
@@ -1041,7 +1041,7 @@ When it comes to the observability features ([Tracer](../core/tracer.md){target=
 This requires a change in mindset to ensure operational excellence is part of the software development lifecycle.
 
 ???+ tip
-    You can find more details on other leading practices described in the [Well-Architected Serverless Lens](https://aws.amazon.com/blogs/aws/new-serverless-lens-in-aws-well-architected-tool/).
+    You can find more details on other leading practices described in the [Well-Architected Serverless Lens](https://aws.amazon.com/blogs/aws/new-serverless-lens-in-aws-well-architected-tool/){target="_blank"}.
 
     Powertools for AWS Lambda (Python) is largely designed to make some of these practices easier to adopt from day 1.
 

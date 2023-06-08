@@ -91,7 +91,7 @@ You can also gracefully handle schema validation errors by catching `SchemaValid
 
 You might want to validate only a portion of your event - This is what the `envelope` parameter is for.
 
-Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html) to extract a portion of JSON you want before applying JSON Schema validation.
+Envelopes are [JMESPath expressions](https://jmespath.org/tutorial.html){target="_blank"} to extract a portion of JSON you want before applying JSON Schema validation.
 
 Here is a sample custom EventBridge event, where we only validate what's inside the `detail` key:
 
@@ -113,7 +113,7 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
     --8<-- "examples/validation/src/getting_started_validator_unwrapping_payload.json"
     ```
 
-This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections), combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions) and [function expressions](https://jmespath.org/tutorial.html#functions).
+This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections){target="_blank"}, combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions){target="_blank"} and [function expressions](https://jmespath.org/tutorial.html#functions){target="_blank"}.
 
 When combined, these features allow you to extract what you need before validating the actual payload.
 

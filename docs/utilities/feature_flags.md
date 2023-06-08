@@ -17,7 +17,7 @@ Feature flags are used to modify behaviour without changing the application's co
 **Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
-    You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
+    You can use [Parameters utility](parameters.md){target="_blank"} for static flags while this utility can do both static and dynamic feature flags.
 
 ???+ warning
     Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
@@ -453,7 +453,7 @@ These are the available options for further customization.
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
-| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                                                  |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                          |
 
 === "appconfig_provider_options.py"
 

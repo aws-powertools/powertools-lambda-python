@@ -1617,21 +1617,6 @@ files = [
 ]
 
 [[package]]
-name = "mkdocs-open-in-new-tab"
-version = "1.0.2"
-description = "MkDocs plugin to open outgoing links and PDFs in new tab."
-category = "dev"
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "mkdocs-open-in-new-tab-1.0.2.tar.gz", hash = "sha256:9d4f20210205e1bc8565c4d07391edb6823b7226323ec61f1f00f38fcb334eb3"},
-    {file = "mkdocs_open_in_new_tab-1.0.2-py3-none-any.whl", hash = "sha256:1d65041f458d3f402cd66008416e81f622c4f60910f96c4616d9681c82c634be"},
-]
-
-[package.dependencies]
-mkdocs = "*"
-
-[[package]]
 name = "mpmath"
 version = "1.3.0"
 description = "Python library for arbitrary-precision floating-point arithmetic"
@@ -3102,4 +3087,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "f18669c45609cdb168942ff0f43ceaa3efacf985b3ae5e05e258ea1a910acc5e"
+content-hash = "e19d37cdb2bff43a2a3a193503b12e9d7816a7875a1ac8302d04736a2f9a5052"

@@ -14,9 +14,9 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 
     You can choose to support us in three ways:
 
-    1) [**Become a reference customer**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E). This gives us permission to list your company in our documentation.
+    1) [**Become a reference customer**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
 
-    2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
+    2) [**Share your work**](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
 
     3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
 
@@ -462,8 +462,8 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
 | App                                                                                                                                                            | ARN                                                                                                                            | Description                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer)             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
-| [aws-lambda-powertools-python-layer-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64) | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
+| [aws-lambda-powertools-python-layer](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
+| [aws-lambda-powertools-python-layer-arm64](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
 
 ??? note "Click to expand and copy SAR code snippets for popular frameworks"
 
@@ -547,7 +547,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
     === "Terraform"
 
-    	> Credits to [Dani Comnea](https://github.com/DanyC97) for providing the Terraform equivalent.
+    	> Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank"} for providing the Terraform equivalent.
 
         ```terraform hl_lines="12-13 15-20 23-25 40"
         terraform {
@@ -595,7 +595,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
 ??? example "Example: Least-privileged IAM permissions to deploy Layer"
 
-    > Credits to [mwarkentin](https://github.com/mwarkentin) for providing the scoped down IAM permissions.
+    > Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank"} for providing the scoped down IAM permissions.
 
     The region and the account id for `CloudFormationTransform` and `GetCfnTemplate` are fixed.
 
@@ -757,7 +757,7 @@ The following companies, among others, use Powertools:
 
 ### Sharing your work
 
-Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/).
+Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://awslabs.github.io/aws-lambda-powertools-python/latest/we_made_this/){target="_blank"}.
 
 ### Using Lambda Layer or SAR
 
