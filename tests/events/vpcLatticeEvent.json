@@ -7,7 +7,9 @@
     "host": "test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws",
     "accept": "*/*"
   },
-  "query_string_parameters": {},
-  "body": "",
-  "is_base64_encoded": false
+  "query_string_parameters": {
+    "order-id": "1"
+  },
+  "body": "eyJ0ZXN0IjogImV2ZW50In0=",
+  "is_base64_encoded": true
 }

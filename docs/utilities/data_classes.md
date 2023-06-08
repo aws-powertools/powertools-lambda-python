@@ -1124,68 +1124,21 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
 
 ### VPC Lattice
 
-The VPC Lattice service supports Lambda invocation for requests over both HTTP and HTTPS. The service sends an event in JSON format, and adds the `X-Forwarded-For` header to every request. The service also adds the X-Forwarded-Proto header to requests over HTTPS.
+You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.
 
-The service Base64 encodes the body and sets isBase64Encoded to true, if the content-encoding header is present, and the content type is not one of the following:
-
-* `text/*`
-* `application/json`
-* `application/xml`
-* `application/javascript`
-
-If the content-encoding header is not present, Base64 encoding depends on the content type. For the content types, `text/*`, `application/json`, `application/xml`, and `application/javascript`, the service sends the body as is and sets `is_base64_encoded` to `false`.
+[Click here](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"} for more information about using AWS Lambda with Amazon VPC Lattice.
 
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, VPCLatticeEvent
-
-    @event_source(data_class=VPCLatticeEvent)
-    def lambda_handler(event: VPCLatticeEvent, context):
-        do_something_with(event.body)
-
+    --8<-- "examples/event_sources/src/vpc_lattice.py"
     ```
 
 === "Lattice Example Event"
 
-    ```json
-    {
-        "raw_path": "/testpath",
-        "method": "GET",
-        "headers": {
-            "user_agent": "curl/7.64.1",
-            "x-forwarded-for": "10.213.229.10",
-            "host": "test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws",
-            "accept": "*/*"
-        },
-        "query_string_parameters": {
-            "key": "value"
-        },
-        "body": "...",
-        "is_base64_encoded": false
-    }
-    ```
-
-=== "Lattice Return Object"
-
     ```python
-    response = {
-        "isBase64Encoded": False,
-        "statusCode": 200,
-        headers: {
-            "Content-Type": "application/text"
-        },
-        body: "Event Response to VPC Lattice 🔥🚀🔥"
-    }
-
-    return response
+    --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
     ```
-
-The response from your Lambda function must include the Base64 encoding status, status code, and headers. You can omit the body.
-
-To include a binary content in the body of the response, you must Base64 encode the content and set `isBase64Encoded` to `True`. The service decodes the content to retrieve the binary content and sends it to the client in the body of the HTTP response.
-
-The VPC Lattice service does not honor hop-by-hop headers, such as `Connection` or `Transfer-Encoding`. You can omit the `Content-Length` header because the service computes it before sending responses to clients.
 
 ## Advanced
 

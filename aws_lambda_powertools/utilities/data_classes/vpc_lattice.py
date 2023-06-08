@@ -3,7 +3,7 @@ from typing import Any, Dict, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     DictWrapper,
-    get_header_value
+    get_header_value,
 )
 
 
@@ -89,4 +89,3 @@ class VPCLatticeEvent(DictWrapper):
             Header value
         """
         return get_header_value(self.headers, name, default_value, case_sensitive)
-

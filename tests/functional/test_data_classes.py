@@ -25,7 +25,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SESEvent,
     SNSEvent,
     SQSEvent,
-    VPCLatticeEvent
+    VPCLatticeEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     APIGatewayAuthorizerEventV2,
@@ -2048,6 +2048,10 @@ def test_vpc_lattice_event():
     event = VPCLatticeEvent(load_event("vpcLatticeEvent.json"))
 
     assert event.raw_path == event["raw_path"]
+    assert event.get_query_string_value("order-id") == "1"
+    assert event.get_header_value("user_agent") == "curl/7.64.1"
+    assert event.decoded_body == '{"test": "event"}'
+    assert event.json_body == {"test": "event"}
     assert event.method == event["method"]
     assert event.headers == event["headers"]
     assert event.query_string_parameters == event["query_string_parameters"]
