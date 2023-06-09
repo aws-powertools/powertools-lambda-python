@@ -5,7 +5,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: v4.4.0
     hooks:
       - id: check-merge-conflict
       - id: trailing-whitespace
@@ -30,9 +30,9 @@ repos:
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: "11c08644ce6df850480d98f628596446a526cbc6" # frozen: v0.31.1
+    rev: "v0.34.0"
     hooks:
-      - id: markdownlint
+      - id: markdownlint-docker
         args: ["--fix"]
   - repo: local
     hooks:
@@ -43,7 +43,7 @@ repos:
         types: [yaml]
         files: examples/.*
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.23
+    rev: v1.6.24
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]
