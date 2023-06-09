@@ -76,6 +76,14 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 
 * [aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig](https://aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig){target="_blank"}
 
+### Designing for Idempotency
+
+> **Author: [Valentin Dreismann](linkedin.com/in/valentin-dreismann-69694b16a){target="_blank"}** :material-linkedin:
+
+This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
+
+* [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
