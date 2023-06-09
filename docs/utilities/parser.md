@@ -161,9 +161,9 @@ Parser comes with the following built-in models:
 | **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
 | **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
 | **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
-| **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation 'create' custom resource           |
-| **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation 'update' custom resource           |
-| **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation 'delete' custom resource           |
+| **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
+| **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                 |
+| **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                 |
 | **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                |
 | **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                               |
 | **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                    |
