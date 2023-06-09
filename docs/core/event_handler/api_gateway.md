@@ -327,7 +327,7 @@ For convenience, these are the default values when using `CORSConfig` to enable 
     If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
 
 | Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
-|----------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
 | **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
 | **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
@@ -367,7 +367,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 === "compressing_responses.py"
 
-    ```python hl_lines="14"
+    ```python hl_lines="17 27"
      --8<-- "examples/event_handler_rest/src/compressing_responses.py"
     ```
 
@@ -486,7 +486,7 @@ When necessary, you can set a prefix when including a router object. This means 
 You can use specialized router classes according to the type of event that you are resolving. This way you'll get type hints from your IDE as you access the `current_event` property.
 
 | Router                  | Resolver                  | `current_event` type   |
-|-------------------------|---------------------------|------------------------|
+| ----------------------- | ------------------------- | ---------------------- |
 | APIGatewayRouter        | APIGatewayRestResolver    | APIGatewayProxyEvent   |
 | APIGatewayHttpRouter    | APIGatewayHttpResolver    | APIGatewayProxyEventV2 |
 | ALBRouter               | ALBResolver               | ALBEvent               |
