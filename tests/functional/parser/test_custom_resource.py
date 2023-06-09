@@ -70,17 +70,17 @@ def handle_delete_custom_resource(event: CloudFormationCustomResourceDeleteModel
 
 
 def test_create_trigger_event():
-    event_dict = load_event("customResourceCreate.json")
+    event_dict = load_event("cloudformationCustomResourceCreate.json")
     handle_create_custom_resource(event_dict, LambdaContext())
 
 
 def test_update_trigger_event():
-    event_dict = load_event("customResourceUpdate.json")
+    event_dict = load_event("cloudformationCustomResourceUpdate.json")
     handle_update_custom_resource(event_dict, LambdaContext())
 
 
 def test_delete_trigger_event():
-    event_dict = load_event("customResourceDelete.json")
+    event_dict = load_event("cloudformationCustomResourceDelete.json")
     handle_delete_custom_resource(event_dict, LambdaContext())
 
 
@@ -126,5 +126,5 @@ def handle_create_custom_resource_extended_model(event: MyCustomResource, _: Lam
 
 
 def test_create_trigger_event_custom_model():
-    event_dict = load_event("customResourceCreate.json")
+    event_dict = load_event("cloudformationCustomResourceCreate.json")
     handle_create_custom_resource_extended_model(event_dict, LambdaContext())
