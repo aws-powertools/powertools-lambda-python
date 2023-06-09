@@ -28,4 +28,4 @@ class CloudFormationCustomResourceDeleteModel(CloudFormationCustomResourceBaseMo
 
 class CloudFormationCustomResourceUpdateModel(CloudFormationCustomResourceBaseModel):
     request_type: Literal["Update"] = Field(..., alias="RequestType")
-    old_resource_properties: Dict[str, Any] | Type[BaseModel] = Field(..., alias="OldResourceProperties")
+    old_resource_properties: Dict[str, Any] | Type[BaseModel] | None = Field(None, alias="OldResourceProperties")
