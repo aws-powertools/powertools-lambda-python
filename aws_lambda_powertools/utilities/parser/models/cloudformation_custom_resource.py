@@ -1,4 +1,6 @@
-from typing import Any, Dict, Type, Union
+from __future__ import annotations
+
+from typing import Any, Dict, Type
 
 from pydantic import BaseModel, Field, HttpUrl
 
