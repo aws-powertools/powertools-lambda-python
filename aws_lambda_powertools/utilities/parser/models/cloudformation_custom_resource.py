@@ -13,7 +13,7 @@ class CloudFormationCustomResourceBaseModel(BaseModel):
     request_id: str = Field(..., alias="RequestId")
     logical_resource_id: str = Field(..., alias="LogicalResourceId")
     resource_type: str = Field(..., alias="ResourceType")
-    resource_properties: Union[Dict[str, Any], Type[BaseModel]] = Field(..., alias="ResourceProperties")
+    resource_properties: Dict[str, Any] | Type[BaseModel] | None = Field(None, alias="ResourceProperties")
 
 
 class CloudFormationCustomResourceCreateModel(CloudFormationCustomResourceBaseModel):
