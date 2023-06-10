@@ -106,7 +106,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```
 === "cdk.py"
 
-    ```python title="AWS Cloud Development Kit (CDK) Construct example"
+    ```python hl_lines="14 17 26-29"  title="AWS Cloud Development Kit (CDK) Construct example"
     from aws_cdk import RemovalPolicy
     from aws_cdk import aws_dynamodb as dynamodb
     from aws_cdk import aws_iam as iam
