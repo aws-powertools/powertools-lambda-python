@@ -109,12 +109,13 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```python title="AWS Cloud Development Kit (CDK) Construct example"
     from aws_cdk import RemovalPolicy
     from aws_cdk import aws_dynamodb as dynamodb
+    from aws_cdk import aws_iam as iam
     from constructs import Construct
 
 
     class IdempotencyConstruct(Construct):
 
-        def __init__(self, scope: Construct, id_: str) -> None:
+        def __init__(self, scope: Construct, id_: str, lambda_role: iam.Role) -> None:
             super().__init__(scope, id_)
             self.idempotency_table = dynamodb.Table(
                 self,
@@ -125,6 +126,18 @@ If you're not [changing the default configuration for the DynamoDB persistence l
                 time_to_live_attribute='expiration',
                 point_in_time_recovery=True,
             )
+            lambda_role.attach_inline_policy(
+            iam.Policy(
+                self,
+                'idempotency-policy',
+                statements=[
+                    iam.PolicyStatement(
+                        actions=['dynamodb:PutItem', 'dynamodb:GetItem', 'dynamodb:UpdateItem', 'dynamodb:DeleteItem'],
+                        resources=[self.idempotency_table.table_arn],
+                        effect=iam.Effect.ALLOW,
+                    )
+                ]
+            ))
     ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
