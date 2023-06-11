@@ -2,7 +2,7 @@
 from typing import Optional
 from botocore.auth import SigV4Auth
 from botocore.credentials import Credentials
-from boto3 import Session
+import botocore.session
 
 
 class SigV4AuthFactory:
@@ -45,7 +45,7 @@ class SigV4AuthFactory:
             self._credentials = Credentials(access_key=self._access_key, secret_key=self._secret_key, token=token)
 
         else:
-            self._credentials = Session().get_credentials()
+            self._credentials = botocore.session.Session().get_credentials()
 
         def __call__(self):
             return SigV4Auth(credentials=self._credentials, service=self._service, region=self._region)
