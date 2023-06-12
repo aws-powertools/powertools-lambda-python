@@ -15,7 +15,7 @@
 
 If your change doesn't seem to apply, please leave them unchecked.
 
-* [ ] [Meet tenets criteria](https://awslabs.github.io/aws-lambda-powertools-python/#tenets)
+* [ ] [Meet tenets criteria](https://docs.powertools.aws.dev/lambda-python/#tenets)
 * [ ] I have performed a self-review of this change
 * [ ] Changes have been tested
 * [ ] Changes are documented

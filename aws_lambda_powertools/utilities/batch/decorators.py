@@ -173,7 +173,7 @@ def process_partial_response(
         records: List[Dict] = event.get("Records", [])
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
-        docs = "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
+        docs = "https://docs.powertools.aws.dev/lambda-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
         raise ValueError(
             f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
             f"See sample events in our documentation for either {event_types}: \n {docs}"
@@ -237,7 +237,7 @@ def async_process_partial_response(
         records: List[Dict] = event.get("Records", [])
     except AttributeError:
         event_types = ", ".join(list(EventType.__members__))
-        docs = "https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
+        docs = "https://docs.powertools.aws.dev/lambda-python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
         raise ValueError(
             f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
             f"See sample events in our documentation for either {event_types}: \n {docs}"

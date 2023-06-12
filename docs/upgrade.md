@@ -151,7 +151,7 @@ In V2, we add all headers under `multiValueHeaders` key. This enables seamless s
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 

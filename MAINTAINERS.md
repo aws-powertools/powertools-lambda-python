@@ -144,7 +144,7 @@ Manage [labels](#labels), review issues regularly, and create new labels as need
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
+Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://docs.powertools.aws.dev/lambda-python/latest/roadmap/#roadmap-status-definition).
 
 Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might need additional feedback from the author, other customers, experienced community members and/or maintainers.
 
@@ -169,7 +169,7 @@ RFC is a collaborative process to help us get to the most optimal solution given
 Make sure you ask these questions in mind when reviewing:
 
 - Does it use our [RFC template](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
-- Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+- Does the match our [Tenets](https://docs.powertools.aws.dev/lambda-python/latest/#tenets)?
 - Does the proposal address the use case? If so, is the recommended usage explicit?
 - Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 - Can anyone familiar with the code base implement it?
@@ -243,7 +243,7 @@ Keep the `develop` branch at production quality at all times. Backport features 
 
 ### Manage Roadmap
 
-See [Roadmap section](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/)
+See [Roadmap section](https://docs.powertools.aws.dev/lambda-python/latest/roadmap/)
 
 Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.
 
