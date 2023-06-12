@@ -8,7 +8,7 @@ from .exceptions import (
     SchemaValidationError,
 )
 from .metric import single_metric
-from .metrics import EphemeralMetrics, Metrics
+from .metrics import CloudWatchEMF, EphemeralMetrics, Metrics
 
 __all__ = [
     "Metrics",
@@ -20,4 +20,5 @@ __all__ = [
     "MetricResolutionError",
     "SchemaValidationError",
     "MetricValueError",
+    "CloudWatchEMF",
 ]
