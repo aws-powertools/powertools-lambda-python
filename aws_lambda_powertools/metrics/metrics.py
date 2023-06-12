@@ -119,6 +119,10 @@ class Metrics(MetricManager):
         self.set_default_dimensions(**self.default_dimensions)
 
 
+# add alias for original EMF format to make the provider more explicit
+CloudWatchEMF = Metrics
+
+
 class EphemeralMetrics(MetricManager):
     """Non-singleton version of Metrics to not persist metrics across instances
 
