@@ -4,7 +4,7 @@ description: Utility
 ---
 <!-- markdownlint-disable MD043 -->
 
-This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/).
+This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/){target="_blank"}.
 
 ## Key features
 
@@ -24,7 +24,7 @@ Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
 
     To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
-    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off):
+    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank"}:
 
 	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
 
@@ -156,27 +156,30 @@ def my_function():
 
 Parser comes with the following built-in models:
 
-| Model name                              | Description                                                                           |
-| --------------------------------------- | ------------------------------------------------------------------------------------- |
-| **AlbModel**                            | Lambda Event Source payload for Amazon Application Load Balancer                      |
-| **APIGatewayProxyEventModel**           | Lambda Event Source payload for Amazon API Gateway                                    |
-| **APIGatewayProxyEventV2Model**         | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
-| **CloudwatchLogsModel**                 | Lambda Event Source payload for Amazon CloudWatch Logs                                |
-| **DynamoDBStreamModel**                 | Lambda Event Source payload for Amazon DynamoDB Streams                               |
-| **EventBridgeModel**                    | Lambda Event Source payload for Amazon EventBridge                                    |
-| **KafkaMskEventModel**                  | Lambda Event Source payload for AWS MSK payload                                       |
-| **KafkaSelfManagedEventModel**          | Lambda Event Source payload for self managed Kafka payload                            |
-| **KinesisDataStreamModel**              | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
-| **KinesisFirehoseModel**                | Lambda Event Source payload for Amazon Kinesis Firehose                               |
-| **KinesisFirehoseSqsModel**             | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
-| **LambdaFunctionUrlModel**              | Lambda Event Source payload for Lambda Function URL payload                           |
-| **S3EventNotificationEventBridgeModel** | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
-| **S3Model**                             | Lambda Event Source payload for Amazon S3                                             |
-| **S3ObjectLambdaEvent**                 | Lambda Event Source payload for Amazon S3 Object Lambda                               |
-| **S3SqsEventNotificationModel**         | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS) |
-| **SesModel**                            | Lambda Event Source payload for Amazon Simple Email Service                           |
-| **SnsModel**                            | Lambda Event Source payload for Amazon Simple Notification Service                    |
-| **SqsModel**                            | Lambda Event Source payload for Amazon SQS                                            |
+| Model name                                  | Description                                                                           |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
+| **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
+| **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
+| **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
+| **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                 |
+| **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                 |
+| **CloudwatchLogsModel**                     | Lambda Event Source payload for Amazon CloudWatch Logs                                |
+| **DynamoDBStreamModel**                     | Lambda Event Source payload for Amazon DynamoDB Streams                               |
+| **EventBridgeModel**                        | Lambda Event Source payload for Amazon EventBridge                                    |
+| **KafkaMskEventModel**                      | Lambda Event Source payload for AWS MSK payload                                       |
+| **KafkaSelfManagedEventModel**              | Lambda Event Source payload for self managed Kafka payload                            |
+| **KinesisDataStreamModel**                  | Lambda Event Source payload for Amazon Kinesis Data Streams                           |
+| **KinesisFirehoseModel**                    | Lambda Event Source payload for Amazon Kinesis Firehose                               |
+| **KinesisFirehoseSqsModel**                 | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
+| **LambdaFunctionUrlModel**                  | Lambda Event Source payload for Lambda Function URL payload                           |
+| **S3EventNotificationEventBridgeModel**     | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
+| **S3Model**                                 | Lambda Event Source payload for Amazon S3                                             |
+| **S3ObjectLambdaEvent**                     | Lambda Event Source payload for Amazon S3 Object Lambda                               |
+| **S3SqsEventNotificationModel**             | Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3->SQS) |
+| **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
+| **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
+| **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
 
 #### Extending built-in models
 
@@ -245,13 +248,13 @@ for order_item in ret.detail.items:
 
 ???+ tip
     When extending a `string` field containing JSON, you need to wrap the field
-    with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type):
+    with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type){target="_blank"}:
 
     ```python hl_lines="14 18-19"
     --8<-- "examples/parser/src/extending_built_in_models_with_json_mypy.py"
     ```
 
-    Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpmanual.io/usage/validators/) to transform the JSON string into a dict before the mapping:
+    Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpmanual.io/usage/validators/){target="_blank"} to transform the JSON string into a dict before the mapping:
 
     ```python hl_lines="18-20 24-25"
     --8<-- "examples/parser/src/extending_built_in_models_with_json_validator.py"
@@ -495,14 +498,14 @@ parse(model=UserModel, event=payload)
 ### Advanced use cases
 
 ???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
-    Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator)
+    Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator){target="_blank"}
 
-There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability), [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value).
+There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability){target="_blank"}, [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value){target="_blank"}.
 
 ???+ tip "Pydantic helper functions"
-	Pydantic also offers [functions](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions) to parse models from files, dicts, string, etc.
+	Pydantic also offers [functions](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions){target="_blank"} to parse models from files, dicts, string, etc.
 
-Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/) as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
+Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/){target="_blank"} as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
 
 ```python hl_lines="21 28-31" title="Converting data models in various formats"
 from aws_lambda_powertools.utilities import Logger

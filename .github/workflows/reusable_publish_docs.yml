@@ -1,5 +1,7 @@
 name: Reusable publish documentation
 
+# see .github/workflows/on_push_docs.yml for docs
+
 env:
   ORIGIN: awslabs/aws-lambda-powertools-python
 
@@ -26,9 +28,9 @@ on:
         default: develop
 
 permissions:
-  id-token: write
-  contents: write
-  pages: write
+  id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+  contents: write  # push to gh-pages
+  pages: write     # deploy gh-pages website
 
 jobs:
   publish_docs:
@@ -39,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: "Docs"
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           fetch-depth: 0
           ref: ${{ inputs.git_ref }}

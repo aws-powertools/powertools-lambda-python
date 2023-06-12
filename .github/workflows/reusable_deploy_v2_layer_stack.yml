@@ -1,5 +1,32 @@
 name: Deploy CDK Layer v2 stack
 
+# PROCESS
+#
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. Deploy previously built layer for each AWS commercial region
+# 3. Export all published Layers as JSON
+# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     latest_published_version: ${{ inputs.latest_published_version }}
+
 on:
   workflow_call:
     inputs:
@@ -95,7 +122,7 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials

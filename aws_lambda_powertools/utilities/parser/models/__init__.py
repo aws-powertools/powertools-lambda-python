@@ -14,6 +14,12 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .cloudformation_custom_resource import (
+    CloudFormationCustomResourceBaseModel,
+    CloudFormationCustomResourceCreateModel,
+    CloudFormationCustomResourceDeleteModel,
+    CloudFormationCustomResourceUpdateModel,
+)
 from .cloudwatch import (
     CloudWatchLogsData,
     CloudWatchLogsDecode,
@@ -147,4 +153,8 @@ __all__ = [
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",
+    "CloudFormationCustomResourceUpdateModel",
+    "CloudFormationCustomResourceDeleteModel",
+    "CloudFormationCustomResourceCreateModel",
+    "CloudFormationCustomResourceBaseModel",
 ]
