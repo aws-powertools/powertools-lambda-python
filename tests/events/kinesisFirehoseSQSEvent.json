@@ -1,0 +1,12 @@
+{
+   "invocationId": "556b67a3-48fc-4385-af49-e133aade9cb9",
+   "deliveryStreamArn": "arn:aws:firehose:us-east-1:123456789012:deliverystream/PUT-S3-tdyyE",
+   "region": "us-east-1",
+   "records": [
+    {
+      "recordId": "49640912821178817833517986466168945147170627572855734274000000",
+      "approximateArrivalTimestamp": 1684864917398,
+      "data": "eyJtZXNzYWdlSWQiOiI1YWI4MDdkNC01NjQ0LTRjNTUtOTdhMy00NzM5NjYzNWFjNzQiLCJyZWNlaXB0SGFuZGxlIjoiQVFFQndKbkt5ckhpZ1VNWmo2cllpZ0NneGxhUzNTTHkwYS4uLiIsImJvZHkiOiJUZXN0IG1lc3NhZ2UuIiwiYXR0cmlidXRlcyI6eyJBcHByb3hpbWF0ZVJlY2VpdmVDb3VudCI6IjEiLCJTZW50VGltZXN0YW1wIjoiMTY4NDg2NDg1MjQ5MSIsIlNlbmRlcklkIjoiQUlEQUlFTlFaSk9MTzIzWVZKNFZPIiwiQXBwcm94aW1hdGVGaXJzdFJlY2VpdmVUaW1lc3RhbXAiOiIxNjg0ODY0ODcyNDkxIn0sIm1lc3NhZ2VBdHRyaWJ1dGVzIjp7fSwibWQ1T2ZNZXNzYWdlQXR0cmlidXRlcyI6bnVsbCwibWQ1T2ZCb2R5IjoiYzhiNmJjNjBjOGI4YjNhOTA0ZTQ1YzFmYWJkZjUyM2QiLCJldmVudFNvdXJjZSI6ImF3czpzcXMiLCJldmVudFNvdXJjZUFSTiI6ImFybjphd3M6c3FzOnVzLWVhc3QtMToyMDA5ODQxMTIzODY6U05TIiwiYXdzUmVnaW9uIjoidXMtZWFzdC0xIn0K"
+    }
+   ]
+}

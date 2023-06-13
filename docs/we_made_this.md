@@ -1,11 +1,11 @@
 ---
 title: We Made This (Community)
-description: Blog posts, tutorials, and videos about AWS Lambda Powertools created by the Powertools Community.
+description: Blog posts, tutorials, and videos about Powertools for AWS Lambda (Python) created by the Powertools for AWS Lambda (Python) Community.
 ---
 
 <!-- markdownlint-disable  MD001 MD043 -->
 
-This space is dedicated to highlight our awesome community content featuring Powertools 🙏!
+This space is dedicated to highlight our awesome community content featuring Powertools for AWS Lambda (Python) 🙏!
 
 !!! info "[Get your content featured here](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
 
@@ -13,7 +13,7 @@ This space is dedicated to highlight our awesome community content featuring Pow
 
 [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET){target="_blank"}
 
-Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect with the Powertools community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
+Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect with the Powertools for AWS Lambda (Python) community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
 
 ## Blog posts
 
@@ -75,6 +75,14 @@ This article walks through a sample AWS EventBridge cookiecutter template presen
 This article walks through how CyberArk uses Powertools to implement Feature Flags with AWS AppConfig
 
 * [aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig](https://aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig){target="_blank"}
+
+### Designing for Idempotency
+
+> **Author: [Valentin Dreismann](linkedin.com/in/valentin-dreismann-69694b16a){target="_blank"}** :material-linkedin:
+
+This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
+
+* [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
 
 ## Videos
 

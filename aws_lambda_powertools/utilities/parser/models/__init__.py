@@ -14,6 +14,12 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .cloudformation_custom_resource import (
+    CloudFormationCustomResourceBaseModel,
+    CloudFormationCustomResourceCreateModel,
+    CloudFormationCustomResourceDeleteModel,
+    CloudFormationCustomResourceUpdateModel,
+)
 from .cloudwatch import (
     CloudWatchLogsData,
     CloudWatchLogsDecode,
@@ -42,6 +48,7 @@ from .kinesis_firehose import (
     KinesisFirehoseRecord,
     KinesisFirehoseRecordMetadata,
 )
+from .kinesis_firehose_sqs import KinesisFirehoseSqsModel, KinesisFirehoseSqsRecord
 from .lambda_function_url import LambdaFunctionUrlModel
 from .s3 import (
     S3EventNotificationEventBridgeDetailModel,
@@ -144,4 +151,10 @@ __all__ = [
     "KafkaRecordModel",
     "KafkaMskEventModel",
     "KafkaBaseEventModel",
+    "KinesisFirehoseSqsModel",
+    "KinesisFirehoseSqsRecord",
+    "CloudFormationCustomResourceUpdateModel",
+    "CloudFormationCustomResourceDeleteModel",
+    "CloudFormationCustomResourceCreateModel",
+    "CloudFormationCustomResourceBaseModel",
 ]

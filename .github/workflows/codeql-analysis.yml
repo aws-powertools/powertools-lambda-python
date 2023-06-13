@@ -1,5 +1,15 @@
 name: "CodeQL"
 
+# PROCESS
+#
+# 1. Static code analysis with CodeQL
+
+# USAGE
+#
+# NOTE: This is our slowest workflow hence it only runs on code merged.
+#
+# Always triggered on PR merge when source code changes.
+
 on:
   push:
     paths:
@@ -11,6 +21,9 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
 
     strategy:
       fail-fast: false
@@ -23,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL

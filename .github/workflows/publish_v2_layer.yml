@@ -1,5 +1,31 @@
 name: Deploy v2 layer to all regions
 
+# PROCESS
+#
+# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for x86 and ARM (uses custom runner as it's CPU heavy)
+# 2. Kick off pipeline for beta, prod, and canary releases
+# 3. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 4. Builds and publishes docs with latest Layer ARN using given version (generally coming from release)
+
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/release.yml
+#
+# publish_layer:
+#   needs: [seal, release, create_tag]
+#   secrets: inherit
+#   permissions:
+#     id-token: write
+#     contents: write
+#     pages: write
+#     pull-requests: write
+#   uses: ./.github/workflows/publish_v2_layer.yml
+#   with:
+#     latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+#     pre_release: ${{ inputs.pre_release }}
+
+
 on:
   workflow_dispatch:
     inputs:
@@ -37,7 +63,7 @@ jobs:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           fetch-depth: 0
       - name: Install poetry
@@ -47,7 +73,7 @@ jobs:
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
           python-version: "3.10"
           cache: "pip"
@@ -58,13 +84,13 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.0.0
+        uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@4b4e9c3e2d4531116a6f8ba8e71fc6e2cb6e6c8c # v2.5.0
+        uses: docker/setup-buildx-action@6a58db7e0d21ca03e6c44877909e80e45217eed2 # v2.6.0
         with:
           install: true
           driver: docker
@@ -91,7 +117,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -107,7 +133,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -117,7 +143,7 @@ jobs:
       latest_published_version: ${{ inputs.latest_published_version }}
 
   sar-beta:
-    needs: build-layer
+    needs: beta  # canaries run on Layer Beta env
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write
@@ -133,7 +159,7 @@ jobs:
       package-version: ${{ inputs.latest_published_version }}
 
   sar-prod:
-    needs: [build-layer, sar-beta]
+    needs: sar-beta
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write
@@ -170,7 +196,7 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           fetch-depth: 0
       - name: Download CDK layer artifact
@@ -224,6 +250,7 @@ jobs:
       pages: write
       pull-requests: none
       id-token: write
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}

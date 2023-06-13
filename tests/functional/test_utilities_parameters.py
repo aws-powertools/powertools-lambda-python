@@ -2171,10 +2171,64 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     stubber.activate()
 
     try:
-        value: str = provider.get(mock_name)
+        value: bytes = provider.get(mock_name)
         str_value = value.decode("utf-8")
         assert str_value == json.dumps(mock_body_json)
         stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_appconf_provider_multiple_unique_config_names(mock_name, config):
+    """
+    Test appconfig_provider.get with multiple config names
+    """
+
+    # GIVEN a provider instance, we should be able to retrieve multiple appconfig profiles.
+    environment = "dev"
+    application = "myapp"
+    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+
+    mock_body_json_first_call = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    encoded_message_first_call = json.dumps(mock_body_json_first_call).encode("utf-8")
+    mock_value_first_call = StreamingBody(BytesIO(encoded_message_first_call), len(encoded_message_first_call))
+
+    mock_body_json_second_call = {"myenvvar1": "Thor", "myenvvar2": 5}
+    encoded_message_second_call = json.dumps(mock_body_json_second_call).encode("utf-8")
+    mock_value_second_call = StreamingBody(BytesIO(encoded_message_second_call), len(encoded_message_second_call))
+
+    # WHEN making two API calls using the same provider instance.
+    stubber = stub.Stubber(provider.client)
+
+    response_get_latest_config_first_call = {
+        "Configuration": mock_value_first_call,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
+    stubber.add_response("get_latest_configuration", response_get_latest_config_first_call)
+
+    response_get_latest_config_second_call = {
+        "Configuration": mock_value_second_call,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
+    stubber.add_response("get_latest_configuration", response_get_latest_config_second_call)
+
+    stubber.activate()
+
+    try:
+        # THEN we should expect different return values.
+        value_first_call: bytes = provider.get(mock_name)
+        value_second_call: bytes = provider.get(f"{mock_name}_ second_config")
+
+        assert value_first_call != value_second_call
+        stubber.assert_no_pending_responses()
+
     finally:
         stubber.deactivate()
 

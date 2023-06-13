@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aws-lambda-powertools-python-layer"
 version = "1.1.0"
-description = "AWS Lambda Powertools for Python Lambda Layers"
+description = "Powertools for AWS Lambda (Python) Lambda Layers"
 authors = ["DevAx <aws-devax-open-source@amazon.com>"]
 
 license = "MIT"

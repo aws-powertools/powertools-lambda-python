@@ -72,13 +72,15 @@ jobs:
           RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
       # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
       - name: Install poetry
-        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+        run: |
+          pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+          pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@ef49c63acef7fe8680789ddb31f376cc898f0012 # v0.3.0
 
       - name: Bump package version
         id: versioning
@@ -123,7 +125,7 @@ jobs:
       SOURCE_INTEGRITY_HASH: ${{ needs.seal.outputs.SOURCE_CODE_HASH }}
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -139,7 +141,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Set up Python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
           python-version: "3.10"
           cache: "poetry"
@@ -164,7 +166,7 @@ jobs:
       SOURCE_INTEGRITY_HASH: ${{ needs.seal.outputs.SOURCE_CODE_HASH }}
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -177,7 +179,7 @@ jobs:
       - name: Install poetry
         run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Set up Python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
           python-version: "3.10"
           cache: "poetry"
@@ -223,7 +225,7 @@ jobs:
       BUILD_INTEGRITY_HASH: ${{ needs.build.outputs.BUILD_INTEGRITY_HASH }}
     steps:
       # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -264,7 +266,7 @@ jobs:
       SOURCE_INTEGRITY_HASH: ${{ needs.seal.outputs.SOURCE_CODE_HASH }}
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -285,13 +287,13 @@ jobs:
       - id: setup-git
         name: Git client setup and refresh tip
         run: |
-          git config user.name "Powertools bot"
+          git config user.name "Powertools for AWS Lambda (Python) bot"
           git config user.email "aws-lambda-powertools-feedback@amazon.com"
           git config remote.origin.url >&-
 
       - name: Create Git Tag
         run: |
-          git add pyproject.toml
+          git add pyproject.toml aws_lambda_powertools/shared/version.py
           git commit -m "chore: version bump"
           git tag -a v"${RELEASE_VERSION}" -m "release_version: v${RELEASE_VERSION}"
           git push origin v"${RELEASE_VERSION}"
@@ -310,7 +312,7 @@ jobs:
       SOURCE_INTEGRITY_HASH: ${{ needs.seal.outputs.SOURCE_CODE_HASH }}
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -332,7 +334,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml"
+          files: "pyproject.toml aws_lambda_powertools/shared/version.py"
           temp_branch_prefix: "ci-bump"
           pull_request_title: "chore(ci): bump version to ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -370,7 +372,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           ref: ${{ env.RELEASE_COMMIT }}
       - name: Close issues related to this release

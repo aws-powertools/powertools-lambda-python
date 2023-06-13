@@ -35,7 +35,7 @@ def idempotency_table_name(infrastructure: dict) -> str:
 @pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - TTL 5s"})
+    payload = json.dumps({"message": "Powertools for AWS Lambda (Python) - TTL 5s"})
 
     # WHEN
     # first execution
@@ -65,8 +65,8 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
 @pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
-    payload_timeout_execution = json.dumps({"sleep": 5, "message": "Lambda Powertools - TTL 1s"})
-    payload_working_execution = json.dumps({"sleep": 0, "message": "Lambda Powertools - TTL 1s"})
+    payload_timeout_execution = json.dumps({"sleep": 5, "message": "Powertools for AWS Lambda (Python) - TTL 1s"})
+    payload_working_execution = json.dumps({"sleep": 0, "message": "Powertools for AWS Lambda (Python) - TTL 1s"})
 
     # WHEN
     # first call should fail due to timeout
@@ -89,7 +89,7 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
 @pytest.mark.xdist_group(name="idempotency")
 def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # GIVEN
-    arguments = json.dumps({"message": "Lambda Powertools - Parallel execution"})
+    arguments = json.dumps({"message": "Powertools for AWS Lambda (Python) - Parallel execution"})
 
     # WHEN
     # executing Lambdas in parallel
@@ -107,7 +107,7 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
 @pytest.mark.xdist_group(name="idempotency")
 def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - Idempotent function thread safety check"})
+    payload = json.dumps({"message": "Powertools for AWS Lambda (Python) - Idempotent function thread safety check"})
 
     # WHEN
     # first execution

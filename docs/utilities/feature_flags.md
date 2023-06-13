@@ -17,7 +17,7 @@ Feature flags are used to modify behaviour without changing the application's co
 **Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
-    You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
+    You can use [Parameters utility](parameters.md){target="_blank"} for static flags while this utility can do both static and dynamic feature flags.
 
 ???+ warning
     Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
@@ -257,7 +257,7 @@ You can also have features enabled only at specific days, for example: enable ch
 ???+ info "How should I use timezones?"
     You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
     in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
-    Powertools takes care of converting and calculate the correct timestamps for you.
+    Powertools for AWS Lambda (Python) takes care of converting and calculate the correct timestamps for you.
 
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
     specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
@@ -502,7 +502,7 @@ These are the available options for further customization.
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
-| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                          |
 
 === "appconfig_provider_options.py"
 
@@ -578,5 +578,5 @@ You can unit test your feature flags locally and independently without setting u
 | Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
 | **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
-| **[Parameters utility](parameters.md)**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
+| **[Parameters utility](parameters.md){target="_blank"}**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
 | **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |
