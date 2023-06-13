@@ -5,7 +5,7 @@ import logging
 import numbers
 import time
 import warnings
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError
 from aws_lambda_powertools.metrics.provider import MetricsBase, MetricsProviderBase
@@ -31,9 +31,9 @@ class DataDogProvider(MetricsProviderBase):
     }
     """
 
-    def __init__(self, namespace):
-        self.metrics = []
-        self.namespace = namespace
+    def __init__(self, namespace: str = "default"):
+        self.metrics: List = []
+        self.namespace: str = namespace
         super().__init__()
 
     #  adding name,value,timestamp,tags
@@ -45,10 +45,9 @@ class DataDogProvider(MetricsProviderBase):
             timestamp = time.time()
         self.metrics.append({"m": name, "v": int(value), "e": timestamp, "t": tags})
 
-    # serialize for flushing
-    def serialize(self) -> Dict:
+    # serialize for flushing (Do we really need this function for datadog?)
+    def serialize(self) -> List:
         # logic here is to add dimension and metadata to each metric's tag with "key:value" format
-        extra_tags: List = []
         output_list: List = []
 
         for single_metric in self.metrics:
@@ -57,18 +56,18 @@ class DataDogProvider(MetricsProviderBase):
                     "m": f"{self.namespace}.{single_metric['m']}",
                     "v": single_metric["v"],
                     "e": single_metric["e"],
-                    "t": single_metric["t"] + extra_tags,
+                    "t": single_metric["t"],
                 }
             )
 
-        return {"List": output_list}
+        return output_list
 
     # flush serialized data to output
-    def flush(self, metrics):
+    def flush(self, metrics: List):
         # submit through datadog extension
         if lambda_metric:
             # use lambda_metric function from datadog package, submit metrics to datadog
-            for metric_item in metrics.get("List"):
+            for metric_item in metrics:
                 lambda_metric(
                     metric_name=metric_item["m"],
                     value=metric_item["v"],
@@ -78,7 +77,7 @@ class DataDogProvider(MetricsProviderBase):
         else:
             # flush to log with datadog format
             # https://github.com/DataDog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
-            for metric_item in metrics.get("List"):
+            for metric_item in metrics:
                 print(json.dumps(metric_item, separators=(",", ":")))
 
     def clear(self):
@@ -103,7 +102,10 @@ class DataDogMetrics(MetricsBase):
         self.provider = provider
         super().__init__()
 
-    def add_metric(self, name: str, value: float, timestamp: Optional[int] = None, tags: Optional[List] = None):
+    # drop additional kwargs to keep same experience
+    def add_metric(
+        self, name: str, value: float, timestamp: Optional[int] = None, tags: Optional[List] = None, *args, **kwargs
+    ):
         self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:

@@ -8,7 +8,7 @@ from .exceptions import (
     SchemaValidationError,
 )
 from .metric import single_metric
-from .metrics import CloudWatchEMF, EphemeralMetrics, Metrics
+from .provider.cloudwatch_emf import CloudWatchEMF, EphemeralMetrics, Metrics
 
 __all__ = [
     "Metrics",
