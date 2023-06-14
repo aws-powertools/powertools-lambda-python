@@ -518,10 +518,10 @@ class ApiGatewayResolver(BaseRouter):
             for item in methods:
                 _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
 
-                # To prioritize routes based on specificity, we handle dynamic and static routes differently. Dynamic
-                # routes, which contain variable parts, are stored separately from static routes. This allows us to
-                # first check the static routes for a match before attempting to match the dynamic routes. By
-                # following this approach, we ensure that the most specific route is prioritized and processed first.
+                # The more specific route wins.
+                # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
+                # Then attempt a match for static routes before dynamic routes.
+                # This ensures that the most specific route is prioritized and processed first (studies/fetch).
                 if _route.rule.groups > 0:
                     self._dynamic_routes.append(_route)
                 else:
