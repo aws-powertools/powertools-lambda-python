@@ -11,9 +11,8 @@ from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
 from aws_lambda_powertools.logging.types import LogRecord
-
-from ..shared import constants
-from ..shared.functions import powertools_dev_is_set
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 RESERVED_LOG_ATTRS = (
     "name",
@@ -72,10 +71,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self,
         json_serializer: Callable[[LogRecord], str] | None = None,
         json_deserializer: Callable[[Dict | str | bool | int | float], str] | None = None,
-        json_default: Optional[Callable[[Any], Any]] = None,
-        datefmt: Optional[str] = None,
+        json_default: Callable[[Any], Any] | None = None,
+        datefmt: str | None = None,
         use_datetime_directive: bool = False,
-        log_record_order: Optional[List[str]] = None,
+        log_record_order: List[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
         **kwargs,
