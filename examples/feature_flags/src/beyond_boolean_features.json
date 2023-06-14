@@ -1,0 +1,22 @@
+{
+	"premium_features": {
+	  "boolean_type": false,
+	  "default": [],
+	  "rules": {
+		"customer tier equals premium": {
+		  "when_match": [
+			"no_ads",
+			"no_limits",
+			"chat"
+		  ],
+		  "conditions": [
+			{
+			  "action": "EQUALS",
+			  "key": "tier",
+			  "value": "premium"
+			}
+		  ]
+		}
+	  }
+	}
+  }

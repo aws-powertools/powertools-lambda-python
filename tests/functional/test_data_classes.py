@@ -26,6 +26,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     SESEvent,
     SNSEvent,
     SQSEvent,
+    VPCLatticeEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.api_gateway_authorizer_event import (
     APIGatewayAuthorizerEventV2,
@@ -2212,3 +2213,18 @@ def test_aws_config_rule_scheduled():
     assert event.invoking_event.notification_creation_time == invoking_event["notificationCreationTime"]
     assert event.invoking_event.message_type == invoking_event["messageType"]
     assert event.invoking_event.record_version == invoking_event["recordVersion"]
+
+
+def test_vpc_lattice_event():
+    event = VPCLatticeEvent(load_event("vpcLatticeEvent.json"))
+
+    assert event.raw_path == event["raw_path"]
+    assert event.get_query_string_value("order-id") == "1"
+    assert event.get_header_value("user_agent") == "curl/7.64.1"
+    assert event.decoded_body == '{"test": "event"}'
+    assert event.json_body == {"test": "event"}
+    assert event.method == event["method"]
+    assert event.headers == event["headers"]
+    assert event.query_string_parameters == event["query_string_parameters"]
+    assert event.body == event["body"]
+    assert event.is_base64_encoded == event["is_base64_encoded"]

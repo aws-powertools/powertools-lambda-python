@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Lambda Powertools for Python Feature flags sample template
+Resources:
+  FeatureStoreApp:
+    Type: AWS::AppConfig::Application
+    Properties:
+      Description: "AppConfig Application for feature toggles"
+      Name: product-catalogue
+
+  FeatureStoreDevEnv:
+    Type: AWS::AppConfig::Environment
+    Properties:
+      ApplicationId: !Ref FeatureStoreApp
+      Description: "Development Environment for the App Config Store"
+      Name: dev
+
+  FeatureStoreConfigProfile:
+    Type: AWS::AppConfig::ConfigurationProfile
+    Properties:
+      ApplicationId: !Ref FeatureStoreApp
+      Name: features
+      LocationUri: "hosted"
+
+  HostedConfigVersion:
+    Type: AWS::AppConfig::HostedConfigurationVersion
+    Properties:
+      ApplicationId: !Ref FeatureStoreApp
+      ConfigurationProfileId: !Ref FeatureStoreConfigProfile
+      Description: 'A sample hosted configuration version'
+      Content: |
+        {
+              "premium_features": {
+                "default": false,
+                "rules": {
+                  "customer tier equals premium": {
+                    "when_match": true,
+                    "conditions": [
+                      {
+                        "action": "EQUALS",
+                        "key": "tier",
+                        "value": "premium"
+                      }
+                    ]
+                  }
+                }
+              },
+              "ten_percent_off_campaign": {
+                "default": false
+              }
+          }
+      ContentType: 'application/json'
+
+  ConfigDeployment:
+    Type: AWS::AppConfig::Deployment
+    Properties:
+      ApplicationId: !Ref FeatureStoreApp
+      ConfigurationProfileId: !Ref FeatureStoreConfigProfile
+      ConfigurationVersion: !Ref HostedConfigVersion
+      DeploymentStrategyId: "AppConfig.AllAtOnce"
+      EnvironmentId: !Ref FeatureStoreDevEnv

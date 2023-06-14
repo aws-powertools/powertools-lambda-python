@@ -21,6 +21,7 @@ from .s3_event import S3Event, S3EventBridgeNotificationEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
+from .vpc_lattice import VPCLatticeEvent
 
 __all__ = [
     "APIGatewayProxyEvent",
@@ -44,4 +45,5 @@ __all__ = [
     "SQSEvent",
     "event_source",
     "AWSConfigRuleEvent",
+    "VPCLatticeEvent",
 ]

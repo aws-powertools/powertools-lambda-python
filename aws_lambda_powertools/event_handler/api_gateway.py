@@ -84,6 +84,7 @@ class CORSConfig:
 
     cors_config = CORSConfig(
         allow_origin="https://wwww.example.com/",
+        extra_origins=["https://dev.example.com/"],
         expose_headers=["x-exposed-response-header"],
         allow_headers=["x-custom-request-header"],
         max_age=100,
@@ -106,6 +107,7 @@ class CORSConfig:
     def __init__(
         self,
         allow_origin: str = "*",
+        extra_origins: Optional[List[str]] = None,
         allow_headers: Optional[List[str]] = None,
         expose_headers: Optional[List[str]] = None,
         max_age: Optional[int] = None,
@@ -117,6 +119,8 @@ class CORSConfig:
         allow_origin: str
             The value of the `Access-Control-Allow-Origin` to send in the response. Defaults to "*", but should
             only be used during development.
+        extra_origins: Optional[List[str]]
+            The list of additional allowed origins.
         allow_headers: Optional[List[str]]
             The list of additional allowed headers. This list is added to list of
             built-in allowed headers: `Authorization`, `Content-Type`, `X-Amz-Date`,
@@ -128,16 +132,29 @@ class CORSConfig:
         allow_credentials: bool
             A boolean value that sets the value of `Access-Control-Allow-Credentials`
         """
-        self.allow_origin = allow_origin
+        self._allowed_origins = [allow_origin]
+        if extra_origins:
+            self._allowed_origins.extend(extra_origins)
         self.allow_headers = set(self._REQUIRED_HEADERS + (allow_headers or []))
         self.expose_headers = expose_headers or []
         self.max_age = max_age
         self.allow_credentials = allow_credentials
 
-    def to_dict(self) -> Dict[str, str]:
+    def to_dict(self, origin: Optional[str]) -> Dict[str, str]:
         """Builds the configured Access-Control http headers"""
+
+        # If there's no Origin, don't add any CORS headers
+        if not origin:
+            return {}
+
+        # If the origin doesn't match any of the allowed origins, and we don't allow all origins ("*"),
+        # don't add any CORS headers
+        if origin not in self._allowed_origins and "*" not in self._allowed_origins:
+            return {}
+
+        # The origin matched an allowed origin, so return the CORS headers
         headers: Dict[str, str] = {
-            "Access-Control-Allow-Origin": self.allow_origin,
+            "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
 
@@ -207,9 +224,9 @@ class ResponseBuilder:
         self.response = response
         self.route = route
 
-    def _add_cors(self, cors: CORSConfig):
+    def _add_cors(self, event: BaseProxyEvent, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
-        self.response.headers.update(cors.to_dict())
+        self.response.headers.update(cors.to_dict(event.get_header_value("Origin")))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -230,7 +247,7 @@ class ResponseBuilder:
         if self.route is None:
             return
         if self.route.cors:
-            self._add_cors(cors or CORSConfig())
+            self._add_cors(event, cors or CORSConfig())
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
         if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
@@ -466,7 +483,8 @@ class ApiGatewayResolver(BaseRouter):
             with api gateways with multiple custom mappings.
         """
         self._proxy_type = proxy_type
-        self._routes: List[Route] = []
+        self._dynamic_routes: List[Route] = []
+        self._static_routes: List[Route] = []
         self._route_keys: List[str] = []
         self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
@@ -498,7 +516,17 @@ class ApiGatewayResolver(BaseRouter):
                 cors_enabled = cors
 
             for item in methods:
-                self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
+
+                # The more specific route wins.
+                # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
+                # Then attempt a match for static routes before dynamic routes.
+                # This ensures that the most specific route is prioritized and processed first (studies/fetch).
+                if _route.rule.groups > 0:
+                    self._dynamic_routes.append(_route)
+                else:
+                    self._static_routes.append(_route)
+
                 route_key = item + rule
                 if route_key in self._route_keys:
                     warnings.warn(
@@ -607,7 +635,7 @@ class ApiGatewayResolver(BaseRouter):
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
-        for route in self._routes:
+        for route in self._static_routes + self._dynamic_routes:
             if method != route.method:
                 continue
             match_results: Optional[Match] = route.rule.match(path)
@@ -644,7 +672,7 @@ class ApiGatewayResolver(BaseRouter):
         headers: Dict[str, Union[str, List[str]]] = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
-            headers.update(self._cors.to_dict())
+            headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
