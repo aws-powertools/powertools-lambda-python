@@ -298,7 +298,7 @@ def test_no_matches():
         return app.resolve(event, context)
 
     # Also check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1205,7 +1205,7 @@ def test_api_gateway_app_router_with_different_methods():
     app.include_router(router)
 
     # Also check check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:

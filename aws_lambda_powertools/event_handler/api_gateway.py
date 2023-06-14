@@ -483,7 +483,8 @@ class ApiGatewayResolver(BaseRouter):
             with api gateways with multiple custom mappings.
         """
         self._proxy_type = proxy_type
-        self._routes: List[Route] = []
+        self._dynamic_routes: List[Route] = []
+        self._static_routes: List[Route] = []
         self._route_keys: List[str] = []
         self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
@@ -517,15 +518,14 @@ class ApiGatewayResolver(BaseRouter):
             for item in methods:
                 _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
 
-                # If the compiled regex contains groups, we want to prioritize routes that will fully match the path
-                # directly. To achieve this, we add routes with groups at the end of the list, while routes without
-                # groups are added at the beginning of the list.
+                # To prioritize routes based on specificity, we handle dynamic and static routes differently. Dynamic
+                # routes, which contain variable parts, are stored separately from static routes. This allows us to
+                # first check the static routes for a match before attempting to match the dynamic routes. By
+                # following this approach, we ensure that the most specific route is prioritized and processed first.
                 if _route.rule.groups > 0:
-                    # Insert route at the end of the list
-                    self._routes.append(_route)
+                    self._dynamic_routes.append(_route)
                 else:
-                    # Insert route at the beginning of the list
-                    self._routes.insert(0, _route)
+                    self._static_routes.append(_route)
 
                 route_key = item + rule
                 if route_key in self._route_keys:
@@ -635,7 +635,7 @@ class ApiGatewayResolver(BaseRouter):
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
-        for route in self._routes:
+        for route in self._static_routes + self._dynamic_routes:
             if method != route.method:
                 continue
             match_results: Optional[Match] = route.rule.match(path)
