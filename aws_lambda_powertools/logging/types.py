@@ -3,13 +3,14 @@ from __future__ import annotations
 import sys
 
 if sys.version_info >= (3, 11):
-    from typing import NotRequired, TypedDict
-elif sys.version_info >= (3, 8):
-    from typing import TypedDict
-
-    from typing_extensions import NotRequired
+    from typing import NotRequired
 else:
-    from typing_extensions import NotRequired, TypedDict
+    from typing_extensions import NotRequired
+
+if sys.version_info >= (3, 8):
+    from typing import TypedDict
+else:
+    from typing_extensions import TypedDict
 
 from typing import Any, Dict, List
 
