@@ -604,7 +604,7 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
 
 === "bring_your_own_formatter.py"
 
-    ```python hl_lines="2 5-6 12"
+    ```python hl_lines="2-3 6 11-12 15"
     --8<-- "examples/logger/src/bring_your_own_formatter.py"
     ```
 
