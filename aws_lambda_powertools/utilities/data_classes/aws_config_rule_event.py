@@ -17,7 +17,7 @@ def get_invoke_event(
     if message_type == "OversizedConfigurationItemChangeNotification":
         return AWSConfigOversizedConfiguration(invoking_event)
 
-    # Default return is ConfigurationChanged
+    # Default return is AWSConfigConfigurationChanged
     return AWSConfigConfigurationChanged(invoking_event)
 
 
