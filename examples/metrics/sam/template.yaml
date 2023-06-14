@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Lambda Powertools Metrics doc examples
+Description: Powertools for AWS Lambda (Python) version
 
 Globals:
   Function:
@@ -15,7 +15,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:32
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:34
 
 Resources:
   CaptureLambdaHandlerExample:
