@@ -483,7 +483,8 @@ class ApiGatewayResolver(BaseRouter):
             with api gateways with multiple custom mappings.
         """
         self._proxy_type = proxy_type
-        self._routes: List[Route] = []
+        self._dynamic_routes: List[Route] = []
+        self._static_routes: List[Route] = []
         self._route_keys: List[str] = []
         self._exception_handlers: Dict[Type, Callable] = {}
         self._cors = cors
@@ -515,7 +516,17 @@ class ApiGatewayResolver(BaseRouter):
                 cors_enabled = cors
 
             for item in methods:
-                self._routes.append(Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control))
+                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
+
+                # The more specific route wins.
+                # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
+                # Then attempt a match for static routes before dynamic routes.
+                # This ensures that the most specific route is prioritized and processed first (studies/fetch).
+                if _route.rule.groups > 0:
+                    self._dynamic_routes.append(_route)
+                else:
+                    self._static_routes.append(_route)
+
                 route_key = item + rule
                 if route_key in self._route_keys:
                     warnings.warn(
@@ -624,7 +635,7 @@ class ApiGatewayResolver(BaseRouter):
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
-        for route in self._routes:
+        for route in self._static_routes + self._dynamic_routes:
             if method != route.method:
                 continue
             match_results: Optional[Match] = route.rule.match(path)
