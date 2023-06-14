@@ -12,7 +12,14 @@ if sys.version_info >= (3, 8):
 else:
     from typing_extensions import TypedDict
 
-from typing import Any, Dict, List
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
+from typing import Any, Dict, List, Union
+
+LogRecord: TypeAlias = Union[Dict[str, Any], "PowertoolsLogRecord"]
 
 
 class PowertoolsLogRecord(TypedDict):
