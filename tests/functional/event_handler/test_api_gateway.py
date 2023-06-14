@@ -298,7 +298,7 @@ def test_no_matches():
         return app.resolve(event, context)
 
     # Also check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1205,7 +1205,7 @@ def test_api_gateway_app_router_with_different_methods():
     app.include_router(router)
 
     # Also check check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1647,3 +1647,26 @@ def test_dict_response_with_status_code():
     assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     response_body = json.loads(response["body"])
     assert response_body["message"] == "success"
+
+
+def test_route_match_prioritize_full_match():
+    # GIVEN a Http API V1, with a function registered with two routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/{path}")
+    def dynamic_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "dynamic"}))
+
+    @router.get("/my/path")
+    def static_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "static"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler with /foo/dynamic
+    response = app(LOAD_GW_EVENT, {})
+
+    # THEN the static_handler should have been called, because it fully matches the path directly
+    response_body = json.loads(response["body"])
+    assert response_body["hello"] == "static"
