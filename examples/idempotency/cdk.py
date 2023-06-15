@@ -5,8 +5,8 @@ from constructs import Construct
 
 
 class IdempotencyConstruct(Construct):
-    def __init__(self, scope: Construct, id_: str, lambda_role: iam.Role) -> None:
-        super().__init__(scope, id_)
+    def __init__(self, scope: Construct, name: str, lambda_role: iam.Role) -> None:
+        super().__init__(scope, name)
         self.idempotency_table = dynamodb.Table(
             self,
             "IdempotencyTable",
@@ -16,7 +16,6 @@ class IdempotencyConstruct(Construct):
             time_to_live_attribute="expiration",
             point_in_time_recovery=True,
         )
-        self.idempotency_table.grant(lambda_role, "dynamodb:PutItem")
-        self.idempotency_table.grant(lambda_role, "dynamodb:GetItem")
-        self.idempotency_table.grant(lambda_role, "dynamodb:UpdateItem")
-        self.idempotency_table.grant(lambda_role, "dynamodb:DeleteItem")
+        self.idempotency_table.grant(
+            lambda_role, "dynamodb:PutItem", "dynamodb:GetItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem"
+        )

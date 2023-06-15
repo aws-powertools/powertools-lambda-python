@@ -79,12 +79,12 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
 === "sam.yaml"
 
-    ```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
+    ```yaml hl_lines="6-14 24-31" title="AWS Serverless Application Model (SAM) example"
     --8<-- "examples/idempotency/sam.yaml"
     ```
 === "cdk.py"
 
-    ```python hl_lines="14 17 20-23"  title="AWS Cloud Development Kit (CDK) Construct example"
+    ```python hl_lines="10 13 16 19-21"  title="AWS Cloud Development Kit (CDK) Construct example"
     --8<-- "examples/idempotency/cdk.py"
     ```
 
