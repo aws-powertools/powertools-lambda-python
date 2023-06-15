@@ -16,7 +16,7 @@ class DictWrapper(Mapping):
         data : Dict[str, Any]
             Lambda Event Source Event payload
         json_deserializer : Callable, optional
-            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
         """
         self._data = data
