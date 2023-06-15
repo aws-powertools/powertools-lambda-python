@@ -328,17 +328,10 @@ CloudWatch EMF Metrics format will not be accepted for most observability provid
 
 In this case, we and our AWS Lambda Partners are offering built-in provider to make metrics submission easier.
 
-You can import from metric provider package, init the provider and use them as default metrics class
+You can import from metric provider package, init the provider and use them like the default metrics class
 
-```python title="Using built-in Datadog Metrics Provider"
-from aws_lambda_powertools.metrics.provider.datadog_provider_draft import DataDogProvider,DataDogMetrics
-
-dd_provider = DataDogProvider(namespace="default")
-metrics = DataDogMetrics(provider=dd_provider)
-
-@metrics.log_metrics(capture_cold_start_metric: bool = True, raise_on_empty_metrics: bool = False)
-def lambda_handler(event, context)
-    metrics.add_metric(name="item_sold",value=1,tags=["category:online"])
+```python hl_lines="1 3 4" title="Using built-in Datadog Metrics Provider"
+--8<-- "examples/metrics/src/use_providers.py"
 ```
 
 ## Testing your code
