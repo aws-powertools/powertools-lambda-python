@@ -9,6 +9,20 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 def get_invoke_event(
     invoking_event: dict,
 ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
+    """
+    Returns the corresponding event object based on the messageType in the invoking event.
+
+    Parameters
+    ----------
+    invoking_event: dict
+        The invoking event received.
+
+    Returns
+    -------
+    AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
+        The event object based on the messageType in the invoking event.
+    """
+
     message_type = invoking_event.get("messageType")
 
     if message_type == "ScheduledNotification":
