@@ -13,8 +13,8 @@ Globals:
         LOG_LEVEL: INFO
     Layers:
       # Find the latest Layer version in the official documentation
-      # https://docs.powertools.aws.dev/lambda-python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:34
+      # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:35
 
 Resources:
   LoggerLambdaHandlerExample:

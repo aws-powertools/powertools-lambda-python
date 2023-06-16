@@ -4,6 +4,9 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.17.0"></a>
+## [v2.17.0] - 2023-06-16
 ## Bug Fixes
 
 * **event_handler:** prioritize static over dynamic route to prevent order of route registration mismatch ([#2458](https://github.com/awslabs/aws-lambda-powertools-python/issues/2458))
@@ -28,6 +31,7 @@
 
 ## Maintenance
 
+* version bump
 * **ci:** document all github action workflows and enforce least-privilege ([#2395](https://github.com/awslabs/aws-lambda-powertools-python/issues/2395))
 * **ci:** fix PR labeling permission scope ([#2396](https://github.com/awslabs/aws-lambda-powertools-python/issues/2396))
 * **deps:** bump aws-actions/configure-aws-credentials from 2.1.0 to 2.2.0 ([#2469](https://github.com/awslabs/aws-lambda-powertools-python/issues/2469))
@@ -48,10 +52,10 @@
 * **deps-dev:** bump mypy-boto3-logs from 1.26.53 to 1.26.149 ([#2409](https://github.com/awslabs/aws-lambda-powertools-python/issues/2409))
 * **deps-dev:** bump cfn-lint from 0.77.7 to 0.77.8 ([#2451](https://github.com/awslabs/aws-lambda-powertools-python/issues/2451))
 * **deps-dev:** bump mypy-boto3-s3 from 1.26.127 to 1.26.153 ([#2452](https://github.com/awslabs/aws-lambda-powertools-python/issues/2452))
-* **deps-dev:** bump aws-cdk from 2.83.1 to 2.84.0 ([#2460](https://github.com/awslabs/aws-lambda-powertools-python/issues/2460))
 * **deps-dev:** bump cfn-lint from 0.77.8 to 0.77.9 ([#2472](https://github.com/awslabs/aws-lambda-powertools-python/issues/2472))
 * **deps-dev:** bump flake8-comprehensions from 3.12.0 to 3.13.0 ([#2471](https://github.com/awslabs/aws-lambda-powertools-python/issues/2471))
 * **deps-dev:** bump mkdocs-material from 9.1.15 to 9.1.16 ([#2470](https://github.com/awslabs/aws-lambda-powertools-python/issues/2470))
+* **deps-dev:** bump aws-cdk from 2.83.1 to 2.84.0 ([#2460](https://github.com/awslabs/aws-lambda-powertools-python/issues/2460))
 
 
 <a name="v2.16.2"></a>
@@ -3368,7 +3372,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.2...HEAD
+[Unreleased]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.17.0...HEAD
+[v2.17.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.2...v2.17.0
 [v2.16.2]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.1...v2.16.2
 [v2.16.1]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.16.0...v2.16.1
 [v2.16.0]: https://github.com/awslabs/aws-lambda-powertools-python/compare/v2.15.0...v2.16.0
