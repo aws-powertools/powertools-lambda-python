@@ -2,7 +2,6 @@ import copy
 import datetime
 import sys
 import warnings
-from hashlib import md5
 from unittest.mock import MagicMock
 
 import jmespath
@@ -995,8 +994,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
-    expected_value = f"test-func.{function_name}#" + md5(json_serialize(None).encode()).hexdigest()
-    assert expected_value == hashed_key
+    assert hashed_key is None
 
 
 @pytest.mark.parametrize(
@@ -1093,7 +1091,7 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # WHEN handling the idempotent call
     # AND save_inprogress raises a ClientError
     with pytest.raises(IdempotencyPersistenceLayerError) as e:
-        lambda_handler({}, lambda_context)
+        lambda_handler({"data": "some"}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
     # AND append downstream exception details
@@ -1363,7 +1361,7 @@ def test_idempotent_function_duplicates(
 
     assert one(data=mock_event) == "one"
     assert two(data=mock_event) == "two"
-    assert len(persistence_store.client.method_calls) == 4
+    assert len(persistence_store.client.method_calls) == 0
 
 
 def test_invalid_dynamodb_persistence_layer():
