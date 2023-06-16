@@ -4,6 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Features
+
+* **feature_flags:** add modulo range condition for segmented experimentation support ([#2331](https://github.com/awslabs/aws-lambda-powertools-python/issues/2331))
+
+## Maintenance
+
+* **deps-dev:** bump pytest-mock from 3.10.0 to 3.11.1 ([#2485](https://github.com/awslabs/aws-lambda-powertools-python/issues/2485))
+
 
 <a name="v2.17.0"></a>
 ## [v2.17.0] - 2023-06-16
