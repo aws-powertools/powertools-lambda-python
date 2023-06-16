@@ -47,31 +47,31 @@ tests-no-zope = ["cloudpickle", "hypothesis", "mypy (>=1.1.1)", "pympler", "pyte
 
 [[package]]
 name = "aws-cdk-asset-awscli-v1"
-version = "2.2.190"
+version = "2.2.192"
 description = "A library that contains the AWS CLI for use in Lambda Layers"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-awscli-v1-2.2.190.tar.gz", hash = "sha256:e890fc7a4045615cfd4d247cb2df0c0c6724b5d755de93b9265d795e93c1b185"},
-    {file = "aws_cdk.asset_awscli_v1-2.2.190-py3-none-any.whl", hash = "sha256:daa9fe772109c3cf9e4bc30feba39cf1cc5291fc55dca659ebdedab36eab247e"},
+    {file = "aws-cdk.asset-awscli-v1-2.2.192.tar.gz", hash = "sha256:73d7887dc6ad2c6cd770386da1b9113b7c8f355a500ca4dc4931c796c41c74cf"},
+    {file = "aws_cdk.asset_awscli_v1-2.2.192-py3-none-any.whl", hash = "sha256:9c6146a842936607fb47e8b3e45de42104fa3235e3e2e446843795b2b683af10"},
 ]
 
 [package.dependencies]
-jsii = ">=1.83.0,<2.0.0"
+jsii = ">=1.84.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-asset-kubectl-v20"
-version = "2.1.1"
+version = "2.1.2"
 description = "A library that contains kubectl for use in Lambda Layers"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-kubectl-v20-2.1.1.tar.gz", hash = "sha256:9834cdb150c5590aea4e5eba6de2a89b4c60617451181c524810c5a75154565c"},
-    {file = "aws_cdk.asset_kubectl_v20-2.1.1-py3-none-any.whl", hash = "sha256:a2fad1a5a35a94a465efe60859f91e45dacc33261fb9bbf1cf9bbc6e2f70e9d6"},
+    {file = "aws-cdk.asset-kubectl-v20-2.1.2.tar.gz", hash = "sha256:346283e43018a43e3b3ca571de3f44e85d49c038dc20851894cb8f9b2052b164"},
+    {file = "aws_cdk.asset_kubectl_v20-2.1.2-py3-none-any.whl", hash = "sha256:7f0617ab6cb942b066bd7174bf3e1f377e57878c3e1cddc21d6b2d13c92d0cc1"},
 ]
 
 [package.dependencies]
@@ -81,18 +81,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-asset-node-proxy-agent-v5"
-version = "2.0.164"
+version = "2.0.165"
 description = "@aws-cdk/asset-node-proxy-agent-v5"
 category = "dev"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-node-proxy-agent-v5-2.0.164.tar.gz", hash = "sha256:921488d2f4889295595db3e0f57d8a35b8599cd34cc1c73cd50c3df9937e5b31"},
-    {file = "aws_cdk.asset_node_proxy_agent_v5-2.0.164-py3-none-any.whl", hash = "sha256:969335c09bb741fe148eeba8da1d3ce20e99834094e938e2cefffb803532fa12"},
+    {file = "aws-cdk.asset-node-proxy-agent-v5-2.0.165.tar.gz", hash = "sha256:e1afb5773d185cf5f335e4c2dd8dd09967a5e700b45eddf5559b24d7e665628d"},
+    {file = "aws_cdk.asset_node_proxy_agent_v5-2.0.165-py3-none-any.whl", hash = "sha256:96afc5747276d21fc25a4aacdb361e3b1cb9a53b2a87a2affa20bbfbe87a0c65"},
 ]
 
 [package.dependencies]
-jsii = ">=1.83.0,<2.0.0"
+jsii = ">=1.84.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -211,14 +211,14 @@ requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.68.0"
+version = "1.69.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 category = "dev"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.68.0.tar.gz", hash = "sha256:d12a7bb3909142d32458f76818cb96a5ebc5f50fbd5943301d552679a893afcc"},
-    {file = "aws_sam_translator-1.68.0-py3-none-any.whl", hash = "sha256:557d8080c9e6c1c609bfe806ea9545f7ea34144e2466c0ddc801806c2c05afdc"},
+    {file = "aws-sam-translator-1.69.0.tar.gz", hash = "sha256:bf26c061675f20367e87d48963ada1ec983a8d897e85db02d0f35913a6174bb0"},
+    {file = "aws_sam_translator-1.69.0-py3-none-any.whl", hash = "sha256:c6ed7a25c77d30d3d31156049415d15fde46c0d3b77a4c5cdc0ef8b53ba9bca2"},
 ]
 
 [package.dependencies]
@@ -323,18 +323,18 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.26.153"
+version = "1.26.154"
 description = "The AWS SDK for Python"
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.26.153-py3-none-any.whl", hash = "sha256:ec3a4aef45d16d9362191aa245a31059df009cd73668d0c3b15126cfeb5d3fd7"},
-    {file = "boto3-1.26.153.tar.gz", hash = "sha256:92de7eec15adda76abff0580b1e8ca70646470fba4c807934062456d0c5c9171"},
+    {file = "boto3-1.26.154-py3-none-any.whl", hash = "sha256:ee2b3733f40f935da78bf76bc8e82af6e90841406e04605e3b2d765b50cad05e"},
+    {file = "boto3-1.26.154.tar.gz", hash = "sha256:cf1067d101be538f399b685bbe6beb4bfed01095da8497d0c7fa8b8788a65c6b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.29.153,<1.30.0"
+botocore = ">=1.29.154,<1.30.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -343,14 +343,14 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.29.153"
+version = "1.29.154"
 description = "Low-level, data-driven core of boto 3."
 category = "main"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.29.153-py3-none-any.whl", hash = "sha256:d6d3294fde297ae76fadb4bafad93ef958f145bb9a502bf7b1e57ff6f8dc4039"},
-    {file = "botocore-1.29.153.tar.gz", hash = "sha256:d59b8e87138581a339b9f84a9e90bc4c1a152cf8ca2adbaad7792a4c4125bffa"},
+    {file = "botocore-1.29.154-py3-none-any.whl", hash = "sha256:b9853f72a3c93f1aa8c9a1636911cdbec3662bca2e04e4ee00437c4f8c9fa2d4"},
+    {file = "botocore-1.29.154.tar.gz", hash = "sha256:a9c7da497ac5f7d4f3e932b4442e7c32cc2936f3a4658165f1528336fc429c3d"},
 ]
 
 [package.dependencies]
@@ -939,14 +939,14 @@ test = ["pytest"]
 
 [[package]]
 name = "flake8-comprehensions"
-version = "3.12.0"
+version = "3.13.0"
 description = "A flake8 plugin to help you write better list/set/dict comprehensions."
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "flake8_comprehensions-3.12.0-py3-none-any.whl", hash = "sha256:013234637ec7dfcb7cd2900578fb53c512f81db909cefe371c019232695c362d"},
-    {file = "flake8_comprehensions-3.12.0.tar.gz", hash = "sha256:419ef1a6e8de929203791a5e8ff5e3906caeba13eb3290eebdbf88a9078d502e"},
+    {file = "flake8_comprehensions-3.13.0-py3-none-any.whl", hash = "sha256:cc0d6dbb336ff4e9cdf4eb605a3f719ea59261f2d6ba52034871a173c40e1f60"},
+    {file = "flake8_comprehensions-3.13.0.tar.gz", hash = "sha256:83cf98e816c9e23360f36aaf47de59a5b21437fdff8a056c46e2ad49f81861bf"},
 ]
 
 [package.dependencies]
@@ -1745,14 +1745,14 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.1.15"
+version = "9.1.16"
 description = "Documentation that simply works"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mkdocs_material-9.1.15-py3-none-any.whl", hash = "sha256:b49e12869ab464558e2dd3c5792da5b748a7e0c48ee83b4d05715f98125a7a39"},
-    {file = "mkdocs_material-9.1.15.tar.gz", hash = "sha256:8513ab847c9a541ed3d11a3a7eed556caf72991ee786c31c5aac6691a121088a"},
+    {file = "mkdocs_material-9.1.16-py3-none-any.whl", hash = "sha256:f9e62558a6b01ffac314423cbc223d970c25fbc78999860226245b64e64d6751"},
+    {file = "mkdocs_material-9.1.16.tar.gz", hash = "sha256:1021bfea20f00a9423530c8c2ae9be3c78b80f5a527b3f822e6de3d872e5ab79"},
 ]
 
 [package.dependencies]
@@ -2456,14 +2456,14 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-mock"
-version = "3.10.0"
+version = "3.11.1"
 description = "Thin-wrapper around the mock package for easier use with pytest"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest-mock-3.10.0.tar.gz", hash = "sha256:fbbdb085ef7c252a326fd8cdcac0aa3b1333d8811f131bdcc701002e1be7ed4f"},
-    {file = "pytest_mock-3.10.0-py3-none-any.whl", hash = "sha256:f4c973eeae0282963eb293eb173ce91b091a79c1334455acfac9ddee8a1c784b"},
+    {file = "pytest-mock-3.11.1.tar.gz", hash = "sha256:7f6b125602ac6d743e523ae0bfa71e1a697a2f5534064528c6ff84c2f7c2fc7f"},
+    {file = "pytest_mock-3.11.1-py3-none-any.whl", hash = "sha256:21c279fff83d70763b05f8874cc9cfb3fcacd6d354247a976f9529d19f9acf39"},
 ]
 
 [package.dependencies]
@@ -3254,7 +3254,9 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [extras]
 all = ["aws-encryption-sdk", "aws-xray-sdk", "fastjsonschema", "itsdangerous", "pydantic"]
 aws-sdk = ["boto3"]
-datamasking = ["aws-encryption-sdk", "itsdangerous"]
+datamasking-all = ["aws-encryption-sdk", "itsdangerous"]
+datamasking-aws-sdk = ["aws-encryption-sdk"]
+datamasking-itsdangerous = ["itsdangerous"]
 parser = ["pydantic"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]
@@ -3262,4 +3264,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "92c5d3786ca365b43effc8980a79c7db910d490a71d9144774494b06f8699aaa"
+content-hash = "4769cd27de113edf6b8422419346193f46d4a12cc3a04c9c4e285155e51b4ce0"

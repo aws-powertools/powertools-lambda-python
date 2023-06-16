@@ -95,7 +95,9 @@ aws-requests-auth = "^0.4.3"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
-datamasking = ["itsdangerous", "aws-encryption-sdk"]
+datamasking-itsdangerous = ["itsdangerous"]
+datamasking-aws-sdk= ["aws-encryption-sdk"]
+datamasking-all = ["itsdangerous", "aws-encryption-sdk"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
 all = ["pydantic", "aws-xray-sdk", "fastjsonschema", "itsdangerous", "aws-encryption-sdk"]
