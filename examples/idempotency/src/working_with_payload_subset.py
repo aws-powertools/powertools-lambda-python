@@ -30,8 +30,8 @@ class PaymentError(Exception):
 @idempotent(config=config, persistence_store=persistence_layer)
 def lambda_handler(event: dict, context: LambdaContext):
     try:
-        payment_data = json.loads(event.get("body"))
-        payment: Payment = create_subscription_payment(payment_data)
+        payment_info: str = event.get("body", "")
+        payment: Payment = create_subscription_payment(json.loads(payment_info))
         return {
             "payment_id": payment.payment_id,
             "message": "success",
