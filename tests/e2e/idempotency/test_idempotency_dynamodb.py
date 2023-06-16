@@ -28,6 +28,11 @@ def function_thread_safety_handler_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def optional_idempotency_key_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("OptionalIdempotencyKeyHandlerArn", "")
+
+
+@pytest.fixture
 def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
@@ -35,7 +40,7 @@ def idempotency_table_name(infrastructure: dict) -> str:
 @pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - TTL 5s"})
+    payload = json.dumps({"message": "Powertools for AWS Lambda (Python) - TTL 5s"})
 
     # WHEN
     # first execution
@@ -65,8 +70,8 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
 @pytest.mark.xdist_group(name="idempotency")
 def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # GIVEN
-    payload_timeout_execution = json.dumps({"sleep": 5, "message": "Lambda Powertools - TTL 1s"})
-    payload_working_execution = json.dumps({"sleep": 0, "message": "Lambda Powertools - TTL 1s"})
+    payload_timeout_execution = json.dumps({"sleep": 5, "message": "Powertools for AWS Lambda (Python) - TTL 1s"})
+    payload_working_execution = json.dumps({"sleep": 0, "message": "Powertools for AWS Lambda (Python) - TTL 1s"})
 
     # WHEN
     # first call should fail due to timeout
@@ -89,7 +94,7 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
 @pytest.mark.xdist_group(name="idempotency")
 def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
     # GIVEN
-    arguments = json.dumps({"message": "Lambda Powertools - Parallel execution"})
+    arguments = json.dumps({"message": "Powertools for AWS Lambda (Python) - Parallel execution"})
 
     # WHEN
     # executing Lambdas in parallel
@@ -107,7 +112,7 @@ def test_parallel_execution_idempotency(parallel_execution_handler_fn_arn: str):
 @pytest.mark.xdist_group(name="idempotency")
 def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn: str):
     # GIVEN
-    payload = json.dumps({"message": "Lambda Powertools - Idempotent function thread safety check"})
+    payload = json.dumps({"message": "Powertools for AWS Lambda (Python) - Idempotent function thread safety check"})
 
     # WHEN
     # first execution
@@ -132,3 +137,33 @@ def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn
 
     # we use set() here because we want to compare the elements regardless of their order in the array
     assert set(first_execution_response) == set(second_execution_response)
+
+
+@pytest.mark.xdist_group(name="idempotency")
+def test_optional_idempotency_key(optional_idempotency_key_fn_arn: str):
+    # GIVEN two payloads where only one has the expected idempotency key
+    payload = json.dumps({"headers": {"X-Idempotency-Key": "here"}})
+    payload_without = json.dumps({"headers": {}})
+
+    # WHEN
+    # we make one request with an idempotency key
+    first_execution, _ = data_fetcher.get_lambda_response(lambda_arn=optional_idempotency_key_fn_arn, payload=payload)
+    first_execution_response = first_execution["Payload"].read().decode("utf-8")
+
+    # and two others without the idempotency key
+    second_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn, payload=payload_without
+    )
+    second_execution_response = second_execution["Payload"].read().decode("utf-8")
+
+    third_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn, payload=payload_without
+    )
+    third_execution_response = third_execution["Payload"].read().decode("utf-8")
+
+    # THEN
+    # we should treat 2nd and 3rd requests with NULL idempotency key as non-idempotent transactions
+    # that is, no cache, no calls to persistent store, etc.
+    assert first_execution_response != second_execution_response
+    assert first_execution_response != third_execution_response
+    assert second_execution_response != third_execution_response

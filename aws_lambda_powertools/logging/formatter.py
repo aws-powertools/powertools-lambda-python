@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import inspect
 import json
 import logging
@@ -8,8 +10,9 @@ from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from ..shared import constants
-from ..shared.functions import powertools_dev_is_set
+from aws_lambda_powertools.logging.types import LogRecord
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 RESERVED_LOG_ATTRS = (
     "name",
@@ -54,7 +57,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
 
 
 class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
-    """AWS Lambda Powertools Logging formatter.
+    """Powertools for AWS Lambda (Python) Logging formatter.
 
     Formats the log message as a JSON encoded string. If the message is a
     dict it will be used directly.
@@ -66,12 +69,12 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def __init__(
         self,
-        json_serializer: Optional[Callable[[Dict], str]] = None,
-        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
-        json_default: Optional[Callable[[Any], Any]] = None,
-        datefmt: Optional[str] = None,
+        json_serializer: Callable[[LogRecord], str] | None = None,
+        json_deserializer: Callable[[Dict | str | bool | int | float], str] | None = None,
+        json_default: Callable[[Any], Any] | None = None,
+        datefmt: str | None = None,
         use_datetime_directive: bool = False,
-        log_record_order: Optional[List[str]] = None,
+        log_record_order: List[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
         **kwargs,
@@ -144,7 +147,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         super().__init__(datefmt=self.datefmt)
 
-    def serialize(self, log: Dict) -> str:
+    def serialize(self, log: LogRecord) -> str:
         """Serialize structured log dict to JSON str"""
         return self.json_serializer(log)
 

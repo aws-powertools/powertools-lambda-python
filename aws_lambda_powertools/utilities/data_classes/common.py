@@ -16,7 +16,7 @@ class DictWrapper(Mapping):
         data : Dict[str, Any]
             Lambda Event Source Event payload
         json_deserializer : Callable, optional
-            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
         """
         self._data = data
@@ -113,7 +113,7 @@ def get_header_value(
 class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
-        return self["headers"]
+        return self.get("headers") or {}
 
     @property
     def query_string_parameters(self) -> Optional[Dict[str, str]]:

@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: partial batch response sample
 
@@ -37,6 +37,7 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       VisibilityTimeout: 30 # Fn timeout * 6
+      SqsManagedSseEnabled: true
       RedrivePolicy:
         maxReceiveCount: 2
         deadLetterTargetArn: !GetAtt SampleDLQ.Arn

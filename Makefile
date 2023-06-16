@@ -6,11 +6,13 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
+	@$(MAKE) dev-version-plugin
 	poetry install --extras "all"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
+	@$(MAKE) dev-version-plugin
 	poetry install --extras "all"
 	pre-commit install
 
@@ -106,3 +108,7 @@ changelog:
 
 mypy:
 	poetry run mypy --pretty aws_lambda_powertools examples
+
+
+dev-version-plugin:
+	poetry self add git+https://github.com/monim67/poetry-bumpversion@ef49c63acef7fe8680789ddb31f376cc898f0012

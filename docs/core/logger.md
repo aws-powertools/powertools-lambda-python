@@ -108,7 +108,7 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 #### set_correlation_id method
 
-You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md) to easily access events properties.
+You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md){target="_blank"} to easily access events properties.
 
 === "set_correlation_id_method.py"
 
@@ -242,7 +242,7 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 #### Clearing all state
 
-Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html), this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
+Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html){target="_blank"}, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
 ???+ tip "Tip: When is this useful?"
     It is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
@@ -360,7 +360,7 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code), a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
 
 Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 
@@ -407,7 +407,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
 ???+ note
-	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you want Logger to calculate sampling for every invocation
+	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
 
 === "sampling_debug_logs.py"
 
@@ -441,7 +441,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 ???+ info
     When `POWERTOOLS_DEV` env var is present and set to `"true"`, Logger's default serializer (`json.dumps`) will pretty-print log messages for easier readability.
 
-```python hl_lines="2 7-8" title="Pre-configuring Lambda Powertools Formatter"
+```python hl_lines="2 7-8" title="Pre-configuring Powertools for AWS Lambda (Python) Formatter"
 --8<-- "examples/logger/src/powertools_formatter_setup.py"
 ```
 
@@ -604,7 +604,7 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
 
 === "bring_your_own_formatter.py"
 
-    ```python hl_lines="2 5-6 12"
+    ```python hl_lines="2-3 6 11-12 15"
     --8<-- "examples/logger/src/bring_your_own_formatter.py"
     ```
 
@@ -618,7 +618,7 @@ The `log` argument is the final log record containing [our standard keys](#stand
 For exceptional cases where you want to completely replace our formatter logic, you can subclass `BasePowertoolsFormatter`.
 
 ???+ warning
-    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools Logger provides. This also means keeping state of logging keys added.
+    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means keeping state of logging keys added.
 
 === "bring_your_own_formatter_from_scratch.py"
 
@@ -688,7 +688,7 @@ for the given name and level to the logging module. By default, this logs all bo
 ---8<-- "examples/logger/src/enabling_boto_logging.py"
 ```
 
-### How can I enable Powertools logging for imported libraries?
+### How can I enable Powertools for AWS Lambda (Python) logging for imported libraries?
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
@@ -703,7 +703,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 
@@ -721,7 +721,7 @@ You can also add them later anywhere in your code with `append_keys`, or remove 
     ---8<-- "examples/logger/src/append_and_remove_keys_output.json"
     ```
 
-For log records originating from Powertools Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
+For log records originating from Powertools for AWS Lambda (Python) Logger, the `name` attribute will be the same as `service`, for log records coming from standard library logger, it will be the name of the logger (i.e. what was used as name argument to `logging.getLogger`).
 
 ### What's the difference between `append_keys` and `extra`?
 
@@ -741,6 +741,7 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
     ---8<-- "examples/logger/src/append_keys_vs_extra_output.json"
     ```
 
-### How do I aggregate and search Powertools logs across accounts?
+<!-- markdownlint-disable MD013 -->
+### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
-As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460)
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460){target="_blank"}

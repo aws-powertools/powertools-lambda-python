@@ -25,7 +25,7 @@ from typing import (
 import boto3
 from botocore.config import Config
 
-from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
@@ -254,11 +254,14 @@ class BaseProvider(ABC):
             Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
         """
         if client is not None:
+            user_agent.register_feature_to_client(client=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        return session.client(service_name=service_name, config=config)
+        client = session.client(service_name=service_name, config=config)
+        user_agent.register_feature_to_client(client=client, feature="parameters")
+        return client
 
     # maintenance: change DynamoDBServiceResource type to ParameterResourceClients when we expand
     @staticmethod
@@ -288,11 +291,14 @@ class BaseProvider(ABC):
             Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
         """
         if client is not None:
+            user_agent.register_feature_to_resource(resource=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        return session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
+        client = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
+        user_agent.register_feature_to_resource(resource=client, feature="parameters")
+        return client
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:
