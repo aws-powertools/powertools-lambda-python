@@ -469,19 +469,11 @@ sequenceDiagram
 
 This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).
 
-```python hl_lines="5-10" title="Customizing DynamoDBPersistenceLayer to suit your table structure"
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
+=== "Customizing DynamoDBPersistenceLayer to suit your table structure"
 
-persistence_layer = DynamoDBPersistenceLayer(
-	table_name="IdempotencyTable",
-	key_attr="idempotency_key",
-	expiry_attr="expires_at",
-	in_progress_expiry_attr="in_progress_expires_at",
-	status_attr="current_status",
-	data_attr="result_data",
-	validation_key_attr="validation_key",
-)
-```
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/customize_persistence_layer.py"
+    ```
 
 When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
 
@@ -529,21 +521,17 @@ This is a locking mechanism for correctness. Since we don't know the result from
 
 You can enable in-memory caching with the **`use_local_cache`** parameter:
 
-```python hl_lines="8 11" title="Caching idempotent transactions in-memory to prevent multiple calls to storage"
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
+=== "Caching idempotent transactions in-memory to prevent multiple calls to storage"
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-config =  IdempotencyConfig(
-	event_key_jmespath="body",
-	use_local_cache=True,
-)
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_local_cache.py"
+    ```
 
-@idempotent(config=config, persistence_store=persistence_layer)
-def handler(event, context):
-	...
-```
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
+    ```
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
 
@@ -555,21 +543,17 @@ In most cases, it is not desirable to store the idempotency records forever. Rat
 
 You can change this window with the **`expires_after_seconds`** parameter:
 
-```python hl_lines="8 11" title="Adjusting idempotency record expiration"
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
+=== "Adjusting idempotency record expiration"
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-config =  IdempotencyConfig(
-	event_key_jmespath="body",
-	expires_after_seconds=5*60,  # 5 minutes
-)
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_record_expiration.py"
+    ```
 
-@idempotent(config=config, persistence_store=persistence_layer)
-def handler(event, context):
-	...
-```
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_record_expiration_payload.json"
+    ```
 
 This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
 
