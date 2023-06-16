@@ -184,7 +184,7 @@ class BasePersistenceLayer(ABC):
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
 
             warnings.warn(
-                f"No idempotency key value found. Skipping persistence layer and validation operations. jmespath: {self.event_key_jmespath}",
+                f"No idempotency key value found. Skipping persistence layer and validation operations. jmespath: {self.event_key_jmespath}",  # noqa: E501
                 stacklevel=2,
             )
             return None
