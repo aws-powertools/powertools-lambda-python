@@ -156,7 +156,9 @@ def test_optional_idempotency_key(optional_idempotency_key_fn_arn: str):
     )
     second_execution_response = second_execution["Payload"].read().decode("utf-8")
 
-    third_execution, _ = data_fetcher.get_lambda_response(lambda_arn=optional_idempotency_key_fn_arn, payload=payload)
+    third_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn, payload=payload_without
+    )
     third_execution_response = third_execution["Payload"].read().decode("utf-8")
 
     # THEN
