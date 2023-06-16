@@ -324,7 +324,7 @@ class BasePersistenceLayer(ABC):
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
             # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
-            return
+            return None
 
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
 
