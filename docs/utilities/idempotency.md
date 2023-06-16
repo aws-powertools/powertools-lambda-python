@@ -79,15 +79,15 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
 
-=== "sam.yaml"
+=== "AWS SAM"
 
     ```yaml hl_lines="6-14 24-31" title="AWS Serverless Application Model (SAM) example"
-    --8<-- "examples/idempotency/sam.yaml"
+    --8<-- "examples/idempotency/sam/template.yaml"
     ```
-=== "cdk.py"
+=== "AWS CDK"
 
     ```python hl_lines="10 13 16 19-21"  title="AWS Cloud Development Kit (CDK) Construct example"
-    --8<-- "examples/idempotency/cdk.py"
+    --8<-- "examples/idempotency/src/cdk.py"
     ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
@@ -143,41 +143,10 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass.py"
     ```
 
-=== "parser_pydantic_sample.py"
+=== "Using Pydantic"
 
-    ```python hl_lines="1-2 22 32"
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-    from aws_lambda_powertools.utilities.parser import BaseModel
-
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="order_id",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-
-    class OrderItem(BaseModel):
-        sku: str
-        description: str
-
-
-    class Order(BaseModel):
-        item: OrderItem
-        order_id: int
-
-
-    @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
-    def process_order(order: Order):
-        return f"processed order {order.order_id}"
-
-	def lambda_handler(event, context):
-		config.register_lambda_context(context) # see Lambda timeouts section
-		order_item = OrderItem(sku="fake", description="sample")
-		order = Order(item=order_item, order_id="fake-id")
-
-		# `order` parameter must be called as a keyword argument to work
-		process_order(order=order)
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
 #### Batch integration
@@ -189,71 +158,16 @@ You can can easily integrate with [Batch utility](batch.md){target="_blank"} via
 
     Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
 
-=== "batch_sample.py"
+=== "Integration with Batch Processor"
 
-    ```python hl_lines="3-4 10 15 21 25-26 29 31"
-    from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
-    from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-    from aws_lambda_powertools.utilities.idempotency import (
-        DynamoDBPersistenceLayer, IdempotencyConfig, idempotent_function)
-
-
-    processor = BatchProcessor(event_type=EventType.SQS)
-    dynamodb = DynamoDBPersistenceLayer(table_name="idem")
-    config =  IdempotencyConfig(
-        event_key_jmespath="messageId",  # see Choosing a payload subset section
-        use_local_cache=True,
-    )
-
-
-    @idempotent_function(data_keyword_argument="record", config=config, persistence_store=dynamodb)
-    def record_handler(record: SQSRecord):
-        return {"message": record.body}
-
-
-    def lambda_handler(event, context):
-        config.register_lambda_context(context) # see Lambda timeouts section
-
-        # with Lambda context registered for Idempotency
-        # we can now kick in the Bach processing logic
-        batch = event["Records"]
-        with processor(records=batch, handler=record_handler):
-            # in case you want to access each record processed by your record_handler
-            # otherwise ignore the result variable assignment
-            processed_messages = processor.process()
-
-        return processor.response()
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
     ```
 
-=== "batch_event.json"
+=== "Sample event"
 
-    ```json hl_lines="4"
-    {
-        "Records": [
-            {
-                "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
-                "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a...",
-                "body": "Test message.",
-                "attributes": {
-                    "ApproximateReceiveCount": "1",
-                    "SentTimestamp": "1545082649183",
-                    "SenderId": "AIDAIENQZJOLO23YVJ4VO",
-                    "ApproximateFirstReceiveTimestamp": "1545082649185"
-                },
-                "messageAttributes": {
-                    "testAttr": {
-                    "stringValue": "100",
-                    "binaryValue": "base64Str",
-                    "dataType": "Number"
-                    }
-                },
-                "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
-                "eventSource": "aws:sqs",
-                "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
-                "awsRegion": "us-east-2"
-            }
-        ]
-    }
+    ```json
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
     ```
 
 ### Choosing a payload subset for idempotency
