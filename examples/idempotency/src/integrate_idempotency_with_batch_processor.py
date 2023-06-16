@@ -11,7 +11,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = Logger()
 processor = BatchProcessor(event_type=EventType.SQS)
 
-dynamodb = DynamoDBPersistenceLayer(table_name="idem")
+dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(
     event_key_jmespath="messageId",  # see Choosing a payload subset section
 )

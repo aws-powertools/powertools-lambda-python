@@ -183,7 +183,7 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-**What we want here** is to instruct Idempotency to use `user` and `product_id` fields from our incoming payload as our idempotency key.
+**What we want here** is to instruct Idempotency to use `user_id` and `product_id` fields from our incoming payload as our idempotency key.
 If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
 
 ???+ tip "Deserializing JSON strings in payloads for increased accuracy."
@@ -192,68 +192,16 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 
     To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
-=== "payment.py"
+=== "Payment function"
 
-    ```python hl_lines="2-4 10 12 15 20"
-    import json
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    # Deserialize JSON string under the "body" key
-    # then extract "user" and "product_id" data
-    config = IdempotencyConfig(event_key_jmespath="powertools_json(body).[user, product_id]")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        body = json.loads(event['body'])
-        payment = create_subscription_payment(
-            user=body['user'],
-            product=body['product_id']
-        )
-        ...
-        return {
-            "payment_id": payment.id,
-            "message": "success",
-            "statusCode": 200
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_payload_subset.py"
     ```
 
-=== "Example event"
+=== "Sample event"
 
-    ```json hl_lines="28"
-    {
-      "version":"2.0",
-      "routeKey":"ANY /createpayment",
-      "rawPath":"/createpayment",
-      "rawQueryString":"",
-      "headers": {
-        "Header1": "value1",
-        "Header2": "value2"
-      },
-      "requestContext":{
-        "accountId":"123456789012",
-        "apiId":"api-id",
-        "domainName":"id.execute-api.us-east-1.amazonaws.com",
-        "domainPrefix":"id",
-        "http":{
-          "method":"POST",
-          "path":"/createpayment",
-          "protocol":"HTTP/1.1",
-          "sourceIp":"ip",
-          "userAgent":"agent"
-        },
-        "requestId":"id",
-        "routeKey":"ANY /createpayment",
-        "stage":"$default",
-        "time":"10/Feb/2021:13:40:43 +0000",
-        "timeEpoch":1612964443723
-      },
-      "body":"{\"user\":\"xyz\",\"product_id\":\"123456789\"}",
-      "isBase64Encoded":false
-    }
+    ```json
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
     ```
 
 ### Lambda timeouts
