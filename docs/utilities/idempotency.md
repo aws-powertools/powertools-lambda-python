@@ -256,24 +256,11 @@ If you are using `idempotent_function`, any unhandled exceptions that are raised
 
 If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
 
-```python hl_lines="2-4 8-10" title="Exception not affecting idempotency record sample"
-def lambda_handler(event, context):
-    # If an exception is raised here, no idempotent record will ever get created as the
-    # idempotent function does not get called
-    do_some_stuff()
+=== "Handling exceptions"
 
-    result = call_external_service(data={"user": "user1", "id": 5})
-
-    # This exception will not cause the idempotent record to be deleted, since it
-    # happens after the decorated function has been successfully called
-    raise Exception
-
-
-@idempotent_function(data_keyword_argument="data", config=config, persistence_store=dynamodb)
-def call_external_service(data: dict, **kwargs):
-    result = requests.post('http://example.com', json={"user": data['user'], "transaction_id": data['id']}
-    return result.json()
-```
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_exceptions.py"
+    ```
 
 ???+ warning
     **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
