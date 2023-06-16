@@ -280,7 +280,7 @@ The condition evaluates `START <= CONTEXT_VALUE % BASE <= END`.
 
 === "modulo_range_feature.py"
 
-    ```python hl_lines="1 6 40"
+    ```python hl_lines="1 6 38"
     --8<-- "examples/feature_flags/src/modulo_range_feature.py"
     ```
 
