@@ -649,6 +649,36 @@ sequenceDiagram
 <i>Idempotent request during and after Lambda timeouts</i>
 </center>
 
+#### Optional idempotency key
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt request with idempotency key
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else request(s) without idempotency key
+        Client->>Lambda: Invoke (event)
+        Note over Lambda: Idempotency key is missing
+        Note over Persistence Layer: Skips any operation to fetch, update, and delete
+        Lambda-->>Lambda: Call your function
+        Lambda-->>Client: Response sent to client
+    end
+```
+<i>Optional idempotency key</i>
+</center>
+
 ## Advanced
 
 ### Persistence layers
