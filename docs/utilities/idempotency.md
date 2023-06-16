@@ -3,6 +3,8 @@ title: Idempotency
 description: Utility
 ---
 
+<!-- markdownlint-disable MD051 -->
+
 The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
 are safe to retry.
 
@@ -77,31 +79,16 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
 
-```yaml hl_lines="5-13 21-23" title="AWS Serverless Application Model (SAM) example"
-Resources:
-  IdempotencyTable:
-	Type: AWS::DynamoDB::Table
-	Properties:
-	  AttributeDefinitions:
-		-   AttributeName: id
-			AttributeType: S
-	  KeySchema:
-		-   AttributeName: id
-			KeyType: HASH
-	  TimeToLiveSpecification:
-		AttributeName: expiration
-		Enabled: true
-	  BillingMode: PAY_PER_REQUEST
+=== "sam.yaml"
 
-  HelloWorldFunction:
-  Type: AWS::Serverless::Function
-  Properties:
-	Runtime: python3.9
-	...
-	Policies:
-	  - DynamoDBCrudPolicy:
-		  TableName: !Ref IdempotencyTable
-```
+    ```yaml hl_lines="6-14 24-31" title="AWS Serverless Application Model (SAM) example"
+    --8<-- "examples/idempotency/sam.yaml"
+    ```
+=== "cdk.py"
+
+    ```python hl_lines="10 13 16 19-21"  title="AWS Cloud Development Kit (CDK) Construct example"
+    --8<-- "examples/idempotency/cdk.py"
+    ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
@@ -148,7 +135,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 === "Example event"
 
-    ```json
+   ```json
     {
       "username": "xyz",
       "product_id": "123456789"
@@ -334,10 +321,12 @@ In this example, we have a Lambda handler that creates a payment for a user subs
 
 Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
 
-**What we want here** is to instruct Idempotency to use `user` and `product_id` fields from our incoming payload as our idempotency key. If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
+**What we want here** is to instruct Idempotency to use `user` and `product_id` fields from our incoming payload as our idempotency key.
+If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
 
 ???+ tip "Deserializing JSON strings in payloads for increased accuracy."
-    The payload extracted by the `event_key_jmespath` is treated as a string by default. This means there could be differences in whitespace even when the JSON payload itself is identical.
+    The payload extracted by the `event_key_jmespath` is treated as a string by default.
+    This means there could be differences in whitespace even when the JSON payload itself is identical.
 
     To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
@@ -410,7 +399,8 @@ Imagine the function executes successfully, but the client never receives the re
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"}, Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
+Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
 ???+ example
     If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
@@ -418,7 +408,8 @@ To prevent against extended failed retries when a [Lambda function times out](ht
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
 
 ???+ important
-    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code, you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
+    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code,
+    you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
 
 Here is an example on how you register the Lambda context in your handler:
 
@@ -658,6 +649,36 @@ sequenceDiagram
 <i>Idempotent request during and after Lambda timeouts</i>
 </center>
 
+#### Optional idempotency key
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    alt request with idempotency key
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else request(s) without idempotency key
+        Client->>Lambda: Invoke (event)
+        Note over Lambda: Idempotency key is missing
+        Note over Persistence Layer: Skips any operation to fetch, update, and delete
+        Lambda-->>Lambda: Call your function
+        Lambda-->>Client: Response sent to client
+    end
+```
+<i>Optional idempotency key</i>
+</center>
+
 ## Advanced
 
 ### Persistence layers
@@ -698,14 +719,14 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-| Parameter                       | Default | Description                                                                                                                                          |
-| ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank"}  |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                         |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                       |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                             |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                         |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                          |
+| Parameter                       | Default | Description                                                                                                                                                |
+| ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank"}        |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                               |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                             |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                   |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                               |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                |
 | **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank"} in the standard library. |
 
 ### Handling concurrent executions with the same payload
@@ -863,6 +884,9 @@ By using **`payload_validation_jmespath="amount"`**, we prevent this potentially
 If you want to enforce that an idempotency key is required, you can set **`raise_on_no_idempotency_key`** to `True`.
 
 This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`event_key_jmespath`** is `None`.
+
+???+ warning
+    To prevent errors, transactions will not be treated as idempotent if **`raise_on_no_idempotency_key`** is set to `False` and the evaluation of **`event_key_jmespath`** is `None`. Therefore, no data will be fetched, stored, or deleted in the idempotency storage layer.
 
 === "app.py"
 

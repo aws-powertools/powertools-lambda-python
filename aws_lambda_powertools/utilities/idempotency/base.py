@@ -111,7 +111,8 @@ class IdempotencyHandler:
         except IdempotencyItemAlreadyExistsError:
             # Now we know the item already exists, we can retrieve it
             record = self._get_idempotency_record()
-            return self._handle_for_status(record)
+            if record is not None:
+                return self._handle_for_status(record)
         except Exception as exc:
             raise IdempotencyPersistenceLayerError(
                 "Failed to save in progress record to idempotency store", exc
@@ -138,7 +139,7 @@ class IdempotencyHandler:
 
         return None
 
-    def _get_idempotency_record(self) -> DataRecord:
+    def _get_idempotency_record(self) -> Optional[DataRecord]:
         """
         Retrieve the idempotency record from the persistence layer.
 

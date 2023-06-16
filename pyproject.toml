@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.16.2"
+version = "2.17.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -47,14 +47,14 @@ flake8 = [
   { version = ">=5", python= ">=3.8"},
 ]
 flake8-builtins = "^2.1.0"
-flake8-comprehensions = "^3.12.0"
+flake8-comprehensions = "^3.13.0"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
 flake8-variables-names = "^0.0.5"
 flake8-black = "^0.3.6"
 isort = "^5.11.5"
 pytest-cov = "^4.1.0"
-pytest-mock = "^3.5.1"
+pytest-mock = "^3.11.1"
 pdoc3 = "^0.10.0"
 pytest-asyncio = "^0.21.0"
 bandit = "^1.7.5"
@@ -84,7 +84,7 @@ mypy-boto3-s3 = "^1.26.153"
 mypy-boto3-xray = "^1.26.122"
 types-requests = "^2.31.0"
 typing-extensions = "^4.6.2"
-mkdocs-material = "^9.1.15"
+mkdocs-material = "^9.1.16"
 filelock = "^3.12.2"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
@@ -105,7 +105,7 @@ all = ["pydantic", "aws-xray-sdk", "fastjsonschema", "itsdangerous", "aws-encryp
 aws-sdk = ["boto3"]
 
 [tool.poetry.group.dev.dependencies]
-cfn-lint = "0.77.8"
+cfn-lint = "0.77.9"
 mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 httpx = ">=0.23.3,<0.25.0"
