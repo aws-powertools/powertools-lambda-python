@@ -39,7 +39,7 @@ class TypeDeserializer:
             --------                                ------
             {'NULL': True}                          None
             {'BOOL': True/False}                    True/False
-            {'N': str(value)}                       str(value)
+            {'N': Decimal(value)}                   Decimal(value)
             {'S': string}                           string
             {'B': bytes}                            bytes
             {'NS': [str(value)]}                    set([str(value)])
