@@ -3,6 +3,8 @@ title: Idempotency
 description: Utility
 ---
 
+<!-- markdownlint-disable MD051 -->
+
 The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
 are safe to retry.
 
@@ -852,6 +854,9 @@ By using **`payload_validation_jmespath="amount"`**, we prevent this potentially
 If you want to enforce that an idempotency key is required, you can set **`raise_on_no_idempotency_key`** to `True`.
 
 This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`event_key_jmespath`** is `None`.
+
+???+ warning
+    To prevent errors, transactions will not be treated as idempotent if **`raise_on_no_idempotency_key`** is set to `False` and the evaluation of **`event_key_jmespath`** is `None`. Consequently, no data will be stored in the idempotency storage layer.
 
 === "app.py"
 
