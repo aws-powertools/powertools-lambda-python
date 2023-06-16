@@ -28,6 +28,11 @@ def function_thread_safety_handler_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def optional_idempotency_key_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("OptionalIdempotencyKeyHandlerArn", "")
+
+
+@pytest.fixture
 def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
@@ -132,3 +137,31 @@ def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn
 
     # we use set() here because we want to compare the elements regardless of their order in the array
     assert set(first_execution_response) == set(second_execution_response)
+
+
+@pytest.mark.xdist_group(name="idempotency")
+def test_optional_idempotency_key(optional_idempotency_key_fn_arn: str):
+    # GIVEN two payloads where only one has the expected idempotency key
+    payload = json.dumps({"headers": {"X-Idempotency-Key": "here"}})
+    payload_without = json.dumps({"headers": {}})
+
+    # WHEN
+    # we make one request with an idempotency key
+    first_execution, _ = data_fetcher.get_lambda_response(lambda_arn=optional_idempotency_key_fn_arn, payload=payload)
+    first_execution_response = first_execution["Payload"].read().decode("utf-8")
+
+    # and two others without the idempotency key
+    second_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn, payload=payload_without
+    )
+    second_execution_response = second_execution["Payload"].read().decode("utf-8")
+
+    third_execution, _ = data_fetcher.get_lambda_response(lambda_arn=optional_idempotency_key_fn_arn, payload=payload)
+    third_execution_response = third_execution["Payload"].read().decode("utf-8")
+
+    # THEN
+    # we should treat 2nd and 3rd requests with NULL idempotency key as non-idempotent transactions
+    # that is, no cache, no calls to persistent store, etc.
+    assert first_execution_response != second_execution_response
+    assert first_execution_response != third_execution_response
+    assert second_execution_response != third_execution_response
