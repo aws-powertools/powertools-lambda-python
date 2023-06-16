@@ -5,16 +5,13 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
-are safe to retry.
+The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which are safe to retry.
 
 ## Terminology
 
-The property of idempotency means that an operation does not cause additional side effects if it is called more than
-once with the same input parameters.
+The property of idempotency means that an operation does not cause additional side effects if it is called more than once with the same input parameters.
 
-**Idempotent operations will return the same result when they are called multiple
-times with the same parameters**. This makes idempotent operations safe to retry.
+**Idempotent operations will return the same result when they are called multiple times with the same parameters**. This makes idempotent operations safe to retry.
 
 **Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
 
@@ -51,6 +48,7 @@ classDiagram
 * Select a subset of the event as the idempotency key using JMESPath expressions
 * Set a time window in which records with the same payload should be considered duplicates
 * Expires in-progress executions if the Lambda function times out halfway through
+* Bring Your Own Persistence Store
 
 ## Getting started
 
@@ -59,7 +57,7 @@ classDiagram
 Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
 
 ???+ note
-    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), it already adds the required permissions.
+    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources) or [AWS Cloud Development Kit (CDK)](#required-resources), it already adds the required permissions.
 
 ### Required resources
 
@@ -84,7 +82,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```yaml hl_lines="6-14 24-31" title="AWS Serverless Application Model (SAM) example"
     --8<-- "examples/idempotency/sam/template.yaml"
     ```
-=== "AWS CDK"
+=== "AWS Cloud Development Kit (CDK)"
 
     ```python hl_lines="10 13 16 19-21"  title="AWS Cloud Development Kit (CDK) Construct example"
     --8<-- "examples/idempotency/src/cdk.py"
@@ -577,66 +575,25 @@ By default, we will return the same result as it returned before, however in thi
 
 With **`payload_validation_jmespath`**, you can provide an additional JMESPath expression to specify which part of the event body should be validated against previous idempotent invocations
 
-=== "app.py"
+=== "Payload validation"
 
-    ```python hl_lines="7 11 18 25"
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    config = IdempotencyConfig(
-        event_key_jmespath="[userDetail, productId]",
-        payload_validation_jmespath="amount"
-    )
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        # Creating a subscription payment is a side
-        # effect of calling this function!
-        payment = create_subscription_payment(
-          user=event['userDetail']['username'],
-          product=event['product_id'],
-          amount=event['amount']
-        )
-        ...
-        return {
-            "message": "success",
-            "statusCode": 200,
-            "payment_id": payment.id,
-            "amount": payment.amount
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_validation_payload.py"
     ```
 
-=== "Example Event 1"
+=== "Sample event 1"
 
-    ```json hl_lines="8"
-    {
-        "userDetail": {
-            "username": "User1",
-            "user_email": "user@example.com"
-        },
-        "productId": 1500,
-        "charge_type": "subscription",
-        "amount": 500
-    }
+    ```json
+    --8<-- "examples/idempotency/src/working_with_validation_payload_payload1.json"
     ```
 
-=== "Example Event 2"
+=== "Sample event 2"
 
-    ```json hl_lines="8"
-    {
-        "userDetail": {
-            "username": "User1",
-            "user_email": "user@example.com"
-        },
-        "productId": 1500,
-        "charge_type": "subscription",
-        "amount": 1
-    }
+    ```json
+    --8<-- "examples/idempotency/src/working_with_validation_payload_payload2.json"
     ```
 
-In this example, the **`userDetail`** and **`productId`** keys are used as the payload to generate the idempotency key, as per **`event_key_jmespath`** parameter.
+In this example, the **`user_id`** and **`product_id`** keys are used as the payload to generate the idempotency key, as per **`event_key_jmespath`** parameter.
 
 ???+ note
     If we try to send the same request but with a different amount, we will raise **`IdempotencyValidationError`**.
