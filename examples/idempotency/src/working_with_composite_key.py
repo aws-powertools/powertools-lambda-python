@@ -9,5 +9,5 @@ persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable", sort
 
 @idempotent(persistence_store=persistence_layer)
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
-    user_id: str = event.get("body")["user_id"]
+    user_id: str = event.get("body", "")["user_id"]
     return {"message": "success", "user_id": user_id}

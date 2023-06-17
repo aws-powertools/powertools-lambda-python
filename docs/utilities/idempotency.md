@@ -741,115 +741,32 @@ The idempotency utility provides several routes to test your code.
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html){target="_blank"} fixture:
 
-=== "tests.py"
+=== "test_disabling_idempotency_utility.py"
 
-    ```python hl_lines="24-25"
-    from dataclasses import dataclass
-
-    import pytest
-
-    import app
-
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-            def get_remaining_time_in_millis(self) -> int:
-              return 5
-
-        return LambdaContext()
-
-
-    def test_idempotent_lambda_handler(monkeypatch, lambda_context):
-        # Set POWERTOOLS_IDEMPOTENCY_DISABLED before calling decorated functions
-        monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", 1)
-
-        result = handler({}, lambda_context)
-        ...
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/test_disabling_idempotency_utility.py"
     ```
-=== "app.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
+=== "app_disabling_idempotency_utility.py"
 
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/app_disabling_idempotency_utility.py"
     ```
 
 ### Testing with DynamoDB Local
 
 To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
-=== "tests.py"
+=== "test_with_dynamodb_local.py"
 
-    ```python hl_lines="24-27"
-    from dataclasses import dataclass
-
-    import boto3
-    import pytest
-
-    import app
-
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-            def get_remaining_time_in_millis(self) -> int:
-              return 5
-
-        return LambdaContext()
-
-    def test_idempotent_lambda(lambda_context):
-        # Configure the boto3 to use the endpoint for the DynamoDB Local instance
-        dynamodb_local_client = boto3.client("dynamodb", endpoint_url='http://localhost:8000')
-        app.persistence_layer.client = dynamodb_local_client
-
-        # If desired, you can use a different DynamoDB Local table name than what your code already uses
-        # app.persistence_layer.table_name = "another table name"
-
-        result = app.handler({'testkey': 'testvalue'}, lambda_context)
-        assert result['payment_id'] == 12345
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/test_with_dynamodb_local.py"
     ```
 
-=== "app.py"
+=== "app_with_dynamodb_local.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/app_with_dynamodb_local.py"
     ```
 
 ### How do I mock all DynamoDB I/O operations
@@ -857,58 +774,16 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"} which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.
 
-=== "tests.py"
+=== "test_with_io_operations.py"
 
-    ```python hl_lines="26-29"
-    from dataclasses import dataclass
-    from unittest.mock import MagicMock
-
-    import boto3
-    import pytest
-
-    import app
-
-
-    @pytest.fixture
-    def lambda_context():
-        @dataclass
-        class LambdaContext:
-            function_name: str = "test"
-            memory_limit_in_mb: int = 128
-            invoked_function_arn: str = "arn:aws:lambda:eu-west-1:809313241:function:test"
-            aws_request_id: str = "52fdfc07-2182-154f-163f-5f0f9a621d72"
-
-            def get_remaining_time_in_millis(self) -> int:
-              return 5
-
-        return LambdaContext()
-
-
-    def test_idempotent_lambda(lambda_context):
-        mock_client = MagicMock()
-        app.persistence_layer.client = mock_client
-        result = app.handler({'testkey': 'testvalue'}, lambda_context)
-        mock_client.put_item.assert_called()
-        ...
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/test_with_io_operations.py"
     ```
 
-=== "app.py"
+=== "app_with_io_operations.py"
 
-    ```python
-    from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="idempotency")
-
-    @idempotent(persistence_store=persistence_layer)
-    def handler(event, context):
-        print('expensive operation')
-        return {
-            "payment_id": 12345,
-            "message": "success",
-            "statusCode": 200,
-        }
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/app_with_io_operations.py"
     ```
 
 ## Extra resources
