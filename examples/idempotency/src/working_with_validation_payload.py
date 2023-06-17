@@ -8,8 +8,8 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="ddbtimeout")
-config = IdempotencyConfig(event_key_jmespath="[user_id, product_id]", payload_validation_jmespath="amount")
+persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+config = IdempotencyConfig(event_key_jmespath='["user_id", "product_id"]', payload_validation_jmespath="amount")
 
 
 @dataclass

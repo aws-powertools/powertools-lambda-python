@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="ddbtimeout")
+persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
 config = IdempotencyConfig()
 

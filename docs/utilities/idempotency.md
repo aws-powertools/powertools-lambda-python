@@ -611,50 +611,22 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 ???+ warning
     To prevent errors, transactions will not be treated as idempotent if **`raise_on_no_idempotency_key`** is set to `False` and the evaluation of **`event_key_jmespath`** is `None`. Therefore, no data will be fetched, stored, or deleted in the idempotency storage layer.
 
-=== "app.py"
+=== "Idempotency key required"
 
-    ```python hl_lines="9-10 13"
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
-
-    # Requires "user"."uid" and "order_id" to be present
-    config = IdempotencyConfig(
-        event_key_jmespath="[user.uid, order_id]",
-        raise_on_no_idempotency_key=True,
-    )
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-        pass
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_idempotency_key_required.py"
     ```
 
 === "Success Event"
 
-    ```json hl_lines="3 6"
-    {
-        "user": {
-            "uid": "BB0D045C-8878-40C8-889E-38B3CB0A61B1",
-            "name": "Foo"
-        },
-        "order_id": 10000
-    }
+    ```json
+    --8<-- "examples/idempotency/src/working_with_idempotency_key_required_payload_success.json"
     ```
 
 === "Failure Event"
 
-    Notice that `order_id` is now accidentally within `user` key
-
-    ```json hl_lines="3 5"
-    {
-        "user": {
-            "uid": "DE0D000E-1234-10D1-991E-EAC1DD1D52C8",
-            "name": "Joe Bloggs",
-            "order_id": 10000
-        },
-    }
+    ```json
+    --8<-- "examples/idempotency/src/working_with_idempotency_key_required_payload_error.json"
     ```
 
 ### Customizing boto configuration

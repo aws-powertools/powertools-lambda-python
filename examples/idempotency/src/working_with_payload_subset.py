@@ -13,7 +13,7 @@ persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
 # Deserialize JSON string under the "body" key
 # then extract "user" and "product_id" data
-config = IdempotencyConfig(event_key_jmespath="powertools_json(body).[user_id, product_id]")
+config = IdempotencyConfig(event_key_jmespath='powertools_json(body).["user_id", "product_id"]')
 
 
 @dataclass
