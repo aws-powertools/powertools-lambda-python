@@ -635,42 +635,20 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
 
 === "Custom session"
 
-    ```python hl_lines="1 6 9 14"
-    import boto3
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
-
-    boto3_session = boto3.session.Session()
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        boto3_session=boto3_session
-    )
-
-    config = IdempotencyConfig(event_key_jmespath="body")
-
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-       ...
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_custom_session.py"
     ```
+
 === "Custom config"
 
-    ```python hl_lines="1 7 10"
-    from botocore.config import Config
-    from aws_lambda_powertools.utilities.idempotency import (
-        IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-    )
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_custom_config.py"
+    ```
 
-    config = IdempotencyConfig(event_key_jmespath="body")
-    boto_config = Config()
-    persistence_layer = DynamoDBPersistenceLayer(
-        table_name="IdempotencyTable",
-        boto_config=boto_config
-    )
+=== "Sample Event"
 
-    @idempotent(config=config, persistence_store=persistence_layer)
-    def handler(event, context):
-       ...
+    ```json
+    --8<-- "examples/idempotency/src/working_with_custom_config_payload.json"
     ```
 
 ### Using a DynamoDB table with a composite primary key

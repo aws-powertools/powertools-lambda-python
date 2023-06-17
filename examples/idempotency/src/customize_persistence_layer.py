@@ -16,5 +16,5 @@ persistence_layer = DynamoDBPersistenceLayer(
 
 
 @idempotent(persistence_store=persistence_layer)
-def lambda_handler(event: dict, context: LambdaContext):
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     return event
