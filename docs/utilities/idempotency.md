@@ -659,26 +659,25 @@ With this setting, we will save the idempotency key in the sort key instead of t
 
 You can optionally set a static value for the partition key using the `static_pk_value` parameter.
 
-```python hl_lines="5" title="Reusing a DynamoDB table that uses a composite primary key"
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, idempotent
+=== "Reusing a DynamoDB table that uses a composite primary key"
 
-persistence_layer = DynamoDBPersistenceLayer(
-	table_name="IdempotencyTable",
-	sort_key_attr='sort_key')
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/working_with_composite_key.py"
+    ```
 
+=== "Sample Event"
 
-@idempotent(persistence_store=persistence_layer)
-def handler(event, context):
-	return {"message": "success": "id": event['body']['id]}
-```
+    ```json
+    --8<-- "examples/idempotency/src/working_with_composite_key_payload.json"
+    ```
 
 The example function above would cause data to be stored in DynamoDB like this:
 
-| id                           | sort_key                         | expiration | status      | data                                 |
-| ---------------------------- | -------------------------------- | ---------- | ----------- | ------------------------------------ |
-| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"id": 12391, "message": "success"}  |
-| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"id": 527212, "message": "success"} |
-| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                      |
+| id                           | sort_key                         | expiration | status      | data                                      |
+| ---------------------------- | -------------------------------- | ---------- | ----------- | ----------------------------------------- |
+| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"user_id": 12391, "message": "success"}  |
+| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"user_id": 527212, "message": "success"} |
+| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                           |
 
 ### Bring your own persistent store
 
