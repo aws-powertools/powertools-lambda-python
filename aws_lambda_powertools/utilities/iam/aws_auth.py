@@ -38,8 +38,8 @@ class AwsSignedRequest:
         headers: Optional[str],
         access_key: Optional[str],
         secret_key: Optional[str],
-        token: Optional[str],
         region: Optional[str],
+        token: Optional[str] = None,
         sign_payload: Optional[bool] = False,
     ):
 
@@ -55,12 +55,14 @@ class AwsSignedRequest:
         else:
             self._region = region
 
-        if access_key and secret_key or token:
+        if access_key and secret_key:
             self._access_key = access_key
             self._secret_key = secret_key
-            self._credentials = Credentials(access_key=self._access_key, secret_key=self._secret_key, token=token)
+            self._token = token
+            self._credentials = Credentials(access_key=self._access_key, secret_key=self._secret_key, token=self._token)
         else:
-            self._credentials = botocore.session.Session().get_credentials()
+            credentials = botocore.session.Session().get_credentials()
+            self._credentials = credentials.get_frozen_credentials()
 
         def __call__(self):
             request = AWSRequest(method=self._method, url=self._url, data=self._data, params=self._params, headers=self._headers)
