@@ -717,21 +717,17 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 	Make sure to account for this behaviour, if you set the `event_key_jmespath`.
 
-```python hl_lines="9 10" title="Using Idempotency with JSONSchema Validation utility"
-from aws_lambda_powertools.utilities.validation import validator, envelopes
-from aws_lambda_powertools.utilities.idempotency import (
-	IdempotencyConfig, DynamoDBPersistenceLayer, idempotent
-)
+=== "Using Idempotency with JSONSchema Validation utility"
 
-config = IdempotencyConfig(event_key_jmespath="[message, username]")
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+    ```python hl_lines="4-9 12 18 28"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
+    ```
 
-@validator(envelope=envelopes.API_GATEWAY_HTTP)
-@idempotent(config=config, persistence_store=persistence_layer)
-def lambda_handler(event, context):
-	cause_some_side_effects(event['username')
-	return {"message": event['message'], "statusCode": 200}
-```
+=== "Sample Event"
+
+    ```json
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_validator_payload.json"
+    ```
 
 ???+ tip "Tip: JMESPath Powertools for AWS Lambda (Python) functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
