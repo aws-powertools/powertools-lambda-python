@@ -110,7 +110,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
 === "Idempotent decorator"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="4-7 10 24"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency.py"
     ```
 
@@ -137,13 +137,13 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 === "Using Dataclasses"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="3-7 11 26 37"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass.py"
     ```
 
 === "Using Pydantic"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="1-5 10 23 34"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
@@ -158,13 +158,13 @@ You can can easily integrate with [Batch utility](batch.md){target="_blank"} via
 
 === "Integration with Batch Processor"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="2 12 16 20 31"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
     ```
 
 === "Sample event"
 
-    ```json
+    ```json hl_lines="4"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
     ```
 
@@ -192,14 +192,14 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 
 === "Payment function"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="5-9 16 30"
     --8<-- "examples/idempotency/src/working_with_payload_subset.py"
     ```
 
 === "Sample event"
 
-    ```json
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
+    ```json hl_lines="28"
+    --8<-- "examples/idempotency/src/working_with_payload_subset_payload.json"
     ```
 
 ### Lambda timeouts
@@ -223,7 +223,7 @@ Here is an example on how you register the Lambda context in your handler:
 
 === "Registering the Lambda context"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="11 20"
     --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
     ```
 
@@ -256,7 +256,7 @@ If an Exception is raised _outside_ the scope of the decorated function and afte
 
 === "Handling exceptions"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="18-22 28 31"
     --8<-- "examples/idempotency/src/working_with_exceptions.py"
     ```
 
@@ -469,7 +469,7 @@ This persistence layer is built-in, and you can either use an existing DynamoDB 
 
 === "Customizing DynamoDBPersistenceLayer to suit your table structure"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="7-15"
     --8<-- "examples/idempotency/src/customize_persistence_layer.py"
     ```
 
@@ -521,7 +521,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
 
 === "Caching idempotent transactions in-memory to prevent multiple calls to storage"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="3 11"
     --8<-- "examples/idempotency/src/working_with_local_cache.py"
     ```
 
@@ -543,7 +543,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 
 === "Adjusting idempotency record expiration"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="3 11"
     --8<-- "examples/idempotency/src/working_with_record_expiration.py"
     ```
 
@@ -577,19 +577,19 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 === "Payload validation"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="12 20 28"
     --8<-- "examples/idempotency/src/working_with_validation_payload.py"
     ```
 
 === "Sample event 1"
 
-    ```json
+    ```json hl_lines="2 5"
     --8<-- "examples/idempotency/src/working_with_validation_payload_payload1.json"
     ```
 
 === "Sample event 2"
 
-    ```json
+    ```json hl_lines="2 5"
     --8<-- "examples/idempotency/src/working_with_validation_payload_payload2.json"
     ```
 
@@ -613,19 +613,19 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 === "Idempotency key required"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="11"
     --8<-- "examples/idempotency/src/working_with_idempotency_key_required.py"
     ```
 
 === "Success Event"
 
-    ```json
+    ```json hl_lines="3 6"
     --8<-- "examples/idempotency/src/working_with_idempotency_key_required_payload_success.json"
     ```
 
 === "Failure Event"
 
-    ```json
+    ```json hl_lines="3 5"
     --8<-- "examples/idempotency/src/working_with_idempotency_key_required_payload_error.json"
     ```
 
@@ -635,13 +635,13 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
 
 === "Custom session"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="1 11 13"
     --8<-- "examples/idempotency/src/working_with_custom_session.py"
     ```
 
 === "Custom config"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="1 11 13"
     --8<-- "examples/idempotency/src/working_with_custom_config.py"
     ```
 
@@ -661,7 +661,7 @@ You can optionally set a static value for the partition key using the `static_pk
 
 === "Reusing a DynamoDB table that uses a composite primary key"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="7"
     --8<-- "examples/idempotency/src/working_with_composite_key.py"
     ```
 
@@ -692,7 +692,7 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 === "Bring your own persistent store"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="8 18 65 74 96 124"
     --8<-- "examples/idempotency/src/bring_your_own_persistent_store.py"
     ```
 
@@ -719,13 +719,13 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 === "Using Idempotency with JSONSchema Validation utility"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="7 9 13"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
     ```
 
 === "Sample Event"
 
-    ```json
+    ```json hl_lines="60"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator_payload.json"
     ```
 
@@ -743,13 +743,13 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "test_disabling_idempotency_utility.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="3 4 24"
     --8<-- "examples/idempotency/src/test_disabling_idempotency_utility.py"
     ```
 
 === "app_disabling_idempotency_utility.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="10"
     --8<-- "examples/idempotency/src/app_disabling_idempotency_utility.py"
     ```
 
@@ -759,13 +759,13 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 === "test_with_dynamodb_local.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="3-5 25 28"
     --8<-- "examples/idempotency/src/test_with_dynamodb_local.py"
     ```
 
 === "app_with_dynamodb_local.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="10"
     --8<-- "examples/idempotency/src/app_with_dynamodb_local.py"
     ```
 
@@ -776,13 +776,13 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "test_with_io_operations.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="4 5 27"
     --8<-- "examples/idempotency/src/test_with_io_operations.py"
     ```
 
 === "app_with_io_operations.py"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="10"
     --8<-- "examples/idempotency/src/app_with_io_operations.py"
     ```
 

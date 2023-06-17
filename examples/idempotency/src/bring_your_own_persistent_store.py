@@ -15,7 +15,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import DataRec
 logger = logging.getLogger(__name__)
 
 
-class DynamoDBPersistenceLayer(BasePersistenceLayer):
+class MyOwnPersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
         table_name: str,
@@ -37,7 +37,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
-        super(DynamoDBPersistenceLayer, self).__init__()
+        super(MyOwnPersistenceLayer, self).__init__()
 
     def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
         """
