@@ -1,6 +1,6 @@
 """Advanced feature flags utility"""
-from .auth import SigV4AuthFactory
+from .aws_auth import AwsSignedRequest
 
 __all__ = [
-    "SigV4AuthFactory",
+    "AwsSignedRequest",
 ]
