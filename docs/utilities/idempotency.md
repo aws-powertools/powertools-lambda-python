@@ -77,15 +77,21 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ tip "Tip: You can share a single state table for all functions"
     You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
 
-=== "AWS SAM"
+=== "AWS Serverless Application Model (SAM) example"
 
-    ```yaml hl_lines="6-14 24-31" title="AWS Serverless Application Model (SAM) example"
-    --8<-- "examples/idempotency/sam/template.yaml"
+    ```yaml hl_lines="6-14 24-31"
+    --8<-- "examples/idempotency/templates/sam.yaml"
     ```
 === "AWS Cloud Development Kit (CDK)"
 
-    ```python hl_lines="10 13 16 19-21"  title="AWS Cloud Development Kit (CDK) Construct example"
-    --8<-- "examples/idempotency/src/cdk.py"
+    ```python hl_lines="10 13 16 19-21"
+    --8<-- "examples/idempotency/templates/cdk.py"
+    ```
+
+=== "Terraform"
+
+    ```terraform hl_lines="10 13 16 19-21"
+    --8<-- "examples/idempotency/templates/terraform.tf"
     ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
