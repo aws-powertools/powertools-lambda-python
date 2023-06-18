@@ -1,5 +1,29 @@
 # Enable rules.
-select = ["A", "C4", "C90", "COM", "D", "E", "ERA", "FA", "F", "FIX", "I", "ICN", "ISC", "PLE", "PLC", "PLR", "PLW", "PL", "PYI", "Q", "PTH", "TD", "W"]
+select = [
+    "A",
+    "C4",
+    "C90",
+    "COM",
+    #"D", # pydocstyle - not enabled temporarily
+    "E",
+    "ERA",
+    "FA",
+    "FIX",
+    "F",
+    "I",
+    "ICN",
+    "ISC",
+    "PLE",
+    "PLC",
+    "PLR",
+    "PLW",
+    "PL",
+    "PYI",
+    "Q",
+    "PTH",
+    "TD",
+    "W"
+]
 
 # Ignore specific rules
 ignore = [
@@ -10,7 +34,6 @@ ignore = [
     "COM812", # Trailing comma missing - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
     "ERA001", # Found commented-out code - disabled temporarily
-    "D", # pydocstyle - disabled temporarily
     "PLW", # Warning category - disabled temporarily
     "PLR", # Refactoring category - disabled temporarily
     "PLC", # Convention category - disabled temporarily
