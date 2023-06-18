@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import (
-    DictWrapper,
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
 )
 

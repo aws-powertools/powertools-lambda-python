@@ -1,9 +1,10 @@
-import base64
 from typing import Any, Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import (
-    DictWrapper,
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    base64_decode,
     get_header_value,
+    get_query_string_value,
 )
 
 
@@ -35,7 +36,7 @@ class VPCLatticeEvent(DictWrapper):
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
         if self.is_base64_encoded:
-            return base64.b64decode(body.encode()).decode()
+            return base64_decode(body)
         return body
 
     @property
@@ -67,8 +68,7 @@ class VPCLatticeEvent(DictWrapper):
         str, optional
             Query string parameter value
         """
-        params = self.query_string_parameters
-        return default_value if params is None else params.get(name, default_value)
+        return get_query_string_value(self.query_string_parameters, name, default_value)
 
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False

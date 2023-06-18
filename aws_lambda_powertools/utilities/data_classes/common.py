@@ -4,6 +4,10 @@ from collections.abc import Mapping
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+    get_query_string_value,
+)
 
 
 class DictWrapper(Mapping):
@@ -90,26 +94,6 @@ class DictWrapper(Mapping):
         return self._data
 
 
-def get_header_value(
-    headers: Dict[str, str], name: str, default_value: Optional[str], case_sensitive: Optional[bool]
-) -> Optional[str]:
-    """Get header value by name"""
-    # If headers is NoneType, return default value
-    if not headers:
-        return default_value
-
-    if case_sensitive:
-        return headers.get(name, default_value)
-    name_lower = name.lower()
-
-    return next(
-        # Iterate over the dict and do a case-insensitive key comparison
-        (value for key, value in headers.items() if key.lower() == name_lower),
-        # Default value is returned if no matches was found
-        default_value,
-    )
-
-
 class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
@@ -166,8 +150,7 @@ class BaseProxyEvent(DictWrapper):
         str, optional
             Query string parameter value
         """
-        params = self.query_string_parameters
-        return default_value if params is None else params.get(name, default_value)
+        return get_query_string_value(self.query_string_parameters, name, default_value)
 
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
