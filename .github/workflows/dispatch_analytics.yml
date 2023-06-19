@@ -33,7 +33,7 @@ permissions:
 
 jobs:
   dispatch_token:
-    if: github.repository == 'aws-powertools/lambda-python'
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     concurrency:
       group: analytics
     runs-on: ubuntu-latest

@@ -196,7 +196,7 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 !!! note "No code changes required"
 
-We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/lambda-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
 
 As such, you must update your IAM Role permissions to allow the following IAM actions:
 
@@ -217,7 +217,7 @@ Previously, we used the function/method name to generate the partition key value
 
 In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
 
-[For example](https://github.com/aws-powertools/lambda-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+[For example](https://github.com/aws-powertools/powertools-lambda-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
 
 <!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
 

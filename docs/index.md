@@ -8,15 +8,15 @@ description: Powertools for AWS Lambda (Python)
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity.
 
 ???+ tip
-    Powertools for AWS Lambda (Python) is also available for [Java](https://awslabs.github.io/aws-lambda-powertools-java/){target="_blank"}, [TypeScript](https://awslabs.github.io/aws-lambda-powertools-typescript/latest/){target="_blank"}, and [.NET](https://awslabs.github.io/aws-lambda-powertools-dotnet/){target="_blank"}
+    Powertools for AWS Lambda (Python) is also available for [Java](https://docs.powertools.aws.dev/lambda-java/){target="_blank"}, [TypeScript](https://docs.powertools.aws.dev/lambda-typescript/latest/){target="_blank"}, and [.NET](https://docs.powertools.aws.dev/lambda-dotnet/){target="_blank"}
 
 ??? hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
 
     You can choose to support us in three ways:
 
-    1) [**Become a reference customer**](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E). This gives us permission to list your company in our documentation.
+    1) [**Become a reference customer**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E). This gives us permission to list your company in our documentation.
 
-    2) [**Share your work**](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
+    2) [**Share your work**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E). Blog posts, video, sample projects you used Powertools!
 
     3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
 
@@ -68,7 +68,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
 [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.
 
-For our Layers, we compile and optimize [all dependencies](https://github.com/aws-powertools/lambda-python/blob/develop/pyproject.toml#L98){target="_blank"}, and [remove duplicate dependencies already available in the Lambda runtime](https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+For our Layers, we compile and optimize [all dependencies](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/pyproject.toml#L98){target="_blank"}, and [remove duplicate dependencies already available in the Lambda runtime](https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
 You can include Powertools for AWS Lambda (Python) Lambda Layer using [AWS Lambda Console](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using){target="_blank"}, or your preferred deployment framework.
 
@@ -504,7 +504,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
                 Properties:
                     Location:
                         ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
-                        # Find latest from github.com/aws-powertools/lambda-python/releases
+                        # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
                         SemanticVersion: 2.0.0
         ```
 
@@ -514,7 +514,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
         from aws_cdk import core, aws_sam as sam, aws_lambda
 
         POWERTOOLS_BASE_NAME = 'AWSLambdaPowertools'
-        # Find latest from github.com/aws-powertools/lambda-python/releases
+        # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
         POWERTOOLS_VER = '2.0.0'
         POWERTOOLS_ARN = 'arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer'
 
@@ -741,7 +741,7 @@ When necessary, you can use `POWERTOOLS_DEBUG` environment variable to enable de
 
 ### Becoming a reference customer
 
-Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/aws-powertools/lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"} issue.
+Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"} issue.
 
 The following companies, among others, use Powertools:
 
