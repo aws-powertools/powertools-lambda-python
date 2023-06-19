@@ -404,7 +404,7 @@ As 2.12.0, `process_partial_response` and `async_process_partial_response` are t
 
 When using Sentry.io for error monitoring, you can override `failure_handler` to capture each processing exception with Sentry SDK:
 
-> Credits to [Charles-Axel Dein](https://github.com/awslabs/aws-lambda-powertools-python/issues/293#issuecomment-781961732){target="_blank"}
+> Credits to [Charles-Axel Dein](https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732){target="_blank"}
 
 ```python hl_lines="1 7-8" title="Integrating error tracking with Sentry.io"
 --8<-- "examples/batch_processing/src/sentry_error_tracking.py"

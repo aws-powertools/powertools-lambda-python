@@ -9,9 +9,9 @@ Metadata:
     LicenseUrl: <LAYER_CONTENT_PATH>/LICENSE
     ReadmeUrl: <LAYER_CONTENT_PATH>/README.md
     Labels: ['layer','lambda','powertools','python', 'aws']
-    HomePageUrl: https://github.com/awslabs/aws-lambda-powertools-python
+    HomePageUrl: https://github.com/aws-powertools/powertools-lambda-python
     SemanticVersion: <VERSION>
-    SourceCodeUrl: https://github.com/awslabs/aws-lambda-powertools-python
+    SourceCodeUrl: https://github.com/aws-powertools/powertools-lambda-python
 
 Transform: AWS::Serverless-2016-10-31
 Description: AWS Lambda Layer for aws-lambda-powertools with python 3.10, 3.9, 3.8 or 3.7

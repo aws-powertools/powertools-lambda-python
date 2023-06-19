@@ -15,7 +15,7 @@ Logger provides an opinionated logger with output structured as JSON.
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Logger requires two settings:
 
@@ -163,7 +163,7 @@ You can append additional keys using either mechanism:
 #### append_keys method
 
 ???+ warning
-	`append_keys` is not thread-safe, please see [RFC](https://github.com/awslabs/aws-lambda-powertools-python/issues/991){target="_blank"}.
+	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank"}.
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -407,7 +407,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
 ???+ note
-	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
+	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
 
 === "sampling_debug_logs.py"
 
@@ -744,4 +744,4 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 <!-- markdownlint-disable MD013 -->
 ### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
-As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460){target="_blank"}
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/aws-powertools/powertools-lambda-python/issues/460){target="_blank"}

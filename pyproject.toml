@@ -14,8 +14,8 @@ classifiers=[
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
-repository = "https://github.com/awslabs/aws-lambda-powertools-python"
-documentation = "https://awslabs.github.io/aws-lambda-powertools-python/"
+repository = "https://github.com/aws-powertools/powertools-lambda-python"
+documentation = "https://docs.powertools.aws.dev/lambda-python/"
 readme = "README.md"
 keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "powertools", "feature_flags", "idempotency", "middleware"]
 # MIT-0 is not recognized as an existing license from poetry.
@@ -23,8 +23,8 @@ keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "pow
 license = "MIT"
 
 [tool.poetry.urls]
-"Issue tracker" = "https://github.com/awslabs/aws-lambda-powertools-python/issues"
-"Releases" = "https://github.com/awslabs/aws-lambda-powertools-python/releases"
+"Issue tracker" = "https://github.com/aws-powertools/powertools-lambda-python/issues"
+"Releases" = "https://github.com/aws-powertools/powertools-lambda-python/releases"
 
 [tool.poetry.dependencies]
 python = "^3.7.4"

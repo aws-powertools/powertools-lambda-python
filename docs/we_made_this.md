@@ -7,7 +7,7 @@ description: Blog posts, tutorials, and videos about Powertools for AWS Lambda (
 
 This space is dedicated to highlight our awesome community content featuring Powertools for AWS Lambda (Python) 🙏!
 
-!!! info "[Get your content featured here](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
+!!! info "[Get your content featured here](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
 
 ## Connect
 

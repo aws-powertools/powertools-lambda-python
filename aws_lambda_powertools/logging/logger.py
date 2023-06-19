@@ -259,12 +259,12 @@ class Logger:
             sys.excepthook = functools.partial(log_uncaught_exception_hook, logger=self)
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
-    # https://github.com/awslabs/aws-lambda-powertools-python/issues/1660
+    # https://github.com/aws-powertools/powertools-lambda-python/issues/1660
     if not TYPE_CHECKING:
 
         def __getattr__(self, name):
             # Proxy attributes not found to actual logger to support backward compatibility
-            # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+            # https://github.com/aws-powertools/powertools-lambda-python/issues/97
             return getattr(self._logger, name)
 
     def _get_logger(self):
@@ -598,7 +598,7 @@ class Logger:
             # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters
             # should be appended and custom keys that might happen to be Powertools for AWS Lambda (Python)
             # Formatter parameters should be discarded this prevents adding them as custom keys, for example,
-            # `json_default=<callable>` see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
+            # `json_default=<callable>` see https://github.com/aws-powertools/powertools-lambda-python/issues/1263
             custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
             return self.registered_formatter.append_keys(**custom_keys)
 
