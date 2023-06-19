@@ -150,7 +150,9 @@ class BaseProxyEvent(DictWrapper):
         str, optional
             Query string parameter value
         """
-        return get_query_string_value(self.query_string_parameters, name, default_value)
+        return get_query_string_value(
+            query_string_parameters=self.query_string_parameters, name=name, default_value=default_value
+        )
 
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
@@ -170,7 +172,9 @@ class BaseProxyEvent(DictWrapper):
         str, optional
             Header value
         """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(
+            headers=self.headers, name=name, default_value=default_value, case_sensitive=case_sensitive
+        )
 
     def header_serializer(self) -> BaseHeadersSerializer:
         raise NotImplementedError()
