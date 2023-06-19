@@ -308,7 +308,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             # If a message failed due to model validation (e.g., poison pill)
             # we convert to an event source data class...but self.model is still true
             # therefore, we do an additional check on whether the failed message is still a model
-            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
             if self.model and getattr(msg, "parse_obj", None):
                 msg_id = msg.messageId
             else:
@@ -319,7 +319,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_kinesis_failures(self):
         failures = []
         for msg in self.fail_messages:
-            # # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            # # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
             if self.model and getattr(msg, "parse_obj", None):
                 msg_id = msg.kinesis.sequenceNumber
             else:
@@ -330,7 +330,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _collect_dynamodb_failures(self):
         failures = []
         for msg in self.fail_messages:
-            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+            # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
             if self.model and getattr(msg, "parse_obj", None):
                 msg_id = msg.dynamodb.SequenceNumber
             else:
@@ -357,7 +357,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         # this means we can't collect the message id if we try transforming again
         # so we convert into to the equivalent batch type model (e.g., SQS, Kinesis, DynamoDB Stream)
         # and downstream we can correctly collect the correct message id identifier and make the failed record available
-        # see https://github.com/awslabs/aws-lambda-powertools-python/issues/2091
+        # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
         logger.debug("Record cannot be converted to customer's model; converting without model")
         failed_record: "EventSourceDataClassTypes" = self._to_batch_type(record=record, event_type=self.event_type)
         return self.failure_handler(record=failed_record, exception=sys.exc_info())
