@@ -131,7 +131,7 @@ Review pull requests regularly, comment, suggest, reject, merge and close. Accep
 
 PRs are [labeled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
 
-Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at the human level.
+Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/aws-powertools/powertools-lambda-python/releases) - make sure they communicate their intent at the human level.
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
@@ -145,7 +145,7 @@ Manage [labels](#labels), review issues regularly, and create new labels as need
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
+Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://docs.powertools.aws.dev/lambda-python/latest/roadmap/#roadmap-status-definition).
 
 Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might need additional feedback from the author, other customers, experienced community members and/or maintainers.
 
@@ -169,8 +169,8 @@ RFC is a collaborative process to help us get to the most optimal solution given
 
 Make sure you ask these questions in mind when reviewing:
 
-- Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
-- Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+- Does it use our [RFC template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
+- Does the match our [Tenets](https://docs.powertools.aws.dev/lambda-python/latest/#tenets)?
 - Does the proposal address the use case? If so, is the recommended usage explicit?
 - Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 - Can anyone familiar with the code base implement it?
@@ -260,7 +260,7 @@ Release complete : milestone, m6, 10:31,2m
 
 #### Drafting release notes
 
-Visit the [Releases page](https://github.com/awslabs/aws-lambda-powertools-python/releases) and choose the edit pencil button.
+Visit the [Releases page](https://github.com/aws-powertools/powertools-lambda-python/releases) and choose the edit pencil button.
 
 Make sure the `tag` field reflects the new version you're releasing, the target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
 
@@ -268,7 +268,7 @@ You'll notice we group all changes based on their [labels](#labels) like `featur
 
 **I spotted a typo or incorrect grouping - how do I fix it?**
 
-Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release-drafter.yml) to update the Draft release.
+Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml) to update the Draft release.
 
 > **NOTE**: This won't change the CHANGELOG as the merge commit is immutable. Don't worry about it. We'd only rewrite git history only if this can lead to confusion and we'd pair with another maintainer.
 
@@ -286,17 +286,17 @@ These are some questions to keep in mind when drafting your first or future rele
 
 Once you're happy, hit `Publish release` 🎉🎉🎉.
 
-This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
+This will kick off the [Publishing workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
 
 ### Run end to end tests
 
-E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml).
+E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml).
 
 To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites) and an [account bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) (`cdk bootstrap`). With a default AWS CLI profile configured, or `AWS_PROFILE` environment variable set, run `make e2e tests`.
 
 ### Releasing a documentation hotfix
 
-You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools for AWS Lambda (Python) version available.
+You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools for AWS Lambda (Python) version available.
 
 This workflow will update both user guide and API documentation.
 
@@ -308,7 +308,7 @@ Keep the `develop` branch at production quality at all times. Backport features 
 
 ### Manage Roadmap
 
-See [Roadmap section](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/)
+See [Roadmap section](https://docs.powertools.aws.dev/lambda-python/latest/roadmap/)
 
 Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.
 
@@ -344,7 +344,7 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 
 ### Crediting contributions
 
-We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
+We credit all contributions as part of each [release note](https://github.com/aws-powertools/powertools-lambda-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
 
 ### Is that a bug?
 
@@ -417,7 +417,7 @@ Where:
 
 ### Mechanics
 
-Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
+Under [`BaseInfrastructure`](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
 
 This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run one, subset, or all tests and only deploy their related infrastructure, without any custom configuration.
 

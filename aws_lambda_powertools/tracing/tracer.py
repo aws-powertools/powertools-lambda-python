@@ -771,7 +771,7 @@ class Tracer:
 
     def _disable_xray_trace_batching(self):
         """Configure X-Ray SDK to send subsegment individually over batching
-        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        Known issue: https://github.com/aws-powertools/powertools-lambda-python/issues/283
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting streaming override")

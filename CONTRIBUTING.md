@@ -37,13 +37,13 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an [issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+3. You open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
 
 ### Dev setup
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
 
-Firstly, [fork the repository](https://github.com/awslabs/aws-lambda-powertools-python/fork).
+Firstly, [fork the repository](https://github.com/aws-powertools/powertools-lambda-python/fork).
 
 To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
 
@@ -55,7 +55,7 @@ To send us a pull request, please follow these steps:
 2. Run all tests, and code baseline checks: `make pr`
     - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
 3. Commit to your fork using clear commit messages.
-4. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
+4. Send us a pull request with a [conventional semantic title](https://github.com/aws-powertools/powertools-lambda-python/pull/67), and answering any default questions in the pull request interface.
 5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
@@ -78,7 +78,7 @@ You might find useful to run both the documentation website and the API referenc
 | **Docstring**         | We use a slight variation of Numpy convention with markdown to help generate more readable API references.                                                                                                                                                                  |
 | **Style guide**       | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                                                |
 | **Core utilities**    | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.                                                                                                            |
-| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).                                                                               |
+| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://docs.powertools.aws.dev/lambda-python/#tenets).                                                                               |
 | **Exceptions**        | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.                                                                                                                                                                         |
 | **Git commits**       | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly. |
 | **API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.                                          |

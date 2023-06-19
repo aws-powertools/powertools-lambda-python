@@ -151,7 +151,7 @@ In V2, we add all headers under `multiValueHeaders` key. This enables seamless s
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
@@ -196,7 +196,7 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 !!! note "No code changes required"
 
-We replaced `GetConfiguration` API ([now deprecated](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
 
 As such, you must update your IAM Role permissions to allow the following IAM actions:
 
@@ -217,7 +217,7 @@ Previously, we used the function/method name to generate the partition key value
 
 In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
 
-[For example](https://github.com/awslabs/aws-lambda-powertools-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+[For example](https://github.com/aws-powertools/powertools-lambda-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
 
 <!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
 
