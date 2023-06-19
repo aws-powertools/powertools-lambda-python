@@ -69,7 +69,7 @@ def save_api_execution_history(path: str, headers: dict, request_context: dict) 
 
     try:
         # using the feature flags utility to check if the new feature "save api call to history" is enabled by default
-        # see: https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/feature_flags/#static-flags
+        # see: https://docs.powertools.aws.dev/lambda-python/latest/utilities/feature_flags/#static-flags
         save_history: JSONType = feature_flags.evaluate(name="save_history", default=False)
         if save_history:
             # saving history in dynamodb table

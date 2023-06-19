@@ -21,7 +21,7 @@ on:
         description: "Record PR workflow execution ID to download PR details"
         required: true
         type: number
-      workflow_origin: # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
+      workflow_origin: # see https://github.com/aws-powertools/powertools-lambda-python/issues/1349
         description: "Repository full name for runner integrity"
         required: true
         type: string
@@ -54,8 +54,8 @@ jobs:
   export_pr_details:
     permissions:
       actions: read  # download PR artifact
-    # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1349
-    if: inputs.workflow_origin == 'awslabs/aws-lambda-powertools-python'
+    # see https://github.com/aws-powertools/powertools-lambda-python/issues/1349
+    if: inputs.workflow_origin == 'aws-powertools/powertools-lambda-python'
     runs-on: ubuntu-latest
     env:
       FILENAME: pr.txt

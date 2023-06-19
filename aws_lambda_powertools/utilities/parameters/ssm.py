@@ -319,7 +319,7 @@ class SSMProvider(BaseProvider):
         errors: List[str] = []
 
         # Decided for single-thread as it outperforms in 128M and 1G + reduce timeout risk
-        # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+        # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
         for parameter, options in batch.items():
             try:
                 response[parameter] = self.get(parameter, options["max_age"], options["transform"], options["decrypt"])
@@ -769,7 +769,7 @@ def get_parameters_by_name(
     """
 
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
-    # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+    # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
     max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
