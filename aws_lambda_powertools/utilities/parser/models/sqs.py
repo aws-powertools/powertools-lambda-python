@@ -24,7 +24,7 @@ class SqsMsgAttributeModel(BaseModel):
     binaryListValues: List[str] = []
     dataType: str
 
-    # context on why it's commented: https://github.com/awslabs/aws-lambda-powertools-python/pull/118
+    # context on why it's commented: https://github.com/aws-powertools/powertools-lambda-python/pull/118
     # Amazon SQS supports the logical data types String, Number, and Binary with optional custom data type
     # labels with the format .custom-data-type.
     # https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-metadata.html#sqs-message-attributes

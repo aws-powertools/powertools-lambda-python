@@ -323,7 +323,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
@@ -358,7 +358,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(
@@ -403,7 +403,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(idempotency_key=idempotency_key)
@@ -441,7 +441,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)

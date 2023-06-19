@@ -12,7 +12,7 @@ feature_flags = FeatureFlags(store=app_config)
 @app.get("/products")
 def list_products():
     # getting fields from request
-    # https://awslabs.github.io/aws-lambda-powertools-python/latest/core/event_handler/api_gateway/#accessing-request-details
+    # https://docs.powertools.aws.dev/lambda-python/latest/core/event_handler/api_gateway/#accessing-request-details
     json_body = app.current_event.json_body
     headers = app.current_event.headers
 
