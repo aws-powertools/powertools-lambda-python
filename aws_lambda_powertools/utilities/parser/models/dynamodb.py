@@ -15,7 +15,7 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
 
-    # context on why it's commented: https://github.com/awslabs/aws-lambda-powertools-python/pull/118
+    # context on why it's commented: https://github.com/aws-powertools/powertools-lambda-python/pull/118
     # since both images are optional, they can both be None. However, at least one must
     # exist in a legal model of NEW_AND_OLD_IMAGES type
     # @root_validator

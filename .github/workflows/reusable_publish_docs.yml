@@ -3,7 +3,7 @@ name: Reusable publish documentation
 # see .github/workflows/on_push_docs.yml for docs
 
 env:
-  ORIGIN: awslabs/aws-lambda-powertools-python
+  ORIGIN: aws-powertools/powertools-lambda-python
 
 on:
   workflow_call:
