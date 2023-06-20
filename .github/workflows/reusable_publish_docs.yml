@@ -103,12 +103,24 @@ jobs:
         env:
           VERSION: ${{ inputs.version }}
           ALIAS: ${{ inputs.alias }}
+        # We originally used "mike" from PyPi to manage versions for us, but since we moved to S3, we can't use it to manage versions any more.
+        # Instead, we're using some shell script that manages the versions.
+        #
+        # Operations:
+        #   1. Download the versions.json file from S3
+        #   2. Find any reference to the alias and delete it from the versions file
+        #   3. We insert the new version to the versions.json file with the corresponding alias
+        #   4. Once done, we'll upload it back to S3.
         run: |
           aws s3 cp \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
             versions_old.json
-          jq 'del(.[].aliases[] | select(. == "stage"))' < versions_old.json > versions_proc.json
-          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": ["latest"]}]' < versions_proc.json > versions.json
+          jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
+          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"]}]' < versions_proc.json > versions.json
           aws s3 cp \
             versions.json \
-            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-typescript/versions.json
+          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": []}]' < versions_old.json > versions.json
+          aws s3 cp \
+            versions.json \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-typescript/versions.json
