@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from unittest.mock import MagicMock
 
-import app_with_io_operations
+import app_test_io_operations
 import pytest
 
 
@@ -22,7 +22,7 @@ def lambda_context():
 
 def test_idempotent_lambda(lambda_context):
     mock_client = MagicMock()
-    app_with_io_operations.persistence_layer.client = mock_client
-    result = app_with_io_operations.handler({"testkey": "testvalue"}, lambda_context)
+    app_test_io_operations.persistence_layer.client = mock_client
+    result = app_test_io_operations.handler({"testkey": "testvalue"}, lambda_context)
     mock_client.put_item.assert_called()
     assert result

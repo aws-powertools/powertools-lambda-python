@@ -749,14 +749,14 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "test_disabling_idempotency_utility.py"
 
-    ```python hl_lines="3 4 24"
-    --8<-- "examples/idempotency/src/test_disabling_idempotency_utility.py"
+    ```python hl_lines="3 4 23"
+    --8<-- "examples/idempotency/tests/test_disabling_idempotency_utility.py"
     ```
 
-=== "app_disabling_idempotency_utility.py"
+=== "app_test_disabling_idempotency_utility.py"
 
     ```python hl_lines="10"
-    --8<-- "examples/idempotency/src/app_disabling_idempotency_utility.py"
+    --8<-- "examples/idempotency/tests/app_test_disabling_idempotency_utility.py"
     ```
 
 ### Testing with DynamoDB Local
@@ -766,13 +766,13 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 === "test_with_dynamodb_local.py"
 
     ```python hl_lines="3-5 25 28"
-    --8<-- "examples/idempotency/src/test_with_dynamodb_local.py"
+    --8<-- "examples/idempotency/tests/test_with_dynamodb_local.py"
     ```
 
-=== "app_with_dynamodb_local.py"
+=== "app_test_dynamodb_local.py"
 
     ```python hl_lines="10"
-    --8<-- "examples/idempotency/src/app_with_dynamodb_local.py"
+    --8<-- "examples/idempotency/tests/app_test_dynamodb_local.py"
     ```
 
 ### How do I mock all DynamoDB I/O operations
@@ -783,13 +783,13 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 === "test_with_io_operations.py"
 
     ```python hl_lines="4 5 27"
-    --8<-- "examples/idempotency/src/test_with_io_operations.py"
+    --8<-- "examples/idempotency/tests/test_with_io_operations.py"
     ```
 
-=== "app_with_io_operations.py"
+=== "app_test_io_operations.py"
 
     ```python hl_lines="10"
-    --8<-- "examples/idempotency/src/app_with_io_operations.py"
+    --8<-- "examples/idempotency/tests/app_test_io_operations.py"
     ```
 
 ## Extra resources

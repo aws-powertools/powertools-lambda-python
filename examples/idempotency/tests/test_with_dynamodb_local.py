@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-import app_with_dynamodb_local
+import app_test_dynamodb_local
 import boto3
 import pytest
 
@@ -23,10 +23,10 @@ def lambda_context():
 def test_idempotent_lambda(lambda_context):
     # Configure the boto3 to use the endpoint for the DynamoDB Local instance
     dynamodb_local_client = boto3.client("dynamodb", endpoint_url="http://localhost:8000")
-    app_with_dynamodb_local.persistence_layer.client = dynamodb_local_client
+    app_test_dynamodb_local.persistence_layer.client = dynamodb_local_client
 
     # If desired, you can use a different DynamoDB Local table name than what your code already uses
     # app.persistence_layer.table_name = "another table name" # noqa: E800
 
-    result = app_with_dynamodb_local.handler({"testkey": "testvalue"}, lambda_context)
+    result = app_test_dynamodb_local.handler({"testkey": "testvalue"}, lambda_context)
     assert result["payment_id"] == 12345
