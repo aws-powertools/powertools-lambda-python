@@ -88,6 +88,18 @@ jobs:
           VERSION: ${{ inputs.version }}
           ALIAS: ${{ inputs.alias }}
         run: |
+          aws s3 cp \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
+            versions_old.json
+          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": []}]' < versions_old.json > versions.json
+          aws s3 cp \
+            versions.json \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json
+      - name: Deploy Docs (Version)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
           aws s3 sync \
             site/ \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.VERSION }}/
