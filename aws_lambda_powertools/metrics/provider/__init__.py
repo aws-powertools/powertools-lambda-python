@@ -8,6 +8,10 @@ from aws_lambda_powertools.metrics.provider.datadog_provider_draft import (
     DataDogMetrics,
     DataDogProvider,
 )
+from aws_lambda_powertools.metrics.provider.opentelemetry_provider_draft import (
+    OTLPMetrics,
+    OTLPProvider,
+)
 
 __all__ = [
     "MetricsBase",
@@ -17,4 +21,6 @@ __all__ = [
     "Metrics",
     "EphemeralMetrics",
     "CloudWatchEMF",
+    "OTLPProvider",
+    "OTLPMetrics",
 ]
