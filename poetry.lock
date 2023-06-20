@@ -936,13 +936,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "hvac"
-version = "1.1.0"
+version = "1.1.1"
 description = "HashiCorp Vault API client"
 optional = false
 python-versions = ">=3.6.2,<4.0.0"
 files = [
-    {file = "hvac-1.1.0-py3-none-any.whl", hash = "sha256:12368860f117c7e886acc348bf6a3f58d01c3fad17d4604c24ee9df3ee8a3dee"},
-    {file = "hvac-1.1.0.tar.gz", hash = "sha256:079dca58856dee6646ed5a2f2283809c16d2deedde1e9e9615b2910324a4b969"},
+    {file = "hvac-1.1.1-py3-none-any.whl", hash = "sha256:466e883665b4082933106b292649f9fba3bc0709a1ec1729e9e35b29477164b3"},
+    {file = "hvac-1.1.1.tar.gz", hash = "sha256:f9dbcc46b98b250c785eb1050aa11ee34a0c8b6616b75218cf1346a9817992f9"},
 ]
 
 [package.dependencies]
@@ -1632,13 +1632,13 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.26.149"
-description = "Type annotations for boto3.CloudFormation 1.26.149 service generated with mypy-boto3-builder 7.14.5"
+version = "1.26.156"
+description = "Type annotations for boto3.CloudFormation 1.26.156 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudformation-1.26.149.tar.gz", hash = "sha256:cdc1a41aa63acca0d732f61179c5049be94d9b3640f3807da0d595ed6dd44a15"},
-    {file = "mypy_boto3_cloudformation-1.26.149-py3-none-any.whl", hash = "sha256:7a9d0b4670699e2e96efe567668bd0dd12bd6e2264aa54686cdd8b70c2d69a94"},
+    {file = "mypy-boto3-cloudformation-1.26.156.tar.gz", hash = "sha256:cf5c568fae32ba216749d01208239ae5342b1e1c0842fae115c0176e911a441a"},
+    {file = "mypy_boto3_cloudformation-1.26.156-py3-none-any.whl", hash = "sha256:0c9007a1c0a74d2a857761305c0365f971d6b44b1a10648b52c115f46ecaf53f"},
 ]
 
 [package.dependencies]
@@ -1702,13 +1702,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.26.153"
-description = "Type annotations for boto3.S3 1.26.153 service generated with mypy-boto3-builder 7.14.5"
+version = "1.26.155"
+description = "Type annotations for boto3.S3 1.26.155 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.26.153.tar.gz", hash = "sha256:2d50350394aea8f934e5bc67f6ad0f7f51544bb07640275a2db9fd3a040816b1"},
-    {file = "mypy_boto3_s3-1.26.153-py3-none-any.whl", hash = "sha256:dcf903bdcdbc955f4d5ba62cb8a58069808f357a67b02a4fb6b888596c2ee455"},
+    {file = "mypy-boto3-s3-1.26.155.tar.gz", hash = "sha256:2a399abba8c45b7bb3f3623baf86858625d7b0e5a902edfe7d9fa18fcbeb2f7b"},
+    {file = "mypy_boto3_s3-1.26.155-py3-none-any.whl", hash = "sha256:0dd0f5747451cbffb3582d416b3bc32fa2573c9e1c9dd6a6073463be0621d2c2"},
 ]
 
 [package.dependencies]
@@ -2939,4 +2939,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "99d4ebf572515b3a3efd086a34b56ed15b1a50014b9b6cb9556753ee2c64feef"
+content-hash = "0add647781de3fcd05c901f5436eb2e053e694771d42c58f7ea2829c48f05734"
