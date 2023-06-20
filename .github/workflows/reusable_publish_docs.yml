@@ -120,7 +120,3 @@ jobs:
           aws s3 cp \
             versions.json \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-typescript/versions.json
-          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": []}]' < versions_old.json > versions.json
-          aws s3 cp \
-            versions.json \
-            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-typescript/versions.json
