@@ -1,5 +1,4 @@
 import base64
-import json
 import zlib
 from typing import Dict, List, Optional
 
@@ -97,5 +96,6 @@ class CloudWatchLogsEvent(DictWrapper):
     def parse_logs_data(self) -> CloudWatchLogsDecodedData:
         """Decode, decompress and parse json data as CloudWatchLogsDecodedData"""
         if self._json_logs_data is None:
-            self._json_logs_data = json.loads(self.decompress_logs_data.decode("UTF-8"))
+            self._json_logs_data = self._json_deserializer(self.decompress_logs_data.decode("UTF-8"))
+
         return CloudWatchLogsDecodedData(self._json_logs_data)
