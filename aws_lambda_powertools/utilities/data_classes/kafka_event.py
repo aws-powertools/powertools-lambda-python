@@ -2,6 +2,9 @@ import base64
 from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+)
 
 
 class KafkaEventRecord(DictWrapper):
@@ -69,17 +72,10 @@ class KafkaEventRecord(DictWrapper):
 
     def get_header_value(
         self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
-    ) -> Optional[bytes]:
+    ) -> Optional[str]:
         """Get a decoded header value by name."""
-        if case_sensitive:
-            return self.decoded_headers.get(name, default_value)
-        name_lower = name.lower()
-
-        return next(
-            # Iterate over the dict and do a case-insensitive key comparison
-            (value for key, value in self.decoded_headers.items() if key.lower() == name_lower),
-            # Default value is returned if no matches was found
-            default_value,
+        return get_header_value(
+            headers=self.decoded_headers, name=name, default_value=default_value, case_sensitive=case_sensitive
         )
 
 

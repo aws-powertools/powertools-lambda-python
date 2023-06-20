@@ -6,6 +6,8 @@ from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
     BaseRequestContextV2,
     DictWrapper,
+)
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
 )
 
