@@ -3,62 +3,59 @@ from tests.functional.utils import load_event
 
 
 def test_kafka_msk_event():
-    event = KafkaEvent(load_event("kafkaEventMsk.json"))
-    assert event.event_source == "aws:kafka"
-    assert (
-        event.event_source_arn
-        == "arn:aws:kafka:us-east-1:0123456789019:cluster/SalesCluster/abcd1234-abcd-cafe-abab-9876543210ab-4"
-    )
+    raw_event = load_event("kafkaEventMsk.json")
+    parsed_event = KafkaEvent(raw_event)
 
-    bootstrap_servers_raw = "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092,b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092"  # noqa E501
+    assert parsed_event.event_source == raw_event["eventSource"]
+    assert parsed_event.event_source_arn == raw_event["eventSourceArn"]
 
-    bootstrap_servers_list = [
-        "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
-        "b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
-    ]
+    bootstrap_servers_raw = raw_event["bootstrapServers"]
 
-    assert event.bootstrap_servers == bootstrap_servers_raw
-    assert event.decoded_bootstrap_servers == bootstrap_servers_list
+    bootstrap_servers_list = raw_event["bootstrapServers"].split(",")
 
-    records = list(event.records)
+    assert parsed_event.bootstrap_servers == bootstrap_servers_raw
+    assert parsed_event.decoded_bootstrap_servers == bootstrap_servers_list
+
+    records = list(parsed_event.records)
     assert len(records) == 1
     record = records[0]
-    assert record.topic == "mytopic"
-    assert record.partition == 0
-    assert record.offset == 15
-    assert record.timestamp == 1545084650987
-    assert record.timestamp_type == "CREATE_TIME"
+    raw_record = raw_event["records"]["mytopic-0"][0]
+    assert record.topic == raw_record["topic"]
+    assert record.partition == raw_record["partition"]
+    assert record.offset == raw_record["offset"]
+    assert record.timestamp == raw_record["timestamp"]
+    assert record.timestamp_type == raw_record["timestampType"]
     assert record.decoded_key == b"recordKey"
-    assert record.value == "eyJrZXkiOiJ2YWx1ZSJ9"
+    assert record.value == raw_record["value"]
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
 
 
 def test_kafka_self_managed_event():
-    event = KafkaEvent(load_event("kafkaEventSelfManaged.json"))
-    assert event.event_source == "aws:SelfManagedKafka"
+    raw_event = load_event("kafkaEventSelfManaged.json")
+    parsed_event = KafkaEvent(raw_event)
 
-    bootstrap_servers_raw = "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092,b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092"  # noqa E501
+    assert parsed_event.event_source == raw_event["eventSource"]
 
-    bootstrap_servers_list = [
-        "b-2.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
-        "b-1.demo-cluster-1.a1bcde.c1.kafka.us-east-1.amazonaws.com:9092",
-    ]
+    bootstrap_servers_raw = raw_event["bootstrapServers"]
 
-    assert event.bootstrap_servers == bootstrap_servers_raw
-    assert event.decoded_bootstrap_servers == bootstrap_servers_list
+    bootstrap_servers_list = raw_event["bootstrapServers"].split(",")
 
-    records = list(event.records)
+    assert parsed_event.bootstrap_servers == bootstrap_servers_raw
+    assert parsed_event.decoded_bootstrap_servers == bootstrap_servers_list
+
+    records = list(parsed_event.records)
     assert len(records) == 1
     record = records[0]
-    assert record.topic == "mytopic"
-    assert record.partition == 0
-    assert record.offset == 15
-    assert record.timestamp == 1545084650987
-    assert record.timestamp_type == "CREATE_TIME"
+    raw_record = raw_event["records"]["mytopic-0"][0]
+    assert record.topic == raw_record["topic"]
+    assert record.partition == raw_record["partition"]
+    assert record.offset == raw_record["offset"]
+    assert record.timestamp == raw_record["timestamp"]
+    assert record.timestamp_type == raw_record["timestampType"]
     assert record.decoded_key == b"recordKey"
-    assert record.value == "eyJrZXkiOiJ2YWx1ZSJ9"
+    assert record.value == raw_record["value"]
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
