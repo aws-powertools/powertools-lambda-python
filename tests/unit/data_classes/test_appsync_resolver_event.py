@@ -9,37 +9,39 @@ from tests.functional.utils import load_event
 
 
 def test_appsync_resolver_event():
-    event = AppSyncResolverEvent(load_event("appSyncResolverEvent.json"))
+    raw_event = load_event("appSyncResolverEvent.json")
+    parsed_event = AppSyncResolverEvent(raw_event)
 
-    assert event.type_name == "Merchant"
-    assert event.field_name == "locations"
-    assert event.arguments["name"] == "value"
-    assert event.identity["claims"]["token_use"] == "id"
-    assert event.source["name"] == "Value"
-    assert event.get_header_value("X-amzn-trace-id") == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
-    assert event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
-    assert event.get_header_value("missing", default_value="Foo") == "Foo"
-    assert event.prev_result == {}
-    assert event.stash is None
+    assert parsed_event.type_name == raw_event["typeName"]
+    assert parsed_event.field_name == raw_event["fieldName"]
+    assert parsed_event.arguments.get("name") == raw_event["arguments"]["name"]
+    assert parsed_event.identity.claims.get("token_use") == raw_event["identity"]["claims"]["token_use"]
+    assert parsed_event.source.get("name") == raw_event["source"]["name"]
+    assert parsed_event.get_header_value("X-amzn-trace-id") == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert parsed_event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
+    assert parsed_event.get_header_value("missing", default_value="Foo") == "Foo"
+    assert parsed_event.prev_result == {}
+    assert parsed_event.stash is None
 
-    info = event.info
+    info = parsed_event.info
     assert info is not None
     assert isinstance(info, AppSyncResolverEventInfo)
-    assert info.field_name == event["fieldName"]
-    assert info.parent_type_name == event["typeName"]
+    assert info.field_name == raw_event["fieldName"]
+    assert info.parent_type_name == raw_event["typeName"]
     assert info.variables is None
     assert info.selection_set_list is None
     assert info.selection_set_graphql is None
 
-    assert isinstance(event.identity, AppSyncIdentityCognito)
-    identity: AppSyncIdentityCognito = event.identity
+    assert isinstance(parsed_event.identity, AppSyncIdentityCognito)
+    identity: AppSyncIdentityCognito = parsed_event.identity
+    raw_identity = raw_event["identity"]
     assert identity.claims is not None
-    assert identity.sub == "07920713-4526-4642-9c88-2953512de441"
+    assert identity.sub == raw_identity["claims"]["sub"]
     assert len(identity.source_ip) == 1
-    assert identity.username == "mike"
-    assert identity.default_auth_strategy == "ALLOW"
+    assert identity.username == raw_identity["username"]
+    assert identity.default_auth_strategy == raw_identity["defaultAuthStrategy"]
     assert identity.groups is None
-    assert identity.issuer == identity["issuer"]
+    assert identity.issuer == raw_identity["issuer"]
 
 
 def test_get_identity_object_is_none():
@@ -75,25 +77,27 @@ def test_get_identity_object_iam():
 
 
 def test_appsync_resolver_direct():
-    event = AppSyncResolverEvent(load_event("appSyncDirectResolver.json"))
+    raw_event = load_event("appSyncDirectResolver.json")
+    parsed_event = AppSyncResolverEvent(raw_event)
 
-    assert event.source is None
-    assert event.arguments["id"] == "my identifier"
-    assert event.stash == {}
-    assert event.prev_result is None
-    assert isinstance(event.identity, AppSyncIdentityCognito)
+    assert parsed_event.source is None
+    assert parsed_event.arguments.get("id") == raw_event["arguments"]["id"]
+    assert parsed_event.stash == {}
+    assert parsed_event.prev_result is None
+    assert isinstance(parsed_event.identity, AppSyncIdentityCognito)
 
-    info = event.info
+    info = parsed_event.info
+    info_raw = raw_event["info"]
     assert info is not None
     assert isinstance(info, AppSyncResolverEventInfo)
     assert info.selection_set_list is not None
     assert info.selection_set_list == info["selectionSetList"]
-    assert info.selection_set_graphql == info["selectionSetGraphQL"]
-    assert info.parent_type_name == info["parentTypeName"]
-    assert info.field_name == info["fieldName"]
+    assert info.selection_set_graphql == info_raw["selectionSetGraphQL"]
+    assert info.parent_type_name == info_raw["parentTypeName"]
+    assert info.field_name == info_raw["fieldName"]
 
-    assert event.type_name == info.parent_type_name
-    assert event.field_name == info.field_name
+    assert parsed_event.type_name == info.parent_type_name
+    assert parsed_event.field_name == info.field_name
 
 
 def test_appsync_resolver_event_info():
