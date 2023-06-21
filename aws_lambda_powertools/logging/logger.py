@@ -591,7 +591,7 @@ class Logger:
         log_keys = {**self._default_log_keys, **keys}
         is_logger_preconfigured = getattr(self._logger, "init", False)
         if not is_logger_preconfigured:
-            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)
             self.registered_handler.setFormatter(formatter)
 
             # when using a custom Powertools for AWS Lambda (Python) Formatter
