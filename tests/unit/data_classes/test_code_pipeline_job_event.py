@@ -12,86 +12,96 @@ from tests.functional.utils import load_event
 
 
 def test_code_pipeline_event():
-    event = CodePipelineJobEvent(load_event("codePipelineEvent.json"))
+    raw_event = load_event("codePipelineEvent.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    job = event["CodePipeline.job"]
-    assert job["id"] == event.get_id
-    assert job["accountId"] == event.account_id
+    job = raw_event["CodePipeline.job"]
+    assert job["id"] == parsed_event.get_id
+    assert job["accountId"] == parsed_event.account_id
 
-    data = event.data
+    data = parsed_event.data
     assert isinstance(data, CodePipelineData)
-    assert job["data"]["continuationToken"] == data.continuation_token
+    assert data.continuation_token == job["data"]["continuationToken"]
+
     configuration = data.action_configuration.configuration
-    assert "MyLambdaFunctionForAWSCodePipeline" == configuration.function_name
-    assert event.user_parameters == configuration.user_parameters
-    assert "some-input-such-as-a-URL" == configuration.user_parameters
+    configuration_raw = raw_event["CodePipeline.job"]["data"]["actionConfiguration"]["configuration"]
+    assert configuration.function_name == configuration_raw["FunctionName"]
+    assert parsed_event.user_parameters == configuration_raw["UserParameters"]
+    assert configuration.user_parameters == configuration_raw["UserParameters"]
 
     input_artifacts = data.input_artifacts
+    input_artifacts_raw = raw_event["CodePipeline.job"]["data"]["inputArtifacts"][0]
     assert len(input_artifacts) == 1
-    assert "ArtifactName" == input_artifacts[0].name
+    assert input_artifacts[0].name == input_artifacts_raw["name"]
     assert input_artifacts[0].revision is None
-    assert "S3" == input_artifacts[0].location.get_type
+    assert input_artifacts[0].location.get_type == input_artifacts_raw["location"]["type"]
 
     output_artifacts = data.output_artifacts
     assert len(output_artifacts) == 0
 
     artifact_credentials = data.artifact_credentials
-    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
-    assert artifact_credentials_dict["accessKeyId"] == artifact_credentials.access_key_id
-    assert artifact_credentials_dict["secretAccessKey"] == artifact_credentials.secret_access_key
-    assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
+    artifact_credentials_raw = raw_event["CodePipeline.job"]["data"]["artifactCredentials"]
+    assert artifact_credentials.access_key_id == artifact_credentials_raw["accessKeyId"]
+    assert artifact_credentials.secret_access_key == artifact_credentials_raw["secretAccessKey"]
+    assert artifact_credentials.session_token == artifact_credentials_raw["sessionToken"]
 
 
 def test_code_pipeline_event_with_encryption_keys():
-    event = CodePipelineJobEvent(load_event("codePipelineEventWithEncryptionKey.json"))
+    raw_event = load_event("codePipelineEventWithEncryptionKey.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    job = event["CodePipeline.job"]
-    assert job["id"] == event.get_id
-    assert job["accountId"] == event.account_id
+    job = raw_event["CodePipeline.job"]
+    assert job["id"] == parsed_event.get_id
+    assert job["accountId"] == parsed_event.account_id
 
-    data = event.data
+    data = parsed_event.data
     assert isinstance(data, CodePipelineData)
-    assert job["data"]["continuationToken"] == data.continuation_token
+    assert data.continuation_token == job["data"]["continuationToken"]
+
     configuration = data.action_configuration.configuration
-    assert "MyLambdaFunctionForAWSCodePipeline" == configuration.function_name
-    assert event.user_parameters == configuration.user_parameters
-    assert "some-input-such-as-a-URL" == configuration.user_parameters
+    configuration_raw = raw_event["CodePipeline.job"]["data"]["actionConfiguration"]["configuration"]
+    assert configuration.function_name == configuration_raw["FunctionName"]
+    assert parsed_event.user_parameters == configuration_raw["UserParameters"]
+    assert configuration.user_parameters == configuration_raw["UserParameters"]
 
     input_artifacts = data.input_artifacts
+    input_artifacts_raw = raw_event["CodePipeline.job"]["data"]["inputArtifacts"][0]
     assert len(input_artifacts) == 1
-    assert "ArtifactName" == input_artifacts[0].name
+    assert input_artifacts[0].name == input_artifacts_raw["name"]
     assert input_artifacts[0].revision is None
-    assert "S3" == input_artifacts[0].location.get_type
+    assert input_artifacts[0].location.get_type == input_artifacts_raw["location"]["type"]
 
     output_artifacts = data.output_artifacts
     assert len(output_artifacts) == 0
 
     artifact_credentials = data.artifact_credentials
-    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
-    assert artifact_credentials_dict["accessKeyId"] == artifact_credentials.access_key_id
-    assert artifact_credentials_dict["secretAccessKey"] == artifact_credentials.secret_access_key
-    assert artifact_credentials_dict["sessionToken"] == artifact_credentials.session_token
+    artifact_credentials_raw = raw_event["CodePipeline.job"]["data"]["artifactCredentials"]
+    assert artifact_credentials.access_key_id == artifact_credentials_raw["accessKeyId"]
+    assert artifact_credentials.secret_access_key == artifact_credentials_raw["secretAccessKey"]
+    assert artifact_credentials.session_token == artifact_credentials_raw["sessionToken"]
 
     encryption_key = data.encryption_key
-    assert "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab" == encryption_key.get_id
-    assert "KMS" == encryption_key.get_type
+    assert encryption_key.get_id == raw_event["CodePipeline.job"]["data"]["encryptionKey"]["id"]
+    assert encryption_key.get_type == raw_event["CodePipeline.job"]["data"]["encryptionKey"]["type"]
 
 
 def test_code_pipeline_event_missing_user_parameters():
-    event = CodePipelineJobEvent(load_event("codePipelineEventEmptyUserParameters.json"))
+    raw_event = load_event("codePipelineEventEmptyUserParameters.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    assert event.data.continuation_token is None
-    configuration = event.data.action_configuration.configuration
+    assert parsed_event.data.continuation_token is None
+    configuration = parsed_event.data.action_configuration.configuration
     decoded_params = configuration.decoded_user_parameters
-    assert decoded_params == event.decoded_user_parameters
+    assert decoded_params == parsed_event.decoded_user_parameters
     assert decoded_params is None
     assert configuration.decoded_user_parameters is None
 
 
 def test_code_pipeline_event_non_json_user_parameters():
-    event = CodePipelineJobEvent(load_event("codePipelineEvent.json"))
+    raw_event = load_event("codePipelineEvent.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    configuration = event.data.action_configuration.configuration
+    configuration = parsed_event.data.action_configuration.configuration
     assert configuration.user_parameters is not None
 
     with pytest.raises(json.decoder.JSONDecodeError):
@@ -99,36 +109,51 @@ def test_code_pipeline_event_non_json_user_parameters():
 
 
 def test_code_pipeline_event_decoded_data():
-    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+    raw_event = load_event("codePipelineEventData.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    assert event.data.continuation_token is None
-    configuration = event.data.action_configuration.configuration
+    assert parsed_event.data.continuation_token is None
+    configuration = parsed_event.data.action_configuration.configuration
     decoded_params = configuration.decoded_user_parameters
-    assert decoded_params == event.decoded_user_parameters
+    assert decoded_params == parsed_event.decoded_user_parameters
     assert decoded_params["KEY"] == "VALUE"
     assert configuration.decoded_user_parameters["KEY"] == "VALUE"
 
-    assert "my-pipeline-SourceArtifact" == event.data.input_artifacts[0].name
-
-    output_artifacts = event.data.output_artifacts
+    assert (
+        parsed_event.data.input_artifacts[0].name == raw_event["CodePipeline.job"]["data"]["inputArtifacts"][0]["name"]
+    )
+    output_artifacts = parsed_event.data.output_artifacts
     assert len(output_artifacts) == 1
-    assert "S3" == output_artifacts[0].location.get_type
-    assert "my-pipeline/invokeOutp/D0YHsJn" == output_artifacts[0].location.s3_location.key
+    assert (
+        output_artifacts[0].location.get_type
+        == raw_event["CodePipeline.job"]["data"]["outputArtifacts"][0]["location"]["type"]
+    )
+    assert (
+        output_artifacts[0].location.s3_location.key
+        == raw_event["CodePipeline.job"]["data"]["outputArtifacts"][0]["location"]["s3Location"]["objectKey"]
+    )
 
-    artifact_credentials = event.data.artifact_credentials
-    artifact_credentials_dict = event["CodePipeline.job"]["data"]["artifactCredentials"]
+    artifact_credentials = parsed_event.data.artifact_credentials
+    artifact_credentials_raw = raw_event["CodePipeline.job"]["data"]["artifactCredentials"]
     assert isinstance(artifact_credentials.expiration_time, int)
-    assert artifact_credentials_dict["expirationTime"] == artifact_credentials.expiration_time
+    assert artifact_credentials.expiration_time == artifact_credentials_raw["expirationTime"]
 
-    assert "us-west-2-123456789012-my-pipeline" == event.input_bucket_name
-    assert "my-pipeline/test-api-2/TdOSFRV" == event.input_object_key
+    assert (
+        parsed_event.input_bucket_name
+        == raw_event["CodePipeline.job"]["data"]["inputArtifacts"][0]["location"]["s3Location"]["bucketName"]
+    )
+    assert (
+        parsed_event.input_object_key
+        == raw_event["CodePipeline.job"]["data"]["inputArtifacts"][0]["location"]["s3Location"]["objectKey"]
+    )
 
 
 def test_code_pipeline_get_artifact_not_found():
-    event = CodePipelineJobEvent(load_event("codePipelineEventData.json"))
+    raw_event = load_event("codePipelineEventData.json")
+    parsed_event = CodePipelineJobEvent(raw_event)
 
-    assert event.find_input_artifact("not-found") is None
-    assert event.get_artifact("not-found", "foo") is None
+    assert parsed_event.find_input_artifact("not-found") is None
+    assert parsed_event.get_artifact("not-found", "foo") is None
 
 
 def test_code_pipeline_get_artifact(mocker: MockerFixture):
