@@ -1,5 +1,8 @@
 from aws_lambda_powertools.utilities.data_classes.connect_contact_flow_event import (
+    ConnectContactFlowChannel,
+    ConnectContactFlowEndpointType,
     ConnectContactFlowEvent,
+    ConnectContactFlowInitiationMethod,
 )
 from tests.functional.utils import load_event
 
@@ -11,11 +14,11 @@ def test_connect_contact_flow_event_min():
     contact_data_raw = raw_event["Details"]["ContactData"]
 
     assert parsed_event.contact_data.attributes == {}
-    assert parsed_event.contact_data.channel == contact_data_raw["Channel"]
+    assert parsed_event.contact_data.channel == ConnectContactFlowChannel.VOICE
     assert parsed_event.contact_data.contact_id == contact_data_raw["ContactId"]
     assert parsed_event.contact_data.customer_endpoint is None
     assert parsed_event.contact_data.initial_contact_id == contact_data_raw["InitialContactId"]
-    assert parsed_event.contact_data.initiation_method == contact_data_raw["InitiationMethod"]
+    assert parsed_event.contact_data.initiation_method == ConnectContactFlowInitiationMethod.API
     assert parsed_event.contact_data.instance_arn == contact_data_raw["InstanceARN"]
     assert parsed_event.contact_data.media_streams.customer.audio.start_fragment_number is None
     assert parsed_event.contact_data.media_streams.customer.audio.start_timestamp is None
@@ -33,13 +36,13 @@ def test_connect_contact_flow_event_all():
     contact_data_raw = raw_event["Details"]["ContactData"]
 
     assert parsed_event.contact_data.attributes == {"Language": "en-US"}
-    assert parsed_event.contact_data.channel == contact_data_raw["Channel"]
+    assert parsed_event.contact_data.channel == ConnectContactFlowChannel.VOICE
     assert parsed_event.contact_data.contact_id == contact_data_raw["ContactId"]
     assert parsed_event.contact_data.customer_endpoint is not None
     assert parsed_event.contact_data.customer_endpoint.address == contact_data_raw["CustomerEndpoint"]["Address"]
-    assert parsed_event.contact_data.customer_endpoint.endpoint_type == contact_data_raw["CustomerEndpoint"]["Type"]
+    assert parsed_event.contact_data.customer_endpoint.endpoint_type == ConnectContactFlowEndpointType.TELEPHONE_NUMBER
     assert parsed_event.contact_data.initial_contact_id == contact_data_raw["InitialContactId"]
-    assert parsed_event.contact_data.initiation_method == contact_data_raw["InitiationMethod"]
+    assert parsed_event.contact_data.initiation_method == ConnectContactFlowInitiationMethod.API
     assert parsed_event.contact_data.instance_arn == contact_data_raw["InstanceARN"]
     assert (
         parsed_event.contact_data.media_streams.customer.audio.start_fragment_number
@@ -59,5 +62,5 @@ def test_connect_contact_flow_event_all():
     assert parsed_event.contact_data.queue.name == contact_data_raw["Queue"]["Name"]
     assert parsed_event.contact_data.system_endpoint is not None
     assert parsed_event.contact_data.system_endpoint.address == contact_data_raw["SystemEndpoint"]["Address"]
-    assert parsed_event.contact_data.system_endpoint.endpoint_type == contact_data_raw["SystemEndpoint"]["Type"]
+    assert parsed_event.contact_data.system_endpoint.endpoint_type == ConnectContactFlowEndpointType.TELEPHONE_NUMBER
     assert parsed_event.parameters == {"ParameterOne": "One", "ParameterTwo": "Two"}

@@ -3,15 +3,16 @@ from tests.functional.utils import load_event
 
 
 def test_event_bridge_event():
-    event = EventBridgeEvent(load_event("eventBridgeEvent.json"))
+    raw_event = load_event("eventBridgeEvent.json")
+    parsed_event = EventBridgeEvent(raw_event)
 
-    assert event.get_id == event["id"]
-    assert event.version == event["version"]
-    assert event.account == event["account"]
-    assert event.time == event["time"]
-    assert event.region == event["region"]
-    assert event.resources == event["resources"]
-    assert event.source == event["source"]
-    assert event.detail_type == event["detail-type"]
-    assert event.detail == event["detail"]
-    assert event.replay_name == "replay_archive"
+    assert parsed_event.get_id == raw_event["id"]
+    assert parsed_event.version == raw_event["version"]
+    assert parsed_event.account == raw_event["account"]
+    assert parsed_event.time == raw_event["time"]
+    assert parsed_event.region == raw_event["region"]
+    assert parsed_event.resources == raw_event["resources"]
+    assert parsed_event.source == raw_event["source"]
+    assert parsed_event.detail_type == raw_event["detail-type"]
+    assert parsed_event.detail == raw_event["detail"]
+    assert parsed_event.replay_name == "replay_archive"
