@@ -22,12 +22,13 @@ def test_ses_trigger_event():
     assert headers[0].name == raw_event["Records"][0]["ses"]["mail"]["headers"][0]["name"]
     assert headers[0].value == raw_event["Records"][0]["ses"]["mail"]["headers"][0]["value"]
     common_headers = mail.common_headers
-    assert common_headers.return_path == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["returnPath"]
+    common_headers_raw = raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]
+    assert common_headers.return_path == common_headers_raw["returnPath"]
     assert common_headers.get_from == common_headers.raw_event["from"]
-    assert common_headers.date == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["date"]
+    assert common_headers.date == common_headers_raw["date"]
     assert common_headers.to == [expected_address]
-    assert common_headers.message_id == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["messageId"]
-    assert common_headers.subject == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["subject"]
+    assert common_headers.message_id == common_headers_raw["messageId"]
+    assert common_headers.subject == common_headers_raw["subject"]
     assert common_headers.cc is None
     assert common_headers.bcc is None
     assert common_headers.sender is None
