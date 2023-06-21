@@ -16,29 +16,32 @@ def test_dynamodb_stream_trigger_event():
         prec=38,
         traps=[Clamped, Overflow, Inexact, Rounded, Underflow],
     )
-    event = DynamoDBStreamEvent(load_event("dynamoStreamEvent.json"))
 
-    records = list(event.records)
+    raw_event = load_event("dynamoStreamEvent.json")
+    parsed_event = DynamoDBStreamEvent(raw_event)
+
+    records = list(parsed_event.records)
 
     record = records[0]
-    assert record.aws_region == "us-west-2"
+    record_raw = raw_event["Records"][0]
+    assert record.aws_region == record_raw["awsRegion"]
+    assert record.event_id == record_raw["eventID"]
+    assert record.event_name is DynamoDBRecordEventName.INSERT
+    assert record.event_source == record_raw["eventSource"]
+    assert record.event_source_arn == record_raw["eventSourceARN"]
+    assert record.event_version == record_raw["eventVersion"]
+    assert record.user_identity is None
     dynamodb = record.dynamodb
     assert dynamodb is not None
     assert dynamodb.approximate_creation_date_time is None
     keys = dynamodb.keys
     assert keys is not None
     assert keys["Id"] == decimal_context.create_decimal(101)
-    assert dynamodb.new_image["Message"] == "New item!"
+    assert dynamodb.new_image.get("Message") == record_raw["dynamodb"]["NewImage"]["Message"]["S"]
     assert dynamodb.old_image is None
-    assert dynamodb.sequence_number == "111"
-    assert dynamodb.size_bytes == 26
+    assert dynamodb.sequence_number == record_raw["dynamodb"]["SequenceNumber"]
+    assert dynamodb.size_bytes == record_raw["dynamodb"]["SizeBytes"]
     assert dynamodb.stream_view_type == StreamViewType.NEW_AND_OLD_IMAGES
-    assert record.event_id == "1"
-    assert record.event_name is DynamoDBRecordEventName.INSERT
-    assert record.event_source == "aws:dynamodb"
-    assert record.event_source_arn == "eventsource_arn"
-    assert record.event_version == "1.0"
-    assert record.user_identity is None
 
 
 def test_dynamodb_stream_record_deserialization():
