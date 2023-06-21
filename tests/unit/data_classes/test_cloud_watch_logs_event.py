@@ -3,13 +3,14 @@ from tests.functional.utils import load_event
 
 
 def test_cloud_watch_trigger_event():
-    event = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
+    raw_event = load_event("cloudWatchLogEvent.json")
+    parsed_event = CloudWatchLogsEvent(raw_event)
 
-    decompressed_logs_data = event.decompress_logs_data
-    assert event.decompress_logs_data == decompressed_logs_data
+    decompressed_logs_data = parsed_event.decompress_logs_data
+    assert parsed_event.decompress_logs_data == decompressed_logs_data
 
-    json_logs_data = event.parse_logs_data()
-    assert event.parse_logs_data().raw_event == json_logs_data.raw_event
+    json_logs_data = parsed_event.parse_logs_data()
+    assert parsed_event.parse_logs_data().raw_event == json_logs_data.raw_event
     log_events = json_logs_data.log_events
     log_event = log_events[0]
 
@@ -25,4 +26,4 @@ def test_cloud_watch_trigger_event():
     assert log_event.extracted_fields is None
 
     event2 = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
-    assert event.raw_event == event2.raw_event
+    assert parsed_event.raw_event == event2.raw_event
