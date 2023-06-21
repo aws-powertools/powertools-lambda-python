@@ -12,8 +12,8 @@ def test_rabbit_mq_event():
     raw_event = load_event("rabbitMQEvent.json")
     parsed_event = RabbitMQEvent(raw_event)
 
-    assert parsed_event.event_source == "aws:rmq"
-    assert parsed_event.event_source_arn is not None
+    assert parsed_event.event_source == raw_event["eventSource"]
+    assert parsed_event.event_source_arn == raw_event["eventSourceArn"]
 
     message = parsed_event.rmq_messages_by_queue["pizzaQueue::/"][0]
     assert message.redelivered is False
@@ -25,19 +25,24 @@ def test_rabbit_mq_event():
     assert isinstance(message, RabbitMessage)
     properties = message.basic_properties
     assert isinstance(properties, BasicProperties)
-    assert properties.content_type == "text/plain"
+    assert (
+        properties.content_type == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["contentType"]
+    )
     assert properties.content_encoding is None
     assert isinstance(properties.headers, Dict)
-    assert properties.headers["header1"] is not None
-    assert properties.delivery_mode == 1
-    assert properties.priority == 34
+    assert properties.headers.get("header1") is not None
+    assert (
+        properties.delivery_mode
+        == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["deliveryMode"]
+    )
+    assert properties.priority == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["priority"]
     assert properties.correlation_id is None
     assert properties.reply_to is None
-    assert properties.expiration == "60000"
+    assert properties.expiration == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["expiration"]
     assert properties.message_id is None
-    assert properties.timestamp is not None
+    assert properties.timestamp == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["timestamp"]
     assert properties.get_type is None
-    assert properties.user_id is not None
+    assert properties.user_id == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["userId"]
     assert properties.app_id is None
     assert properties.cluster_id is None
-    assert properties.body_size == 80
+    assert properties.body_size == raw_event["rmqMessagesByQueue"]["pizzaQueue::/"][0]["basicProperties"]["bodySize"]
