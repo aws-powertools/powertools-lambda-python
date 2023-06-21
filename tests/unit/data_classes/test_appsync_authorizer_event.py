@@ -6,16 +6,16 @@ from tests.functional.utils import load_event
 
 
 def test_appsync_authorizer_event():
-    event = AppSyncAuthorizerEvent(load_event("appSyncAuthorizerEvent.json"))
+    raw_event = load_event("appSyncAuthorizerEvent.json")
+    parsed_event = AppSyncAuthorizerEvent(raw_event)
 
-    assert event.authorization_token == "BE9DC5E3-D410-4733-AF76-70178092E681"
-    assert event.authorization_token == event["authorizationToken"]
-    assert event.request_context.api_id == event["requestContext"]["apiId"]
-    assert event.request_context.account_id == event["requestContext"]["accountId"]
-    assert event.request_context.request_id == event["requestContext"]["requestId"]
-    assert event.request_context.query_string == event["requestContext"]["queryString"]
-    assert event.request_context.operation_name == event["requestContext"]["operationName"]
-    assert event.request_context.variables == event["requestContext"]["variables"]
+    assert parsed_event.authorization_token == raw_event["authorizationToken"]
+    assert parsed_event.request_context.api_id == raw_event["requestContext"]["apiId"]
+    assert parsed_event.request_context.account_id == raw_event["requestContext"]["accountId"]
+    assert parsed_event.request_context.request_id == raw_event["requestContext"]["requestId"]
+    assert parsed_event.request_context.query_string == raw_event["requestContext"]["queryString"]
+    assert parsed_event.request_context.operation_name == raw_event["requestContext"]["operationName"]
+    assert parsed_event.request_context.variables == raw_event["requestContext"]["variables"]
 
 
 def test_appsync_authorizer_response():
