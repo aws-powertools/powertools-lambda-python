@@ -17,13 +17,11 @@ def test_seq_trigger_event():
     assert record.receipt_handle == raw_event["Records"][0]["receiptHandle"]
     assert record.body == raw_event["Records"][0]["body"]
     assert attributes.aws_trace_header is None
-    assert attributes.approximate_receive_count == raw_event["Records"][0]["attributes"]["ApproximateReceiveCount"]
-    assert attributes.sent_timestamp == raw_event["Records"][0]["attributes"]["SentTimestamp"]
-    assert attributes.sender_id == raw_event["Records"][0]["attributes"]["SenderId"]
-    assert (
-        attributes.approximate_first_receive_timestamp
-        == raw_event["Records"][0]["attributes"]["ApproximateFirstReceiveTimestamp"]
-    )
+    raw_attributes = raw_event["Records"][0]["attributes"]
+    assert attributes.approximate_receive_count == raw_attributes["ApproximateReceiveCount"]
+    assert attributes.sent_timestamp == raw_attributes["SentTimestamp"]
+    assert attributes.sender_id == raw_attributes["SenderId"]
+    assert attributes.approximate_first_receive_timestamp == raw_attributes["ApproximateFirstReceiveTimestamp"]
     assert attributes.sequence_number is None
     assert attributes.message_group_id is None
     assert attributes.message_deduplication_id is None

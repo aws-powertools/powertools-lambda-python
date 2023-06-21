@@ -33,19 +33,21 @@ def test_ses_trigger_event():
     assert common_headers.sender is None
     assert common_headers.reply_to is None
     receipt = record.ses.receipt
-    assert receipt.timestamp == raw_event["Records"][0]["ses"]["receipt"]["timestamp"]
-    assert receipt.processing_time_millis == raw_event["Records"][0]["ses"]["receipt"]["processingTimeMillis"]
+    raw_receipt = raw_event["Records"][0]["ses"]["receipt"]
+    assert receipt.timestamp == raw_receipt["timestamp"]
+    assert receipt.processing_time_millis == raw_receipt["processingTimeMillis"]
     assert receipt.recipients == [expected_address]
-    assert receipt.spam_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["spamVerdict"]["status"]
-    assert receipt.virus_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["virusVerdict"]["status"]
-    assert receipt.spf_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["spfVerdict"]["status"]
-    assert receipt.dmarc_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["dmarcVerdict"]["status"]
-    assert receipt.dkim_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["dkimVerdict"]["status"]
-    assert receipt.dmarc_policy == raw_event["Records"][0]["ses"]["receipt"]["dmarcPolicy"]
+    assert receipt.spam_verdict.status == raw_receipt["spamVerdict"]["status"]
+    assert receipt.virus_verdict.status == raw_receipt["virusVerdict"]["status"]
+    assert receipt.spf_verdict.status == raw_receipt["spfVerdict"]["status"]
+    assert receipt.dmarc_verdict.status == raw_receipt["dmarcVerdict"]["status"]
+    assert receipt.dkim_verdict.status == raw_receipt["dkimVerdict"]["status"]
+    assert receipt.dmarc_policy == raw_receipt["dmarcPolicy"]
     action = receipt.action
-    assert action.get_type == raw_event["Records"][0]["ses"]["receipt"]["action"]["type"]
-    assert action.function_arn == raw_event["Records"][0]["ses"]["receipt"]["action"]["functionArn"]
-    assert action.invocation_type == raw_event["Records"][0]["ses"]["receipt"]["action"]["invocationType"]
+    raw_action = raw_event["Records"][0]["ses"]["receipt"]["action"]
+    assert action.get_type == raw_action["type"]
+    assert action.function_arn == raw_action["functionArn"]
+    assert action.invocation_type == raw_action["invocationType"]
     assert action.topic_arn is None
     assert parsed_event.record.raw_event == raw_event["Records"][0]
     assert parsed_event.mail.raw_event == raw_event["Records"][0]["ses"]["mail"]
