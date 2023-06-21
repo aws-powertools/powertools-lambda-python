@@ -3,15 +3,16 @@ from tests.functional.utils import load_event
 
 
 def test_vpc_lattice_event():
-    event = VPCLatticeEvent(load_event("vpcLatticeEvent.json"))
+    raw_event = load_event("vpcLatticeEvent.json")
+    parsed_event = VPCLatticeEvent(raw_event)
 
-    assert event.raw_path == event["raw_path"]
-    assert event.get_query_string_value("order-id") == "1"
-    assert event.get_header_value("user_agent") == "curl/7.64.1"
-    assert event.decoded_body == '{"test": "event"}'
-    assert event.json_body == {"test": "event"}
-    assert event.method == event["method"]
-    assert event.headers == event["headers"]
-    assert event.query_string_parameters == event["query_string_parameters"]
-    assert event.body == event["body"]
-    assert event.is_base64_encoded == event["is_base64_encoded"]
+    assert parsed_event.raw_path == raw_event["raw_path"]
+    assert parsed_event.get_query_string_value("order-id") == "1"
+    assert parsed_event.get_header_value("user_agent") == "curl/7.64.1"
+    assert parsed_event.decoded_body == '{"test": "event"}'
+    assert parsed_event.json_body == {"test": "event"}
+    assert parsed_event.method == raw_event["method"]
+    assert parsed_event.headers == raw_event["headers"]
+    assert parsed_event.query_string_parameters == raw_event["query_string_parameters"]
+    assert parsed_event.body == raw_event["body"]
+    assert parsed_event.is_base64_encoded == raw_event["is_base64_encoded"]

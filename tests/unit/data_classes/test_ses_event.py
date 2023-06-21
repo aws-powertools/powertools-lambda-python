@@ -3,49 +3,50 @@ from tests.functional.utils import load_event
 
 
 def test_ses_trigger_event():
-    event = SESEvent(load_event("sesEvent.json"))
+    raw_event = load_event("sesEvent.json")
+    parsed_event = SESEvent(raw_event)
 
     expected_address = "johndoe@example.com"
-    records = list(event.records)
+    records = list(parsed_event.records)
     record = records[0]
-    assert record.event_source == "aws:ses"
-    assert record.event_version == "1.0"
+    assert record.event_source == raw_event["Records"][0]["eventSource"]
+    assert record.event_version == raw_event["Records"][0]["eventVersion"]
     mail = record.ses.mail
-    assert mail.timestamp == "1970-01-01T00:00:00.000Z"
-    assert mail.source == "janedoe@example.com"
-    assert mail.message_id == "o3vrnil0e2ic28tr"
+    assert mail.timestamp == raw_event["Records"][0]["ses"]["mail"]["timestamp"]
+    assert mail.source == raw_event["Records"][0]["ses"]["mail"]["source"]
+    assert mail.message_id == raw_event["Records"][0]["ses"]["mail"]["messageId"]
     assert mail.destination == [expected_address]
     assert mail.headers_truncated is False
     headers = list(mail.headers)
     assert len(headers) == 10
-    assert headers[0].name == "Return-Path"
-    assert headers[0].value == "<janedoe@example.com>"
+    assert headers[0].name == raw_event["Records"][0]["ses"]["mail"]["headers"][0]["name"]
+    assert headers[0].value == raw_event["Records"][0]["ses"]["mail"]["headers"][0]["value"]
     common_headers = mail.common_headers
-    assert common_headers.return_path == "janedoe@example.com"
+    assert common_headers.return_path == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["returnPath"]
     assert common_headers.get_from == common_headers.raw_event["from"]
-    assert common_headers.date == "Wed, 7 Oct 2015 12:34:56 -0700"
+    assert common_headers.date == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["date"]
     assert common_headers.to == [expected_address]
-    assert common_headers.message_id == "<0123456789example.com>"
-    assert common_headers.subject == "Test Subject"
+    assert common_headers.message_id == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["messageId"]
+    assert common_headers.subject == raw_event["Records"][0]["ses"]["mail"]["commonHeaders"]["subject"]
     assert common_headers.cc is None
     assert common_headers.bcc is None
     assert common_headers.sender is None
     assert common_headers.reply_to is None
     receipt = record.ses.receipt
-    assert receipt.timestamp == "1970-01-01T00:00:00.000Z"
-    assert receipt.processing_time_millis == 574
+    assert receipt.timestamp == raw_event["Records"][0]["ses"]["receipt"]["timestamp"]
+    assert receipt.processing_time_millis == raw_event["Records"][0]["ses"]["receipt"]["processingTimeMillis"]
     assert receipt.recipients == [expected_address]
-    assert receipt.spam_verdict.status == "PASS"
-    assert receipt.virus_verdict.status == "PASS"
-    assert receipt.spf_verdict.status == "PASS"
-    assert receipt.dmarc_verdict.status == "PASS"
-    assert receipt.dkim_verdict.status == "PASS"
-    assert receipt.dmarc_policy == "reject"
+    assert receipt.spam_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["spamVerdict"]["status"]
+    assert receipt.virus_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["virusVerdict"]["status"]
+    assert receipt.spf_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["spfVerdict"]["status"]
+    assert receipt.dmarc_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["dmarcVerdict"]["status"]
+    assert receipt.dkim_verdict.status == raw_event["Records"][0]["ses"]["receipt"]["dkimVerdict"]["status"]
+    assert receipt.dmarc_policy == raw_event["Records"][0]["ses"]["receipt"]["dmarcPolicy"]
     action = receipt.action
-    assert action.get_type == action.raw_event["type"]
-    assert action.function_arn == action.raw_event["functionArn"]
-    assert action.invocation_type == action.raw_event["invocationType"]
+    assert action.get_type == raw_event["Records"][0]["ses"]["receipt"]["action"]["type"]
+    assert action.function_arn == raw_event["Records"][0]["ses"]["receipt"]["action"]["functionArn"]
+    assert action.invocation_type == raw_event["Records"][0]["ses"]["receipt"]["action"]["invocationType"]
     assert action.topic_arn is None
-    assert event.record.raw_event == event["Records"][0]
-    assert event.mail.raw_event == event["Records"][0]["ses"]["mail"]
-    assert event.receipt.raw_event == event["Records"][0]["ses"]["receipt"]
+    assert parsed_event.record.raw_event == raw_event["Records"][0]
+    assert parsed_event.mail.raw_event == raw_event["Records"][0]["ses"]["mail"]
+    assert parsed_event.receipt.raw_event == raw_event["Records"][0]["ses"]["receipt"]

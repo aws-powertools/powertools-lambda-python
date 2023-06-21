@@ -5,8 +5,10 @@ from tests.functional.utils import load_event
 
 
 def test_s3_trigger_event():
-    event = S3Event(load_event("s3Event.json"))
-    records = list(event.records)
+    raw_event = load_event("s3Event.json")
+    parsed_event = S3Event(raw_event)
+
+    records = list(parsed_event.records)
     assert len(records) == 1
     record = records[0]
     assert record.event_version == "2.1"
@@ -32,9 +34,9 @@ def test_s3_trigger_event():
     assert s3.get_object.version_id is None
     assert s3.get_object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacier_event_data is None
-    assert event.record.raw_event == event["Records"][0]
-    assert event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
-    assert event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
+    assert parsed_event.record.raw_event == raw_event["Records"][0]
+    assert parsed_event.bucket_name == "lambda-artifacts-deafc19498e3f2df"
+    assert parsed_event.object_key == "b21b84d653bb07b05b1e6b33684dc11b"
 
 
 def test_s3_key_unquote_plus():
@@ -45,8 +47,9 @@ def test_s3_key_unquote_plus():
 
 
 def test_s3_key_url_decoded_key():
-    event = S3Event(load_event("s3EventDecodedKey.json"))
-    assert event.object_key == event.record["s3"]["object"]["urlDecodedKey"]
+    raw_event = load_event("s3EventDecodedKey.json")
+    parsed_event = S3Event(raw_event)
+    assert parsed_event.object_key == raw_event["Records"][0]["s3"]["object"]["urlDecodedKey"]
 
 
 def test_s3_glacier_event():

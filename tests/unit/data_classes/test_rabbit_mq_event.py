@@ -9,12 +9,13 @@ from tests.functional.utils import load_event
 
 
 def test_rabbit_mq_event():
-    event = RabbitMQEvent(load_event("rabbitMQEvent.json"))
+    raw_event = load_event("rabbitMQEvent.json")
+    parsed_event = RabbitMQEvent(raw_event)
 
-    assert event.event_source == "aws:rmq"
-    assert event.event_source_arn is not None
+    assert parsed_event.event_source == "aws:rmq"
+    assert parsed_event.event_source_arn is not None
 
-    message = event.rmq_messages_by_queue["pizzaQueue::/"][0]
+    message = parsed_event.rmq_messages_by_queue["pizzaQueue::/"][0]
     assert message.redelivered is False
     assert message.data is not None
     assert message.decoded_data is not None
