@@ -57,7 +57,7 @@ jobs:
       id-token: write
       pages: none
       pull-requests: none
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     defaults:
       run:
         working-directory: ./layer
