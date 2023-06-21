@@ -36,7 +36,7 @@ def evaluate_mocked_schema(
 
     # Mock the current time
     year, month, day, hour, minute, second, timezone = mocked_time
-    time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.time_conditions._get_now_from_timezone")
+    time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.comparators._get_now_from_timezone")
     time.return_value = datetime.datetime(
         year=year, month=month, day=day, hour=hour, minute=minute, second=second, microsecond=0, tzinfo=timezone
     )

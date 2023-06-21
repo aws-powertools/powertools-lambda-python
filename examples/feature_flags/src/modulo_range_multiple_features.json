@@ -1,0 +1,50 @@
+{
+  "sale_experiment_discount": {
+    "boolean_type": false,
+    "default": 0,
+    "rules": {
+      "control group - standard 10% discount segment": {
+        "when_match": 10,
+        "conditions": [
+          {
+            "action": "MODULO_RANGE",
+            "key": "user_id",
+            "value": {
+              "BASE": 10,
+              "START": 0,
+              "END": 3
+            }
+          }
+        ]
+      },
+      "test experiment 1 - 15% discount segment": {
+        "when_match": 15,
+        "conditions": [
+          {
+            "action": "MODULO_RANGE",
+            "key": "user_id",
+            "value": {
+              "BASE": 10,
+              "START": 4,
+              "END": 6
+            }
+          }
+        ]
+      },
+      "test experiment 2 - 18% discount segment": {
+        "when_match": 18,
+        "conditions": [
+          {
+            "action": "MODULO_RANGE",
+            "key": "user_id",
+            "value": {
+              "BASE": 10,
+              "START": 7,
+              "END": 9
+            }
+          }
+        ]
+      }
+    }
+  }
+}

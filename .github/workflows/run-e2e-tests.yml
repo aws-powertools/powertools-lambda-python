@@ -37,7 +37,7 @@ concurrency: e2e
 
 jobs:
   run:
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read  # checkout code
