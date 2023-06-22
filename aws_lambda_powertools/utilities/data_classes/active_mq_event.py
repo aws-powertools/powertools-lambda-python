@@ -1,4 +1,4 @@
-from typing import Any, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
@@ -112,6 +112,10 @@ class ActiveMQEvent(DictWrapper):
     - https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/
     """
 
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        self._messages = (ActiveMQMessage(record) for record in self["messages"])
+
     @property
     def event_source(self) -> str:
         return self["eventSource"]
@@ -128,4 +132,4 @@ class ActiveMQEvent(DictWrapper):
 
     @property
     def message(self) -> ActiveMQMessage:
-        return next(self.messages)
+        return next(self._messages)

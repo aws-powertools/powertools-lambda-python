@@ -87,6 +87,11 @@ class KafkaEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
 
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        for chunk in self["records"].values():
+            self._records = (KafkaEventRecord(record) for record in chunk)
+
     @property
     def event_source(self) -> str:
         """The AWS service from which the Kafka event record originated."""
@@ -117,4 +122,4 @@ class KafkaEvent(DictWrapper):
     @property
     def record(self) -> KafkaEventRecord:
         """The next Kafka record."""
-        return next(self.records)
+        return next(self._records)

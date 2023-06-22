@@ -1,3 +1,5 @@
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes.active_mq_event import (
     ActiveMQEvent,
     ActiveMQMessage,
@@ -37,3 +39,20 @@ def test_active_mq_event():
     message = messages[1]
     assert message.json_data["timeout"] == 0
     assert message.json_data["data"] == "CZrmf0Gw8Ov4bqLQxD4E"
+
+    assert parsed_event.message == messages[1]
+    assert parsed_event.message == messages[2]
+
+
+def test_activemq_message_property_with_stopiteration_error():
+    # GIVEN a kafka event with one record
+    raw_event = load_event("activeMQEvent.json")
+    parsed_event = ActiveMQEvent(raw_event)
+
+    # WHEN calling record property four times
+    # THEN raise StopIteration
+    with pytest.raises(StopIteration):
+        assert parsed_event.message.message_id is not None
+        assert parsed_event.message.message_type is not None
+        assert parsed_event.message.data is not None
+        assert parsed_event.message.decoded_data is not None

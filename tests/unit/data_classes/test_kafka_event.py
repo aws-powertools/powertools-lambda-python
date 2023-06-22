@@ -1,3 +1,5 @@
+import pytest
+
 from aws_lambda_powertools.utilities.data_classes import KafkaEvent
 from tests.functional.utils import load_event
 
@@ -31,6 +33,8 @@ def test_kafka_msk_event():
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
 
+    assert parsed_event.record == records[0]
+
 
 def test_kafka_self_managed_event():
     raw_event = load_event("kafkaEventSelfManaged.json")
@@ -59,3 +63,17 @@ def test_kafka_self_managed_event():
     assert record.json_value == {"key": "value"}
     assert record.decoded_headers == {"headerKey": b"headerValue"}
     assert record.get_header_value("HeaderKey", case_sensitive=False) == b"headerValue"
+
+    assert parsed_event.record == records[0]
+
+
+def test_kafka_record_property_with_stopiteration_error():
+    # GIVEN a kafka event with one record
+    raw_event = load_event("kafkaEventMsk.json")
+    parsed_event = KafkaEvent(raw_event)
+
+    # WHEN calling record property twice
+    # THEN raise StopIteration
+    with pytest.raises(StopIteration):
+        assert parsed_event.record.topic is not None
+        assert parsed_event.record.partition is not None
