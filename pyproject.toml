@@ -39,17 +39,6 @@ coverage = {extras = ["toml"], version = "^7.2"}
 pytest = "^7.3.2"
 black = "^23.3"
 boto3 = "^1.18"
-flake8 = [
-  # https://github.com/python/importlib_metadata/issues/406
-  { version = "*", python="^3.7" },
-  { version = ">=5", python= ">=3.8"},
-]
-flake8-builtins = "^2.1.0"
-flake8-comprehensions = "^3.13.0"
-flake8-debugger = "^4.0.0"
-flake8-fixme = "^1.1.1"
-flake8-variables-names = "^0.0.5"
-flake8-black = "^0.3.6"
 isort = "^5.11.5"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.11.1"
@@ -58,8 +47,6 @@ pytest-asyncio = "^0.21.0"
 bandit = "^1.7.5"
 radon = "^5.1.0"
 xenon = "^0.9.0"
-flake8-eradicate = "^1.2.1"
-flake8-bugbear = "^23.3.12"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^1.1.2"
 retry = "^0.9.2"
@@ -185,7 +172,3 @@ generate-setup-file = true
 [tool.poetry_bumpversion.file."aws_lambda_powertools/shared/version.py"]
 search = 'VERSION = "{current_version}"'
 replace = 'VERSION = "{new_version}"'
-
-# NOTE
-# As of now, Feb 2020, flake8 don't support pyproject
-# For latest: https://github.com/flying-sheep/awesome-python-packaging
