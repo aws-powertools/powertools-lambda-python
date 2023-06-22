@@ -2,6 +2,6 @@
   "name": "aws-lambda-powertools-python-e2e",
   "version": "1.0.0",
   "devDependencies": {
-    "aws-cdk": "^2.84.0"
+    "aws-cdk": "^2.85.0"
   }
 }
