@@ -715,8 +715,10 @@ class ApiGatewayResolver(BaseRouter):
         for prefix in self._strip_prefixes:
             if path == prefix:
                 return "/"
-            if self._path_starts_with(path, prefix):
-                return path[len(prefix) :]
+            path = re.sub(rf"^/?({prefix})/", r"/", path)
+
+        if not path:
+            path = "/"
 
         return path
 
