@@ -19,4 +19,7 @@ on:
 
 jobs:
   changelog:
+    permissions:
+      contents: write       # create temporary branch to store changelog changes
+      pull-requests: write  # create PR with changelog changes
     uses: ./.github/workflows/reusable_publish_changelog.yml
