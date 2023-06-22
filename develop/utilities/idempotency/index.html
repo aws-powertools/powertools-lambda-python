@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#terminology" class="md-skip">
+        <a href="#key-features" class="md-skip">
           Skip to content
         </a>
       
@@ -699,15 +699,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#terminology" class="md-nav__link">
-    Terminology
+  <a href="#key-features" class="md-nav__link">
+    Key features
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    Key features
+  <a href="#terminology" class="md-nav__link">
+    Terminology
   </a>
   
 </li>
@@ -1116,15 +1116,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#terminology" class="md-nav__link">
-    Terminology
+  <a href="#key-features" class="md-nav__link">
+    Key features
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    Key features
+  <a href="#terminology" class="md-nav__link">
+    Terminology
   </a>
   
 </li>
@@ -1447,6 +1447,14 @@
 
 <p>The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which
 are safe to retry.</p>
+<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Prevent Lambda handler from executing more than once on the same event payload during a time window</li>
+<li>Ensure Lambda handler returns the same result when called with the same payload</li>
+<li>Select a subset of the event as the idempotency key using JMESPath expressions</li>
+<li>Set a time window in which records with the same payload should be considered duplicates</li>
+<li>Expires in-progress executions if the Lambda function times out halfway through</li>
+</ul>
 <h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h2>
 <p>The property of idempotency means that an operation does not cause additional side effects if it is called more than
 once with the same input parameters.</p>
@@ -1474,14 +1482,6 @@ times with the same parameters</strong>. This makes idempotent operations safe t
     IdempotencyRecord -- Status</code></pre></p>
 <p><i>Idempotency record representation</i>
 </center></p>
-<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Prevent Lambda handler from executing more than once on the same event payload during a time window</li>
-<li>Ensure Lambda handler returns the same result when called with the same payload</li>
-<li>Select a subset of the event as the idempotency key using JMESPath expressions</li>
-<li>Set a time window in which records with the same payload should be considered duplicates</li>
-<li>Expires in-progress executions if the Lambda function times out halfway through</li>
-</ul>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="iam-permissions">IAM Permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h3>
 <p>Your Lambda function IAM Role must have <code>dynamodb:GetItem</code>, <code>dynamodb:PutItem</code>, <code>dynamodb:UpdateItem</code> and <code>dynamodb:DeleteItem</code> IAM permissions before using this feature.</p>
@@ -3547,7 +3547,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
   <small>
     
       Last update:
-      2023-06-16
+      2023-06-22
     
   </small>
 </div>

@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#terminology" class="md-skip">
+        <a href="#key-features" class="md-skip">
           Skip to content
         </a>
       
@@ -713,15 +713,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#terminology" class="md-nav__link">
-    Terminology
+  <a href="#key-features" class="md-nav__link">
+    Key features
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    Key features
+  <a href="#terminology" class="md-nav__link">
+    Terminology
   </a>
   
 </li>
@@ -1013,15 +1013,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#terminology" class="md-nav__link">
-    Terminology
+  <a href="#key-features" class="md-nav__link">
+    Key features
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    Key features
+  <a href="#terminology" class="md-nav__link">
+    Terminology
   </a>
   
 </li>
@@ -1242,6 +1242,14 @@
 <summary>Info</summary>
 <p>When using <code>AppConfigStore</code>, we currently only support AppConfig using <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations" target="_blank">freeform configuration profile</a>  .</p>
 </details>
+<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Define simple feature flags to dynamically decide when to enable a feature</li>
+<li>Fetch one or all feature flags enabled for a given application context</li>
+<li>Support for static feature flags to simply turn on/off a feature without rules</li>
+<li>Support for time based feature flags</li>
+<li>Bring your own Feature Flags Store Provider</li>
+</ul>
 <h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h2>
 <p>Feature flags are used to modify behaviour without changing the application's code. These flags can be <strong>static</strong> or <strong>dynamic</strong>.</p>
 <p><strong>Static flags</strong>. Indicates something is simply <code>on</code> or <code>off</code>, for example <code>TRACER_ENABLED=True</code>.</p>
@@ -1264,14 +1272,6 @@
 <summary>Note</summary>
 <p>AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html" target="_blank">Configuration</a>.</p>
 </details>
-<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
-<ul>
-<li>Define simple feature flags to dynamically decide when to enable a feature</li>
-<li>Fetch one or all feature flags enabled for a given application context</li>
-<li>Support for static feature flags to simply turn on/off a feature without rules</li>
-<li>Support for time based feature flags</li>
-<li>Bring your own Feature Flags Store Provider</li>
-</ul>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="iam-permissions">IAM Permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h3>
 <p>When using the default store <code>AppConfigStore</code>, your Lambda function IAM Role must have <code>appconfig:GetLatestConfiguration</code> and <code>appconfig:StartConfigurationSession</code> IAM permissions before using this feature.</p>
@@ -3836,7 +3836,7 @@ of the same experiment.</p>
   <small>
     
       Last update:
-      2023-06-16
+      2023-06-22
     
   </small>
 </div>
