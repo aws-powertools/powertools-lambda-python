@@ -86,7 +86,7 @@ mkdocs-material = "^9.1.16"
 filelock = "^3.12.2"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
-ijson = "^3.2.1"
+ijson = "^3.2.2"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
 hvac = "^1.1.1"
 aws-requests-auth = "^0.4.3"
