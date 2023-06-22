@@ -29,10 +29,10 @@ class DataMasking:
     def _use_ast(self, data: Union[dict, str], fields, action, *args, **kwargs) -> str:
         if fields is None:
             raise ValueError("No fields specified.")
+
         if isinstance(data, str):
             # Parse JSON string as dictionary
             my_dict_parsed = json.loads(data)
-
         elif isinstance(data, dict):
             # Turn into json string so everything has quotes around it
             my_dict_parsed = json.dumps(data)

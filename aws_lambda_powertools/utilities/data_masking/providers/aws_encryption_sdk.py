@@ -24,12 +24,13 @@ class SingletonMeta(type):
         return cls._instances[cls]
 
 
-class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
-    CACHE_CAPACITY: int = 100
-    MAX_ENTRY_AGE_SECONDS: float = 300.0
-    MAX_MESSAGES: int = 200
-    # NOTE: You can also set max messages/bytes per data key
+CACHE_CAPACITY: int = 100
+MAX_ENTRY_AGE_SECONDS: float = 300.0
+MAX_MESSAGES: int = 200
+# NOTE: You can also set max messages/bytes per data key
 
+
+class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
     cache = LocalCryptoMaterialsCache(CACHE_CAPACITY)
     session = botocore.session.Session()
 
@@ -40,8 +41,8 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
         self.cache_cmm = CachingCryptoMaterialsManager(
             master_key_provider=self.key_provider,
             cache=self.cache,
-            max_age=self.MAX_ENTRY_AGE_SECONDS,
-            max_messages_encrypted=self.MAX_MESSAGES,
+            max_age=MAX_ENTRY_AGE_SECONDS,
+            max_messages_encrypted=MAX_MESSAGES,
         )
 
     def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:

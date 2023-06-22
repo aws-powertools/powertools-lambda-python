@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from collections.abc import Iterable
 
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING as MASK
+from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING
 
 
 class Provider:
@@ -20,7 +20,7 @@ class Provider:
 
     def mask(self, data):
         if isinstance(data, (str, dict, bytes)):
-            return MASK
+            return DATA_MASKING_STRING
         elif isinstance(data, Iterable):
-            return type(data)([MASK] * len(data))
-        return MASK
+            return type(data)([DATA_MASKING_STRING] * len(data))
+        return DATA_MASKING_STRING
