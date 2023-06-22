@@ -5,7 +5,7 @@ description: Utility
 
 The streaming utility handles datasets larger than the available memory as streaming data.
 
-## Key Features
+## Key features
 
 * Stream Amazon S3 objects with a file-like interface with minimal memory consumption
 * Built-in popular data transformations to decompress and deserialize (gzip, CSV, and ZIP)
