@@ -19,6 +19,9 @@ on:
     paths:
       - ".github/workflows/**"
 
+permissions:
+  contents: read
+
 jobs:
   enforce_pinned_workflows:
     name: Harden Security
