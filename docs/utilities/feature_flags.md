@@ -8,6 +8,14 @@ The feature flags utility provides a simple rule engine to define when one or mu
 ???+ info
     When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
+## Key features
+
+* Define simple feature flags to dynamically decide when to enable a feature
+* Fetch one or all feature flags enabled for a given application context
+* Support for static feature flags to simply turn on/off a feature without rules
+* Support for time based feature flags
+* Bring your own Feature Flags Store Provider
+
 ## Terminology
 
 Feature flags are used to modify behaviour without changing the application's code. These flags can be **static** or **dynamic**.
@@ -30,14 +38,6 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ???+ note
     AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
-
-## Key features
-
-* Define simple feature flags to dynamically decide when to enable a feature
-* Fetch one or all feature flags enabled for a given application context
-* Support for static feature flags to simply turn on/off a feature without rules
-* Support for time based feature flags
-* Bring your own Feature Flags Store Provider
 
 ## Getting started
 
