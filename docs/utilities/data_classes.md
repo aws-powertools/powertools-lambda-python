@@ -7,7 +7,7 @@ description: Utility
 
 Event Source Data Classes utility provides classes self-describing Lambda event sources.
 
-## Key Features
+## Key features
 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
