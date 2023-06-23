@@ -109,14 +109,18 @@ jobs:
         # Operations:
         #   1. Download the versions.json file from S3
         #   2. Find any reference to the alias and delete it from the versions file
-        #   3. We insert the new version to the versions.json file with the corresponding alias
+        #   3. This is voodoo (don't use JQ):
+        #      - we assign the input as $o and the new version/alias as $n, 
+        #      - we check if the version number exists in the file already (for republishing docs)
+        #      - if it's an alias (stage/latest/*) or old version, we do nothing and output $o (original input)
+        #      - if it's a new version number, we add it at position 0 in the array.
         #   4. Once done, we'll upload it back to S3.
         run: |
           aws s3 cp \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
             versions_old.json
           jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
-          jq '. += [{"version": "${{ env.VERSION }}", "title": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"]}]' < versions_proc.json > versions.json
+          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": "${{env.ALIAS}}" }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == "${{ env.VERSION }}";.) then $o else $n + $o end' < versions_proc.json > versions.json
           aws s3 cp \
             versions.json \
-            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-typescript/versions.json
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json
