@@ -1797,7 +1797,7 @@
 <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/products&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">list_products</span><span class="p">():</span>
     <span class="c1"># getting fields from request</span>
-    <span class="c1"># https://docs.powertools.aws.dev/lambda-python/latest/core/event_handler/api_gateway/#accessing-request-details</span>
+    <span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#accessing-request-details</span>
     <span class="n">json_body</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">json_body</span>
     <span class="n">headers</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span>
 

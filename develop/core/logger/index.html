@@ -1625,7 +1625,7 @@
 </span><span class="hll"><span class="w">        </span><span class="nt">LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
 </span><span class="w">    </span><span class="nt">Layers</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Find the latest Layer version in the official documentation</span>
-<span class="w">      </span><span class="c1"># https://docs.powertools.aws.dev/lambda-python/latest/#lambda-layer</span>
+<span class="w">      </span><span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:35</span>
 
 <span class="nt">Resources</span><span class="p">:</span>
@@ -2921,7 +2921,7 @@
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging.formatter</span> <span class="kn">import</span> <span class="n">LambdaPowertoolsFormatter</span>
 </span>
 <span class="c1"># NOTE: Check docs for all available options</span>
-<span class="c1"># https://docs.powertools.aws.dev/lambda-python/latest/core/logger/#lambdapowertoolsformatter</span>
+<span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#lambdapowertoolsformatter</span>
 
 <span class="hll"><span class="n">formatter</span> <span class="o">=</span> <span class="n">LambdaPowertoolsFormatter</span><span class="p">(</span><span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">log_record_order</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;message&quot;</span><span class="p">])</span>
 </span><span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;example&quot;</span><span class="p">,</span> <span class="n">logger_formatter</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>

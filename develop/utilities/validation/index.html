@@ -1070,8 +1070,7 @@
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="kn">import</span> <span class="nn">getting_started_validator_decorator_schema</span> <span class="k">as</span> <span class="nn">schemas</span>
@@ -1081,7 +1080,7 @@
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">validator</span>
 </span>
 <span class="c1"># we can get list of allowed IPs from AWS Parameter Store using Parameters Utility</span>
-<span class="c1"># See: https://docs.powertools.aws.dev/lambda-python/latest/utilities/parameters/</span>
+<span class="c1"># See: https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/</span>
 <span class="n">ALLOWED_IPS</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;/lambda-powertools/allowed_ips&quot;</span><span class="p">)</span>
 
 
@@ -1100,7 +1099,6 @@
 <span class="hll"><span class="c1"># using a decorator to validate input and output data</span>
 </span><span class="hll"><span class="nd">@validator</span><span class="p">(</span><span class="n">inbound_schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">outbound_schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">OUTPUT</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">user_details</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -1112,9 +1110,9 @@
         <span class="p">):</span>
             <span class="n">user_details</span> <span class="o">=</span> <span class="n">User</span><span class="p">(</span><span class="n">ip</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ip&quot;</span><span class="p">),</span> <span class="n">permissions</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="s2">&quot;write&quot;</span><span class="p">])</span><span class="o">.</span><span class="vm">__dict__</span>
 
-<span class="hll">        <span class="c1"># the body must be an object because must match OUTPUT schema, otherwise it fails</span>
-</span>        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">user_details</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span> <span class="k">if</span> <span class="n">user_details</span> <span class="k">else</span> <span class="mi">204</span><span class="p">}</span>
-    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># the body must be an object because must match OUTPUT schema, otherwise it fails</span>
+<span class="hll">        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">user_details</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span> <span class="k">if</span> <span class="n">user_details</span> <span class="k">else</span> <span class="mi">204</span><span class="p">}</span>
+</span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UserPermissionsError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
 </code></pre></div></td></tr></table></div>
 </div>
@@ -1300,7 +1298,7 @@
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">SchemaValidationError</span><span class="p">,</span> <span class="n">validate</span>
 </span>
 <span class="c1"># we can get list of allowed IPs from AWS Parameter Store using Parameters Utility</span>
-<span class="c1"># See: https://docs.powertools.aws.dev/lambda-python/latest/utilities/parameters/</span>
+<span class="c1"># See: https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/</span>
 <span class="n">ALLOWED_IPS</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;/lambda-powertools/allowed_ips&quot;</span><span class="p">)</span>
 
 
@@ -1693,7 +1691,7 @@
 </span>
 
 <span class="c1"># extracting detail from EventBridge custom event</span>
-<span class="c1"># see: https://docs.powertools.aws.dev/lambda-python/latest/utilities/jmespath_functions/#built-in-envelopes</span>
+<span class="c1"># see: https://docs.powertools.aws.dev/lambda/python/latest/utilities/jmespath_functions/#built-in-envelopes</span>
 <span class="hll"><span class="nd">@validator</span><span class="p">(</span><span class="n">inbound_schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">my_event</span> <span class="o">=</span> <span class="n">EventBridgeEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
