@@ -5,12 +5,13 @@ from ... import Logger
 from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
-from .exceptions import ConfigurationStoreError
-from .time_conditions import (
+from .comparators import (
     compare_datetime_range,
     compare_days_of_week,
+    compare_modulo_range,
     compare_time_range,
 )
+from .exceptions import ConfigurationStoreError
 
 
 class FeatureFlags:
@@ -47,8 +48,6 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
-        if not context_value:
-            return False
         mapping_by_action = {
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
@@ -67,6 +66,7 @@ class FeatureFlags:
             schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
+            schema.RuleAction.MODULO_RANGE.value: lambda a, b: compare_modulo_range(a, b),
         }
 
         try:

@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import base64
 import json
+import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
 from typing import (
@@ -24,6 +25,8 @@ from typing import (
 import boto3
 from botocore.config import Config
 
+from aws_lambda_powertools.shared import constants, user_agent
+from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
@@ -35,7 +38,8 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
 
 
-DEFAULT_MAX_AGE_SECS = 5
+DEFAULT_MAX_AGE_SECS = "5"
+
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
 TRANSFORM_METHOD_JSON = "json"
@@ -77,7 +81,7 @@ class BaseProvider(ABC):
     def get(
         self,
         name: str,
-        max_age: int = DEFAULT_MAX_AGE_SECS,
+        max_age: Optional[int] = None,
         transform: TransformOptions = None,
         force_fetch: bool = False,
         **sdk_options,
@@ -121,6 +125,9 @@ class BaseProvider(ABC):
         value: Optional[Union[str, bytes, dict]] = None
         key = (name, transform)
 
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.store[key].value
 
@@ -149,7 +156,7 @@ class BaseProvider(ABC):
     def get_multiple(
         self,
         path: str,
-        max_age: int = DEFAULT_MAX_AGE_SECS,
+        max_age: Optional[int] = None,
         transform: TransformOptions = None,
         raise_on_transform_error: bool = False,
         force_fetch: bool = False,
@@ -185,6 +192,9 @@ class BaseProvider(ABC):
             When the parameter provider fails to transform a parameter value.
         """
         key = (path, transform)
+
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
             return self.store[key].value  # type: ignore # need to revisit entire typing here
@@ -244,11 +254,14 @@ class BaseProvider(ABC):
             Instance of a boto3 client for Parameters feature (e.g., ssm, appconfig, secretsmanager, etc.)
         """
         if client is not None:
+            user_agent.register_feature_to_client(client=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        return session.client(service_name=service_name, config=config)
+        client = session.client(service_name=service_name, config=config)
+        user_agent.register_feature_to_client(client=client, feature="parameters")
+        return client
 
     # maintenance: change DynamoDBServiceResource type to ParameterResourceClients when we expand
     @staticmethod
@@ -278,11 +291,14 @@ class BaseProvider(ABC):
             Instance of a boto3 resource client for Parameters feature (e.g., dynamodb, etc.)
         """
         if client is not None:
+            user_agent.register_feature_to_resource(resource=client, feature="parameters")
             return client
 
         session = session or boto3.Session()
         config = config or Config()
-        return session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
+        client = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
+        user_agent.register_feature_to_resource(resource=client, feature="parameters")
+        return client
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:

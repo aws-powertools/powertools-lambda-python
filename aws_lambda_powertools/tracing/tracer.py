@@ -529,7 +529,7 @@ class Tracer:
             return self._decorate_generator_function(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
-        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):  # type: ignore
+        elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
             return self._decorate_generator_function_with_context_manager(
                 method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
             )
@@ -771,7 +771,7 @@ class Tracer:
 
     def _disable_xray_trace_batching(self):
         """Configure X-Ray SDK to send subsegment individually over batching
-        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        Known issue: https://github.com/aws-powertools/powertools-lambda-python/issues/283
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting streaming override")

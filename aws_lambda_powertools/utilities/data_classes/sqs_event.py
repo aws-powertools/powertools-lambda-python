@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -104,6 +104,35 @@ class SQSRecord(DictWrapper):
         return self["body"]
 
     @property
+    def json_body(self) -> Any:
+        """Deserializes JSON string available in 'body' property
+
+        Notes
+        -----
+
+        **Strict typing**
+
+        Caller controls the type as we can't use recursive generics here.
+
+        JSON Union types would force caller to have to cast a type. Instead,
+        we choose Any to ease ergonomics and other tools receiving this data.
+
+        Examples
+        --------
+
+        **Type deserialized data from JSON string**
+
+        ```python
+        data: dict = record.json_body  # {"telemetry": [], ...}
+        # or
+        data: list = record.json_body  # ["telemetry_values"]
+        ```
+        """
+        if self._json_data is None:
+            self._json_data = self._json_deserializer(self["body"])
+        return self._json_data
+
+    @property
     def attributes(self) -> SQSRecordAttributes:
         """A map of the attributes requested in ReceiveMessage to their respective values."""
         return SQSRecordAttributes(self["attributes"])
@@ -133,6 +162,18 @@ class SQSRecord(DictWrapper):
         """aws region eg: us-east-1"""
         return self["awsRegion"]
 
+    @property
+    def queue_url(self) -> str:
+        """The URL of the queue."""
+        arn_parts = self["eventSourceARN"].split(":")
+        region = arn_parts[3]
+        account_id = arn_parts[4]
+        queue_name = arn_parts[5]
+
+        queue_url = f"https://sqs.{region}.amazonaws.com/{account_id}/{queue_name}"
+
+        return queue_url
+
 
 class SQSEvent(DictWrapper):
     """SQS Event
@@ -145,4 +186,4 @@ class SQSEvent(DictWrapper):
     @property
     def records(self) -> Iterator[SQSRecord]:
         for record in self["Records"]:
-            yield SQSRecord(record)
+            yield SQSRecord(data=record, json_deserializer=self._json_deserializer)

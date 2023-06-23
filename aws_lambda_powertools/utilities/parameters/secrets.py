@@ -3,6 +3,7 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 
+import os
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
@@ -10,6 +11,9 @@ from botocore.config import Config
 
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
+
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_max_age
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
@@ -111,11 +115,7 @@ class SecretsProvider(BaseProvider):
 
 
 def get_secret(
-    name: str,
-    transform: Optional[str] = None,
-    force_fetch: bool = False,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
-    **sdk_options
+    name: str, transform: Optional[str] = None, force_fetch: bool = False, max_age: Optional[int] = None, **sdk_options
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -128,7 +128,7 @@ def get_secret(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
-    max_age: int
+    max_age: int, optional
         Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
@@ -161,6 +161,9 @@ def get_secret(
         >>>
         >>> get_secret("my-secret", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
+
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:

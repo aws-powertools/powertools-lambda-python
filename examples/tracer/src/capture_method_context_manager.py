@@ -19,7 +19,7 @@ def collect_payment(charge_id: str) -> Generator[str, None, None]:
 
 @tracer.capture_lambda_handler
 @logger.inject_lambda_context
-def handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     charge_id = event.get("charge_id", "")
     with collect_payment(charge_id=charge_id) as receipt_id:
         logger.info(f"Processing payment collection for charge {charge_id} with receipt {receipt_id}")

@@ -1,0 +1,28 @@
+{
+    "version": "0",
+    "id": "f5f1e65c-dc3a-93ca-6c1e-b1647eac7963",
+    "detail-type": "Object Created",
+    "source": "aws.s3",
+    "account": "123456789012",
+    "time": "2023-03-08T17:50:14Z",
+    "region": "eu-west-1",
+    "resources": [
+        "arn:aws:s3:::example-bucket"
+    ],
+    "detail": {
+        "version": "0",
+        "bucket": {
+            "name": "example-bucket"
+        },
+        "object": {
+            "key": "IMG_m7fzo3.jpg",
+            "size": 184662,
+            "etag": "4e68adba0abe2dc8653dc3354e14c01d",
+            "sequencer": "006408CAD69598B05E"
+        },
+        "request-id": "57H08PA84AB1JZW0",
+        "requester": "123456789012",
+        "source-ip-address": "34.252.34.74",
+        "reason": "PutObject"
+    }
+}

@@ -20,7 +20,7 @@ Some Lambda Event Sources require clusters (e.g., MSK) leading to additional del
 
 ### Observability providers
 
-We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/awslabs/aws-lambda-powertools-python/issues/1433). We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
+We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/aws-powertools/powertools-lambda-python/issues/1433){target="_blank"}. We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
 
 ### Lambda Layer in release notes
 
@@ -34,15 +34,15 @@ This means we have room to include a JSON map for Lambda Layers and facilitate a
 
 We want to enable MyPy strict mode against the code base. We need a RFC to identify most critical areas to start, and do so gradually as to not impact new features and enhancements in parallel.
 
-This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc) to compile less performing parts of the code base as a C-Extension.
+This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc){target="_blank"} to compile less performing parts of the code base as a C-Extension.
 
 ### New utilities
-
-With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/awslabs/aws-lambda-powertools-python/issues/1173), **(2)** [Integration/End-to-end Testing](https://github.com/awslabs/aws-lambda-powertools-python/issues/1169), and **(3)** [Event Bridge](https://github.com/awslabs/aws-lambda-powertools-python/issues/1168).
+<!-- markdownlint-disable MD013 -->
+With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/aws-powertools/powertools-lambda-python/issues/1173){target="_blank"}, **(2)** [Integration/End-to-end Testing](https://github.com/aws-powertools/powertools-lambda-python/issues/1169){target="_blank"}, and **(3)** [Event Bridge](https://github.com/aws-powertools/powertools-lambda-python/issues/1168){target="_blank"}.
 
 ### Open iteration planning
 
-We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET) to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
+We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
 
 ## Roadmap status definition
 
@@ -82,18 +82,18 @@ graph LR
 
 Our end-to-end mechanism follows four major steps:
 
-* **Feature Request**. Ideas start with a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.
+* **Feature Request**. Ideas start with a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.
     * Maintainers review requests based on [project tenets](index.md#tenets){target="_blank"}, customers reaction (👍), and use cases.
-* **Request-for-comments (RFC)**. Design proposals use our [RFC issue template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE){target="_blank"} to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.
+* **Request-for-comments (RFC)**. Design proposals use our [RFC issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE){target="_blank"} to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.
     * This helps refine the initial idea with community feedback before a decision is made.
 * **Decision**. After carefully reviewing and discussing them, maintainers make a final decision on whether to start implementation, defer or reject it, and update everyone with the next steps.
 * **Implementation**. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.
 
-???+ info "See [Maintainers](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md) document to understand how we triage issues and pull requests, labels and governance."
+???+ info "See [Maintainers](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md){target="_blank"} document to understand how we triage issues and pull requests, labels and governance."
 
 ## Disclaimer
 
-The AWS Lambda Powertools team values feedback and guidance from its community of users, although final decisions on inclusion into the project will be made by AWS.
+The Powertools for AWS Lambda (Python) team values feedback and guidance from its community of users, although final decisions on inclusion into the project will be made by AWS.
 
 We determine the high-level direction for our open roadmap based on customer feedback and popularity (👍🏽 and comments), security and operational impacts, and business value. Where features don’t meet our goals and longer-term strategy, we will communicate that clearly and openly as quickly as possible with an explanation of why the decision was made.
 

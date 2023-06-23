@@ -14,7 +14,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 ### Required resources
 
@@ -102,7 +102,7 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 
 #### Lambda Function URL
 
-When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html), you can use `LambdaFunctionUrlResolver`.
+When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html){target="_blank"}, you can use `LambdaFunctionUrlResolver`.
 
 === "getting_started_lambda_function_url_resolver.py"
 
@@ -253,7 +253,7 @@ When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apig
 
 **Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/awslabs/aws-lambda-powertools-roadmap/issues/34).
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34){target="_blank"}.
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
@@ -280,7 +280,8 @@ To address this API Gateway behavior, we use `strip_prefixes` parameter to accou
 
 You can configure CORS at the `APIGatewayRestResolver` constructor via `cors` parameter using the `CORSConfig` class.
 
-This will ensure that CORS headers are always returned as part of the response when your functions match the path invoked.
+This will ensure that CORS headers are returned as part of the response when your functions match the path invoked and the `Origin`
+matches one of the allowed values.
 
 ???+ tip
     Optionally disable CORS on a per path basis with `cors=False` parameter.
@@ -297,6 +298,18 @@ This will ensure that CORS headers are always returned as part of the response w
     --8<-- "examples/event_handler_rest/src/setting_cors_output.json"
     ```
 
+=== "setting_cors_extra_origins.py"
+
+    ```python hl_lines="5 11-12 34"
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins.py"
+    ```
+
+=== "setting_cors_extra_origins_output.json"
+
+    ```json
+    --8<-- "examples/event_handler_rest/src/setting_cors_extra_origins_output.json"
+    ```
+
 #### Pre-flight
 
 Pre-flight (OPTIONS) calls are typically handled at the API Gateway or Lambda Function URL level as per [our sample infrastructure](#required-resources), no Lambda integration is necessary. However, ALB expects you to handle pre-flight requests.
@@ -310,9 +323,13 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ warning
     Always configure `allow_origin` when using in production.
 
+???+ tip "Multiple origins?"
+    If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
+
 | Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
 | **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
 | **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}. |
 | **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
@@ -323,15 +340,15 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
 
 ???+ info
-    Powertools serializes headers and cookies according to the type of input event.
+    Powertools for AWS Lambda (Python) serializes headers and cookies according to the type of input event.
     Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
 
 ???+ warning "Using multiple values for HTTP headers in ALB?"
-    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers) to serialize response headers correctly.
+    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers){target="_blank"} to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 
-    ```python hl_lines="9 28-32"
+    ```python hl_lines="9 29-35"
     --8<-- "examples/event_handler_rest/src/fine_grained_responses.py"
     ```
 
@@ -343,15 +360,24 @@ You can use the `Response` class to have full control over the response. For exa
 
 ### Compress
 
-You can compress with gzip and base64 encode your responses via `compress` parameter.
+You can compress with gzip and base64 encode your responses via `compress` parameter. You have the option to pass the `compress` parameter when working with a specific route or using the Response object.
+
+???+ info
+    The `compress` parameter used in the Response object takes precedence over the one used in the route.
 
 ???+ warning
     The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
-=== "compressing_responses.py"
+=== "compressing_responses_using_route.py"
 
-    ```python hl_lines="14"
-     --8<-- "examples/event_handler_rest/src/compressing_responses.py"
+    ```python hl_lines="17 27"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_route.py"
+    ```
+
+=== "compressing_responses_using_response.py"
+
+    ```python hl_lines="24"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_response.py"
     ```
 
 === "compressing_responses.json"
@@ -403,7 +429,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables).
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank"}.
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
@@ -469,7 +495,7 @@ When necessary, you can set a prefix when including a router object. This means 
 You can use specialized router classes according to the type of event that you are resolving. This way you'll get type hints from your IDE as you access the `current_event` property.
 
 | Router                  | Resolver                  | `current_event` type   |
-|-------------------------|---------------------------|------------------------|
+| ----------------------- | ------------------------- | ---------------------- |
 | APIGatewayRouter        | APIGatewayRestResolver    | APIGatewayProxyEvent   |
 | APIGatewayHttpRouter    | APIGatewayHttpResolver    | APIGatewayProxyEventV2 |
 | ALBRouter               | ALBResolver               | ALBEvent               |

@@ -1,7 +1,7 @@
-site_name: AWS Lambda Powertools for Python
-site_description: AWS Lambda Powertools for Python
+site_name: Powertools for AWS Lambda (Python)
+site_description: Powertools for AWS Lambda (Python)
 site_author: Amazon Web Services
-repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 
 nav:
@@ -75,6 +75,7 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: "."
       check_paths: true
+      restrict_base_path: false
   - meta
   - toc:
       permalink: true

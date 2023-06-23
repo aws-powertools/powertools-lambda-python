@@ -41,6 +41,7 @@ class RuleAction(str, Enum):
     SCHEDULE_BETWEEN_TIME_RANGE = "SCHEDULE_BETWEEN_TIME_RANGE"  # hour:min 24 hours clock
     SCHEDULE_BETWEEN_DATETIME_RANGE = "SCHEDULE_BETWEEN_DATETIME_RANGE"  # full datetime format, excluding timezone
     SCHEDULE_BETWEEN_DAYS_OF_WEEK = "SCHEDULE_BETWEEN_DAYS_OF_WEEK"  # MONDAY, TUESDAY, .... see TimeValues enum
+    MODULO_RANGE = "MODULO_RANGE"
 
 
 class TimeKeys(Enum):
@@ -69,6 +70,16 @@ class TimeValues(Enum):
     THURSDAY = "THURSDAY"
     FRIDAY = "FRIDAY"
     SATURDAY = "SATURDAY"
+
+
+class ModuloRangeValues(Enum):
+    """
+    Possible values when using modulo range rule
+    """
+
+    BASE = "BASE"
+    START = "START"
+    END = "END"
 
 
 class SchemaValidator(BaseValidator):
@@ -325,9 +336,9 @@ class ConditionsValidator(BaseValidator):
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
-        value = condition.get(CONDITION_VALUE, "")
-        if not value:
-            raise SchemaValidationError(f"'value' key must not be empty, rule={rule_name}")
+        value = condition.get(CONDITION_VALUE)
+        if value is None:
+            raise SchemaValidationError(f"'value' key must not be null, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
 
         # time actions need to be parsed to make sure date and time format is valid and timezone is recognized
@@ -341,6 +352,9 @@ class ConditionsValidator(BaseValidator):
             )
         elif action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value:
             ConditionsValidator._validate_schedule_between_days_of_week(value, rule_name)
+        # modulo range condition needs validation on base, start, and end attributes
+        elif action == RuleAction.MODULO_RANGE.value:
+            ConditionsValidator._validate_modulo_range(value, rule_name)
 
     @staticmethod
     def _validate_datetime_value(datetime_str: str, rule_name: str):
@@ -434,3 +448,22 @@ class ConditionsValidator(BaseValidator):
         # try to see if the timezone string corresponds to any known timezone
         if not tz.gettz(timezone):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
+
+    @staticmethod
+    def _validate_modulo_range(value: Any, rule_name: str):
+        error_str = f"condition with a 'MODULO_RANGE' action must have a condition value type dictionary with 'BASE', 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
+        if not isinstance(value, dict):
+            raise SchemaValidationError(error_str)
+
+        base = value.get(ModuloRangeValues.BASE.value)
+        start = value.get(ModuloRangeValues.START.value)
+        end = value.get(ModuloRangeValues.END.value)
+        if base is None or start is None or end is None:
+            raise SchemaValidationError(error_str)
+        if not isinstance(base, int) or not isinstance(start, int) or not isinstance(end, int):
+            raise SchemaValidationError(f"'BASE', 'START' and 'END' must be integers, rule={rule_name}")
+
+        if not 0 <= start <= end <= base - 1:
+            raise SchemaValidationError(
+                f"condition with 'MODULO_RANGE' action must satisfy 0 <= START <= END <= BASE-1, rule={rule_name}"
+            )

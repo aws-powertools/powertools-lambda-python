@@ -1,0 +1,88 @@
+name: "Create PR custom action"
+description: "Create a PR and a temporary branch, close duplicates"
+
+# PROCESS
+#
+# 1. Setup git client using Powertools for AWS Lambda (Python) bot username
+# 2. Pushes staged files to a temporary branch
+# 3. Creates a PR from temporary branch against a target branch (typically trunk: develop, main, etc.)
+# 4. Searches for duplicate PRs with the same title
+# 5. If duplicates are found, link to the most recent one, close and delete their branches so we keep a single PR
+# 6. In the event of failure, we delete the now orphaned branch (if any), and propagate the failure
+
+# USAGE
+#
+# - name: Create PR
+#   id: create-pr
+#   uses: ./.github/actions/create-pr
+#   with:
+#     files: "CHANGELOG.md"
+#     temp_branch_prefix: "ci-changelog"
+#     pull_request_title: "chore(ci): changelog rebuild"
+#     github_token: ${{ secrets.GITHUB_TOKEN }}
+# - name: Step to demonstrate how to access outputs (no need for this)
+#   run: |
+#     echo "PR number: ${PR_ID}"
+#     echo "Branch: ${BRANCH}"
+#   env:
+#     PR_ID: ${{ steps.create-pr.outputs.pull_request_id}}
+#     BRANCH: ${{ steps.create-pr.outputs.temp_branch}}
+
+inputs:
+  files:
+    description: "Files to add separated by space"
+    required: true
+  temp_branch_prefix:
+    description: "Prefix for temporary git branch to be created, e.g, ci-docs"
+    required: true
+  pull_request_title:
+    description: "Pull Request title to use"
+    required: true
+  github_token:
+    description: "GitHub token for GitHub CLI"
+    required: true
+  target_branch:
+    description: "Branch to target when creating a PR against (develop, by default)"
+    required: false
+    default: develop
+
+outputs:
+  pull_request_id:
+    description: "Pull request ID created"
+    value: ${{ steps.create-pr.outputs.pull_request_id }}
+  temp_branch:
+    description: "Temporary branch created with staged changed"
+    value: ${{ steps.create-pr.outputs.temp_branch }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: adjust-path
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+    - id: setup-git
+      name: Git client setup and refresh tip
+      run: |
+        git config user.name "Powertools for AWS Lambda (Python) bot"
+        git config user.email "aws-lambda-powertools-feedback@amazon.com"
+        git config pull.rebase true
+        git config remote.origin.url >&-
+      shell: bash
+    - id: create-pr
+      working-directory: ${{ env.GITHUB_WORKSPACE }}
+      run: create_pr_for_staged_changes.sh "${FILES}"
+      env:
+        FILES: ${{ inputs.files }}
+        TEMP_BRANCH_PREFIX: ${{ inputs.temp_branch_prefix }}
+        PR_TITLE: ${{ inputs.pull_request_title }}
+        BASE_BRANCH: ${{ inputs.target_branch }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      shell: bash
+    - id: cleanup
+      name: Cleanup orphaned branch
+      if: failure()
+      run: git push origin --delete "${TEMP_BRANCH_PREFIX}-${GITHUB_RUN_ID}" || echo "Must have failed before creating temporary branch; no cleanup needed."
+      env:
+        TEMP_BRANCH_PREFIX: ${{ inputs.temp_branch_prefix }}
+        GITHUB_RUN_ID: ${{ github.run_id }}
+      shell: bash

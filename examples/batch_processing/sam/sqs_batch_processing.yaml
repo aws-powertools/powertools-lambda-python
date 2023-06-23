@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: partial batch response sample
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 256
+    Runtime: python3.10
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+        POWERTOOLS_SERVICE_NAME: hello
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: hello_world
+      Policies:
+        - SQSPollerPolicy:
+            QueueName: !GetAtt SampleQueue.QueueName
+      Events:
+        Batch:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt SampleQueue.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+
+  SampleDLQ:
+    Type: AWS::SQS::Queue
+
+  SampleQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 30 # Fn timeout * 6
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        maxReceiveCount: 2
+        deadLetterTargetArn: !GetAtt SampleDLQ.Arn

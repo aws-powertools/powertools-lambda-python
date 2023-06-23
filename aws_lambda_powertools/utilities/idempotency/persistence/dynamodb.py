@@ -1,14 +1,16 @@
+from __future__ import annotations
+
 import datetime
 import logging
 import os
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 import boto3
 from boto3.dynamodb.types import TypeDeserializer
 from botocore.config import Config
 from botocore.exceptions import ClientError
 
-from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
@@ -18,6 +20,10 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     STATUS_CONSTANTS,
     DataRecord,
 )
+
+if TYPE_CHECKING:
+    from mypy_boto3_dynamodb import DynamoDBClient
+    from mypy_boto3_dynamodb.type_defs import AttributeValueTypeDef
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +42,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         validation_key_attr: str = "validation",
         boto_config: Optional[Config] = None,
         boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: "DynamoDBClient" | None = None,
     ):
         """
         Initialize the DynamoDB client
@@ -63,8 +70,10 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for hashed representation of the parts of the event used for validation
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
-        boto3_session : boto3.session.Session, optional
+        boto3_session : boto3.Session, optional
             Boto3 session to use for AWS API communication
+        boto3_client : DynamoDBClient, optional
+            Boto3 DynamoDB Client to use, boto3_session and boto_config will be ignored if both are provided
 
         Examples
         --------
@@ -80,10 +89,14 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             >>> def handler(event, context):
             >>>     return {"StatusCode": 200}
         """
+        if boto3_client is None:
+            self._boto_config = boto_config or Config()
+            self._boto3_session: boto3.Session = boto3_session or boto3.session.Session()
+            self.client: "DynamoDBClient" = self._boto3_session.client("dynamodb", config=self._boto_config)
+        else:
+            self.client = boto3_client
 
-        self._boto_config = boto_config or Config()
-        self._boto3_session = boto3_session or boto3.session.Session()
-        self._client = self._boto3_session.client("dynamodb", config=self._boto_config)
+        user_agent.register_feature_to_client(client=self.client, feature="idempotency")
 
         if sort_key_attr == key_attr:
             raise ValueError(f"key_attr [{key_attr}] and sort_key_attr [{sort_key_attr}] cannot be the same!")
@@ -106,6 +119,21 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         super(DynamoDBPersistenceLayer, self).__init__()
 
     def _get_key(self, idempotency_key: str) -> dict:
+        """Build primary key attribute simple or composite based on params.
+
+        When sort_key_attr is set, we must return a composite key with static_pk_value,
+        otherwise we use the idempotency key given.
+
+        Parameters
+        ----------
+        idempotency_key : str
+            idempotency key to use for simple primary key
+
+        Returns
+        -------
+        dict
+            simple or composite key for DynamoDB primary key
+        """
         if self.sort_key_attr:
             return {self.key_attr: {"S": self.static_pk_value}, self.sort_key_attr: {"S": idempotency_key}}
         return {self.key_attr: {"S": idempotency_key}}
@@ -136,7 +164,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
-        response = self._client.get_item(
+        response = self.client.get_item(
             TableName=self.table_name, Key=self._get_key(idempotency_key), ConsistentRead=True
         )
         try:
@@ -147,8 +175,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _put_record(self, data_record: DataRecord) -> None:
         item = {
+            # get simple or composite primary key
             **self._get_key(data_record.idempotency_key),
-            self.key_attr: {"S": data_record.idempotency_key},
             self.expiry_attr: {"N": str(data_record.expiry_timestamp)},
             self.status_attr: {"S": data_record.status},
         }
@@ -191,7 +219,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             condition_expression = (
                 f"{idempotency_key_not_exist} OR {idempotency_expiry_expired} OR ({inprogress_expiry_expired})"
             )
-            self._client.put_item(
+            self.client.put_item(
                 TableName=self.table_name,
                 Item=item,
                 ConditionExpression=condition_expression,
@@ -220,7 +248,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         update_expression = "SET #response_data = :response_data, #expiry = :expiry, " "#status = :status"
-        expression_attr_values = {
+        expression_attr_values: Dict[str, "AttributeValueTypeDef"] = {
             ":expiry": {"N": str(data_record.expiry_timestamp)},
             ":response_data": {"S": data_record.response_data},
             ":status": {"S": data_record.status},
@@ -236,15 +264,14 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             expression_attr_values[":validation_key"] = {"S": data_record.payload_hash}
             expression_attr_names["#validation_key"] = self.validation_key_attr
 
-        kwargs = {
-            "Key": self._get_key(data_record.idempotency_key),
-            "UpdateExpression": update_expression,
-            "ExpressionAttributeValues": expression_attr_values,
-            "ExpressionAttributeNames": expression_attr_names,
-        }
-
-        self._client.update_item(TableName=self.table_name, **kwargs)
+        self.client.update_item(
+            TableName=self.table_name,
+            Key=self._get_key(data_record.idempotency_key),
+            UpdateExpression=update_expression,
+            ExpressionAttributeNames=expression_attr_names,
+            ExpressionAttributeValues=expression_attr_values,
+        )
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
-        self._client.delete_item(TableName=self.table_name, Key={**self._get_key(data_record.idempotency_key)})
+        self.client.delete_item(TableName=self.table_name, Key={**self._get_key(data_record.idempotency_key)})

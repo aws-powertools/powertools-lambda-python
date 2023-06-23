@@ -13,6 +13,7 @@
     - [Triage Bug Reports](#triage-bug-reports)
     - [Triage RFCs](#triage-rfcs)
     - [Releasing a new version](#releasing-a-new-version)
+        - [Release process visualized](#release-process-visualized)
         - [Drafting release notes](#drafting-release-notes)
     - [Run end to end tests](#run-end-to-end-tests)
     - [Releasing a documentation hotfix](#releasing-a-documentation-hotfix)
@@ -69,41 +70,42 @@ Previous active maintainers who contributed to this project.
 
 These are the most common labels used by maintainers to triage issues, pull requests (PR), and for project management:
 
-| Label                  | Usage                                                                       | Notes                                                           |
-| ---------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| triage                 | New issues that require maintainers review                                  | Issue template                                                  |
-| bug                    | Unexpected, reproducible and unintended software behavior                   | PR/Release automation; Doc snippets are excluded;               |
-| not-a-bug              | New and existing bug reports incorrectly submitted as bug                   | Analytics                                                       |
-| documentation          | Documentation improvements                                                  | PR/Release automation; Doc additions, fixes, etc.;              |
-| feature-request        | New or enhancements to existing features                                    | Issue template                                                  |
-| typing                 | New or enhancements to static typing                                        | Issue template                                                  |
-| RFC                    | Technical design documents related to a feature request                     | Issue template                                                  |
-| bug-upstream           | Bug caused by upstream dependency                                           |                                                                 |
-| help wanted            | Tasks you want help from anyone to move forward                             | Bandwidth, complex topics, etc.                                 |
-| need-customer-feedback | Tasks that need more feedback before proceeding                             | 80/20% rule, uncertain, etc.                                    |
-| need-more-information  | Missing information before making any calls                                 |                                                                 |
-| need-documentation     | PR is missing or has incomplete documentation                               |                                                                 |
-| need-issue             | PR is missing a related issue for tracking change                           | Needs to be automated                                           |
-| need-rfc               | Feature request requires a RFC to improve discussion                        |                                                                 |
-| pending-release        | Merged changes that will be available soon                                  | Release automation auto-closes/notifies it                      |
-| revisit-in-3-months    | Blocked issues/PRs that need to be revisited                                | Often related to `need-customer-feedback`, prioritization, etc. |
-| breaking-change        | Changes that will cause customer impact and need careful triage             |                                                                 |
-| do-not-merge           | PRs that are blocked for varying reasons                                    | Timeline is uncertain                                           |
-| size/XS                | PRs between 0-9 LOC                                                         | PR automation                                                   |
-| size/S                 | PRs between 10-29 LOC                                                       | PR automation                                                   |
-| size/M                 | PRs between 30-99 LOC                                                       | PR automation                                                   |
-| size/L                 | PRs between 100-499 LOC                                                     | PR automation                                                   |
-| size/XL                | PRs between 500-999 LOC, often PRs that grown with feedback                 | PR automation                                                   |
-| size/XXL               | PRs with 1K+ LOC, largely documentation related                             | PR automation                                                   |
-| tests                  | PRs that add or change tests                                                | PR automation                                                   |
-| `<utility>`            | PRs related to a Powertools utility, e.g. `parameters`, `tracer`            | PR automation                                                   |
-| feature                | New features or minor changes                                               | PR/Release automation                                           |
-| dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.                      | PR/ automation                                                  |
-| github-actions         | Changes in GitHub workflows                                                 | PR automation                                                   |
-| github-templates       | Changes in GitHub issue/PR templates                                        | PR automation                                                   |
-| internal               | Changes in governance, tech debt and chores (linting setup, baseline, etc.) | PR automation                                                   |
-| customer-reference     | Authorization to use company name in our documentation                      | Public Relations                                                |
-| community-content      | Suggested content to feature in our documentation                           | Public Relations                                                |
+| Label                  | Usage                                                                                    | Notes                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| triage                 | New issues that require maintainers review                                               | Issue template                                                  |
+| bug                    | Unexpected, reproducible and unintended software behavior                                | PR/Release automation; Doc snippets are excluded;               |
+| not-a-bug              | New and existing bug reports incorrectly submitted as bug                                | Analytics                                                       |
+| documentation          | Documentation improvements                                                               | PR/Release automation; Doc additions, fixes, etc.;              |
+| feature-request        | New or enhancements to existing features                                                 | Issue template                                                  |
+| typing                 | New or enhancements to static typing                                                     | Issue template                                                  |
+| RFC                    | Technical design documents related to a feature request                                  | Issue template                                                  |
+| bug-upstream           | Bug caused by upstream dependency                                                        |                                                                 |
+| help wanted            | Tasks you want help from anyone to move forward                                          | Bandwidth, complex topics, etc.                                 |
+| need-customer-feedback | Tasks that need more feedback before proceeding                                          | 80/20% rule, uncertain, etc.                                    |
+| need-more-information  | Missing information before making any calls                                              |                                                                 |
+| need-documentation     | PR is missing or has incomplete documentation                                            |                                                                 |
+| need-issue             | PR is missing a related issue for tracking change                                        | PR automation                                                   |
+| need-rfc               | Feature request requires a RFC to improve discussion                                     |                                                                 |
+| pending-release        | Merged changes that will be available soon                                               | Release automation auto-closes/notifies it                      |
+| revisit-in-3-months    | Blocked issues/PRs that need to be revisited                                             | Often related to `need-customer-feedback`, prioritization, etc. |
+| breaking-change        | Changes that will cause customer impact and need careful triage                          |                                                                 |
+| do-not-merge           | PRs that are blocked for varying reasons                                                 | Timeline is uncertain                                           |
+| size/XS                | PRs between 0-9 LOC                                                                      | PR automation                                                   |
+| size/S                 | PRs between 10-29 LOC                                                                    | PR automation                                                   |
+| size/M                 | PRs between 30-99 LOC                                                                    | PR automation                                                   |
+| size/L                 | PRs between 100-499 LOC                                                                  | PR automation                                                   |
+| size/XL                | PRs between 500-999 LOC, often PRs that grown with feedback                              | PR automation                                                   |
+| size/XXL               | PRs with 1K+ LOC, largely documentation related                                          | PR automation                                                   |
+| tests                  | PRs that add or change tests                                                             | PR automation                                                   |
+| `<utility>`            | PRs related to a Powertools for AWS Lambda (Python) utility, e.g. `parameters`, `tracer` | PR automation                                                   |
+| feature                | New features or minor changes                                                            | PR/Release automation                                           |
+| dependencies           | Changes that touch dependencies, e.g. Dependabot, etc.                                   | PR/ automation                                                  |
+| github-actions         | Changes in GitHub workflows                                                              | PR automation                                                   |
+| github-templates       | Changes in GitHub issue/PR templates                                                     | PR automation                                                   |
+| internal               | Changes in governance and chores (linting setup, baseline, etc.)                         | PR automation                                                   |
+| tech-debt              | Changes in tech debt                                                                     |                                                                 |
+| customer-reference     | Authorization to use company name in our documentation                                   | Public Relations                                                |
+| community-content      | Suggested content to feature in our documentation                                        | Public Relations                                                |
 
 ## Maintainer Responsibilities
 
@@ -129,7 +131,7 @@ Review pull requests regularly, comment, suggest, reject, merge and close. Accep
 
 PRs are [labeled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
 
-Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/awslabs/aws-lambda-powertools-python/releases) - make sure they communicate their intent at the human level.
+Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/aws-powertools/powertools-lambda-python/releases) - make sure they communicate their intent at the human level.
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
@@ -143,7 +145,7 @@ Manage [labels](#labels), review issues regularly, and create new labels as need
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
-Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/#roadmap-status-definition).
+Make sure issues are assigned to our [board of activities](https://github.com/orgs/awslabs/projects/51/) and have the right [status](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/#roadmap-status-definition).
 
 Use our [labels](#labels) to signal good first issues to new community members, and to set expectation that this might need additional feedback from the author, other customers, experienced community members and/or maintainers.
 
@@ -167,8 +169,8 @@ RFC is a collaborative process to help us get to the most optimal solution given
 
 Make sure you ask these questions in mind when reviewing:
 
-- Does it use our [RFC template](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
-- Does the match our [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)?
+- Does it use our [RFC template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE)?
+- Does the match our [Tenets](https://docs.powertools.aws.dev/lambda/python/latest/#tenets)?
 - Does the proposal address the use case? If so, is the recommended usage explicit?
 - Does it focus on the mechanics to solve the use case over fine-grained implementation details?
 - Can anyone familiar with the code base implement it?
@@ -184,17 +186,81 @@ Some examples using our initial and new RFC templates: #92, #94, #95, #991, #122
 
 Firstly, make sure the commit history in the `develop` branch **(1)** it's up to date, **(2)** commit messages are semantic, and **(3)** commit messages have their respective area, for example `feat(logger): <change>`, `chore(ci): ...`).
 
-**Found typos or unclear commit messages?**
-
-Reword through rebase and push with `--force-with-lease` once you're confident. This will ensure [CHANGELOG](./CHANGELOG.md) is always clear for customers looking to understand what changed in between releases - was that a bug? what new features and for which utility?
-
 **Looks good, what's next?**
 
-The only step is to draft and publish a good release notes, everything else is automated.
+Kickoff the `Release` workflow with the intended version - this might take around 25m-30m to complete.
+
+Once complete, you can start drafting the release notes to let customers know **what changed and what's in it for them (a.k.a why they should care)**. We have guidelines in the release notes section so you know what good looks like.
+
+> **NOTE**: Documentation might take a few minutes to reflect the latest version due to caching and CDN invalidations.
+
+#### Release process visualized
+
+Every release makes hundreds of checks, security scans, canaries and deployments - all of these are automated.
+
+This is a close visual representation of the main steps (GitHub Actions UI should be the source of truth).
+
+<!-- use 8s to graph steps faster than 8s like seal/checksum that actually takes 0s -->
+
+```mermaid
+gantt
+
+title      Release process
+dateFormat HH:mm
+axisFormat %H:%M
+
+Release commit   : milestone, m1, 10:00,2m
+
+section Seal
+    Bump release version        : active, 8s
+    Prevent source tampering    : active, 43s
+section QA
+    Quality checks              : active, 2.2m
+section Build
+    Checksum                    : active, 8s
+    Build release artifact      : active, 39s
+    Seal                        : active, 8s
+section Release
+    Checksum                    : active, 8s
+    PyPi temp credentials       : active, 8s
+    Publish PyPi                : active, pypi, 10:06, 29s
+
+PyPi release : milestone, m2, 10:06,1s
+
+section Git release
+    Checksum                    : active, after pypi, 8s
+    Git Tag                     : active, 8s
+    Bump package version        : active, 8s
+    Create PR                   : active, 8s
+
+section Layer release
+    Build (x86+ARM)             : active, layer_build, 10:08, 6m
+    Deploy Beta                 : active, layer_beta, after layer_build, 6.3m
+    Deploy Prod                 : active, layer_prod, after layer_beta, 6.3m
+
+Layer release : milestone, m3, 10:26,1s
+
+section SAR release
+    Deploy Beta                 : active, sar_beta, after layer_beta, 2.2m
+    Deploy Prod                 : active, sar_prod, after sar_beta, 2.2m
+
+SAR release : milestone, m4, 10:25,1s
+
+section Docs
+    Create PR (Layer ARN)       : active, after layer_prod, 8s
+    Release versioned docs      : active, 2.2m
+
+Documentation release : milestone, m4, 10:28,1m
+
+section Post-release
+    Close pending issues        : active, 8s
+
+Release complete : milestone, m6, 10:31,2m
+```
 
 #### Drafting release notes
 
-Visit the [Releases page](https://github.com/awslabs/aws-lambda-powertools-python/releases) and choose the edit pencil button.
+Visit the [Releases page](https://github.com/aws-powertools/powertools-lambda-python/releases) and choose the edit pencil button.
 
 Make sure the `tag` field reflects the new version you're releasing, the target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
 
@@ -202,7 +268,9 @@ You'll notice we group all changes based on their [labels](#labels) like `featur
 
 **I spotted a typo or incorrect grouping - how do I fix it?**
 
-Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release-drafter.yml) to update the Draft release.
+Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml) to update the Draft release.
+
+> **NOTE**: This won't change the CHANGELOG as the merge commit is immutable. Don't worry about it. We'd only rewrite git history only if this can lead to confusion and we'd pair with another maintainer.
 
 **All looking good, what's next?**
 
@@ -218,19 +286,17 @@ These are some questions to keep in mind when drafting your first or future rele
 
 Once you're happy, hit `Publish release` 🎉🎉🎉.
 
-This will kick off the [Publishing workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/release.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
-
-> TODO: Include information to verify SAR and Lambda Layers deployment; we're still finalizing Lambda Layer automated deployment in GitHub Actions - ping @am29d when in doubt.
+This will kick off the [Publishing workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
 
 ### Run end to end tests
 
-E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/run-e2e-tests.yml).
+E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml).
 
 To run locally, you need [AWS CDK CLI](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites) and an [account bootstrapped](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html) (`cdk bootstrap`). With a default AWS CLI profile configured, or `AWS_PROFILE` environment variable set, run `make e2e tests`.
 
 ### Releasing a documentation hotfix
 
-You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/awslabs/aws-lambda-powertools-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools version available.
+You can rebuild the latest documentation without a full release via this [GitHub Actions Workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/rebuild_latest_docs.yml). Choose `Run workflow`, keep `develop` as the branch, and input the latest Powertools for AWS Lambda (Python) version available.
 
 This workflow will update both user guide and API documentation.
 
@@ -242,7 +308,7 @@ Keep the `develop` branch at production quality at all times. Backport features 
 
 ### Manage Roadmap
 
-See [Roadmap section](https://awslabs.github.io/aws-lambda-powertools-python/latest/roadmap/)
+See [Roadmap section](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/)
 
 Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.
 
@@ -278,7 +344,7 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 
 ### Crediting contributions
 
-We credit all contributions as part of each [release note](https://github.com/awslabs/aws-lambda-powertools-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
+We credit all contributions as part of each [release note](https://github.com/aws-powertools/powertools-lambda-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
 
 ### Is that a bug?
 
@@ -351,7 +417,7 @@ Where:
 
 ### Mechanics
 
-Under [`BaseInfrastructure`](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
+Under [`BaseInfrastructure`](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
 
 This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run one, subset, or all tests and only deploy their related infrastructure, without any custom configuration.
 

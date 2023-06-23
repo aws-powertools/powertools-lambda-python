@@ -41,8 +41,8 @@ class DataRecord:
         status: str = "",
         expiry_timestamp: Optional[int] = None,
         in_progress_expiry_timestamp: Optional[int] = None,
-        response_data: Optional[str] = "",
-        payload_hash: Optional[str] = None,
+        response_data: str = "",
+        payload_hash: str = "",
     ) -> None:
         """
 
@@ -118,7 +118,7 @@ class BasePersistenceLayer(ABC):
         self.function_name = ""
         self.backend = ""
         self.configured = False
-        self.event_key_jmespath: Optional[str] = None
+        self.event_key_jmespath: str = ""
         self.event_key_compiled_jmespath = None
         self.jmespath_options: Optional[dict] = None
         self.payload_validation_enabled = False
@@ -126,7 +126,7 @@ class BasePersistenceLayer(ABC):
         self.raise_on_no_idempotency_key = False
         self.expires_after_seconds: int = 60 * 60  # 1 hour default
         self.use_local_cache = False
-        self.hash_function = None
+        self.hash_function = hashlib.md5
 
     def configure(self, config: IdempotencyConfig, function_name: Optional[str] = None) -> None:
         """
@@ -162,7 +162,7 @@ class BasePersistenceLayer(ABC):
             self._cache = LRUDict(max_items=config.local_cache_max_items)
         self.hash_function = getattr(hashlib, config.hash_function)
 
-    def _get_hashed_idempotency_key(self, data: Dict[str, Any]) -> str:
+    def _get_hashed_idempotency_key(self, data: Dict[str, Any]) -> Optional[str]:
         """
         Extract idempotency key and return a hashed representation
 
@@ -183,7 +183,12 @@ class BasePersistenceLayer(ABC):
         if self.is_missing_idempotency_key(data=data):
             if self.raise_on_no_idempotency_key:
                 raise IdempotencyKeyError("No data found to create a hashed idempotency_key")
-            warnings.warn(f"No value found for idempotency_key. jmespath: {self.event_key_jmespath}", stacklevel=2)
+
+            warnings.warn(
+                f"No idempotency key value found. Skipping persistence layer and validation operations. jmespath: {self.event_key_jmespath}",  # noqa: E501
+                stacklevel=2,
+            )
+            return None
 
         generated_hash = self._generate_hash(data=data)
         return f"{self.function_name}#{generated_hash}"
@@ -319,10 +324,16 @@ class BasePersistenceLayer(ABC):
         result: dict
             The response from function
         """
+        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        if idempotency_key is None:
+            # If the idempotency key is None, no data will be saved in the Persistence Layer.
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
+            return None
+
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
 
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(data=data),
+            idempotency_key=idempotency_key,
             status=STATUS_CONSTANTS["COMPLETED"],
             expiry_timestamp=self._get_expiry_timestamp(),
             response_data=response_data,
@@ -347,8 +358,15 @@ class BasePersistenceLayer(ABC):
         remaining_time_in_millis: Optional[int]
             If expiry of in-progress invocations is enabled, this will contain the remaining time available in millis
         """
+
+        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        if idempotency_key is None:
+            # If the idempotency key is None, no data will be saved in the Persistence Layer.
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
+            return None
+
         data_record = DataRecord(
-            idempotency_key=self._get_hashed_idempotency_key(data=data),
+            idempotency_key=idempotency_key,
             status=STATUS_CONSTANTS["INPROGRESS"],
             expiry_timestamp=self._get_expiry_timestamp(),
             payload_hash=self._get_hashed_payload(data=data),
@@ -385,7 +403,14 @@ class BasePersistenceLayer(ABC):
         exception
             The exception raised by the function
         """
-        data_record = DataRecord(idempotency_key=self._get_hashed_idempotency_key(data=data))
+
+        idempotency_key = self._get_hashed_idempotency_key(data=data)
+        if idempotency_key is None:
+            # If the idempotency key is None, no data will be saved in the Persistence Layer.
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
+            return None
+
+        data_record = DataRecord(idempotency_key=idempotency_key)
 
         logger.debug(
             f"Function raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
@@ -395,7 +420,7 @@ class BasePersistenceLayer(ABC):
 
         self._delete_from_cache(idempotency_key=data_record.idempotency_key)
 
-    def get_record(self, data: Dict[str, Any]) -> DataRecord:
+    def get_record(self, data: Dict[str, Any]) -> Optional[DataRecord]:
         """
         Retrieve idempotency key for data provided, fetch from persistence store, and convert to DataRecord.
 
@@ -418,6 +443,10 @@ class BasePersistenceLayer(ABC):
         """
 
         idempotency_key = self._get_hashed_idempotency_key(data=data)
+        if idempotency_key is None:
+            # If the idempotency key is None, no data will be saved in the Persistence Layer.
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
+            return None
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
         if cached_record:

@@ -7,7 +7,7 @@ description: Utility
 
 Event Source Data Classes utility provides classes self-describing Lambda event sources.
 
-## Key Features
+## Key features
 
 * Type hinting and code completion for common event types
 * Helper functions for decoding/deserializing nested fields
@@ -52,6 +52,22 @@ Same example as above, but using the `event_source` decorator
         if 'helloworld' in event.path and event.http_method == 'GET':
             do_something_with(event.body, user)
     ```
+
+Log Data Event for Troubleshooting
+
+=== "app.py"
+
+    ```python hl_lines="4 8"
+    from aws_lambda_powertools.utilities.data_classes import event_source, APIGatewayProxyEvent
+    from aws_lambda_powertools.logging.logger import Logger
+
+    logger = Logger(service="hello_logs", level="DEBUG")
+
+    @event_source(data_class=APIGatewayProxyEvent)
+    def lambda_handler(event: APIGatewayProxyEvent, context):
+        logger.debug(event)
+    ```
+
 **Autocomplete with self-documented properties and methods**
 
 ![Utilities Data Classes](../media/utilities_data_classes.png)
@@ -68,6 +84,7 @@ Same example as above, but using the `event_source` decorator
 | [Application Load Balancer](#application-load-balancer)                   | `ALBEvent`                                         |
 | [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
+| [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -82,9 +99,11 @@ Same example as above, but using the `event_source` decorator
 | [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
 | [S3](#s3)                                                                 | `S3Event`                                          |
 | [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
+| [S3 EventBridge Notification](#s3-eventbridge-notification)               | `S3EventBridgeNotificationEvent`                   |
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
+| [VPC Lattice](#vpc-lattice)                                               | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
@@ -444,6 +463,26 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
     }
     ```
 
+### AWS Config Rule
+
+=== "aws_config_rule.py"
+    ```python hl_lines="3 11"
+    --8<-- "examples/event_sources/src/aws_config_rule.py"
+    ```
+
+=== "Event - ItemChanged"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_item_changed.json"
+    ```
+=== "Event - Oversized"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_oversized.json"
+    ```
+=== "Event - ScheduledNotification"
+    ```json
+    --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
+    ```
+
 ### CloudWatch Dashboard Custom Widget
 
 === "app.py"
@@ -521,7 +560,7 @@ decompress and parse json data from the event.
         return "nothing to be processed"
     ```
 
-Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md) for more robust log processing.
+Alternatively, you can use `extract_cloudwatch_logs_from_record` to seamless integrate with the [Batch utility](./batch.md){target="_blank"} for more robust log processing.
 
 === "app.py"
 
@@ -597,7 +636,7 @@ Data classes and utility functions to help create continuous delivery pipelines 
 
 ### Cognito User Pool
 
-Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources), all of which map to a different data class, which
+Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources){target="_blank"}, all of which map to a different data class, which
 can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event`:
 
 | Trigger/Event Source  | Data Class                                                                     |
@@ -1043,6 +1082,19 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         return {"status_code": 200}
     ```
 
+### S3 EventBridge Notification
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, S3EventBridgeNotificationEvent
+
+    @event_source(data_class=S3EventBridgeNotificationEvent)
+    def lambda_handler(event: S3EventBridgeNotificationEvent, context):
+        bucket_name = event.detail.bucket.name
+        file_key = event.detail.object.key
+    ```
+
 ### SES
 
 === "app.py"
@@ -1089,4 +1141,47 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         # Multiple records can be delivered in a single event
         for record in event.records:
             do_something_with(record.body)
+    ```
+
+### VPC Lattice
+
+You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.
+
+[Click here](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"} for more information about using AWS Lambda with Amazon VPC Lattice.
+
+=== "app.py"
+
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/vpc_lattice.py"
+    ```
+
+=== "Lattice Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
+    ```
+
+## Advanced
+
+### Debugging
+
+Alternatively, you can print out the fields to obtain more information. All classes come with a `__str__` method that generates a dictionary string which can be quite useful for debugging.
+
+However, certain events may contain sensitive fields such as `secret_access_key` and `session_token`, which are labeled as `[SENSITIVE]` to prevent any accidental disclosure of confidential information.
+
+!!! warning "If we fail to deserialize a field value (e.g., JSON), they will appear as `[Cannot be deserialized]`"
+
+=== "debugging.py"
+    ```python hl_lines="9"
+    --8<-- "examples/event_sources/src/debugging.py"
+    ```
+
+=== "debugging_event.json"
+    ```json hl_lines="28 29"
+    --8<-- "examples/event_sources/src/debugging_event.json"
+    ```
+=== "debugging_output.json"
+    ```json hl_lines="16 17 18"
+    --8<-- "examples/event_sources/src/debugging_output.json"
+    ```
     ```

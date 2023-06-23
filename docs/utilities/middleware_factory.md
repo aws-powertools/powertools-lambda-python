@@ -15,7 +15,7 @@ Middleware factory provides a decorator factory to create your own middleware to
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.
 
@@ -70,7 +70,7 @@ You can also have your own keyword arguments after the mandatory arguments.
 
 ## Advanced
 
-For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside your middleware, and add annotations as well as metadata for additional operational insights.
+For advanced use cases, you can instantiate [Tracer](../core/tracer.md){target="_blank"} inside your middleware, and add annotations as well as metadata for additional operational insights.
 
 === "advanced_middleware_tracer_function.py"
     ```python hl_lines="7 9 12 16 17 19 25 42"
@@ -87,12 +87,12 @@ For advanced use cases, you can instantiate [Tracer](../core/tracer.md) inside y
 
 ### Tracing middleware **execution**
 
-If you are making use of [Tracer](../core/tracer.md), you can trace the execution of your middleware to ease operations.
+If you are making use of [Tracer](../core/tracer.md){target="_blank"}, you can trace the execution of your middleware to ease operations.
 
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
 ???+ warning
-    You must [enable Active Tracing](../core/tracer/#permissions) in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
+    You must [enable Active Tracing](../core/tracer/#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
 === "getting_started_middleware_tracer_function.py"
     ```python hl_lines="8 14 15 36"
@@ -105,13 +105,14 @@ This makes use of an existing Tracer instance that you may have initialized anyw
     --8<-- "examples/middleware_factory/src/getting_started_middleware_tracer_payload.json"
     ```
 
-When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md) `## middleware_name`, in this example the middleware name is `## middleware_with_tracing`.
+When executed, your middleware name will [appear in AWS X-Ray Trace details as](../core/tracer.md){target="_blank"} `## middleware_name`, in this example the middleware name is `## middleware_with_tracing`.
 
 ![Middleware simple Tracer](../media/middleware_factory_tracer_1.png)
 
-### Combining Powertools utilities
+### Combining Powertools for AWS Lambda (Python) utilities
 
-You can create your own middleware and combine many features of Lambda Powertools such as [trace](../core/logger.md), [logs](../core/logger.md), [feature flags](feature_flags.md), [validation](validation.md), [jmespath_functions](jmespath_functions.md) and others to abstract non-functional code.
+<!-- markdownlint-disable MD013 -->
+You can create your own middleware and combine many features of Powertools for AWS Lambda (Python) such as [trace](../core/logger.md){target="_blank"}, [logs](../core/logger.md){target="_blank"}, [feature flags](feature_flags.md){target="_blank"}, [validation](validation.md){target="_blank"}, [jmespath_functions](jmespath_functions.md){target="_blank"} and others to abstract non-functional code.
 
 In the example below, we create a Middleware with the following features:
 

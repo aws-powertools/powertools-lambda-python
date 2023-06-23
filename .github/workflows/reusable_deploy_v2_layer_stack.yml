@@ -1,11 +1,31 @@
 name: Deploy CDK Layer v2 stack
 
-env:
-  CDK_VERSION: 2.44.0
+# PROCESS
+#
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. Deploy previously built layer for each AWS commercial region
+# 3. Export all published Layers as JSON
+# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
 
-permissions:
-  id-token: write
-  contents: write
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     latest_published_version: ${{ inputs.latest_published_version }}
 
 on:
   workflow_call:
@@ -31,55 +51,93 @@ jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
+    # lower privilege propagated from parent workflow (publish_v2_layer.yml)
+    permissions:
+      id-token: write
+      pull-requests: none
+      contents: read
+      pages: none
     defaults:
       run:
         working-directory: ./layer
     strategy:
       fail-fast: false
       matrix:
-        region:
-          [
-            "af-south-1",
-            "eu-central-1",
-            "us-east-1",
-            "us-east-2",
-            "us-west-1",
-            "us-west-2",
-            "ap-east-1",
-            "ap-south-1",
-            "ap-northeast-1",
-            "ap-northeast-2",
-            "ap-southeast-1",
-            "ap-southeast-2",
-            "ca-central-1",
-            "eu-west-1",
-            "eu-west-2",
-            "eu-west-3",
-            "eu-south-1",
-            "eu-north-1",
-            "sa-east-1",
-            "ap-southeast-3",
-            "ap-northeast-3",
-            "me-south-1",
-          ]
+        # To get a list of current regions, use:
+        # aws ec2 describe-regions --all-regions --query "Regions[].RegionName" --output text | tr "\t" "\n" | sort
+        include:
+          - region: "af-south-1"
+            has_arm64_support: "true"
+          - region: "ap-east-1"
+            has_arm64_support: "true"
+          - region: "ap-northeast-1"
+            has_arm64_support: "true"
+          - region: "ap-northeast-2"
+            has_arm64_support: "true"
+          - region: "ap-northeast-3"
+            has_arm64_support: "true"
+          - region: "ap-south-1"
+            has_arm64_support: "true"
+          - region: "ap-south-2"
+            has_arm64_support: "false"
+          - region: "ap-southeast-1"
+            has_arm64_support: "true"
+          - region: "ap-southeast-2"
+            has_arm64_support: "true"
+          - region: "ap-southeast-3"
+            has_arm64_support: "true"
+          - region: "ap-southeast-4"
+            has_arm64_support: "false"
+          - region: "ca-central-1"
+            has_arm64_support: "true"
+          - region: "eu-central-1"
+            has_arm64_support: "true"
+          - region: "eu-central-2"
+            has_arm64_support: "false"
+          - region: "eu-north-1"
+            has_arm64_support: "true"
+          - region: "eu-south-1"
+            has_arm64_support: "true"
+          - region: "eu-south-2"
+            has_arm64_support: "false"
+          - region: "eu-west-1"
+            has_arm64_support: "true"
+          - region: "eu-west-2"
+            has_arm64_support: "true"
+          - region: "eu-west-3"
+            has_arm64_support: "true"
+          - region: "me-central-1"
+            has_arm64_support: "false"
+          - region: "me-south-1"
+            has_arm64_support: "true"
+          - region: "sa-east-1"
+            has_arm64_support: "true"
+          - region: "us-east-1"
+            has_arm64_support: "true"
+          - region: "us-east-2"
+            has_arm64_support: "true"
+          - region: "us-west-1"
+            has_arm64_support: "true"
+          - region: "us-west-2"
+            has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
       - name: Install poetry
         run: pipx install poetry
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@67fbcbb121271f7775d2e7715933280b06314838
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
         with:
-          python-version: "3.9"
+          python-version: "3.10"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
@@ -88,20 +146,21 @@ jobs:
           poetry export --format requirements.txt --output requirements.txt
           pip install -r requirements.txt
       - name: install cdk and deps
+        working-directory: ./
         run: |
-          npm install -g "aws-cdk@$CDK_VERSION"
-          cdk --version
+          npm install
+          npx cdk --version
       - name: install deps
         run: poetry install
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
           name: ${{ inputs.artefact-name }}
           path: layer
       - name: unzip artefact
         run: unzip cdk.out.zip
       - name: CDK Deploy Layer
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
@@ -111,18 +170,11 @@ jobs:
           cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
         with:
           name: cdk-layer-stack
           path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
-        run: cdk deploy --app cdk.out --context region=${{ matrix.region}} --parameters DeployStage="${{ inputs.stage }}" 'CanaryV2Stack' --require-approval never --verbose
-
-  update_v2_layer_arn_docs:
-    needs: deploy-cdk-stack
-    if: ${{ inputs.stage == 'PROD' }}
-    uses: ./.github/workflows/reusable_update_v2_layer_arn_docs.yml
-    with:
-      latest_published_version: ${{ inputs.latest_published_version }}
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose

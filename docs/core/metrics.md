@@ -3,9 +3,9 @@ title: Metrics
 description: Core utility
 ---
 
-Metrics creates custom metrics asynchronously by logging metrics to standard output following [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html).
+Metrics creates custom metrics asynchronously by logging metrics to standard output following [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"}.
 
-These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/).
+These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/){target="_blank"}.
 
 ## Key features
 
@@ -22,7 +22,7 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
 * **Metric**. It's the name of the metric, for example: `SuccessfulBooking` or `UpdatedBooking`.
 * **Unit**. It's a value representing the unit of measure for the corresponding metric, for example: `Count` or `Seconds`.
-* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics).
+* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
 
 <figure>
   <img src="../../media/metrics_terminology.png" />
@@ -32,7 +32,7 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Metric has two global settings that will be used across all metrics emitted:
 
@@ -83,7 +83,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 ### Adding high-resolution metrics
 
-You can create [high-resolution metrics](https://aws.amazon.com/pt/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/) passing `resolution` parameter to `add_metric`.
+You can create [high-resolution metrics](https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/){target="_blank"} passing `resolution` parameter to `add_metric`.
 
 ???+ tip "When is it useful?"
     High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.
@@ -154,7 +154,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
     * Maximum of 29 user-defined dimensions
     * Namespace is set, and no more than one
-    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
+    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"}
 
 #### Raising SchemaValidationError on empty metrics
 
@@ -191,7 +191,7 @@ If it's a cold start invocation, this feature will:
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
 ???+ info
-    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you'd prefer a flag to override it.
+    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
 ## Advanced
 
@@ -219,7 +219,7 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
 
 ???+ info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing). Keep the following formula in mind:
+    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}. Keep the following formula in mind:
 
     **unique metric = (metric_name + dimension_name + dimension_value)**
 
@@ -251,13 +251,15 @@ By default it will skip all previously defined dimensions including default dime
 
 ### Flushing metrics manually
 
-If you prefer not to use `log_metrics` because you might want to encapsulate additional logic when doing so, you can manually flush and clear metrics as follows:
+If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
 
 ???+ warning
-	Metrics, dimensions and namespace validation still applies
+    This does not capture Cold Start metrics, and metric data validation still applies.
 
-```python hl_lines="11-14" title="Manually flushing and clearing metrics from memory"
---8<-- "examples/metrics/src/single_metric.py"
+Contrary to the `log_metrics` decorator, you are now also responsible to flush metrics in the event of an exception.
+
+```python hl_lines="18" title="Manually flushing and clearing metrics from memory"
+--8<-- "examples/metrics/src/flush_metrics.py"
 ```
 
 ### Metrics isolation
@@ -290,7 +292,7 @@ The former creates metrics asynchronously via CloudWatch Logs, and the latter us
 !!! important "Key concept"
     CloudWatch [considers a metric unique](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric){target="_blank"} by a combination of metric **name**, metric **namespace**, and zero or more metric **dimensions**.
 
-With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html) defining one or more metrics with distinct dimensions.
+With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"} defining one or more metrics with distinct dimensions.
 
 This is a subtle yet important distinction. Imagine you had the following metrics to emit:
 
@@ -327,7 +329,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/).
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
 --8<-- "examples/metrics/src/run_tests_env_var.sh"
@@ -372,4 +374,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py)
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}

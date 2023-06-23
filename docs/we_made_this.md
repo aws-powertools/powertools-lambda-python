@@ -1,19 +1,19 @@
 ---
 title: We Made This (Community)
-description: Blog posts, tutorials, and videos about AWS Lambda Powertools created by the Powertools Community.
+description: Blog posts, tutorials, and videos about Powertools for AWS Lambda (Python) created by the Powertools for AWS Lambda (Python) Community.
 ---
 
 <!-- markdownlint-disable  MD001 MD043 -->
 
-This space is dedicated to highlight our awesome community content featuring Powertools 🙏!
+This space is dedicated to highlight our awesome community content featuring Powertools for AWS Lambda (Python) 🙏!
 
-!!! info "[Get your content featured here](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
+!!! info "[Get your content featured here](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
 
 ## Connect
 
 [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET){target="_blank"}
 
-Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect with the Powertools community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
+Join us on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to connect with the Powertools for AWS Lambda (Python) community 👋. Ask questions, learn from each other, contribute, hang out with key contributors, and more!
 
 ## Blog posts
 
@@ -76,6 +76,14 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 
 * [aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig](https://aws.amazon.com/blogs/mt/how-cyberark-implements-feature-flags-with-aws-appconfig){target="_blank"}
 
+### Designing for Idempotency
+
+> **Author: [Valentin Dreismann](linkedin.com/in/valentin-dreismann-69694b16a){target="_blank"}** :material-linkedin:
+
+This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
+
+* [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
@@ -95,6 +103,16 @@ In this session you will learn how to increase code quality, extensibility and t
 A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank"} feature along with tips and tricks.
 
 <iframe src="https://player.twitch.tv/?video=1174133534&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+
+#### Level Up Your CI/CD With Smart AWS Feature Flags
+
+> **Author: [Ran Isenberg](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank"}**
+
+Feature flags can improve your CI/CD process by enabling capabilities otherwise not possible, thus making them an enabler of DevOps and a crucial part of continuous integration. Partial rollouts, A/B testing, and the ability to quickly change a configuration without redeploying code are advantages you gain by using features flags.
+
+In this talk, you will learn the added value of using feature flags as part of your CI/CD process and how AWS Lambda Powertools can help with that.
+
+<iframe width="620" height="378" src="https://www.youtube.com/embed/3IT4UzN9Jds" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## Workshops
 
@@ -123,3 +141,13 @@ This repository provides a working, deployable, open source based, AWS Lambda ha
 This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the AWS Lambda Powertools utilities for Python.
 
 :material-github: [github.com/ran-isenberg/aws-lambda-handler-cookbook](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
+
+### Serverless Transactional Message App
+
+> **Author: [Santiago Garcia Arango](mailto:san99tiago@gmail.com) [:material-web:](https://san99tiago.com/){target="_blank"} [:material-linkedin:](https://www.linkedin.com/in/san99tiago/){target="_blank"}**
+
+This repository contains a well documented example of a Transactional Messages App that illustrates how to use Lambda PowerTools to process SQS  messages in batches (with IaC on top of CDK).
+
+It uses LambdaPowerTools Logger, Tracing, DataClasses and includes unit tests.
+
+:material-github: [github.com/san99tiago/aws-cdk-transactional-messages](https://github.com/san99tiago/aws-cdk-transactional-messages){:target="_blank"}

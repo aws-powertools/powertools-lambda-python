@@ -216,6 +216,13 @@ def persistence_store_compound(config):
 
 
 @pytest.fixture
+def persistence_store_compound_static_pk_value(config, static_pk_value):
+    return DynamoDBPersistenceLayer(
+        table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk", static_pk_value=static_pk_value
+    )
+
+
+@pytest.fixture
 def idempotency_config(config, request, default_jmespath):
     return IdempotencyConfig(
         event_key_jmespath=request.param.get("event_key_jmespath") or default_jmespath,
@@ -246,3 +253,37 @@ def config_with_jmespath_options(config, request):
 @pytest.fixture
 def mock_function():
     return mock.MagicMock()
+
+
+@pytest.fixture
+def static_pk_value():
+    return "static-value"
+
+
+@pytest.fixture
+def expected_params_update_item_compound_key_static_pk_value(
+    expected_params_update_item, hashed_idempotency_key, static_pk_value
+):
+    return {
+        # same as in any update_item transaction except the `Key` due to composite key value
+        **expected_params_update_item,
+        "Key": {"id": {"S": static_pk_value}, "sk": {"S": hashed_idempotency_key}},
+    }
+
+
+@pytest.fixture
+def expected_params_put_item_compound_key_static_pk_value(
+    expected_params_put_item, hashed_idempotency_key, static_pk_value
+):
+    return {
+        # same as in any put_item transaction except the `Item` due to composite key value
+        **expected_params_put_item,
+        "Item": {
+            "expiration": {"N": stub.ANY},
+            "in_progress_expiration": {"N": stub.ANY},
+            "id": {"S": static_pk_value},
+            "sk": {"S": hashed_idempotency_key},
+            "status": {"S": "INPROGRESS"},
+        },
+        "TableName": "TEST_TABLE",
+    }

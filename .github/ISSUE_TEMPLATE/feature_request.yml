@@ -1,12 +1,12 @@
 name: Feature request
-description: Suggest an idea for Lambda Powertools
+description: Suggest an idea for Powertools for AWS Lambda (Python)
 title: "Feature request: TITLE"
 labels: ["feature-request", "triage"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thank you for taking the time to suggest an idea to the Lambda Powertools project.
+        Thank you for taking the time to suggest an idea to the Powertools for AWS Lambda (Python) project.
 
         *Future readers*: Please react with 👍 and your use case to help us understand customer demand.
   - type: textarea
@@ -36,9 +36,9 @@ body:
     attributes:
       label: Acknowledgment
       options:
-        - label: This feature request meets [Lambda Powertools Tenets](https://awslabs.github.io/aws-lambda-powertools-python/latest/#tenets)
+        - label: This feature request meets [Powertools for AWS Lambda (Python) Tenets](https://docs.powertools.aws.dev/lambda/python/latest/#tenets)
           required: true
-        - label: Should this be considered in other Lambda Powertools languages? i.e. [Java](https://github.com/awslabs/aws-lambda-powertools-java/), [TypeScript](https://github.com/awslabs/aws-lambda-powertools-typescript/)
+        - label: Should this be considered in other Powertools for AWS Lambda languages? i.e. [Java](https://github.com/aws-powertools/powertools-lambda-java/), [TypeScript](https://github.com/aws-powertools/powertools-lambda-typescript/), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet/)
           required: false
   - type: markdown
     attributes:

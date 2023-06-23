@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Type, Union
+from typing import Dict, List, Optional, Sequence, Type, Union
 
 from pydantic import BaseModel
 
@@ -24,7 +24,7 @@ class SqsMsgAttributeModel(BaseModel):
     binaryListValues: List[str] = []
     dataType: str
 
-    # context on why it's commented: https://github.com/awslabs/aws-lambda-powertools-python/pull/118
+    # context on why it's commented: https://github.com/aws-powertools/powertools-lambda-python/pull/118
     # Amazon SQS supports the logical data types String, Number, and Binary with optional custom data type
     # labels with the format .custom-data-type.
     # https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-metadata.html#sqs-message-attributes
@@ -52,7 +52,7 @@ class SqsMsgAttributeModel(BaseModel):
 class SqsRecordModel(BaseModel):
     messageId: str
     receiptHandle: str
-    body: Union[str, Type[BaseModel]]
+    body: Union[str, Type[BaseModel], BaseModel]
     attributes: SqsAttributesModel
     messageAttributes: Dict[str, SqsMsgAttributeModel]
     md5OfBody: str
@@ -63,4 +63,4 @@ class SqsRecordModel(BaseModel):
 
 
 class SqsModel(BaseModel):
-    Records: List[SqsRecordModel]
+    Records: Sequence[SqsRecordModel]

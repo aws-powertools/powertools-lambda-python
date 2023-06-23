@@ -46,7 +46,10 @@ This is the sample infrastructure we are using for the initial examples with a A
 
 You can define your functions to match GraphQL types and fields with the `app.resolver()` decorator.
 
-Here's an example where we have two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use Scalar type utilities to generate the right output based on our schema definition.
+???+ question "What is a type and field?"
+    A type would be a top-level **GraphQL Type** like `Query`, `Mutation`, `Todo`. A **GraphQL Field** would be `listTodos` under `Query`, `createTodo` under `Mutation`, etc.
+
+Here's an example with two separate functions to resolve `getTodo` and `listTodos` fields within the `Query` type. For completion, we use [Scalar type utilities](#scalar-functions) to generate the right output based on our schema definition.
 
 ???+ important
     GraphQL arguments are passed as function keyword arguments.
@@ -58,27 +61,35 @@ Here's an example where we have two separate functions to resolve `getTodo` and 
 
 === "getting_started_graphql_api_resolver.py"
 
-    ```python hl_lines="14 20 30 32-33 42 44 55"
+    ```python hl_lines="14 21 31 33-34 43 45 53 55 66"
     --8<-- "examples/event_handler_graphql/src/getting_started_graphql_api_resolver.py"
     ```
 
 === "getting_started_schema.graphql"
 
-    ```typescript hl_lines="6-7"
+    ```typescript hl_lines="7-9 13"
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "getting_started_get_todo.json"
+=== "sample events"
 
-    ```json hl_lines="2-3"
-    --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
-    ```
+    === "getting_started_get_todo.json"
 
-=== "getting_started_list_todos.json"
+        ```json hl_lines="2-3 42"
+        --8<-- "examples/event_handler_graphql/src/getting_started_get_todo.json"
+        ```
 
-    ```json hl_lines="2 40 42"
-    --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
-    ```
+    === "getting_started_list_todos.json"
+
+        ```json hl_lines="2 40"
+        --8<-- "examples/event_handler_graphql/src/getting_started_list_todos.json"
+        ```
+
+    === "getting_started_create_todo.json"
+
+        ```json hl_lines="2 48 49"
+        --8<-- "examples/event_handler_graphql/src/getting_started_create_todo.json"
+        ```
 
 ### Scalar functions
 
@@ -145,7 +156,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 ???+ note
     Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
 
-Within your function's folder, add Powertools as a dependency with `pipenv install aws-lambda-powertools`.
+Within your function's folder, add Powertools for AWS Lambda (Python) as a dependency with `pipenv install aws-lambda-powertools`.
 
 Use the following code for `merchantInfo` and `searchMerchant` functions respectively.
 

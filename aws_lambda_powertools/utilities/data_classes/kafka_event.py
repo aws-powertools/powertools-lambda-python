@@ -1,8 +1,10 @@
 import base64
-import json
 from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+)
 
 
 class KafkaEventRecord(DictWrapper):
@@ -55,7 +57,7 @@ class KafkaEventRecord(DictWrapper):
     def json_value(self) -> Any:
         """Decodes the text encoded data as JSON."""
         if self._json_data is None:
-            self._json_data = json.loads(self.decoded_value.decode("utf-8"))
+            self._json_data = self._json_deserializer(self.decoded_value.decode("utf-8"))
         return self._json_data
 
     @property
@@ -70,17 +72,10 @@ class KafkaEventRecord(DictWrapper):
 
     def get_header_value(
         self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
-    ) -> Optional[bytes]:
+    ) -> Optional[str]:
         """Get a decoded header value by name."""
-        if case_sensitive:
-            return self.decoded_headers.get(name, default_value)
-        name_lower = name.lower()
-
-        return next(
-            # Iterate over the dict and do a case-insensitive key comparison
-            (value for key, value in self.decoded_headers.items() if key.lower() == name_lower),
-            # Default value is returned if no matches was found
-            default_value,
+        return get_header_value(
+            headers=self.decoded_headers, name=name, default_value=default_value, case_sensitive=case_sensitive
         )
 
 
@@ -91,6 +86,10 @@ class KafkaEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
+
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        self._records: Optional[Iterator[KafkaEventRecord]] = None
 
     @property
     def event_source(self) -> str:
@@ -117,9 +116,24 @@ class KafkaEvent(DictWrapper):
         """The Kafka records."""
         for chunk in self["records"].values():
             for record in chunk:
-                yield KafkaEventRecord(record)
+                yield KafkaEventRecord(data=record, json_deserializer=self._json_deserializer)
 
     @property
     def record(self) -> KafkaEventRecord:
-        """The next Kafka record."""
-        return next(self.records)
+        """
+        Returns the next Kafka record using an iterator.
+
+        Returns
+        -------
+        KafkaEventRecord
+            The next Kafka record.
+
+        Raises
+        ------
+        StopIteration
+            If there are no more records available.
+
+        """
+        if self._records is None:
+            self._records = self.records
+        return next(self._records)

@@ -249,6 +249,26 @@ def test_log_metrics(capsys, metrics, dimensions, namespace):
     assert expected == output
 
 
+def test_log_metrics_manual_flush(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(namespace=namespace)
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+    for dimension in dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    # WHEN we manually the metrics
+    my_metrics.flush_metrics()
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
+
+    # THEN we should have no exceptions
+    # and a valid EMF object should be flushed correctly
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
 def test_namespace_env_var(monkeypatch, capsys, metric, dimension, namespace):
     # GIVEN POWERTOOLS_METRICS_NAMESPACE is set
     monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", namespace)

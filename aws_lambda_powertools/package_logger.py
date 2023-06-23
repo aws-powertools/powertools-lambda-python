@@ -5,7 +5,7 @@ from aws_lambda_powertools.shared.functions import powertools_debug_is_set
 
 
 def set_package_logger_handler(stream=None):
-    """Sets up Lambda Powertools package logging.
+    """Sets up Powertools for AWS Lambda (Python) package logging.
 
     By default, we discard any output to not interfere with customers logging.
 
