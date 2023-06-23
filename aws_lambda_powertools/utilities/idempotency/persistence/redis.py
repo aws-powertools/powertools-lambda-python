@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
-        connection,
+        connection: Union[redis.Redis, redis.RedisCluster],
         in_progress_expiry_attr: str = "in_progress_expiration",
         status_attr: str = "status",
         data_attr: str = "data",
@@ -41,7 +41,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         """
 
         # Initialize connection with Redis
-        self._connection: Union[redis.Redis, redis.RedisCluster] = connection.init_connection()
+        self._connection = connection
 
         self.in_progress_expiry_attr = in_progress_expiry_attr
         self.status_attr = status_attr

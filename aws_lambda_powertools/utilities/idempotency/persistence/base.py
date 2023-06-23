@@ -268,12 +268,14 @@ class BasePersistenceLayer(ABC):
             unix timestamp of expiry date for idempotency record
 
         """
-        if self.backend == "redis":
+        # removed for now, seems not being used in redis
+        """ if self.backend == "redis":
             return self.expires_after_seconds
-        else:
-            now = datetime.datetime.now()
-            period = datetime.timedelta(seconds=self.expires_after_seconds)
-            return int((now + period).timestamp())
+        else: """
+
+        now = datetime.datetime.now()
+        period = datetime.timedelta(seconds=self.expires_after_seconds)
+        return int((now + period).timestamp())
 
     def _save_to_cache(self, data_record: DataRecord):
         """
@@ -368,6 +370,7 @@ class BasePersistenceLayer(ABC):
         data_record = DataRecord(
             idempotency_key=idempotency_key,
             status=STATUS_CONSTANTS["INPROGRESS"],
+            # This expiry_timestamp is never used in redis, remove specific _get_expiry_timestamp for now
             expiry_timestamp=self._get_expiry_timestamp(),
             payload_hash=self._get_hashed_payload(data=data),
         )

@@ -163,14 +163,14 @@ You can initialize `RedisCachePersistenceLayer` class and use it with `idempoten
 === "app.py"
 
 ```python
-	from aws_lambda_powertools.utilities.connections import RedisStandalone, RedisCluster
+	from aws_lambda_powertools.utilities.connections import RedisConnection
 	from aws_lambda_powertools.utilities.idempotency import (
 	    idempotent,
 	    RedisCachePersistenceLayer,
 	    IdempotencyConfig
 	)
 	# For connection using Redis Standalone architecture
-	redis_connection = RedisStandalone(host="192.168.68.112", port=6379, password="pass", db_index=0)
+	redis_connection = RedisConnection(host="192.168.68.112", port=6379, password="pass", db_index=0).get_standalone_connection()
 
 	persistence_layer = RedisCachePersistenceLayer(connection=redis_connection)
 	config =  IdempotencyConfig(
@@ -755,15 +755,15 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 This persistence layer is built-in and you can use ElastiCache to store and see the keys.
 
 ```python
-	from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
-	persistence_layer = RedisCachePersistenceLayer(
-	    static_pk_value: Optional[str] = None,
-	    expiry_attr: str = "expiration",
-	    in_progress_expiry_attr: str = "in_progress_expiration",
-	    status_attr: str = "status",
-	    data_attr: str = "data",
-	    validation_key_attr: str = "validation",
-	  )
+from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
+persistence_layer = RedisCachePersistenceLayer(
+    static_pk_value: Optional[str] = None,
+    expiry_attr: str = "expiration",
+    in_progress_expiry_attr: str = "in_progress_expiration",
+    status_attr: str = "status",
+    data_attr: str = "data",
+    validation_key_attr: str = "validation",
+)
 ```
 
 When using ElastiCache for Redis as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
@@ -780,16 +780,16 @@ When using ElastiCache for Redis as a persistence layer, you can alter the attri
 #### RedisStandalone/RedisCluster
 
 ```python
-from aws_lambda_powertools.utilities.connections import RedisStandalone,RedisCluster
+from aws_lambda_powertools.utilities.connections import RedisConnection
 
-redis_connection = RedisStandalone(
+redis_connection = RedisConnection(
 	host="192.168.68.112",
 	port=6379,
-	username = "abc"
+	username = "abc",
 	password="pass",
 	db_index=0,
 	url = None
-)
+).get_standalone_connection()
 ```
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
@@ -880,14 +880,14 @@ def handler(event, context):
 _**Redis**_
 
 ```python
-from aws_lambda_powertools.utilities.connections import RedisStandalone, RedisCluster
+from aws_lambda_powertools.utilities.connections import RedisConnection
 from aws_lambda_powertools.utilities.idempotency import (
 	idempotent,
 	RedisCachePersistenceLayer,
 	IdempotencyConfig
 )
 # For connection using Redis Standalone architecture
-redis_connection = RedisStandalone(host="192.168.68.112", port=6379, password="pass", db_index=0)
+redis_connection = RedisConnection(host="192.168.68.112", port=6379, password="pass", db_index=0).get_standalone_connection()
 
 persistence_layer = RedisCachePersistenceLayer(connection=redis_connection)
 config =  IdempotencyConfig(
