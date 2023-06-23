@@ -5,7 +5,7 @@ description: Utility
 
 The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, and Amazon DynamoDB Streams.
 
-## Key Features
+## Key features
 
 * Reports batch item failures to reduce number of retries for a record upon errors
 * Simple interface to process each batch record

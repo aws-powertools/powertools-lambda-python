@@ -10,7 +10,7 @@ const awsconfig = {
 };
 
 const RUNTIME = "python"
-const BASE_ORIGIN = "awslabs.github.io"
+const BASE_ORIGIN = "docs.powertools.aws.dev"
 
 function copyToClipboard(e) {
 	e.preventDefault()

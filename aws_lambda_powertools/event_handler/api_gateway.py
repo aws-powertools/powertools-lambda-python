@@ -177,6 +177,7 @@ class Response:
         body: Union[str, bytes, None] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
+        compress: Optional[bool] = None,
     ):
         """
 
@@ -199,6 +200,7 @@ class Response:
         self.base64_encoded = False
         self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
         self.cookies = cookies or []
+        self.compress = compress
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -233,6 +235,38 @@ class ResponseBuilder:
         cache_control = cache_control if self.response.status_code == 200 else "no-cache"
         self.response.headers["Cache-Control"] = cache_control
 
+    @staticmethod
+    def _has_compression_enabled(
+        route_compression: bool, response_compression: Optional[bool], event: BaseProxyEvent
+    ) -> bool:
+        """
+        Checks if compression is enabled.
+
+        NOTE: Response compression takes precedence.
+
+        Parameters
+        ----------
+        route_compression: bool, optional
+            A boolean indicating whether compression is enabled or not in the route setting.
+        response_compression: bool, optional
+            A boolean indicating whether compression is enabled or not in the response setting.
+        event: BaseProxyEvent
+            The event object containing the request details.
+
+        Returns
+        -------
+        bool
+            True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
+        """
+        encoding: str = event.get_header_value(name="accept-encoding", default_value="", case_sensitive=False)  # type: ignore[assignment] # noqa: E501
+        if "gzip" in encoding:
+            if response_compression is not None:
+                return response_compression  # e.g., Response(compress=False/True))
+            if route_compression:
+                return True  # e.g., @app.get(compress=True)
+
+        return False
+
     def _compress(self):
         """Compress the response body, but only if `Accept-Encoding` headers includes gzip."""
         self.response.headers["Content-Encoding"] = "gzip"
@@ -250,7 +284,9 @@ class ResponseBuilder:
             self._add_cors(event, cors or CORSConfig())
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
-        if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
+        if self._has_compression_enabled(
+            route_compression=self.route.compress, response_compression=self.response.compress, event=event
+        ):
             self._compress()
 
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
