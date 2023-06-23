@@ -24,7 +24,7 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 | **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
 | **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
 | **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
-| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                                                                      | -                    | -                               |
+| **Idempotency**                    | Updated [partition key](#idempotency-partition-key-format) to include fully qualified function/method names.                                                                                            | -                    | -                               |
 
 ### First Steps
 
@@ -151,7 +151,7 @@ In V2, we add all headers under `multiValueHeaders` key. This enables seamless s
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 

@@ -79,7 +79,7 @@ body:
     id: logs
     attributes:
       label: Debugging logs
-      description: If available, please share [debugging logs](https://docs.powertools.aws.dev/lambda-python/#debug-mode)
+      description: If available, please share [debugging logs](https://docs.powertools.aws.dev/lambda/python/#debug-mode)
       render: python
     validations:
       required: false
