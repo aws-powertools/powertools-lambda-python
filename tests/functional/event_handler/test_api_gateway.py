@@ -390,7 +390,7 @@ def test_override_route_compress_parameter():
     assert result["multiValueHeaders"].get("Content-Encoding") is None
 
 
-def test_compress_response_object():
+def test_response_with_compress_enabled():
     # GIVEN a function
     # AND an event with a "Accept-Encoding" that include gzip
     # AND the Response object with compress=True
