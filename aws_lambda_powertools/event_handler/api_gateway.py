@@ -235,7 +235,7 @@ class ResponseBuilder:
         cache_control = cache_control if self.response.status_code == 200 else "no-cache"
         self.response.headers["Cache-Control"] = cache_control
 
-    def _check_compress_enabled(self, compress: Optional[bool], event: BaseProxyEvent) -> bool:
+    def _has_compression_enabled(self, compress: Optional[bool], event: BaseProxyEvent) -> bool:
         """
         Checks if compression is enabled
 
@@ -275,7 +275,7 @@ class ResponseBuilder:
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
         # The `compress` parameter used in the Response object takes precedence over the one used in the route.
-        if self._check_compress_enabled(self.route.compress, event) and self.response.compress is not False:
+        if self._has_compression_enabled(self.route.compress, event) and self.response.compress is not False:
             self._compress()
 
     def _response(self, event: BaseProxyEvent):
@@ -291,7 +291,7 @@ class ResponseBuilder:
         -------
         None
         """
-        if self.response.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
+        if self._has_compression_enabled(self.response.compress, event):
             self._compress()
 
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
