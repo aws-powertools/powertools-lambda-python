@@ -177,6 +177,7 @@ class Response:
         body: Union[str, bytes, None] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
+        compress: Optional[bool] = None,
     ):
         """
 
@@ -199,6 +200,7 @@ class Response:
         self.base64_encoded = False
         self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
         self.cookies = cookies or []
+        self.compress = compress
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
@@ -250,12 +252,33 @@ class ResponseBuilder:
             self._add_cors(event, cors or CORSConfig())
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
-        if self.route.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
+        if (
+            self.route.compress
+            and "gzip" in (event.get_header_value("accept-encoding", "") or "")
+            and self.response.compress is not False
+        ):
+            self._compress()
+
+    def _response(self, event: BaseProxyEvent):
+        """
+        The Response object can encode and compress the response by setting the 'compress' parameter to True.
+
+        Parameters
+        ----------
+        event: BaseProxyEvent
+            The event object representing the incoming request.
+
+        Returns
+        -------
+        None
+        """
+        if self.response.compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
             self._compress()
 
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
+        self._response(event)
 
         if isinstance(self.response.body, bytes):
             logger.debug("Encoding bytes response with base64")

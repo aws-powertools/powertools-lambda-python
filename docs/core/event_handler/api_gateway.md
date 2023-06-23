@@ -360,15 +360,24 @@ You can use the `Response` class to have full control over the response. For exa
 
 ### Compress
 
-You can compress with gzip and base64 encode your responses via `compress` parameter.
+You can compress with gzip and base64 encode your responses via `compress` parameter. You have the option to pass the `compress` parameter when working with a specific route or using the Response object.
+
+???+ info
+    The `compress` parameter used in the Response object takes precedence over the one used in the route.
 
 ???+ warning
     The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
-=== "compressing_responses.py"
+=== "compressing_responses_using_route.py"
 
     ```python hl_lines="17 27"
-     --8<-- "examples/event_handler_rest/src/compressing_responses.py"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_route.py"
+    ```
+
+=== "compressing_responses_using_response.py"
+
+    ```python hl_lines="24"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_response.py"
     ```
 
 === "compressing_responses.json"

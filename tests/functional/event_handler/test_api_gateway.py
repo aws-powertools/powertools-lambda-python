@@ -366,6 +366,58 @@ def test_cors_preflight_body_is_empty_not_null():
     assert result["body"] == ""
 
 
+def test_override_route_compress_parameter():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=False
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request", compress=True)
+    def with_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=False)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then the response is not compressed
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+    assert result["multiValueHeaders"].get("Content-Encoding") is None
+
+
+def test_compress_response_object():
+    # GIVEN a function
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=True
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request")
+    def route_without_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=True)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then gzip the response and base64 encode as a string
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
