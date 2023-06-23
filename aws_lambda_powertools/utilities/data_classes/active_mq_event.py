@@ -114,7 +114,7 @@ class ActiveMQEvent(DictWrapper):
 
     def __init__(self, data: Dict[str, Any]):
         super().__init__(data)
-        self._messages = (ActiveMQMessage(record) for record in self["messages"])
+        self._messages = None
 
     @property
     def event_source(self) -> str:
@@ -132,4 +132,20 @@ class ActiveMQEvent(DictWrapper):
 
     @property
     def message(self) -> ActiveMQMessage:
+        """
+        Returns the next ActiveMQ message using an iterator.
+
+        Returns
+        -------
+        ActiveMQMessage
+            The next activemq message.
+
+        Raises
+        ------
+        StopIteration
+            If there are no more records available.
+
+        """
+        if self._messages is None:
+            self._messages = self.messages
         return next(self._messages)

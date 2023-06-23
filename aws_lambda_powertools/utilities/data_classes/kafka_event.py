@@ -89,8 +89,7 @@ class KafkaEvent(DictWrapper):
 
     def __init__(self, data: Dict[str, Any]):
         super().__init__(data)
-        for chunk in self["records"].values():
-            self._records = (KafkaEventRecord(record) for record in chunk)
+        self._records = None
 
     @property
     def event_source(self) -> str:
@@ -121,5 +120,20 @@ class KafkaEvent(DictWrapper):
 
     @property
     def record(self) -> KafkaEventRecord:
-        """The next Kafka record."""
+        """
+        Returns the next Kafka record using an iterator.
+
+        Returns
+        -------
+        KafkaEventRecord
+            The next Kafka record.
+
+        Raises
+        ------
+        StopIteration
+            If there are no more records available.
+
+        """
+        if self._records is None:
+            self._records = self.records
         return next(self._records)
