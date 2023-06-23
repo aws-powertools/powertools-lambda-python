@@ -235,14 +235,21 @@ class ResponseBuilder:
         cache_control = cache_control if self.response.status_code == 200 else "no-cache"
         self.response.headers["Cache-Control"] = cache_control
 
-    def _has_compression_enabled(self, compress: Optional[bool], event: BaseProxyEvent) -> bool:
+    @staticmethod
+    def _has_compression_enabled(
+        route_compression: bool, response_compression: Optional[bool], event: BaseProxyEvent
+    ) -> bool:
         """
-        Checks if compression is enabled
+        Checks if compression is enabled.
+
+        NOTE: Response compression takes precedence.
 
         Parameters
         ----------
-        compress: bool, optional
-            A boolean indicating whether compression is enabled or not.
+        route_compression: bool, optional
+            A boolean indicating whether compression is enabled or not in the route setting.
+        response_compression: bool, optional
+            A boolean indicating whether compression is enabled or not in the response setting.
         event: BaseProxyEvent
             The event object containing the request details.
 
@@ -251,9 +258,12 @@ class ResponseBuilder:
         bool
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
-
-        if compress and "gzip" in (event.get_header_value("accept-encoding", "") or ""):
-            return True
+        encoding: str = event.get_header_value(name="accept-encoding", default_value="", case_sensitive=False)  # type: ignore[assignment] # noqa: E501
+        if "gzip" in encoding:
+            if response_compression is not None:
+                return response_compression  # e.g., Response(compress=False/True))
+            if route_compression:
+                return True  # e.g., @app.get(compress=True)
 
         return False
 
@@ -274,30 +284,14 @@ class ResponseBuilder:
             self._add_cors(event, cors or CORSConfig())
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
-        # The `compress` parameter used in the Response object takes precedence over the one used in the route.
-        if self._has_compression_enabled(self.route.compress, event) and self.response.compress is not False:
-            self._compress()
-
-    def _response(self, event: BaseProxyEvent):
-        """
-        The Response object can encode and compress the response by setting the 'compress' parameter to True.
-
-        Parameters
-        ----------
-        event: BaseProxyEvent
-            The event object representing the incoming request.
-
-        Returns
-        -------
-        None
-        """
-        if self._has_compression_enabled(self.response.compress, event):
+        if self._has_compression_enabled(
+            route_compression=self.route.compress, response_compression=self.response.compress, event=event
+        ):
             self._compress()
 
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
-        self._response(event)
 
         if isinstance(self.response.body, bytes):
             logger.debug("Encoding bytes response with base64")
