@@ -7,7 +7,7 @@
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/#features).
 
-> Also available in [Java](https://github.com/aws-powertools/powertools-lambda-java), [Typescript](https://github.com/aws-powertools/powertools-lambda-typescript), and [.NET](https://docs.powertools.aws.dev/lambda-dotnet/).
+> Also available in [Java](https://github.com/aws-powertools/powertools-lambda-java), [Typescript](https://github.com/aws-powertools/powertools-lambda-typescript), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet).
 
 **[📜Documentation](https://docs.powertools.aws.dev/lambda/python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
 
