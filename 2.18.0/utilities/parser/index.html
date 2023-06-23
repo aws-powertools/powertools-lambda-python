@@ -1,0 +1,2195 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Utility">
+      
+      
+        <meta name="author" content="Amazon Web Services">
+      
+      
+      
+        <link rel="prev" href="../data_classes/">
+      
+      
+        <link rel="next" href="../idempotency/">
+      
+      <link rel="icon" href="../../media/aws-logo-light.svg">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.16">
+    
+    
+      
+        <title>Parser (Pydantic) - Powertools for AWS Lambda (Python)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#key-features" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Powertools for AWS Lambda (Python)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Parser (Pydantic)
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+            
+              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 6H7c-3.31 0-6 2.69-6 6s2.69 6 6 6h10c3.31 0 6-2.69 6-6s-2.69-6-6-6zm0 10H7c-2.21 0-4-1.79-4-4s1.79-4 4-4h10c2.21 0 4 1.79 4 4s-1.79 4-4 4zM7 9c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
+              </label>
+            
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+            
+              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17 7H7a5 5 0 0 0-5 5 5 5 0 0 0 5 5h10a5 5 0 0 0 5-5 5 5 0 0 0-5-5m0 8a3 3 0 0 1-3-3 3 3 0 0 1 3-3 3 3 0 0 1 3 3 3 3 0 0 1-3 3Z"/></svg>
+              </label>
+            
+          
+        </form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    Powertools for AWS Lambda (Python)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Homepage
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/" class="md-nav__link">
+        Tutorial
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        Roadmap
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" target="_blank" class="md-nav__link">
+        API reference
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upgrade/" class="md-nav__link">
+        Upgrade guide
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../we_made_this/" class="md-nav__link">
+        We Made This (Community)
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="0">
+          Core utilities
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Core utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/tracer/" class="md-nav__link">
+        Tracer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/logger/" class="md-nav__link">
+        Logger
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/metrics/" class="md-nav__link">
+        Metrics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_4" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_8_4" id="__nav_8_4_label" tabindex="0">
+          Event Handler
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_8_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8_4">
+          <span class="md-nav__icon md-icon"></span>
+          Event Handler
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/event_handler/api_gateway/" class="md-nav__link">
+        REST API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/event_handler/appsync/" class="md-nav__link">
+        GraphQL API
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" checked>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="0">
+          Utilities
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_9">
+          <span class="md-nav__icon md-icon"></span>
+          Utilities
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/" class="md-nav__link">
+        Parameters
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../batch/" class="md-nav__link">
+        Batch Processing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../typing/" class="md-nav__link">
+        Typing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_classes/" class="md-nav__link">
+        Event Source Data Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Parser (Pydantic)
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Parser (Pydantic)
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    Key features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting started
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defining-models" class="md-nav__link">
+    Defining models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parsing-events" class="md-nav__link">
+    Parsing events
+  </a>
+  
+    <nav class="md-nav" aria-label="Parsing events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event_parser-decorator" class="md-nav__link">
+    event_parser decorator
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parse-function" class="md-nav__link">
+    parse function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-models" class="md-nav__link">
+    Built-in models
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extending-built-in-models" class="md-nav__link">
+    Extending built-in models
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#envelopes" class="md-nav__link">
+    Envelopes
+  </a>
+  
+    <nav class="md-nav" aria-label="Envelopes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-envelopes" class="md-nav__link">
+    Built-in envelopes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bringing-your-own-envelope" class="md-nav__link">
+    Bringing your own envelope
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-model-validation" class="md-nav__link">
+    Data model validation
+  </a>
+  
+    <nav class="md-nav" aria-label="Data model validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validating-fields" class="md-nav__link">
+    validating fields
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-entire-model" class="md-nav__link">
+    validating entire model
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-use-cases" class="md-nav__link">
+    Advanced use cases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../idempotency/" class="md-nav__link">
+        Idempotency
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../feature_flags/" class="md-nav__link">
+        Feature flags
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../streaming/" class="md-nav__link">
+        Streaming
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../middleware_factory/" class="md-nav__link">
+        Middleware factory
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jmespath_functions/" class="md-nav__link">
+        JMESPath Functions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/aws-cloudformation/custom-resource-helper" target="_blank" class="md-nav__link">
+        CloudFormation Custom Resources
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    Key features
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    Getting started
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    Install
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#defining-models" class="md-nav__link">
+    Defining models
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parsing-events" class="md-nav__link">
+    Parsing events
+  </a>
+  
+    <nav class="md-nav" aria-label="Parsing events">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#event_parser-decorator" class="md-nav__link">
+    event_parser decorator
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parse-function" class="md-nav__link">
+    parse function
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#built-in-models" class="md-nav__link">
+    Built-in models
+  </a>
+  
+    <nav class="md-nav" aria-label="Built-in models">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#extending-built-in-models" class="md-nav__link">
+    Extending built-in models
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#envelopes" class="md-nav__link">
+    Envelopes
+  </a>
+  
+    <nav class="md-nav" aria-label="Envelopes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-envelopes" class="md-nav__link">
+    Built-in envelopes
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bringing-your-own-envelope" class="md-nav__link">
+    Bringing your own envelope
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-model-validation" class="md-nav__link">
+    Data model validation
+  </a>
+  
+    <nav class="md-nav" aria-label="Data model validation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#validating-fields" class="md-nav__link">
+    validating fields
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-entire-model" class="md-nav__link">
+    validating entire model
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#advanced-use-cases" class="md-nav__link">
+    Advanced use cases
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#faq" class="md-nav__link">
+    FAQ
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Parser (Pydantic)</h1>
+
+<!-- markdownlint-disable MD043 -->
+
+<p>This utility provides data parsing and deep validation using <a href="https://pydantic-docs.helpmanual.io/" target="_blank">Pydantic</a>.</p>
+<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Defines data in pure Python classes, then parse, validate and extract only what you want</li>
+<li>Built-in envelopes to unwrap, extend, and validate popular event sources payloads</li>
+<li>Enforces type hints at runtime with user-friendly errors</li>
+</ul>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<h3 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" target="_blank">Lambda Layer/SAR</a></p>
+</div>
+<p>Add <code>aws-lambda-powertools[parser]</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>. This will ensure you have the required dependencies before using Parser.</p>
+<details class="warning" open="open">
+<summary>Warning</summary>
+<p>This will increase the compressed package size by &gt;10MB due to the Pydantic dependency.</p>
+<p>To reduce the impact on the package size at the expense of 30%-50% of its performance <a href="https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off" target="_blank">Pydantic can also be
+installed without binary files</a>:</p>
+<p>Pip example: <code>SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]</code></p>
+</details>
+<h3 id="defining-models">Defining models<a class="headerlink" href="#defining-models" title="Permanent link">&para;</a></h3>
+<p>You can define models to parse incoming events by inheriting from <code>BaseModel</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Defining an Order data model</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">quantity</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderItem</span><span class="p">]</span> <span class="c1"># nesting models are supported</span>
+    <span class="n">optional_field</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="c1"># this field may or may not be available when parsing</span>
+</code></pre></div></td></tr></table></div>
+<p>These are simply Python classes that inherit from BaseModel. <strong>Parser</strong> enforces type hints declared in your model at runtime.</p>
+<h3 id="parsing-events">Parsing events<a class="headerlink" href="#parsing-events" title="Permanent link">&para;</a></h3>
+<p>You can parse inbound events using <strong>event_parser</strong> decorator, or the standalone <code>parse</code> function. Both are also able to parse either dictionary or JSON string as an input.</p>
+<h4 id="event_parser-decorator">event_parser decorator<a class="headerlink" href="#event_parser-decorator" title="Permanent link">&para;</a></h4>
+<p>Use the decorator for fail fast scenarios where you want your Lambda function to raise an exception in the event of a malformed payload.</p>
+<p><code>event_parser</code> decorator will throw a <code>ValidationError</code> if your event cannot be parsed according to the model.</p>
+<details class="note" open="open">
+<summary>Note</summary>
+<p><strong>This decorator will replace the <code>event</code> object with the parsed model if successful</strong>. This means you might be careful when nesting other decorators that expect <code>event</code> to be a <code>dict</code>.</p>
+</details>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Parsing and validating upon invocation with event_parser decorator</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">event_parser</span><span class="p">,</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">quantity</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderItem</span><span class="p">]</span> <span class="c1"># nesting models are supported</span>
+    <span class="n">optional_field</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="c1"># this field may or may not be available when parsing</span>
+
+
+<span class="hll"><span class="nd">@event_parser</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">Order</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">Order</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">items</span><span class="p">)</span>
+
+    <span class="n">order_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">items</span><span class="p">]</span>
+    <span class="o">...</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">10876546789</span><span class="p">,</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;My order&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1015938732</span><span class="p">,</span>
+            <span class="s2">&quot;quantity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;item xpto&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">LambdaContext</span><span class="p">())</span>
+<span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">LambdaContext</span><span class="p">())</span> <span class="c1"># also works if event is a JSON string</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="parse-function">parse function<a class="headerlink" href="#parse-function" title="Permanent link">&para;</a></h4>
+<p>Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Using standalone parse function for more flexibility</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">quantity</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderItem</span><span class="p">]</span> <span class="c1"># nesting models are supported</span>
+    <span class="n">optional_field</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="c1"># this field may or may not be available when parsing</span>
+
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">10876546789</span><span class="p">,</span>
+    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;My order&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+<span class="hll">            <span class="c1"># this will cause a validation error</span>
+</span>            <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1015938732</span><span class="p">],</span>
+            <span class="s2">&quot;quantity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;item xpto&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">my_function</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+<span class="hll">        <span class="n">parsed_payload</span><span class="p">:</span> <span class="n">Order</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">Order</span><span class="p">)</span>
+</span>        <span class="c1"># payload dict is now parsed into our model</span>
+        <span class="k">return</span> <span class="n">parsed_payload</span><span class="o">.</span><span class="n">items</span>
+    <span class="k">except</span> <span class="n">ValidationError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;status_code&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid order&quot;</span>
+        <span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="built-in-models">Built-in models<a class="headerlink" href="#built-in-models" title="Permanent link">&para;</a></h3>
+<p>Parser comes with the following built-in models:</p>
+<table>
+<thead>
+<tr>
+<th>Model name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AlbModel</strong></td>
+<td>Lambda Event Source payload for Amazon Application Load Balancer</td>
+</tr>
+<tr>
+<td><strong>APIGatewayProxyEventModel</strong></td>
+<td>Lambda Event Source payload for Amazon API Gateway</td>
+</tr>
+<tr>
+<td><strong>APIGatewayProxyEventV2Model</strong></td>
+<td>Lambda Event Source payload for Amazon API Gateway v2 payload</td>
+</tr>
+<tr>
+<td><strong>CloudFormationCustomResourceCreateModel</strong></td>
+<td>Lambda Event Source payload for AWS CloudFormation <code>CREATE</code> operation</td>
+</tr>
+<tr>
+<td><strong>CloudFormationCustomResourceUpdateModel</strong></td>
+<td>Lambda Event Source payload for AWS CloudFormation <code>UPDATE</code> operation</td>
+</tr>
+<tr>
+<td><strong>CloudFormationCustomResourceDeleteModel</strong></td>
+<td>Lambda Event Source payload for AWS CloudFormation <code>DELETE</code> operation</td>
+</tr>
+<tr>
+<td><strong>CloudwatchLogsModel</strong></td>
+<td>Lambda Event Source payload for Amazon CloudWatch Logs</td>
+</tr>
+<tr>
+<td><strong>DynamoDBStreamModel</strong></td>
+<td>Lambda Event Source payload for Amazon DynamoDB Streams</td>
+</tr>
+<tr>
+<td><strong>EventBridgeModel</strong></td>
+<td>Lambda Event Source payload for Amazon EventBridge</td>
+</tr>
+<tr>
+<td><strong>KafkaMskEventModel</strong></td>
+<td>Lambda Event Source payload for AWS MSK payload</td>
+</tr>
+<tr>
+<td><strong>KafkaSelfManagedEventModel</strong></td>
+<td>Lambda Event Source payload for self managed Kafka payload</td>
+</tr>
+<tr>
+<td><strong>KinesisDataStreamModel</strong></td>
+<td>Lambda Event Source payload for Amazon Kinesis Data Streams</td>
+</tr>
+<tr>
+<td><strong>KinesisFirehoseModel</strong></td>
+<td>Lambda Event Source payload for Amazon Kinesis Firehose</td>
+</tr>
+<tr>
+<td><strong>KinesisFirehoseSqsModel</strong></td>
+<td>Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records</td>
+</tr>
+<tr>
+<td><strong>LambdaFunctionUrlModel</strong></td>
+<td>Lambda Event Source payload for Lambda Function URL payload</td>
+</tr>
+<tr>
+<td><strong>S3EventNotificationEventBridgeModel</strong></td>
+<td>Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.</td>
+</tr>
+<tr>
+<td><strong>S3Model</strong></td>
+<td>Lambda Event Source payload for Amazon S3</td>
+</tr>
+<tr>
+<td><strong>S3ObjectLambdaEvent</strong></td>
+<td>Lambda Event Source payload for Amazon S3 Object Lambda</td>
+</tr>
+<tr>
+<td><strong>S3SqsEventNotificationModel</strong></td>
+<td>Lambda Event Source payload for S3 event notifications wrapped in SQS event (S3-&gt;SQS)</td>
+</tr>
+<tr>
+<td><strong>SesModel</strong></td>
+<td>Lambda Event Source payload for Amazon Simple Email Service</td>
+</tr>
+<tr>
+<td><strong>SnsModel</strong></td>
+<td>Lambda Event Source payload for Amazon Simple Notification Service</td>
+</tr>
+<tr>
+<td><strong>SqsModel</strong></td>
+<td>Lambda Event Source payload for Amazon SQS</td>
+</tr>
+</tbody>
+</table>
+<h4 id="extending-built-in-models">Extending built-in models<a class="headerlink" href="#extending-built-in-models" title="Permanent link">&para;</a></h4>
+<p>You can extend them to include your own models, and yet have all other known fields parsed along the way.</p>
+<details class="tip" open="open">
+<summary>Tip</summary>
+<p>For Mypy users, we only allow type override for fields where payload is injected e.g. <code>detail</code>, <code>body</code>, etc.</p>
+</details>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Extending EventBridge model as an example</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="n">EventBridgeModel</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">quantity</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">OrderItem</span><span class="p">]</span>
+
+<span class="hll"><span class="k">class</span> <span class="nc">OrderEventModel</span><span class="p">(</span><span class="n">EventBridgeModel</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">detail</span><span class="p">:</span> <span class="n">Order</span>
+</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;6a7e8feb-b491-4cf7-a9f1-bf3703467718&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;detail-type&quot;</span><span class="p">:</span> <span class="s2">&quot;OrderPurchased&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;OrderService&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;account&quot;</span><span class="p">:</span> <span class="s2">&quot;111122223333&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-10-22T18:43:48Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;some_additional&quot;</span><span class="p">],</span>
+<span class="hll">    <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span>        <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">10876546789</span><span class="p">,</span>
+        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;My order&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;items&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1015938732</span><span class="p">,</span>
+                <span class="s2">&quot;quantity&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;item xpto&quot;</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="hll"><span class="n">ret</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">OrderEventModel</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</span>
+<span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">source</span> <span class="o">==</span> <span class="s2">&quot;OrderService&quot;</span>
+<span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">detail</span><span class="o">.</span><span class="n">description</span> <span class="o">==</span> <span class="s2">&quot;My order&quot;</span>
+<span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">detail_type</span> <span class="o">==</span> <span class="s2">&quot;OrderPurchased&quot;</span> <span class="c1"># we rename it to snake_case since detail-type is an invalid name</span>
+
+<span class="k">for</span> <span class="n">order_item</span> <span class="ow">in</span> <span class="n">ret</span><span class="o">.</span><span class="n">detail</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
+    <span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>What's going on here, you might ask</strong>:</p>
+<ol>
+<li>We imported our built-in model <code>EventBridgeModel</code> from the parser utility</li>
+<li>Defined how our <code>Order</code> should look like</li>
+<li>Defined how part of our EventBridge event should look like by overriding <code>detail</code> key within our <code>OrderEventModel</code></li>
+<li>Parser parsed the original event against <code>OrderEventModel</code></li>
+</ol>
+<details class="tip" open="open">
+<summary>Tip</summary>
+<p>When extending a <code>string</code> field containing JSON, you need to wrap the field
+with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target="_blank">Pydantic's Json Type</a>:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Json</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">event_parser</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="n">APIGatewayProxyEventV2Model</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+<span class="k">class</span> <span class="nc">CancelOrder</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span> <span class="nc">CancelOrderModel</span><span class="p">(</span><span class="n">APIGatewayProxyEventV2Model</span><span class="p">):</span>
+<span class="hll">    <span class="n">body</span><span class="p">:</span> <span class="n">Json</span><span class="p">[</span><span class="n">CancelOrder</span><span class="p">]</span>  <span class="c1"># type: ignore[assignment]</span>
+</span>
+
+<span class="nd">@event_parser</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">CancelOrderModel</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">CancelOrderModel</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">cancel_order</span><span class="p">:</span> <span class="n">CancelOrder</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">body</span>
+</span>
+    <span class="k">assert</span> <span class="n">cancel_order</span><span class="o">.</span><span class="n">order_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
+<p>Alternatively, you could use a <a href="https://pydantic-docs.helpmanual.io/usage/validators/" target="_blank">Pydantic validator</a> to transform the JSON string into a dict before the mapping:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">validator</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">event_parser</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="n">APIGatewayProxyEventV2Model</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+<span class="k">class</span> <span class="nc">CancelOrder</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="k">class</span> <span class="nc">CancelOrderModel</span><span class="p">(</span><span class="n">APIGatewayProxyEventV2Model</span><span class="p">):</span>
+    <span class="n">body</span><span class="p">:</span> <span class="n">CancelOrder</span>  <span class="c1"># type: ignore[assignment]</span>
+
+<span class="hll">    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span class="hll">    <span class="k">def</span> <span class="nf">transform_body_to_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span class="hll">        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span>
+
+<span class="nd">@event_parser</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">CancelOrderModel</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">CancelOrderModel</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">cancel_order</span><span class="p">:</span> <span class="n">CancelOrder</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">body</span>
+</span>
+    <span class="k">assert</span> <span class="n">cancel_order</span><span class="o">.</span><span class="n">order_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<h3 id="envelopes">Envelopes<a class="headerlink" href="#envelopes" title="Permanent link">&para;</a></h3>
+<p>When trying to parse your payloads wrapped in a known structure, you might encounter the following situations:</p>
+<ul>
+<li>Your actual payload is wrapped around a known structure, for example Lambda Event Sources like EventBridge</li>
+<li>You're only interested in a portion of the payload, for example parsing the <code>detail</code> of custom events in EventBridge, or <code>body</code> of SQS records</li>
+</ul>
+<p>You can either solve these situations by creating a model of these known structures, parsing them, then extracting and parsing a key where your payload is.</p>
+<p>This can become difficult quite quickly. Parser makes this problem easier through a feature named <code>Envelope</code>.</p>
+<p>Envelopes can be used via <code>envelope</code> parameter available in both <code>parse</code> function and <code>event_parser</code> decorator.</p>
+<p>Here's an example of parsing a model found in an event coming from EventBridge, where all you want is what's inside the <code>detail</code> key.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Parsing payload in a given key only using envelope feature</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">event_parser</span><span class="p">,</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">envelopes</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="k">class</span> <span class="nc">UserModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password2</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;6a7e8feb-b491-4cf7-a9f1-bf3703467718&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;detail-type&quot;</span><span class="p">:</span> <span class="s2">&quot;CustomerSignedUp&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="s2">&quot;CustomerService&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;account&quot;</span><span class="p">:</span> <span class="s2">&quot;111122223333&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="s2">&quot;2020-10-22T18:43:48Z&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;region&quot;</span><span class="p">:</span> <span class="s2">&quot;us-west-1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;resources&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;some_additional_&quot;</span><span class="p">],</span>
+<span class="hll">    <span class="s2">&quot;detail&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class="hll">        <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;password1&quot;</span><span class="p">:</span> <span class="s2">&quot;myp@ssword&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="s2">&quot;password2&quot;</span><span class="p">:</span> <span class="s2">&quot;repeat password&quot;</span>
+</span><span class="hll">    <span class="p">}</span>
+</span><span class="p">}</span>
+
+<span class="hll"><span class="n">ret</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UserModel</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EventBridgeEnvelope</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</span>
+<span class="c1"># Parsed model only contains our actual model, not the entire EventBridge + Payload parsed</span>
+<span class="k">assert</span> <span class="n">ret</span><span class="o">.</span><span class="n">password1</span> <span class="o">==</span> <span class="n">ret</span><span class="o">.</span><span class="n">password2</span>
+
+<span class="c1"># Same behaviour but using our decorator</span>
+<span class="hll"><span class="nd">@event_parser</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UserModel</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EventBridgeEnvelope</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">UserModel</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="n">event</span><span class="o">.</span><span class="n">password1</span> <span class="o">==</span> <span class="n">event</span><span class="o">.</span><span class="n">password2</span>
+</code></pre></div></td></tr></table></div>
+<p><strong>What's going on here, you might ask</strong>:</p>
+<ol>
+<li>We imported built-in <code>envelopes</code> from the parser utility</li>
+<li>Used <code>envelopes.EventBridgeEnvelope</code> as the envelope for our <code>UserModel</code> model</li>
+<li>Parser parsed the original event against the EventBridge model</li>
+<li>Parser then parsed the <code>detail</code> key using <code>UserModel</code></li>
+</ol>
+<h4 id="built-in-envelopes">Built-in envelopes<a class="headerlink" href="#built-in-envelopes" title="Permanent link">&para;</a></h4>
+<p>Parser comes with the following built-in envelopes, where <code>Model</code> in the return section is your given model.</p>
+<table>
+<thead>
+<tr>
+<th>Envelope name</th>
+<th>Behaviour</th>
+<th>Return</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DynamoDBStreamEnvelope</strong></td>
+<td>1. Parses data using <code>DynamoDBStreamModel</code>. <br/> 2. Parses records in <code>NewImage</code> and <code>OldImage</code> keys using your model. <br/> 3. Returns a list with a dictionary containing <code>NewImage</code> and <code>OldImage</code> keys</td>
+<td><code>List[Dict[str, Optional[Model]]]</code></td>
+</tr>
+<tr>
+<td><strong>EventBridgeEnvelope</strong></td>
+<td>1. Parses data using <code>EventBridgeModel</code>. <br/> 2. Parses <code>detail</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
+<tr>
+<td><strong>SqsEnvelope</strong></td>
+<td>1. Parses data using <code>SqsModel</code>. <br/> 2. Parses records in <code>body</code> key using your model and return them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>CloudWatchLogsEnvelope</strong></td>
+<td>1. Parses data using <code>CloudwatchLogsModel</code> which will base64 decode and decompress it. <br/> 2. Parses records in <code>message</code> key using your model and return them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>KinesisDataStreamEnvelope</strong></td>
+<td>1. Parses data using <code>KinesisDataStreamModel</code> which will base64 decode it. <br/> 2. Parses records in in <code>Records</code> key using your model and returns them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>KinesisFirehoseEnvelope</strong></td>
+<td>1. Parses data using <code>KinesisFirehoseModel</code> which will base64 decode it. <br/> 2. Parses records in in <code>Records</code> key using your model and returns them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>SnsEnvelope</strong></td>
+<td>1. Parses data using <code>SnsModel</code>. <br/> 2. Parses records in <code>body</code> key using your model and return them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>SnsSqsEnvelope</strong></td>
+<td>1. Parses data using <code>SqsModel</code>. <br/> 2. Parses SNS records in <code>body</code> key using <code>SnsNotificationModel</code>. <br/> 3. Parses data in <code>Message</code> key using your model and return them in a list.</td>
+<td><code>List[Model]</code></td>
+</tr>
+<tr>
+<td><strong>ApiGatewayEnvelope</strong></td>
+<td>1. Parses data using <code>APIGatewayProxyEventModel</code>. <br/> 2. Parses <code>body</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
+<tr>
+<td><strong>ApiGatewayV2Envelope</strong></td>
+<td>1. Parses data using <code>APIGatewayProxyEventV2Model</code>. <br/> 2. Parses <code>body</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
+<tr>
+<td><strong>LambdaFunctionUrlEnvelope</strong></td>
+<td>1. Parses data using <code>LambdaFunctionUrlModel</code>. <br/> 2. Parses <code>body</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
+<tr>
+<td><strong>KafkaEnvelope</strong></td>
+<td>1. Parses data using <code>KafkaRecordModel</code>. <br/> 2. Parses <code>value</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
+</tbody>
+</table>
+<h4 id="bringing-your-own-envelope">Bringing your own envelope<a class="headerlink" href="#bringing-your-own-envelope" title="Permanent link">&para;</a></h4>
+<p>You can create your own Envelope model and logic by inheriting from <code>BaseEnvelope</code>, and implementing the <code>parse</code> method.</p>
+<p>Here's a snippet of how the EventBridge envelope we demonstrated previously is implemented.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">EventBridge Model</label><label for="__tabbed_1_2">EventBridge Envelope</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+
+<span class="k">class</span> <span class="nc">EventBridgeModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">version</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># noqa: A003,VNE003</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">account</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">time</span><span class="p">:</span> <span class="n">datetime</span>
+    <span class="n">region</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">resources</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">detail_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">alias</span><span class="o">=</span><span class="s2">&quot;detail-type&quot;</span><span class="p">)</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseEnvelope</span><span class="p">,</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="n">EventBridgeModel</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="n">Model</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">BaseModel</span><span class="p">)</span>
+
+<span class="hll"><span class="k">class</span> <span class="nc">EventBridgeEnvelope</span><span class="p">(</span><span class="n">BaseEnvelope</span><span class="p">):</span>
+</span>
+<span class="hll">    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Model</span><span class="p">]:</span>
+</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Parses data found with model provided</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        data : Dict</span>
+<span class="sd">            Lambda event to be parsed</span>
+<span class="sd">        model : Model</span>
+<span class="sd">            Data model provided to parse after extracting data using envelope</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Any</span>
+<span class="sd">            Parsed detail payload with model provided</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+<span class="hll">        <span class="n">parsed_envelope</span> <span class="o">=</span> <span class="n">EventBridgeModel</span><span class="o">.</span><span class="n">parse_obj</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class="hll">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">parsed_envelope</span><span class="o">.</span><span class="n">detail</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<p><strong>What's going on here, you might ask</strong>:</p>
+<ol>
+<li>We defined an envelope named <code>EventBridgeEnvelope</code> inheriting from <code>BaseEnvelope</code></li>
+<li>Implemented the <code>parse</code> abstract method taking <code>data</code> and <code>model</code> as parameters</li>
+<li>Then, we parsed the incoming data with our envelope to confirm it matches EventBridge's structure defined in <code>EventBridgeModel</code></li>
+<li>Lastly, we call <code>_parse</code> from <code>BaseEnvelope</code> to parse the data in our envelope (.detail) using the customer model</li>
+</ol>
+<h3 id="data-model-validation">Data model validation<a class="headerlink" href="#data-model-validation" title="Permanent link">&para;</a></h3>
+<details class="warning" open="open">
+<summary>Warning</summary>
+<p>This is radically different from the <strong>Validator utility</strong> which validates events against JSON Schema.</p>
+</details>
+<p>You can use parser's validator for deep inspection of object values and complex relationships.</p>
+<p>There are two types of class method decorators you can use:</p>
+<ul>
+<li><strong><code>validator</code></strong> - Useful to quickly validate an individual field and its value</li>
+<li><strong><code>root_validator</code></strong> - Useful to validate the entire model's data</li>
+</ul>
+<p>Keep the following in mind regardless of which decorator you end up using it:</p>
+<ul>
+<li>You must raise either <code>ValueError</code>, <code>TypeError</code>, or <code>AssertionError</code> when value is not compliant</li>
+<li>You must return the value(s) itself if compliant</li>
+</ul>
+<h4 id="validating-fields">validating fields<a class="headerlink" href="#validating-fields" title="Permanent link">&para;</a></h4>
+<p>Quick validation to verify whether the field <code>message</code> has the value of <code>hello world</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Data field validation with validator</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">validator</span>
+
+<span class="k">class</span> <span class="nc">HelloWorldModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="hll">    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">)</span>
+</span>    <span class="k">def</span> <span class="nf">is_hello_world</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="s2">&quot;hello world&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Message must be hello world!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">v</span>
+
+<span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">HelloWorldModel</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;hello universe&quot;</span><span class="p">})</span>
+</code></pre></div></td></tr></table></div>
+<p>If you run as-is, you should expect the following error with the message we provided in our exception:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample validation error message</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">message</span>
+  <span class="n">Message</span> <span class="n">must</span> <span class="n">be</span> <span class="n">hello</span> <span class="n">world</span><span class="err">!</span> <span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="n">value_error</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<p>Alternatively, you can pass <code>'*'</code> as an argument for the decorator so that you can validate every value available.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Validating all data fields with custom logic</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">validator</span>
+
+<span class="k">class</span> <span class="nc">HelloWorldModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">sender</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="hll">    <span class="nd">@validator</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+</span>    <span class="k">def</span> <span class="nf">has_whitespace</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39; &#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Must have whitespace...&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">v</span>
+
+<span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">HelloWorldModel</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;hello universe&quot;</span><span class="p">,</span> <span class="s2">&quot;sender&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">})</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="validating-entire-model">validating entire model<a class="headerlink" href="#validating-entire-model" title="Permanent link">&para;</a></h4>
+<p><code>root_validator</code> can help when you have a complex validation mechanism. For example finding whether data has been omitted, comparing field values, etc.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Comparing and validating multiple fields at once with root_validator</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">root_validator</span>
+
+<span class="k">class</span> <span class="nc">UserModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password2</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="nd">@root_validator</span>
+    <span class="k">def</span> <span class="nf">check_passwords_match</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="n">pw1</span><span class="p">,</span> <span class="n">pw2</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password1&#39;</span><span class="p">),</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password2&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pw1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pw2</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">pw1</span> <span class="o">!=</span> <span class="n">pw2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;passwords do not match&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">values</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;password1&quot;</span><span class="p">:</span> <span class="s2">&quot;myp@ssword&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;password2&quot;</span><span class="p">:</span> <span class="s2">&quot;repeat password&quot;</span>
+<span class="p">}</span>
+
+<span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UserModel</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<details class="info" open="open">
+<summary>Info</summary>
+<p>You can read more about validating list items, reusing validators, validating raw inputs, and a lot more in <a href="https://pydantic-docs.helpmanual.io/usage/validators/">Pydantic's documentation</a>.</p>
+</details>
+<h3 id="advanced-use-cases">Advanced use cases<a class="headerlink" href="#advanced-use-cases" title="Permanent link">&para;</a></h3>
+<details class="tip" open="open">
+<summary>Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?</summary>
+<p>Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator" target="_blank">data model code generation tool for Pydantic</a></p>
+</details>
+<p>There are number of advanced use cases well documented in Pydantic's doc such as creating <a href="https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability" target="_blank">immutable models</a>, <a href="https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value" target="_blank">declaring fields with dynamic values</a>.</p>
+<details class="tip" open="open">
+<summary>Pydantic helper functions</summary>
+<p>Pydantic also offers <a href="https://pydantic-docs.helpmanual.io/usage/models/#helper-functions" target="_blank">functions</a> to parse models from files, dicts, string, etc.</p>
+</details>
+<p>Two possible unknown use cases are Models and exception' serialization. Models have methods to <a href="https://pydantic-docs.helpmanual.io/usage/exporting_models/" target="_blank">export them</a> as <code>dict</code>, <code>JSON</code>, <code>JSON Schema</code>, and Validation exceptions can be exported as JSON.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Converting data models in various formats</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">parse</span><span class="p">,</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">ValidationError</span><span class="p">,</span> <span class="n">validator</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;user&quot;</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">UserModel</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">username</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password1</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">password2</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="s2">&quot;universe&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;password1&quot;</span><span class="p">:</span> <span class="s2">&quot;myp@ssword&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;password2&quot;</span><span class="p">:</span> <span class="s2">&quot;repeat password&quot;</span>
+<span class="p">}</span>
+
+<span class="k">def</span> <span class="nf">my_function</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">parse</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">UserModel</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">ValidationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="hll">        <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
+</span>        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;status_code&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+            <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Invalid username&quot;</span>
+        <span class="p">}</span>
+
+<span class="n">User</span><span class="p">:</span> <span class="n">UserModel</span> <span class="o">=</span> <span class="n">my_function</span><span class="p">()</span>
+<span class="hll"><span class="n">user_dict</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+</span><span class="hll"><span class="n">user_json</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+</span><span class="hll"><span class="n">user_json_schema_as_dict</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">schema</span><span class="p">()</span>
+</span><span class="hll"><span class="n">user_json_schema_as_json</span> <span class="o">=</span> <span class="n">User</span><span class="o">.</span><span class="n">schema_json</span><span class="p">(</span><span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+<p>These can be quite useful when manipulating models that later need to be serialized as inputs for services like DynamoDB, EventBridge, etc.</p>
+<h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
+<p><strong>When should I use parser vs data_classes utility?</strong></p>
+<p>Use data classes utility when you're after autocomplete, self-documented attributes and helpers to extract data from common event sources.</p>
+<p>Parser is best suited for those looking for a trade-off between defining their models for deep validation, parsing and autocomplete for an additional dependency to be brought in.</p>
+<p><strong>How do I import X from Pydantic?</strong></p>
+<p>We export most common classes, exceptions, and utilities from Pydantic as part of parser e.g. <code>from aws_lambda_powertools.utilities.parser import BaseModel</code>.</p>
+<p>If what you're trying to use isn't available as part of the high level import system, use the following escape hatch mechanism:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Pydantic import escape hatch</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.pydantic</span> <span class="kn">import</span> <span class="o">&lt;</span><span class="n">what</span> <span class="n">you</span><span class="s1">&#39;d like to import&#39;</span><span class="o">&gt;</span>
+</code></pre></div></td></tr></table></div>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2023-06-09
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2022 Amazon Web Services
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.a51614de.min.js"></script>
+      
+        
+          <script src="../../javascript/aws-amplify.min.js"></script>
+        
+      
+        
+          <script src="../../javascript/extra.js"></script>
+        
+      
+    
+  </body>
+</html>
