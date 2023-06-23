@@ -133,7 +133,7 @@ class ActiveMQEvent(DictWrapper):
     @property
     def message(self) -> ActiveMQMessage:
         """
-        Returns the next ActiveMQ message using an iterator.
+        Returns the next ActiveMQ message using an iterator
 
         Returns
         -------
