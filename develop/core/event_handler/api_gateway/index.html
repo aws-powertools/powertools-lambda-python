@@ -3418,12 +3418,16 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </div>
 </div>
 <h3 id="compress">Compress<a class="headerlink" href="#compress" title="Permanent link">&para;</a></h3>
-<p>You can compress with gzip and base64 encode your responses via <code>compress</code> parameter.</p>
+<p>You can compress with gzip and base64 encode your responses via <code>compress</code> parameter. You have the option to pass the <code>compress</code> parameter when working with a specific route or using the Response object.</p>
+<details class="info" open="open">
+<summary>Info</summary>
+<p>The <code>compress</code> parameter used in the Response object takes precedence over the one used in the route.</p>
+</details>
 <details class="warning" open="open">
 <summary>Warning</summary>
 <p>The client must send the <code>Accept-Encoding</code> header, otherwise a normal response will be sent.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">compressing_responses.py</label><label for="__tabbed_10_2">compressing_responses.json</label><label for="__tabbed_10_3">compressing_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">compressing_responses_using_route.py</label><label for="__tabbed_10_2">compressing_responses_using_response.py</label><label for="__tabbed_10_3">compressing_responses.json</label><label for="__tabbed_10_4">compressing_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3499,6 +3503,70 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 
      <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_types</span><span class="o">.</span><span class="n">APPLICATION_JSON</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">())</span>
 
+
+ <span class="c1"># You can continue to use other utilities just as before</span>
+ <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">API_GATEWAY_REST</span><span class="p">)</span>
+ <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
+ <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code> <span class="kn">import</span> <span class="nn">requests</span>
+
+ <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+ <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="p">(</span>
+     <span class="n">APIGatewayRestResolver</span><span class="p">,</span>
+     <span class="n">Response</span><span class="p">,</span>
+     <span class="n">content_types</span><span class="p">,</span>
+ <span class="p">)</span>
+ <span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+ <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+ <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+ <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+ <span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
+
+
+ <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+ <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
+ <span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+     <span class="n">todos</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
+     <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+     <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+<span class="hll">     <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">content_type</span><span class="o">=</span><span class="n">content_types</span><span class="o">.</span><span class="n">APPLICATION_JSON</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">],</span> <span class="n">compress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span>
 
  <span class="c1"># You can continue to use other utilities just as before</span>
  <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">API_GATEWAY_REST</span><span class="p">)</span>
@@ -4921,7 +4989,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-06-19
+      2023-06-23
     
   </small>
 </div>
