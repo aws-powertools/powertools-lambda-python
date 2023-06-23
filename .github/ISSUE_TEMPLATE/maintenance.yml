@@ -53,7 +53,7 @@ body:
     attributes:
       label: Acknowledgment
       options:
-        - label: This request meets [Powertools for AWS Lambda (Python) Tenets](https://docs.powertools.aws.dev/lambda-python/latest/#tenets)
+        - label: This request meets [Powertools for AWS Lambda (Python) Tenets](https://docs.powertools.aws.dev/lambda/python/latest/#tenets)
           required: true
         - label: Should this be considered in other Powertools for AWS Lambda languages? i.e. [Java](https://github.com/aws-powertools/powertools-lambda-java/), [TypeScript](https://github.com/aws-powertools/powertools-lambda-typescript/), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet/)
           required: false
