@@ -114,7 +114,7 @@ class ActiveMQEvent(DictWrapper):
 
     def __init__(self, data: Dict[str, Any]):
         super().__init__(data)
-        self._messages = None
+        self._messages: Optional[Iterator[ActiveMQMessage]] = None
 
     @property
     def event_source(self) -> str:

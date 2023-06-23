@@ -89,7 +89,7 @@ class KafkaEvent(DictWrapper):
 
     def __init__(self, data: Dict[str, Any]):
         super().__init__(data)
-        self._records = None
+        self._records: Optional[Iterator[KafkaEventRecord]] = None
 
     @property
     def event_source(self) -> str:
