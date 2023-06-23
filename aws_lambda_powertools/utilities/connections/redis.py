@@ -1,7 +1,10 @@
 import logging
 from typing import Optional, Type, Union
 
-import redis
+try:
+    import redis  # type:ignore
+except ImportError:
+    redis = None
 
 from .base_sync import BaseConnectionSync
 from .exceptions import RedisConnectionError

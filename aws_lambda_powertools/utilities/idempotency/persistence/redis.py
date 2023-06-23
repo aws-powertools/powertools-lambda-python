@@ -1,8 +1,11 @@
 import datetime
 import logging
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
-import redis
+try:
+    import redis  # type:ignore
+except ImportError:
+    redis = None
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -20,7 +23,7 @@ logger = logging.getLogger(__name__)
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
-        connection: Union[redis.Redis, redis.RedisCluster],
+        connection,
         in_progress_expiry_attr: str = "in_progress_expiration",
         status_attr: str = "status",
         data_attr: str = "data",
@@ -53,8 +56,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         return DataRecord(
             status=item[self.status_attr],
             in_progress_expiry_timestamp=item.get(self.in_progress_expiry_attr),
-            response_data=item.get(self.data_attr),
-            payload_hash=item.get(self.validation_key_attr),
+            response_data=str(item.get(self.data_attr)),
+            payload_hash=str(item.get(self.validation_key_attr)),
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
