@@ -4,6 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **event_source:** convert functional tests to unit tests ([#2506](https://github.com/aws-powertools/powertools-lambda-python/issues/2506))
+
+## Maintenance
+
+* **analytics:** update docs base origin url ([#2560](https://github.com/aws-powertools/powertools-lambda-python/issues/2560))
+* **deps-dev:** bump pytest from 7.3.2 to 7.4.0 ([#2557](https://github.com/aws-powertools/powertools-lambda-python/issues/2557))
+
 
 <a name="v2.18.0"></a>
 ## [v2.18.0] - 2023-06-23
