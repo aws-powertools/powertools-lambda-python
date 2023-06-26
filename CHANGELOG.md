@@ -4,6 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **event_source:** convert functional tests to unit tests ([#2506](https://github.com/aws-powertools/powertools-lambda-python/issues/2506))
+
+## Documentation
+
+* **idempotency:** split snippets, improve wording and lint examples ([#2492](https://github.com/aws-powertools/powertools-lambda-python/issues/2492))
+
+## Maintenance
+
+* **analytics:** update docs base origin url ([#2560](https://github.com/aws-powertools/powertools-lambda-python/issues/2560))
+* **deps:** bump ossf/scorecard-action from 2.1.3 to 2.2.0 ([#2563](https://github.com/aws-powertools/powertools-lambda-python/issues/2563))
+* **deps-dev:** bump mkdocs-material from 9.1.16 to 9.1.17 ([#2564](https://github.com/aws-powertools/powertools-lambda-python/issues/2564))
+* **deps-dev:** bump pytest from 7.3.2 to 7.4.0 ([#2557](https://github.com/aws-powertools/powertools-lambda-python/issues/2557))
+
 
 <a name="v2.18.0"></a>
 ## [v2.18.0] - 2023-06-23
