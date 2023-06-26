@@ -56,7 +56,7 @@ classDiagram
 Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
 
 ???+ note
-    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources) or [AWS Cloud Development Kit (CDK)](#required-resources), it already adds the required permissions.
+    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), [AWS Cloud Development Kit (CDK)](#required-resources), or [Terraform](#required-resources) it already adds the required permissions.
 
 ### Required resources
 
