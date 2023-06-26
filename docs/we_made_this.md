@@ -35,6 +35,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
 
+* [Serverless API Idempotency with AWS Lambda Powertools and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank"}** :material-twitter:
