@@ -25,7 +25,7 @@ class PaymentError(Exception):
     ...
 
 
-@idempotent(persistence_store=persistence_layer)
+@idempotent(config=config, persistence_store=persistence_layer)
 def lambda_handler(event: dict, context: LambdaContext):
     try:
         payment: Payment = create_subscription_payment(event)

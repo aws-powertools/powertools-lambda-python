@@ -89,7 +89,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
 === "Terraform"
 
-    ```terraform hl_lines="10 13 16 19-21"
+    ```terraform hl_lines="14-26 64-70"
     --8<-- "examples/idempotency/templates/terraform.tf"
     ```
 
@@ -163,7 +163,7 @@ You can can easily integrate with [Batch utility](batch.md){target="_blank"} via
 
 === "Integration with Batch Processor"
 
-    ```python hl_lines="2 12 16 20 31"
+    ```python hl_lines="2 12 16 20 31 35 37"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
     ```
 
@@ -526,7 +526,7 @@ You can enable in-memory caching with the **`use_local_cache`** parameter:
 
 === "Caching idempotent transactions in-memory to prevent multiple calls to storage"
 
-    ```python hl_lines="3 11"
+    ```python hl_lines="11"
     --8<-- "examples/idempotency/src/working_with_local_cache.py"
     ```
 
@@ -548,7 +548,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 
 === "Adjusting idempotency record expiration"
 
-    ```python hl_lines="3 11"
+    ```python hl_lines="11"
     --8<-- "examples/idempotency/src/working_with_record_expiration.py"
     ```
 
@@ -724,7 +724,7 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 === "Using Idempotency with JSONSchema Validation utility"
 
-    ```python hl_lines="7 9 13"
+    ```python hl_lines="13"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
     ```
 
@@ -748,7 +748,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 === "test_disabling_idempotency_utility.py"
 
-    ```python hl_lines="3 4 23"
+    ```python hl_lines="3 4 23 24"
     --8<-- "examples/idempotency/tests/test_disabling_idempotency_utility.py"
     ```
 
@@ -764,7 +764,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 === "test_with_dynamodb_local.py"
 
-    ```python hl_lines="3-5 25 28"
+    ```python hl_lines="3-5 25 26"
     --8<-- "examples/idempotency/tests/test_with_dynamodb_local.py"
     ```
 
@@ -781,7 +781,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 === "test_with_io_operations.py"
 
-    ```python hl_lines="4 5 27"
+    ```python hl_lines="4 5 24 25 27"
     --8<-- "examples/idempotency/tests/test_with_io_operations.py"
     ```
 
