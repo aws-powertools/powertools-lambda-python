@@ -154,6 +154,7 @@ class BaseProxyEvent(DictWrapper):
             query_string_parameters=self.query_string_parameters, name=name, default_value=default_value
         )
 
+    # Maintenance: missing @overload to ensure return type is a str when default_value is set
     def get_header_value(
         self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
     ) -> Optional[str]:

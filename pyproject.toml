@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.17.0"
+version = "2.18.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -15,7 +15,7 @@ classifiers=[
     "Programming Language :: Python :: 3.10",
 ]
 repository = "https://github.com/aws-powertools/powertools-lambda-python"
-documentation = "https://docs.powertools.aws.dev/lambda-python/"
+documentation = "https://docs.powertools.aws.dev/lambda/python/"
 readme = "README.md"
 keywords = ["aws_lambda_powertools", "aws", "tracing", "logging", "lambda", "powertools", "feature_flags", "idempotency", "middleware"]
 # MIT-0 is not recognized as an existing license from poetry.
@@ -36,7 +36,7 @@ typing-extensions = "^4.6.2"
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
-pytest = "^7.3.2"
+pytest = "^7.4.0"
 black = "^23.3"
 boto3 = "^1.18"
 flake8 = [
@@ -48,7 +48,7 @@ flake8-builtins = "^2.1.0"
 flake8-comprehensions = "^3.13.0"
 flake8-debugger = "^4.0.0"
 flake8-fixme = "^1.1.1"
-flake8-variables-names = "^0.0.5"
+flake8-variables-names = "^0.0.6"
 flake8-black = "^0.3.6"
 isort = "^5.11.5"
 pytest-cov = "^4.1.0"
@@ -73,7 +73,7 @@ python-snappy = "^0.6.1"
 mypy-boto3-appconfig = "^1.26.71"
 mypy-boto3-cloudformation = "^1.26.156"
 mypy-boto3-cloudwatch = "^1.26.127"
-mypy-boto3-dynamodb = "^1.26.152"
+mypy-boto3-dynamodb = "^1.26.158"
 mypy-boto3-lambda = "^1.26.157"
 mypy-boto3-logs = "^1.26.149"
 mypy-boto3-secretsmanager = "^1.26.135"
@@ -82,11 +82,11 @@ mypy-boto3-s3 = "^1.26.155"
 mypy-boto3-xray = "^1.26.122"
 types-requests = "^2.31.0"
 typing-extensions = "^4.6.2"
-mkdocs-material = "^9.1.16"
+mkdocs-material = "^9.1.17"
 filelock = "^3.12.2"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.26.70"
-ijson = "^3.2.1"
+ijson = "^3.2.2"
 typed-ast = { version = "^1.5.4", python = "< 3.8"}
 hvac = "^1.1.1"
 aws-requests-auth = "^0.4.3"

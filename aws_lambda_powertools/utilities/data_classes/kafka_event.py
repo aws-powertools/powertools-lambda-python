@@ -87,6 +87,10 @@ class KafkaEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
 
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        self._records: Optional[Iterator[KafkaEventRecord]] = None
+
     @property
     def event_source(self) -> str:
         """The AWS service from which the Kafka event record originated."""
@@ -116,5 +120,20 @@ class KafkaEvent(DictWrapper):
 
     @property
     def record(self) -> KafkaEventRecord:
-        """The next Kafka record."""
-        return next(self.records)
+        """
+        Returns the next Kafka record using an iterator.
+
+        Returns
+        -------
+        KafkaEventRecord
+            The next Kafka record.
+
+        Raises
+        ------
+        StopIteration
+            If there are no more records available.
+
+        """
+        if self._records is None:
+            self._records = self.records
+        return next(self._records)

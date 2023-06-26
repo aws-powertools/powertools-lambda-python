@@ -7,6 +7,14 @@ description: Utility
 
 The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which are safe to retry.
 
+## Key features
+
+* Prevent Lambda handler from executing more than once on the same event payload during a time window
+* Ensure Lambda handler returns the same result when called with the same payload
+* Select a subset of the event as the idempotency key using JMESPath expressions
+* Set a time window in which records with the same payload should be considered duplicates
+* Expires in-progress executions if the Lambda function times out halfway through
+
 ## Terminology
 
 The property of idempotency means that an operation does not cause additional side effects if it is called more than once with the same input parameters.
@@ -40,15 +48,6 @@ classDiagram
 
 <i>Idempotency record representation</i>
 </center>
-
-## Key features
-
-* Prevent Lambda handler from executing more than once on the same event payload during a time window
-* Ensure Lambda handler returns the same result when called with the same payload
-* Select a subset of the event as the idempotency key using JMESPath expressions
-* Set a time window in which records with the same payload should be considered duplicates
-* Expires in-progress executions if the Lambda function times out halfway through
-* Bring Your Own Persistence Store
 
 ## Getting started
 
