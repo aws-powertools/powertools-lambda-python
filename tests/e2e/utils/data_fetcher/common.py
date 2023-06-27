@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Tuple
 
 import boto3
-import requests as requests
+import requests
 from mypy_boto3_lambda import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 from requests import Request, Response
