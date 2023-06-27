@@ -44,8 +44,8 @@ exclude = ["docs", ".eggs", "setup.py", "example", ".aws-sam", ".git", "dist", "
 line-length = 120
 
 
-#fix = true
-#fixable = ["I", "COM812", "W"]
+fix = true
+fixable = ["I", "COM812", "W"]
 
 # See: https://github.com/astral-sh/ruff/issues/128
 typing-modules = ["aws_lambda_powertools.utilities.parser.types"]
