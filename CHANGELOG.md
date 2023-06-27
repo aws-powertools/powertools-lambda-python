@@ -4,6 +4,35 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **e2e:** fix idempotency tests ([#2576](https://github.com/aws-powertools/powertools-lambda-python/issues/2576))
+
+## Code Refactoring
+
+* **event_source:** convert functional tests to unit tests ([#2506](https://github.com/aws-powertools/powertools-lambda-python/issues/2506))
+
+## Documentation
+
+* **i-made-this:** added new article on idempotency ([#2582](https://github.com/aws-powertools/powertools-lambda-python/issues/2582))
+* **i-made-this:** article on idempotency w/ CDK and Powertools ([#2569](https://github.com/aws-powertools/powertools-lambda-python/issues/2569))
+* **idempotency:** split snippets, improve wording and lint examples ([#2492](https://github.com/aws-powertools/powertools-lambda-python/issues/2492))
+
+## Features
+
+* **parser:** add support to VpcLatticeModel ([#2584](https://github.com/aws-powertools/powertools-lambda-python/issues/2584))
+
+## Maintenance
+
+* **analytics:** update docs base origin url ([#2560](https://github.com/aws-powertools/powertools-lambda-python/issues/2560))
+* **ci:** replace flake8 with Ruff as a linter ([#2495](https://github.com/aws-powertools/powertools-lambda-python/issues/2495))
+* **ci:** enable Ruff rule E501 and fix errors ([#2587](https://github.com/aws-powertools/powertools-lambda-python/issues/2587))
+* **deps:** bump ossf/scorecard-action from 2.1.3 to 2.2.0 ([#2563](https://github.com/aws-powertools/powertools-lambda-python/issues/2563))
+* **deps:** bump pypa/gh-action-pypi-publish from 1.8.6 to 1.8.7 ([#2573](https://github.com/aws-powertools/powertools-lambda-python/issues/2573))
+* **deps-dev:** bump mkdocs-material from 9.1.16 to 9.1.17 ([#2564](https://github.com/aws-powertools/powertools-lambda-python/issues/2564))
+* **deps-dev:** bump pytest from 7.3.2 to 7.4.0 ([#2557](https://github.com/aws-powertools/powertools-lambda-python/issues/2557))
+* **deps-dev:** bump mypy from 1.4.0 to 1.4.1 ([#2574](https://github.com/aws-powertools/powertools-lambda-python/issues/2574))
+
 
 <a name="v2.18.0"></a>
 ## [v2.18.0] - 2023-06-23
