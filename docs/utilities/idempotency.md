@@ -147,7 +147,7 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
 
     ```json
     {
-      "username": "xyz",
+      "user": "xyz",
       "product_id": "123456789"
     }
     ```

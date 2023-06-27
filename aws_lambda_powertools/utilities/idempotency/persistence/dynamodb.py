@@ -32,7 +32,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
         table_name: str,
-        key_attr: Optional[str] = "id",
+        key_attr: str = "id",  # remove optional for type checking.
         static_pk_value: Optional[str] = None,
         sort_key_attr: Optional[str] = None,
         expiry_attr: str = "expiration",
