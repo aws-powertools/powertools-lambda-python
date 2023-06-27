@@ -180,6 +180,7 @@ Parser comes with the following built-in models:
 | **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
+| **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
 
 #### Extending built-in models
 
@@ -336,6 +337,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **ApiGatewayV2Envelope**      | 1. Parses data using `APIGatewayProxyEventV2Model`. <br/> 2. Parses `body` key using your model and returns it.                                                                                             | `Model`                            |
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
+| **VpcLatticeEnvelope**        | 1. Parses data using `VpcLatticeModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 
 #### Bringing your own envelope
 
