@@ -60,7 +60,8 @@ def reset_tracing_config(mocker):
     Tracer._reset_config()
     # reset global cold start module
     mocker.patch(
-        "aws_lambda_powertools.tracing.tracer.is_cold_start", new_callable=mocker.PropertyMock(return_value=True)
+        "aws_lambda_powertools.tracing.tracer.is_cold_start",
+        new_callable=mocker.PropertyMock(return_value=True),
     )
     yield
 
@@ -107,7 +108,9 @@ def test_tracer_lambda_handler_subsegment(mocker, dummy_response, provider_stub,
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="handler response", value=dummy_response, namespace="booking"
+        key="handler response",
+        value=dummy_response,
+        namespace="booking",
     )
 
 
@@ -128,7 +131,7 @@ def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock
     # and use service name as a metadata namespace
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_method.<locals>.greeting"
+        name=f"## {MODULE_PREFIX}.test_tracer_method.<locals>.greeting",
     )
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
         key=f"{MODULE_PREFIX}.test_tracer_method.<locals>.greeting response",
@@ -153,7 +156,9 @@ def test_tracer_custom_metadata(monkeypatch, mocker, dummy_response, provider_st
     # THEN we should have metadata expected and booking as namespace
     assert put_metadata_mock.call_count == 1
     assert put_metadata_mock.call_args_list[0] == mocker.call(
-        key=annotation_key, value=annotation_value, namespace="booking"
+        key=annotation_key,
+        value=annotation_value,
+        namespace="booking",
     )
 
 
@@ -315,10 +320,10 @@ async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub,
     # THEN we should add metadata for each response like we would for a sync decorated method
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert in_subsegment_greeting_call_args == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting"
+        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting",
     )
     assert in_subsegment_greeting2_call_args == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting_2"
+        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting_2",
     )
 
     assert in_subsegment_mock.put_metadata.call_count == 2
@@ -408,7 +413,7 @@ def test_tracer_yield_from_context_manager(mocker, provider_stub, in_subsegment_
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert yield_function_trace == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_context_manager.<locals>.yield_with_capture"
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_context_manager.<locals>.yield_with_capture",
     )
     assert "test result" in result
 
@@ -479,7 +484,7 @@ def test_tracer_yield_from_nested_context_manager(mocker, provider_stub, in_subs
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert yield_function_trace == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_nested_context_manager.<locals>.yield_with_capture"
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_nested_context_manager.<locals>.yield_with_capture",
     )
     assert "test result" in result
 
@@ -511,7 +516,7 @@ def test_tracer_yield_from_generator(mocker, provider_stub, in_subsegment_mock):
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
     assert generator_fn_trace == mocker.call(
-        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_generator.<locals>.generator_fn"
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_generator.<locals>.generator_fn",
     )
     assert "test result" in result
 
@@ -647,7 +652,10 @@ def test_tracer_lambda_handler_add_service_annotation(mocker, dummy_response, pr
 
 
 def test_tracer_lambda_handler_do_not_add_service_annotation_when_missing(
-    mocker, dummy_response, provider_stub, in_subsegment_mock
+    mocker,
+    dummy_response,
+    provider_stub,
+    in_subsegment_mock,
 ):
     # GIVEN
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)

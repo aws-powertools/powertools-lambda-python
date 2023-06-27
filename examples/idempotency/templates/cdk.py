@@ -17,5 +17,9 @@ class IdempotencyConstruct(Construct):
             point_in_time_recovery=True,
         )
         self.idempotency_table.grant(
-            lambda_role, "dynamodb:PutItem", "dynamodb:GetItem", "dynamodb:UpdateItem", "dynamodb:DeleteItem"
+            lambda_role,
+            "dynamodb:PutItem",
+            "dynamodb:GetItem",
+            "dynamodb:UpdateItem",
+            "dynamodb:DeleteItem",
         )

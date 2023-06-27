@@ -72,7 +72,8 @@ def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
 
 
 def resolve_env_var_choice(
-    env: Optional[str] = None, choice: Optional[Union[str, float]] = None
+    env: Optional[str] = None,
+    choice: Optional[Union[str, float]] = None,
 ) -> Optional[Union[str, float]]:
     """Pick explicit choice over env, if available, otherwise return env value received
 
@@ -112,7 +113,8 @@ def powertools_dev_is_set() -> bool:
     is_on = strtobool(os.getenv(constants.POWERTOOLS_DEV_ENV, "0"))
     if is_on:
         warnings.warn(
-            "POWERTOOLS_DEV environment variable is enabled. Increasing verbosity across utilities.", stacklevel=2
+            "POWERTOOLS_DEV environment variable is enabled. Increasing verbosity across utilities.",
+            stacklevel=2,
         )
         return True
 

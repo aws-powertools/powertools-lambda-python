@@ -69,11 +69,16 @@ class VPCLatticeEvent(DictWrapper):
             Query string parameter value
         """
         return get_query_string_value(
-            query_string_parameters=self.query_string_parameters, name=name, default_value=default_value
+            query_string_parameters=self.query_string_parameters,
+            name=name,
+            default_value=default_value,
         )
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 
@@ -91,5 +96,8 @@ class VPCLatticeEvent(DictWrapper):
             Header value
         """
         return get_header_value(
-            headers=self.headers, name=name, default_value=default_value, case_sensitive=case_sensitive
+            headers=self.headers,
+            name=name,
+            default_value=default_value,
+            case_sensitive=case_sensitive,
         )

@@ -11,7 +11,9 @@ from retry import retry
 
 
 def get_lambda_response(
-    lambda_arn: str, payload: Optional[str] = None, client: Optional[LambdaClient] = None
+    lambda_arn: str,
+    payload: Optional[str] = None,
+    client: Optional[LambdaClient] = None,
 ) -> Tuple[InvocationResponseTypeDef, datetime]:
     client = client or boto3.client("lambda")
     payload = payload or ""

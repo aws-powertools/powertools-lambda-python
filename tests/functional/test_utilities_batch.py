@@ -300,7 +300,7 @@ def test_batch_processor_context_with_failure(sqs_event_factory, record_handler)
     assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)
     assert len(batch.fail_messages) == 2
     assert batch.response() == {
-        "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}]
+        "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}],
     }
 
 
@@ -345,7 +345,7 @@ def test_batch_processor_kinesis_context_with_failure(kinesis_event_factory, kin
         "batchItemFailures": [
             {"itemIdentifier": first_record.kinesis.sequence_number},
             {"itemIdentifier": third_record.kinesis.sequence_number},
-        ]
+        ],
     }
 
 
@@ -408,7 +408,7 @@ def test_batch_processor_dynamodb_context_with_failure(dynamodb_event_factory, d
         "batchItemFailures": [
             {"itemIdentifier": first_record["dynamodb"]["SequenceNumber"]},
             {"itemIdentifier": third_record["dynamodb"]["SequenceNumber"]},
-        ]
+        ],
     }
 
 
@@ -482,7 +482,7 @@ def test_batch_processor_context_model_with_failure(sqs_event_factory, order_eve
         "batchItemFailures": [
             {"itemIdentifier": first_record["messageId"]},
             {"itemIdentifier": third_record["messageId"]},
-        ]
+        ],
     }
 
 
@@ -574,12 +574,14 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
         "batchItemFailures": [
             {"itemIdentifier": first_record["dynamodb"]["SequenceNumber"]},
             {"itemIdentifier": third_record["dynamodb"]["SequenceNumber"]},
-        ]
+        ],
     }
 
 
 def test_batch_processor_kinesis_context_parser_model(
-    kinesis_record_handler_model: Callable, kinesis_event_factory, order_event_factory
+    kinesis_record_handler_model: Callable,
+    kinesis_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -603,7 +605,9 @@ def test_batch_processor_kinesis_context_parser_model(
 
 
 def test_batch_processor_kinesis_context_parser_model_with_failure(
-    kinesis_record_handler_model: Callable, kinesis_event_factory, order_event_factory
+    kinesis_record_handler_model: Callable,
+    kinesis_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -625,7 +629,7 @@ def test_batch_processor_kinesis_context_parser_model_with_failure(
         "batchItemFailures": [
             {"itemIdentifier": first_record["kinesis"]["sequenceNumber"]},
             {"itemIdentifier": third_record["kinesis"]["sequenceNumber"]},
-        ]
+        ],
     }
 
 
@@ -773,7 +777,7 @@ def test_async_batch_processor_context_with_failure(sqs_event_factory, async_rec
     assert processed_messages[1] == ("success", second_record.body, second_record.raw_event)
     assert len(batch.fail_messages) == 2
     assert batch.response() == {
-        "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}]
+        "batchItemFailures": [{"itemIdentifier": first_record.message_id}, {"itemIdentifier": third_record.message_id}],
     }
 
 
@@ -842,7 +846,9 @@ def test_async_process_partial_response_invalid_input(async_record_handler: Call
 
 
 def test_batch_processor_model_with_partial_validation_error(
-    record_handler_model: Callable, sqs_event_factory, order_event_factory
+    record_handler_model: Callable,
+    sqs_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -861,12 +867,14 @@ def test_batch_processor_model_with_partial_validation_error(
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["messageId"]},
-        ]
+        ],
     }
 
 
 def test_batch_processor_dynamodb_context_model_with_partial_validation_error(
-    dynamodb_record_handler_model: Callable, dynamodb_event_factory, order_event_factory
+    dynamodb_record_handler_model: Callable,
+    dynamodb_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -885,12 +893,14 @@ def test_batch_processor_dynamodb_context_model_with_partial_validation_error(
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["dynamodb"]["SequenceNumber"]},
-        ]
+        ],
     }
 
 
 def test_batch_processor_kinesis_context_parser_model_with_partial_validation_error(
-    kinesis_record_handler_model: Callable, kinesis_event_factory, order_event_factory
+    kinesis_record_handler_model: Callable,
+    kinesis_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -909,12 +919,14 @@ def test_batch_processor_kinesis_context_parser_model_with_partial_validation_er
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["kinesis"]["sequenceNumber"]},
-        ]
+        ],
     }
 
 
 def test_async_batch_processor_model_with_partial_validation_error(
-    async_record_handler_model: Callable, sqs_event_factory, order_event_factory
+    async_record_handler_model: Callable,
+    sqs_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -933,12 +945,14 @@ def test_async_batch_processor_model_with_partial_validation_error(
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["messageId"]},
-        ]
+        ],
     }
 
 
 def test_async_batch_processor_dynamodb_context_model_with_partial_validation_error(
-    async_dynamodb_record_handler: Callable, dynamodb_event_factory, order_event_factory
+    async_dynamodb_record_handler: Callable,
+    dynamodb_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -957,12 +971,14 @@ def test_async_batch_processor_dynamodb_context_model_with_partial_validation_er
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["dynamodb"]["SequenceNumber"]},
-        ]
+        ],
     }
 
 
 def test_async_batch_processor_kinesis_context_parser_model_with_partial_validation_error(
-    async_kinesis_record_handler_model: Callable, kinesis_event_factory, order_event_factory
+    async_kinesis_record_handler_model: Callable,
+    kinesis_event_factory,
+    order_event_factory,
 ):
     # GIVEN
     order_event = order_event_factory({"type": "success"})
@@ -981,5 +997,5 @@ def test_async_batch_processor_kinesis_context_parser_model_with_partial_validat
     assert batch.response() == {
         "batchItemFailures": [
             {"itemIdentifier": malformed_record["kinesis"]["sequenceNumber"]},
-        ]
+        ],
     }

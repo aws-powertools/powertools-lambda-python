@@ -72,8 +72,8 @@ def test_kinesis_trigger_event():
                 "invokeIdentityArn": "arn:aws:iam::123456789012:role/lambda-role",
                 "awsRegion": "us-east-2",
                 "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream",
-            }
-        ]
+            },
+        ],
     }
 
     handle_kinesis(event_dict, LambdaContext())
@@ -97,8 +97,8 @@ def test_kinesis_trigger_bad_base64_event():
                 "invokeIdentityArn": "arn:aws:iam::123456789012:role/lambda-role",
                 "awsRegion": "us-east-2",
                 "eventSourceARN": "arn:aws:kinesis:us-east-2:123456789012:stream/lambda-stream",
-            }
-        ]
+            },
+        ],
     }
     with pytest.raises(ValidationError):
         handle_kinesis_no_envelope(event_dict, LambdaContext())

@@ -56,7 +56,7 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
-        )
+        ),
     )
 
     # THEN
@@ -94,7 +94,7 @@ def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endp
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
-        )
+        ),
     )
 
     # THEN
@@ -133,7 +133,7 @@ def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
             method="POST",
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
-        )
+        ),
     )
 
     # THEN
@@ -170,7 +170,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
             auth=build_iam_auth(url=url, aws_service="execute-api"),
-        )
+        ),
     )
 
     # THEN
@@ -207,7 +207,7 @@ def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
             url=url,
             json={"body": body, "status_code": status_code, "headers": headers, "cookies": list(map(str, cookies))},
             auth=build_iam_auth(url=url, aws_service="lambda"),
-        )
+        ),
     )
 
     # THEN

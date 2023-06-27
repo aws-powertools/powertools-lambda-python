@@ -209,7 +209,13 @@ class Route:
     """Internally used Route Configuration"""
 
     def __init__(
-        self, method: str, rule: Pattern, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+        self,
+        method: str,
+        rule: Pattern,
+        func: Callable,
+        cors: bool,
+        compress: bool,
+        cache_control: Optional[str],
     ):
         self.method = method.upper()
         self.rule = rule
@@ -237,7 +243,9 @@ class ResponseBuilder:
 
     @staticmethod
     def _has_compression_enabled(
-        route_compression: bool, response_compression: Optional[bool], event: BaseProxyEvent
+        route_compression: bool,
+        response_compression: Optional[bool],
+        event: BaseProxyEvent,
     ) -> bool:
         """
         Checks if compression is enabled.
@@ -285,7 +293,9 @@ class ResponseBuilder:
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
         if self._has_compression_enabled(
-            route_compression=self.route.compress, response_compression=self.response.compress, event=event
+            route_compression=self.route.compress,
+            response_compression=self.response.compress,
+            event=event,
         ):
             self._compress()
 
@@ -400,7 +410,11 @@ class BaseRouter(ABC):
         return self.route(rule, "PUT", cors, compress, cache_control)
 
     def delete(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -427,7 +441,11 @@ class BaseRouter(ABC):
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
     def patch(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -566,7 +584,8 @@ class ApiGatewayResolver(BaseRouter):
                 route_key = item + rule
                 if route_key in self._route_keys:
                     warnings.warn(
-                        f"A route like this was already registered. method: '{item}' rule: '{rule}'", stacklevel=2
+                        f"A route like this was already registered. method: '{item}' rule: '{rule}'",
+                        stacklevel=2,
                     )
                 self._route_keys.append(route_key)
                 if cors_enabled:
@@ -725,7 +744,7 @@ class ApiGatewayResolver(BaseRouter):
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
                 body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
-            )
+            ),
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:

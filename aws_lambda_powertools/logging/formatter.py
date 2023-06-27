@@ -127,7 +127,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             constants.PRETTY_INDENT if powertools_dev_is_set() else constants.COMPACT_INDENT
         )  # indented json serialization when in AWS SAM Local
         self.json_serializer = json_serializer or partial(
-            json.dumps, default=self.json_default, separators=(",", ":"), indent=self.json_indent
+            json.dumps,
+            default=self.json_default,
+            separators=(",", ":"),
+            indent=self.json_indent,
         )
 
         self.datefmt = datefmt

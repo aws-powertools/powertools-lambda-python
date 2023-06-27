@@ -172,7 +172,10 @@ class MetricManager:
             self.metric_set.clear()
 
     def serialize_metric_set(
-        self, metrics: Optional[Dict] = None, dimensions: Optional[Dict] = None, metadata: Optional[Dict] = None
+        self,
+        metrics: Optional[Dict] = None,
+        dimensions: Optional[Dict] = None,
+        metadata: Optional[Dict] = None,
     ) -> Dict:
         """Serializes metric and dimensions set
 
@@ -256,7 +259,7 @@ class MetricManager:
                         "Namespace": self.namespace,  # "test_namespace"
                         "Dimensions": [list(dimensions.keys())],  # [ "service" ]
                         "Metrics": metric_definition,
-                    }
+                    },
                 ],
             },
             **dimensions,  # "service": "test_service"
@@ -283,7 +286,7 @@ class MetricManager:
         logger.debug(f"Adding dimension: {name}:{value}")
         if len(self.dimension_set) == MAX_DIMENSIONS:
             raise SchemaValidationError(
-                f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}."
+                f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}.",
             )
         # Cast value to str according to EMF spec
         # Majority of values are expected to be string already, so
@@ -443,7 +446,7 @@ class MetricManager:
             return resolution
 
         raise MetricResolutionError(
-            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}"  # noqa: E501
+            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}",  # noqa: E501
         )
 
     def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
@@ -471,7 +474,7 @@ class MetricManager:
 
             if unit not in self._metric_units:
                 raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}"
+                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}",
                 )
 
         if isinstance(unit, MetricUnit):

@@ -85,11 +85,15 @@ class AppConfigProvider(BaseProvider):
         super().__init__()
 
         self.client: "AppConfigDataClient" = self._build_boto3_client(
-            service_name="appconfigdata", client=boto3_client, session=boto3_session, config=config
+            service_name="appconfigdata",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
         )
 
         self.application = resolve_env_var_choice(
-            choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+            choice=application,
+            env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
         )
         self.environment = environment
         self.current_version = ""
@@ -141,7 +145,7 @@ def get_app_config(
     transform: TransformOptions = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
-    **sdk_options
+    **sdk_options,
 ) -> Union[str, list, dict, bytes]:
     """
     Retrieve a configuration value from AWS App Config.
@@ -199,5 +203,9 @@ def get_app_config(
         DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
 
     return DEFAULT_PROVIDERS["appconfig"].get(
-        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+        name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
     )
