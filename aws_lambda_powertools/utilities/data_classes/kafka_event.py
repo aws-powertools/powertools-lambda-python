@@ -71,11 +71,17 @@ class KafkaEventRecord(DictWrapper):
         return {k: bytes(v) for chunk in self.headers for k, v in chunk.items()}
 
     def get_header_value(
-        self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
+        self,
+        name: str,
+        default_value: Optional[Any] = None,
+        case_sensitive: bool = True,
     ) -> Optional[str]:
         """Get a decoded header value by name."""
         return get_header_value(
-            headers=self.decoded_headers, name=name, default_value=default_value, case_sensitive=case_sensitive
+            headers=self.decoded_headers,
+            name=name,
+            default_value=default_value,
+            case_sensitive=case_sensitive,
         )
 
 

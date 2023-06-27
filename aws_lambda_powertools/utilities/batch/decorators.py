@@ -71,7 +71,11 @@ def async_batch_processor(
 
 @lambda_handler_decorator
 def batch_processor(
-    handler: Callable, event: Dict, context: LambdaContext, record_handler: Callable, processor: BatchProcessor
+    handler: Callable,
+    event: Dict,
+    context: LambdaContext,
+    record_handler: Callable,
+    processor: BatchProcessor,
 ):
     """
     Middleware to handle batch event processing
@@ -176,7 +180,7 @@ def process_partial_response(
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
         raise ValueError(
             f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
-            f"See sample events in our documentation for either {event_types}: \n {docs}"
+            f"See sample events in our documentation for either {event_types}: \n {docs}",
         )
 
     with processor(records, record_handler, context):
@@ -240,7 +244,7 @@ def async_process_partial_response(
         docs = "https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-sqs"  # noqa: E501 # long-line
         raise ValueError(
             f"Invalid event format. Please ensure batch event is a valid {processor.event_type.value} event. \n"
-            f"See sample events in our documentation for either {event_types}: \n {docs}"
+            f"See sample events in our documentation for either {event_types}: \n {docs}",
         )
 
     with processor(records, record_handler, context):

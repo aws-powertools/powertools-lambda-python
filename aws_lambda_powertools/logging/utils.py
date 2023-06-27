@@ -68,7 +68,9 @@ def _exclude_registered_loggers_filter(loggers: Set[str]) -> List[logging.Logger
 
 
 def _find_registered_loggers(
-    source_logger: Logger, loggers: Set[str], filter_func: Callable[[Set[str]], List[logging.Logger]]
+    source_logger: Logger,
+    loggers: Set[str],
+    filter_func: Callable[[Set[str]], List[logging.Logger]],
 ) -> List[logging.Logger]:
     """Filter root loggers based on provided parameters."""
     root_loggers = filter_func(loggers)

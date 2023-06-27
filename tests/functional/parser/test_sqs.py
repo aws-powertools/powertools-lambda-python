@@ -45,14 +45,14 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
                     "ApproximateFirstReceiveTimestamp": "1545082649185",
                 },
                 "messageAttributes": {
-                    "testAttr": {"stringValue": "100", "binaryValue": "base64Str", "dataType": "Number"}
+                    "testAttr": {"stringValue": "100", "binaryValue": "base64Str", "dataType": "Number"},
                 },
                 "md5OfBody": "e4e68fb7bd0e697a0ae8f1bb342846b3",
                 "eventSource": "aws:sqs",
                 "eventSourceARN": "arn:aws:sqs:us-east-2:123456789012:my-queue",
                 "awsRegion": "us-east-2",
-            }
-        ]
+            },
+        ],
     }
 
     with pytest.raises(ValidationError):

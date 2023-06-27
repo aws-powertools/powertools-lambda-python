@@ -22,7 +22,10 @@ def base64_decode(value: str) -> str:
 
 
 def get_header_value(
-    headers: dict[str, Any], name: str, default_value: str | None, case_sensitive: bool | None
+    headers: dict[str, Any],
+    name: str,
+    default_value: str | None,
+    case_sensitive: bool | None,
 ) -> str | None:
     """
     Get the value of a header by its name.
@@ -60,7 +63,9 @@ def get_header_value(
 
 
 def get_query_string_value(
-    query_string_parameters: dict[str, str] | None, name: str, default_value: str | None = None
+    query_string_parameters: dict[str, str] | None,
+    name: str,
+    default_value: str | None = None,
 ) -> str | None:
     """
     Retrieves the value of a query string parameter specified by the given name.

@@ -69,10 +69,10 @@ def test_s3_glacier_event():
                     "restoreEventData": {
                         "lifecycleRestorationExpiryTime": "1970-01-01T00:01:00.000Z",
                         "lifecycleRestoreStorageClass": "standard",
-                    }
-                }
-            }
-        ]
+                    },
+                },
+            },
+        ],
     }
     event = S3Event(example_event)
     record = next(event.records)

@@ -119,7 +119,9 @@ def validator(
     """  # noqa: E501
     if envelope:
         event = jmespath_utils.extract_data_from_envelope(
-            data=event, envelope=envelope, jmespath_options=jmespath_options
+            data=event,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
         )
 
     if inbound_schema:
@@ -221,7 +223,9 @@ def validate(
     """  # noqa: E501
     if envelope:
         event = jmespath_utils.extract_data_from_envelope(
-            data=event, envelope=envelope, jmespath_options=jmespath_options
+            data=event,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
         )
 
     validate_data_against_schema(data=event, schema=schema, formats=formats)

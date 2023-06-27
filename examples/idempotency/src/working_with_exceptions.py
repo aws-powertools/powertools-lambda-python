@@ -31,6 +31,7 @@ def lambda_handler(event: dict, context: LambdaContext):
 @idempotent_function(data_keyword_argument="data", config=config, persistence_store=persistence_layer)
 def call_external_service(data: dict):
     result: requests.Response = requests.post(
-        "https://jsonplaceholder.typicode.com/comments/", json={"user": data["user"], "transaction_id": data["id"]}
+        "https://jsonplaceholder.typicode.com/comments/",
+        json={"user": data["user"], "transaction_id": data["id"]},
     )
     return result.json()

@@ -121,7 +121,7 @@ def test_s3_sqs_event_notification():
     assert model.Records[0].body.Records[0].eventVersion == body["Records"][0]["eventVersion"]
     assert model.Records[0].body.Records[0].eventSource == body["Records"][0]["eventSource"]
     assert model.Records[0].body.Records[0].eventTime == datetime.fromisoformat(
-        body["Records"][0]["eventTime"].replace("Z", "+00:00")
+        body["Records"][0]["eventTime"].replace("Z", "+00:00"),
     )
     assert model.Records[0].body.Records[0].eventName == body["Records"][0]["eventName"]
 

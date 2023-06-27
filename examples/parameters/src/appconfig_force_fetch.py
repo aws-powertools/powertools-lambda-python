@@ -10,7 +10,10 @@ def lambda_handler(event: dict, context: LambdaContext):
     try:
         # Retrieve a single parameter
         endpoint_comments: Any = parameters.get_app_config(
-            name="config", environment="dev", application="comments", force_fetch=True
+            name="config",
+            environment="dev",
+            application="comments",
+            force_fetch=True,
         )
 
         # the value of this parameter is https://jsonplaceholder.typicode.com/comments/

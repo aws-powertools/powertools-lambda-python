@@ -17,7 +17,7 @@ class ParametersStack(BaseInfrastructure):
 
         env_vars = {"parameters": json.dumps(parameters)}
         functions = self.create_lambda_functions(
-            function_props={"environment": env_vars, "timeout": Duration.seconds(30)}
+            function_props={"environment": env_vars, "timeout": Duration.seconds(30)},
         )
 
         self._create_app_config(function=functions["ParameterAppconfigFreeformHandler"])
@@ -30,7 +30,7 @@ class ParametersStack(BaseInfrastructure):
                     "ssm:GetParameters",
                 ],
                 resources=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/powertools/e2e/parameters/*"],
-            )
+            ),
         )
 
     def _create_app_config(self, function: Function):
@@ -122,7 +122,7 @@ class ParametersStack(BaseInfrastructure):
                     "appconfig:StartConfigurationSession",
                 ],
                 resources=["*"],
-            )
+            ),
         )
 
     def _create_ssm_parameters(self) -> List[str]:

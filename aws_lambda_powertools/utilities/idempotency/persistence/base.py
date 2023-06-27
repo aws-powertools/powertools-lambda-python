@@ -339,7 +339,7 @@ class BasePersistenceLayer(ABC):
         )
         logger.debug(
             f"Function successfully executed. Saving record to persistence store with "
-            f"idempotency key: {data_record.idempotency_key}"
+            f"idempotency key: {data_record.idempotency_key}",
         )
         self._update_record(data_record=data_record)
 
@@ -412,7 +412,7 @@ class BasePersistenceLayer(ABC):
 
         logger.debug(
             f"Function raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
-            f"store for idempotency key: {data_record.idempotency_key}"
+            f"store for idempotency key: {data_record.idempotency_key}",
         )
         self._delete_record(data_record=data_record)
 
