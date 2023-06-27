@@ -43,7 +43,6 @@ ignore = [
     "PLC", # Convention category - disabled temporarily
     "PLE", # Error category - disabled temporarily
     "ISC", # flake8-implicit-str-concat - disabled temporarily
-    "E501", # Line too long - disabled temporarily
     "I001", # isort - disabled temporarily
     ]
 

@@ -576,7 +576,7 @@ def single_metric(
         from aws_lambda_powertools.metrics import MetricUnit
         from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric: # noqa E501
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric:
             metric.add_dimension(name="function_version", value="47")
 
     **Same as above but set namespace using environment variable**
@@ -587,7 +587,7 @@ def single_metric(
         from aws_lambda_powertools.metrics import MetricUnit
         from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric: # noqa E501
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric:
             metric.add_dimension(name="function_version", value="47")
 
     Parameters
@@ -618,7 +618,7 @@ def single_metric(
         When metric value isn't a number
     SchemaValidationError
         When metric object fails EMF schema validation
-    """
+    """  # noqa: E501
     metric_set: Optional[Dict] = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
