@@ -3,7 +3,7 @@ from typing import Dict, Type, Union
 from pydantic import BaseModel
 
 
-class VPCLatticeModel(BaseModel):
+class VpcLatticeModel(BaseModel):
     method: str
     raw_path: str
     body: Union[str, Type[BaseModel]]

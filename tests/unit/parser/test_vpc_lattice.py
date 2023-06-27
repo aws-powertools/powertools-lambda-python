@@ -5,27 +5,27 @@ from aws_lambda_powertools.utilities.parser import (
     envelopes,
     event_parser,
 )
-from aws_lambda_powertools.utilities.parser.models import VPCLatticeModel
+from aws_lambda_powertools.utilities.parser.models import VpcLatticeModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import myVPCLatticeBusiness
+from tests.functional.parser.schemas import MyVpcLatticeBusiness
 from tests.functional.utils import load_event
 
 
-@event_parser(model=myVPCLatticeBusiness, envelope=envelopes.VPCLatticeEnvelope)
-def handle_lambda_vpclattice_with_envelope(event: myVPCLatticeBusiness, context: LambdaContext):
+@event_parser(model=MyVpcLatticeBusiness, envelope=envelopes.VpcLatticeEnvelope)
+def handle_lambda_vpclattice_with_envelope(event: MyVpcLatticeBusiness, context: LambdaContext):
     assert event.username == "Leandro"
     assert event.name == "Damascena"
 
 
-def test_vpclattice_event_with_envelope():
+def test_vpc_lattice_event_with_envelope():
     event = load_event("vpcLatticeEvent.json")
     event["body"] = '{"username": "Leandro", "name": "Damascena"}'
     handle_lambda_vpclattice_with_envelope(event, LambdaContext())
 
 
-def test_vpclattice_event():
+def test_vpc_lattice_event():
     raw_event = load_event("vpcLatticeEvent.json")
-    model = VPCLatticeModel(**raw_event)
+    model = VpcLatticeModel(**raw_event)
 
     assert model.body == raw_event["body"]
     assert model.method == raw_event["method"]
@@ -35,8 +35,8 @@ def test_vpclattice_event():
     assert model.query_string_parameters == raw_event["query_string_parameters"]
 
 
-def test_vpclattice_event_custom_model():
-    class MyCustomResource(VPCLatticeModel):
+def test_vpc_lattice_event_custom_model():
+    class MyCustomResource(VpcLatticeModel):
         body: str
 
     raw_event = load_event("vpcLatticeEvent.json")
@@ -45,9 +45,9 @@ def test_vpclattice_event_custom_model():
     assert model.body == raw_event["body"]
 
 
-def test_vpclattice_event_invalid():
+def test_vpc_lattice_event_invalid():
     raw_event = load_event("vpcLatticeEvent.json")
     raw_event["body"] = ["some_data"]
 
     with pytest.raises(ValidationError):
-        VPCLatticeModel(**raw_event)
+        VpcLatticeModel(**raw_event)

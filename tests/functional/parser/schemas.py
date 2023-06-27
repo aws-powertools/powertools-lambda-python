@@ -101,6 +101,6 @@ class MyKinesisFirehoseBusiness(BaseModel):
     Hello: str
 
 
-class myVPCLatticeBusiness(BaseModel):
+class MyVpcLatticeBusiness(BaseModel):
     username: str
     name: str
