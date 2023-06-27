@@ -20,6 +20,8 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 If you're using any API Gateway integration, you must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function.
 
+In case of using [VPC Lattice](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you must have a service network configured to invoke your Lambda function.
+
 This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.
 
 ???+ info "There is no additional permissions or dependencies required to use this utility."
@@ -42,7 +44,7 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, `LambdaFunctionUrlResolver`, and `VPCLatticeResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
     We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
@@ -114,6 +116,22 @@ When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/d
 
     ```json hl_lines="4-5" title="Example payload delivered to the handler"
     --8<-- "examples/event_handler_lambda_function_url/src/getting_started_lambda_function_url_resolver.json"
+    ```
+
+#### VPC Lattice
+
+When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you can use `VPCLatticeResolver`.
+
+=== "getting_started_vpclattice_resolver.py"
+
+    ```python hl_lines="5 11" title="Using Lambda Function URL resolver"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.py"
+    ```
+
+=== "getting_started_vpclattice_resolver.json"
+
+    ```json hl_lines="2 3" title="Example payload delivered to the handler"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.json"
     ```
 
 ### Dynamic routes

@@ -41,12 +41,6 @@ from aws_lambda_powertools.utilities.data_classes import (
 from tests.functional.utils import load_event
 
 
-@pytest.fixture
-def json_dump():
-    # our serializers reduce length to save on costs; fixture to replicate separators
-    return lambda obj: json.dumps(obj, separators=(",", ":"))
-
-
 def read_media(file_name: str) -> bytes:
     path = Path(str(Path(__file__).parent.parent.parent.parent) + "/docs/media/" + file_name)
     return path.read_bytes()

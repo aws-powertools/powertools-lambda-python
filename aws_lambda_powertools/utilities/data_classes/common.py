@@ -136,6 +136,16 @@ class BaseProxyEvent(DictWrapper):
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
 
+    # VPC Lattice path
+    @property
+    def raw_path(self) -> str:
+        return self.get("raw_path") or ""
+
+    # VPC Lattice http method
+    @property
+    def method(self) -> str:
+        return self.get("method") or ""
+
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
 

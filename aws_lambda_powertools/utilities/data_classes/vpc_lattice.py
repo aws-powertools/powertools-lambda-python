@@ -1,6 +1,10 @@
 from typing import Any, Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.shared.headers_serializer import (
+    BaseHeadersSerializer,
+    SingleValueHeadersSerializer,
+)
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     base64_decode,
     get_header_value,
@@ -8,7 +12,7 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
 )
 
 
-class VPCLatticeEvent(DictWrapper):
+class VPCLatticeEvent(BaseProxyEvent):
     @property
     def body(self) -> str:
         """The VPC Lattice body."""
@@ -93,3 +97,7 @@ class VPCLatticeEvent(DictWrapper):
         return get_header_value(
             headers=self.headers, name=name, default_value=default_value, case_sensitive=case_sensitive
         )
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        # When using the VPC Lattice integration, we just have single header.
+        return SingleValueHeadersSerializer()
