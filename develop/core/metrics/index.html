@@ -1946,7 +1946,10 @@
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">single_metric</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">Metrics</span><span class="p">,</span> <span class="n">MetricUnit</span>
@@ -1960,8 +1963,11 @@
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
     <span class="k">with</span> <span class="n">single_metric</span><span class="p">(</span>
-<span class="hll">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RecordsCount&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">default_dimensions</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">default_dimensions</span>
-</span>    <span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
+<span class="hll">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RecordsCount&quot;</span><span class="p">,</span>
+</span>        <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">default_dimensions</span><span class="o">=</span><span class="n">metrics</span><span class="o">.</span><span class="n">default_dimensions</span><span class="p">,</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
         <span class="n">metric</span><span class="o">.</span><span class="n">add_dimension</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;TableName&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>
@@ -1979,7 +1985,10 @@
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">single_metric</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">MetricUnit</span>
@@ -1990,8 +1999,11 @@
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
     <span class="k">with</span> <span class="n">single_metric</span><span class="p">(</span>
-<span class="hll">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RecordsCount&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">default_dimensions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="n">STAGE</span><span class="p">}</span>
-</span>    <span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
+<span class="hll">        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;RecordsCount&quot;</span><span class="p">,</span>
+</span>        <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span>
+        <span class="n">value</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">default_dimensions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="n">STAGE</span><span class="p">},</span>
+    <span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
         <span class="n">metric</span><span class="o">.</span><span class="n">add_dimension</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;TableName&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>

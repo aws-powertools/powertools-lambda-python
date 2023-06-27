@@ -2697,7 +2697,10 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">23</span>
 <span class="normal">24</span>
 <span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">httpx</span>  <span class="c1"># external dependency</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">httpx</span>  <span class="c1"># external dependency</span>
 
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
 </span>    <span class="n">AsyncBatchProcessor</span><span class="p">,</span>
@@ -2721,9 +2724,12 @@ This helps preserve the ordering of messages in your queue.</p>
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">async_process_partial_response</span><span class="p">(</span>
-</span><span class="hll">        <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">async_record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span>
-</span><span class="hll">    <span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+</span><span class="hll">        <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">record_handler</span><span class="o">=</span><span class="n">async_record_handler</span><span class="p">,</span>
+</span>        <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span>
+        <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
 <details class="warning" open="open">
 <summary>Using tracer?</summary>
 <p><code>AsyncBatchProcessor</code> uses <code>asyncio.gather</code> which can cause side effects and reach trace limits at high concurrency.</p>

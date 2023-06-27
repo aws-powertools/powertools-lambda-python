@@ -1770,7 +1770,10 @@
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
-<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 
@@ -1782,9 +1785,12 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Retrieve a single parameter</span>
 <span class="hll">        <span class="n">endpoint_comments</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span>
-</span><span class="hll">            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">20</span>
-</span><span class="hll">        <span class="p">)</span>
-</span>
+</span><span class="hll">            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+</span><span class="hll">            <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+</span>            <span class="n">application</span><span class="o">=</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span>
+            <span class="n">max_age</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="c1"># the value of this parameter is https://jsonplaceholder.typicode.com/comments/</span>
         <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint_comments</span><span class="p">)</span>
 
@@ -1960,7 +1966,10 @@
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
-<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 
@@ -1972,9 +1981,12 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Retrieve a single parameter</span>
 <span class="hll">        <span class="n">endpoint_comments</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_app_config</span><span class="p">(</span>
-</span><span class="hll">            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span> <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span> <span class="n">force_fetch</span><span class="o">=</span><span class="kc">True</span>
-</span><span class="hll">        <span class="p">)</span>
-</span>
+</span><span class="hll">            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;config&quot;</span><span class="p">,</span>
+</span><span class="hll">            <span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span>
+</span>            <span class="n">application</span><span class="o">=</span><span class="s2">&quot;comments&quot;</span><span class="p">,</span>
+            <span class="n">force_fetch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
         <span class="c1"># the value of this parameter is https://jsonplaceholder.typicode.com/comments/</span>
         <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint_comments</span><span class="p">)</span>
 
@@ -2102,20 +2114,21 @@
 <span class="c1"># see: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html</span>
 <span class="n">sts_client</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;sts&quot;</span><span class="p">)</span>
 <span class="n">assumed_role_object</span> <span class="o">=</span> <span class="n">sts_client</span><span class="o">.</span><span class="n">assume_role</span><span class="p">(</span>
-    <span class="n">RoleArn</span><span class="o">=</span><span class="s2">&quot;arn:aws:iam::account-of-role-to-assume:role/name-of-role&quot;</span><span class="p">,</span> <span class="n">RoleSessionName</span><span class="o">=</span><span class="s2">&quot;RoleAssume1&quot;</span>
+    <span class="n">RoleArn</span><span class="o">=</span><span class="s2">&quot;arn:aws:iam::account-of-role-to-assume:role/name-of-role&quot;</span><span class="p">,</span>
+    <span class="n">RoleSessionName</span><span class="o">=</span><span class="s2">&quot;RoleAssume1&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">credentials</span> <span class="o">=</span> <span class="n">assumed_role_object</span><span class="p">[</span><span class="s2">&quot;Credentials&quot;</span><span class="p">]</span>
 
 <span class="c1"># using temporary credentials in your SSMProvider provider</span>
-<span class="c1"># see: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session</span>
-<span class="hll"><span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span>
+<span class="hll"><span class="c1"># see: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html#module-boto3.session</span>
+</span><span class="hll"><span class="n">boto3_session</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">Session</span><span class="p">(</span>
 </span><span class="hll">    <span class="n">region_name</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">aws_access_key_id</span><span class="o">=</span><span class="n">credentials</span><span class="p">[</span><span class="s2">&quot;AccessKeyId&quot;</span><span class="p">],</span>
 </span><span class="hll">    <span class="n">aws_secret_access_key</span><span class="o">=</span><span class="n">credentials</span><span class="p">[</span><span class="s2">&quot;SecretAccessKey&quot;</span><span class="p">],</span>
 </span><span class="hll">    <span class="n">aws_session_token</span><span class="o">=</span><span class="n">credentials</span><span class="p">[</span><span class="s2">&quot;SessionToken&quot;</span><span class="p">],</span>
 </span><span class="hll"><span class="p">)</span>
-</span><span class="hll"><span class="n">ssm_provider</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">SSMProvider</span><span class="p">(</span><span class="n">boto3_session</span><span class="o">=</span><span class="n">boto3_session</span><span class="p">)</span>
-</span>
+</span><span class="n">ssm_provider</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">SSMProvider</span><span class="p">(</span><span class="n">boto3_session</span><span class="o">=</span><span class="n">boto3_session</span><span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
@@ -2124,7 +2137,6 @@
         <span class="n">endpoint_comments</span> <span class="o">=</span> <span class="s2">&quot;https://jsonplaceholder.typicode.com/noexists/&quot;</span>
 
         <span class="k">for</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">all_parameters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
             <span class="k">if</span> <span class="n">parameter</span> <span class="o">==</span> <span class="s2">&quot;endpoint_comments&quot;</span><span class="p">:</span>
                 <span class="n">endpoint_comments</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -2195,7 +2207,11 @@
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
 <span class="kn">import</span> <span class="nn">boto3</span>
@@ -2217,7 +2233,11 @@
         <span class="n">ec2</span><span class="o">.</span><span class="n">import_key_pair</span><span class="p">(</span><span class="n">KeyName</span><span class="o">=</span><span class="n">name_key_pair</span><span class="p">,</span> <span class="n">PublicKeyMaterial</span><span class="o">=</span><span class="n">ec2_pem</span><span class="p">)</span>
 
         <span class="n">ec2</span><span class="o">.</span><span class="n">create_instances</span><span class="p">(</span>
-            <span class="n">ImageId</span><span class="o">=</span><span class="s2">&quot;ami-026b57f3c383c2eec&quot;</span><span class="p">,</span> <span class="n">InstanceType</span><span class="o">=</span><span class="s2">&quot;t2.micro&quot;</span><span class="p">,</span> <span class="n">MinCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">MaxCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">KeyName</span><span class="o">=</span><span class="n">name_key_pair</span>
+            <span class="n">ImageId</span><span class="o">=</span><span class="s2">&quot;ami-026b57f3c383c2eec&quot;</span><span class="p">,</span>
+            <span class="n">InstanceType</span><span class="o">=</span><span class="s2">&quot;t2.micro&quot;</span><span class="p">,</span>
+            <span class="n">MinCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">MaxCount</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">KeyName</span><span class="o">=</span><span class="n">name_key_pair</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;EC2 created&quot;</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
@@ -2740,7 +2760,9 @@
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="hll"><span class="kn">import</span> <span class="nn">requests</span>
 </span>
@@ -2748,16 +2770,18 @@
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="hll"><span class="n">dynamodb_provider</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">DynamoDBProvider</span><span class="p">(</span>
-</span><span class="hll">    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;ParameterTable&quot;</span><span class="p">,</span> <span class="n">key_attr</span><span class="o">=</span><span class="s2">&quot;IdKeyAttr&quot;</span><span class="p">,</span> <span class="n">sort_attr</span><span class="o">=</span><span class="s2">&quot;SkKeyAttr&quot;</span><span class="p">,</span> <span class="n">value_attr</span><span class="o">=</span><span class="s2">&quot;ValueAttr&quot;</span>
-</span><span class="hll"><span class="p">)</span>
-</span>
+</span><span class="hll">    <span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;ParameterTable&quot;</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">key_attr</span><span class="o">=</span><span class="s2">&quot;IdKeyAttr&quot;</span><span class="p">,</span>
+</span>    <span class="n">sort_attr</span><span class="o">=</span><span class="s2">&quot;SkKeyAttr&quot;</span><span class="p">,</span>
+    <span class="n">value_attr</span><span class="o">=</span><span class="s2">&quot;ValueAttr&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+<span class="hll">    <span class="k">try</span><span class="p">:</span>
+</span>        <span class="c1"># Usually an endpoint is not sensitive data, so we store it in DynamoDB Table</span>
+        <span class="n">endpoint_comments</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">dynamodb_provider</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments_endpoint&quot;</span><span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># Usually an endpoint is not sensitive data, so we store it in DynamoDB Table</span>
-<span class="hll">        <span class="n">endpoint_comments</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">dynamodb_provider</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;comments_endpoint&quot;</span><span class="p">)</span>
-</span>
         <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint_comments</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">],</span> <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">}</span>

@@ -1688,8 +1688,7 @@
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">binascii</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">is_dataclass</span>
@@ -1722,12 +1721,11 @@
 
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
     <span class="c1"># Try to validate the schema</span>
     <span class="k">try</span><span class="p">:</span>
-<span class="hll">        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(powertools_base64(payload))&quot;</span><span class="p">)</span>
-</span>
-        <span class="c1"># alternatively, extract_data_from_envelope works here too</span>
+        <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;powertools_json(powertools_base64(payload))&quot;</span><span class="p">)</span>
+<span class="hll">
+</span>        <span class="c1"># alternatively, extract_data_from_envelope works here too</span>
         <span class="n">payload_decoded</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">event</span><span class="p">[</span><span class="s2">&quot;payload&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
 
         <span class="n">order_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload_decoded</span><span class="p">)</span>
@@ -1737,17 +1735,17 @@
             <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;order created&quot;</span><span class="p">,</span>
             <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="p">}</span>
-<span class="hll">    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span>
-            <span class="s2">&quot;The powertools_json(powertools_base64()) envelope function must match a valid path.&quot;</span>
+    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span>
+</span>            <span class="s2">&quot;The powertools_json(powertools_base64()) envelope function must match a valid path.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-<span class="hll">    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be a valid base64 encoded string&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be valid JSON (base64 encoded).&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="k">except</span> <span class="n">SchemaValidationError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
-</span>        <span class="c1"># SchemaValidationError indicates where a data mismatch is</span>
-        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exception</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be a valid base64 encoded string&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Payload must be valid JSON (base64 encoded).&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">SchemaValidationError</span> <span class="k">as</span> <span class="n">exception</span><span class="p">:</span>
+<span class="hll">        <span class="c1"># SchemaValidationError indicates where a data mismatch is</span>
+</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exception</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">return_error_message</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
@@ -2006,7 +2004,7 @@
 </span><span class="hll">            <span class="s2">&quot;logGroup&quot;</span><span class="p">:</span> <span class="s2">&quot;/aws/lambda/powertools-example&quot;</span><span class="p">,</span>
 </span><span class="hll">            <span class="s2">&quot;logStream&quot;</span><span class="p">:</span> <span class="s2">&quot;2022/08/07/[$LATEST]d3a8dcaffc7f4de2b8db132e3e106660&quot;</span><span class="p">,</span>
 </span><span class="hll">            <span class="s2">&quot;logEvents&quot;</span><span class="p">:</span> <span class="p">{},</span>
-</span><span class="hll">        <span class="p">}</span>
+</span><span class="hll">        <span class="p">},</span>
 </span><span class="hll">    <span class="p">],</span>
 </span><span class="hll">    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;owner&quot;</span><span class="p">,</span> <span class="s2">&quot;logGroup&quot;</span><span class="p">,</span> <span class="s2">&quot;logStream&quot;</span><span class="p">,</span> <span class="s2">&quot;logEvents&quot;</span><span class="p">],</span>
 </span>    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -2109,8 +2107,7 @@
 <span class="normal">44</span>
 <span class="normal">45</span>
 <span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">binascii</span>
 
 <span class="kn">import</span> <span class="nn">snappy</span>
@@ -2136,25 +2133,24 @@
 </span>
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="n">logs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">logs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">extract_data_from_envelope</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
                 <span class="c1"># NOTE: Use the prefix `_func_` before the name of the function</span>
-<span class="hll">                <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;Records[*].decode_snappy_compression(log)&quot;</span><span class="p">,</span>
-</span>                <span class="n">jmespath_options</span><span class="o">=</span><span class="n">custom_jmespath_options</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;Records[*].decode_snappy_compression(log)&quot;</span><span class="p">,</span>
+<span class="hll">                <span class="n">jmespath_options</span><span class="o">=</span><span class="n">custom_jmespath_options</span><span class="p">,</span>
+</span>            <span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;logs&quot;</span><span class="p">:</span> <span class="n">logs</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Extracted messages&quot;</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
-<span class="hll">    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;The envelope function must match a valid path.&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="k">except</span> <span class="n">snappy</span><span class="o">.</span><span class="n">UncompressError</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid snappy compressed binary&quot;</span><span class="p">)</span>
-<span class="hll">    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
-</span>        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid base64 encoded string&quot;</span><span class="p">)</span>
-
+    <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;The envelope function must match a valid path.&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">snappy</span><span class="o">.</span><span class="n">UncompressError</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid snappy compressed binary&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid base64 encoded string&quot;</span><span class="p">)</span>
+</span>
 
 <span class="k">def</span> <span class="nf">return_error_message</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;logs&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>

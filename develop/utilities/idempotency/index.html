@@ -1603,7 +1603,11 @@
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
-<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="n">RemovalPolicy</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="n">RemovalPolicy</span>
 <span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="n">aws_dynamodb</span> <span class="k">as</span> <span class="n">dynamodb</span>
 <span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="n">aws_iam</span> <span class="k">as</span> <span class="n">iam</span>
 <span class="kn">from</span> <span class="nn">constructs</span> <span class="kn">import</span> <span class="n">Construct</span>
@@ -1622,9 +1626,13 @@
 </span>            <span class="n">point_in_time_recovery</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
 <span class="hll">        <span class="bp">self</span><span class="o">.</span><span class="n">idempotency_table</span><span class="o">.</span><span class="n">grant</span><span class="p">(</span>
-</span><span class="hll">            <span class="n">lambda_role</span><span class="p">,</span> <span class="s2">&quot;dynamodb:PutItem&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamodb:GetItem&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamodb:UpdateItem&quot;</span><span class="p">,</span> <span class="s2">&quot;dynamodb:DeleteItem&quot;</span>
-</span><span class="hll">        <span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+</span><span class="hll">            <span class="n">lambda_role</span><span class="p">,</span>
+</span><span class="hll">            <span class="s2">&quot;dynamodb:PutItem&quot;</span><span class="p">,</span>
+</span>            <span class="s2">&quot;dynamodb:GetItem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dynamodb:UpdateItem&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;dynamodb:DeleteItem&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2509,7 +2517,8 @@ This means that new invocations will execute your code again despite having the 
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
-<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="normal">36</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
@@ -2542,7 +2551,8 @@ This means that new invocations will execute your code again despite having the 
 <span class="hll"><span class="nd">@idempotent_function</span><span class="p">(</span><span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">persistence_store</span><span class="o">=</span><span class="n">persistence_layer</span><span class="p">)</span>
 </span><span class="k">def</span> <span class="nf">call_external_service</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
     <span class="n">result</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
-        <span class="s2">&quot;https://jsonplaceholder.typicode.com/comments/&quot;</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]}</span>
+        <span class="s2">&quot;https://jsonplaceholder.typicode.com/comments/&quot;</span><span class="p">,</span>
+        <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;user&quot;</span><span class="p">],</span> <span class="s2">&quot;transaction_id&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">]},</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>

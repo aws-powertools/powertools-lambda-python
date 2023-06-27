@@ -953,9 +953,7 @@
 <span class="normal">27</span>
 <span class="normal">28</span>
 <span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 
@@ -966,24 +964,22 @@
 
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-
     <span class="n">limit_execution</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span>  <span class="c1"># milliseconds</span>
 
     <span class="c1"># scrape website and exit before lambda timeout</span>
-<span class="hll">    <span class="k">while</span> <span class="n">context</span><span class="o">.</span><span class="n">get_remaining_time_in_millis</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">limit_execution</span><span class="p">:</span>
-</span>
-        <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/comments&quot;</span><span class="p">)</span>
-        <span class="c1"># add logic here and save the results of the request to an S3 bucket, for example.</span>
+    <span class="k">while</span> <span class="n">context</span><span class="o">.</span><span class="n">get_remaining_time_in_millis</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">limit_execution</span><span class="p">:</span>
+<span class="hll">        <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/comments&quot;</span><span class="p">)</span>
+</span>        <span class="c1"># add logic here and save the results of the request to an S3 bucket, for example.</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;operation&quot;</span><span class="p">:</span> <span class="s2">&quot;scrape_website&quot;</span><span class="p">,</span>
                 <span class="s2">&quot;request_id&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">aws_request_id</span><span class="p">,</span>
-<span class="hll">                <span class="s2">&quot;remaining_time&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">get_remaining_time_in_millis</span><span class="p">(),</span>
-</span><span class="hll">                <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">2</span><span class="p">],</span>
-</span>            <span class="p">}</span>
-        <span class="p">)</span>
-
+                <span class="s2">&quot;remaining_time&quot;</span><span class="p">:</span> <span class="n">context</span><span class="o">.</span><span class="n">get_remaining_time_in_millis</span><span class="p">(),</span>
+                <span class="s2">&quot;comments&quot;</span><span class="p">:</span> <span class="n">comments</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">2</span><span class="p">],</span>
+<span class="hll">            <span class="p">},</span>
+</span><span class="hll">        <span class="p">)</span>
+</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Success&quot;</span><span class="p">}</span>

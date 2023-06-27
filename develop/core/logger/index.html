@@ -3514,7 +3514,7 @@
                 <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatTime</span><span class="p">(</span><span class="n">record</span><span class="p">),</span>
                 <span class="s2">&quot;my_default_key&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span><span class="p">,</span>
                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">log_format</span><span class="p">,</span>
-            <span class="p">}</span>
+            <span class="p">},</span>
         <span class="p">)</span>
 
 
@@ -3569,7 +3569,9 @@
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">import</span> <span class="nn">functools</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">import</span> <span class="nn">functools</span>
 </span>
 <span class="hll"><span class="kn">import</span> <span class="nn">orjson</span>
 </span>
@@ -3584,7 +3586,9 @@
 <span class="hll"><span class="n">custom_serializer_with_parameters</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">,</span> <span class="n">option</span><span class="o">=</span><span class="n">orjson</span><span class="o">.</span><span class="n">OPT_SERIALIZE_NUMPY</span><span class="p">)</span>
 </span>
 <span class="n">logger_two</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span>
-    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">,</span> <span class="n">json_serializer</span><span class="o">=</span><span class="n">custom_serializer_with_parameters</span><span class="p">,</span> <span class="n">json_deserializer</span><span class="o">=</span><span class="n">custom_deserializer</span>
+    <span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
+    <span class="n">json_serializer</span><span class="o">=</span><span class="n">custom_serializer_with_parameters</span><span class="p">,</span>
+    <span class="n">json_deserializer</span><span class="o">=</span><span class="n">custom_deserializer</span><span class="p">,</span>
 <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
