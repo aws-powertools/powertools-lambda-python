@@ -57,7 +57,7 @@ class DataDogProvider(MetricsProviderBase):
                     "v": single_metric["v"],
                     "e": single_metric["e"],
                     "t": single_metric["t"],
-                }
+                },
             )
 
         return output_list
@@ -104,7 +104,13 @@ class DataDogMetrics(MetricsBase):
 
     # drop additional kwargs to keep same experience
     def add_metric(
-        self, name: str, value: float, timestamp: Optional[int] = None, tags: Optional[List] = None, *args, **kwargs
+        self,
+        name: str,
+        value: float,
+        timestamp: Optional[int] = None,
+        tags: Optional[List] = None,
+        *args,
+        **kwargs,
     ):
         self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags)
 

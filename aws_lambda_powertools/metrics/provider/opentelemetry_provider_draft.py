@@ -12,15 +12,15 @@ logger = logging.getLogger(__name__)
 
 # Check if using datadog layer
 try:
-    from opentelemetry import metrics  # type: ignore
+    from opentelemetry import metrics
     from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import (
-        OTLPMetricExporter,  # type: ignore
+        OTLPMetricExporter,
     )
-    from opentelemetry.sdk.metrics import MeterProvider  # type: ignore
+    from opentelemetry.sdk.metrics import MeterProvider
     from opentelemetry.sdk.metrics.export import (
-        PeriodicExportingMetricReader,  # type: ignore
+        PeriodicExportingMetricReader,
     )
-    from opentelemetry.sdk.resources import SERVICE_NAME, Resource  # type: ignore
+    from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 
     otlp_metrics = True
 except ImportError:
@@ -86,7 +86,13 @@ class OTLPMetrics(MetricsBase):
 
     # drop additional kwargs to keep same experience
     def add_metric(
-        self, name: str, value: float, unit: Optional[str] = "1", tags: Optional[Dict] = None, *args, **kwargs
+        self,
+        name: str,
+        value: float,
+        unit: Optional[str] = "1",
+        tags: Optional[Dict] = None,
+        *args,
+        **kwargs,
     ):
         self.provider.add_metric(name=name, value=value, unit=unit, tags=tags)
 
