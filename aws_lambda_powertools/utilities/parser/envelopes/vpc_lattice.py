@@ -23,7 +23,7 @@ class VpcLatticeEnvelope(BaseEnvelope):
 
         Returns
         -------
-        Any
+        Optional[Model]
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with VPC Lattice model {VpcLatticeModel}")
