@@ -14,7 +14,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 ### Required resources
 
@@ -253,7 +253,7 @@ When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apig
 
 **Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/awslabs/aws-lambda-powertools-roadmap/issues/34){target="_blank"}.
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34){target="_blank"}.
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
@@ -360,15 +360,24 @@ You can use the `Response` class to have full control over the response. For exa
 
 ### Compress
 
-You can compress with gzip and base64 encode your responses via `compress` parameter.
+You can compress with gzip and base64 encode your responses via `compress` parameter. You have the option to pass the `compress` parameter when working with a specific route or using the Response object.
+
+???+ info
+    The `compress` parameter used in the Response object takes precedence over the one used in the route.
 
 ???+ warning
     The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
-=== "compressing_responses.py"
+=== "compressing_responses_using_route.py"
 
     ```python hl_lines="17 27"
-     --8<-- "examples/event_handler_rest/src/compressing_responses.py"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_route.py"
+    ```
+
+=== "compressing_responses_using_response.py"
+
+    ```python hl_lines="24"
+     --8<-- "examples/event_handler_rest/src/compressing_responses_using_response.py"
     ```
 
 === "compressing_responses.json"

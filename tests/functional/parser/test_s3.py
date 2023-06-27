@@ -79,7 +79,7 @@ def handle_s3_glacier(event: S3Model, _: LambdaContext):
     assert s3.object.sequencer == "0C0F6F405D6ED209E1"
     assert record.glacierEventData is not None
     convert_time = int(
-        round(record.glacierEventData.restoreEventData.lifecycleRestorationExpiryTime.timestamp() * 1000)
+        round(record.glacierEventData.restoreEventData.lifecycleRestorationExpiryTime.timestamp() * 1000),
     )
     assert convert_time == 60000
     assert record.glacierEventData.restoreEventData.lifecycleRestoreStorageClass == "standard"

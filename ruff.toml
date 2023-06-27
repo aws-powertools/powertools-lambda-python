@@ -1,0 +1,70 @@
+# Enable rules.
+select = [
+    "A", # flake8-builtins - https://beta.ruff.rs/docs/rules/#flake8-builtins-a
+    "B", # flake8-bugbear-b - https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
+    "C4", # flake8-comprehensions - https://beta.ruff.rs/docs/rules/#flake8-comprehensions-c4
+    "C90", # mccabe - https://beta.ruff.rs/docs/rules/#mccabe-c90
+    "COM", # flak8-commas - https://beta.ruff.rs/docs/rules/#flake8-commas-com
+    #"D", # pydocstyle - not enabled temporarily
+    "E", # pycodestyle error - https://beta.ruff.rs/docs/rules/#error-e
+    "ERA", # flake8-eradicate - https://beta.ruff.rs/docs/rules/#eradicate-era
+    "FA", # flake8-future-annotations - https://beta.ruff.rs/docs/rules/#flake8-future-annotations-fa
+    "FIX", # flake8-fixme - https://beta.ruff.rs/docs/rules/#flake8-fixme-fix
+    "F", # pyflakes - https://beta.ruff.rs/docs/rules/#pyflakes-f
+    "I", # isort - https://beta.ruff.rs/docs/rules/#isort-i
+    "ICN", # flake8-import-conventions - https://beta.ruff.rs/docs/rules/#flake8-import-conventions-icn
+    "ISC", # flake8-implicit-str-concat - https://beta.ruff.rs/docs/rules/#flake8-implicit-str-concat-isc
+    "PLE", # pylint error - https://beta.ruff.rs/docs/rules/#error-ple
+    "PLC", # pylint convention - https://beta.ruff.rs/docs/rules/#convention-plc
+    "PLR", # pylint refactoring - https://beta.ruff.rs/docs/rules/#refactor-plr
+    "PLW", # pylint warning - https://beta.ruff.rs/docs/rules/#warning-plw
+    "PL", # pylint - https://beta.ruff.rs/docs/rules/#pylint-pl
+    "PYI", # flake8-pyi - https://beta.ruff.rs/docs/rules/#flake8-pyi-pyi
+    "Q", # flake8-quotes - https://beta.ruff.rs/docs/rules/#flake8-quotes-q
+    "PTH", # flake8-use-pathlib - https://beta.ruff.rs/docs/rules/#flake8-use-pathlib-pth
+    "T10", # flake8-debugger https://beta.ruff.rs/docs/rules/#flake8-debugger-t10
+    "TD", # flake8-todo - https://beta.ruff.rs/docs/rules/#flake8-todos-td
+    "W" # pycodestyle warning - https://beta.ruff.rs/docs/rules/#warning-w
+]
+
+# Ignore specific rules
+ignore = [
+    "W291", # https://beta.ruff.rs/docs/rules/trailing-whitespace/
+    "PLR0913", # https://beta.ruff.rs/docs/rules/too-many-arguments/
+    "PLR2004", #https://beta.ruff.rs/docs/rules/magic-value-comparison/
+    "PLW0603", #https://beta.ruff.rs/docs/rules/global-statement/
+    "B904", # raise-without-from-inside-except - disabled temporarily
+    "PLC1901", # Compare-to-empty-string - disabled temporarily
+    ]
+
+# Exclude files and directories
+exclude = ["docs", ".eggs", "setup.py", "example", ".aws-sam", ".git", "dist", ".md", ".yaml", "example/samconfig.toml", ".txt", ".ini"]
+
+# Maximum line length
+line-length = 120
+
+
+fix = true
+fixable = ["I", "COM812", "W"]
+
+# See: https://github.com/astral-sh/ruff/issues/128
+typing-modules = ["aws_lambda_powertools.utilities.parser.types"]
+
+[mccabe]
+# Maximum cyclomatic complexity
+max-complexity = 15
+
+[pylint]
+# Maximum number of nested blocks
+max-branches = 15
+# Maximum number of if statements in a function
+max-statements = 70
+
+[isort]
+split-on-trailing-comma = true
+
+[per-file-ignores]
+# Ignore specific rules for specific files
+"tests/e2e/utils/data_builder/__init__.py" = ["F401"]
+"tests/e2e/utils/data_fetcher/__init__.py" = ["F401"]
+"aws_lambda_powertools/utilities/data_classes/s3_event.py" = ["A003"]

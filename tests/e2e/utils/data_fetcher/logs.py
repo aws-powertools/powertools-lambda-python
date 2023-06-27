@@ -118,7 +118,7 @@ class LogFetcher:
 
         if len(filtered_logs) < self.minimum_log_entries:
             raise ValueError(
-                f"Number of log entries found doesn't meet minimum required ({self.minimum_log_entries}). Repeating..."
+                f"Number of log entries found doesn't meet minimum required ({self.minimum_log_entries}). Repeating...",
             )
 
         return filtered_logs

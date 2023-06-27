@@ -41,6 +41,7 @@ class RuleAction(str, Enum):
     SCHEDULE_BETWEEN_TIME_RANGE = "SCHEDULE_BETWEEN_TIME_RANGE"  # hour:min 24 hours clock
     SCHEDULE_BETWEEN_DATETIME_RANGE = "SCHEDULE_BETWEEN_DATETIME_RANGE"  # full datetime format, excluding timezone
     SCHEDULE_BETWEEN_DAYS_OF_WEEK = "SCHEDULE_BETWEEN_DAYS_OF_WEEK"  # MONDAY, TUESDAY, .... see TimeValues enum
+    MODULO_RANGE = "MODULO_RANGE"
 
 
 class TimeKeys(Enum):
@@ -69,6 +70,16 @@ class TimeValues(Enum):
     THURSDAY = "THURSDAY"
     FRIDAY = "FRIDAY"
     SATURDAY = "SATURDAY"
+
+
+class ModuloRangeValues(Enum):
+    """
+    Possible values when using modulo range rule
+    """
+
+    BASE = "BASE"
+    START = "START"
+    END = "END"
 
 
 class SchemaValidator(BaseValidator):
@@ -220,7 +231,10 @@ class RulesValidator(BaseValidator):
     """Validates each rule and calls ConditionsValidator to validate each rule's conditions"""
 
     def __init__(
-        self, feature: Dict[str, Any], boolean_feature: bool, logger: Optional[Union[logging.Logger, Logger]] = None
+        self,
+        feature: Dict[str, Any],
+        boolean_feature: bool,
+        logger: Optional[Union[logging.Logger, Logger]] = None,
     ):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
@@ -240,7 +254,10 @@ class RulesValidator(BaseValidator):
         for rule_name, rule in self.rules.items():
             self.logger.debug(f"Attempting to validate rule={rule_name} and feature={self.feature_name}")
             self.validate_rule(
-                rule=rule, rule_name=rule_name, feature_name=self.feature_name, boolean_feature=self.boolean_feature
+                rule=rule,
+                rule_name=rule_name,
+                feature_name=self.feature_name,
+                boolean_feature=self.boolean_feature,
             )
             conditions = ConditionsValidator(rule=rule, rule_name=rule_name, logger=self.logger)
             conditions.validate()
@@ -296,7 +313,7 @@ class ConditionsValidator(BaseValidator):
         if action not in RuleAction.__members__:
             allowed_values = [_action.value for _action in RuleAction]
             raise SchemaValidationError(
-                f"'action' value must be either {allowed_values}, rule_name={rule_name}, action={action}"
+                f"'action' value must be either {allowed_values}, rule_name={rule_name}, action={action}",
             )
 
     @staticmethod
@@ -312,15 +329,15 @@ class ConditionsValidator(BaseValidator):
         action = condition.get(CONDITION_ACTION, "")
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key != TimeKeys.CURRENT_TIME.value:
             raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_TIME' condition key, rule={rule_name}"  # noqa: E501
+                f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_TIME' condition key, rule={rule_name}",  # noqa: E501
             )
         if action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key != TimeKeys.CURRENT_DATETIME.value:
             raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME' condition key, rule={rule_name}"  # noqa: E501
+                f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME' condition key, rule={rule_name}",  # noqa: E501
             )
         if action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value and key != TimeKeys.CURRENT_DAY_OF_WEEK.value:
             raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_OF_WEEK' condition key, rule={rule_name}"  # noqa: E501
+                f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_OF_WEEK' condition key, rule={rule_name}",  # noqa: E501
             )
 
     @staticmethod
@@ -333,14 +350,23 @@ class ConditionsValidator(BaseValidator):
         # time actions need to be parsed to make sure date and time format is valid and timezone is recognized
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
-                value, rule_name, action, ConditionsValidator._validate_time_value
+                value,
+                rule_name,
+                action,
+                ConditionsValidator._validate_time_value,
             )
         elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
-                value, rule_name, action, ConditionsValidator._validate_datetime_value
+                value,
+                rule_name,
+                action,
+                ConditionsValidator._validate_datetime_value,
             )
         elif action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value:
             ConditionsValidator._validate_schedule_between_days_of_week(value, rule_name)
+        # modulo range condition needs validation on base, start, and end attributes
+        elif action == RuleAction.MODULO_RANGE.value:
+            ConditionsValidator._validate_modulo_range(value, rule_name)
 
     @staticmethod
     def _validate_datetime_value(datetime_str: str, rule_name: str):
@@ -365,7 +391,7 @@ class ConditionsValidator(BaseValidator):
         if date.tzinfo is not None:
             raise SchemaValidationError(
                 "'START' and 'END' must not include timezone information. Set the timezone using the 'TIMEZONE' "
-                f"field, rule={rule_name} "
+                f"field, rule={rule_name} ",
             )
 
     @staticmethod
@@ -375,7 +401,7 @@ class ConditionsValidator(BaseValidator):
 
         if not match:
             raise SchemaValidationError(
-                f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}"
+                f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}",
             )
 
     @staticmethod
@@ -398,7 +424,7 @@ class ConditionsValidator(BaseValidator):
                 TimeValues.SUNDAY.value,
             ]:
                 raise SchemaValidationError(
-                    f"condition value DAYS must represent a day of the week in 'TimeValues' enum, rule={rule_name}"
+                    f"condition value DAYS must represent a day of the week in 'TimeValues' enum, rule={rule_name}",
                 )
 
         timezone = value.get(TimeValues.TIMEZONE.value, "UTC")
@@ -411,7 +437,10 @@ class ConditionsValidator(BaseValidator):
 
     @staticmethod
     def _validate_schedule_between_time_and_datetime_ranges(
-        value: Any, rule_name: str, action_name: str, validator: Callable[[str, str], None]
+        value: Any,
+        rule_name: str,
+        action_name: str,
+        validator: Callable[[str, str], None],
     ):
         error_str = f"condition with a '{action_name}' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
@@ -434,3 +463,22 @@ class ConditionsValidator(BaseValidator):
         # try to see if the timezone string corresponds to any known timezone
         if not tz.gettz(timezone):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
+
+    @staticmethod
+    def _validate_modulo_range(value: Any, rule_name: str):
+        error_str = f"condition with a 'MODULO_RANGE' action must have a condition value type dictionary with 'BASE', 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
+        if not isinstance(value, dict):
+            raise SchemaValidationError(error_str)
+
+        base = value.get(ModuloRangeValues.BASE.value)
+        start = value.get(ModuloRangeValues.START.value)
+        end = value.get(ModuloRangeValues.END.value)
+        if base is None or start is None or end is None:
+            raise SchemaValidationError(error_str)
+        if not isinstance(base, int) or not isinstance(start, int) or not isinstance(end, int):
+            raise SchemaValidationError(f"'BASE', 'START' and 'END' must be integers, rule={rule_name}")
+
+        if not 0 <= start <= end <= base - 1:
+            raise SchemaValidationError(
+                f"condition with 'MODULO_RANGE' action must satisfy 0 <= START <= END <= BASE-1, rule={rule_name}",
+            )

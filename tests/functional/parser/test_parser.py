@@ -22,7 +22,8 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
 
 
 @pytest.mark.parametrize(
-    "invalid_envelope,expected", [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)]
+    "invalid_envelope,expected",
+    [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)],
 )
 def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelope, expected):
     @event_parser(model=dummy_schema, envelope=invalid_envelope)

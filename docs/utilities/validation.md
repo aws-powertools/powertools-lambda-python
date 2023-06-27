@@ -16,7 +16,7 @@ This utility provides JSON Schema validation for events and responses, including
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 

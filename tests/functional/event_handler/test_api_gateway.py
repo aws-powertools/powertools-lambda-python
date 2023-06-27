@@ -298,7 +298,7 @@ def test_no_matches():
         return app.resolve(event, context)
 
     # Also check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -364,6 +364,58 @@ def test_cors_preflight_body_is_empty_not_null():
 
     # THEN there body should be empty strings
     assert result["body"] == ""
+
+
+def test_override_route_compress_parameter():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=False
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request", compress=True)
+    def with_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=False)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then the response is not compressed
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+    assert result["multiValueHeaders"].get("Content-Encoding") is None
+
+
+def test_response_with_compress_enabled():
+    # GIVEN a function
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=True
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request")
+    def route_without_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=True)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then gzip the response and base64 encode as a string
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
 
 
 def test_compress():
@@ -871,17 +923,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -907,17 +959,17 @@ def test_similar_dynamic_routes_with_whitespaces():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested account"
@@ -1205,7 +1257,7 @@ def test_api_gateway_app_router_with_different_methods():
     app.include_router(router)
 
     # Also check check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1647,3 +1699,26 @@ def test_dict_response_with_status_code():
     assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     response_body = json.loads(response["body"])
     assert response_body["message"] == "success"
+
+
+def test_route_match_prioritize_full_match():
+    # GIVEN a Http API V1, with a function registered with two routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/{path}")
+    def dynamic_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "dynamic"}))
+
+    @router.get("/my/path")
+    def static_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "static"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler with /foo/dynamic
+    response = app(LOAD_GW_EVENT, {})
+
+    # THEN the static_handler should have been called, because it fully matches the path directly
+    response_body = json.loads(response["body"])
+    assert response_body["hello"] == "static"

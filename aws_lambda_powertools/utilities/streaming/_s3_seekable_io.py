@@ -48,7 +48,12 @@ class _S3SeekableIO(IO[bytes]):
     """
 
     def __init__(
-        self, bucket: str, key: str, version_id: Optional[str] = None, boto3_client=Optional["Client"], **sdk_options
+        self,
+        bucket: str,
+        key: str,
+        version_id: Optional[str] = None,
+        boto3_client=Optional["Client"],
+        **sdk_options,
     ):
         self.bucket = bucket
         self.key = key

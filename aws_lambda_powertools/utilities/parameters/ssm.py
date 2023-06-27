@@ -108,7 +108,10 @@ class SSMProvider(BaseProvider):
         super().__init__()
 
         self.client: "SSMClient" = self._build_boto3_client(
-            service_name="ssm", client=boto3_client, session=boto3_session, config=config
+            service_name="ssm",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
         )
 
     # We break Liskov substitution principle due to differences in signatures of this method and superclass get method
@@ -156,7 +159,8 @@ class SSMProvider(BaseProvider):
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
         )
 
         # Add to `decrypt` sdk_options to we can have an explicit option for this
@@ -279,7 +283,8 @@ class SSMProvider(BaseProvider):
 
         # If decrypt is not set, resolve it from the environment variable, defaulting to False
         decrypt = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
         )
 
         # Init potential batch/decrypt batch responses and errors
@@ -313,13 +318,15 @@ class SSMProvider(BaseProvider):
         return {**response, **batch_ret, **decrypt_ret}
 
     def _get_parameters_by_name_with_decrypt_option(
-        self, batch: Dict[str, Dict], raise_on_error: bool
+        self,
+        batch: Dict[str, Dict],
+        raise_on_error: bool,
     ) -> Tuple[Dict, List]:
         response: Dict[str, Any] = {}
         errors: List[str] = []
 
         # Decided for single-thread as it outperforms in 128M and 1G + reduce timeout risk
-        # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+        # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
         for parameter, options in batch.items():
             try:
                 response[parameter] = self.get(parameter, options["max_age"], options["transform"], options["decrypt"])
@@ -332,7 +339,10 @@ class SSMProvider(BaseProvider):
         return response, errors
 
     def _get_parameters_batch_by_name(
-        self, batch: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+        self,
+        batch: Dict[str, Dict],
+        raise_on_error: bool = True,
+        decrypt: bool = False,
     ) -> Tuple[Dict, List]:
         """Slice batch and fetch parameters using GetParameters by max permitted"""
         errors: List[str] = []
@@ -358,7 +368,11 @@ class SSMProvider(BaseProvider):
         return cache
 
     def _get_parameters_by_name_in_chunks(
-        self, batch: Dict[str, Dict], cache: Dict[str, Any], raise_on_error: bool, decrypt: bool = False
+        self,
+        batch: Dict[str, Dict],
+        cache: Dict[str, Any],
+        raise_on_error: bool,
+        decrypt: bool = False,
     ) -> Tuple[Dict, List]:
         """Take out differences from cache and batch, slice it and fetch from SSM"""
         response: Dict[str, Any] = {}
@@ -368,7 +382,9 @@ class SSMProvider(BaseProvider):
 
         for chunk in slice_dictionary(data=diff, chunk_size=self._MAX_GET_PARAMETERS_ITEM):
             response, possible_errors = self._get_parameters_by_name(
-                parameters=chunk, raise_on_error=raise_on_error, decrypt=decrypt
+                parameters=chunk,
+                raise_on_error=raise_on_error,
+                decrypt=decrypt,
             )
             response.update(response)
             errors.extend(possible_errors)
@@ -376,7 +392,10 @@ class SSMProvider(BaseProvider):
         return response, errors
 
     def _get_parameters_by_name(
-        self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+        self,
+        parameters: Dict[str, Dict],
+        raise_on_error: bool = True,
+        decrypt: bool = False,
     ) -> Tuple[Dict[str, Any], List[str]]:
         """Use SSM GetParameters to fetch parameters, hydrate cache, and handle partial failure
 
@@ -418,7 +437,10 @@ class SSMProvider(BaseProvider):
         return transformed_params, batch_errors
 
     def _transform_and_cache_get_parameters_response(
-        self, api_response: GetParametersResultTypeDef, parameters: Dict[str, Any], raise_on_error: bool = True
+        self,
+        api_response: GetParametersResultTypeDef,
+        parameters: Dict[str, Any],
+        raise_on_error: bool = True,
     ) -> Dict[str, Any]:
         response: Dict[str, Any] = {}
 
@@ -441,7 +463,8 @@ class SSMProvider(BaseProvider):
 
     @staticmethod
     def _handle_any_invalid_get_parameter_errors(
-        api_response: GetParametersResultTypeDef, raise_on_error: bool = True
+        api_response: GetParametersResultTypeDef,
+        raise_on_error: bool = True,
     ) -> List[str]:
         """GetParameters is non-atomic. Failures don't always reflect in exceptions so we need to collect."""
         failed_parameters = api_response["InvalidParameters"]
@@ -455,7 +478,10 @@ class SSMProvider(BaseProvider):
 
     @staticmethod
     def _split_batch_and_decrypt_parameters(
-        parameters: Dict[str, Dict], transform: TransformOptions, max_age: int, decrypt: bool
+        parameters: Dict[str, Dict],
+        transform: TransformOptions,
+        max_age: int,
+        decrypt: bool,
     ) -> Tuple[Dict[str, Dict], Dict[str, Dict]]:
         """Split parameters that can be fetched by GetParameters vs GetParameter
 
@@ -503,7 +529,7 @@ class SSMProvider(BaseProvider):
         """Raise GetParameterError if fail-fast is disabled and '_errors' key is in parameters batch"""
         if not raise_on_error and reserved_parameter in parameters:
             raise GetParameterError(
-                f"You cannot fetch a parameter named '{reserved_parameter}' in graceful error mode."
+                f"You cannot fetch a parameter named '{reserved_parameter}' in graceful error mode.",
             )
 
 
@@ -571,14 +597,19 @@ def get_parameter(
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+        choice=decrypt,
     )
 
     # Add to `decrypt` sdk_options to we can have an explicit option for this
     sdk_options["decrypt"] = decrypt
 
     return DEFAULT_PROVIDERS["ssm"].get(
-        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+        name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
     )
 
 
@@ -653,7 +684,8 @@ def get_parameters(
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+        choice=decrypt,
     )
 
     sdk_options["recursive"] = recursive
@@ -769,14 +801,15 @@ def get_parameters_by_name(
     """
 
     # NOTE: Decided against using multi-thread due to single-thread outperforming in 128M and 1G + timeout risk
-    # see: https://github.com/awslabs/aws-lambda-powertools-python/issues/1040#issuecomment-1299954613
+    # see: https://github.com/aws-powertools/powertools-lambda-python/issues/1040#issuecomment-1299954613
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
     max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
     # If decrypt is not set, resolve it from the environment variable, defaulting to False
     decrypt = resolve_truthy_env_var_choice(
-        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"), choice=decrypt
+        env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+        choice=decrypt,
     )
 
     # Only create the provider if this function is called at least once
@@ -784,5 +817,9 @@ def get_parameters_by_name(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     return DEFAULT_PROVIDERS["ssm"].get_parameters_by_name(
-        parameters=parameters, max_age=max_age, transform=transform, decrypt=decrypt, raise_on_error=raise_on_error
+        parameters=parameters,
+        max_age=max_age,
+        transform=transform,
+        decrypt=decrypt,
+        raise_on_error=raise_on_error,
     )

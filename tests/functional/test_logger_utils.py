@@ -130,7 +130,9 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
     # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to INCLUDED external loggers
     # AND external logger_1 is also in EXCLUDE list
     utils.copy_config_to_registered_loggers(
-        source_logger=powertools_logger, include={logger_1.name, logger_2.name}, exclude={logger_1.name}
+        source_logger=powertools_logger,
+        include={logger_1.name, logger_2.name},
+        exclude={logger_1.name},
     )
     msg = "test message3"
     logger_2.info(msg)
@@ -172,7 +174,9 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, 
     # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to INCLUDED external logger
     # AND external logger used with custom log_level
     utils.copy_config_to_registered_loggers(
-        source_logger=powertools_logger, include={logger.name}, log_level=level_to_set
+        source_logger=powertools_logger,
+        include={logger.name},
+        log_level=level_to_set,
     )
     msg = "test message4"
     logger.warning(msg)

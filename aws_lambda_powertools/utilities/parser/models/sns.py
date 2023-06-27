@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from typing import Type as TypingType
-from typing import Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import HttpUrl

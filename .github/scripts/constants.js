@@ -31,7 +31,7 @@ module.exports = Object.freeze({
     "LABEL_PENDING_RELEASE": "pending-release",
 
     /** @type {string} */
-    "HANDLE_MAINTAINERS_TEAM": "@awslabs/aws-lambda-powertools-python",
+    "HANDLE_MAINTAINERS_TEAM": "@aws-powertools/powertools-lambda-python",
 
     /** @type {string[]} */
     "IGNORE_AUTHORS": ["dependabot[bot]", "markdownify[bot]"],

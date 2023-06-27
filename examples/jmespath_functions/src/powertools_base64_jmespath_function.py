@@ -31,7 +31,6 @@ class DataclassCustomEncoder(json.JSONEncoder):
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
-
     # Try to validate the schema
     try:
         validate(event=event, schema=schemas.INPUT, envelope="powertools_json(powertools_base64(payload))")
@@ -48,7 +47,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
         }
     except JMESPathTypeError:
         return return_error_message(
-            "The powertools_json(powertools_base64()) envelope function must match a valid path."
+            "The powertools_json(powertools_base64()) envelope function must match a valid path.",
         )
     except binascii.Error:
         return return_error_message("Payload must be a valid base64 encoded string")
