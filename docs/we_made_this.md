@@ -86,6 +86,14 @@ This article outlines the importance of idempotency, key considerations and trad
 
 * [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
 
+### Implementing Idempotency in Serverless Architectures
+
+> **Author: [Seongwoo Choi](https://www.linkedin.com/in/%EC%84%B1%EC%9A%B0-%EC%B5%9C-44b12b1ab/){target="_blank"}** :material-linkedin:
+
+This blog post focuses on the importance of idempotency in distributed services and explores streamlined idempotent request flows. It provides guidance on idempotency tests using duplicate requests.
+
+* [Implementing Idempotency in Serverless Architectures](https://medium.com/@nuatmochoi/implementing-idempotency-in-serverless-architectures-f9079ef1c7da){target="_blank"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
