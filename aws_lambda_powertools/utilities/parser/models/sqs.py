@@ -29,24 +29,24 @@ class SqsMsgAttributeModel(BaseModel):
     # labels with the format .custom-data-type.
     # https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-message-metadata.html#sqs-message-attributes
     # @validator("dataType")
-    # def valid_type(cls, v):  # noqa: VNE001,E800 # noqa: E800
-    #     pattern = re.compile("Number.*|String.*|Binary.*") # noqa: E800
-    #     if not pattern.match(v): # noqa: E800
-    #         raise TypeError("data type is invalid") # noqa: E800
-    #     return v # noqa: E800
+    # def valid_type(cls, v):  # noqa: VNE001,ERA001 # noqa: ERA001
+    #     pattern = re.compile("Number.*|String.*|Binary.*") # noqa: ERA001
+    #     if not pattern.match(v): # noqa: ERA001
+    #         raise TypeError("data type is invalid") # noqa: ERA001
+    #     return v # noqa: ERA001
     #
     # # validate that dataType and value are not None and match
     # @root_validator
-    # def check_str_and_binary_values(cls, values): # noqa: E800
-    #     binary_val, str_val = values.get("binaryValue", ""), values.get("stringValue", "") # noqa: E800
-    #     data_type = values.get("dataType") # noqa: E800
-    #     if not str_val and not binary_val: # noqa: E800
-    #         raise TypeError("both binaryValue and stringValue are missing") # noqa: E800
-    #     if data_type.startswith("Binary") and not binary_val: # noqa: E800
-    #         raise TypeError("binaryValue is missing") # noqa: E800
-    #     if (data_type.startswith("String") or data_type.startswith("Number")) and not str_val: # noqa: E800
-    #         raise TypeError("stringValue is missing") # noqa: E800
-    #     return values # noqa: E800
+    # def check_str_and_binary_values(cls, values): # noqa: ERA001
+    #     binary_val, str_val = values.get("binaryValue", ""), values.get("stringValue", "") # noqa: ERA001
+    #     data_type = values.get("dataType") # noqa: ERA001
+    #     if not str_val and not binary_val: # noqa: ERA001
+    #         raise TypeError("both binaryValue and stringValue are missing") # noqa: ERA001
+    #     if data_type.startswith("Binary") and not binary_val: # noqa: ERA001
+    #         raise TypeError("binaryValue is missing") # noqa: ERA001
+    #     if (data_type.startswith("String") or data_type.startswith("Number")) and not str_val: # noqa: ERA001
+    #         raise TypeError("stringValue is missing") # noqa: ERA001
+    #     return values # noqa: ERA001
 
 
 class SqsRecordModel(BaseModel):

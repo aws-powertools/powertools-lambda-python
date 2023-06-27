@@ -159,13 +159,13 @@ class BasePartialProcessor(ABC):
         #
         #   Scenario: Injects Lambda context
         #
-        #   def record_handler(record, lambda_context): ... # noqa: E800
-        #   with processor(records=batch, handler=record_handler, lambda_context=context): ... # noqa: E800
+        #   def record_handler(record, lambda_context): ... # noqa: ERA001
+        #   with processor(records=batch, handler=record_handler, lambda_context=context): ... # noqa: ERA001
         #
         #   Scenario: Does NOT inject Lambda context (default)
         #
-        #   def record_handler(record): pass # noqa: E800
-        #   with processor(records=batch, handler=record_handler): ... # noqa: E800
+        #   def record_handler(record): pass # noqa: ERA001
+        #   with processor(records=batch, handler=record_handler): ... # noqa: ERA001
         #
         if lambda_context is None:
             self._handler_accepts_lambda_context = False
@@ -449,7 +449,7 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
         logger.info(record.dynamodb.new_image)
         payload: dict = json.loads(record.dynamodb.new_image.get("item"))
         # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: ERA001
         # payload = change.get("Message") -> "<payload>"
         ...
 
@@ -593,7 +593,7 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
         logger.info(record.dynamodb.new_image)
         payload: dict = json.loads(record.dynamodb.new_image.get("item"))
         # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: ERA001
         # payload = change.get("Message") -> "<payload>"
         ...
 

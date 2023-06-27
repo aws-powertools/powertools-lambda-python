@@ -225,10 +225,10 @@ class MetricManager:
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
         # For standard resolution metrics, don't add StorageResolution field to avoid unnecessary ingestion of data into cloudwatch # noqa E501
-        # Example: [ { "Name": "metric_name", "Unit": "Count"} ] # noqa E800
+        # Example: [ { "Name": "metric_name", "Unit": "Count"} ] # noqa ERA001
         #
         # In case using high-resolution metrics, add StorageResolution field
-        # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa E800
+        # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa ERA001
         metric_definition: List[MetricNameUnitResolution] = []
         metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
 

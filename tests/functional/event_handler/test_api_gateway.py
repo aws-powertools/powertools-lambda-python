@@ -923,17 +923,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -959,17 +959,17 @@ def test_similar_dynamic_routes_with_whitespaces():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested account"

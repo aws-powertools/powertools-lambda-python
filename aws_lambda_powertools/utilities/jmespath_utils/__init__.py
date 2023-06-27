@@ -47,7 +47,7 @@ def extract_data_from_envelope(data: Union[Dict, str], envelope: str, jmespath_o
 
 
         def handler(event: dict, context: LambdaContext):
-            # event = {"body": "{\"customerId\":\"dd4649e6-2484-4993-acb8-0f9123103394\"}"}  # noqa: E800
+            # event = {"body": "{\"customerId\":\"dd4649e6-2484-4993-acb8-0f9123103394\"}"}  # noqa: ERA001
             payload = extract_data_from_envelope(data=event, envelope="powertools_json(body)")
             customer = payload.get("customerId")  # now deserialized
             ...
