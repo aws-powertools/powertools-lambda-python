@@ -87,7 +87,7 @@ class Logger:
         service name to be appended in logs, by default "service_undefined"
     level : str, int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
-        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
         by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
@@ -108,7 +108,7 @@ class Logger:
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200. # noqa: E501
+        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200.
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
@@ -200,7 +200,7 @@ class Logger:
     ------
     InvalidLoggerSamplingRateError
         When sampling rate provided is not a float
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
