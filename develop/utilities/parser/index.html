@@ -19,7 +19,7 @@
         <link rel="next" href="../idempotency/">
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.1.17">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.17">
     
     
       
@@ -1443,6 +1443,10 @@ installed without binary files</a>:</p>
 <td><strong>SqsModel</strong></td>
 <td>Lambda Event Source payload for Amazon SQS</td>
 </tr>
+<tr>
+<td><strong>VpcLatticeModel</strong></td>
+<td>Lambda Event Source payload for Amazon VPC Lattice</td>
+</tr>
 </tbody>
 </table>
 <h4 id="extending-built-in-models">Extending built-in models<a class="headerlink" href="#extending-built-in-models" title="Permanent link">&para;</a></h4>
@@ -1810,6 +1814,11 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target
 <td>1. Parses data using <code>KafkaRecordModel</code>. <br/> 2. Parses <code>value</code> key using your model and returns it.</td>
 <td><code>Model</code></td>
 </tr>
+<tr>
+<td><strong>VpcLatticeEnvelope</strong></td>
+<td>1. Parses data using <code>VpcLatticeModel</code>. <br/> 2. Parses <code>value</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
 </tbody>
 </table>
 <h4 id="bringing-your-own-envelope">Bringing your own envelope<a class="headerlink" href="#bringing-your-own-envelope" title="Permanent link">&para;</a></h4>
@@ -2127,7 +2136,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target
   <small>
     
       Last update:
-      2023-06-09
+      2023-06-27
     
   </small>
 </div>
