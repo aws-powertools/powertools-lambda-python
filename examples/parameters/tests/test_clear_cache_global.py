@@ -1,5 +1,4 @@
 import pytest
-
 from src import app
 
 from aws_lambda_powertools.utilities import parameters

@@ -91,7 +91,7 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
         },
         "Key": {"id": {"S": hashed_idempotency_key}},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, #expiry = :expiry, #status = :status",
     }
 
 

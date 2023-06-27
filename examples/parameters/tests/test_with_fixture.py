@@ -1,5 +1,4 @@
 import pytest
-
 from src import single_mock
 
 
