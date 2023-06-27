@@ -105,7 +105,7 @@ def test_code_pipeline_event_non_json_user_parameters():
     assert configuration.user_parameters is not None
 
     with pytest.raises(json.decoder.JSONDecodeError):
-        configuration.decoded_user_parameters
+        assert configuration.decoded_user_parameters is not None
 
 
 def test_code_pipeline_event_decoded_data():

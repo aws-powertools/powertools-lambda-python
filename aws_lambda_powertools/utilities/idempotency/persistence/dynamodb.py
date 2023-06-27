@@ -247,7 +247,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
-        update_expression = "SET #response_data = :response_data, #expiry = :expiry, " "#status = :status"
+        update_expression = "SET #response_data = :response_data, #expiry = :expiry, #status = :status"
         expression_attr_values: Dict[str, "AttributeValueTypeDef"] = {
             ":expiry": {"N": str(data_record.expiry_timestamp)},
             ":response_data": {"S": data_record.response_data},
