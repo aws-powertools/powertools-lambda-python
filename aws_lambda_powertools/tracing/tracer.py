@@ -510,7 +510,7 @@ class Tracer:
                 functools.partial(self.capture_method, capture_response=capture_response, capture_error=capture_error),
             )
 
-        # Example: app.ClassA.get_all  # noqa E800
+        # Example: app.ClassA.get_all  # noqa ERA001
         method_name = f"{method.__module__}.{method.__qualname__}"
 
         capture_response = resolve_truthy_env_var_choice(

@@ -37,7 +37,6 @@ ignore = [
     "B018", # useless-expression - disabled temporarily
     "COM812", # Trailing comma missing - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
-    "ERA001", # Found commented-out code - disabled temporarily
     "PLW", # Warning category - disabled temporarily
     "PLR", # Refactoring category - disabled temporarily
     "PLC", # Convention category - disabled temporarily
