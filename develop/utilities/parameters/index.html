@@ -3760,19 +3760,17 @@
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
-
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">single_mock</span>
 
-<span class="hll">
-</span><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
-<span class="k">def</span> <span class="nf">mock_parameter_response</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
+
+<span class="hll"><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+</span><span class="k">def</span> <span class="nf">mock_parameter_response</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">mockreturn</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;mock_value&quot;</span>
-<span class="hll">
-</span>    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">single_mock</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="s2">&quot;get_parameter&quot;</span><span class="p">,</span> <span class="n">mockreturn</span><span class="p">)</span>
 
+<span class="hll">    <span class="n">monkeypatch</span><span class="o">.</span><span class="n">setattr</span><span class="p">(</span><span class="n">single_mock</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="s2">&quot;get_parameter&quot;</span><span class="p">,</span> <span class="n">mockreturn</span><span class="p">)</span>
+</span>
 
 <span class="c1"># Pass our fixture as an argument to all tests where we want to mock the get_parameter response</span>
 <span class="k">def</span> <span class="nf">test_handler</span><span class="p">(</span><span class="n">mock_parameter_response</span><span class="p">):</span>
@@ -3845,17 +3843,15 @@ object named <code>get_parameter_mock</code>.</p>
 <span class="normal">19</span>
 <span class="normal">20</span>
 <span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
-
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">app</span>
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">clear_parameters_cache</span><span class="p">():</span>
-<span class="hll">    <span class="k">yield</span>
-</span>    <span class="n">app</span><span class="o">.</span><span class="n">ssm_provider</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>  <span class="c1"># This will clear SSMProvider cache</span>
-
+    <span class="k">yield</span>
+<span class="hll">    <span class="n">app</span><span class="o">.</span><span class="n">ssm_provider</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>  <span class="c1"># This will clear SSMProvider cache</span>
+</span>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
 <span class="k">def</span> <span class="nf">mock_parameter_response</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
@@ -3895,9 +3891,7 @@ object named <code>get_parameter_mock</code>.</p>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
-
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 <span class="kn">from</span> <span class="nn">src</span> <span class="kn">import</span> <span class="n">app</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities</span> <span class="kn">import</span> <span class="n">parameters</span>
@@ -3905,9 +3899,9 @@ object named <code>get_parameter_mock</code>.</p>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">clear_parameters_cache</span><span class="p">():</span>
-<span class="hll">    <span class="k">yield</span>
-</span>    <span class="n">parameters</span><span class="o">.</span><span class="n">clear_caches</span><span class="p">()</span>  <span class="c1"># This will clear all providers cache</span>
-
+    <span class="k">yield</span>
+<span class="hll">    <span class="n">parameters</span><span class="o">.</span><span class="n">clear_caches</span><span class="p">()</span>  <span class="c1"># This will clear all providers cache</span>
+</span>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
 <span class="k">def</span> <span class="nf">mock_parameter_response</span><span class="p">(</span><span class="n">monkeypatch</span><span class="p">):</span>
