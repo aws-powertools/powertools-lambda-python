@@ -846,7 +846,7 @@ class ApiGatewayResolver(BaseRouter):
             if prefix:
                 rule = route[0]
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
-                route = (rule, *route[1:])
+                route = (rule, *route[1:])  # noqa: PLW2901
 
             self.route(*route)(func)
 

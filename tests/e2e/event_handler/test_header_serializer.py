@@ -67,7 +67,7 @@ def test_alb_headers_serializer(alb_basic_listener_endpoint):
     # Only the last header should be set
     for key, value in headers.items():
         assert key in response.headers
-        value = value if isinstance(value, str) else sorted(value)[-1]
+        value = value if isinstance(value, str) else sorted(value)[-1]  # noqa: PLW2901
         assert response.headers[key] == value
 
     # Only the last cookie should be set
@@ -104,7 +104,7 @@ def test_alb_multi_value_headers_serializer(alb_multi_value_header_listener_endp
 
     for key, value in headers.items():
         assert key in response.headers
-        value = value if isinstance(value, str) else ", ".join(sorted(value))
+        value = value if isinstance(value, str) else ", ".join(sorted(value))  # noqa: PLW2901
 
         # ALB sorts the header values randomly, so we have to re-order them for comparison here
         returned_value = ", ".join(sorted(response.headers[key].split(", ")))
@@ -143,7 +143,7 @@ def test_api_gateway_rest_headers_serializer(apigw_rest_endpoint):
 
     for key, value in headers.items():
         assert key in response.headers
-        value = value if isinstance(value, str) else ", ".join(sorted(value))
+        value = value if isinstance(value, str) else ", ".join(sorted(value))  # noqa: PLW2901
         assert response.headers[key] == value
 
     for cookie in cookies:
@@ -180,7 +180,7 @@ def test_api_gateway_http_headers_serializer(apigw_http_endpoint):
 
     for key, value in headers.items():
         assert key in response.headers
-        value = value if isinstance(value, str) else ", ".join(sorted(value))
+        value = value if isinstance(value, str) else ", ".join(sorted(value))  # noqa: PLW2901
         assert response.headers[key] == value
 
     for cookie in cookies:
@@ -217,7 +217,7 @@ def test_lambda_function_url_headers_serializer(lambda_function_url_endpoint):
 
     for key, value in headers.items():
         assert key in response.headers
-        value = value if isinstance(value, str) else ", ".join(sorted(value))
+        value = value if isinstance(value, str) else ", ".join(sorted(value))  # noqa: PLW2901
         assert response.headers[key] == value
 
     for cookie in cookies:
