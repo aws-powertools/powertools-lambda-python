@@ -4038,7 +4038,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 </span><span class="hll">    <span class="n">app_test_dynamodb_local</span><span class="o">.</span><span class="n">persistence_layer</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">dynamodb_local_client</span>
 </span>
     <span class="c1"># If desired, you can use a different DynamoDB Local table name than what your code already uses</span>
-    <span class="c1"># app.persistence_layer.table_name = &quot;another table name&quot; # noqa: E800</span>
+    <span class="c1"># app.persistence_layer.table_name = &quot;another table name&quot; # noqa: ERA001</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="n">app_test_dynamodb_local</span><span class="o">.</span><span class="n">handler</span><span class="p">({</span><span class="s2">&quot;testkey&quot;</span><span class="p">:</span> <span class="s2">&quot;testvalue&quot;</span><span class="p">},</span> <span class="n">lambda_context</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="s2">&quot;payment_id&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">12345</span>
