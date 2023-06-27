@@ -35,6 +35,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
 
+* [Serverless API Idempotency with AWS Lambda Powertools and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank"}** :material-twitter:
@@ -83,6 +85,14 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
 
 * [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
+
+### Implementing Idempotency in Serverless Architectures
+
+> **Author: [Seongwoo Choi](https://www.linkedin.com/in/%EC%84%B1%EC%9A%B0-%EC%B5%9C-44b12b1ab/){target="_blank"}** :material-linkedin:
+
+This blog post focuses on the importance of idempotency in distributed services and explores streamlined idempotent request flows. It provides guidance on idempotency tests using duplicate requests.
+
+* [Implementing Idempotency in Serverless Architectures](https://medium.com/@nuatmochoi/implementing-idempotency-in-serverless-architectures-f9079ef1c7da){target="_blank"}
 
 ## Videos
 

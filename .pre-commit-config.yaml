@@ -40,3 +40,9 @@ repos:
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: 3420134c37197c21edffc7e6093b14ffae8402f2 # v1.81.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-recursive

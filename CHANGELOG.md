@@ -5,6 +5,49 @@
 # Unreleased
 
 
+<a name="v2.18.0"></a>
+## [v2.18.0] - 2023-06-23
+## Bug Fixes
+
+* **docs:** ensure versions.json is updated ([#2505](https://github.com/aws-powertools/powertools-lambda-python/issues/2505))
+* **event_source:** centralizing helper functions for query, header and base64 ([#2496](https://github.com/aws-powertools/powertools-lambda-python/issues/2496))
+
+## Documentation
+
+* **homepage:** fix .NET repository link ([#2549](https://github.com/aws-powertools/powertools-lambda-python/issues/2549))
+* **homepage:** add Open Source Security Foundation badge; update links to new url ([#2545](https://github.com/aws-powertools/powertools-lambda-python/issues/2545))
+* **navigation:** make Key Feature the first section ([#2517](https://github.com/aws-powertools/powertools-lambda-python/issues/2517))
+
+## Features
+
+* **event_handler:** support to enable or disable compression in custom responses ([#2544](https://github.com/aws-powertools/powertools-lambda-python/issues/2544))
+* **feature_flags:** add modulo range condition for segmented experimentation support ([#2331](https://github.com/aws-powertools/powertools-lambda-python/issues/2331))
+
+## Maintenance
+
+* version bump
+* **ci:** fix changelog build permissions ([#2519](https://github.com/aws-powertools/powertools-lambda-python/issues/2519))
+* **ci:** remove GH pages action ([#2501](https://github.com/aws-powertools/powertools-lambda-python/issues/2501))
+* **ci:** updates runner names in workflows ([#2510](https://github.com/aws-powertools/powertools-lambda-python/issues/2510))
+* **ci:** introduces OSSF Scorecard ([#2512](https://github.com/aws-powertools/powertools-lambda-python/issues/2512))
+* **ci:** fix codeowners team name ([#2516](https://github.com/aws-powertools/powertools-lambda-python/issues/2516))
+* **deps:** bump actions/upload-artifact from 3.1.0 to 3.1.2 ([#2522](https://github.com/aws-powertools/powertools-lambda-python/issues/2522))
+* **deps:** bump actions/checkout from 3.1.0 to 3.5.3 ([#2523](https://github.com/aws-powertools/powertools-lambda-python/issues/2523))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.153 to 1.26.155 ([#2498](https://github.com/aws-powertools/powertools-lambda-python/issues/2498))
+* **deps-dev:** bump aws-cdk from 2.84.0 to 2.85.0 ([#2524](https://github.com/aws-powertools/powertools-lambda-python/issues/2524))
+* **deps-dev:** bump mypy-boto3-lambda from 1.26.147 to 1.26.157 ([#2507](https://github.com/aws-powertools/powertools-lambda-python/issues/2507))
+* **deps-dev:** bump cfn-lint from 0.77.9 to 0.77.10 ([#2508](https://github.com/aws-powertools/powertools-lambda-python/issues/2508))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.26.149 to 1.26.156 ([#2503](https://github.com/aws-powertools/powertools-lambda-python/issues/2503))
+* **deps-dev:** bump sentry-sdk from 1.25.1 to 1.26.0 ([#2527](https://github.com/aws-powertools/powertools-lambda-python/issues/2527))
+* **deps-dev:** bump hvac from 1.1.0 to 1.1.1 ([#2497](https://github.com/aws-powertools/powertools-lambda-python/issues/2497))
+* **deps-dev:** bump flake8-variables-names from 0.0.5 to 0.0.6 ([#2525](https://github.com/aws-powertools/powertools-lambda-python/issues/2525))
+* **deps-dev:** bump ijson from 3.2.1 to 3.2.2 ([#2526](https://github.com/aws-powertools/powertools-lambda-python/issues/2526))
+* **deps-dev:** bump pytest-mock from 3.10.0 to 3.11.1 ([#2485](https://github.com/aws-powertools/powertools-lambda-python/issues/2485))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.152 to 1.26.158 ([#2528](https://github.com/aws-powertools/powertools-lambda-python/issues/2528))
+* **deps-dev:** bump mypy from 1.3.0 to 1.4.0 ([#2509](https://github.com/aws-powertools/powertools-lambda-python/issues/2509))
+* **documentation:** updating repository URL and name to the new location ([#2499](https://github.com/aws-powertools/powertools-lambda-python/issues/2499))
+
+
 <a name="v2.17.0"></a>
 ## [v2.17.0] - 2023-06-16
 ## Bug Fixes
@@ -2799,7 +2842,7 @@
 * unnecessary return; better error handling
 * snake_case
 * comment out validators [#118](https://github.com/aws-powertools/powertools-lambda-python/issues/118)
-* CR fixes Merge branch 'develop' of https://github.com/aws-powertools/powertools-lambda-python into pydantic
+* CR fixes Merge branch 'develop' of https://github.com/awslabs/aws-lambda-powertools-python into pydantic
 * reduce complexity of dynamo envelope
 * poetry update + pydantic, typing_extensions as optional
 * add only pydantic (+1 squashed commit) Squashed commits: [804f251] fix poetry.lock, revert changes
@@ -3372,7 +3415,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.17.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.18.0...HEAD
+[v2.18.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.17.0...v2.18.0
 [v2.17.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.16.2...v2.17.0
 [v2.16.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.16.1...v2.16.2
 [v2.16.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.16.0...v2.16.1

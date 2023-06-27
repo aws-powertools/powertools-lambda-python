@@ -952,11 +952,6 @@ def test_is_missing_idempotency_key():
     assert BasePersistenceLayer.is_missing_idempotency_key({})
     # GIVEN an empty str THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key("")
-    # GIVEN False THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(False)
-    # GIVEN number 0 THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(0)
-
     # GIVEN None THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key(None)
     # GIVEN a list of Nones THEN is_missing_idempotency_key is True
@@ -966,15 +961,23 @@ def test_is_missing_idempotency_key():
     # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
 
+    # GIVEN True THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(True) is False
+    # GIVEN False THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(False) is False
+    # GIVEN number 0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0) is False
+    # GIVEN number 0.0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0.0) is False
     # GIVEN a str THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
     # GIVEN str "False" THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("False") is False
-    # GIVEN an number THEN is_missing_idempotency_key is False
+    # GIVEN a number THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(1000) is False
     # GIVEN a float THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(10.01) is False
-    # GIVEN a list of all not None THEN is_missing_idempotency_key is False
+    # GIVEN a list with some items THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
 
 

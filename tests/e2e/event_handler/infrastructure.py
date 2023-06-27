@@ -73,7 +73,14 @@ class EventHandlerStack(BaseInfrastructure):
         CfnOutput(self.stack, "APIGatewayHTTPUrl", value=(apigw.url or ""))
 
     def _create_api_gateway_rest(self, function: Function):
-        apigw = apigwv1.RestApi(self.stack, "APIGatewayRest", deploy_options=apigwv1.StageOptions(stage_name="dev"))
+        apigw = apigwv1.RestApi(
+            self.stack,
+            "APIGatewayRest",
+            deploy_options=apigwv1.StageOptions(stage_name="dev"),
+            # disables creation of a role that is not destroyed due to a breaking change in CDK
+            # https://github.com/aws/aws-cdk/issues/22020
+            cloud_watch_role=False,
+        )
 
         todos = apigw.root.add_resource("todos")
         todos.add_method("POST", apigwv1.LambdaIntegration(function, proxy=True))
