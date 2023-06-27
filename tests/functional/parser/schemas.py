@@ -99,3 +99,8 @@ class MyLambdaKafkaBusiness(BaseModel):
 
 class MyKinesisFirehoseBusiness(BaseModel):
     Hello: str
+
+
+class myVPCLatticeBusiness(BaseModel):
+    username: str
+    name: str
