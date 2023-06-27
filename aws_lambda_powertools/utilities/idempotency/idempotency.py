@@ -137,7 +137,7 @@ def idempotent_function(
         if data_keyword_argument not in kwargs:
             raise RuntimeError(
                 f"Unable to extract '{data_keyword_argument}' from keyword arguments."
-                f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument"
+                f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument",
             )
 
         payload = kwargs.get(data_keyword_argument)

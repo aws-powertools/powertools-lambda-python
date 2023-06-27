@@ -87,7 +87,7 @@ class Logger:
         service name to be appended in logs, by default "service_undefined"
     level : str, int optional
         The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
-        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'. # noqa: E501
+        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
         by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
@@ -108,7 +108,7 @@ class Logger:
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200. # noqa: E501
+        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200.
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
@@ -200,7 +200,7 @@ class Logger:
     ------
     InvalidLoggerSamplingRateError
         When sampling rate provided is not a float
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -223,10 +223,12 @@ class Logger:
         **kwargs,
     ):
         self.service = resolve_env_var_choice(
-            choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+            choice=service,
+            env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
         )
         self.sampling_rate = resolve_env_var_choice(
-            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE)
+            choice=sampling_rate,
+            env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE),
         )
         self.child = child
         self.logger_formatter = logger_formatter
@@ -234,7 +236,7 @@ class Logger:
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
+            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false"),
         )
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
@@ -327,7 +329,7 @@ class Logger:
         except ValueError:
             raise InvalidLoggerSamplingRateError(
                 f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
-                f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+                f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable.",
             )
 
     @overload
@@ -415,7 +417,8 @@ class Logger:
             )
 
         log_event = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false"), choice=log_event
+            env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false"),
+            choice=log_event,
         )
 
         @functools.wraps(lambda_handler)
@@ -456,7 +459,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.info(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def error(
@@ -476,7 +484,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.error(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def exception(
@@ -496,7 +509,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.exception(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def critical(
@@ -516,7 +534,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.critical(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def warning(
@@ -536,7 +559,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.warning(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def debug(
@@ -556,7 +584,12 @@ class Logger:
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.debug(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def append_keys(self, **additional_keys):

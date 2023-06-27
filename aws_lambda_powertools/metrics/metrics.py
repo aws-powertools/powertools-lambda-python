@@ -76,7 +76,7 @@ class Metrics(MetricManager):
         self.dimension_set = self._dimensions
 
         self.dimension_set.update(**self._default_dimensions)
-        return super().__init__(
+        super().__init__(
             namespace=namespace,
             service=service,
             metric_set=self.metric_set,

@@ -17,16 +17,9 @@ repos:
         entry: poetry run black
         language: system
         types: [python]
-      - id: isort
-        name: formatting::isort
-        entry: poetry run isort
-        language: system
-        types: [python]
-  - repo: local
-    hooks:
-      - id: flake8
-        name: linting::flake8
-        entry: poetry run flake8
+      - id: ruff
+        name: linting-format::ruff
+        entry: poetry run ruff
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli

@@ -85,7 +85,7 @@ def test_invalid_rule():
                 "a",
                 "b",
             ],
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -98,9 +98,9 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: "False",
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -113,9 +113,9 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -128,7 +128,7 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: []},
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -141,7 +141,7 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: {}},
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -157,9 +157,9 @@ def test_invalid_condition():
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: "stuff", CONDITION_KEY: "a", CONDITION_VALUE: "a"},
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -173,9 +173,9 @@ def test_invalid_condition():
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: RuleAction.EQUALS.value},
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -193,9 +193,9 @@ def test_invalid_condition():
                         CONDITION_KEY: 5,
                         CONDITION_VALUE: "a",
                     },
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -256,9 +256,9 @@ def test_valid_condition_all_actions():
                             CONDITION_VALUE: "GUEST",
                         },
                     ],
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     validator.validate()

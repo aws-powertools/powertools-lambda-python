@@ -145,7 +145,11 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
@@ -165,7 +169,11 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -590,7 +598,7 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
                     "timestamp": self.formatTime(record),
                     "my_default_key": "test",
                     **self.custom_format,
-                }
+                },
             )
 
     custom_formatter = CustomFormatter()
@@ -842,7 +850,8 @@ def test_use_datetime(stdout, service_name, utc):
 
     expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
     assert re.fullmatch(
-        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}",
+        log["timestamp"],
     )
 
 

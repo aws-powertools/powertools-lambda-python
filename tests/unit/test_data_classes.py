@@ -180,7 +180,7 @@ def test_dict_wrapper_str_property_list_exception():
     event_source = DataClassSample({})
     event_str = (
         "{'data_property': ['string', 0, 0.0, {'broken_data_property': "
-        + "'[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
+        "'[Cannot be deserialized]', 'raw_event': '[SENSITIVE]'}], 'raw_event': '[SENSITIVE]'}"
     )
     assert str(event_source) == event_str
 
@@ -213,9 +213,8 @@ def test_dict_wrapper_str_recursive_property():
 
     event_source = DataClassRecursive({})
     assert (
-        str(event_source)
-        == "{'data_property': {'raw_event': '[SENSITIVE]', 'terminal_property': 'end-recursion'},"
-        + " 'raw_event': '[SENSITIVE]'}"
+        str(event_source) == "{'data_property': {'raw_event': '[SENSITIVE]', 'terminal_property': 'end-recursion'},"
+        " 'raw_event': '[SENSITIVE]'}"
     )
 
 

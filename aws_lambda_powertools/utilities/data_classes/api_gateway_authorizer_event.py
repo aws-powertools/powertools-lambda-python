@@ -163,7 +163,10 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return BaseRequestContext(self._data)
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 
@@ -265,7 +268,10 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         return self.get("stageVariables")
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 
@@ -343,7 +349,7 @@ DENY_ALL_RESPONSE = {
                 "Action": "execute-api:Invoke",
                 "Effect": "Deny",
                 "Resource": ["*"],
-            }
+            },
         ],
     },
 }
@@ -452,7 +458,13 @@ class APIGatewayAuthorizerResponse:
             raise ValueError(f"Invalid resource path: {resource}. Path should match {self.path_regex}")
 
         resource_arn = APIGatewayRouteArn(
-            self.region, self.aws_account_id, self.api_id, self.stage, http_method, resource, self.partition
+            self.region,
+            self.aws_account_id,
+            self.api_id,
+            self.stage,
+            http_method,
+            resource,
+            self.partition,
         ).arn
 
         route = {"resourceArn": resource_arn, "conditions": conditions}

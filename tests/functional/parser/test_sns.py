@@ -52,8 +52,8 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
                     "TopicArn": "arn:aws:sns:us-east-2:123456789012:sns-lambda",
                     "Subject": "TestInvoke",
                 },
-            }
-        ]
+            },
+        ],
     }
 
     with pytest.raises(ValidationError):

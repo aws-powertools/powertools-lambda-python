@@ -26,7 +26,7 @@ def test_idempotent_lambda(lambda_context):
     app_test_dynamodb_local.persistence_layer.client = dynamodb_local_client
 
     # If desired, you can use a different DynamoDB Local table name than what your code already uses
-    # app.persistence_layer.table_name = "another table name" # noqa: E800
+    # app.persistence_layer.table_name = "another table name" # noqa: ERA001
 
     result = app_test_dynamodb_local.handler({"testkey": "testvalue"}, lambda_context)
     assert result["payment_id"] == 12345

@@ -61,11 +61,13 @@ class BaseInfrastructure(InfrastructureProvider):
 
         if not self._feature_infra_file.exists():
             raise FileNotFoundError(
-                "You must have your infrastructure defined in 'tests/e2e/<feature>/infrastructure.py'."
+                "You must have your infrastructure defined in 'tests/e2e/<feature>/infrastructure.py'.",
             )
 
     def create_lambda_functions(
-        self, function_props: Optional[Dict] = None, architecture: Architecture = Architecture.X86_64
+        self,
+        function_props: Optional[Dict] = None,
+        architecture: Architecture = Architecture.X86_64,
     ) -> Dict[str, Function]:
         """Create Lambda functions available under handlers_dir
 
