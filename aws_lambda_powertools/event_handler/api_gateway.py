@@ -843,12 +843,14 @@ class ApiGatewayResolver(BaseRouter):
         router.context = self.context
 
         for route, func in router._routes.items():
+            new_route = route
+
             if prefix:
                 rule = route[0]
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
-                route = (rule, *route[1:])  # noqa: PLW2901
+                new_route = (rule, *route[1:])
 
-            self.route(*route)(func)
+            self.route(*new_route)(func)
 
 
 class Router(BaseRouter):
