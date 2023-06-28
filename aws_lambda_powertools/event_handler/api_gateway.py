@@ -693,12 +693,8 @@ class ApiGatewayResolver(BaseRouter):
 
     def _resolve(self) -> ResponseBuilder:
         """Resolves the response or return the not found response"""
-        if self._proxy_type == ProxyEventType.VPCLatticeEvent:
-            method = self.current_event.method.upper()
-            path = self._remove_prefix(self.current_event.raw_path)
-        else:
-            method = self.current_event.http_method.upper()
-            path = self._remove_prefix(self.current_event.path)
+        method = self.current_event.http_method.upper()
+        path = self._remove_prefix(self.current_event.path)
 
         for route in self._static_routes + self._dynamic_routes:
             if method != route.method:

@@ -124,7 +124,7 @@ When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/late
 
 === "getting_started_vpclattice_resolver.py"
 
-    ```python hl_lines="5 11" title="Using Lambda Function URL resolver"
+    ```python hl_lines="5 11" title="Using VPC Lattice resolver"
     --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.py"
     ```
 

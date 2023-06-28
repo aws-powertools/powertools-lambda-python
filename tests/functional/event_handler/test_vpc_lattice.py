@@ -9,7 +9,7 @@ from tests.functional.utils import load_event
 
 
 def test_vpclattice_event():
-    # GIVEN an Application Load Balancer proxy type event
+    # GIVEN a VPC Lattice event
     app = VPCLatticeResolver()
 
     @app.get("/testpath")
@@ -22,14 +22,14 @@ def test_vpclattice_event():
     result = app(load_event("vpcLatticeEvent.json"), {})
 
     # THEN process event correctly
-    # AND set the current_event type as ALBEvent
+    # AND set the current_event type as VPCLatticeEvent
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
     assert result["body"] == "foo"
 
 
 def test_vpclattice_event_path_trailing_slash(json_dump):
-    # GIVEN an Application Load Balancer proxy type event
+    # GIVEN a VPC Lattice event
     app = VPCLatticeResolver()
 
     @app.get("/testpath")
@@ -62,7 +62,7 @@ def test_cors_preflight_body_is_empty_not_null():
 
 
 def test_vpclattice_url_no_matches():
-    # GIVEN a Lambda Function Url type event
+    # GIVEN a VPC Lattice event
     app = VPCLatticeResolver()
 
     @app.post("/no_match")
