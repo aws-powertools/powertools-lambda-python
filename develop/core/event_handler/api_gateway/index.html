@@ -572,6 +572,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vpc-lattice" class="md-nav__link">
+    VPC Lattice
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1172,6 +1179,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#vpc-lattice" class="md-nav__link">
+    VPC Lattice
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1441,7 +1455,7 @@
 
   <h1>REST API</h1>
 
-<p>Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Balancer (ALB), and Lambda Function URLs.</p>
+<p>Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Balancer (ALB), Lambda Function URLs, and VPC Lattice.</p>
 <h2 id="key-features">Key Features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.</li>
@@ -1455,6 +1469,7 @@
 </details>
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
 <p>If you're using any API Gateway integration, you must have an existing <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html" target="_blank">API Gateway Proxy integration</a> or <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html" target="_blank">ALB</a> configured to invoke your Lambda function.</p>
+<p>In case of using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">VPC Lattice</a>, you must have a service network configured to invoke your Lambda function.</p>
 <p>This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.</p>
 <details class="info" open="open">
 <summary>There is no additional permissions or dependencies required to use this utility.</summary>
@@ -1644,7 +1659,7 @@
 <h3 id="event-resolvers">Event Resolvers<a class="headerlink" href="#event-resolvers" title="Permanent link">&para;</a></h3>
 <p>Before you decorate your functions to handle a given path and HTTP method(s), you need to initialize a resolver.</p>
 <p>A resolver will handle request resolution, including <a href="#split-routes-with-router">one or more routers</a>, and give you access to the current event via typed properties.</p>
-<p>For resolvers, we provide: <code>APIGatewayRestResolver</code>, <code>APIGatewayHttpResolver</code>, <code>ALBResolver</code>, and <code>LambdaFunctionUrlResolver</code>. From here on, we will default to <code>APIGatewayRestResolver</code> across examples.</p>
+<p>For resolvers, we provide: <code>APIGatewayRestResolver</code>, <code>APIGatewayHttpResolver</code>, <code>ALBResolver</code>, <code>LambdaFunctionUrlResolver</code>, and <code>VPCLatticeResolver</code>. From here on, we will default to <code>APIGatewayRestResolver</code> across examples.</p>
 <details class="info" open="open">
 <summary>Auto-serialization</summary>
 <p>We serialize <code>Dict</code> responses as JSON, trim whitespace for compact responses, set content-type to <code>application/json</code>, and
@@ -2184,6 +2199,102 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </div>
 </div>
 </div>
+<h4 id="vpc-lattice">VPC Lattice<a class="headerlink" href="#vpc-lattice" title="Permanent link">&para;</a></h4>
+<p>When using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">VPC Lattice with AWS Lambda</a>, you can use <code>VPCLatticeResolver</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">getting_started_vpclattice_resolver.py</label><label for="__tabbed_4_2">getting_started_vpclattice_resolver.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Using VPC Lattice resolver</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">VPCLatticeResolver</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="hll"><span class="n">app</span> <span class="o">=</span> <span class="n">VPCLatticeResolver</span><span class="p">()</span>
+</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
+<span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+    <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
+    <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
+
+
+<span class="c1"># You can continue to use other utilities just as before</span>
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">APPLICATION_LOAD_BALANCER</span><span class="p">)</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Example payload delivered to the handler</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;raw_path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/testpath&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">    </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+</span><span class="w">    </span><span class="nt">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;curl/7.64.1&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;x-forwarded-for&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.213.229.10&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;accept&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*/*&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;query_string_parameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;order-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eyJ0ZXN0IjogImV2ZW50In0=&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;is_base64_encoded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="dynamic-routes">Dynamic routes<a class="headerlink" href="#dynamic-routes" title="Permanent link">&para;</a></h3>
 <p>You can use <code>/todos/&lt;todo_id&gt;</code> to configure dynamic URL paths, where <code>&lt;todo_id&gt;</code> will be resolved at runtime.</p>
 <p>Each dynamic route you set must be part of your function signature. This allows us to call your function using keyword arguments when matching your dynamic route.</p>
@@ -2191,7 +2302,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <summary>Note</summary>
 <p>For brevity, we will only include the necessary keys for each sample request for the example to work.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">dynamic_routes.py</label><label for="__tabbed_4_2">dynamic_routes.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">dynamic_routes.py</label><label for="__tabbed_5_2">dynamic_routes.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2278,7 +2389,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <summary>Warning</summary>
 <p>We choose the most explicit registered route that matches an incoming event.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">dynamic_routes_catch_all.py</label><label for="__tabbed_5_2">dynamic_routes_catch_all.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">dynamic_routes_catch_all.py</label><label for="__tabbed_6_2">dynamic_routes_catch_all.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2340,7 +2451,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </div>
 <h3 id="http-methods">HTTP Methods<a class="headerlink" href="#http-methods" title="Permanent link">&para;</a></h3>
 <p>You can use named decorators to specify the HTTP method that should be handled in your functions. That is, <code>app.&lt;http_method&gt;</code>, where the HTTP method could be <code>get</code>, <code>post</code>, <code>put</code>, <code>patch</code> and <code>delete</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">http_methods.py</label><label for="__tabbed_6_2">http_methods.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">http_methods.py</label><label for="__tabbed_7_2">http_methods.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2936,7 +3047,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <p><strong>Scenario</strong>: You have a custom domain <code>api.mydomain.dev</code>. Then you set <code>/payment</code> API Mapping to forward any payment requests to your Payments API.</p>
 <p><strong>Challenge</strong>: This means your <code>path</code> value for any API requests will always contain <code>/payment/&lt;actual_request&gt;</code>, leading to HTTP 404 as Event Handler is trying to match what's after <code>payment/</code>. This gets further complicated with an <a href="https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34" target="_blank">arbitrary level of nesting</a>.</p>
 <p>To address this API Gateway behavior, we use <code>strip_prefixes</code> parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">custom_api_mapping.py</label><label for="__tabbed_7_2">custom_api_mapping.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">custom_api_mapping.py</label><label for="__tabbed_8_2">custom_api_mapping.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3008,7 +3119,7 @@ matches one of the allowed values.</p>
 <summary>Tip</summary>
 <p>Optionally disable CORS on a per path basis with <code>cors=False</code> parameter.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:4"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><input id="__tabbed_8_4" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">setting_cors.py</label><label for="__tabbed_8_2">setting_cors_output.json</label><label for="__tabbed_8_3">setting_cors_extra_origins.py</label><label for="__tabbed_8_4">setting_cors_extra_origins_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:4"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><input id="__tabbed_9_4" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">setting_cors.py</label><label for="__tabbed_9_2">setting_cors_output.json</label><label for="__tabbed_9_3">setting_cors_extra_origins.py</label><label for="__tabbed_9_4">setting_cors_extra_origins_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3305,7 +3416,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Using multiple values for HTTP headers in ALB?</summary>
 <p>Make sure you <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers" target="_blank">enable the multi value headers feature</a> to serialize response headers correctly.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">fine_grained_responses.py</label><label for="__tabbed_9_2">fine_grained_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">fine_grained_responses.py</label><label for="__tabbed_10_2">fine_grained_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3427,7 +3538,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Warning</summary>
 <p>The client must send the <code>Accept-Encoding</code> header, otherwise a normal response will be sent.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">compressing_responses_using_route.py</label><label for="__tabbed_10_2">compressing_responses_using_response.py</label><label for="__tabbed_10_3">compressing_responses.json</label><label for="__tabbed_10_4">compressing_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:4"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">compressing_responses_using_route.py</label><label for="__tabbed_11_2">compressing_responses_using_response.py</label><label for="__tabbed_11_3">compressing_responses.json</label><label for="__tabbed_11_4">compressing_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3626,7 +3737,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Note</summary>
 <p>Lambda Function URLs handle binary media types automatically.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:4"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><input id="__tabbed_11_4" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">binary_responses.py</label><label for="__tabbed_11_2">binary_responses_logo.svg</label><label for="__tabbed_11_3">binary_responses.json</label><label for="__tabbed_11_4">binary_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">binary_responses.py</label><label for="__tabbed_12_2">binary_responses_logo.svg</label><label for="__tabbed_12_3">binary_responses.json</label><label for="__tabbed_12_4">binary_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3943,7 +4054,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <h3 id="split-routes-with-router">Split routes with Router<a class="headerlink" href="#split-routes-with-router" title="Permanent link">&para;</a></h3>
 <p>As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the <code>Router</code> feature is useful.</p>
 <p>Let's assume you have <code>split_route.py</code> as your Lambda function entrypoint and routes in <code>split_route_module.py</code>. This is how you'd use the <code>Router</code> feature.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">split_route_module.py</label><label for="__tabbed_12_2">split_route.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">split_route_module.py</label><label for="__tabbed_13_2">split_route.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>We import <strong>Router</strong> instead of <strong>APIGatewayRestResolver</strong>; syntax wise is exactly the same.</p>
@@ -4058,7 +4169,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <h4 id="route-prefix">Route prefix<a class="headerlink" href="#route-prefix" title="Permanent link">&para;</a></h4>
 <p>In the previous example, <code>split_route_module.py</code> routes had a <code>/todos</code> prefix. This might grow over time and become repetitive.</p>
 <p>When necessary, you can set a prefix when including a router object. This means you could remove <code>/todos</code> prefix altogether.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">split_route_prefix.py</label><label for="__tabbed_13_2">split_route_prefix_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">split_route_prefix.py</label><label for="__tabbed_14_2">split_route_prefix_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4259,7 +4370,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Tip</summary>
 <p>This can also be useful for middlewares injecting contextual information before a request is processed.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">split_route_append_context.py</label><label for="__tabbed_14_2">split_route_append_context_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">split_route_append_context.py</label><label for="__tabbed_15_2">split_route_append_context_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4455,10 +4566,10 @@ your development, building, deployment tooling need to accommodate the distinct 
 </ul>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>You can test your routes by passing a proxy event request with required params.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">API Gateway REST API</label><label for="__tabbed_15_2">API Gateway HTTP API</label><label for="__tabbed_15_3">Application Load Balancer</label><label for="__tabbed_15_4">Lambda Function URL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:4"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">API Gateway REST API</label><label for="__tabbed_16_2">API Gateway HTTP API</label><label for="__tabbed_16_3">Application Load Balancer</label><label for="__tabbed_16_4">Lambda Function URL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_16_2">assert_rest_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_17_2">assert_rest_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4580,7 +4691,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">assert_http_api_resolver_response.py</label><label for="__tabbed_17_2">assert_http_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">assert_http_api_resolver_response.py</label><label for="__tabbed_18_2">assert_http_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4714,7 +4825,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_18_2">assert_alb_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_19_2">assert_alb_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4838,7 +4949,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_19_2">assert_function_url_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_20_2">assert_function_url_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4989,7 +5100,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-06-23
+      2023-06-28
     
   </small>
 </div>
