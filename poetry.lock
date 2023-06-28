@@ -1498,13 +1498,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.26.157"
-description = "Type annotations for boto3.Lambda 1.26.157 service generated with mypy-boto3-builder 7.14.5"
+version = "1.26.163"
+description = "Type annotations for boto3.Lambda 1.26.163 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-lambda-1.26.157.tar.gz", hash = "sha256:ef5e0c3c7a8467e85d57b2caaee4ff7db9ba1e4703d3c28213df1269180f1731"},
-    {file = "mypy_boto3_lambda-1.26.157-py3-none-any.whl", hash = "sha256:2e0c5f92e2c22cadd0093bd800ab24393cbb247a5971c119a7d9d6a18bd9ee43"},
+    {file = "mypy-boto3-lambda-1.26.163.tar.gz", hash = "sha256:fd36cf8a3f5e733f6e80c755af19538ce0a50c3eafb1be7cf7de0c29c40788a0"},
+    {file = "mypy_boto3_lambda-1.26.163-py3-none-any.whl", hash = "sha256:f6ca7fd11c8e9c81218fdbeae163c343c6dc3b7df88a70c30c0c7b30c90163d9"},
 ]
 
 [package.dependencies]
@@ -1628,7 +1628,7 @@ optional = false
 python-versions = ">=3.7"
 files = [
     {file = "pathspec-0.11.1-py3-none-any.whl", hash = "sha256:d8af70af76652554bd134c22b3e8a1cc46ed7d91edcdd721ef1a0c51a84a5293"},
-    {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798dERA001fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
+    {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798de800fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
 ]
 
 [[package]]
@@ -2745,4 +2745,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "27fb7818ae11e6ca12cddc942f555a8d28517c9efb776f188a22a365f1bd36ed"
+content-hash = "d325f3945110c11fea3afff56f34269053d1d1c68fd5d02aca7d44e2dc9e9fbc"
