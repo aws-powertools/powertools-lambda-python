@@ -9,12 +9,10 @@ logger = Logger()
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
-
     limit_execution: int = 1000  # milliseconds
 
     # scrape website and exit before lambda timeout
     while context.get_remaining_time_in_millis() > limit_execution:
-
         comments: requests.Response = requests.get("https://jsonplaceholder.typicode.com/comments")
         # add logic here and save the results of the request to an S3 bucket, for example.
 
@@ -24,7 +22,7 @@ def lambda_handler(event, context: LambdaContext) -> dict:
                 "request_id": context.aws_request_id,
                 "remaining_time": context.get_remaining_time_in_millis(),
                 "comments": comments.json()[:2],
-            }
+            },
         )
 
         sleep(1)

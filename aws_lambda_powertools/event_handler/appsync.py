@@ -165,7 +165,7 @@ class AppSyncResolver(Router):
 
     def resolve(
         self,
-        event: Union[Dict[str, Any], List[Dict[str, Any]]],
+        event: dict,
         context: LambdaContext,
         data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
@@ -292,7 +292,7 @@ class AppSyncResolver(Router):
 
     def __call__(
         self,
-        event: Union[dict, List[dict]],
+        event: dict,
         context: LambdaContext,
         data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:

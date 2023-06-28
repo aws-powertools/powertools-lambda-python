@@ -8,6 +8,14 @@ The feature flags utility provides a simple rule engine to define when one or mu
 ???+ info
     When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
+## Key features
+
+* Define simple feature flags to dynamically decide when to enable a feature
+* Fetch one or all feature flags enabled for a given application context
+* Support for static feature flags to simply turn on/off a feature without rules
+* Support for time based feature flags
+* Bring your own Feature Flags Store Provider
+
 ## Terminology
 
 Feature flags are used to modify behaviour without changing the application's code. These flags can be **static** or **dynamic**.
@@ -30,14 +38,6 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 
 ???+ note
     AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
-
-## Key features
-
-* Define simple feature flags to dynamically decide when to enable a feature
-* Fetch one or all feature flags enabled for a given application context
-* Support for static feature flags to simply turn on/off a feature without rules
-* Support for time based feature flags
-* Bring your own Feature Flags Store Provider
 
 ## Getting started
 
@@ -262,6 +262,54 @@ You can also have features enabled only at specific days, for example: enable ch
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
     specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
 
+### Modulo Range Segmented Experimentation
+
+Feature flags can also be used to run experiments on a segment of users based on modulo range conditions on context variables.
+This allows you to have features that are only enabled for a certain segment of users, comparing across multiple variants
+of the same experiment.
+
+Use cases:
+
+* Enable an experiment for a percentage of users
+* Scale up an experiment incrementally in production - canary release
+* Run multiple experiments or variants simultaneously by assigning a spectrum segment to each experiment variant.
+
+The modulo range condition takes three values - `BASE`, `START` and `END`.
+
+The condition evaluates `START <= CONTEXT_VALUE % BASE <= END`.
+
+=== "modulo_range_feature.py"
+
+    ```python hl_lines="1 6 38"
+    --8<-- "examples/feature_flags/src/modulo_range_feature.py"
+    ```
+
+=== "modulo_range_feature_event.json"
+
+    ```json hl_lines="2"
+    --8<-- "examples/feature_flags/src/modulo_range_feature_event.json"
+    ```
+
+=== "modulo_range_features.json"
+
+    ```json hl_lines="13-21"
+    --8<-- "examples/feature_flags/src/modulo_range_features.json"
+    ```
+
+You can run multiple experiments on your users with the spectrum of your choice.
+
+=== "modulo_range_multiple_feature.py"
+
+    ```python hl_lines="1 6 67"
+    --8<-- "examples/feature_flags/src/modulo_range_multiple_feature.py"
+    ```
+
+=== "modulo_range_multiple_features.json"
+
+    ```json hl_lines="9-16 23-31 37-45"
+    --8<-- "examples/feature_flags/src/modulo_range_multiple_features.json"
+    ```
+
 ### Beyond boolean feature flags
 
 ???+ info "When is this useful?"
@@ -385,9 +433,10 @@ The `action` configuration can have the following values, where the expressions 
 | **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`                                |
 | **VALUE_IN_KEY**                    | `lambda a, b: b in a`                                    |
 | **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`                                |
-| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: time(a).start <= b <= time(a).end`         |
-| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: datetime(a).start <= b <= datetime(b).end` |
+| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: b.start <= time(a) <= b.end`        |
+| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: b.start <= datetime(a) <= b.end` |
 | **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
+| **MODULO_RANGE**                    | `lambda a, b: b.start <= a % b.base <= b.end`            |
 
 ???+ info
     The `key` and `value` will be compared to the input from the `context` parameter.

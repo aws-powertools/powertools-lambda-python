@@ -50,7 +50,7 @@ def test_authorizer_response_allow_all_routes_with_context():
                     "Action": "execute-api:Invoke",
                     "Effect": "Allow",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/*"],
-                }
+                },
             ],
         },
         "context": {"name": "Foo"},
@@ -70,7 +70,7 @@ def test_authorizer_response_allow_all_routes_with_usage_identifier_key():
                     "Action": "execute-api:Invoke",
                     "Effect": "Allow",
                     "Resource": ["arn:aws:execute-api:us-east-1:1111111111:api/dev/*/*"],
-                }
+                },
             ],
         },
         "usageIdentifierKey": "key",
@@ -88,7 +88,7 @@ def test_authorizer_response_deny_all_routes(builder: APIGatewayAuthorizerRespon
                     "Action": "execute-api:Invoke",
                     "Effect": "Deny",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/*/*"],
-                }
+                },
             ],
         },
     }
@@ -104,7 +104,7 @@ def test_authorizer_response_allow_route(builder: APIGatewayAuthorizerResponse):
                     "Action": "execute-api:Invoke",
                     "Effect": "Allow",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/foo"],
-                }
+                },
             ],
         },
         "principalId": "foo",
@@ -122,7 +122,7 @@ def test_authorizer_response_deny_route(builder: APIGatewayAuthorizerResponse):
                     "Action": "execute-api:Invoke",
                     "Effect": "Deny",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/PUT/foo"],
-                }
+                },
             ],
         },
     }
@@ -145,7 +145,7 @@ def test_authorizer_response_allow_route_with_conditions(builder: APIGatewayAuth
                     "Effect": "Allow",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/POST/foo"],
                     "Condition": [{"StringEquals": {"method.request.header.Content-Type": "text/html"}}],
-                }
+                },
             ],
         },
     }
@@ -164,7 +164,7 @@ def test_authorizer_response_deny_route_with_conditions(builder: APIGatewayAutho
                     "Effect": "Deny",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/POST/foo"],
                     "Condition": [{"StringEquals": {"method.request.header.Content-Type": "application/json"}}],
-                }
+                },
             ],
         },
     }
@@ -192,7 +192,7 @@ def test_authorizer_response_allow_route_with_underscore(builder: APIGatewayAuth
                     "Action": "execute-api:Invoke",
                     "Effect": "Allow",
                     "Resource": ["arn:aws:execute-api:us-west-1:123456789:fantom/dev/GET/has_underscore"],
-                }
+                },
             ],
         },
     }

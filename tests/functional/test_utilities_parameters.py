@@ -282,7 +282,7 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
     stubber.add_response("query", response, expected_params)
@@ -319,7 +319,7 @@ def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
     response = {
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": value}} for (name, value) in mock_params.items()
-        ]
+        ],
     }
     expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
     stubber.add_response("query", response, expected_params)
@@ -373,7 +373,7 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names[1:]
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -413,7 +413,7 @@ def test_dynamodb_provider_get_multiple_sdk_options(mock_name, mock_value, confi
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -453,7 +453,7 @@ def test_dynamodb_provider_get_multiple_sdk_options_overwrite(mock_name, mock_va
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -495,7 +495,7 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -532,7 +532,7 @@ def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -570,7 +570,7 @@ def test_ssm_provider_get_with_decrypt_environment_variable(monkeypatch, mock_na
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": True}
     stubber.add_response("get_parameter", response, expected_params)
@@ -607,7 +607,7 @@ def test_ssm_provider_get_default_config(monkeypatch, mock_name, mock_value, moc
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -764,7 +764,9 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
 
 
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
-    mock_value, mock_version, config
+    mock_value,
+    mock_version,
+    config,
 ):
     # GIVEN three parameters are requested
     # one requires decryption, two can be batched
@@ -776,7 +778,8 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
 
     expected_stub_params = {"Names": [success, fail]}
     expected_stub_response = build_get_parameters_stub(
-        params={fail: mock_value, success: mock_value}, invalid_parameters=[fail]
+        params={fail: mock_value, success: mock_value},
+        invalid_parameters=[fail],
     )
 
     provider = parameters.SSMProvider(config=config)
@@ -905,7 +908,7 @@ def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -940,7 +943,7 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -980,7 +983,7 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version, config):
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1024,7 +1027,7 @@ def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_ve
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1090,7 +1093,7 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names[1:]
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "NextToken": "next_token"}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1134,7 +1137,7 @@ def test_ssm_provider_get_multiple_sdk_options(mock_name, mock_value, mock_versi
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "MaxResults": 10}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1178,7 +1181,7 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1186,7 +1189,10 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
 
     try:
         values = provider.get_multiple(
-            mock_name, Path="THIS_SHOULD_BE_OVERWRITTEN", Recursive=False, WithDecryption=True
+            mock_name,
+            Path="THIS_SHOULD_BE_OVERWRITTEN",
+            Recursive=False,
+            WithDecryption=True,
         )
 
         stubber.assert_no_pending_responses()
@@ -1843,7 +1849,10 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
         # as that's right before we call SSM, and when options have been merged
         # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+            self,
+            parameters: Dict[str, Dict],
+            raise_on_error: bool = True,
+            decrypt: bool = False,
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[mock_name]["max_age"] == 0
@@ -1866,7 +1875,10 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
             super().__init__(config, **kwargs)
 
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+            self,
+            parameters: Dict[str, Dict],
+            raise_on_error: bool = True,
+            decrypt: bool = False,
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN we should always split to respect GetParameters max
             assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
@@ -2096,7 +2108,10 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
 
     try:
         value = provider.get(
-            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+            mock_name,
+            transform="json",
+            ApplicationIdentifier=application,
+            EnvironmentIdentifier=environment,
         )
 
         assert value == mock_body_json
@@ -2135,7 +2150,10 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
 
     try:
         value = provider.get(
-            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+            mock_name,
+            transform="json",
+            ApplicationIdentifier=application,
+            EnvironmentIdentifier=environment,
         )
 
         assert value == mock_body_json

@@ -28,6 +28,11 @@ def function_thread_safety_handler_fn_arn(infrastructure: dict) -> str:
 
 
 @pytest.fixture
+def optional_idempotency_key_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("OptionalIdempotencyKeyHandlerArn", "")
+
+
+@pytest.fixture
 def idempotency_table_name(infrastructure: dict) -> str:
     return infrastructure.get("DynamoDBTable", "")
 
@@ -40,20 +45,23 @@ def test_ttl_caching_expiration_idempotency(ttl_cache_expiration_handler_fn_arn:
     # WHEN
     # first execution
     first_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=ttl_cache_expiration_handler_fn_arn, payload=payload
+        lambda_arn=ttl_cache_expiration_handler_fn_arn,
+        payload=payload,
     )
     first_execution_response = first_execution["Payload"].read().decode("utf-8")
 
     # the second execution should return the same response as the first execution
     second_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=ttl_cache_expiration_handler_fn_arn, payload=payload
+        lambda_arn=ttl_cache_expiration_handler_fn_arn,
+        payload=payload,
     )
     second_execution_response = second_execution["Payload"].read().decode("utf-8")
 
     # wait 8s to expire ttl and execute again, this should return a new response value
     sleep(8)
     third_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=ttl_cache_expiration_handler_fn_arn, payload=payload
+        lambda_arn=ttl_cache_expiration_handler_fn_arn,
+        payload=payload,
     )
     third_execution_response = third_execution["Payload"].read().decode("utf-8")
 
@@ -71,13 +79,15 @@ def test_ttl_caching_timeout_idempotency(ttl_cache_timeout_handler_fn_arn: str):
     # WHEN
     # first call should fail due to timeout
     execution_with_timeout, _ = data_fetcher.get_lambda_response(
-        lambda_arn=ttl_cache_timeout_handler_fn_arn, payload=payload_timeout_execution
+        lambda_arn=ttl_cache_timeout_handler_fn_arn,
+        payload=payload_timeout_execution,
     )
     execution_with_timeout_response = execution_with_timeout["Payload"].read().decode("utf-8")
 
     # the second call should work and return the payload
     execution_working, _ = data_fetcher.get_lambda_response(
-        lambda_arn=ttl_cache_timeout_handler_fn_arn, payload=payload_working_execution
+        lambda_arn=ttl_cache_timeout_handler_fn_arn,
+        payload=payload_working_execution,
     )
     execution_working_response = execution_working["Payload"].read().decode("utf-8")
 
@@ -112,13 +122,15 @@ def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn
     # WHEN
     # first execution
     first_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=function_thread_safety_handler_fn_arn, payload=payload
+        lambda_arn=function_thread_safety_handler_fn_arn,
+        payload=payload,
     )
     first_execution_response = first_execution["Payload"].read().decode("utf-8")
 
     # the second execution should return the same response as the first execution
     second_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=function_thread_safety_handler_fn_arn, payload=payload
+        lambda_arn=function_thread_safety_handler_fn_arn,
+        payload=payload,
     )
     second_execution_response = second_execution["Payload"].read().decode("utf-8")
 
@@ -132,3 +144,35 @@ def test_idempotent_function_thread_safety(function_thread_safety_handler_fn_arn
 
     # we use set() here because we want to compare the elements regardless of their order in the array
     assert set(first_execution_response) == set(second_execution_response)
+
+
+@pytest.mark.xdist_group(name="idempotency")
+def test_optional_idempotency_key(optional_idempotency_key_fn_arn: str):
+    # GIVEN two payloads where only one has the expected idempotency key
+    payload = json.dumps({"headers": {"X-Idempotency-Key": "here"}})
+    payload_without = json.dumps({"headers": {}})
+
+    # WHEN
+    # we make one request with an idempotency key
+    first_execution, _ = data_fetcher.get_lambda_response(lambda_arn=optional_idempotency_key_fn_arn, payload=payload)
+    first_execution_response = first_execution["Payload"].read().decode("utf-8")
+
+    # and two others without the idempotency key
+    second_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn,
+        payload=payload_without,
+    )
+    second_execution_response = second_execution["Payload"].read().decode("utf-8")
+
+    third_execution, _ = data_fetcher.get_lambda_response(
+        lambda_arn=optional_idempotency_key_fn_arn,
+        payload=payload_without,
+    )
+    third_execution_response = third_execution["Payload"].read().decode("utf-8")
+
+    # THEN
+    # we should treat 2nd and 3rd requests with NULL idempotency key as non-idempotent transactions
+    # that is, no cache, no calls to persistent store, etc.
+    assert first_execution_response != second_execution_response
+    assert first_execution_response != third_execution_response
+    assert second_execution_response != third_execution_response

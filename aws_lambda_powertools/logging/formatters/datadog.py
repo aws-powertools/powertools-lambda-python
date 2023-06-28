@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-from typing import Any, Callable
+from typing import Any, Callable, Dict
 
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
+from aws_lambda_powertools.logging.types import LogRecord
 
 
 class DatadogLogFormatter(LambdaPowertoolsFormatter):
     def __init__(
         self,
-        json_serializer: Callable[[dict], str] | None = None,
-        json_deserializer: Callable[[dict | str | bool | int | float], str] | None = None,
+        json_serializer: Callable[[LogRecord], str] | None = None,
+        json_deserializer: Callable[[Dict | str | bool | int | float], str] | None = None,
         json_default: Callable[[Any], Any] | None = None,
         datefmt: str | None = None,
         use_datetime_directive: bool = False,

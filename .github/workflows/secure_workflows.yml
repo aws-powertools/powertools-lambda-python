@@ -27,6 +27,6 @@ jobs:
       contents: read  # checkout code and subsequently GitHub action workflows
     steps:
       - name: Checkout code
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
       - name: Ensure 3rd party workflows have SHA pinned
         uses: zgosalvez/github-actions-ensure-sha-pinned-actions@555a30da2656b4a7cf47b107800bef097723363e # v2.1.3

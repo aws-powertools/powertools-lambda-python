@@ -7,7 +7,7 @@ description: Blog posts, tutorials, and videos about Powertools for AWS Lambda (
 
 This space is dedicated to highlight our awesome community content featuring Powertools for AWS Lambda (Python) 🙏!
 
-!!! info "[Get your content featured here](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
+!!! info "[Get your content featured here](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}!"
 
 ## Connect
 
@@ -34,6 +34,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 * [Part 5 - Input Validation](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-elevate-your-handler-s-code-part-5-input-validation){:target="_blank"}
 
 * [Part 6 - Configuration & Feature Flags](https://www.ranthebuilder.cloud/post/aws-lambda-cookbook-part-6-feature-flags-configuration-best-practices){:target="_blank"}
+
+* [Serverless API Idempotency with AWS Lambda Powertools and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){:target="_blank"}
 
 ### Making all your APIs idempotent
 
@@ -83,6 +85,14 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
 
 * [Idempotency the right way](https://engineering.cloudflight.io/idempotency-the-right-way){target="_blank"}
+
+### Implementing Idempotency in Serverless Architectures
+
+> **Author: [Seongwoo Choi](https://www.linkedin.com/in/%EC%84%B1%EC%9A%B0-%EC%B5%9C-44b12b1ab/){target="_blank"}** :material-linkedin:
+
+This blog post focuses on the importance of idempotency in distributed services and explores streamlined idempotent request flows. It provides guidance on idempotency tests using duplicate requests.
+
+* [Implementing Idempotency in Serverless Architectures](https://medium.com/@nuatmochoi/implementing-idempotency-in-serverless-architectures-f9079ef1c7da){target="_blank"}
 
 ## Videos
 

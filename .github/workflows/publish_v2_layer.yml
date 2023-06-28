@@ -57,13 +57,13 @@ jobs:
       id-token: write
       pages: none
       pull-requests: none
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     defaults:
       run:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           fetch-depth: 0
       - name: Install poetry
@@ -90,7 +90,7 @@ jobs:
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@6a58db7e0d21ca03e6c44877909e80e45217eed2 # v2.6.0
+        uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34 # v2.7.0
         with:
           install: true
           driver: docker
@@ -196,7 +196,7 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
           fetch-depth: 0
       - name: Download CDK layer artifact

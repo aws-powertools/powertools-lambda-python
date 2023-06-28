@@ -24,7 +24,6 @@ custom_jmespath_options = {"custom_functions": CustomFunctions()}
 
 
 def lambda_handler(event, context) -> dict:
-
     try:
         logs = []
         logs.append(
@@ -33,7 +32,7 @@ def lambda_handler(event, context) -> dict:
                 # NOTE: Use the prefix `_func_` before the name of the function
                 envelope="Records[*].decode_snappy_compression(log)",
                 jmespath_options=custom_jmespath_options,
-            )
+            ),
         )
         return {"logs": logs, "message": "Extracted messages", "success": True}
     except JMESPathTypeError:
