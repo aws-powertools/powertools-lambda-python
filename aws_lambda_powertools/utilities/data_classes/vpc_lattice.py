@@ -1,6 +1,10 @@
 from typing import Any, Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.shared.headers_serializer import (
+    BaseHeadersSerializer,
+    HttpApiHeadersSerializer,
+)
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     base64_decode,
     get_header_value,
@@ -8,7 +12,7 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
 )
 
 
-class VPCLatticeEvent(DictWrapper):
+class VPCLatticeEvent(BaseProxyEvent):
     @property
     def body(self) -> str:
         """The VPC Lattice body."""
@@ -53,6 +57,19 @@ class VPCLatticeEvent(DictWrapper):
     def raw_path(self) -> str:
         """The raw VPC Lattice request path."""
         return self["raw_path"]
+
+    # VPCLattice event has no path field
+    # Added here for consistency with the BaseProxyEvent class
+    @property
+    def path(self) -> str:
+        return self["raw_path"]
+
+    # VPCLattice event has no http_method field
+    # Added here for consistency with the BaseProxyEvent class
+    @property
+    def http_method(self) -> str:
+        """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
+        return self["method"]
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
@@ -101,3 +118,7 @@ class VPCLatticeEvent(DictWrapper):
             default_value=default_value,
             case_sensitive=case_sensitive,
         )
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        # When using the VPC Lattice integration, we have multiple HTTP Headers.
+        return HttpApiHeadersSerializer()
