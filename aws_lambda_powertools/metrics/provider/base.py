@@ -123,6 +123,6 @@ class MetricsBase(ABC):
             return
 
         logger.debug("Adding cold start metric and function_name dimension")
-        self.add_metric(name="ColdStart", value=1)
+        self.add_metric(name="ColdStart", value=1, tag=[{"function_name": context.function_name}])
 
         is_cold_start = False

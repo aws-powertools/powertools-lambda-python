@@ -20,6 +20,7 @@ from aws_lambda_powertools.metrics.base import (
     MetricManager,
     reset_cold_start_flag,
 )
+from aws_lambda_powertools.metrics.provider import CloudWatchEMF, MetricsBase, MetricsProviderBase
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -1171,3 +1172,139 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
 
     output = capture_metrics_output_multiple_emf_objects(capsys)
     assert len(output) == 2
+
+
+@pytest.fixture
+def metrics_provider() -> MetricsProviderBase:
+    class MetricsProvider(MetricsProviderBase):
+        def __init__(self):
+            self.metric_store: List = []
+            self.result: str
+            super().__init__()
+
+        def add_metric(self, name: str, value: float, tag: List = None, *args, **kwargs):
+            self.metric_store.append({"name": name, "value": value, "tag": tag})
+
+        def serialize(self, raise_on_empty_metrics: bool = False, *args, **kwargs):
+            if raise_on_empty_metrics and len(self.metric_store) == 0:
+                raise SchemaValidationError("Must contain at least one metric.")
+
+            self.result = json.dumps(self.metric_store)
+
+        def flush(self, *args, **kwargs):
+            print(self.result)
+
+        def clear(self):
+            self.result = ""
+            self.metric_store = []
+
+    return MetricsProvider
+
+
+@pytest.fixture
+def metrics_class() -> MetricsBase:
+    class MetricsClass(MetricsBase):
+        def __init__(self, provider):
+            self.provider = provider
+            super().__init__()
+
+        def add_metric(self, name: str, value: float, tag: List = None, *args, **kwargs):
+            self.provider.add_metric(name=name, value=value, tag=tag)
+
+        def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
+            self.provider.serialize(raise_on_empty_metrics=raise_on_empty_metrics)
+            self.provider.flush()
+            self.provider.clear()
+
+    return MetricsClass
+
+
+def test_cloudwatch_emf(namespace):
+    assert CloudWatchEMF == Metrics
+
+
+def test_metrics_provider_basic(capsys, metrics_provider, metric):
+    provider = metrics_provider()
+    provider.add_metric(**metric)
+    provider.serialize()
+    provider.flush()
+    output = capture_metrics_output(capsys)
+    assert output[0]["name"] == metric["name"]
+    assert output[0]["value"] == metric["value"]
+
+
+def test_metrics_provider_class_basic(capsys, metrics_provider, metrics_class, metric):
+    metrics = metrics_class(provider=metrics_provider())
+    metrics.add_metric(**metric)
+    metrics.flush_metrics()
+    output = capture_metrics_output(capsys)
+    assert output[0]["name"] == metric["name"]
+    assert output[0]["value"] == metric["value"]
+
+
+def test_metrics_provider_class_decorate(metrics_class, metrics_provider):
+    # GIVEN Metrics is initialized
+    my_metrics = metrics_class(provider=metrics_provider())
+
+    # WHEN log_metrics is used to serialize metrics
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context):
+        return True
+
+    # THEN log_metrics should invoke the function it decorates
+    # and return no error if we have a namespace and dimension
+    assert lambda_handler({}, {}) is True
+
+
+def test_metrics_provider_class_coldstart(capsys, metrics_provider, metrics_class):
+    my_metrics = metrics_class(provider=metrics_provider())
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+
+    output = capture_metrics_output(capsys)
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
+    assert output[0]["name"] == "ColdStart"
+    assert output[0]["value"] == 1
+    assert output[0]["tag"] == [{"function_name": "example_fn"}]
+
+
+def test_metrics_provider_class_no_coldstart(capsys, metrics_provider, metrics_class):
+    my_metrics = metrics_class(provider=metrics_provider())
+
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @my_metrics.log_metrics(capture_cold_start_metric=True)
+    def lambda_handler(evt, context):
+        pass
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+    lambda_handler({}, LambdaContext("example_fn"))
+    _ = capture_metrics_output(capsys)
+    # drop first one
+
+    lambda_handler({}, LambdaContext("example_fn"))
+    output = capture_metrics_output(capsys)
+
+    # no coldstart is here
+    assert "ColdStart" not in json.dumps(output)
+
+
+def test_metric_provider_raise_on_empty_metrics(metrics_provider, metrics_class):
+    # GIVEN Metrics is initialized
+    my_metrics = metrics_class(provider=metrics_provider())
+
+    # WHEN log_metrics is used with raise_on_empty_metrics param and has no metrics
+    @my_metrics.log_metrics(raise_on_empty_metrics=True)
+    def lambda_handler(evt, context):
+        pass
+
+    # THEN the raised exception should be SchemaValidationError
+    # and specifically about the lack of Metrics
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
+        lambda_handler({}, {})
