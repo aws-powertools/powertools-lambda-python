@@ -4,7 +4,7 @@ import json
 import pytest
 from itsdangerous.url_safe import URLSafeSerializer
 
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING as MASK
+from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.provider import Provider
 from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import (
@@ -53,7 +53,9 @@ python_dict = {
 }
 json_dict = json.dumps(python_dict)
 dict_fields = ["a.1.None", "a.b.3.4"]
-masked_with_fields = {"a": {"1": {"None": MASK, "four": "world"}, "b": {"3": {"4": MASK, "e": "world"}}}}
+masked_with_fields = {
+    "a": {"1": {"None": DATA_MASKING_STRING, "four": "world"}, "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}}}
+}
 aws_encrypted_with_fields = {
     "a": {
         "1": {"None": bytes("hello", "utf-8"), "four": "world"},
@@ -83,7 +85,7 @@ json_blob = {
     Praesent fringilla sem eu dui convallis luctus. Donec ullamcorper, sapien ut convallis congue,
     risus mauris pretium tortor, nec dignissim arcu urna a nisl. Vivamus non fermentum ex. Proin
     interdum nisi id sagittis egestas. Nam sit amet nisi nec quam pharetra sagittis. Aliquam erat
-    volutpat. Donec nec luctus sem, nec ornare lorem. Vivamus vitae orci quis enim faucibus placerat. 
+    volutpat. Donec nec luctus sem, nec ornare lorem. Vivamus vitae orci quis enim faucibus placerat.
     Nulla facilisi. Proin in turpis orci. Donec imperdiet velit ac tellus gravida, eget laoreet tellus
     malesuada. Praesent venenatis tellus ac urna blandit, at varius felis posuere. Integer a commodo nunc.
     """,
@@ -98,17 +100,20 @@ fields_to_mask = [dict_fields, dict_fields, json_blob_fields]
 
 data_types_and_masks = [
     # simple data types
-    [42, MASK],
-    [4.22, MASK],
-    [True, MASK],
-    [None, MASK],
-    ["this is a string", MASK],
+    [42, DATA_MASKING_STRING],
+    [4.22, DATA_MASKING_STRING],
+    [True, DATA_MASKING_STRING],
+    [None, DATA_MASKING_STRING],
+    ["this is a string", DATA_MASKING_STRING],
     # iterables
-    [[1, 2, 3, 4], [MASK, MASK, MASK, MASK]],
-    [["hello", 1, 2, 3, "world"], [MASK, MASK, MASK, MASK, MASK]],
+    [[1, 2, 3, 4], [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]],
+    [
+        ["hello", 1, 2, 3, "world"],
+        [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING],
+    ],
     # dictionaries
-    [python_dict, MASK],
-    [json_dict, MASK],
+    [python_dict, DATA_MASKING_STRING],
+    [json_dict, DATA_MASKING_STRING],
 ]
 data_types = [item[0] for item in data_types_and_masks]
 
@@ -180,7 +185,7 @@ def test_decrypt_not_implemented():
 def test_aws_encryption_sdk_with_context():
     data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[AWS_SDK_KEY]))
     encrypted_data = data_masker.encrypt(
-        str(python_dict), encryption_context={"not really": "a secret", "but adds": "some authentication"}
+        str(python_dict), encryption_context={"not really": "a secret", "but adds": "some auth"}
     )
     decrypted_data = data_masker.decrypt(encrypted_data)
     assert decrypted_data == bytes(str(python_dict), "utf-8")
@@ -201,7 +206,7 @@ def test_parsing_nonstring_fields():
         }
     }
     masked = data_masker.mask(_python_dict, fields=[3.4])
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": MASK}}
+    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
 
 
 def test_parsing_nonstring_keys_and_fields():
@@ -213,4 +218,4 @@ def test_parsing_nonstring_keys_and_fields():
         }
     }
     masked = data_masker.mask(_python_dict, fields=[3.4])
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": MASK}}
+    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}

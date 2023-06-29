@@ -22,11 +22,11 @@ class DataMasking:
 
     def _apply_action(self, data, fields, action, *args, **kwargs):
         if fields is not None:
-            return self._use_ast(data, fields, action, *args, **kwargs)
+            return self._apply_action_to_fields(data, fields, action, *args, **kwargs)
         else:
             return action(data, *args, **kwargs)
 
-    def _use_ast(self, data: Union[dict, str], fields, action, *args, **kwargs) -> str:
+    def _apply_action_to_fields(self, data: Union[dict, str], fields, action, *args, **kwargs) -> str:
         if fields is None:
             raise ValueError("No fields specified.")
 
