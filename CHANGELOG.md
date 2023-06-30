@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump pydantic from 1.10.9 to 1.10.10 ([#2624](https://github.com/aws-powertools/powertools-lambda-python/issues/2624))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.158 to 1.26.164 ([#2622](https://github.com/aws-powertools/powertools-lambda-python/issues/2622))
+
 
 <a name="v2.19.0"></a>
 ## [v2.19.0] - 2023-06-30
