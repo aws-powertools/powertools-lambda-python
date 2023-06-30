@@ -15,16 +15,16 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
 
-    # context on why it's commented: https://github.com/awslabs/aws-lambda-powertools-python/pull/118
+    # context on why it's commented: https://github.com/aws-powertools/powertools-lambda-python/pull/118
     # since both images are optional, they can both be None. However, at least one must
     # exist in a legal model of NEW_AND_OLD_IMAGES type
     # @root_validator
-    # def check_one_image_exists(cls, values): # noqa: E800
-    #     new_img, old_img = values.get("NewImage"), values.get("OldImage") # noqa: E800
-    #     stream_type = values.get("StreamViewType") # noqa: E800
-    #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: E800
-    #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: E800,E501
-    #     return values # noqa: E800
+    # def check_one_image_exists(cls, values): # noqa: ERA001
+    #     new_img, old_img = values.get("NewImage"), values.get("OldImage") # noqa: ERA001
+    #     stream_type = values.get("StreamViewType") # noqa: ERA001
+    #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: ERA001
+    #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: ERA001,E501
+    #     return values # noqa: ERA001
 
 
 class UserIdentity(BaseModel):

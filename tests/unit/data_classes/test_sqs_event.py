@@ -1,21 +1,50 @@
 import json
-from typing import Dict
-
-import pytest
 
 from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 from tests.functional.utils import load_event
 
 
-@pytest.mark.parametrize(
-    "raw_event",
-    [
-        pytest.param(load_event("s3SqsEvent.json")),
-    ],
-    ids=["s3_sqs"],
-)
-def test_decode_nested_s3_event(raw_event: Dict):
+def test_seq_trigger_event():
+    raw_event = load_event("sqsEvent.json")
+    parsed_event = SQSEvent(raw_event)
+
+    records = list(parsed_event.records)
+    record = records[0]
+    attributes = record.attributes
+    message_attributes = record.message_attributes
+    test_attr = message_attributes["testAttr"]
+
+    assert len(records) == 2
+    assert record.message_id == raw_event["Records"][0]["messageId"]
+    assert record.receipt_handle == raw_event["Records"][0]["receiptHandle"]
+    assert record.body == raw_event["Records"][0]["body"]
+    assert attributes.aws_trace_header is None
+    raw_attributes = raw_event["Records"][0]["attributes"]
+    assert attributes.approximate_receive_count == raw_attributes["ApproximateReceiveCount"]
+    assert attributes.sent_timestamp == raw_attributes["SentTimestamp"]
+    assert attributes.sender_id == raw_attributes["SenderId"]
+    assert attributes.approximate_first_receive_timestamp == raw_attributes["ApproximateFirstReceiveTimestamp"]
+    assert attributes.sequence_number is None
+    assert attributes.message_group_id is None
+    assert attributes.message_deduplication_id is None
+    assert message_attributes["NotFound"] is None
+    assert message_attributes.get("NotFound") is None
+    assert test_attr.string_value == raw_event["Records"][0]["messageAttributes"]["testAttr"]["stringValue"]
+    assert test_attr.binary_value == raw_event["Records"][0]["messageAttributes"]["testAttr"]["binaryValue"]
+    assert test_attr.data_type == raw_event["Records"][0]["messageAttributes"]["testAttr"]["dataType"]
+    assert record.md5_of_body == raw_event["Records"][0]["md5OfBody"]
+    assert record.event_source == raw_event["Records"][0]["eventSource"]
+    assert record.event_source_arn == raw_event["Records"][0]["eventSourceARN"]
+    assert record.queue_url == "https://sqs.us-east-2.amazonaws.com/123456789012/my-queue"
+    assert record.aws_region == raw_event["Records"][0]["awsRegion"]
+
+    record_2 = records[1]
+    assert record_2.json_body == {"message": "foo1"}
+
+
+def test_decode_nested_s3_event(raw_event):
+    raw_event = load_event("s3SqsEvent.json")
     event = SQSEvent(raw_event)
 
     records = list(event.records)
@@ -63,14 +92,8 @@ def test_decode_nested_s3_event(raw_event: Dict):
     assert s3_record.user_identity.principal_id == "A1YQ72UWCM96UF"
 
 
-@pytest.mark.parametrize(
-    "raw_event",
-    [
-        pytest.param(load_event("snsSqsEvent.json")),
-    ],
-    ids=["sns_sqs"],
-)
-def test_decode_nested_sns_event(raw_event: Dict):
+def test_decode_nested_sns_event(raw_event):
+    raw_event = load_event("snsSqsEvent.json")
     event = SQSEvent(raw_event)
 
     records = list(event.records)

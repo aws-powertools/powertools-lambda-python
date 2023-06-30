@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Optional, Tuple
 
 import boto3
-import requests as requests
+import requests
 from mypy_boto3_lambda import LambdaClient
 from mypy_boto3_lambda.type_defs import InvocationResponseTypeDef
 from requests import Request, Response
@@ -11,7 +11,9 @@ from retry import retry
 
 
 def get_lambda_response(
-    lambda_arn: str, payload: Optional[str] = None, client: Optional[LambdaClient] = None
+    lambda_arn: str,
+    payload: Optional[str] = None,
+    client: Optional[LambdaClient] = None,
 ) -> Tuple[InvocationResponseTypeDef, datetime]:
     client = client or boto3.client("lambda")
     payload = payload or ""

@@ -172,7 +172,10 @@ class MetricManager:
             self.metric_set.clear()
 
     def serialize_metric_set(
-        self, metrics: Optional[Dict] = None, dimensions: Optional[Dict] = None, metadata: Optional[Dict] = None
+        self,
+        metrics: Optional[Dict] = None,
+        dimensions: Optional[Dict] = None,
+        metadata: Optional[Dict] = None,
     ) -> Dict:
         """Serializes metric and dimensions set
 
@@ -225,10 +228,10 @@ class MetricManager:
         logger.debug({"details": "Serializing metrics", "metrics": metrics, "dimensions": dimensions})
 
         # For standard resolution metrics, don't add StorageResolution field to avoid unnecessary ingestion of data into cloudwatch # noqa E501
-        # Example: [ { "Name": "metric_name", "Unit": "Count"} ] # noqa E800
+        # Example: [ { "Name": "metric_name", "Unit": "Count"} ] # noqa ERA001
         #
         # In case using high-resolution metrics, add StorageResolution field
-        # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa E800
+        # Example: [ { "Name": "metric_name", "Unit": "Count", "StorageResolution": 1 } ] # noqa ERA001
         metric_definition: List[MetricNameUnitResolution] = []
         metric_names_and_values: Dict[str, float] = {}  # { "metric_name": 1.0 }
 
@@ -256,7 +259,7 @@ class MetricManager:
                         "Namespace": self.namespace,  # "test_namespace"
                         "Dimensions": [list(dimensions.keys())],  # [ "service" ]
                         "Metrics": metric_definition,
-                    }
+                    },
                 ],
             },
             **dimensions,  # "service": "test_service"
@@ -283,7 +286,7 @@ class MetricManager:
         logger.debug(f"Adding dimension: {name}:{value}")
         if len(self.dimension_set) == MAX_DIMENSIONS:
             raise SchemaValidationError(
-                f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}."
+                f"Maximum number of dimensions exceeded ({MAX_DIMENSIONS}): Unable to add dimension {name}.",
             )
         # Cast value to str according to EMF spec
         # Majority of values are expected to be string already, so
@@ -443,7 +446,7 @@ class MetricManager:
             return resolution
 
         raise MetricResolutionError(
-            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}"  # noqa: E501
+            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}",  # noqa: E501
         )
 
     def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
@@ -471,7 +474,7 @@ class MetricManager:
 
             if unit not in self._metric_units:
                 raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}"
+                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}",
                 )
 
         if isinstance(unit, MetricUnit):
@@ -576,7 +579,7 @@ def single_metric(
         from aws_lambda_powertools.metrics import MetricUnit
         from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric: # noqa E501
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric:
             metric.add_dimension(name="function_version", value="47")
 
     **Same as above but set namespace using environment variable**
@@ -587,7 +590,7 @@ def single_metric(
         from aws_lambda_powertools.metrics import MetricUnit
         from aws_lambda_powertools.metrics import MetricResolution
 
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric: # noqa E501
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric:
             metric.add_dimension(name="function_version", value="47")
 
     Parameters
@@ -618,7 +621,7 @@ def single_metric(
         When metric value isn't a number
     SchemaValidationError
         When metric object fails EMF schema validation
-    """
+    """  # noqa: E501
     metric_set: Optional[Dict] = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)

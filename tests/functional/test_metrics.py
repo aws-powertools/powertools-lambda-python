@@ -104,7 +104,10 @@ def a_hundred_metric_values() -> List[Dict[str, str]]:
 
 
 def serialize_metrics(
-    metrics: List[Dict], dimensions: List[Dict], namespace: str, metadatas: List[Dict] = None
+    metrics: List[Dict],
+    dimensions: List[Dict],
+    namespace: str,
+    metadatas: List[Dict] = None,
 ) -> Dict:
     """Helper function to build EMF object from a list of metrics, dimensions"""
     my_metrics = MetricManager(namespace=namespace)
@@ -833,7 +836,11 @@ def test_log_metrics_with_metadata(capsys, metric, dimension, namespace, service
 
 
 def test_serialize_high_resolution_metric_set_metric_definition(
-    metric_with_resolution, dimension, namespace, service, metadata
+    metric_with_resolution,
+    dimension,
+    namespace,
+    service,
+    metadata,
 ):
     expected_metric_definition = {
         "single_metric": [1.0],
@@ -844,7 +851,7 @@ def test_serialize_high_resolution_metric_set_metric_definition(
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
                     "Metrics": [{"Name": "single_metric", "Unit": "Count", "StorageResolution": 1}],
-                }
+                },
             ],
         },
         "service": "test_service",
@@ -877,7 +884,7 @@ def test_serialize_metric_set_metric_definition(metric, dimension, namespace, se
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
                     "Metrics": [{"Name": "single_metric", "Unit": "Count"}],
-                }
+                },
             ],
         },
         "service": "test_service",
@@ -960,7 +967,11 @@ def test_log_multiple_metrics(capsys, metrics_same_name, dimensions, namespace):
 
 
 def test_serialize_metric_set_metric_definition_multiple_values(
-    metrics_same_name, dimension, namespace, service, metadata
+    metrics_same_name,
+    dimension,
+    namespace,
+    service,
+    metadata,
 ):
     expected_metric_definition = {
         "metric_one": [1.0, 5.0],
@@ -971,7 +982,7 @@ def test_serialize_metric_set_metric_definition_multiple_values(
                     "Namespace": "test_namespace",
                     "Dimensions": [["test_dimension", "service"]],
                     "Metrics": [{"Name": "metric_one", "Unit": "Count"}],
-                }
+                },
             ],
         },
         "service": "test_service",

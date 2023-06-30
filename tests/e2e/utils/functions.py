@@ -21,7 +21,7 @@ def execute_lambdas_in_parallel(function_name: str, lambdas_arn: list, arguments
                     function_name,
                     arn,
                     arguments,
-                )
+                ),
             )
 
         executor.shutdown(wait=True)

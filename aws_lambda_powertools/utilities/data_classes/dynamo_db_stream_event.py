@@ -18,7 +18,7 @@ class TypeDeserializer:
     """
     Deserializes DynamoDB types to Python types.
 
-    It's based on boto3's [DynamoDB TypeDeserializer](https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html). # noqa: E501
+    It's based on boto3's [DynamoDB TypeDeserializer](https://boto3.amazonaws.com/v1/documentation/api/latest/_modules/boto3/dynamodb/types.html).
 
     The only notable difference is that for Binary (`B`, `BS`) values we return Python Bytes directly,
     since we don't support Python 2.
@@ -39,7 +39,7 @@ class TypeDeserializer:
             --------                                ------
             {'NULL': True}                          None
             {'BOOL': True/False}                    True/False
-            {'N': str(value)}                       str(value)
+            {'N': Decimal(value)}                   Decimal(value)
             {'S': string}                           string
             {'B': bytes}                            bytes
             {'NS': [str(value)]}                    set([str(value)])

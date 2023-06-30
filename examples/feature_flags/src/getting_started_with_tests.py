@@ -36,11 +36,11 @@ def test_flags_condition_match(mocker):
                             "action": RuleAction.EQUALS.value,
                             "key": "tenant_id",
                             "value": "12345",
-                        }
+                        },
                     ],
-                }
+                },
             },
-        }
+        },
     }
 
     # WHEN

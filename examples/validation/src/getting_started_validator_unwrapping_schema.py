@@ -11,8 +11,8 @@ INPUT = {
                 "s3_key": "event.txt",
                 "file_size": 200,
                 "file_type": "text/plain",
-            }
-        }
+            },
+        },
     ],
     "required": ["data"],
     "properties": {
@@ -54,6 +54,6 @@ INPUT = {
                     "pattern": "^.*$",
                 },
             },
-        }
+        },
     },
 }

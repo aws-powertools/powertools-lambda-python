@@ -14,6 +14,12 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .cloudformation_custom_resource import (
+    CloudFormationCustomResourceBaseModel,
+    CloudFormationCustomResourceCreateModel,
+    CloudFormationCustomResourceDeleteModel,
+    CloudFormationCustomResourceUpdateModel,
+)
 from .cloudwatch import (
     CloudWatchLogsData,
     CloudWatchLogsDecode,
@@ -78,6 +84,7 @@ from .ses import (
 )
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
+from .vpc_lattice import VpcLatticeModel
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
@@ -147,4 +154,9 @@ __all__ = [
     "KafkaBaseEventModel",
     "KinesisFirehoseSqsModel",
     "KinesisFirehoseSqsRecord",
+    "CloudFormationCustomResourceUpdateModel",
+    "CloudFormationCustomResourceDeleteModel",
+    "CloudFormationCustomResourceCreateModel",
+    "CloudFormationCustomResourceBaseModel",
+    "VpcLatticeModel",
 ]

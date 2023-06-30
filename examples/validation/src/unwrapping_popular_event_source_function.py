@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities.validation import envelopes, validator
 
 
 # extracting detail from EventBridge custom event
-# see: https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/jmespath_functions/#built-in-envelopes
+# see: https://docs.powertools.aws.dev/lambda/python/latest/utilities/jmespath_functions/#built-in-envelopes
 @validator(inbound_schema=schemas.INPUT, envelope=envelopes.EVENTBRIDGE)
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     my_event = EventBridgeEvent(event)
