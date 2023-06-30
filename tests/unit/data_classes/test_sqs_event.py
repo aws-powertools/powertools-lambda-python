@@ -67,7 +67,7 @@ def test_decode_nested_s3_event():
     assert record.event_source_arn == raw_event["Records"][0]["eventSourceARN"]
     assert record.aws_region == raw_event["Records"][0]["awsRegion"]
 
-    s3_event: S3Event = record.decode_nested_s3_event
+    s3_event: S3Event = record.decoded_nested_s3_event
     s3_record = s3_event.record
     raw_body = json.loads(raw_event["Records"][0]["body"])
 
@@ -120,7 +120,7 @@ def test_decode_nested_sns_event():
     assert record.event_source_arn == raw_event["Records"][0]["eventSourceARN"]
     assert record.aws_region == raw_event["Records"][0]["awsRegion"]
 
-    sns_message: SNSMessage = record.decode_nested_sns_event
+    sns_message: SNSMessage = record.decoded_nested_sns_event
     raw_body = json.loads(raw_event["Records"][0]["body"])
     message = json.loads(sns_message.message)
 

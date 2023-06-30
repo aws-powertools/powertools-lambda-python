@@ -179,7 +179,7 @@ class SQSRecord(DictWrapper):
         return queue_url
 
     @property
-    def decode_nested_s3_event(self) -> S3Event:
+    def decoded_nested_s3_event(self) -> S3Event:
         """Returns the nested `S3Event` object that is sent in the body of a SQS message.
 
         Even though you can typecast the object returned by `record.json_body`
@@ -194,13 +194,13 @@ class SQSRecord(DictWrapper):
         --------
 
         ```python
-        nested_event: S3Event = record.decode_nested_s3_event
+        nested_event: S3Event = record.decoded_nested_s3_event
         ```
         """
         return self._decode_nested_event(S3Event)
 
     @property
-    def decode_nested_sns_event(self) -> SNSMessage:
+    def decoded_nested_sns_event(self) -> SNSMessage:
         """Returns the nested `SNSMessage` object that is sent in the body of a SQS message.
 
         Even though you can typecast the object returned by `record.json_body`
@@ -216,7 +216,7 @@ class SQSRecord(DictWrapper):
         --------
 
         ```python
-        nested_message: SNSMessage = record.decode_nested_sns_event
+        nested_message: SNSMessage = record.decoded_nested_sns_event
         ```
         """
         return self._decode_nested_event(SNSMessage)
