@@ -2875,4 +2875,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "69f86798a26c33e9466a146f96aa91c0e0e3074654b72bf6d9e6f9da78a9f1bf"
+content-hash = "ea4b3b7ff32e0f70d48ec58b0610b4a0b18e86a53e3c125767c3ff8b38020bf6"
