@@ -29,23 +29,7 @@ def handle_cloudwatch_logs(event: List[MyCloudWatchBusiness], _: LambdaContext):
 
 @event_parser(model=CloudWatchLogsModel)
 def handle_cloudwatch_logs_no_envelope(event: CloudWatchLogsModel, _: LambdaContext):
-    assert event.awslogs.decoded_data.owner == "123456789123"
-    assert event.awslogs.decoded_data.logGroup == "testLogGroup"
-    assert event.awslogs.decoded_data.logStream == "testLogStream"
-    assert event.awslogs.decoded_data.subscriptionFilters == ["testFilter"]
-    assert event.awslogs.decoded_data.messageType == "DATA_MESSAGE"
-
-    assert len(event.awslogs.decoded_data.logEvents) == 2
-    log_record: CloudWatchLogsLogEvent = event.awslogs.decoded_data.logEvents[0]
-    assert log_record.id == "eventId1"
-    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
-    assert convert_time == 1440442987000
-    assert log_record.message == "[ERROR] First test message"
-    log_record: CloudWatchLogsLogEvent = event.awslogs.decoded_data.logEvents[1]
-    assert log_record.id == "eventId2"
-    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
-    assert convert_time == 1440442987001
-    assert log_record.message == "[ERROR] Second test message"
+    return event
 
 
 def test_validate_event_user_model_with_envelope():
@@ -72,8 +56,26 @@ def test_validate_event_does_not_conform_with_user_dict_model():
 
 
 def test_handle_cloudwatch_trigger_event_no_envelope():
-    event_dict = load_event("cloudWatchLogEvent.json")
-    handle_cloudwatch_logs_no_envelope(event_dict, LambdaContext())
+    raw_event = load_event("cloudWatchLogEvent.json")
+    parsed_event: CloudWatchLogsModel = handle_cloudwatch_logs_no_envelope(raw_event, LambdaContext())
+
+    assert parsed_event.awslogs.decoded_data.owner == "123456789123"
+    assert parsed_event.awslogs.decoded_data.logGroup == "testLogGroup"
+    assert parsed_event.awslogs.decoded_data.logStream == "testLogStream"
+    assert parsed_event.awslogs.decoded_data.subscriptionFilters == ["testFilter"]
+    assert parsed_event.awslogs.decoded_data.messageType == "DATA_MESSAGE"
+
+    assert len(parsed_event.awslogs.decoded_data.logEvents) == 2
+    log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[0]
+    assert log_record.id == "eventId1"
+    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
+    assert convert_time == 1440442987000
+    assert log_record.message == "[ERROR] First test message"
+    log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[1]
+    assert log_record.id == "eventId2"
+    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
+    assert convert_time == 1440442987001
+    assert log_record.message == "[ERROR] Second test message"
 
 
 def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
