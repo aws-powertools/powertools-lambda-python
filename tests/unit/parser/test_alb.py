@@ -13,7 +13,7 @@ def handle_alb(event: AlbModel, _: LambdaContext):
 
 def test_alb_trigger_event():
     raw_event = load_event("albEvent.json")
-    parsed_event = handle_alb(raw_event, LambdaContext())
+    parsed_event: AlbModel = handle_alb(raw_event, LambdaContext())
 
     assert parsed_event.requestContext.elb.targetGroupArn == raw_event["requestContext"]["elb"]["targetGroupArn"]
     assert parsed_event.httpMethod == raw_event["httpMethod"]
