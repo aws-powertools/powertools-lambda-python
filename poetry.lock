@@ -1442,17 +1442,17 @@ typing-extensions = ">=4.1.0"
 
 [[package]]
 name = "mypy-boto3-appconfigdata"
-version = "1.26.70"
-description = "Type annotations for boto3.AppConfigData 1.26.70 service generated with mypy-boto3-builder 7.12.3"
+version = "1.27.0"
+description = "Type annotations for boto3.AppConfigData 1.27.0 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-appconfigdata-1.26.70.tar.gz", hash = "sha256:fafa2cb8500d8291c0a51369f323ce01e15bdf71ef3d07a4a16d5e12b7b545ab"},
-    {file = "mypy_boto3_appconfigdata-1.26.70-py3-none-any.whl", hash = "sha256:c04e24f56bf1cf3127939571875617529b290a7adba7a49cb04a68476f4dfe9e"},
+    {file = "mypy-boto3-appconfigdata-1.27.0.tar.gz", hash = "sha256:a240f3c7b4f8b559d2b9a572c756884fe8247643fbc8c609d22f7414a79aa462"},
+    {file = "mypy_boto3_appconfigdata-1.27.0-py3-none-any.whl", hash = "sha256:cfe864dab8557b66654d903104ac5a259079e24d43edd06469bd4715f5173a42"},
 ]
 
 [package.dependencies]
-typing-extensions = ">=4.1.0"
+typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
@@ -2745,4 +2745,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "906d8206a4d10f9ac939fbbac0e8427e41ee232dd006ce3043de8a5348fd9c11"
+content-hash = "ea4b3b7ff32e0f70d48ec58b0610b4a0b18e86a53e3c125767c3ff8b38020bf6"
