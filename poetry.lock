@@ -1554,13 +1554,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.26.162"
-description = "Type annotations for boto3.SSM 1.26.162 service generated with mypy-boto3-builder 7.14.5"
+version = "1.27.0"
+description = "Type annotations for boto3.SSM 1.27.0 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-ssm-1.26.162.tar.gz", hash = "sha256:a5d9d7e4c7dbf4788dddcc02410afa349d7356a24fbffe5b7a36cd0c04211f06"},
-    {file = "mypy_boto3_ssm-1.26.162-py3-none-any.whl", hash = "sha256:42c52e55a94b5d5ce14d628b4bc168b2b4230e130050172bf54747edb7b8da14"},
+    {file = "mypy-boto3-ssm-1.27.0.tar.gz", hash = "sha256:1803f1aa582a2f7f2c6a8aa17c1f5f5eccd9f66ae8f5d1f8b2ae26dc237b4a94"},
+    {file = "mypy_boto3_ssm-1.27.0-py3-none-any.whl", hash = "sha256:07e0a2ab5957439e527c8381a54d9479d07b9e95b96a7cfcfcefddf3c4a78e29"},
 ]
 
 [package.dependencies]
@@ -2745,4 +2745,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "906d8206a4d10f9ac939fbbac0e8427e41ee232dd006ce3043de8a5348fd9c11"
+content-hash = "17981a580b85321be3e9b22bb721ef2b248ef6a2da7b676af1fed2d215bb766c"
