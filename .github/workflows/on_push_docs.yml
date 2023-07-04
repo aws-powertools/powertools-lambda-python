@@ -20,6 +20,9 @@ on:
       - "examples/**"
       - "CHANGELOG.md"
 
+permissions:
+  contents: read
+
 jobs:
   release-docs:
     permissions:

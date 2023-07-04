@@ -26,6 +26,9 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   get_pr_details:
     permissions:
