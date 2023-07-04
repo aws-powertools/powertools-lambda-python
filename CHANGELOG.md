@@ -4,6 +4,18 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **docs:** ensure version alias is in an array to prevent "you're not viewing the latest version" incorrect message ([#2629](https://github.com/aws-powertools/powertools-lambda-python/issues/2629))
+
+## Maintenance
+
+* **ci:** enforce top-level permission to minimum fail-safe permission as per openssf ([#2638](https://github.com/aws-powertools/powertools-lambda-python/issues/2638))
+* **ci:** prevent merging PRs that do not meet minimum requirements ([#2639](https://github.com/aws-powertools/powertools-lambda-python/issues/2639))
+* **deps:** bump pydantic from 1.10.9 to 1.10.10 ([#2624](https://github.com/aws-powertools/powertools-lambda-python/issues/2624))
+* **deps-dev:** bump mypy-boto3-appconfigdata from 1.26.70 to 1.27.0 ([#2636](https://github.com/aws-powertools/powertools-lambda-python/issues/2636))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.158 to 1.26.164 ([#2622](https://github.com/aws-powertools/powertools-lambda-python/issues/2622))
+
 
 <a name="v2.19.0"></a>
 ## [v2.19.0] - 2023-06-30
