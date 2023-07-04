@@ -52,16 +52,15 @@ def test_s3_object_event_temp_credentials():
     session_context = parsed_event.userIdentity.sessionContext
     assert session_context is not None
     session_issuer = session_context.sessionIssuer
+    session_issuer_raw = event["userIdentity"]["sessionContext"]["sessionIssuer"]
     assert session_issuer is not None
-    assert session_issuer.type == event["userIdentity"]["sessionContext"]["sessionIssuer"]["type"]
-    assert session_issuer.userName == event["userIdentity"]["sessionContext"]["sessionIssuer"]["userName"]
-    assert session_issuer.principalId == event["userIdentity"]["sessionContext"]["sessionIssuer"]["principalId"]
-    assert session_issuer.arn == event["userIdentity"]["sessionContext"]["sessionIssuer"]["arn"]
-    assert session_issuer.accountId == event["userIdentity"]["sessionContext"]["sessionIssuer"]["accountId"]
+    assert session_issuer.type == session_issuer_raw["type"]
+    assert session_issuer.userName == session_issuer_raw["userName"]
+    assert session_issuer.principalId == session_issuer_raw["principalId"]
+    assert session_issuer.arn == session_issuer_raw["arn"]
+    assert session_issuer.accountId == session_issuer_raw["accountId"]
     session_attributes = session_context.attributes
+    session_attributes_raw = event["userIdentity"]["sessionContext"]["attributes"]
     assert session_attributes is not None
-    assert (
-        str(session_attributes.mfaAuthenticated).lower()
-        == event["userIdentity"]["sessionContext"]["attributes"]["mfaAuthenticated"]
-    )
-    assert session_attributes.creationDate == event["userIdentity"]["sessionContext"]["attributes"]["creationDate"]
+    assert str(session_attributes.mfaAuthenticated).lower() == session_attributes_raw["mfaAuthenticated"]
+    assert session_attributes.creationDate == session_attributes_raw["creationDate"]
