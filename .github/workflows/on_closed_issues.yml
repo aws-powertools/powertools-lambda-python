@@ -12,6 +12,9 @@ name: Closed Issue Message
 on:
   issues:
       types: [closed]
+permissions:
+  contents: read
+
 jobs:
   auto_comment:
       runs-on: ubuntu-latest

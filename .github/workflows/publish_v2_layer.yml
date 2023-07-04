@@ -49,6 +49,9 @@ on:
         type: boolean
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   build-layer:
     permissions:
