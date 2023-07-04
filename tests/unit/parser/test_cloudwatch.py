@@ -19,6 +19,12 @@ from tests.functional.parser.schemas import MyCloudWatchBusiness
 from tests.functional.utils import load_event
 
 
+def decode_cloudwatch_raw_event(event: dict):
+    payload = base64.b64decode(event)
+    uncompressed = zlib.decompress(payload, zlib.MAX_WBITS | 32)
+    return json.loads(uncompressed.decode("utf-8"))
+
+
 @event_parser(model=MyCloudWatchBusiness, envelope=envelopes.CloudWatchLogsEnvelope)
 def handle_cloudwatch_logs(event: List[MyCloudWatchBusiness], _: LambdaContext):
     assert len(event) == 1
@@ -59,23 +65,29 @@ def test_handle_cloudwatch_trigger_event_no_envelope():
     raw_event = load_event("cloudWatchLogEvent.json")
     parsed_event: CloudWatchLogsModel = handle_cloudwatch_logs_no_envelope(raw_event, LambdaContext())
 
-    assert parsed_event.awslogs.decoded_data.owner == "123456789123"
-    assert parsed_event.awslogs.decoded_data.logGroup == "testLogGroup"
-    assert parsed_event.awslogs.decoded_data.logStream == "testLogStream"
-    assert parsed_event.awslogs.decoded_data.subscriptionFilters == ["testFilter"]
-    assert parsed_event.awslogs.decoded_data.messageType == "DATA_MESSAGE"
+    raw_event_decoded = decode_cloudwatch_raw_event(raw_event["awslogs"]["data"])
+
+    assert parsed_event.awslogs.decoded_data.owner == raw_event_decoded["owner"]
+    assert parsed_event.awslogs.decoded_data.logGroup == raw_event_decoded["logGroup"]
+    assert parsed_event.awslogs.decoded_data.logStream == raw_event_decoded["logStream"]
+    assert parsed_event.awslogs.decoded_data.subscriptionFilters == raw_event_decoded["subscriptionFilters"]
+    assert parsed_event.awslogs.decoded_data.messageType == raw_event_decoded["messageType"]
 
     assert len(parsed_event.awslogs.decoded_data.logEvents) == 2
+
     log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[0]
-    assert log_record.id == "eventId1"
+    raw_log_record = raw_event_decoded["logEvents"][0]
+    assert log_record.id == raw_log_record["id"]
     convert_time = int(round(log_record.timestamp.timestamp() * 1000))
-    assert convert_time == 1440442987000
-    assert log_record.message == "[ERROR] First test message"
+    assert convert_time == raw_log_record["timestamp"]
+    assert log_record.message == raw_log_record["message"]
+
     log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[1]
-    assert log_record.id == "eventId2"
+    raw_log_record = raw_event_decoded["logEvents"][1]
+    assert log_record.id == raw_log_record["id"]
     convert_time = int(round(log_record.timestamp.timestamp() * 1000))
-    assert convert_time == 1440442987001
-    assert log_record.message == "[ERROR] Second test message"
+    assert convert_time == raw_log_record["timestamp"]
+    assert log_record.message == raw_log_record["message"]
 
 
 def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
