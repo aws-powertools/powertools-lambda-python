@@ -120,7 +120,7 @@ jobs:
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
             versions_old.json
           jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
-          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": ["${{env.ALIAS}}"] }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == "${{ env.VERSION }}";.) then $o else $n + $o end' < versions_proc.json > versions.json
+          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"] }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == $n[0].title;.) then [($o | .[] | select(.title == $n[0].title).aliases += $n[0].aliases | . )] else $n + $o end' < versions_proc.json > versions.json
           aws s3 cp \
             versions.json \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json
