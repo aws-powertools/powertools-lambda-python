@@ -47,6 +47,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest

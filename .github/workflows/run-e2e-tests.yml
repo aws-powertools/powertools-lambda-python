@@ -35,6 +35,9 @@ env:
 
 concurrency: e2e
 
+permissions:
+  contents: read
+
 jobs:
   run:
     runs-on: aws-powertools_ubuntu-latest_8-core

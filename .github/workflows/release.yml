@@ -51,6 +51,9 @@ on:
         type: boolean
         required: false
 
+permissions:
+  contents: read
+
 jobs:
 
   # This job bumps the package version to the release version

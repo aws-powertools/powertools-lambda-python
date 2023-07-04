@@ -25,10 +25,14 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   get_pr_details:
     permissions:
       actions: read  # download PR artifact
+      contents: read # checkout code
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     uses: ./.github/workflows/reusable_export_pr_details.yml
     with:
