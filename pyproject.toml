@@ -73,7 +73,7 @@ filelock = "^3.12.2"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.27.0"
 ijson = "^3.2.2"
-typed-ast = { version = "^1.5.4", python = "< 3.8"}
+typed-ast = { version = "^1.5.5", python = "< 3.8"}
 hvac = "^1.1.1"
 aws-requests-auth = "^0.4.3"
 
