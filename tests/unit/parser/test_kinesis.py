@@ -26,10 +26,7 @@ from tests.unit.parser.schemas import MyKinesisBusiness
 
 @event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)
 def handle_kinesis(event: List[MyKinesisBusiness], _: LambdaContext):
-    assert len(event) == 1
-    record: KinesisDataStreamModel = event[0]
-    assert record.message == "test message"
-    assert record.username == "test"
+    return event
 
 
 @event_parser(model=KinesisDataStreamModel)
@@ -44,6 +41,16 @@ def test_kinesis_trigger_bad_base64_event():
 
     with pytest.raises(ValidationError):
         handle_kinesis_no_envelope(raw_event, LambdaContext())
+
+
+def test_kinesis_trigger_event():
+    raw_event = load_event("kinesisSingeEvent.json")
+    parsed_event: MyKinesisBusiness = handle_kinesis(raw_event, LambdaContext())
+
+    assert len(parsed_event) == 1
+    record: KinesisDataStreamModel = parsed_event[0]
+    assert record.message == "test message"
+    assert record.username == "test"
 
 
 def test_kinesis_trigger_event_no_envelope():
