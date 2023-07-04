@@ -9,9 +9,9 @@ from aws_lambda_powertools.utilities.parser import (
     event_parser,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sns_event  # noqa: F401
+from tests.unit.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
 
 
 @event_parser(model=MySnsBusiness, envelope=envelopes.SnsEnvelope)

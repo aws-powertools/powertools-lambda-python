@@ -7,8 +7,8 @@ from aws_lambda_powertools.utilities.parser import (
 )
 from aws_lambda_powertools.utilities.parser.models import VpcLatticeModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyVpcLatticeBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyVpcLatticeBusiness
 
 
 @event_parser(model=MyVpcLatticeBusiness, envelope=envelopes.VpcLatticeEnvelope)

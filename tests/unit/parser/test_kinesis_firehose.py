@@ -15,8 +15,8 @@ from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseSqsRecord,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyKinesisFirehoseBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyKinesisFirehoseBusiness
 
 
 @event_parser(model=MyKinesisFirehoseBusiness, envelope=envelopes.KinesisFirehoseEnvelope)

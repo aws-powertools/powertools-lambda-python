@@ -8,9 +8,9 @@ from aws_lambda_powertools.utilities.parser import (
     event_parser,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
+from tests.unit.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 
 
 @event_parser(model=MySqsBusiness, envelope=envelopes.SqsEnvelope)

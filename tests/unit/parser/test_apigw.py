@@ -4,8 +4,8 @@ from pydantic import ValidationError
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser, parse
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyApiGatewayBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyApiGatewayBusiness
 
 
 @event_parser(model=MyApiGatewayBusiness, envelope=envelopes.ApiGatewayEnvelope)

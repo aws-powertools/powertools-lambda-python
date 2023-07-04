@@ -1,8 +1,8 @@
 from aws_lambda_powertools.utilities.parser import envelopes, event_parser
 from aws_lambda_powertools.utilities.parser.models import LambdaFunctionUrlModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyALambdaFuncUrlBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyALambdaFuncUrlBusiness
 
 
 @event_parser(model=MyALambdaFuncUrlBusiness, envelope=envelopes.LambdaFunctionUrlEnvelope)

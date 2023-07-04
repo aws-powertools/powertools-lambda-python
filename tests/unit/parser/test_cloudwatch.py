@@ -15,8 +15,8 @@ from aws_lambda_powertools.utilities.parser.models import (
     CloudWatchLogsModel,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyCloudWatchBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyCloudWatchBusiness
 
 
 def decode_cloudwatch_raw_event(event: dict):

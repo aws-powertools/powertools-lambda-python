@@ -7,8 +7,8 @@ from aws_lambda_powertools.utilities.parser.models import (
     KafkaSelfManagedEventModel,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyLambdaKafkaBusiness
 from tests.functional.utils import load_event
+from tests.unit.parser.schemas import MyLambdaKafkaBusiness
 
 
 @event_parser(model=MyLambdaKafkaBusiness, envelope=envelopes.KafkaEnvelope)
