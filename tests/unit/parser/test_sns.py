@@ -1,5 +1,5 @@
 import json
-from typing import Any, List
+from typing import List
 
 import pytest
 
@@ -16,9 +16,7 @@ from tests.functional.validator.conftest import sns_event  # noqa: F401
 
 @event_parser(model=MySnsBusiness, envelope=envelopes.SnsEnvelope)
 def handle_sns_json_body(event: List[MySnsBusiness], _: LambdaContext):
-    assert len(event) == 1
-    assert event[0].message == "hello world"
-    assert event[0].username == "lessa"
+    return event
 
 
 def test_handle_sns_trigger_event_json_body(sns_event):  # noqa: F811
@@ -26,14 +24,14 @@ def test_handle_sns_trigger_event_json_body(sns_event):  # noqa: F811
 
 
 def test_validate_event_does_not_conform_with_model():
-    event: Any = {"invalid": "event"}
+    raw_event: dict = {"invalid": "event"}
 
     with pytest.raises(ValidationError):
-        handle_sns_json_body(event, LambdaContext())
+        handle_sns_json_body(raw_event, LambdaContext())
 
 
 def test_validate_event_does_not_conform_user_json_string_with_model():
-    event: Any = {
+    event: dict = {
         "Records": [
             {
                 "EventVersion": "1.0",
@@ -62,52 +60,61 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
 
 @event_parser(model=MyAdvancedSnsBusiness)
 def handle_sns_no_envelope(event: MyAdvancedSnsBusiness, _: LambdaContext):
-    records = event.Records
-    record = records[0]
-
-    assert len(records) == 1
-    assert record.EventVersion == "1.0"
-    assert record.EventSubscriptionArn == "arn:aws:sns:us-east-2:123456789012:sns-la ..."
-    assert record.EventSource == "aws:sns"
-    assert record.Sns.Type == "Notification"
-    assert record.Sns.UnsubscribeUrl.scheme == "https"
-    assert record.Sns.UnsubscribeUrl.host == "sns.us-east-2.amazonaws.com"
-    assert record.Sns.UnsubscribeUrl.query == "Action=Unsubscribe"
-    assert record.Sns.TopicArn == "arn:aws:sns:us-east-2:123456789012:sns-lambda"
-    assert record.Sns.Subject == "TestInvoke"
-    assert record.Sns.SignatureVersion == "1"
-    convert_time = int(round(record.Sns.Timestamp.timestamp() * 1000))
-    assert convert_time == 1546433107000
-    assert record.Sns.Signature == "tcc6faL2yUC6dgZdmrwh1Y4cGa/ebXEkAi6RibDsvpi+tE/1+82j...65r=="
-    assert record.Sns.SigningCertUrl.host == "sns.us-east-2.amazonaws.com"
-    assert record.Sns.SigningCertUrl.scheme == "https"
-    assert record.Sns.SigningCertUrl.host == "sns.us-east-2.amazonaws.com"
-    assert record.Sns.SigningCertUrl.path == "/SimpleNotification"
-    assert record.Sns.MessageId == "95df01b4-ee98-5cb9-9903-4c221d41eb5e"
-    assert record.Sns.Message == "Hello from SNS!"
-    attrib_dict = record.Sns.MessageAttributes
-    assert len(attrib_dict) == 2
-    assert attrib_dict["Test"].Type == "String"
-    assert attrib_dict["Test"].Value == "TestString"
-    assert attrib_dict["TestBinary"].Type == "Binary"
-    assert attrib_dict["TestBinary"].Value == "TestBinary"
+    return event
 
 
 def test_handle_sns_trigger_event_no_envelope():
-    event_dict = load_event("snsEvent.json")
-    handle_sns_no_envelope(event_dict, LambdaContext())
+    raw_event = load_event("snsEvent.json")
+    parsed_event: MyAdvancedSnsBusiness = handle_sns_no_envelope(raw_event, LambdaContext())
+
+    records = parsed_event.Records
+    record = records[0]
+    raw_record = raw_event["Records"][0]
+
+    assert len(records) == 1
+    assert record.EventVersion == raw_record["EventVersion"]
+    assert record.EventSubscriptionArn == raw_record["EventSubscriptionArn"]
+    assert record.EventSource == raw_record["EventSource"]
+
+    sns = record.Sns
+    raw_sns = raw_record["Sns"]
+    assert sns.Type == raw_sns["Type"]
+    assert sns.UnsubscribeUrl.scheme == "https"
+    assert sns.UnsubscribeUrl.host == "sns.us-east-2.amazonaws.com"
+    assert sns.UnsubscribeUrl.query == "Action=Unsubscribe"
+    assert sns.TopicArn == raw_sns["TopicArn"]
+    assert sns.Subject == raw_sns["Subject"]
+    assert sns.SignatureVersion == raw_sns["SignatureVersion"]
+    convert_time = int(round(sns.Timestamp.timestamp() * 1000))
+    assert convert_time == 1546433107000
+    assert sns.Signature == raw_sns["Signature"]
+    assert sns.SigningCertUrl.host == "sns.us-east-2.amazonaws.com"
+    assert sns.SigningCertUrl.scheme == "https"
+    assert sns.SigningCertUrl.host == "sns.us-east-2.amazonaws.com"
+    assert sns.SigningCertUrl.path == "/SimpleNotification"
+    assert sns.MessageId == raw_sns["MessageId"]
+    assert sns.Message == raw_sns["Message"]
+
+    attrib_dict = sns.MessageAttributes
+    assert len(attrib_dict) == 2
+    assert attrib_dict["Test"].Type == raw_sns["MessageAttributes"]["Test"]["Type"]
+    assert attrib_dict["Test"].Value == raw_sns["MessageAttributes"]["Test"]["Value"]
+    assert attrib_dict["TestBinary"].Type == raw_sns["MessageAttributes"]["TestBinary"]["Type"]
+    assert attrib_dict["TestBinary"].Value == raw_sns["MessageAttributes"]["TestBinary"]["Value"]
 
 
 @event_parser(model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
 def handle_sns_sqs_json_body(event: List[MySnsBusiness], _: LambdaContext):
-    assert len(event) == 1
-    assert event[0].message == "hello world"
-    assert event[0].username == "lessa"
+    return event
 
 
 def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
-    event_dict = load_event("snsSqsEvent.json")
-    handle_sns_sqs_json_body(event_dict, LambdaContext())
+    raw_event = load_event("snsSqsEvent.json")
+    parsed_event: MySnsBusiness = handle_sns_sqs_json_body(raw_event, LambdaContext())
+
+    assert len(parsed_event) == 1
+    assert parsed_event[0].message == "hello world"
+    assert parsed_event[0].username == "lessa"
 
 
 def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
@@ -124,5 +131,9 @@ def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
 
 
 def test_handle_sns_sqs_fifo_trigger_event_json_body():
-    event_dict = load_event("snsSqsFifoEvent.json")
-    handle_sns_sqs_json_body(event_dict, LambdaContext())
+    raw_event = load_event("snsSqsFifoEvent.json")
+    parsed_event: MySnsBusiness = handle_sns_sqs_json_body(raw_event, LambdaContext())
+
+    assert len(parsed_event) == 1
+    assert parsed_event[0].message == "hello world"
+    assert parsed_event[0].username == "lessa"
