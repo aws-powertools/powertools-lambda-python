@@ -91,9 +91,9 @@ def test_handle_cloudwatch_trigger_event_no_envelope():
 
 
 def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
-    event_dict: Any = {"awslogs": {"data": "invalid_data"}}
+    raw_event: Any = {"awslogs": {"data": "invalid_data"}}
     with pytest.raises(ValidationError) as context:
-        handle_cloudwatch_logs_no_envelope(event_dict, LambdaContext())
+        handle_cloudwatch_logs_no_envelope(raw_event, LambdaContext())
 
     assert context.value.errors()[0]["msg"] == "unable to decompress data"
 
