@@ -1,29 +1,13 @@
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, event_parser, parse
+from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.parser.models import S3Model, S3RecordModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
-
-
-@event_parser(model=S3Model)
-def handle_s3(event: S3Model, _: LambdaContext):
-    return event
-
-
-@event_parser(model=S3Model)
-def handle_s3_delete_object(event: S3Model, _: LambdaContext):
-    return event
-
-
-@event_parser(model=S3Model)
-def handle_s3_glacier(event: S3Model, _: LambdaContext):
-    return event
 
 
 def test_s3_trigger_event():
     raw_event = load_event("s3Event.json")
-    parsed_event: S3Model = handle_s3(raw_event, LambdaContext())
+    parsed_event: S3Model = S3Model(**raw_event)
 
     records = list(parsed_event.Records)
     assert len(records) == 1
@@ -65,7 +49,7 @@ def test_s3_trigger_event():
 
 def test_s3_glacier_trigger_event():
     raw_event = load_event("s3EventGlacier.json")
-    parsed_event: S3Model = handle_s3_glacier(raw_event, LambdaContext())
+    parsed_event: S3Model = S3Model(**raw_event)
 
     records = list(parsed_event.Records)
     assert len(records) == 1
@@ -115,7 +99,7 @@ def test_s3_glacier_trigger_event():
 
 def test_s3_trigger_event_delete_object():
     raw_event = load_event("s3EventDeleteObject.json")
-    parsed_event: S3Model = handle_s3_delete_object(raw_event, LambdaContext())
+    parsed_event: S3Model = S3Model(**raw_event)
 
     records = list(parsed_event.Records)
     assert len(records) == 1
@@ -158,18 +142,18 @@ def test_s3_trigger_event_delete_object():
 def test_s3_empty_object():
     raw_event = load_event("s3Event.json")
     raw_event["Records"][0]["s3"]["object"]["size"] = 0
-    parse(event=raw_event, model=S3Model)
+    S3Model(**raw_event)
 
 
 def test_s3_none_object_size_failed_validation():
     raw_event = load_event("s3Event.json")
     raw_event["Records"][0]["s3"]["object"]["size"] = None
     with pytest.raises(ValidationError):
-        parse(event=raw_event, model=S3Model)
+        S3Model(**raw_event)
 
 
 def test_s3_none_etag_value_failed_validation():
     raw_event = load_event("s3Event.json")
     raw_event["Records"][0]["s3"]["object"]["eTag"] = None
     with pytest.raises(ValidationError):
-        parse(event=raw_event, model=S3Model)
+        S3Model(**raw_event)

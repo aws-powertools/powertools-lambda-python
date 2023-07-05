@@ -1,17 +1,10 @@
-from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.parser.models import SesModel, SesRecordModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
-
-
-@event_parser(model=SesModel)
-def handle_ses(event: SesModel, _: LambdaContext):
-    return event
 
 
 def test_ses_trigger_event():
     raw_event = load_event("sesEvent.json")
-    parsed_event: SesModel = handle_ses(raw_event, LambdaContext())
+    parsed_event: SesModel = SesModel(**raw_event)
 
     records = parsed_event.Records
     record: SesRecordModel = records[0]

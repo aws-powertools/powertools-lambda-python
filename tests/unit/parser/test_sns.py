@@ -1,37 +1,26 @@
 import json
-from typing import List
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
-from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sns_event  # noqa: F401
 from tests.unit.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
 
 
-@event_parser(model=MySnsBusiness, envelope=envelopes.SnsEnvelope)
-def handle_sns_json_body(event: List[MySnsBusiness], _: LambdaContext):
-    return event
-
-
 def test_handle_sns_trigger_event_json_body(sns_event):  # noqa: F811
-    handle_sns_json_body(sns_event, LambdaContext())
+    parse(event=sns_event, model=MySnsBusiness, envelope=envelopes.SnsEnvelope)
 
 
 def test_validate_event_does_not_conform_with_model():
     raw_event: dict = {"invalid": "event"}
 
     with pytest.raises(ValidationError):
-        handle_sns_json_body(raw_event, LambdaContext())
+        parse(event=raw_event, model=MySnsBusiness, envelope=envelopes.SnsEnvelope)
 
 
 def test_validate_event_does_not_conform_user_json_string_with_model():
-    event: dict = {
+    raw_event: dict = {
         "Records": [
             {
                 "EventVersion": "1.0",
@@ -55,17 +44,12 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
     }
 
     with pytest.raises(ValidationError):
-        handle_sns_json_body(event, LambdaContext())
-
-
-@event_parser(model=MyAdvancedSnsBusiness)
-def handle_sns_no_envelope(event: MyAdvancedSnsBusiness, _: LambdaContext):
-    return event
+        parse(event=raw_event, model=MySnsBusiness, envelope=envelopes.SnsEnvelope)
 
 
 def test_handle_sns_trigger_event_no_envelope():
     raw_event = load_event("snsEvent.json")
-    parsed_event: MyAdvancedSnsBusiness = handle_sns_no_envelope(raw_event, LambdaContext())
+    parsed_event: MyAdvancedSnsBusiness = MyAdvancedSnsBusiness(**raw_event)
 
     records = parsed_event.Records
     record = records[0]
@@ -103,14 +87,9 @@ def test_handle_sns_trigger_event_no_envelope():
     assert attrib_dict["TestBinary"].Value == raw_sns["MessageAttributes"]["TestBinary"]["Value"]
 
 
-@event_parser(model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
-def handle_sns_sqs_json_body(event: List[MySnsBusiness], _: LambdaContext):
-    return event
-
-
 def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
     raw_event = load_event("snsSqsEvent.json")
-    parsed_event: MySnsBusiness = handle_sns_sqs_json_body(raw_event, LambdaContext())
+    parsed_event: MySnsBusiness = parse(event=raw_event, model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
 
     assert len(parsed_event) == 1
     assert parsed_event[0].message == "hello world"
@@ -119,20 +98,20 @@ def test_handle_sns_sqs_trigger_event_json_body():  # noqa: F811
 
 def test_handle_sns_sqs_trigger_event_json_body_missing_unsubscribe_url():
     # GIVEN an event is tampered with a missing UnsubscribeURL
-    event_dict = load_event("snsSqsEvent.json")
-    payload = json.loads(event_dict["Records"][0]["body"])
+    raw_event = load_event("snsSqsEvent.json")
+    payload = json.loads(raw_event["Records"][0]["body"])
     payload.pop("UnsubscribeURL")
-    event_dict["Records"][0]["body"] = json.dumps(payload)
+    raw_event["Records"][0]["body"] = json.dumps(payload)
 
     # WHEN parsing the payload
     # THEN raise a ValidationError error
     with pytest.raises(ValidationError):
-        handle_sns_sqs_json_body(event_dict, LambdaContext())
+        parse(event=raw_event, model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
 
 
 def test_handle_sns_sqs_fifo_trigger_event_json_body():
     raw_event = load_event("snsSqsFifoEvent.json")
-    parsed_event: MySnsBusiness = handle_sns_sqs_json_body(raw_event, LambdaContext())
+    parsed_event: MySnsBusiness = parse(event=raw_event, model=MySnsBusiness, envelope=envelopes.SnsSqsEnvelope)
 
     assert len(parsed_event) == 1
     assert parsed_event[0].message == "hello world"
