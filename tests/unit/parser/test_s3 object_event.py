@@ -1,17 +1,10 @@
-from aws_lambda_powertools.utilities.parser import event_parser
 from aws_lambda_powertools.utilities.parser.models import S3ObjectLambdaEvent
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
-
-
-@event_parser(model=S3ObjectLambdaEvent)
-def handle_s3_object_event_iam(event: S3ObjectLambdaEvent, _: LambdaContext):
-    return event
 
 
 def test_s3_object_event():
     event = load_event("s3ObjectEventIAMUser.json")
-    parsed_event: S3ObjectLambdaEvent = handle_s3_object_event_iam(event, LambdaContext())
+    parsed_event: S3ObjectLambdaEvent = S3ObjectLambdaEvent(**event)
     assert parsed_event.xAmzRequestId == event["xAmzRequestId"]
     assert parsed_event.getObjectContext is not None
     object_context = parsed_event.getObjectContext
@@ -40,14 +33,9 @@ def test_s3_object_event():
     assert parsed_event.protocolVersion == event["protocolVersion"]
 
 
-@event_parser(model=S3ObjectLambdaEvent)
-def handle_s3_object_event_temp_creds(event: S3ObjectLambdaEvent, _: LambdaContext):
-    return event
-
-
 def test_s3_object_event_temp_credentials():
     event = load_event("s3ObjectEventTempCredentials.json")
-    parsed_event: S3ObjectLambdaEvent = handle_s3_object_event_temp_creds(event, LambdaContext())
+    parsed_event: S3ObjectLambdaEvent = S3ObjectLambdaEvent(**event)
     assert parsed_event.xAmzRequestId == event["xAmzRequestId"]
     session_context = parsed_event.userIdentity.sessionContext
     assert session_context is not None

@@ -1,25 +1,18 @@
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser
+from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import LambdaFunctionUrlModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyALambdaFuncUrlBusiness
-
-
-@event_parser(model=MyALambdaFuncUrlBusiness, envelope=envelopes.LambdaFunctionUrlEnvelope)
-def handle_lambda_func_url_with_envelope(event: MyALambdaFuncUrlBusiness, _: LambdaContext):
-    return event
-
-
-@event_parser(model=LambdaFunctionUrlModel)
-def handle_lambda_func_url_event(event: LambdaFunctionUrlModel, _: LambdaContext):
-    return event
 
 
 def test_lambda_func_url_event_with_envelope():
     raw_event = load_event("lambdaFunctionUrlEvent.json")
     raw_event["body"] = '{"message": "Hello", "username": "Ran"}'
 
-    parsed_event: MyALambdaFuncUrlBusiness = handle_lambda_func_url_with_envelope(raw_event, LambdaContext())
+    parsed_event: MyALambdaFuncUrlBusiness = parse(
+        event=raw_event,
+        model=MyALambdaFuncUrlBusiness,
+        envelope=envelopes.LambdaFunctionUrlEnvelope,
+    )
 
     assert parsed_event.message == "Hello"
     assert parsed_event.username == "Ran"
@@ -27,7 +20,7 @@ def test_lambda_func_url_event_with_envelope():
 
 def test_lambda_function_url_event():
     raw_event = load_event("lambdaFunctionUrlEvent.json")
-    parsed_event: LambdaFunctionUrlModel = handle_lambda_func_url_event(raw_event, LambdaContext())
+    parsed_event: LambdaFunctionUrlModel = LambdaFunctionUrlModel(**raw_event)
 
     assert parsed_event.version == raw_event["version"]
     assert parsed_event.routeKey == raw_event["routeKey"]
@@ -73,7 +66,7 @@ def test_lambda_function_url_event():
 
 def test_lambda_function_url_event_iam():
     raw_event = load_event("lambdaFunctionUrlIAMEvent.json")
-    parsed_event: LambdaFunctionUrlModel = handle_lambda_func_url_event(raw_event, LambdaContext())
+    parsed_event: LambdaFunctionUrlModel = LambdaFunctionUrlModel(**raw_event)
 
     assert parsed_event.version == raw_event["version"]
     assert parsed_event.routeKey == raw_event["routeKey"]
