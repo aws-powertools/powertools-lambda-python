@@ -1,28 +1,21 @@
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser, parse
+from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
     APIGatewayProxyEventV2Model,
     RequestContextV2,
     RequestContextV2Authorizer,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyApiGatewayBusiness
-
-
-@event_parser(model=MyApiGatewayBusiness, envelope=envelopes.ApiGatewayV2Envelope)
-def handle_apigw_with_envelope(event: MyApiGatewayBusiness, _: LambdaContext):
-    return event
-
-
-@event_parser(model=APIGatewayProxyEventV2Model)
-def handle_apigw_event(event: APIGatewayProxyEventV2Model, _: LambdaContext):
-    return event
 
 
 def test_apigw_v2_event_with_envelope():
     raw_event = load_event("apiGatewayProxyV2Event.json")
     raw_event["body"] = '{"message": "Hello", "username": "Ran"}'
-    parsed_event: MyApiGatewayBusiness = handle_apigw_with_envelope(raw_event, LambdaContext())
+    parsed_event: MyApiGatewayBusiness = parse(
+        event=raw_event,
+        model=MyApiGatewayBusiness,
+        envelope=envelopes.ApiGatewayV2Envelope,
+    )
 
     assert parsed_event.message == "Hello"
     assert parsed_event.username == "Ran"
@@ -30,7 +23,7 @@ def test_apigw_v2_event_with_envelope():
 
 def test_apigw_v2_event_jwt_authorizer():
     raw_event = load_event("apiGatewayProxyV2Event.json")
-    parsed_event: APIGatewayProxyEventV2Model = handle_apigw_event(raw_event, LambdaContext())
+    parsed_event: APIGatewayProxyEventV2Model = APIGatewayProxyEventV2Model(**raw_event)
 
     assert parsed_event.version == raw_event["version"]
     assert parsed_event.routeKey == raw_event["routeKey"]
@@ -72,7 +65,7 @@ def test_apigw_v2_event_jwt_authorizer():
 
 def test_api_gateway_proxy_v2_event_lambda_authorizer():
     raw_event = load_event("apiGatewayProxyV2LambdaAuthorizerEvent.json")
-    parsed_event: APIGatewayProxyEventV2Model = handle_apigw_event(raw_event, LambdaContext())
+    parsed_event: APIGatewayProxyEventV2Model = APIGatewayProxyEventV2Model(**raw_event)
 
     request_context: RequestContextV2 = parsed_event.requestContext
     assert request_context is not None
@@ -84,7 +77,7 @@ def test_api_gateway_proxy_v2_event_lambda_authorizer():
 
 def test_api_gateway_proxy_v2_event_iam_authorizer():
     raw_event = load_event("apiGatewayProxyV2IamEvent.json")
-    parsed_event: APIGatewayProxyEventV2Model = handle_apigw_event(raw_event, LambdaContext())
+    parsed_event: APIGatewayProxyEventV2Model = APIGatewayProxyEventV2Model(**raw_event)
 
     iam = parsed_event.requestContext.authorizer.iam
     raw_iam = raw_event["requestContext"]["authorizer"]["iam"]
