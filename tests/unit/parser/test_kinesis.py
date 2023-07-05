@@ -1,13 +1,6 @@
-from typing import List
-
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    BaseModel,
-    ValidationError,
-    envelopes,
-    event_parser,
-)
+from aws_lambda_powertools.utilities.parser import BaseModel, ValidationError, envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
     KinesisDataStreamModel,
     KinesisDataStreamRecordPayload,
@@ -19,19 +12,8 @@ from aws_lambda_powertools.utilities.parser.models.kinesis import (
     extract_cloudwatch_logs_from_event,
     extract_cloudwatch_logs_from_record,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyKinesisBusiness
-
-
-@event_parser(model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)
-def handle_kinesis(event: List[MyKinesisBusiness], _: LambdaContext):
-    return event
-
-
-@event_parser(model=KinesisDataStreamModel)
-def handle_kinesis_no_envelope(event: KinesisDataStreamModel, _: LambdaContext):
-    return event
 
 
 def test_kinesis_trigger_bad_base64_event():
@@ -40,12 +22,16 @@ def test_kinesis_trigger_bad_base64_event():
     raw_event["Records"][0]["kinesis"]["data"] = "bad"
 
     with pytest.raises(ValidationError):
-        handle_kinesis_no_envelope(raw_event, LambdaContext())
+        KinesisDataStreamModel(**raw_event)
 
 
 def test_kinesis_trigger_event():
     raw_event = load_event("kinesisSingeEvent.json")
-    parsed_event: MyKinesisBusiness = handle_kinesis(raw_event, LambdaContext())
+    parsed_event: MyKinesisBusiness = parse(
+        event=raw_event,
+        model=MyKinesisBusiness,
+        envelope=envelopes.KinesisDataStreamEnvelope,
+    )
 
     assert len(parsed_event) == 1
     record: KinesisDataStreamModel = parsed_event[0]
@@ -55,7 +41,7 @@ def test_kinesis_trigger_event():
 
 def test_kinesis_trigger_event_no_envelope():
     raw_event = load_event("kinesisStreamEvent.json")
-    parsed_event: KinesisDataStreamModel = handle_kinesis_no_envelope(raw_event, LambdaContext())
+    parsed_event: KinesisDataStreamModel = KinesisDataStreamModel(**raw_event)
 
     records = parsed_event.Records
     assert len(records) == 2
@@ -81,13 +67,13 @@ def test_kinesis_trigger_event_no_envelope():
 def test_validate_event_does_not_conform_with_model_no_envelope():
     raw_event: dict = {"hello": "s"}
     with pytest.raises(ValidationError):
-        handle_kinesis_no_envelope(raw_event, LambdaContext())
+        KinesisDataStreamModel(**raw_event)
 
 
 def test_validate_event_does_not_conform_with_model():
     raw_event: dict = {"hello": "s"}
     with pytest.raises(ValidationError):
-        handle_kinesis(raw_event, LambdaContext())
+        parse(event=raw_event, model=MyKinesisBusiness, envelope=envelopes.KinesisDataStreamEnvelope)
 
 
 def test_kinesis_stream_event_cloudwatch_logs_data_extraction():
