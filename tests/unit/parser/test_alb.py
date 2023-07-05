@@ -1,19 +1,13 @@
 import pytest
 
-from aws_lambda_powertools.utilities.parser import ValidationError, event_parser
+from aws_lambda_powertools.utilities.parser import ValidationError
 from aws_lambda_powertools.utilities.parser.models import AlbModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
-
-
-@event_parser(model=AlbModel)
-def handle_alb(event: AlbModel, _: LambdaContext):
-    return event
 
 
 def test_alb_trigger_event():
     raw_event = load_event("albEvent.json")
-    parsed_event: AlbModel = handle_alb(raw_event, LambdaContext())
+    parsed_event: AlbModel = AlbModel(**raw_event)
 
     assert parsed_event.requestContext.elb.targetGroupArn == raw_event["requestContext"]["elb"]["targetGroupArn"]
     assert parsed_event.httpMethod == raw_event["httpMethod"]
@@ -27,4 +21,4 @@ def test_alb_trigger_event():
 def test_validate_event_does_not_conform_with_model():
     event = {"invalid": "event"}
     with pytest.raises(ValidationError):
-        handle_alb(event, LambdaContext())
+        AlbModel(**event)

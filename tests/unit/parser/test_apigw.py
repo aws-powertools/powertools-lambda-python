@@ -1,27 +1,20 @@
 import pytest
 from pydantic import ValidationError
 
-from aws_lambda_powertools.utilities.parser import envelopes, event_parser, parse
+from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import APIGatewayProxyEventModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyApiGatewayBusiness
-
-
-@event_parser(model=MyApiGatewayBusiness, envelope=envelopes.ApiGatewayEnvelope)
-def handle_apigw_with_envelope(event: MyApiGatewayBusiness, _: LambdaContext):
-    return event
-
-
-@event_parser(model=APIGatewayProxyEventModel)
-def handle_apigw_event(event: APIGatewayProxyEventModel, _: LambdaContext):
-    return event
 
 
 def test_apigw_event_with_envelope():
     raw_event = load_event("apiGatewayProxyEvent.json")
     raw_event["body"] = '{"message": "Hello", "username": "Ran"}'
-    parsed_event: MyApiGatewayBusiness = handle_apigw_with_envelope(raw_event, LambdaContext())
+    parsed_event: MyApiGatewayBusiness = parse(
+        event=raw_event,
+        model=MyApiGatewayBusiness,
+        envelope=envelopes.ApiGatewayEnvelope,
+    )
 
     assert parsed_event.message == "Hello"
     assert parsed_event.username == "Ran"
@@ -29,7 +22,8 @@ def test_apigw_event_with_envelope():
 
 def test_apigw_event():
     raw_event = load_event("apiGatewayProxyEvent.json")
-    parsed_event: APIGatewayProxyEventModel = handle_apigw_event(raw_event, LambdaContext())
+    parsed_event: APIGatewayProxyEventModel = APIGatewayProxyEventModel(**raw_event)
+
     assert parsed_event.version == raw_event["version"]
     assert parsed_event.resource == raw_event["resource"]
     assert parsed_event.path == raw_event["path"]
@@ -138,7 +132,7 @@ def test_apigw_event_with_invalid_websocket_request():
 
     # WHEN calling event_parser with APIGatewayProxyEventModel
     with pytest.raises(ValidationError) as err:
-        handle_apigw_event(event, LambdaContext())
+        APIGatewayProxyEventModel(**event)
 
     # THEN raise TypeError for invalid event
     errors = err.value.errors()
