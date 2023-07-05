@@ -41,6 +41,56 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
 3. You open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
 
+At a high level, these are the steps to get code merged in the repository - don't worry, nearly all of them are automated.
+
+```mermaid
+timeline
+    title Code integration journey (CI)
+    Project setup <br> (make dev)   : Code checkout
+                                    : Virtual environment
+                                    : Dependencies
+                                    : Git pre-commit hooks
+                                    : Local branch
+                                    : Local changes
+                                    : Local tests
+
+    Pre-commit checks <br> (git commit)     : Merge conflict check
+                                            : Trailing whitespaces
+                                            : TOML checks
+                                            : Code linting (standards)
+                                            : Markdown linting
+                                            : CloudFormation linting
+                                            : GitHub Actions linting
+                                            : Terraform linting
+                                            : Secrets linting
+
+    Pre-Pull Request <br> (make pr)     : Code linting
+                                        : Docs linting
+                                        : Static typing analysis
+                                        : Tests (unit|functional|perf)
+                                        : Security baseline
+                                        : Complexity baseline
+                                        : +pre-commit checks
+
+    Pull Request <br> (CI checks)   : Semantic PR title check
+                                    : Related issue check
+                                    : Acknowledgment check
+                                    : Code coverage diff
+                                    : Contribution size check
+                                    : Contribution category check
+                                    : Dependency vulnerability check
+                                    : GitHub Actions security check
+                                    : +pre-pull request checks
+
+    After merge <br> (CI checks)    : End-to-end tests
+                                    : Longer SAST check
+                                    : Security posture check (scorecard)
+                                    : GitHub Actions security check
+                                    : Rebuild Changelog
+                                    : Deploy staging docs
+                                    : Update draft release
+```
+
 ### Dev setup
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
