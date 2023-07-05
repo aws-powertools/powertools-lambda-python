@@ -26,7 +26,7 @@ def test_kinesis_trigger_bad_base64_event():
 
 
 def test_kinesis_trigger_event():
-    raw_event = load_event("kinesisSingeEvent.json")
+    raw_event = load_event("kinesisStreamEventOneRecord.json")
     parsed_event: MyKinesisBusiness = parse(
         event=raw_event,
         model=MyKinesisBusiness,
