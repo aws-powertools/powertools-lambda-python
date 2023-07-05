@@ -18,8 +18,9 @@
 
 # Contributing Guidelines
 
-Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional
-documentation, we greatly value feedback and contributions from our community.
+<!-- markdownlint-disable MD013 -->
+Thank you for your interest in contributing to our project. Whether it's a [bug report](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug_report.yml&title=Bug%3A+TITLE), [new feature](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE), [correction](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), or [additional documentation](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE), we greatly value feedback and contributions from our community.
+<!-- markdownlint-enable MD013 -->
 
 Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
 information to effectively respond to your bug report or contribution.
@@ -28,8 +29,9 @@ information to effectively respond to your bug report or contribution.
 
 We welcome you to use the GitHub issue tracker to report bugs, suggest features, or documentation improvements.
 
-When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
-reported the issue. Please try to include as much information as you can.
+<!-- markdownlint-disable MD013 -->
+[When filing an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), please check [existing open](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc), or [recently closed](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aclosed), issues to make sure somebody else hasn't already reported the issue. Please try to include as much information as you can.
+<!-- markdownlint-enable MD013 -->
 
 ## Contributing via Pull Requests
 
@@ -76,7 +78,7 @@ You might find useful to run both the documentation website and the API referenc
 | Category              | Convention                                                                                                                                                                                                                                                                  |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Docstring**         | We use a slight variation of Numpy convention with markdown to help generate more readable API references.                                                                                                                                                                  |
-| **Style guide**       | We use black as well as [Ruff](https://beta.ruff.rs/docs/) to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                                                |
+| **Style guide**       | We use black as well as [Ruff](https://beta.ruff.rs/docs/) to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                               |
 | **Core utilities**    | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.                                                                                                            |
 | **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://docs.powertools.aws.dev/lambda/python/#tenets).                                                                                        |
 | **Exceptions**        | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.                                                                                                                                                                         |
