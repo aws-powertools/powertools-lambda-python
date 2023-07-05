@@ -1,38 +1,28 @@
-from typing import Any, List
-
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
-from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
 from tests.unit.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 
 
-@event_parser(model=MySqsBusiness, envelope=envelopes.SqsEnvelope)
-def handle_sqs_json_body(event: List[MySqsBusiness], _: LambdaContext):
-    assert len(event) == 1
-    assert event[0].message == "hello world"
-    assert event[0].username == "lessa"
-
-
 def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
-    handle_sqs_json_body(sqs_event, LambdaContext())
+    parsed_event: MySqsBusiness = parse(event=sqs_event, model=MySqsBusiness, envelope=envelopes.SqsEnvelope)
+
+    assert len(parsed_event) == 1
+    assert parsed_event[0].message == "hello world"
+    assert parsed_event[0].username == "lessa"
 
 
 def test_validate_event_does_not_conform_with_model():
     raw_event: dict = {"invalid": "event"}
 
     with pytest.raises(ValidationError):
-        handle_sqs_json_body(raw_event, LambdaContext())
+        parse(event=raw_event, model=MySqsBusiness, envelope=envelopes.SqsEnvelope)
 
 
 def test_validate_event_does_not_conform_user_json_string_with_model():
-    event: Any = {
+    raw_event: dict = {
         "Records": [
             {
                 "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
@@ -56,17 +46,12 @@ def test_validate_event_does_not_conform_user_json_string_with_model():
     }
 
     with pytest.raises(ValidationError):
-        handle_sqs_json_body(event, LambdaContext())
-
-
-@event_parser(model=MyAdvancedSqsBusiness)
-def handle_sqs_no_envelope(event: MyAdvancedSqsBusiness, _: LambdaContext):
-    return event
+        parse(event=raw_event, model=MySqsBusiness, envelope=envelopes.SqsEnvelope)
 
 
 def test_handle_sqs_trigger_event_no_envelope():
     raw_event = load_event("sqsEvent.json")
-    parsed_event: MyAdvancedSqsBusiness = handle_sqs_no_envelope(raw_event, LambdaContext())
+    parsed_event: MyAdvancedSqsBusiness = MyAdvancedSqsBusiness(**raw_event)
 
     records = parsed_event.Records
     record = records[0]
