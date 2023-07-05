@@ -1,12 +1,6 @@
-from typing import List
-
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseModel,
     KinesisFirehoseRecord,
@@ -14,34 +8,13 @@ from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseSqsModel,
     KinesisFirehoseSqsRecord,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyKinesisFirehoseBusiness
 
 
-@event_parser(model=MyKinesisFirehoseBusiness, envelope=envelopes.KinesisFirehoseEnvelope)
-def handle_firehose(event: List[MyKinesisFirehoseBusiness], _: LambdaContext):
-    return event
-
-
-@event_parser(model=KinesisFirehoseModel)
-def handle_firehose_no_envelope_kinesis(event: KinesisFirehoseModel, _: LambdaContext):
-    return event
-
-
-@event_parser(model=KinesisFirehoseModel)
-def handle_firehose_no_envelope_put(event: KinesisFirehoseModel, _: LambdaContext):
-    return event
-
-
-@event_parser(model=KinesisFirehoseSqsModel)
-def handle_firehose_sqs_wrapped_message(event: KinesisFirehoseSqsModel, _: LambdaContext):
-    return event
-
-
 def test_firehose_sqs_wrapped_message_event():
     raw_event = load_event("kinesisFirehoseSQSEvent.json")
-    parsed_event: KinesisFirehoseSqsModel = handle_firehose_sqs_wrapped_message(raw_event, LambdaContext())
+    parsed_event: KinesisFirehoseSqsModel = KinesisFirehoseSqsModel(**raw_event)
 
     assert parsed_event.region == raw_event["region"]
     assert parsed_event.invocationId == raw_event["invocationId"]
@@ -61,7 +34,11 @@ def test_firehose_sqs_wrapped_message_event():
 def test_firehose_trigger_event():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     raw_event["records"].pop(0)  # remove first item since the payload is bytes and we want to test payload json class
-    parsed_event: MyKinesisFirehoseBusiness = handle_firehose(raw_event, LambdaContext())
+    parsed_event: MyKinesisFirehoseBusiness = parse(
+        event=raw_event,
+        model=MyKinesisFirehoseBusiness,
+        envelope=envelopes.KinesisFirehoseEnvelope,
+    )
 
     assert len(parsed_event) == 1
     assert parsed_event[0].Hello == "World"
@@ -69,7 +46,7 @@ def test_firehose_trigger_event():
 
 def test_firehose_trigger_event_kinesis_no_envelope():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
-    parsed_event: KinesisFirehoseModel = handle_firehose_no_envelope_kinesis(raw_event, LambdaContext())
+    parsed_event: KinesisFirehoseModel = KinesisFirehoseModel(**raw_event)
 
     assert parsed_event.region == raw_event["region"]
     assert parsed_event.invocationId == raw_event["invocationId"]
@@ -105,7 +82,7 @@ def test_firehose_trigger_event_kinesis_no_envelope():
 
 def test_firehose_trigger_event_put_no_envelope():
     raw_event = load_event("kinesisFirehosePutEvent.json")
-    parsed_event: KinesisFirehoseModel = handle_firehose_no_envelope_put(raw_event, LambdaContext())
+    parsed_event: KinesisFirehoseModel = KinesisFirehoseModel(**raw_event)
 
     assert parsed_event.region == raw_event["region"]
     assert parsed_event.invocationId == raw_event["invocationId"]
@@ -129,18 +106,18 @@ def test_kinesis_trigger_bad_base64_event():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     raw_event["records"][0]["data"] = {"bad base64"}
     with pytest.raises(ValidationError):
-        handle_firehose_no_envelope_kinesis(raw_event, LambdaContext())
+        KinesisFirehoseModel(**raw_event)
 
 
 def test_kinesis_trigger_bad_timestamp_event():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     raw_event["records"][0]["approximateArrivalTimestamp"] = -1
     with pytest.raises(ValidationError):
-        handle_firehose_no_envelope_kinesis(raw_event, LambdaContext())
+        KinesisFirehoseModel(**raw_event)
 
 
 def test_kinesis_trigger_bad_metadata_timestamp_event():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     raw_event["records"][0]["kinesisRecordMetadata"]["approximateArrivalTimestamp"] = "-1"
     with pytest.raises(ValidationError):
-        handle_firehose_no_envelope_kinesis(raw_event, LambdaContext())
+        KinesisFirehoseModel(**raw_event)
