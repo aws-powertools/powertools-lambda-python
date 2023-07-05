@@ -1,2 +1,13 @@
 # Config: https://google.github.io/clusterfuzzlite/build-integration/#projectyaml
+main_repo: "https://github.com/aws-powertools/powertools-lambda-python.git"
+homepage: "https://docs.powertools.aws.dev/lambda/python/latest/"
 language: python
+primary_contact: "aws-lambda-powertools-feedback@amazon.com"
+auto_ccs:
+  - "aws-lambda-powertools-feedback@amazon.com"
+sanitizers:
+  - address
+  - undefined
+  - memory
+architectures:
+  - x86_64
