@@ -1,20 +1,15 @@
 import base64
 import json
 import zlib
-from typing import Any, List
+from typing import Any
 
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import (
     CloudWatchLogsLogEvent,
     CloudWatchLogsModel,
 )
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyCloudWatchBusiness
 
@@ -23,19 +18,6 @@ def decode_cloudwatch_raw_event(event: dict):
     payload = base64.b64decode(event)
     uncompressed = zlib.decompress(payload, zlib.MAX_WBITS | 32)
     return json.loads(uncompressed.decode("utf-8"))
-
-
-@event_parser(model=MyCloudWatchBusiness, envelope=envelopes.CloudWatchLogsEnvelope)
-def handle_cloudwatch_logs(event: List[MyCloudWatchBusiness], _: LambdaContext):
-    assert len(event) == 1
-    log: MyCloudWatchBusiness = event[0]
-    assert log.my_message == "hello"
-    assert log.user == "test"
-
-
-@event_parser(model=CloudWatchLogsModel)
-def handle_cloudwatch_logs_no_envelope(event: CloudWatchLogsModel, _: LambdaContext):
-    return event
 
 
 def test_validate_event_user_model_with_envelope():
@@ -50,20 +32,29 @@ def test_validate_event_user_model_with_envelope():
     }
     dict_str = json.dumps(inner_event_dict)
     compressesd_str = zlib.compress(str.encode(dict_str), -1)
-    event_dict = {"awslogs": {"data": base64.b64encode(compressesd_str)}}
+    raw_event = {"awslogs": {"data": base64.b64encode(compressesd_str)}}
 
-    handle_cloudwatch_logs(event_dict, LambdaContext())
+    parsed_event: MyCloudWatchBusiness = parse(
+        event=raw_event,
+        model=MyCloudWatchBusiness,
+        envelope=envelopes.CloudWatchLogsEnvelope,
+    )
+
+    assert len(parsed_event) == 1
+    log: MyCloudWatchBusiness = parsed_event[0]
+    assert log.my_message == "hello"
+    assert log.user == "test"
 
 
 def test_validate_event_does_not_conform_with_user_dict_model():
     event_dict = load_event("cloudWatchLogEvent.json")
     with pytest.raises(ValidationError):
-        handle_cloudwatch_logs(event_dict, LambdaContext())
+        MyCloudWatchBusiness(**event_dict)
 
 
 def test_handle_cloudwatch_trigger_event_no_envelope():
     raw_event = load_event("cloudWatchLogEvent.json")
-    parsed_event: CloudWatchLogsModel = handle_cloudwatch_logs_no_envelope(raw_event, LambdaContext())
+    parsed_event: CloudWatchLogsModel = CloudWatchLogsModel(**raw_event)
 
     raw_event_decoded = decode_cloudwatch_raw_event(raw_event["awslogs"]["data"])
 
@@ -93,11 +84,12 @@ def test_handle_cloudwatch_trigger_event_no_envelope():
 def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
     raw_event: Any = {"awslogs": {"data": "invalid_data"}}
     with pytest.raises(ValidationError) as context:
-        handle_cloudwatch_logs_no_envelope(raw_event, LambdaContext())
+        CloudWatchLogsModel(**raw_event)
 
     assert context.value.errors()[0]["msg"] == "unable to decompress data"
 
 
 def test_handle_invalid_event_with_envelope():
+    empty_dict = {}
     with pytest.raises(ValidationError):
-        handle_cloudwatch_logs(event={}, context=LambdaContext())
+        CloudWatchLogsModel(**empty_dict)
