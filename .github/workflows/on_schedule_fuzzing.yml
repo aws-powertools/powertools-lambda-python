@@ -1,30 +1,25 @@
 # Run fuzzing against changes in Pull Requests for bug and leaks detection
-name: Fuzzing (ClusterFuzzLite)
+name: Continuous Fuzzing (ClusterFuzzLite)
 
 # PROCESS
 #
 # 1. Build a fuzzer for python for each sanitizer
-# 2. Fuzz each sanitizer against each change in PR
-# 3. Upload report as an artifact
+# 2. Fuzz each sanitizer against entire repository
+# 3. Aggregate results and upload report as an artifact
 
 # NOTES
 #
 # More info: https://google.github.io/clusterfuzzlite/
 
 on:
-  pull_request:
-    paths:
-      - '**'
+  schedule:
+    - cron: '0 0/6 * * *'  # Every 6th hour.
 
 permissions: read-all
-
 
 jobs:
   fuzzing:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ matrix.sanitizer }}-${{ github.ref }}
-      cancel-in-progress: true
     strategy:
       fail-fast: false
       matrix:
@@ -38,13 +33,12 @@ jobs:
       uses: google/clusterfuzzlite/actions/build_fuzzers@1e163f06cba7820da5154ac9fe1a32d7fe6f73a3  # v1
       with:
         language: python
-        github-token: ${{ secrets.GITHUB_TOKEN }}
         sanitizer: ${{ matrix.sanitizer }}
     - name: Run Fuzzers (${{ matrix.sanitizer }})
       id: run
       uses: google/clusterfuzzlite/actions/run_fuzzers@1e163f06cba7820da5154ac9fe1a32d7fe6f73a3  # v1
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        fuzz-seconds: 90  # shorter interval to not block PR; we run longer interval async for increased safety
-        mode: 'code-change'
+        fuzz-seconds: 3600
+        mode: 'batch'
         sanitizer: ${{ matrix.sanitizer }}
