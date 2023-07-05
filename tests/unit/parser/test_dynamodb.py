@@ -1,30 +1,17 @@
-from typing import Any, Dict, List
-
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
-from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import MyAdvancedDynamoBusiness, MyDynamoBusiness
 
 
-@event_parser(model=MyDynamoBusiness, envelope=envelopes.DynamoDBStreamEnvelope)
-def handle_dynamodb(event: List[Dict[str, MyDynamoBusiness]], _: LambdaContext):
-    return event
-
-
-@event_parser(model=MyAdvancedDynamoBusiness)
-def handle_dynamodb_no_envelope(event: MyAdvancedDynamoBusiness, _: LambdaContext):
-    return event
-
-
 def test_dynamo_db_stream_trigger_event():
     raw_event = load_event("dynamoStreamEvent.json")
-    parserd_event: MyDynamoBusiness = handle_dynamodb(raw_event, LambdaContext())
+    parserd_event: MyDynamoBusiness = parse(
+        event=raw_event,
+        model=MyDynamoBusiness,
+        envelope=envelopes.DynamoDBStreamEnvelope,
+    )
 
     assert len(parserd_event) == 2
 
@@ -51,7 +38,7 @@ def test_dynamo_db_stream_trigger_event():
 
 def test_dynamo_db_stream_trigger_event_no_envelope():
     raw_event = load_event("dynamoStreamEvent.json")
-    parserd_event: MyAdvancedDynamoBusiness = handle_dynamodb_no_envelope(raw_event, LambdaContext())
+    parserd_event: MyAdvancedDynamoBusiness = MyAdvancedDynamoBusiness(**raw_event)
 
     records = parserd_event.Records
     record = records[0]
@@ -86,12 +73,12 @@ def test_dynamo_db_stream_trigger_event_no_envelope():
 
 
 def test_validate_event_does_not_conform_with_model_no_envelope():
-    raw_event: Any = {"hello": "s"}
+    raw_event: dict = {"hello": "s"}
     with pytest.raises(ValidationError):
-        handle_dynamodb_no_envelope(raw_event, LambdaContext())
+        MyAdvancedDynamoBusiness(**raw_event)
 
 
 def test_validate_event_does_not_conform_with_model():
-    raw_event: Any = {"hello": "s"}
+    raw_event: dict = {"hello": "s"}
     with pytest.raises(ValidationError):
-        handle_dynamodb(raw_event, LambdaContext())
+        parse(event=raw_event, model=MyDynamoBusiness, envelope=envelopes.DynamoDBStreamEnvelope)
