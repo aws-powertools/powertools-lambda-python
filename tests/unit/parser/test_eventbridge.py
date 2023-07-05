@@ -1,11 +1,6 @@
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
-from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
 from tests.unit.parser.schemas import (
     MyAdvancedEventbridgeBusiness,
@@ -13,19 +8,13 @@ from tests.unit.parser.schemas import (
 )
 
 
-@event_parser(model=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
-def handle_eventbridge(event: MyEventbridgeBusiness, _: LambdaContext):
-    return event
-
-
-@event_parser(model=MyAdvancedEventbridgeBusiness)
-def handle_eventbridge_no_envelope(event: MyAdvancedEventbridgeBusiness, _: LambdaContext):
-    return event
-
-
 def test_handle_eventbridge_trigger_event():
     raw_event = load_event("eventBridgeEvent.json")
-    parsed_event: MyEventbridgeBusiness = handle_eventbridge(raw_event, LambdaContext())
+    parsed_event: MyEventbridgeBusiness = parse(
+        event=raw_event,
+        model=MyEventbridgeBusiness,
+        envelope=envelopes.EventBridgeEnvelope,
+    )
 
     assert parsed_event.instance_id == raw_event["detail"]["instance_id"]
     assert parsed_event.state == raw_event["detail"]["state"]
@@ -37,12 +26,12 @@ def test_validate_event_does_not_conform_with_user_dict_model():
     raw_event.pop("version")
 
     with pytest.raises(ValidationError):
-        handle_eventbridge(raw_event, LambdaContext())
+        parse(event=raw_event, model=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
 
 
 def test_handle_eventbridge_trigger_event_no_envelope():
     raw_event = load_event("eventBridgeEvent.json")
-    parsed_event: MyAdvancedEventbridgeBusiness = handle_eventbridge_no_envelope(raw_event, LambdaContext())
+    parsed_event: MyAdvancedEventbridgeBusiness = MyAdvancedEventbridgeBusiness(**raw_event)
 
     assert parsed_event.detail.instance_id == raw_event["detail"]["instance_id"]
     assert parsed_event.detail.state == raw_event["detail"]["state"]
@@ -59,5 +48,6 @@ def test_handle_eventbridge_trigger_event_no_envelope():
 
 
 def test_handle_invalid_event_with_eventbridge_envelope():
+    empty_event = {}
     with pytest.raises(ValidationError):
-        handle_eventbridge(event={}, context=LambdaContext())
+        parse(event=empty_event, model=MyEventbridgeBusiness, envelope=envelopes.EventBridgeEnvelope)
