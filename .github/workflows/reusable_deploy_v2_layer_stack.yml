@@ -147,11 +147,11 @@ jobs:
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
       - name: install cdk and deps
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: install deps
         run: poetry install

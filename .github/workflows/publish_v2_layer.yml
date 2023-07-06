@@ -85,7 +85,7 @@ jobs:
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
       - name: Set up QEMU
         uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.0.0
         with:
@@ -101,7 +101,7 @@ jobs:
       - name: install cdk and deps
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: CDK build
         run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out

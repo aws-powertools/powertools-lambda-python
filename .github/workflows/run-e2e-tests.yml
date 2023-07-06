@@ -66,7 +66,7 @@ jobs:
           node-version: "16.12"
       - name: Install CDK CLI
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: Install dependencies
         run: make dev

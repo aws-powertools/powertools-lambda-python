@@ -28,9 +28,7 @@ on:
         default: develop
 
 permissions:
-  id-token: write  # trade JWT token for AWS credentials in AWS Docs account
-  contents: write  # push to gh-pages
-  pages: write     # deploy gh-pages website
+  contents: read
 
 jobs:
   publish_docs:
@@ -40,6 +38,10 @@ jobs:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
     environment: "Docs"
+    permissions:
+      contents: write  # push to gh-pages
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+      pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
@@ -110,7 +112,7 @@ jobs:
         #   1. Download the versions.json file from S3
         #   2. Find any reference to the alias and delete it from the versions file
         #   3. This is voodoo (don't use JQ):
-        #      - we assign the input as $o and the new version/alias as $n, 
+        #      - we assign the input as $o and the new version/alias as $n,
         #      - we check if the version number exists in the file already (for republishing docs)
         #      - if it's an alias (stage/latest/*) or old version, we do nothing and output $o (original input)
         #      - if it's a new version number, we add it at position 0 in the array.

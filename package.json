@@ -3,5 +3,8 @@
   "version": "1.0.0",
   "devDependencies": {
     "aws-cdk": "^2.86.0"
+  },
+  "dependencies": {
+    "package-lock.json": "^1.0.0"
   }
 }
