@@ -1456,13 +1456,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.27.0"
-description = "Type annotations for boto3.CloudFormation 1.27.0 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.0"
+description = "Type annotations for boto3.CloudFormation 1.28.0 service generated with mypy-boto3-builder 7.14.5"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudformation-1.27.0.tar.gz", hash = "sha256:9a9395d79d86f9ed2b18cf796eb9906a47f76bac30fe60c20fd22e082e4b1d5c"},
-    {file = "mypy_boto3_cloudformation-1.27.0-py3-none-any.whl", hash = "sha256:979f61f7466ed3fad239e79f54227b1927a2683a7cfe44993d146279cfba2980"},
+    {file = "mypy-boto3-cloudformation-1.28.0.tar.gz", hash = "sha256:0d2ead02c352bc97ae59b65ae8b00d5ce186435b7cf5736213a52f58df192511"},
+    {file = "mypy_boto3_cloudformation-1.28.0-py3-none-any.whl", hash = "sha256:99d5db7d6b220ba016757670a917bdfdab1c475593153833ed6c5cdd9a9aa9ba"},
 ]
 
 [package.dependencies]
@@ -2749,4 +2749,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "6b78a2eaa84743416b8bbc62aae87607abaf52cb6e748f3529c3e3b3a43c00ac"
+content-hash = "e99b00a4b211a7c671ff96c5d85c82ab94c125fc47e7a569eb6bbcbac347d7d0"
