@@ -3699,9 +3699,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
@@ -3710,8 +3708,7 @@ This helps preserve the ordering of messages in your queue.</p>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-</span><span class="hll">    <span class="n">BasePartialBatchProcessor</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">EventType</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">BasePartialProcessor</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">process_partial_response</span><span class="p">,</span>
 </span><span class="p">)</span>
 
@@ -3720,7 +3717,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
-<span class="hll"><span class="k">class</span> <span class="nc">MyPartialProcessor</span><span class="p">(</span><span class="n">BasePartialBatchProcessor</span><span class="p">):</span>
+<span class="hll"><span class="k">class</span> <span class="nc">MyPartialProcessor</span><span class="p">(</span><span class="n">BasePartialProcessor</span><span class="p">):</span>
 </span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process a record and stores successful results at a Amazon DynamoDB Table</span>
 
@@ -3732,8 +3729,7 @@ This helps preserve the ordering of messages in your queue.</p>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <span class="hll">    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span>        <span class="c1"># It&#39;s called once, *before* processing</span>
@@ -4105,7 +4101,7 @@ This helps preserve the ordering of messages in your queue.</p>
   <small>
     
       Last update:
-      2023-06-22
+      2023-07-07
     
   </small>
 </div>
