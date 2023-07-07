@@ -47,6 +47,9 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: read
+
 jobs:
   deploy-cdk-stack:
     runs-on: ubuntu-latest
@@ -131,7 +134,7 @@ jobs:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: "16.12"
       - name: Setup python
@@ -144,11 +147,11 @@ jobs:
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
       - name: install cdk and deps
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: install deps
         run: poetry install

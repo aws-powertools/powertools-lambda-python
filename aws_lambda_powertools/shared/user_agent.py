@@ -108,6 +108,45 @@ def register_feature_to_session(session, feature):
         logger.debug(f"session passed in doesn't have a event system:{e}")
 
 
+# Add feature user-agent to given sdk botocore.session.Session
+def register_feature_to_botocore_session(botocore_session, feature):
+    """
+    Register the given feature string to the event system of the provided botocore session
+    
+    Please notice this function is for patching botocore session and is different from
+    previous one which is for patching boto3 session
+
+    Parameters
+    ----------
+    botocore_session : botocore.session.Session
+        The botocore session to which the feature will be registered.
+    feature : str
+        The feature string to be appended to the User-Agent header, e.g., "data-masking" in Powertools.
+
+    Raises
+    ------
+    AttributeError
+        If the provided session does not have an event system.
+        
+    Examples
+    --------
+    **register data-masking user-agent to botocore session**
+
+        >>> from aws_lambda_powertools.shared.user_agent import (
+        >>>    register_feature_to_botocore_session
+        >>> )
+        >>>
+        >>> session = botocore.session.Session()
+        >>> register_feature_to_botocore_session(botocore_session=session, feature="data-masking")
+        >>> key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=session)
+    
+    """
+    try:
+        botocore_session.register(TARGET_SDK_EVENT, _create_feature_function(feature))
+    except AttributeError as e:
+        logger.debug(f"botocore session passed in doesn't have a event system:{e}")
+
+
 # Add feature user-agent to given sdk boto3.client
 def register_feature_to_client(client, feature):
     """

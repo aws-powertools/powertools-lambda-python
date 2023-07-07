@@ -10,6 +10,9 @@ env:
   PULL_REQUEST_TITLE: "chore(ci): changelog rebuild"
   FILES_TO_COMMIT: "CHANGELOG.md"
 
+permissions:
+  contents: read
+
 jobs:
   publish_changelog:
     # Force Github action to run only a single job at a time (based on the group name)

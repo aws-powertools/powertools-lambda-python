@@ -1,26 +1,22 @@
 import pytest
 
-from aws_lambda_powertools.utilities.parser import (
-    ValidationError,
-    envelopes,
-    event_parser,
-)
+from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import VpcLatticeModel
-from aws_lambda_powertools.utilities.typing import LambdaContext
-from tests.functional.parser.schemas import MyVpcLatticeBusiness
 from tests.functional.utils import load_event
-
-
-@event_parser(model=MyVpcLatticeBusiness, envelope=envelopes.VpcLatticeEnvelope)
-def handle_lambda_vpclattice_with_envelope(event: MyVpcLatticeBusiness, context: LambdaContext):
-    assert event.username == "Leandro"
-    assert event.name == "Damascena"
+from tests.unit.parser.schemas import MyVpcLatticeBusiness
 
 
 def test_vpc_lattice_event_with_envelope():
-    event = load_event("vpcLatticeEvent.json")
-    event["body"] = '{"username": "Leandro", "name": "Damascena"}'
-    handle_lambda_vpclattice_with_envelope(event, LambdaContext())
+    raw_event = load_event("vpcLatticeEvent.json")
+    raw_event["body"] = '{"username": "Leandro", "name": "Damascena"}'
+    parsed_event: MyVpcLatticeBusiness = parse(
+        event=raw_event,
+        model=MyVpcLatticeBusiness,
+        envelope=envelopes.VpcLatticeEnvelope,
+    )
+
+    assert parsed_event.username == "Leandro"
+    assert parsed_event.name == "Damascena"
 
 
 def test_vpc_lattice_event():

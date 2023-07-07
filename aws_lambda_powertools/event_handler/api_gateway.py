@@ -33,6 +33,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
     LambdaFunctionUrlEvent,
+    VPCLatticeEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -53,6 +54,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEvent = "APIGatewayProxyEvent"
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
+    VPCLatticeEvent = "VPCLatticeEvent"
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
@@ -683,6 +685,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
             logger.debug("Converting event to Lambda Function URL contract")
             return LambdaFunctionUrlEvent(event)
+        if self._proxy_type == ProxyEventType.VPCLatticeEvent:
+            logger.debug("Converting event to VPC Lattice contract")
+            return VPCLatticeEvent(event)
         logger.debug("Converting event to ALB contract")
         return ALBEvent(event)
 
@@ -690,6 +695,7 @@ class ApiGatewayResolver(BaseRouter):
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
+
         for route in self._static_routes + self._dynamic_routes:
             if method != route.method:
                 continue

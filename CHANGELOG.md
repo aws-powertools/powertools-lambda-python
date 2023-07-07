@@ -4,6 +4,102 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **docs:** ensure alias is applied to versioned releases ([#2644](https://github.com/aws-powertools/powertools-lambda-python/issues/2644))
+* **docs:** ensure version alias is in an array to prevent "you're not viewing the latest version" incorrect message ([#2629](https://github.com/aws-powertools/powertools-lambda-python/issues/2629))
+
+## Code Refactoring
+
+* **parser:** convert functional tests to unit tests ([#2656](https://github.com/aws-powertools/powertools-lambda-python/issues/2656))
+
+## Documentation
+
+* **contributing:** add code integration journey graph ([#2685](https://github.com/aws-powertools/powertools-lambda-python/issues/2685))
+* **maintainers:** add cicd pipeline diagram ([#2692](https://github.com/aws-powertools/powertools-lambda-python/issues/2692))
+
+## Maintenance
+
+* **ci:** add gitleaks in pre-commit hooks as an extra safety measure ([#2677](https://github.com/aws-powertools/powertools-lambda-python/issues/2677))
+* **ci:** use deps sha for docs and gitpod images based on ossf findings ([#2662](https://github.com/aws-powertools/powertools-lambda-python/issues/2662))
+* **ci:** prevent merging PRs that do not meet minimum requirements ([#2639](https://github.com/aws-powertools/powertools-lambda-python/issues/2639))
+* **ci:** enforce top-level permission to minimum fail-safe permission as per openssf ([#2638](https://github.com/aws-powertools/powertools-lambda-python/issues/2638))
+* **ci:** propagate checkout permission to nested workflows ([#2642](https://github.com/aws-powertools/powertools-lambda-python/issues/2642))
+* **ci:** improves dependabot based on ossf scorecard recommendations ([#2647](https://github.com/aws-powertools/powertools-lambda-python/issues/2647))
+* **ci:** address ossf scorecard findings on npm, pip, and top-level permission leftover ([#2694](https://github.com/aws-powertools/powertools-lambda-python/issues/2694))
+* **ci:** use sast on every commit on any supported language ([#2646](https://github.com/aws-powertools/powertools-lambda-python/issues/2646))
+* **ci:** enforce pip --require-hashes to maybe satistify scorecard ([#2679](https://github.com/aws-powertools/powertools-lambda-python/issues/2679))
+* **deps:** bump github.com/aws/aws-sdk-go-v2/service/lambda from 1.24.6 to 1.37.0 in /layer/scripts/layer-balancer ([#2653](https://github.com/aws-powertools/powertools-lambda-python/issues/2653))
+* **deps:** bump pydantic from 1.10.10 to 1.10.11 ([#2671](https://github.com/aws-powertools/powertools-lambda-python/issues/2671))
+* **deps:** bump actions/dependency-review-action from 2.5.1 to 3.0.6 ([#2650](https://github.com/aws-powertools/powertools-lambda-python/issues/2650))
+* **deps:** bump squidfunk/mkdocs-material from `3837c0f` to `a28ed81` in /docs ([#2669](https://github.com/aws-powertools/powertools-lambda-python/issues/2669))
+* **deps:** bump golang.org/x/sync from 0.1.0 to 0.3.0 in /layer/scripts/layer-balancer ([#2649](https://github.com/aws-powertools/powertools-lambda-python/issues/2649))
+* **deps:** bump github.com/aws/aws-sdk-go-v2 from 1.16.16 to 1.18.1 in /layer/scripts/layer-balancer ([#2654](https://github.com/aws-powertools/powertools-lambda-python/issues/2654))
+* **deps:** migrate from retry to retry2 to address CVE-2022-42969 ([#2665](https://github.com/aws-powertools/powertools-lambda-python/issues/2665))
+* **deps:** bump actions/setup-node from 3.6.0 to 3.7.0 ([#2689](https://github.com/aws-powertools/powertools-lambda-python/issues/2689))
+* **deps:** bump pydantic from 1.10.9 to 1.10.10 ([#2624](https://github.com/aws-powertools/powertools-lambda-python/issues/2624))
+* **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.17.8 to 1.18.27 in /layer/scripts/layer-balancer ([#2651](https://github.com/aws-powertools/powertools-lambda-python/issues/2651))
+* **deps-dev:** bump sentry-sdk from 1.26.0 to 1.27.0 ([#2652](https://github.com/aws-powertools/powertools-lambda-python/issues/2652))
+* **deps-dev:** bump ruff from 0.0.275 to 0.0.276 ([#2655](https://github.com/aws-powertools/powertools-lambda-python/issues/2655))
+* **deps-dev:** bump typed-ast from 1.5.4 to 1.5.5 ([#2670](https://github.com/aws-powertools/powertools-lambda-python/issues/2670))
+* **deps-dev:** bump ruff from 0.0.276 to 0.0.277 ([#2682](https://github.com/aws-powertools/powertools-lambda-python/issues/2682))
+* **deps-dev:** bump sentry-sdk from 1.27.0 to 1.27.1 ([#2701](https://github.com/aws-powertools/powertools-lambda-python/issues/2701))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.27.0 to 1.28.0 ([#2700](https://github.com/aws-powertools/powertools-lambda-python/issues/2700))
+* **deps-dev:** bump mypy-boto3-appconfigdata from 1.27.0 to 1.28.0 ([#2699](https://github.com/aws-powertools/powertools-lambda-python/issues/2699))
+* **deps-dev:** bump mypy-boto3-lambda from 1.27.0 to 1.28.0 ([#2698](https://github.com/aws-powertools/powertools-lambda-python/issues/2698))
+* **deps-dev:** bump mypy-boto3-appconfigdata from 1.26.70 to 1.27.0 ([#2636](https://github.com/aws-powertools/powertools-lambda-python/issues/2636))
+* **deps-dev:** bump aws-cdk from 2.86.0 to 2.87.0 ([#2696](https://github.com/aws-powertools/powertools-lambda-python/issues/2696))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.26.158 to 1.26.164 ([#2622](https://github.com/aws-powertools/powertools-lambda-python/issues/2622))
+* **deps-dev:** bump mypy-boto3-cloudwatch from 1.27.0 to 1.28.0 ([#2697](https://github.com/aws-powertools/powertools-lambda-python/issues/2697))
+* **user-agent:** support patching botocore session ([#2614](https://github.com/aws-powertools/powertools-lambda-python/issues/2614))
+
+
+<a name="v2.19.0"></a>
+## [v2.19.0] - 2023-06-30
+## Bug Fixes
+
+* **e2e:** fix idempotency tests ([#2576](https://github.com/aws-powertools/powertools-lambda-python/issues/2576))
+
+## Code Refactoring
+
+* **event_source:** convert functional tests to unit tests ([#2506](https://github.com/aws-powertools/powertools-lambda-python/issues/2506))
+
+## Documentation
+
+* **i-made-this:** added new article on idempotency ([#2582](https://github.com/aws-powertools/powertools-lambda-python/issues/2582))
+* **i-made-this:** article on idempotency w/ CDK and Powertools ([#2569](https://github.com/aws-powertools/powertools-lambda-python/issues/2569))
+* **idempotency:** split snippets, improve wording and lint examples ([#2492](https://github.com/aws-powertools/powertools-lambda-python/issues/2492))
+
+## Features
+
+* **event_handler:** add VPCLatticeResolver ([#2601](https://github.com/aws-powertools/powertools-lambda-python/issues/2601))
+* **event_source:** decode nested messages on SQS events ([#2349](https://github.com/aws-powertools/powertools-lambda-python/issues/2349))
+* **parser:** add support to VpcLatticeModel ([#2584](https://github.com/aws-powertools/powertools-lambda-python/issues/2584))
+
+## Maintenance
+
+* version bump
+* **analytics:** update docs base origin url ([#2560](https://github.com/aws-powertools/powertools-lambda-python/issues/2560))
+* **ci:** replace flake8 with Ruff as a linter ([#2495](https://github.com/aws-powertools/powertools-lambda-python/issues/2495))
+* **ci:** enable Ruff rule E501 and fix errors ([#2587](https://github.com/aws-powertools/powertools-lambda-python/issues/2587))
+* **ci:** enable Ruff rule COM812 and fix the errors ([#2595](https://github.com/aws-powertools/powertools-lambda-python/issues/2595))
+* **ci:** enable Ruff rules PLW, PLR, PLC and PLE and fix the errors ([#2593](https://github.com/aws-powertools/powertools-lambda-python/issues/2593))
+* **ci:** enable Ruff autofix rules ([#2599](https://github.com/aws-powertools/powertools-lambda-python/issues/2599))
+* **ci:** enable Ruff rules ISC, I001, B018 and fix the errors ([#2597](https://github.com/aws-powertools/powertools-lambda-python/issues/2597))
+* **ci:** enable Ruff rule ERA001 and fix errors ([#2591](https://github.com/aws-powertools/powertools-lambda-python/issues/2591))
+* **deps:** bump pypa/gh-action-pypi-publish from 1.8.6 to 1.8.7 ([#2573](https://github.com/aws-powertools/powertools-lambda-python/issues/2573))
+* **deps:** bump docker/setup-buildx-action from 2.7.0 to 2.8.0 ([#2604](https://github.com/aws-powertools/powertools-lambda-python/issues/2604))
+* **deps:** bump ossf/scorecard-action from 2.1.3 to 2.2.0 ([#2563](https://github.com/aws-powertools/powertools-lambda-python/issues/2563))
+* **deps:** bump release-drafter/release-drafter from 5.23.0 to 5.24.0 ([#2603](https://github.com/aws-powertools/powertools-lambda-python/issues/2603))
+* **deps-dev:** bump mypy-boto3-s3 from 1.26.155 to 1.26.163 ([#2608](https://github.com/aws-powertools/powertools-lambda-python/issues/2608))
+* **deps-dev:** bump mypy-boto3-lambda from 1.26.157 to 1.26.163 ([#2607](https://github.com/aws-powertools/powertools-lambda-python/issues/2607))
+* **deps-dev:** bump mkdocs-material from 9.1.16 to 9.1.17 ([#2564](https://github.com/aws-powertools/powertools-lambda-python/issues/2564))
+* **deps-dev:** bump ruff from 0.0.272 to 0.0.275 ([#2586](https://github.com/aws-powertools/powertools-lambda-python/issues/2586))
+* **deps-dev:** bump mypy-boto3-ssm from 1.26.97 to 1.26.162 ([#2606](https://github.com/aws-powertools/powertools-lambda-python/issues/2606))
+* **deps-dev:** bump pytest from 7.3.2 to 7.4.0 ([#2557](https://github.com/aws-powertools/powertools-lambda-python/issues/2557))
+* **deps-dev:** bump aws-cdk from 2.85.0 to 2.86.0 ([#2613](https://github.com/aws-powertools/powertools-lambda-python/issues/2613))
+* **deps-dev:** bump mypy from 1.4.0 to 1.4.1 ([#2574](https://github.com/aws-powertools/powertools-lambda-python/issues/2574))
+
 
 <a name="v2.18.0"></a>
 ## [v2.18.0] - 2023-06-23
@@ -3415,7 +3511,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.18.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.19.0...HEAD
+[v2.19.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.18.0...v2.19.0
 [v2.18.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.17.0...v2.18.0
 [v2.17.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.16.2...v2.17.0
 [v2.16.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.16.1...v2.16.2
