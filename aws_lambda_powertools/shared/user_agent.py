@@ -113,8 +113,8 @@ def register_feature_to_botocore_session(botocore_session, feature):
     """
     Register the given feature string to the event system of the provided botocore session
     
-    Please Notice this is for patching botocore session and is different from the previous one 
-    which is for patching boto3 session
+    Please notice this function is for patching botocore session and is different from
+    previous one which is for patching boto3 session
 
     Parameters
     ----------
@@ -138,7 +138,7 @@ def register_feature_to_botocore_session(botocore_session, feature):
         >>>
         >>> session = botocore.session.Session()
         >>> register_feature_to_botocore_session(botocore_session=session, feature="data-masking")
-        >>> key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=self.session)
+        >>> key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=session)
     
     """
     try:
