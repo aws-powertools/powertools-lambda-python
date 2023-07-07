@@ -346,7 +346,7 @@ You can create your own partial batch processor from scratch by inheriting the `
 
 You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
 
-```python hl_lines="9-12 20 35 41 48 59 64 68 76" title="Creating a custom batch processor"
+```python hl_lines="9-11 19 33 39 46 57 62 66 74" title="Creating a custom batch processor"
 --8<-- "examples/batch_processing/src/custom_partial_processor.py"
 ```
 
