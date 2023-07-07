@@ -1,5 +1,6 @@
 .PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-api build-docs-website
 .PHONY: docs-local docs-api-local security-baseline complexity-baseline release-prod release-test release
+.PHONY: int-test-idem
 
 target:
 	@$(MAKE) pr
@@ -30,11 +31,15 @@ lint-docs-fix:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
-	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
+	poetry run pytest -m "not perf" --ignore tests/e2e --ignore tests/integration --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
 unit-test:
 	poetry run pytest tests/unit
+
+int-test-idem:
+	docker run --name int-test-idem -d -p 63005:6379 redis
+	poetry run pytest tests/integration/idempotency;docker stop int-test-idem;docker rm int-test-idem
 
 e2e-test:
 	python parallel_run_e2e.py

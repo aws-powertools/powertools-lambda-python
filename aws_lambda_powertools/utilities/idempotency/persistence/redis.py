@@ -52,10 +52,14 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.validation_key_attr = validation_key_attr
         super(RedisCachePersistenceLayer, self).__init__()
 
-    def _item_to_data_record(self, item: Dict[str, Any]) -> DataRecord:
+    def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
+        in_progress_expiry_timestamp = item.get(self.in_progress_expiry_attr)
+        if isinstance(in_progress_expiry_timestamp, str):
+            in_progress_expiry_timestamp = int(in_progress_expiry_timestamp)
         return DataRecord(
+            idempotency_key=idempotency_key,
             status=item[self.status_attr],
-            in_progress_expiry_timestamp=item.get(self.in_progress_expiry_attr),
+            in_progress_expiry_timestamp=in_progress_expiry_timestamp,
             response_data=str(item.get(self.data_attr)),
             payload_hash=str(item.get(self.validation_key_attr)),
         )
@@ -68,7 +72,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             item = response
         except KeyError:
             raise IdempotencyItemNotFoundError
-        return self._item_to_data_record(item)
+        return self._item_to_data_record(idempotency_key, item)
 
     def _put_record(self, data_record: DataRecord) -> None:
         item: Dict[str, Any] = {}
@@ -112,7 +116,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                 # checking if in_progress_expiry_attr exists
                 # if in_progress_expiry_attr exist, must be lower than now
                 if self.in_progress_expiry_attr in idempotency_record and int(
-                    idempotency_record[self.in_progress_expiry_attr]
+                    idempotency_record[self.in_progress_expiry_attr],
                 ) > int(now.timestamp() * 1000):
                     raise
 
