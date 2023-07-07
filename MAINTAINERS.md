@@ -51,8 +51,6 @@ This is document explains who the maintainers are (see below), what they do in t
 | Maintainer        | GitHub ID                                               | Affiliation |
 | ----------------- | ------------------------------------------------------- | ----------- |
 | Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa)           | Amazon      |
-| Alexander Melnyk  | [am29d](https://github.com/am29d)                       | Amazon      |
-| Michal Ploski     | [mploski](https://github.com/mploski)                   | Amazon      |
 | Simon Thulbourn   | [sthulb](https://github.com/sthulb)                     | Amazon      |
 | Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca)         | Amazon      |
 | Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena) | Amazon      |
@@ -65,6 +63,8 @@ Previous active maintainers who contributed to this project.
 | ----------------- | ----------------------------------------------- | ----------- |
 | Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast) | MongoDB     |
 | Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Apollo      |
+| Alexander Melnyk  | [am29d](https://github.com/am29d)               | Amazon      |
+| Michal Ploski     | [mploski](https://github.com/mploski)           | Amazon      |
 
 ## Labels
 
