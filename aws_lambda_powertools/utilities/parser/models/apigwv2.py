@@ -55,6 +55,7 @@ class RequestContextV2(BaseModel):
     timeEpoch: datetime
     http: RequestContextV2Http
 
+    # validator to normalize timestamp
     @validator("timeEpoch", pre=True)
     def normalize_timestamp(cls, value):
         date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
