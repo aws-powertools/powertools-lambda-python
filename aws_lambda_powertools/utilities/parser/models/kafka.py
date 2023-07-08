@@ -20,7 +20,7 @@ class KafkaRecordModel(BaseModel):
     headers: List[Dict[str, bytes]]
 
     # validators
-    _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var]
+    _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var, unused-ignore]
 
     @validator("value", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
