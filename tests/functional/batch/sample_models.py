@@ -39,8 +39,8 @@ class OrderDynamoDB(BaseModel):
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[OrderDynamoDB]
-    OldImage: Optional[OrderDynamoDB]
+    NewImage: Optional[OrderDynamoDB] = None
+    OldImage: Optional[OrderDynamoDB] = None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):

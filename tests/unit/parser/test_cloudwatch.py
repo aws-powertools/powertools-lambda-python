@@ -86,7 +86,7 @@ def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
     with pytest.raises(ValidationError) as context:
         CloudWatchLogsModel(**raw_event)
 
-    assert context.value.errors()[0]["msg"] == "unable to decompress data"
+    assert "unable to decompress data" in context.value.errors()[0]["msg"]
 
 
 def test_handle_invalid_event_with_envelope():

@@ -7,10 +7,10 @@ from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
-    ApproximateCreationDateTime: Optional[date]
+    ApproximateCreationDateTime: Optional[date] = None
     Keys: Dict[str, Dict[str, Any]]
-    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]]
-    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]]
+    NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
+    OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     SequenceNumber: str
     SizeBytes: int
     StreamViewType: Literal["NEW_AND_OLD_IMAGES", "KEYS_ONLY", "NEW_IMAGE", "OLD_IMAGE"]
@@ -40,7 +40,7 @@ class DynamoDBStreamRecordModel(BaseModel):
     awsRegion: str
     eventSourceARN: str
     dynamodb: DynamoDBStreamChangedRecordModel
-    userIdentity: Optional[UserIdentity]
+    userIdentity: Optional[UserIdentity] = None
 
 
 class DynamoDBStreamModel(BaseModel):

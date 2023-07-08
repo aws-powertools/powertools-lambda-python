@@ -501,8 +501,8 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
             return json.loads(value["S"])
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB]
-        OldImage: Optional[OrderDynamoDB]
+        NewImage: Optional[OrderDynamoDB] = None
+        OldImage: Optional[OrderDynamoDB] = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord
@@ -545,8 +545,8 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
             return json.loads(value["S"])
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-        NewImage: Optional[OrderDynamoDB]
-        OldImage: Optional[OrderDynamoDB]
+        NewImage: Optional[OrderDynamoDB] = None
+        OldImage: Optional[OrderDynamoDB] = None
 
     class OrderDynamoDBRecord(DynamoDBStreamRecordModel):
         dynamodb: OrderDynamoDBChangeRecord

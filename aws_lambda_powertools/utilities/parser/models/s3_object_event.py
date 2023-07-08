@@ -22,7 +22,7 @@ class S3ObjectUserRequest(BaseModel):
 
 class S3ObjectSessionIssuer(BaseModel):
     type: str  # noqa: A003, VNE003
-    userName: Optional[str]
+    userName: Optional[str] = None
     principalId: str
     arn: str
     accountId: str
@@ -42,10 +42,10 @@ class S3ObjectUserIdentity(BaseModel):
     type: str  # noqa003
     accountId: str
     accessKeyId: str
-    userName: Optional[str]
+    userName: Optional[str] = None
     principalId: str
     arn: str
-    sessionContext: Optional[S3ObjectSessionContext]
+    sessionContext: Optional[S3ObjectSessionContext] = None
 
 
 class S3ObjectLambdaEvent(BaseModel):

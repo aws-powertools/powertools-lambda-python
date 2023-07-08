@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Type, Union
 
 from pydantic import BaseModel, validator
@@ -20,7 +20,7 @@ class KafkaRecordModel(BaseModel):
     headers: List[Dict[str, bytes]]
 
     # validators
-    _decode_key = validator("key", allow_reuse=True)(base64_decode)
+    _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var]
 
     @validator("value", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):
@@ -33,6 +33,11 @@ class KafkaRecordModel(BaseModel):
             for key, values in header.items():
                 header[key] = bytes(values)
         return value
+
+    @validator("timestamp", pre=True)
+    def normalize_timestamp(cls, value):
+        date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
+        return date_utc
 
 
 class KafkaBaseEventModel(BaseModel):
