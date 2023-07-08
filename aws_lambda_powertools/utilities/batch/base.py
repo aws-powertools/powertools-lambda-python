@@ -500,8 +500,12 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+
+            if model == self.model or model == getattr(self.model, "__name__", None):
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
@@ -644,8 +648,12 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+
+            if model == self.model or model == getattr(self.model, "__name__", None):
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
