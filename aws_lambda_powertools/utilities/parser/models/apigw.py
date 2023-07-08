@@ -77,6 +77,7 @@ class APIGatewayEventRequestContext(BaseModel):
             raise ValueError("messageId is available only when the `eventType` is `MESSAGE`")
         return values
 
+    # validator to normalize requestTimeEpoch
     @validator("requestTimeEpoch", pre=True)
     def normalize_timestamp(cls, value):
         date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
