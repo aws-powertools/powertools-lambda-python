@@ -945,3 +945,17 @@ def test_logger_log_uncaught_exceptions(service_name, stdout):
     # THEN it should contain our custom exception hook with a copy of our logger
     assert isinstance(exception_hook, functools.partial)
     assert exception_hook.keywords.get("logger") == logger
+
+
+def test_stream_defaults_to_stdout(service_name, capsys):
+    # GIVEN Logger is initialized without any explicit stream
+    logger = Logger(service=service_name)
+    msg = "testing stdout"
+
+    # WHEN logging statements are issued
+    logger.info(msg)
+
+    # THEN we should default to standard output, not standard error.
+    # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
+    log = json.loads(capsys.readouterr().out.strip())
+    assert log["message"] == msg
