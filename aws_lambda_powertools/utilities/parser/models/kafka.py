@@ -19,7 +19,7 @@ class KafkaRecordModel(BaseModel):
     value: Union[str, Type[BaseModel]]
     headers: List[Dict[str, bytes]]
 
-    # validators
+    # Added type ignore to keep compatibility between Pydantic v1 and v2
     _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var, unused-ignore]
 
     @validator("value", pre=True, allow_reuse=True)
@@ -34,6 +34,9 @@ class KafkaRecordModel(BaseModel):
                 header[key] = bytes(values)
         return value
 
+    # Validator to normalize the timestamp field
+    # Converts the provided timestamp value to a UTC datetime object
+    # See: https://github.com/pydantic/pydantic/issues/6518
     @validator("timestamp", pre=True)
     def normalize_timestamp(cls, value):
         date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
