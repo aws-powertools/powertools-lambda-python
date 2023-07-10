@@ -38,7 +38,7 @@ class KafkaRecordModel(BaseModel):
     # Converts the provided timestamp value to a UTC datetime object
     # See: https://github.com/pydantic/pydantic/issues/6518
     @validator("timestamp", pre=True)
-    def normalize_timestamp(cls, value):
+    def coerce_timestamp(cls, value):
         date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
         return date_utc
 

@@ -86,6 +86,8 @@ def test_handle_invalid_cloudwatch_trigger_event_no_envelope():
     with pytest.raises(ValidationError) as context:
         CloudWatchLogsModel(**raw_event)
 
+    # Pydantic v2 adds "Value error," to the error string.
+    # So to maintain compatibility with v1 and v2, we've changed the way we test this.
     assert "unable to decompress data" in context.value.errors()[0]["msg"]
 
 

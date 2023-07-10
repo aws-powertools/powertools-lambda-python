@@ -1,15 +1,15 @@
-from aws_lambda_powertools.shared.functions import disable_pydantic_v2_warning
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
 
 disable_pydantic_v2_warning()
 
-from .alb import AlbModel, AlbRequestContext, AlbRequestContextData  # noqa: E402
-from .apigw import (  # noqa: E402
+from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
+from .apigw import (
     APIGatewayEventAuthorizer,
     APIGatewayEventIdentity,
     APIGatewayEventRequestContext,
     APIGatewayProxyEventModel,
 )
-from .apigwv2 import (  # noqa: E402
+from .apigwv2 import (
     APIGatewayProxyEventV2Model,
     RequestContextV2,
     RequestContextV2Authorizer,
@@ -18,54 +18,54 @@ from .apigwv2 import (  # noqa: E402
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
-from .cloudformation_custom_resource import (  # noqa: E402
+from .cloudformation_custom_resource import (
     CloudFormationCustomResourceBaseModel,
     CloudFormationCustomResourceCreateModel,
     CloudFormationCustomResourceDeleteModel,
     CloudFormationCustomResourceUpdateModel,
 )
-from .cloudwatch import (  # noqa: E402
+from .cloudwatch import (
     CloudWatchLogsData,
     CloudWatchLogsDecode,
     CloudWatchLogsLogEvent,
     CloudWatchLogsModel,
 )
-from .dynamodb import (  # noqa: E402
+from .dynamodb import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamModel,
     DynamoDBStreamRecordModel,
 )
-from .event_bridge import EventBridgeModel  # noqa: E402
-from .kafka import (  # noqa: E402
+from .event_bridge import EventBridgeModel
+from .kafka import (
     KafkaBaseEventModel,
     KafkaMskEventModel,
     KafkaRecordModel,
     KafkaSelfManagedEventModel,
 )
-from .kinesis import (  # noqa: E402
+from .kinesis import (
     KinesisDataStreamModel,
     KinesisDataStreamRecord,
     KinesisDataStreamRecordPayload,
 )
-from .kinesis_firehose import (  # noqa: E402
+from .kinesis_firehose import (
     KinesisFirehoseModel,
     KinesisFirehoseRecord,
     KinesisFirehoseRecordMetadata,
 )
-from .kinesis_firehose_sqs import KinesisFirehoseSqsModel, KinesisFirehoseSqsRecord  # noqa: E402
-from .lambda_function_url import LambdaFunctionUrlModel  # noqa: E402
-from .s3 import (  # noqa: E402
+from .kinesis_firehose_sqs import KinesisFirehoseSqsModel, KinesisFirehoseSqsRecord
+from .lambda_function_url import LambdaFunctionUrlModel
+from .s3 import (
     S3EventNotificationEventBridgeDetailModel,
     S3EventNotificationEventBridgeModel,
     S3EventNotificationObjectModel,
     S3Model,
     S3RecordModel,
 )
-from .s3_event_notification import (  # noqa: E402
+from .s3_event_notification import (
     S3SqsEventNotificationModel,
     S3SqsEventNotificationRecordModel,
 )
-from .s3_object_event import (  # noqa: E402
+from .s3_object_event import (
     S3ObjectConfiguration,
     S3ObjectContext,
     S3ObjectLambdaEvent,
@@ -75,7 +75,7 @@ from .s3_object_event import (  # noqa: E402
     S3ObjectUserIdentity,
     S3ObjectUserRequest,
 )
-from .ses import (  # noqa: E402
+from .ses import (
     SesMail,
     SesMailCommonHeaders,
     SesMailHeaders,
@@ -86,9 +86,9 @@ from .ses import (  # noqa: E402
     SesReceiptVerdict,
     SesRecordModel,
 )
-from .sns import SnsModel, SnsNotificationModel, SnsRecordModel  # noqa: E402
-from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel  # noqa: E402
-from .vpc_lattice import VpcLatticeModel  # noqa: E402
+from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
+from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
+from .vpc_lattice import VpcLatticeModel
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
