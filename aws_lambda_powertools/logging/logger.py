@@ -232,7 +232,8 @@ class Logger:
         )
         self.child = child
         self.logger_formatter = logger_formatter
-        self.logger_handler = logger_handler or logging.StreamHandler(stream)
+        self._stream = stream or sys.stdout
+        self.logger_handler = logger_handler or logging.StreamHandler(self._stream)
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
