@@ -51,18 +51,18 @@ runs:
     - id: integrity_hash
       name: Create integrity hash for downloaded artifact
       run: |
-        HASH=$(sha256sum "${ARTEFACT_NAME}.tar" | awk '{print $1}')
+        HASH=$(sha256sum "${ARTIFACT_NAME}.tar" | awk '{print $1}')
 
         echo "current_hash=${HASH}" >> "$GITHUB_OUTPUT"
       env:
-        ARTEFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
       shell: bash
 
     - id: verify_hash
       name: Verify sealed artifact integrity hash
       run: test "${CURRENT_HASH}" = "${PROVIDED_HASH}" || exit 1
       env:
-        ARTEFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
         PROVIDED_HASH: ${{ inputs.integrity_hash }}
         CURRENT_HASH: ${{ steps.integrity_hash.outputs.current_hash }}
       shell: bash
@@ -70,13 +70,13 @@ runs:
     # Restore and overwrite tarball in current directory
     - id: overwrite
       name: Extract tarball
-      run: tar -xvf "${ARTEFACT_NAME}".tar
+      run: tar -xvf "${ARTIFACT_NAME}".tar
       env:
-        ARTEFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
       shell: bash
 
     - name: Remove archive
-      run: rm -f "${ARTEFACT_NAME}.tar"
+      run: rm -f "${ARTIFACT_NAME}.tar"
       env:
-        ARTEFACT_NAME: ${{ inputs.artifact_name }}
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
       shell: bash
