@@ -19,7 +19,16 @@ export readonly SLSA_VERIFIER_VERSION="2.3.0"
 export readonly SLSA_VERIFIER_CHECKSUM_FILE="SHA256SUM.md"
 export readonly SLSA_VERIFIER_BINARY="./slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
 
-export readonly RELEASE_VERSION="2.17.0a8"
+# Check if RELEASE_VERSION is provided as a command line argument
+if [[ $# -eq 1 ]]; then
+    RELEASE_VERSION="$1"
+else
+    echo "ERROR: Please provider Powertools release version as a command line argument."
+    echo "Example: sh verify_provenance.sh 2.20.0"
+    exit 1
+fi
+
+export readonly RELEASE_VERSION="$RELEASE_VERSION"
 export readonly RELEASE_BINARY="aws_lambda_powertools-${RELEASE_VERSION}-py3-none-any.whl"
 export readonly ORG="heitorlessa"
 export readonly REPO="aws-lambda-powertools-test"
