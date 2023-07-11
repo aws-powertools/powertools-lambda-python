@@ -54,31 +54,25 @@ def test_parser_schema_no_envelope(dummy_event, dummy_schema):
     handle_no_envelope(dummy_event["payload"], LambdaContext())
 
 
+@pytest.mark.usefixtures("pydanticv2_only")
 def test_pydanticv2_validation():
-    from pydantic import __version__
+    class FakeModel(pydantic.BaseModel):
+        region: str
+        event_name: str
+        version: int
 
-    version = __version__.split(".")
+        # WHEN using the validator for v2
+        @pydantic.field_validator("version", mode="before")
+        def validate_field(cls, value):
+            return int(value)
 
-    # GIVEN pydantic v2 version
-    if int(version[0]) == 2:
+    event_raw = {"region": "us-east-1", "event_name": "aws-powertools", "version": "10"}
+    event_parsed = FakeModel(**event_raw)
 
-        class FakeModel(pydantic.BaseModel):
-            region: str
-            event_name: str
-            version: int
-
-            # WHEN using the validator for v2
-            @pydantic.field_validator("version", mode="before")
-            def validate_field(cls, value):
-                return int(value)
-
-        event_raw = {"region": "us-east-1", "event_name": "aws-powertools", "version": "10"}
-        event_parsed = FakeModel(**event_raw)
-
-        # THEN parse the event as expected
-        assert event_parsed.region == event_raw["region"]
-        assert event_parsed.event_name == event_raw["event_name"]
-        assert event_parsed.version == int(event_raw["version"])
+    # THEN parse the event as expected
+    assert event_parsed.region == event_raw["region"]
+    assert event_parsed.event_name == event_raw["event_name"]
+    assert event_parsed.version == int(event_raw["version"])
 
 
 @pytest.mark.parametrize("invalid_schema", [None, str, bool(), [], (), object])
