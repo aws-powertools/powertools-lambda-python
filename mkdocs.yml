@@ -12,6 +12,7 @@ nav:
   - API reference: api/" target="_blank
   - Upgrade guide: upgrade.md
   - We Made This (Community): we_made_this.md
+  - Security: security.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
