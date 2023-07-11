@@ -343,6 +343,8 @@ jobs:
     with:
       latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
       pre_release: ${{ inputs.pre_release }}
+      source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
+      source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
 
   post_release:
     needs: [seal, release, publish_layer]
