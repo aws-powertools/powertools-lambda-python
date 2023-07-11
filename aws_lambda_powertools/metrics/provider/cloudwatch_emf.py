@@ -1,4 +1,6 @@
-from typing import Any, Dict, Optional
+from __future__ import annotations
+
+from typing import Any, Dict
 
 from aws_lambda_powertools.metrics.base import MetricManager
 
@@ -69,7 +71,7 @@ class Metrics(MetricManager):
     _metadata: Dict[str, Any] = {}
     _default_dimensions: Dict[str, Any] = {}
 
-    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+    def __init__(self, service: str | None = None, namespace: str | None = None):
         self.metric_set = self._metrics
         self.metadata_set = self._metadata
         self.default_dimensions = self._default_dimensions
@@ -132,5 +134,5 @@ class EphemeralMetrics(MetricManager):
     - Create the same metrics with different dimensions more than once
     """
 
-    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+    def __init__(self, service: str | None = None, namespace: str | None = None):
         super().__init__(namespace=namespace, service=service)

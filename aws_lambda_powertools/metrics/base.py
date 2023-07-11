@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import functools
 import json
@@ -10,15 +12,15 @@ from contextlib import contextmanager
 from enum import Enum
 from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
-from ..shared import constants
-from ..shared.functions import resolve_env_var_choice
-from .exceptions import (
+from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
 )
-from .types import MetricNameUnitResolution
+from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 logger = logging.getLogger(__name__)
 
@@ -94,11 +96,11 @@ class MetricManager:
 
     def __init__(
         self,
-        metric_set: Optional[Dict[str, Any]] = None,
-        dimension_set: Optional[Dict] = None,
-        namespace: Optional[str] = None,
-        metadata_set: Optional[Dict[str, Any]] = None,
-        service: Optional[str] = None,
+        metric_set: Dict[str, Any] | None = None,
+        dimension_set: Dict | None = None,
+        namespace: str | None = None,
+        metadata_set: Dict[str, Any] | None = None,
+        service: str | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
@@ -112,9 +114,9 @@ class MetricManager:
     def add_metric(
         self,
         name: str,
-        unit: Union[MetricUnit, str],
+        unit: MetricUnit | str,
         value: float,
-        resolution: Union[MetricResolution, int] = 60,
+        resolution: MetricResolution | int = 60,
     ) -> None:
         """Adds given metric
 
@@ -173,9 +175,9 @@ class MetricManager:
 
     def serialize_metric_set(
         self,
-        metrics: Optional[Dict] = None,
-        dimensions: Optional[Dict] = None,
-        metadata: Optional[Dict] = None,
+        metrics: Dict | None = None,
+        dimensions: Dict | None = None,
+        metadata: Dict | None = None,
     ) -> Dict:
         """Serializes metric and dimensions set
 
@@ -355,10 +357,10 @@ class MetricManager:
 
     def log_metrics(
         self,
-        lambda_handler: Union[Callable[[Dict, Any], Any], Optional[Callable[[Dict, Any, Optional[Dict]], Any]]] = None,
+        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Optional[Dict[str, str]] = None,
+        default_dimensions: Dict[str, str] | None = None,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -537,9 +539,9 @@ class SingleMetric(MetricManager):
     def add_metric(
         self,
         name: str,
-        unit: Union[MetricUnit, str],
+        unit: MetricUnit | str,
         value: float,
-        resolution: Union[MetricResolution, int] = 60,
+        resolution: MetricResolution | int = 60,
     ) -> None:
         """Method to prevent more than one metric being created
 
@@ -565,9 +567,9 @@ def single_metric(
     name: str,
     unit: MetricUnit,
     value: float,
-    resolution: Union[MetricResolution, int] = 60,
-    namespace: Optional[str] = None,
-    default_dimensions: Optional[Dict[str, str]] = None,
+    resolution: MetricResolution | int = 60,
+    namespace: str | None = None,
+    default_dimensions: Dict[str, str] | None = None,
 ) -> Generator[SingleMetric, None, None]:
     """Context manager to simplify creation of a single metric
 
@@ -622,7 +624,7 @@ def single_metric(
     SchemaValidationError
         When metric object fails EMF schema validation
     """  # noqa: E501
-    metric_set: Optional[Dict] = None
+    metric_set: Dict | None = None
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
