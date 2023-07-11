@@ -46,3 +46,33 @@ updates:
 #     commit-message:
 #       prefix: chore
 #       include: scope
+
+  - package-ecosystem: pip
+    directory: /benchmark/src/instrumented
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /benchmark/src/reference
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docs
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /examples/event_handler_graphql/src
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /layer/scripts/layer-balancer
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docs
+    schedule:
+      interval: daily

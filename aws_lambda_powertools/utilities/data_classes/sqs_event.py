@@ -1,6 +1,8 @@
-from typing import Any, Dict, Iterator, Optional
+from typing import Any, Dict, Iterator, Optional, Type, TypeVar
 
+from aws_lambda_powertools.utilities.data_classes import S3Event
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
 
 
 class SQSRecordAttributes(DictWrapper):
@@ -82,6 +84,8 @@ class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
 
 class SQSRecord(DictWrapper):
     """An Amazon SQS message"""
+
+    NestedEvent = TypeVar("NestedEvent", bound=DictWrapper)
 
     @property
     def message_id(self) -> str:
@@ -173,6 +177,63 @@ class SQSRecord(DictWrapper):
         queue_url = f"https://sqs.{region}.amazonaws.com/{account_id}/{queue_name}"
 
         return queue_url
+
+    @property
+    def decoded_nested_s3_event(self) -> S3Event:
+        """Returns the nested `S3Event` object that is sent in the body of a SQS message.
+
+        Even though you can typecast the object returned by `record.json_body`
+        directly, this method is provided as a shortcut for convenience.
+
+        Notes
+        -----
+
+        This method does not validate whether the SQS message body is actually a valid S3 event.
+
+        Examples
+        --------
+
+        ```python
+        nested_event: S3Event = record.decoded_nested_s3_event
+        ```
+        """
+        return self._decode_nested_event(S3Event)
+
+    @property
+    def decoded_nested_sns_event(self) -> SNSMessage:
+        """Returns the nested `SNSMessage` object that is sent in the body of a SQS message.
+
+        Even though you can typecast the object returned by `record.json_body`
+        directly, this method is provided as a shortcut for convenience.
+
+        Notes
+        -----
+
+        This method does not validate whether the SQS message body is actually
+        a valid SNS message.
+
+        Examples
+        --------
+
+        ```python
+        nested_message: SNSMessage = record.decoded_nested_sns_event
+        ```
+        """
+        return self._decode_nested_event(SNSMessage)
+
+    def _decode_nested_event(self, nested_event_class: Type[NestedEvent]) -> NestedEvent:
+        """Returns the nested event source data object.
+
+        This is useful for handling events that are sent in the body of a SQS message.
+
+        Examples
+        --------
+
+        ```python
+        data: S3Event = self._decode_nested_event(S3Event)
+        ```
+        """
+        return nested_event_class(self.json_body)
 
 
 class SQSEvent(DictWrapper):

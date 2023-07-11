@@ -35,6 +35,9 @@ env:
 
 concurrency: e2e
 
+permissions:
+  contents: read
+
 jobs:
   run:
     runs-on: aws-powertools_ubuntu-latest_8-core
@@ -58,12 +61,12 @@ jobs:
           architecture: "x64"
           cache: "poetry"
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: "16.12"
       - name: Install CDK CLI
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: Install dependencies
         run: make dev

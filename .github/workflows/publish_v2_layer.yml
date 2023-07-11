@@ -49,6 +49,9 @@ on:
         type: boolean
         required: false
 
+permissions:
+  contents: read
+
 jobs:
   build-layer:
     permissions:
@@ -69,7 +72,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: "16.12"
       - name: Setup python
@@ -82,7 +85,7 @@ jobs:
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
       - name: Set up QEMU
         uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.0.0
         with:
@@ -90,7 +93,7 @@ jobs:
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34 # v2.7.0
+        uses: docker/setup-buildx-action@2a1a44ac4aa01993040736bd95bb470da1a38365 # v2.9.0
         with:
           install: true
           driver: docker
@@ -98,7 +101,7 @@ jobs:
       - name: install cdk and deps
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: CDK build
         run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out

@@ -1,0 +1,15 @@
+# Title for the gitleaks configuration file.
+title = "Gitleaks"
+
+[extend]
+# useDefault will extend the base configuration with the default gitleaks config:
+# https://github.com/zricethezav/gitleaks/blob/master/config/gitleaks.toml
+useDefault = true
+
+[allowlist]
+description = "Allow list false positive"
+
+# Allow list paths to ignore due to false positives.
+paths = [
+  '''tests/unit/parser/test_kinesis_firehose\.py''',
+]

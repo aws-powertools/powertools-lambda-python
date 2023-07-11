@@ -46,3 +46,7 @@ repos:
       - id: terraform_fmt
         args:
           - --args=-recursive
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: "7804d652c0460f0b61ea9bb2c1f202bfcdbbf144" # v8.16.3
+    hooks:
+      - id: gitleaks
