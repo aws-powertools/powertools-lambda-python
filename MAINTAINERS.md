@@ -220,18 +220,23 @@ section Build
     Checksum                    : active, 8s
     Build release artifact      : active, 39s
     Seal                        : active, 8s
+section Provenance
+    Attest build                : active, 8s
+    Sign attestation            : active, attestation, 10:06, 8s
+
 section Release
     Checksum                    : active, 8s
     PyPi temp credentials       : active, 8s
-    Publish PyPi                : active, pypi, 10:06, 29s
+    Publish PyPi                : active, pypi, 10:07, 29s
 
-PyPi release : milestone, m2, 10:06,1s
+PyPi release : milestone, m2, 10:07,1s
 
 section Git release
     Checksum                    : active, after pypi, 8s
     Git Tag                     : active, 8s
     Bump package version        : active, 8s
     Create PR                   : active, 8s
+    Upload attestation          : active, 8s
 
 section Layer release
     Build (x86+ARM)             : active, layer_build, 10:08, 6m
@@ -322,6 +327,13 @@ timeline
                                 : Integrity check
                                 : Build release artifact
                                 : Seal and upload artifact
+
+    Provenance                  : Detect build environment
+                                : Generate SLSA Builder
+                                : Verify SLSA Builder provenance
+                                : Create and sign provenance
+                                : Seal and upload artifact
+                                : Write to public ledger
 
     Release                     : Restore sealed build
                                 : Integrity check
