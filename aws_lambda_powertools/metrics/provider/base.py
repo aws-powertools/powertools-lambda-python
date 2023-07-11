@@ -9,42 +9,141 @@ is_cold_start = True
 
 
 class MetricsProviderBase(ABC):
-    """Class for metric provider template
+    """
+    Class for metric provider template.
 
-    Use this template to create your own metric provider.
+    This class serves as a template for creating your own metric provider. Inherit from this class
+    and implement the required methods to define your specific metric provider.
 
+    Usage:
+        1. Inherit from this class.
+        2. Implement the required methods specific to your metric provider.
+        3. Customize the behavior and functionality of the metric provider in your subclass.
     """
 
-    # General add metric function. Should return combined metrics Dict
     @abstractmethod
     def add_metric(self, *args, **kwargs):
-        pass
+        """
+        Abstract method for adding a metric.
 
-    # serialize and return dict for flushing
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Returns
+        ----------
+        Dict
+            A combined metrics dictionary.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
+
     @abstractmethod
     def serialize(self, *args, **kwargs):
-        pass
+        """
+        Abstract method for serialize a metric.
+
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Returns
+        ----------
+        Dict
+            Serialized metrics
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
 
     # flush serialized data to output, or send to API directly
     @abstractmethod
     def flush(self, *args, **kwargs):
-        pass
+        """
+        Abstract method for flushing a metric.
+
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
 
 
 class MetricsBase(ABC):
-    """Class for metric template
+    """
+    Class for metric template.
 
-    Use this template to create your own metric class.
+    This class serves as a template for creating your own metric class. Inherit from this class
+    and implement the necessary methods to define your specific metric.
 
+    NOTE: need to improve this docstring
     """
 
     @abstractmethod
     def add_metric(self, *args, **kwargs):
-        pass
+        """
+        Abstract method for adding a metric.
+
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Returns
+        ----------
+        Dict
+            A combined metrics dictionary.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
 
     @abstractmethod
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        pass
+        """Manually flushes the metrics. This is normally not necessary,
+        unless you're running on other runtimes besides Lambda, where the @log_metrics
+        decorator already handles things for you.
+
+        Parameters
+        ----------
+        raise_on_empty_metrics : bool, optional
+            raise exception if no metrics are emitted, by default False
+        """
+        raise NotImplementedError
 
     def log_metrics(
         self,

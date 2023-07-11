@@ -71,8 +71,8 @@ class OTLPMetrics(MetricsBase):
 
     Example
     -------
-    dd_provider = DataDogProvider(namespace="default")
-    metrics = DataDogMetrics(provider=dd_provider)
+    dd_provider = OTLPProvider(namespace="default")
+    metrics = OTLPMetrics(provider=dd_provider)
 
     @metrics.log_metrics(capture_cold_start_metric: bool = True, raise_on_empty_metrics: bool = False)
     def lambda_handler(event, context)
