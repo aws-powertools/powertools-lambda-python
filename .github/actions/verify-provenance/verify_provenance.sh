@@ -37,7 +37,7 @@ function download_slsa_verifier() {
     curl --location --silent -O "https://github.com/slsa-framework/slsa-verifier/releases/download/v${SLSA_VERIFIER_VERSION}/slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
 
     debug "[*] Downloading SLSA Verifier checksums"
-    curl --location --silent -O "https://raw.githubusercontent.com/slsa-framework/slsa-verifier/main/${SLSA_VERIFIER_CHECKSUM_FILE}"
+    curl --location --silent -O "https://raw.githubusercontent.com/slsa-framework/slsa-verifier/f59b55ef2190581d40fc1a5f3b7a51cab2f4a652/${SLSA_VERIFIER_CHECKSUM_FILE}"
 
     debug "[*] Verifying SLSA Verifier binary integrity"
     CURRENT_HASH=$(sha256sum "${SLSA_VERIFIER_BINARY}" | awk '{print $1}')
