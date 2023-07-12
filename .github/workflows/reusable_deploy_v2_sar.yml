@@ -28,6 +28,8 @@ name: Deploy V2 SAR
 #     artefact-name: "cdk-layer-artefact"
 #     environment: "layer-beta"
 #     package-version: ${{ inputs.latest_published_version }}
+#     source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+#     source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
 permissions:
   id-token: write
@@ -38,6 +40,7 @@ env:
   AWS_REGION: eu-west-1
   SAR_NAME: aws-lambda-powertools-python-layer
   TEST_STACK_NAME: serverlessrepo-v2-powertools-layer-test-stack
+  RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
 
 on:
   workflow_call:
@@ -58,6 +61,14 @@ on:
         description: "GitHub Environment to use for encrypted secrets"
         required: true
         type: string
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
 
 jobs:
   deploy-sar-app:
@@ -67,13 +78,28 @@ jobs:
       matrix:
         architecture: ["x86_64", "arm64"]
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
+
       - name: AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
+
+      # NOTE
+      # We connect to Layers account to log our intent to publish a SAR Layer
+      # we then jump to our specific SAR Account with the correctly scoped IAM Role
+      # this allows us to have a single trail when a release occurs for a given layer (beta+prod+SAR beta+SAR prod)
       - name: AWS credentials SAR role
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         id: aws-credentials-sar-role
