@@ -1,9 +1,10 @@
-from aws_lambda_powertools.metrics.provider.base import MetricsBase, MetricsProviderBase
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import (
-    CloudWatchEMF,
+from aws_lambda_powertools.metrics.provider.amazon_cloudwatch_emf import (
+    AmazonCloudWatchEMF,
+    EphemeralAmazonCloudWatchEMF,
     EphemeralMetrics,
     Metrics,
 )
+from aws_lambda_powertools.metrics.provider.base import MetricsBase, MetricsProviderBase
 from aws_lambda_powertools.metrics.provider.datadog_provider_draft import (
     DataDogMetrics,
     DataDogProvider,
@@ -19,6 +20,8 @@ __all__ = [
     "DataDogMetrics",
     "DataDogProvider",
     "Metrics",
+    "AmazonCloudWatchEMF",
+    "EphemeralAmazonCloudWatchEMF",
     "EphemeralMetrics",
     "CloudWatchEMF",
     "OTLPProvider",

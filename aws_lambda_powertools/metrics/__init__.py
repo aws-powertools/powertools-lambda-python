@@ -8,7 +8,12 @@ from aws_lambda_powertools.metrics.exceptions import (
     SchemaValidationError,
 )
 from aws_lambda_powertools.metrics.metric import single_metric
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import CloudWatchEMF, EphemeralMetrics, Metrics
+from aws_lambda_powertools.metrics.provider.amazon_cloudwatch_emf import (
+    AmazonCloudWatchEMF,
+    EphemeralAmazonCloudWatchEMF,
+    EphemeralMetrics,
+    Metrics,
+)
 
 __all__ = [
     "Metrics",
@@ -20,5 +25,6 @@ __all__ = [
     "MetricResolutionError",
     "SchemaValidationError",
     "MetricValueError",
-    "CloudWatchEMF",
+    "AmazonCloudWatchEMF",
+    "EphemeralAmazonCloudWatchEMF",
 ]
