@@ -1,0 +1,4 @@
+self-hosted-runner:
+  labels:
+    - aws-powertools_ubuntu-latest_4-core 
+    - aws-powertools_ubuntu-latest_8-core

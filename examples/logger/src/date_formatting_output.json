@@ -1,0 +1,16 @@
+[
+    {
+        "level": "INFO",
+        "location": "<module>:6",
+        "message": "Collecting payment",
+        "timestamp": "2022-10-28T14:35:03.210+02:00",
+        "service": "payment"
+    },
+    {
+        "level": "INFO",
+        "location": "<module>:9",
+        "message": "Calculating points",
+        "timestamp": "10/28/2022 02:35:03 PM",
+        "service": "loyalty"
+    }
+]

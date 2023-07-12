@@ -4,7 +4,12 @@ import jmespath
 import pytest
 from jmespath import functions
 
-from aws_lambda_powertools.utilities.validation import envelopes, exceptions, validate, validator
+from aws_lambda_powertools.utilities.validation import (
+    envelopes,
+    exceptions,
+    validate,
+    validator,
+)
 
 
 def test_validate_raw_event(schema, raw_event):
@@ -54,7 +59,8 @@ def test_validate_invalid_schema_format(raw_event):
 
 
 def test_validate_accept_schema_custom_format(
-    eventbridge_schema_registry_cloudtrail_v2_s3, eventbridge_cloudtrail_s3_head_object_event
+    eventbridge_schema_registry_cloudtrail_v2_s3,
+    eventbridge_cloudtrail_s3_head_object_event,
 ):
     validate(
         event=eventbridge_cloudtrail_s3_head_object_event,
@@ -65,7 +71,9 @@ def test_validate_accept_schema_custom_format(
 
 @pytest.mark.parametrize("invalid_format", [None, bool(), {}, [], object])
 def test_validate_invalid_custom_format(
-    eventbridge_schema_registry_cloudtrail_v2_s3, eventbridge_cloudtrail_s3_head_object_event, invalid_format
+    eventbridge_schema_registry_cloudtrail_v2_s3,
+    eventbridge_cloudtrail_s3_head_object_event,
+    invalid_format,
 ):
     with pytest.raises(exceptions.InvalidSchemaFormatError):
         validate(

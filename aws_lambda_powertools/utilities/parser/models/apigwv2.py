@@ -20,7 +20,7 @@ class RequestContextV2AuthorizerIam(BaseModel):
     principalOrgId: Optional[str]
     userArn: Optional[str]
     userId: Optional[str]
-    cognitoIdentity: RequestContextV2AuthorizerIamCognito
+    cognitoIdentity: Optional[RequestContextV2AuthorizerIamCognito]
 
 
 class RequestContextV2AuthorizerJwt(BaseModel):

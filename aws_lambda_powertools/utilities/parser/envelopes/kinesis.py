@@ -16,7 +16,7 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
     Regardless of its type it'll be parsed into a BaseModel object.
 
     Note: Records will be parsed the same way so if model is str,
-    all items in the list will be parsed as str and npt as JSON (and vice versa)
+    all items in the list will be parsed as str and not as JSON (and vice versa)
     """
 
     def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> List[Optional[Model]]:

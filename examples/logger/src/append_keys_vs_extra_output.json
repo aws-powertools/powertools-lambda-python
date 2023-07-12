@@ -1,0 +1,21 @@
+[
+    {
+        "level": "INFO",
+        "location": "<module>:22",
+        "message": "Charge collected successfully",
+        "timestamp": "2021-01-12 14:09:10,859",
+        "service": "payment",
+        "sampling_rate": 0.0,
+        "payment_id": "123456789",
+        "charge_id": "75edbad0-0857-4fc9-b547-6180e2f7959b"
+    },
+    {
+        "level": "INFO",
+        "location": "<module>:27",
+        "message": "goodbye",
+        "timestamp": "2021-01-12 14:09:10,860",
+        "service": "payment",
+        "sampling_rate": 0.0,
+        "payment_id": "123456789"
+    }
+]

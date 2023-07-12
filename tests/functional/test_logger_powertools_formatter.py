@@ -1,13 +1,16 @@
 """aws_lambda_logging tests."""
 import io
 import json
+import os
 import random
+import re
 import string
 import time
 
 import pytest
 
 from aws_lambda_powertools import Logger
+from aws_lambda_powertools.logging.formatters.datadog import DatadogLogFormatter
 
 
 @pytest.fixture
@@ -19,6 +22,10 @@ def stdout():
 def service_name():
     chars = string.ascii_letters + string.digits
     return "".join(random.SystemRandom().choice(chars) for _ in range(15))
+
+
+def capture_logging_output(stdout):
+    return json.loads(stdout.getvalue().strip())
 
 
 @pytest.mark.parametrize("level", ["DEBUG", "WARNING", "ERROR", "INFO", "CRITICAL"])
@@ -288,3 +295,37 @@ def test_log_formatting(stdout, service_name):
 
     # THEN the formatting should be applied (NB. this is valid json, but hasn't be parsed)
     assert log_dict["message"] == '["foo bar 123 [1, None]", null]'
+
+
+def test_log_json_indent_compact_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV is not set
+    monkeypatch.delenv(name="POWERTOOLS_DEV", raising=False)
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should not have multiple lines
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines == 1
+
+
+def test_log_json_pretty_indent(stdout, service_name, monkeypatch):
+    # GIVEN a logger with default settings and WHEN POWERTOOLS_DEV=="true"
+    monkeypatch.setenv(name="POWERTOOLS_DEV", value="true")
+    logger = Logger(service=service_name, stream=stdout)
+    logger.info("Test message")
+    # THEN the json should contain more than line
+    new_lines = stdout.getvalue().count(os.linesep)
+    assert new_lines > 1
+
+
+def test_datadog_formatter_use_rfc3339_date(stdout, service_name):
+    # GIVEN Datadog Log Formatter is used
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=DatadogLogFormatter())
+    RFC3339_REGEX = r"^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$"
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp uses RFC3339 by default
+    log = capture_logging_output(stdout)
+
+    assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"

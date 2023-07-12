@@ -1,0 +1,21 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    # these are fields you can attach resolvers to (field: Query, field: getTodo)
+    getTodo(id: ID!): Todo
+    listTodos: [Todo]
+}
+
+type Mutation {
+    createTodo(title: String!): Todo
+}
+
+type Todo {
+    id: ID!
+    userId: String
+    title: String
+    completed: Boolean
+}

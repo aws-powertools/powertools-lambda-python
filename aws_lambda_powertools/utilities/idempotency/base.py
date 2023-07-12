@@ -1,4 +1,6 @@
+import datetime
 import logging
+from copy import deepcopy
 from typing import Any, Callable, Dict, Optional, Tuple
 
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -69,11 +71,12 @@ class IdempotencyHandler:
             Function keyword arguments
         """
         self.function = function
-        self.data = _prepare_data(function_payload)
+        self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
+        self.config = config
 
-        persistence_store.configure(config, self.function.__name__)
+        persistence_store.configure(config, f"{self.function.__module__}.{self.function.__qualname__}")
         self.persistence_store = persistence_store
 
     def handle(self) -> Any:
@@ -100,19 +103,45 @@ class IdempotencyHandler:
         try:
             # We call save_inprogress first as an optimization for the most common case where no idempotent record
             # already exists. If it succeeds, there's no need to call get_record.
-            self.persistence_store.save_inprogress(data=self.data)
+            self.persistence_store.save_inprogress(
+                data=self.data,
+                remaining_time_in_millis=self._get_remaining_time_in_millis(),
+            )
         except IdempotencyKeyError:
             raise
         except IdempotencyItemAlreadyExistsError:
             # Now we know the item already exists, we can retrieve it
             record = self._get_idempotency_record()
-            return self._handle_for_status(record)
+            if record is not None:
+                return self._handle_for_status(record)
         except Exception as exc:
-            raise IdempotencyPersistenceLayerError("Failed to save in progress record to idempotency store") from exc
+            raise IdempotencyPersistenceLayerError(
+                "Failed to save in progress record to idempotency store",
+                exc,
+            ) from exc
 
         return self._get_function_response()
 
-    def _get_idempotency_record(self) -> DataRecord:
+    def _get_remaining_time_in_millis(self) -> Optional[int]:
+        """
+        Tries to determine the remaining time available for the current lambda invocation.
+
+        This only works if the idempotent handler decorator is used, since we need to access the lambda context.
+        However, this could be improved if we start storing the lambda context globally during the invocation. One
+        way to do this is to register the lambda context when configuring the IdempotencyConfig object.
+
+        Returns
+        -------
+        Optional[int]
+            Remaining time in millis, or None if the remaining time cannot be determined.
+        """
+
+        if self.config.lambda_context is not None:
+            return self.config.lambda_context.get_remaining_time_in_millis()
+
+        return None
+
+    def _get_idempotency_record(self) -> Optional[DataRecord]:
         """
         Retrieve the idempotency record from the persistence layer.
 
@@ -126,7 +155,7 @@ class IdempotencyHandler:
         except IdempotencyItemNotFoundError:
             # This code path will only be triggered if the record is removed between save_inprogress and get_record.
             logger.debug(
-                f"An existing idempotency record was deleted before we could fetch it. Proceeding with {self.function}"
+                f"An existing idempotency record was deleted before we could fetch it. Proceeding with {self.function}",
             )
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
@@ -137,7 +166,7 @@ class IdempotencyHandler:
         # Wrap remaining unhandled exceptions with IdempotencyPersistenceLayerError to ease exception handling for
         # clients
         except Exception as exc:
-            raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store") from exc
+            raise IdempotencyPersistenceLayerError("Failed to get record from idempotency store", exc) from exc
 
         return data_record
 
@@ -166,9 +195,16 @@ class IdempotencyHandler:
             raise IdempotencyInconsistentStateError("save_inprogress and get_record return inconsistent results.")
 
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:
+            if data_record.in_progress_expiry_timestamp is not None and data_record.in_progress_expiry_timestamp < int(
+                datetime.datetime.now().timestamp() * 1000,
+            ):
+                raise IdempotencyInconsistentStateError(
+                    "item should have been expired in-progress because it already time-outed.",
+                )
+
             raise IdempotencyAlreadyInProgressError(
                 f"Execution already in progress with idempotency key: "
-                f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}"
+                f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
 
         return data_record.response_json_as_dict()
@@ -183,7 +219,8 @@ class IdempotencyHandler:
                 self.persistence_store.delete_record(data=self.data, exception=handler_exception)
             except Exception as delete_exception:
                 raise IdempotencyPersistenceLayerError(
-                    "Failed to delete record from idempotency store"
+                    "Failed to delete record from idempotency store",
+                    delete_exception,
                 ) from delete_exception
             raise
 
@@ -192,7 +229,8 @@ class IdempotencyHandler:
                 self.persistence_store.save_success(data=self.data, result=response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
-                    "Failed to update record state to success in idempotency store"
+                    "Failed to update record state to success in idempotency store",
+                    save_exception,
                 ) from save_exception
 
         return response

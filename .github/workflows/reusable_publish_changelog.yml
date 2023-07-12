@@ -1,0 +1,40 @@
+name: Build and publish latest changelog
+
+# see ./.github/workflows/build_changelog.yml for docs
+
+on:
+  workflow_call:
+
+env:
+  TEMP_BRANCH_PREFIX: "ci-changelog"
+  PULL_REQUEST_TITLE: "chore(ci): changelog rebuild"
+  FILES_TO_COMMIT: "CHANGELOG.md"
+
+permissions:
+  contents: read
+
+jobs:
+  publish_changelog:
+    # Force Github action to run only a single job at a time (based on the group name)
+    # This is to prevent race-condition and inconsistencies with changelog push
+    concurrency:
+      group: changelog-build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write       # create temporary branch with changelog
+      pull-requests: write  # create PR
+    steps:
+      - name: Checkout repository # reusable workflows start clean, so we need to checkout again
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+        with:
+          fetch-depth: 0
+      - name: "Generate latest changelog"
+        run: make changelog
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: ${{ env.FILES_TO_COMMIT }}
+          temp_branch_prefix: ${{ env.TEMP_BRANCH_PREFIX }}
+          pull_request_title: ${{ env.PULL_REQUEST_TITLE }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

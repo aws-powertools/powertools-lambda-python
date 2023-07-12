@@ -5,13 +5,15 @@ from typing import Any, Dict, Optional, Union, cast
 from botocore.config import Config
 
 from aws_lambda_powertools.utilities import jmespath_utils
-from aws_lambda_powertools.utilities.parameters import AppConfigProvider, GetParameterError, TransformParameterError
+from aws_lambda_powertools.utilities.parameters import (
+    AppConfigProvider,
+    GetParameterError,
+    TransformParameterError,
+)
 
 from ... import Logger
 from .base import StoreProvider
 from .exceptions import ConfigurationStoreError, StoreClientError
-
-TRANSFORM_TYPE = "json"
 
 
 class AppConfigStore(StoreProvider):
@@ -64,13 +66,14 @@ class AppConfigStore(StoreProvider):
         try:
             # parse result conf as JSON, keep in cache for self.max_age seconds
             self.logger.debug(
-                "Fetching configuration from the store", extra={"param_name": self.name, "max_age": self.cache_seconds}
+                "Fetching configuration from the store",
+                extra={"param_name": self.name, "max_age": self.cache_seconds},
             )
             return cast(
                 dict,
                 self._conf_store.get(
                     name=self.name,
-                    transform=TRANSFORM_TYPE,
+                    transform="json",
                     max_age=self.cache_seconds,
                 ),
             )
@@ -101,7 +104,9 @@ class AppConfigStore(StoreProvider):
         if self.envelope:
             self.logger.debug("Envelope enabled; extracting data from config", extra={"envelope": self.envelope})
             config = jmespath_utils.extract_data_from_envelope(
-                data=config, envelope=self.envelope, jmespath_options=self.jmespath_options
+                data=config,
+                envelope=self.envelope,
+                jmespath_options=self.jmespath_options,
             )
 
         return config

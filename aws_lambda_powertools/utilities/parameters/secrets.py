@@ -3,10 +3,17 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 
-from typing import Any, Dict, Optional, Union
+import os
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
 from botocore.config import Config
+
+if TYPE_CHECKING:
+    from mypy_boto3_secretsmanager import SecretsManagerClient
+
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_max_age
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 
@@ -20,7 +27,9 @@ class SecretsProvider(BaseProvider):
     config: botocore.config.Config, optional
         Botocore configuration to pass during client initialization
     boto3_session : boto3.session.Session, optional
-            Boto3 session to use for AWS API communication
+            Boto3 session to create a boto3_client from
+    boto3_client: SecretsManagerClient, optional
+            Boto3 SecretsManager Client to use, boto3_session will be ignored if both are provided
 
     Example
     -------
@@ -60,16 +69,24 @@ class SecretsProvider(BaseProvider):
 
     client: Any = None
 
-    def __init__(self, config: Optional[Config] = None, boto3_session: Optional[boto3.session.Session] = None):
+    def __init__(
+        self,
+        config: Optional[Config] = None,
+        boto3_session: Optional[boto3.session.Session] = None,
+        boto3_client: Optional["SecretsManagerClient"] = None,
+    ):
         """
         Initialize the Secrets Manager client
         """
 
-        config = config or Config()
-        session = boto3_session or boto3.session.Session()
-        self.client = session.client("secretsmanager", config=config)
-
         super().__init__()
+
+        self.client: "SecretsManagerClient" = self._build_boto3_client(
+            service_name="secretsmanager",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
+        )
 
     def _get(self, name: str, **sdk_options) -> str:
         """
@@ -86,7 +103,12 @@ class SecretsProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["SecretId"] = name
 
-        return self.client.get_secret_value(**sdk_options)["SecretString"]
+        secret_value = self.client.get_secret_value(**sdk_options)
+
+        if "SecretString" in secret_value:
+            return secret_value["SecretString"]
+
+        return secret_value["SecretBinary"]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -99,8 +121,8 @@ def get_secret(
     name: str,
     transform: Optional[str] = None,
     force_fetch: bool = False,
-    max_age: int = DEFAULT_MAX_AGE_SECS,
-    **sdk_options
+    max_age: Optional[int] = None,
+    **sdk_options,
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -113,7 +135,7 @@ def get_secret(
         Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     force_fetch: bool, optional
         Force update even before a cached item has expired, defaults to False
-    max_age: int
+    max_age: int, optional
         Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
@@ -147,10 +169,17 @@ def get_secret(
         >>> get_secret("my-secret", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
     return DEFAULT_PROVIDERS["secrets"].get(
-        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+        name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
     )

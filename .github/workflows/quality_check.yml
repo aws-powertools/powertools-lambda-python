@@ -1,0 +1,78 @@
+name: Code quality
+
+# PROCESS
+#
+# 1. Install all dependencies and spin off containers for all supported Python versions
+# 2. Run code formatters and linters (various checks) for code standard
+# 3. Run static typing checker for potential bugs
+# 4. Run entire test suite for regressions except end-to-end (unit, functional, performance)
+# 5. Run static analysis (in addition to CodeQL) for common insecure code practices
+# 6. Run complexity baseline to avoid error-prone bugs and keep maintenance lower
+# 7. Collect and report on test coverage
+
+# USAGE
+#
+# Always triggered on new PRs, PR changes and PR merge.
+
+
+on:
+  pull_request:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
+    branches:
+      - develop
+  push:
+    paths:
+      - "aws_lambda_powertools/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "poetry.lock"
+      - "mypy.ini"
+    branches:
+      - develop
+
+permissions:
+  contents: read
+
+jobs:
+  quality_check:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+    env:
+      PYTHON: "${{ matrix.python-version }}"
+    permissions:
+      contents: read  # checkout code only
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
+      - name: Formatting and Linting
+        run: make lint
+      - name: Static type checking
+        run: make mypy
+      - name: Test with pytest
+        run: make test
+      - name: Security baseline
+        run: make security-baseline
+      - name: Complexity baseline
+        run: make complexity-baseline
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # 3.1.4
+        with:
+          file: ./coverage.xml
+          env_vars: PYTHON
+          name: aws-lambda-powertools-python-codecov

@@ -1,0 +1,16 @@
+[
+    {
+        "level": "INFO",
+        "location": "<module>:4",
+        "message": "Local time",
+        "timestamp": "2022-06-24 11:39:49,421+0200",
+        "service": "payment"
+    },
+    {
+        "level": "INFO",
+        "location": "<module>:7",
+        "message": "GMT time zone",
+        "timestamp": "2022-06-24 09:39:49,421+0100",
+        "service": "order"
+    }
+]

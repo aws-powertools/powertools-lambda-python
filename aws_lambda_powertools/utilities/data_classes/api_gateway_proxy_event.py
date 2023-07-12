@@ -1,5 +1,10 @@
 from typing import Any, Dict, List, Optional
 
+from aws_lambda_powertools.shared.headers_serializer import (
+    BaseHeadersSerializer,
+    HttpApiHeadersSerializer,
+    MultiValueHeadersSerializer,
+)
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseProxyEvent,
     BaseRequestContext,
@@ -106,6 +111,9 @@ class APIGatewayProxyEvent(BaseProxyEvent):
     def stage_variables(self) -> Optional[Dict[str, str]]:
         return self.get("stageVariables")
 
+    def header_serializer(self) -> BaseHeadersSerializer:
+        return MultiValueHeadersSerializer()
+
 
 class RequestContextV2AuthorizerIam(DictWrapper):
     @property
@@ -123,23 +131,26 @@ class RequestContextV2AuthorizerIam(DictWrapper):
         """The principal identifier of the caller making the request."""
         return self.get("callerId")
 
+    def _cognito_identity(self) -> Dict:
+        return self.get("cognitoIdentity", {}) or {}  # not available in FunctionURL
+
     @property
     def cognito_amr(self) -> Optional[List[str]]:
         """This represents how the user was authenticated.
         AMR stands for  Authentication Methods References as per the openid spec"""
-        return self["cognitoIdentity"].get("amr")
+        return self._cognito_identity().get("amr")
 
     @property
     def cognito_identity_id(self) -> Optional[str]:
         """The Amazon Cognito identity ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        return self["cognitoIdentity"].get("identityId")
+        return self._cognito_identity().get("identityId")
 
     @property
     def cognito_identity_pool_id(self) -> Optional[str]:
         """The Amazon Cognito identity pool ID of the caller making the request.
         Available only if the request was signed with Amazon Cognito credentials."""
-        return self["cognitoIdentity"].get("identityPoolId")
+        return self._cognito_identity().get("identityPoolId")
 
     @property
     def principal_org_id(self) -> Optional[str]:
@@ -159,12 +170,14 @@ class RequestContextV2AuthorizerIam(DictWrapper):
 
 class RequestContextV2Authorizer(DictWrapper):
     @property
-    def jwt_claim(self) -> Dict[str, Any]:
-        return self["jwt"]["claims"]
+    def jwt_claim(self) -> Optional[Dict[str, Any]]:
+        jwt = self.get("jwt") or {}  # not available in FunctionURL
+        return jwt.get("claims")
 
     @property
-    def jwt_scopes(self) -> List[str]:
-        return self["jwt"]["scopes"]
+    def jwt_scopes(self) -> Optional[List[str]]:
+        jwt = self.get("jwt") or {}  # not available in FunctionURL
+        return jwt.get("scopes")
 
     @property
     def get_lambda(self) -> Optional[Dict[str, Any]]:
@@ -245,3 +258,6 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self.request_context.http.method
+
+    def header_serializer(self):
+        return HttpApiHeadersSerializer()

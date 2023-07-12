@@ -1,0 +1,17 @@
+{
+    "invocationId": "2b4d1ad9-2f48-94bd-a088-767c317e994a",
+    "deliveryStreamArn": "arn:aws:firehose:us-east-2:123456789012:deliverystream/delivery-stream-name",
+    "region": "us-east-2",
+    "records": [
+       {
+          "recordId": "record1",
+          "approximateArrivalTimestamp": 1664029185290,
+          "data": "SGVsbG8gV29ybGQ="
+       },
+       {
+          "recordId": "record2",
+          "approximateArrivalTimestamp": 1664029186945,
+          "data": "eyJIZWxsbyI6ICJXb3JsZCJ9"
+       }
+    ]
+ }

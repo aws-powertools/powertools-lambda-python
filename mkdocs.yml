@@ -1,15 +1,18 @@
-site_name: Lambda Powertools Python
-site_description: AWS Lambda Powertools for Python
+site_name: Powertools for AWS Lambda (Python)
+site_description: Powertools for AWS Lambda (Python)
 site_author: Amazon Web Services
-repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 
 nav:
   - Homepage: index.md
   - Changelog: changelog.md
   - Tutorial: tutorial/index.md
-  - Roadmap: https://github.com/awslabs/aws-lambda-powertools-roadmap/projects/1" target="_blank
+  - Roadmap: roadmap.md
   - API reference: api/" target="_blank
+  - Upgrade guide: upgrade.md
+  - We Made This (Community): we_made_this.md
+  - Security: security.md
   - Core utilities:
       - core/tracer.md
       - core/logger.md
@@ -18,7 +21,6 @@ nav:
           - core/event_handler/api_gateway.md
           - core/event_handler/appsync.md
   - Utilities:
-      - utilities/middleware_factory.md
       - utilities/parameters.md
       - utilities/batch.md
       - utilities/typing.md
@@ -27,6 +29,8 @@ nav:
       - utilities/parser.md
       - utilities/idempotency.md
       - utilities/feature_flags.md
+      - utilities/streaming.md
+      - utilities/middleware_factory.md
       - utilities/jmespath_functions.md
       - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
 
@@ -47,6 +51,7 @@ theme:
         icon: material/toggle-switch
         name: Switch to light mode
   features:
+    - header.autohide
     - navigation.sections
     - navigation.expand
     - navigation.top
@@ -54,6 +59,7 @@ theme:
     - navigation.indexes
     - navigation.tracking
     - content.code.annotate
+    - content.code.copy
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -70,16 +76,23 @@ markdown_extensions:
   - pymdownx.snippets:
       base_path: "."
       check_paths: true
+      restrict_base_path: false
   - meta
   - toc:
       permalink: true
       toc_depth: 4
   - attr_list
-  - pymdownx.emoji
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
   - pymdownx.inlinehilite
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
 
-copyright: Copyright &copy; 2021 Amazon Web Services
+copyright: Copyright &copy; 2022 Amazon Web Services
 
 plugins:
   - git-revision-date

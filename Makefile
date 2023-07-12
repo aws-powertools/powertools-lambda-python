@@ -6,30 +6,45 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
-	poetry install --extras "pydantic"
+	@$(MAKE) dev-version-plugin
+	poetry install --extras "all"
+	pre-commit install
+
+dev-gitpod:
+	pip install --upgrade pip poetry
+	@$(MAKE) dev-version-plugin
+	poetry install --extras "all"
 	pre-commit install
 
 format:
-	poetry run isort aws_lambda_powertools tests
-	poetry run black aws_lambda_powertools tests
+	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run flake8 aws_lambda_powertools/* tests/*
+	poetry run ruff aws_lambda_powertools tests examples
+
+lint-docs:
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
+
+lint-docs-fix:
+	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
-	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=xml
+	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
 unit-test:
 	poetry run pytest tests/unit
 
+e2e-test:
+	python parallel_run_e2e.py
+
 coverage-html:
-	poetry run pytest -m "not perf" --cov=aws_lambda_powertools --cov-report=html
+	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=html
 
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
 
 build: pr
 	poetry build
@@ -40,12 +55,13 @@ release-docs:
 	@echo "Updating website docs"
 	poetry run mike deploy --push --update-aliases ${VERSION} ${ALIAS}
 	@echo "Building API docs"
-	@$(MAKE) build-docs-api
+	@$(MAKE) build-docs-api VERSION=${VERSION}
 
 build-docs-api:
 	poetry run pdoc --html --output-dir ./api/ ./aws_lambda_powertools --force
 	mv -f ./api/aws_lambda_powertools/* ./api/
 	rm -rf ./api/aws_lambda_powertools
+	mkdir ${VERSION} && cp -R api ${VERSION}
 
 docs-local:
 	poetry run mkdocs serve
@@ -84,8 +100,14 @@ release: pr
 	$(MAKE) release-prod
 
 changelog:
-	@echo "[+] Pre-generating CHANGELOG for tag: $$(git describe --abbrev=0 --tag)"
-	docker run -v "${PWD}":/workdir quay.io/git-chglog/git-chglog $$(git describe --abbrev=0 --tag).. > TMP_CHANGELOG.md
+	git fetch --tags origin
+	CURRENT_VERSION=$(shell git describe --abbrev=0 --tag) ;\
+	echo "[+] Pre-generating CHANGELOG for tag: $$CURRENT_VERSION" ;\
+	docker run -v "${PWD}":/workdir quay.io/git-chglog/git-chglog:0.15.1 > CHANGELOG.md
 
 mypy:
-	poetry run mypy --pretty aws_lambda_powertools
+	poetry run mypy --pretty aws_lambda_powertools examples
+
+
+dev-version-plugin:
+	poetry self add git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4

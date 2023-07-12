@@ -77,6 +77,7 @@
           "dkimVerdict": {
             "status": "PASS"
           },
+          "dmarcPolicy": "reject",
           "processingTimeMillis": 574,
           "action": {
             "type": "Lambda",

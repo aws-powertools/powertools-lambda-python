@@ -1,0 +1,17 @@
+[
+    {
+        "level": "INFO",
+        "location": "collect.handler:9",
+        "message": "Collecting payment",
+        "timestamp": "2021-05-03 11:47:12,494+0200",
+        "service": "payment",
+        "sample_key": "value"
+    },
+    {
+        "level": "INFO",
+        "location": "collect.handler:12",
+        "message": "Collecting payment without sample key",
+        "timestamp": "2021-05-03 11:47:12,494+0200",
+        "service": "payment"
+    }
+]

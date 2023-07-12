@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Powertools for AWS Lambda (Python) version
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.10
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: booking
+        POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+
+    Layers:
+      # Find the latest Layer version in the official documentation
+      # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:37
+
+Resources:
+  CaptureLambdaHandlerExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src
+      Handler: capture_lambda_handler.handler

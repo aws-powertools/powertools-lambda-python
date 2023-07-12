@@ -1,0 +1,23 @@
+@model
+type Merchant {
+    id: String!
+    name: String!
+    description: String
+    # Resolves to `common_field`
+    commonField: String  @function(name: "merchantInfo-${env}")
+}
+
+type Location {
+    id: ID!
+    name: String!
+    address: String
+    # Resolves to `common_field`
+    commonField: String  @function(name: "merchantInfo-${env}")
+}
+
+type Query {
+  # List of locations resolves to `list_locations`
+  listLocations(page: Int, size: Int): [Location] @function(name: "merchantInfo-${env}")
+  # List of locations resolves to `list_locations`
+  findMerchant(search: str): [Merchant] @function(name: "searchMerchant-${env}")
+}

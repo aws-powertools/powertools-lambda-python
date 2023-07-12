@@ -11,7 +11,9 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    BasePersistenceLayer,
+)
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -62,6 +64,8 @@ def idempotent(
         return handler(event, context)
 
     config = config or IdempotencyConfig()
+    config.register_lambda_context(context)
+
     args = event, context
     idempotency_handler = IdempotencyHandler(
         function=handler,
@@ -130,13 +134,13 @@ def idempotent_function(
         if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
             return function(*args, **kwargs)
 
-        payload = kwargs.get(data_keyword_argument)
-
-        if not payload:
+        if data_keyword_argument not in kwargs:
             raise RuntimeError(
                 f"Unable to extract '{data_keyword_argument}' from keyword arguments."
-                f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument"
+                f" Ensure this exists in your function's signature as well as the caller used it as a keyword argument",
             )
+
+        payload = kwargs.get(data_keyword_argument)
 
         idempotency_handler = IdempotencyHandler(
             function=function,

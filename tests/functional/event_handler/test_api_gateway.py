@@ -30,15 +30,15 @@ from aws_lambda_powertools.event_handler.exceptions import (
     UnauthorizedError,
 )
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.utilities.data_classes import ALBEvent, APIGatewayProxyEvent, APIGatewayProxyEventV2
+from aws_lambda_powertools.utilities.data_classes import (
+    ALBEvent,
+    APIGatewayProxyEvent,
+    APIGatewayProxyEventV2,
+    event_source,
+)
 from tests.functional.utils import load_event
-
-
-@pytest.fixture
-def json_dump():
-    # our serializers reduce length to save on costs; fixture to replicate separators
-    return lambda obj: json.dumps(obj, separators=(",", ":"))
 
 
 def read_media(file_name: str) -> bytes:
@@ -47,6 +47,7 @@ def read_media(file_name: str) -> bytes:
 
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+LOAD_GW_EVENT_TRAILING_SLASH = load_event("apiGatewayProxyEventPathTrailingSlash.json")
 
 
 def test_alb_event():
@@ -70,6 +71,27 @@ def test_alb_event():
     assert result["body"] == "foo"
 
 
+def test_alb_event_path_trailing_slash(json_dump):
+    # GIVEN an Application Load Balancer proxy type event
+    app = ALBResolver()
+
+    @app.get("/lambda")
+    def foo():
+        assert isinstance(app.current_event, ALBEvent)
+        assert app.lambda_context == {}
+        assert app.current_event.request_context.elb_target_group_arn is not None
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler using path with trailing "/"
+    result = app(load_event("albEventPathTrailingSlash.json"), {})
+
+    # THEN
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+
 def test_api_gateway_v1():
     # GIVEN a Http API V1 proxy type event
     app = APIGatewayRestResolver()
@@ -87,7 +109,43 @@ def test_api_gateway_v1():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
+def test_api_gateway_v1_path_trailing_slash():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT_TRAILING_SLASH, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
+def test_api_gateway_v1_cookies():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+    cookie = Cookie(name="CookieMonster", value="MonsterCookie")
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=[cookie])
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Set-Cookie"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
 def test_api_gateway():
@@ -105,8 +163,26 @@ def test_api_gateway():
     # THEN process event correctly
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
     assert result["body"] == "foo"
+
+
+def test_api_gateway_event_path_trailing_slash(json_dump):
+    # GIVEN a Rest API Gateway proxy type event
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT_TRAILING_SLASH, {})
+    # THEN
+    assert result["statusCode"] == 404
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
 
 
 def test_api_gateway_v2():
@@ -127,7 +203,47 @@ def test_api_gateway_v2():
     # AND set the current_event type as APIGatewayProxyEventV2
     assert result["statusCode"] == 200
     assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert "Cookies" not in result["headers"]
     assert result["body"] == "tom"
+
+
+def test_api_gateway_v2_http_path_trailing_slash(json_dump):
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        post_data = app.current_event.json_body
+        return Response(200, content_types.TEXT_PLAIN, post_data["username"])
+
+    # WHEN calling the event handler
+    result = app(load_event("apiGatewayProxyV2EventPathTrailingSlash.json"), {})
+
+    # THEN expect a 404 response
+    assert result["statusCode"] == 404
+    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    expected = {"statusCode": 404, "message": "Not found"}
+    assert result["body"] == json_dump(expected)
+
+
+def test_api_gateway_v2_cookies():
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayHttpResolver()
+    cookie = Cookie(name="CookieMonster", value="MonsterCookie")
+
+    @app.post("/my/path")
+    def my_path() -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        return Response(200, content_types.TEXT_PLAIN, "Hello world", cookies=[cookie])
+
+    # WHEN calling the event handler
+    result = app(load_event("apiGatewayProxyV2Event.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEventV2
+    assert result["statusCode"] == 200
+    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["cookies"] == ["CookieMonster=MonsterCookie; Secure"]
 
 
 def test_include_rule_matching():
@@ -144,7 +260,7 @@ def test_include_rule_matching():
 
     # THEN
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
     assert result["body"] == "path"
 
 
@@ -176,7 +292,7 @@ def test_no_matches():
         return app.resolve(event, context)
 
     # Also check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -195,7 +311,7 @@ def test_no_matches():
     result = handler(LOAD_GW_EVENT, None)
     assert result["statusCode"] == 404
     # AND cors headers are not returned
-    assert "Access-Control-Allow-Origin" not in result["headers"]
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
 def test_cors():
@@ -218,17 +334,82 @@ def test_cors():
     result = handler(LOAD_GW_EVENT, None)
 
     # THEN the headers should include cors headers
-    assert "headers" in result
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_HTML
-    assert headers["Access-Control-Allow-Origin"] == "*"
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
     assert "Access-Control-Allow-Credentials" not in headers
-    assert headers["Access-Control-Allow-Headers"] == ",".join(sorted(CORSConfig._REQUIRED_HEADERS))
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
     mock_event = {"path": "/my/request", "httpMethod": "GET"}
     result = handler(mock_event, None)
-    assert "Access-Control-Allow-Origin" not in result["headers"]
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_cors_preflight_body_is_empty_not_null():
+    # GIVEN CORS is configured
+    app = ALBResolver(cors=CORSConfig())
+
+    event = {"path": "/my/request", "httpMethod": "OPTIONS"}
+
+    # WHEN calling the event handler
+    result = app(event, {})
+
+    # THEN there body should be empty strings
+    assert result["body"] == ""
+
+
+def test_override_route_compress_parameter():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=False
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request", compress=True)
+    def with_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=False)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then the response is not compressed
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+    assert result["multiValueHeaders"].get("Content-Encoding") is None
+
+
+def test_response_with_compress_enabled():
+    # GIVEN a function
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=True
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request")
+    def route_without_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=True)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then gzip the response and base64 encode as a string
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
 
 
 def test_compress():
@@ -254,8 +435,8 @@ def test_compress():
     assert isinstance(body, str)
     decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
     assert decompress == expected_value
-    headers = result["headers"]
-    assert headers["Content-Encoding"] == "gzip"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
 
 
 def test_base64_encode():
@@ -265,7 +446,7 @@ def test_base64_encode():
 
     @app.get("/my/path", compress=True)
     def read_image() -> Response:
-        return Response(200, "image/png", read_media("idempotent_sequence_exception.png"))
+        return Response(200, "image/png", read_media("tracer_utility_showcase.png"))
 
     # WHEN calling the event handler
     result = app(mock_event, None)
@@ -274,8 +455,8 @@ def test_base64_encode():
     assert result["isBase64Encoded"] is True
     body = result["body"]
     assert isinstance(body, str)
-    headers = result["headers"]
-    assert headers["Content-Encoding"] == "gzip"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
 
 
 def test_compress_no_accept_encoding():
@@ -290,6 +471,24 @@ def test_compress_no_accept_encoding():
 
     # WHEN calling the event handler
     result = app({"path": "/my/path", "httpMethod": "GET", "headers": {}}, None)
+
+    # THEN don't perform any gzip compression
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+
+
+def test_compress_no_accept_encoding_null_headers():
+    # GIVEN a function with compress=True
+    # AND the request has no headers
+    app = ApiGatewayResolver()
+    expected_value = "Foo"
+
+    @app.get("/my/path", compress=True)
+    def return_text() -> Response:
+        return Response(200, content_types.TEXT_PLAIN, expected_value)
+
+    # WHEN calling the event handler
+    result = app({"path": "/my/path", "httpMethod": "GET", "headers": None}, None)
 
     # THEN don't perform any gzip compression
     assert result["isBase64Encoded"] is False
@@ -312,9 +511,9 @@ def test_cache_control_200():
     result = handler({"path": "/success", "httpMethod": "GET"}, None)
 
     # THEN return the set Cache-Control
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_HTML
-    assert headers["Cache-Control"] == "max-age=600"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Cache-Control"] == ["max-age=600"]
 
 
 def test_cache_control_non_200():
@@ -333,9 +532,9 @@ def test_cache_control_non_200():
     result = handler({"path": "/fails", "httpMethod": "DELETE"}, None)
 
     # THEN return a Cache-Control of "no-cache"
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_HTML
-    assert headers["Cache-Control"] == "no-cache"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Cache-Control"] == ["no-cache"]
 
 
 def test_rest_api():
@@ -352,7 +551,7 @@ def test_rest_api():
 
     # THEN automatically process this as a json rest api response
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected_str = json.dumps(expected_dict, separators=(",", ":"), indent=None, cls=Encoder)
     assert result["body"] == expected_str
 
@@ -367,7 +566,7 @@ def test_handling_response_type():
             status_code=404,
             content_type="used-if-not-set-in-header",
             body="Not found",
-            headers={"Content-Type": "header-content-type-wins", "custom": "value"},
+            headers={"Content-Type": ["header-content-type-wins"], "custom": ["value"]},
         )
 
     # WHEN calling the event handler
@@ -375,9 +574,37 @@ def test_handling_response_type():
 
     # THEN the result can include some additional field control like overriding http headers
     assert result["statusCode"] == 404
-    assert result["headers"]["Content-Type"] == "header-content-type-wins"
-    assert result["headers"]["custom"] == "value"
+    assert result["multiValueHeaders"]["Content-Type"] == ["header-content-type-wins"]
+    assert result["multiValueHeaders"]["custom"] == ["value"]
     assert result["body"] == "Not found"
+
+
+def test_cors_multi_origin():
+    # GIVEN a custom cors configuration with multiple origins
+    cors_config = CORSConfig(allow_origin="https://origin1", extra_origins=["https://origin2", "https://origin3"])
+    app = ApiGatewayResolver(cors=cors_config)
+
+    @app.get("/cors")
+    def get_with_cors():
+        return {}
+
+    # WHEN calling the event handler with the correct Origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://origin3"}}
+    result = app(event, None)
+
+    # THEN routes by default return the custom cors headers
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert headers["Access-Control-Allow-Origin"] == ["https://origin3"]
+
+    # WHEN calling the event handler with the wrong origin
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://wrong.origin"}}
+    result = app(event, None)
+
+    # THEN routes by default return the custom cors headers
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert "Access-Control-Allow-Origin" not in headers
 
 
 def test_custom_cors_config():
@@ -391,7 +618,7 @@ def test_custom_cors_config():
         allow_credentials=True,
     )
     app = ApiGatewayResolver(cors=cors_config)
-    event = {"path": "/cors", "httpMethod": "GET"}
+    event = {"path": "/cors", "httpMethod": "GET", "headers": {"Origin": "https://foo1"}}
 
     @app.get("/cors")
     def get_with_cors():
@@ -405,16 +632,16 @@ def test_custom_cors_config():
     result = app(event, None)
 
     # THEN routes by default return the custom cors headers
-    assert "headers" in result
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.APPLICATION_JSON
-    assert headers["Access-Control-Allow-Origin"] == cors_config.allow_origin
-    expected_allows_headers = ",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert headers["Access-Control-Allow-Origin"] == ["https://foo1"]
+    expected_allows_headers = [",".join(sorted(set(allow_header + cors_config._REQUIRED_HEADERS)))]
     assert headers["Access-Control-Allow-Headers"] == expected_allows_headers
-    assert headers["Access-Control-Expose-Headers"] == ",".join(cors_config.expose_headers)
-    assert headers["Access-Control-Max-Age"] == str(cors_config.max_age)
+    assert headers["Access-Control-Expose-Headers"] == [",".join(cors_config.expose_headers)]
+    assert headers["Access-Control-Max-Age"] == [str(cors_config.max_age)]
     assert "Access-Control-Allow-Credentials" in headers
-    assert headers["Access-Control-Allow-Credentials"] == "true"
+    assert headers["Access-Control-Allow-Credentials"] == ["true"]
 
     # AND custom cors was set on the app
     assert isinstance(app._cors, CORSConfig)
@@ -423,7 +650,7 @@ def test_custom_cors_config():
     # AND routes without cors don't include "Access-Control" headers
     event = {"path": "/another-one", "httpMethod": "GET"}
     result = app(event, None)
-    headers = result["headers"]
+    headers = result["multiValueHeaders"]
     assert "Access-Control-Allow-Origin" not in headers
 
 
@@ -438,7 +665,7 @@ def test_no_content_response():
     # THEN return an None body and no Content-Type header
     assert result["statusCode"] == response.status_code
     assert result["body"] is None
-    headers = result["headers"]
+    headers = result["multiValueHeaders"]
     assert "Content-Type" not in headers
 
 
@@ -451,9 +678,9 @@ def test_no_matches_with_cors():
     result = app({"path": "/another-one", "httpMethod": "GET"}, None)
 
     # THEN return a 404
-    # AND cors headers are returned
+    # AND cors headers are NOT returned (because no Origin header was passed in)
     assert result["statusCode"] == 404
-    assert "Access-Control-Allow-Origin" in result["headers"]
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
     assert "Not found" in result["body"]
 
 
@@ -475,16 +702,16 @@ def test_cors_preflight():
         ...
 
     # WHEN calling the handler
-    result = app({"path": "/foo", "httpMethod": "OPTIONS"}, None)
+    result = app({"path": "/foo", "httpMethod": "OPTIONS", "headers": {"Origin": "http://example.org"}}, None)
 
     # THEN return no content
     # AND include Access-Control-Allow-Methods of the cors methods used
     assert result["statusCode"] == 204
-    assert result["body"] is None
-    headers = result["headers"]
+    assert result["body"] == ""
+    headers = result["multiValueHeaders"]
     assert "Content-Type" not in headers
-    assert "Access-Control-Allow-Origin" in result["headers"]
-    assert headers["Access-Control-Allow-Methods"] == "DELETE,GET,OPTIONS"
+    assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Methods"] == [",".join(sorted(["DELETE", "GET", "OPTIONS"]))]
 
 
 def test_custom_preflight_response():
@@ -499,23 +726,26 @@ def test_custom_preflight_response():
             status_code=200,
             content_type=content_types.TEXT_HTML,
             body="Foo",
-            headers={"Access-Control-Allow-Methods": "CUSTOM"},
+            headers={"Access-Control-Allow-Methods": ["CUSTOM"]},
         )
 
     @app.route(method="CUSTOM", rule="/some-call", cors=True)
     def custom_method():
         ...
 
+    # AND the request includes an origin
+    headers = {"Origin": "https://example.org"}
+
     # WHEN calling the handler
-    result = app({"path": "/some-call", "httpMethod": "OPTIONS"}, None)
+    result = app({"path": "/some-call", "httpMethod": "OPTIONS", "headers": headers}, None)
 
     # THEN return the custom preflight response
     assert result["statusCode"] == 200
     assert result["body"] == "Foo"
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_HTML
-    assert "Access-Control-Allow-Origin" in result["headers"]
-    assert headers["Access-Control-Allow-Methods"] == "CUSTOM"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert "Access-Control-Allow-Origin" in result["multiValueHeaders"]
+    assert headers["Access-Control-Allow-Methods"] == ["CUSTOM"]
 
 
 def test_service_error_responses(json_dump):
@@ -533,7 +763,7 @@ def test_service_error_responses(json_dump):
     # THEN return the bad request error response
     # AND status code equals 400
     assert result["statusCode"] == 400
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected = {"statusCode": 400, "message": "Missing required parameter"}
     assert result["body"] == json_dump(expected)
 
@@ -548,7 +778,7 @@ def test_service_error_responses(json_dump):
     # THEN return the unauthorized error response
     # AND status code equals 401
     assert result["statusCode"] == 401
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected = {"statusCode": 401, "message": "Unauthorized"}
     assert result["body"] == json_dump(expected)
 
@@ -563,7 +793,7 @@ def test_service_error_responses(json_dump):
     # THEN return the not found error response
     # AND status code equals 404
     assert result["statusCode"] == 404
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected = {"statusCode": 404, "message": "Not found"}
     assert result["body"] == json_dump(expected)
 
@@ -578,7 +808,7 @@ def test_service_error_responses(json_dump):
     # THEN return the internal server error response
     # AND status code equals 500
     assert result["statusCode"] == 500
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     expected = {"statusCode": 500, "message": "Internal server error"}
     assert result["body"] == json_dump(expected)
 
@@ -593,8 +823,9 @@ def test_service_error_responses(json_dump):
     # THEN return the service error response
     # AND status code equals 502
     assert result["statusCode"] == 502
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
-    assert "Access-Control-Allow-Origin" in result["headers"]
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    # Because no Origin was passed in, there is not Allow-Origin on the output
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
     expected = {"statusCode": 502, "message": "Something went wrong!"}
     assert result["body"] == json_dump(expected)
 
@@ -617,8 +848,8 @@ def test_debug_unhandled_exceptions_debug_on():
     # AND include the exception traceback in the response
     assert result["statusCode"] == 500
     assert "Traceback (most recent call last)" in result["body"]
-    headers = result["headers"]
-    assert headers["Content-Type"] == content_types.TEXT_PLAIN
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_PLAIN]
 
 
 def test_debug_unhandled_exceptions_debug_off():
@@ -640,9 +871,9 @@ def test_debug_unhandled_exceptions_debug_off():
     assert e.value.args == ("Foo",)
 
 
-def test_debug_mode_environment_variable(monkeypatch):
+def test_powertools_dev_sets_debug_mode(monkeypatch):
     # GIVEN a debug mode environment variable is set
-    monkeypatch.setenv(constants.EVENT_HANDLER_DEBUG_ENV, "true")
+    monkeypatch.setenv(constants.POWERTOOLS_DEV_ENV, "true")
     app = ApiGatewayResolver()
 
     # WHEN calling app._debug
@@ -676,6 +907,7 @@ def test_debug_print_event(capsys):
 
     # THEN print the event
     out, err = capsys.readouterr()
+    assert "\n" in out
     assert json.loads(out) == event
 
 
@@ -685,17 +917,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -715,12 +947,48 @@ def test_similar_dynamic_routes():
     app.resolve(event, {})
 
 
+def test_similar_dynamic_routes_with_whitespaces():
+    # GIVEN
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    # WHEN
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
+    @app.get("/accounts/<account_id>")
+    def get_account(account_id: str):
+        assert account_id == "single account"
+
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
+    @app.get("/accounts/<account_id>/source_networks")
+    def get_account_networks(account_id: str):
+        assert account_id == "nested account"
+
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
+    @app.get("/accounts/<account_id>/source_networks/<network_id>")
+    def get_network_account(account_id: str, network_id: str):
+        assert account_id == "nested account"
+        assert network_id == "network 123"
+
+    # THEN
+    event["resource"] = "/accounts/{account_id}"
+    event["path"] = "/accounts/single account"
+    assert app.resolve(event, {})["statusCode"] == 200
+
+    event["resource"] = "/accounts/{account_id}/source_networks"
+    event["path"] = "/accounts/nested account/source_networks"
+    assert app.resolve(event, {})["statusCode"] == 200
+
+    event["resource"] = "/accounts/{account_id}/source_networks/{network_id}"
+    event["path"] = "/accounts/nested account/source_networks/network 123"
+    assert app.resolve(event, {})["statusCode"] == 200
+
+
 @pytest.mark.parametrize(
     "req",
     [
         pytest.param(123456789, id="num"),
         pytest.param("user@example.com", id="email"),
-        pytest.param("-._~'!*:@,;()", id="safe-rfc3986"),
+        pytest.param("-._~'!*:@,;()=", id="safe-rfc3986"),
         pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
     ],
 )
@@ -869,7 +1137,7 @@ def test_api_gateway_request_path_equals_strip_prefix():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router():
@@ -887,7 +1155,7 @@ def test_api_gateway_app_router():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router_with_params():
@@ -913,7 +1181,7 @@ def test_api_gateway_app_router_with_params():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router_with_prefix():
@@ -932,7 +1200,7 @@ def test_api_gateway_app_router_with_prefix():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router_with_prefix_equals_path():
@@ -952,7 +1220,7 @@ def test_api_gateway_app_router_with_prefix_equals_path():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router_with_different_methods():
@@ -983,7 +1251,7 @@ def test_api_gateway_app_router_with_different_methods():
     app.include_router(router)
 
     # Also check check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1002,7 +1270,7 @@ def test_api_gateway_app_router_with_different_methods():
     result = app(LOAD_GW_EVENT, None)
     assert result["statusCode"] == 404
     # AND cors headers are not returned
-    assert "Access-Control-Allow-Origin" not in result["headers"]
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 
 
 def test_duplicate_routes():
@@ -1061,11 +1329,11 @@ def test_route_multiple_methods():
 
     # THEN events are processed correctly
     assert get_result["statusCode"] == 200
-    assert get_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert get_result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert post_result["statusCode"] == 200
-    assert post_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert post_result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert put_result["statusCode"] == 404
-    assert put_result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert put_result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router_access_to_resolver():
@@ -1084,7 +1352,7 @@ def test_api_gateway_app_router_access_to_resolver():
     result = app(LOAD_GW_EVENT, {})
 
     assert result["statusCode"] == 200
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_exception_handler():
@@ -1110,7 +1378,7 @@ def test_exception_handler():
 
     # THEN call the exception_handler
     assert result["statusCode"] == 418
-    assert result["headers"]["Content-Type"] == content_types.TEXT_HTML
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
     assert result["body"] == "Foo!"
 
 
@@ -1137,7 +1405,7 @@ def test_exception_handler_service_error():
 
     # THEN call the exception_handler
     assert result["statusCode"] == 500
-    assert result["headers"]["Content-Type"] == content_types.APPLICATION_JSON
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert result["body"] == "CUSTOM ERROR FORMAT"
 
 
@@ -1156,7 +1424,7 @@ def test_exception_handler_not_found():
 
     # THEN call the exception_handler
     assert result["statusCode"] == 404
-    assert result["headers"]["Content-Type"] == content_types.TEXT_PLAIN
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_PLAIN]
     assert result["body"] == "I am a teapot!"
 
 
@@ -1174,3 +1442,277 @@ def test_exception_handler_not_found_alt():
 
     # THEN call the @app.not_found() function
     assert result["statusCode"] == 404
+
+
+def test_exception_handler_raises_service_error(json_dump):
+    # GIVEN an exception handler raises a ServiceError (BadRequestError)
+    app = ApiGatewayResolver()
+
+    @app.exception_handler(ValueError)
+    def client_error(ex: ValueError):
+        raise BadRequestError("Bad request")
+
+    @app.get("/my/path")
+    def get_lambda() -> Response:
+        raise ValueError("foo")
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 400
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    expected = {"statusCode": 400, "message": "Bad request"}
+    assert result["body"] == json_dump(expected)
+
+
+def test_exception_handler_supports_list(json_dump):
+    # GIVEN a resolver with an exception handler defined for a multiple exceptions in a list
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler([ValueError, NotFoundError])
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
+def test_exception_handler_supports_multiple_decorators(json_dump):
+    # GIVEN a resolver with an exception handler defined with multiple decorators
+    app = ApiGatewayResolver()
+    event = deepcopy(LOAD_GW_EVENT)
+
+    @app.exception_handler(ValueError)
+    @app.exception_handler(NotFoundError)
+    def multiple_error(ex: Exception):
+        raise BadRequestError("Bad request")
+
+    @app.get("/path/a")
+    def path_a() -> Response:
+        raise ValueError("foo")
+
+    @app.get("/path/b")
+    def path_b() -> Response:
+        raise NotFoundError
+
+    # WHEN calling the app generating each exception
+    for route in ["/path/a", "/path/b"]:
+        event["path"] = route
+        result = app(event, {})
+
+        # THEN call the exception handler in the same way for both exceptions
+        assert result["statusCode"] == 400
+        assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+        expected = {"statusCode": 400, "message": "Bad request"}
+        assert result["body"] == json_dump(expected)
+
+
+def test_event_source_compatibility():
+    # GIVEN
+    app = APIGatewayHttpResolver()
+
+    @app.post("/my/path")
+    def my_path():
+        assert isinstance(app.current_event, APIGatewayProxyEventV2)
+        return {}
+
+    # WHEN
+    @event_source(data_class=APIGatewayProxyEventV2)
+    def handler(event: APIGatewayProxyEventV2, context):
+        assert isinstance(event, APIGatewayProxyEventV2)
+        return app.resolve(event, context)
+
+    # THEN
+    result = handler(load_event("apiGatewayProxyV2Event.json"), None)
+    assert result["statusCode"] == 200
+
+
+def test_response_with_status_code_only():
+    ret = Response(status_code=204)
+    assert ret.status_code == 204
+    assert ret.body is None
+    assert ret.headers == {}
+
+
+def test_append_context():
+    app = APIGatewayRestResolver()
+    app.append_context(is_admin=True)
+    assert app.context.get("is_admin") is True
+
+
+def test_router_append_context():
+    router = Router()
+    router.append_context(is_admin=True)
+    assert router.context.get("is_admin") is True
+
+
+def test_route_context_is_cleared_after_resolve():
+    # GIVEN a Http API V1 proxy type event
+    app = APIGatewayRestResolver()
+    app.append_context(is_admin=True)
+
+    @app.get("/my/path")
+    def my_path():
+        return {"is_admin": app.context["is_admin"]}
+
+    # WHEN event resolution kicks in
+    app.resolve(LOAD_GW_EVENT, {})
+
+    # THEN context should be empty
+    assert app.context == {}
+
+
+def test_router_has_access_to_app_context(json_dump):
+    # GIVEN a Router with registered routes
+    app = ApiGatewayResolver()
+    router = Router()
+    ctx = {"is_admin": True}
+
+    @router.get("/my/path")
+    def my_path():
+        return {"is_admin": router.context["is_admin"]}
+
+    app.include_router(router)
+
+    # WHEN context is added and event resolution kicks in
+    app.append_context(**ctx)
+    ret = app.resolve(LOAD_GW_EVENT, {})
+
+    # THEN response include initial context
+    assert ret["body"] == json_dump(ctx)
+    assert router.context == {}
+
+
+def test_include_router_merges_context():
+    # GIVEN
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    # WHEN
+    app.append_context(is_admin=True)
+    router.append_context(product_access=True)
+
+    app.include_router(router)
+
+    assert app.context == router.context
+
+
+def test_nested_app_decorator():
+    # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
+    app = APIGatewayRestResolver()
+
+    @app.get("/my/path")
+    @app.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200
+
+
+def test_nested_router_decorator():
+    # GIVEN a Http API V1 proxy type event
+    # with a function registered with two distinct routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/path")
+    @router.get("/my/anotherPath")
+    def get_lambda() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"foo": "value"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+    result2 = app(load_event("apiGatewayProxyEventAnotherPath.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result2["statusCode"] == 200
+
+
+def test_dict_response():
+    # GIVEN a dict is returned
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 200 and the content type is json
+    assert response["statusCode"] == 200
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"
+
+
+def test_dict_response_with_status_code():
+    # GIVEN a dict is returned with a status code
+    app = ApiGatewayResolver()
+
+    @app.get("/lambda")
+    def get_message():
+        return {"message": "success"}, 201
+
+    # WHEN calling handler
+    response = app({"httpMethod": "GET", "path": "/lambda"}, None)
+
+    # THEN the body is correctly formatted, the status code is 201 and the content type is json
+    assert response["statusCode"] == 201
+    assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    response_body = json.loads(response["body"])
+    assert response_body["message"] == "success"
+
+
+def test_route_match_prioritize_full_match():
+    # GIVEN a Http API V1, with a function registered with two routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/{path}")
+    def dynamic_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "dynamic"}))
+
+    @router.get("/my/path")
+    def static_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "static"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler with /foo/dynamic
+    response = app(LOAD_GW_EVENT, {})
+
+    # THEN the static_handler should have been called, because it fully matches the path directly
+    response_body = json.loads(response["body"])
+    assert response_body["hello"] == "static"

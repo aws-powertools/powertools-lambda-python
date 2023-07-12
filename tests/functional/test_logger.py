@@ -1,3 +1,4 @@
+import functools
 import inspect
 import io
 import json
@@ -5,16 +6,22 @@ import logging
 import random
 import re
 import string
+import sys
+import warnings
+from ast import Dict
 from collections import namedtuple
 from datetime import datetime, timezone
-from typing import Iterable
+from typing import Any, Callable, Iterable, List, Optional, Union
 
 import pytest
 
-from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools import Logger, Tracer, set_package_logger_handler
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
-from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
+from aws_lambda_powertools.logging.formatter import (
+    BasePowertoolsFormatter,
+    LambdaPowertoolsFormatter,
+)
 from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
@@ -138,7 +145,11 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
@@ -158,7 +169,11 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -242,6 +257,19 @@ def test_logger_append_duplicated(stdout, service_name):
     # THEN subsequent log statements should have the latest value
     log = capture_logging_output(stdout)
     assert "new_value" == log["request_id"]
+
+
+def test_logger_honors_given_exception_keys(stdout, service_name):
+    # GIVEN Logger is initialized with exception and exception_name fields
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN log level info
+    logger.info("log", exception="exception_value", exception_name="exception_name_value")
+
+    # THEN log statements should have these keys
+    log = capture_logging_output(stdout)
+    assert "exception_value" == log["exception"]
+    assert "exception_name_value" == log["exception_name"]
 
 
 def test_logger_invalid_sampling_rate(service_name):
@@ -359,6 +387,23 @@ def test_logger_level_env_var_as_int(monkeypatch, service_name):
         Logger(service=service_name)
 
 
+def test_logger_switch_between_levels(stdout, service_name):
+    # GIVEN a Loggers is initialized with INFO level
+    logger = Logger(service=service_name, level="INFO", stream=stdout)
+    logger.info("message info")
+
+    # WHEN we switch to DEBUG level
+    logger.setLevel(level="DEBUG")
+    logger.debug("message debug")
+
+    # THEN we must have different levels and messages in stdout
+    log_output = capture_multiple_logging_statements_output(stdout)
+    assert log_output[0]["level"] == "INFO"
+    assert log_output[0]["message"] == "message info"
+    assert log_output[1]["level"] == "DEBUG"
+    assert log_output[1]["message"] == "message debug"
+
+
 def test_logger_record_caller_location(stdout, service_name):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -399,6 +444,25 @@ def test_logger_extra_kwargs(stdout, service_name):
     fields = {"request_id": "blah"}
 
     logger.info("with extra fields", extra=fields)
+    logger.info("without extra fields")
+
+    extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN first log should have request_id field in the root structure
+    assert "request_id" in extra_fields_log
+
+    # THEN second log should not have request_id in the root structure
+    assert "request_id" not in no_extra_fields_log
+
+
+def test_logger_arbitrary_fields_as_kwargs(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN `request_id` is an arbitrary field in a log message to the existing structured log
+    fields = {"request_id": "blah"}
+
+    logger.info("with arbitrary fields", **fields)
     logger.info("without extra fields")
 
     extra_fields_log, no_extra_fields_log = capture_multiple_logging_statements_output(stdout)
@@ -524,6 +588,9 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
             for key in keys:
                 self.custom_format.pop(key, None)
 
+        def clear_state(self):
+            self.custom_format.clear()
+
         def format(self, record: logging.LogRecord) -> str:  # noqa: A003
             return json.dumps(
                 {
@@ -531,7 +598,7 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
                     "timestamp": self.formatTime(record),
                     "my_default_key": "test",
                     **self.custom_format,
-                }
+                },
             )
 
     custom_formatter = CustomFormatter()
@@ -562,6 +629,97 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
     assert all(k in log for k in lambda_context_keys)
     assert log["correlation_id"] == "value"
     assert logger.get_correlation_id() is None
+
+
+def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, lambda_context):
+    class CustomFormatter(LambdaPowertoolsFormatter):
+        def __init__(
+            self,
+            json_serializer: Optional[Callable[[Dict], str]] = None,
+            json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
+            json_default: Optional[Callable[[Any], Any]] = None,
+            datefmt: Optional[str] = None,
+            use_datetime_directive: bool = False,
+            log_record_order: Optional[List[str]] = None,
+            utc: bool = False,
+            **kwargs,
+        ):
+            super().__init__(
+                json_serializer,
+                json_deserializer,
+                json_default,
+                datefmt,
+                use_datetime_directive,
+                log_record_order,
+                utc,
+                **kwargs,
+            )
+
+    custom_formatter = CustomFormatter()
+
+    # GIVEN a Logger is initialized with a custom formatter
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formatter)
+
+    # WHEN a lambda function is decorated with logger
+    # and state is to be cleared in the next invocation
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        if event.get("add_key"):
+            logger.append_keys(my_key="value")
+        logger.info("Hello")
+
+    handler({"add_key": True}, lambda_context)
+    handler({}, lambda_context)
+
+    lambda_context_keys = (
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+
+    # THEN my_key should only present once
+    # and lambda contextual info should also be in both logs
+    assert "my_key" in first_log
+    assert "my_key" not in second_log
+    assert all(k in first_log for k in lambda_context_keys)
+    assert all(k in second_log for k in lambda_context_keys)
+
+
+def test_logger_custom_formatter_has_standard_and_custom_keys(stdout, service_name, lambda_context):
+    class CustomFormatter(LambdaPowertoolsFormatter):
+        ...
+
+    # GIVEN a Logger is initialized with a custom formatter
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=CustomFormatter(), my_key="value")
+
+    # WHEN a lambda function is decorated with logger
+    @logger.inject_lambda_context
+    def handler(event, context):
+        logger.info("Hello")
+
+    handler({}, lambda_context)
+
+    standard_keys = (
+        "level",
+        "location",
+        "message",
+        "timestamp",
+        "service",
+        "cold_start",
+        "function_name",
+        "function_memory_size",
+        "function_arn",
+        "function_request_id",
+    )
+
+    log = capture_logging_output(stdout)
+
+    # THEN all standard keys should be available
+    assert all(k in log for k in standard_keys)
+    assert "my_key" in log
 
 
 def test_logger_custom_handler(lambda_context, service_name, tmp_path):
@@ -602,6 +760,64 @@ def test_clear_state_on_inject_lambda_context(lambda_context, stdout, service_na
     assert "my_key" not in second_log
 
 
+def test_clear_state_keeps_standard_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+    standard_keys = ["level", "location", "message", "timestamp", "service"]
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for key in standard_keys:
+        assert key in first_log
+        assert key in second_log
+
+
+def test_clear_state_keeps_custom_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    location_format = "%(module)s.%(funcName)s:clear_state"
+    logger = Logger(service=service_name, stream=stdout, location=location_format, custom_key="foo")
+
+    # WHEN clear_state is set
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        logger.info("Foo")
+
+    # THEN all standard keys should be available as usual
+    handler({}, lambda_context)
+    handler({}, lambda_context)
+
+    first_log, second_log = capture_multiple_logging_statements_output(stdout)
+    for log in (first_log, second_log):
+        assert "foo" == log["custom_key"]
+        assert "test_logger.handler:clear_state" == log["location"]
+
+
+def test_clear_state_keeps_exception_keys(lambda_context, stdout, service_name):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN clear_state is set and an exception was logged
+    @logger.inject_lambda_context(clear_state=True)
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "exception_name" to be "ValueError"
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "ValueError" == log["exception_name"]
+
+
 def test_inject_lambda_context_allows_handler_with_kwargs(lambda_context, stdout, service_name):
     # GIVEN
     logger = Logger(service=service_name, stream=stdout)
@@ -634,8 +850,24 @@ def test_use_datetime(stdout, service_name, utc):
 
     expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
     assert re.fullmatch(
-        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}",
+        log["timestamp"],
     )
+
+
+@pytest.mark.parametrize("utc", [False, True])
+def test_use_rfc3339_iso8601(stdout, service_name, utc):
+    # GIVEN
+    logger = Logger(service=service_name, stream=stdout, use_rfc3339=True, utc=utc)
+    RFC3339_REGEX = r"^((?:(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}:\d{2}(?:\.\d+)?))(Z|[\+-]\d{2}:\d{2})?)$"
+
+    # WHEN a log statement happens
+    logger.info({})
+
+    # THEN the timestamp has the appropriate formatting
+    log = capture_logging_output(stdout)
+
+    assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"
 
 
 def test_inject_lambda_context_log_event_request_data_classes(lambda_context, stdout, lambda_event, service_name):
@@ -654,3 +886,76 @@ def test_inject_lambda_context_log_event_request_data_classes(lambda_context, st
     # THEN logger should log event received from Lambda
     logged_event, _ = capture_multiple_logging_statements_output(stdout)
     assert logged_event["message"] == lambda_event
+
+
+def test_inject_lambda_context_with_additional_args(lambda_context, stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # AND a handler that use additional parameters
+    @logger.inject_lambda_context
+    def handler(event, context, planet, str_end="."):
+        logger.info(f"Hello {planet}{str_end}")
+
+    handler({}, lambda_context, "World", str_end="!")
+
+    # THEN the decorator should included them
+    log = capture_logging_output(stdout)
+
+    assert log["message"] == "Hello World!"
+
+
+def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
+    # GIVEN POWERTOOLS_DEBUG is set
+    monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, "1")
+    logger = logging.getLogger("aws_lambda_powertools")
+
+    # WHEN set_package_logger is used at initialization
+    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Tracer)
+    set_package_logger_handler(stream=stdout)
+    Tracer(disabled=True)
+
+    # THEN Tracer debug log statement should be logged
+    output = stdout.getvalue()
+    assert "Tracing has been disabled" in output
+    assert logger.level == logging.DEBUG
+
+
+def test_powertools_debug_env_var_warning(monkeypatch: pytest.MonkeyPatch):
+    # GIVEN POWERTOOLS_DEBUG is set
+    monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, "1")
+    warning_message = "POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG."
+
+    # WHEN set_package_logger is used at initialization
+    # THEN a warning should be emitted
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        set_package_logger_handler()
+        assert len(w) == 1
+        assert str(w[0].message) == warning_message
+
+
+def test_logger_log_uncaught_exceptions(service_name, stdout):
+    # GIVEN an initialized Logger is set with log_uncaught_exceptions
+    logger = Logger(service=service_name, stream=stdout, log_uncaught_exceptions=True)
+
+    # WHEN Python's exception hook is inspected
+    exception_hook = sys.excepthook
+
+    # THEN it should contain our custom exception hook with a copy of our logger
+    assert isinstance(exception_hook, functools.partial)
+    assert exception_hook.keywords.get("logger") == logger
+
+
+def test_stream_defaults_to_stdout(service_name, capsys):
+    # GIVEN Logger is initialized without any explicit stream
+    logger = Logger(service=service_name)
+    msg = "testing stdout"
+
+    # WHEN logging statements are issued
+    logger.info(msg)
+
+    # THEN we should default to standard output, not standard error.
+    # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
+    log = json.loads(capsys.readouterr().out.strip())
+    assert log["message"] == msg

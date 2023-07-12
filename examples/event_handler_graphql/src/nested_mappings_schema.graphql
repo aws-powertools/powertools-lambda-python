@@ -1,0 +1,21 @@
+schema {
+    query: Query
+}
+
+type Query {
+    listLocations: [Location]
+}
+
+type Location {
+    id: ID!
+    name: String!
+    description: String
+    address: String
+}
+
+type Merchant {
+    id: String!
+    name: String!
+    description: String
+    locations: [Location]
+}

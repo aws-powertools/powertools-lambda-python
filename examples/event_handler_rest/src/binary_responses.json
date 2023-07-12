@@ -1,0 +1,8 @@
+{
+    "headers": {
+        "Accept": "image/svg+xml"
+    },
+    "resource": "/logo",
+    "path": "/logo",
+    "httpMethod": "GET"
+}

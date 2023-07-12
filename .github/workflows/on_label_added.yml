@@ -1,0 +1,62 @@
+name: On Label added
+
+# PROCESS
+#
+# 1. Fetch PR details previously saved from untrusted location
+# 2. Parse details for safety
+# 3. Comment on PR labels `size/XXL` and suggest splitting into smaller PRs if possible
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/record_pr.yml
+#
+# Security Note:
+#
+#   This workflow depends on "Record PR" workflow that runs in an untrusted location (forks) instead of `pull_request_target`.
+#   This enforces zero trust where "Record PR" workflow always runs on fork with zero permissions on GH_TOKEN.
+#   When "Record PR" completes, this workflow runs in our repository with the appropriate permissions and sanitize inputs.
+#
+#   Coupled with "Approve GitHub Action to run on forks", we have confidence no privilege can be escalated,
+#   since any malicious change would need to be approved, and upon social engineering, it'll have zero permissions.
+
+on:
+  workflow_run:
+    workflows: ["Record PR details"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+
+jobs:
+  get_pr_details:
+    permissions:
+      actions: read  # download PR artifact
+      contents: read # checkout code
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    uses: ./.github/workflows/reusable_export_pr_details.yml
+    with:
+      record_pr_workflow_id: ${{ github.event.workflow_run.id }}
+      workflow_origin: ${{ github.event.repository.full_name }}
+    secrets:
+      token: ${{ secrets.GITHUB_TOKEN }}
+
+  split_large_pr:
+    needs: get_pr_details
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # comment on PR
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+      # Maintenance: Persist state per PR as an artifact to avoid spam on label add
+      - name: "Suggest split large Pull Request"
+        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        env:
+          PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
+          PR_ACTION: ${{ needs.get_pr_details.outputs.prAction }}
+          PR_AUTHOR: ${{ needs.get_pr_details.outputs.prAuthor }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const script = require('.github/scripts/comment_on_large_pr.js');
+            await script({github, context, core});

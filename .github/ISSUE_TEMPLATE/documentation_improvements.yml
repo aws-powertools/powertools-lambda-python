@@ -1,0 +1,50 @@
+name: Documentation improvements
+description: Suggest a documentation update to improve everyone's experience
+title: "Docs: TITLE"
+labels: ["documentation", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping us improve everyone's experience. We review documentation updates on a case by case basis.
+  - type: textarea
+    id: search_area
+    attributes:
+      label: What were you searching in the docs?
+      description: Please help us understand how you looked for information that was either unclear or not available
+    validations:
+      required: true
+  - type: input
+    id: area
+    attributes:
+      label: Is this related to an existing documentation section?
+      description: Please share a link, if applicable
+    validations:
+      required: false
+  - type: textarea
+    id: idea
+    attributes:
+      label: How can we improve?
+      description: Please share your thoughts on how we can improve this experience
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Got a suggestion in mind?
+      description: Please suggest a proposed update
+    validations:
+      required: false
+  - type: checkboxes
+    id: acknowledgment
+    attributes:
+      label: Acknowledgment
+      options:
+        - label: I understand the final update might be different from my proposed suggestion, or refused.
+          required: true
+  - type: markdown
+    attributes:
+      value: |
+        ---
+
+        **Disclaimer**: We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.

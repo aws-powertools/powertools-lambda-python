@@ -1,0 +1,9 @@
+{
+    "statusCode": 200,
+    "multiValueHeaders": {
+        "Content-Type": ["application/json"],
+        "Content-Encoding": ["gzip"]
+    },
+    "body": "H4sIAAAAAAACE42STU4DMQyFrxJl3QXln96AMyAW7sSDLCVxiJ0Kqerd8TCCUOgii1EmP/783pOPXjmw+N3L0TfB+hz8brvxtC5KGtHvfMCIkzZx0HT5MPmNnziViIr2dIYoeNr8Q1x3xHsjcVadIbkZJoq2RXU8zzQROLseQ9505NzeCNQdMJNBE+UmY4zbzjAJhWtlZ57sB84BWtul+rteH2HPlVgWARwjqXkxpklK5gmEHAQqJBMtFsGVygcKmNVRjG0wxvuzGF2L0dpVUOKMC3bfJNjJgWMrCuZk7cUp02AiD72D6WKHHwUDKbiJs6AZ0VZXKOUx4uNvzdxT+E4mLcMA+6G8nzrLQkaxkNEVrFKW2VGbJCoCY7q2V3+tiv5kGThyxfTecDWbgGz/NfYXhL6ePgF9PnFdPgMAAA==",
+    "isBase64Encoded": true
+}

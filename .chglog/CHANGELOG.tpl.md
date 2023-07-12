@@ -1,13 +1,18 @@
+<!-- changelog is partially generated, so it doesn't follow headings and required structure, so we disable it. -->
+<!-- markdownlint-disable -->
+
 {{ if .Versions -}}
 <a name="unreleased"></a>
-## Unreleased
+# Unreleased
 
 {{ if .Unreleased.CommitGroups -}}
 {{ range .Unreleased.CommitGroups -}}
-### {{ .Title }}
+## {{ .Title }}
 
 {{ range .Commits -}}
+{{ if and (not (hasPrefix .Subject "changelog rebuild")) (not (hasPrefix .Subject "layer docs update")) (not (hasPrefix .Subject "bump version to")) -}}
 * {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}
+{{ end -}}
 {{ end }}
 {{ end -}}
 {{ end -}}
@@ -17,22 +22,25 @@
 <a name="{{ .Tag.Name }}"></a>
 ## {{ if .Tag.Previous }}[{{ .Tag.Name }}]{{ else }}{{ .Tag.Name }}{{ end }} - {{ datetime "2006-01-02" .Tag.Date }}
 {{ range .CommitGroups -}}
-### {{ .Title }}
+
+## {{ .Title }}
 
 {{ range .Commits -}}
+{{ if and (not (hasPrefix .Subject "changelog rebuild")) (not (hasPrefix .Subject "layer docs update")) (not (hasPrefix .Subject "bump version to")) -}}
 * {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}
+{{ end -}}
 {{ end }}
 {{ end -}}
 
 {{- if .RevertCommits -}}
-### Reverts
+## Reverts
 {{ range .RevertCommits -}}
 * {{ .Revert.Header }}
 {{ end }}
 {{ end -}}
 
 {{- if .MergeCommits -}}
-### Pull Requests
+## Pull Requests
 
 {{ range .MergeCommits -}}
 * {{ .Header }}
@@ -41,7 +49,7 @@
 
 {{- if .NoteGroups -}}
 {{ range .NoteGroups -}}
-### {{ .Title }}
+## {{ .Title }}
 {{ range .Notes }}
 {{ .Body }}
 {{ end }}

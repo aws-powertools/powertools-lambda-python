@@ -1,0 +1,17 @@
+{
+    "typeName": "Merchant",
+    "fieldName": "commonField",
+    "arguments": {},
+    "identity": {
+        "claims": {
+            "iat": 1615366261
+        },
+        "username": "marieellis"
+    },
+    "request": {
+        "headers": {
+            "x-amzn-trace-id": "Root=1-60488877-0b0c4e6727ab2a1c545babd0",
+            "x-forwarded-for": "127.0.0.1"
+        }
+    },
+}

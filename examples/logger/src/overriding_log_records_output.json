@@ -1,0 +1,15 @@
+[
+    {
+        "level": "INFO",
+        "location": "[<module>] overriding_log_records",
+        "message": "Collecting payment",
+        "timestamp": "2022-10-28 14:40:43,801+0200",
+        "service": "payment"
+    },
+    {
+        "level": "INFO",
+        "message": "Calculating points",
+        "timestamp": "2022-10-28 14:40:43,801+0200",
+        "service": "loyalty"
+    }
+]

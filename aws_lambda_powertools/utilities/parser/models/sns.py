@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 from typing import Type as TypingType
-from typing import Union
 
 from pydantic import BaseModel, root_validator
 from pydantic.networks import HttpUrl
@@ -22,17 +21,20 @@ class SnsNotificationModel(BaseModel):
     MessageAttributes: Optional[Dict[str, SnsMsgAttributeModel]]
     Message: Union[str, TypingType[BaseModel]]
     MessageId: str
-    SigningCertUrl: HttpUrl
-    Signature: str
+    SigningCertUrl: Optional[HttpUrl]  # NOTE: FIFO opt-in removes attribute
+    Signature: Optional[str]  # NOTE: FIFO opt-in removes attribute
     Timestamp: datetime
-    SignatureVersion: str
+    SignatureVersion: Optional[str]  # NOTE: FIFO opt-in removes attribute
 
     @root_validator(pre=True, allow_reuse=True)
     def check_sqs_protocol(cls, values):
         sqs_rewritten_keys = ("UnsubscribeURL", "SigningCertURL")
         if any(key in sqs_rewritten_keys for key in values):
-            values["UnsubscribeUrl"] = values.pop("UnsubscribeURL")
-            values["SigningCertUrl"] = values.pop("SigningCertURL")
+            # The sentinel value 'None' forces the validator to fail with
+            # ValidatorError instead of KeyError when the key is missing from
+            # the SQS payload
+            values["UnsubscribeUrl"] = values.pop("UnsubscribeURL", None)
+            values["SigningCertUrl"] = values.pop("SigningCertURL", None)
         return values
 
 

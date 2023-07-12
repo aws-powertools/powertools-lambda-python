@@ -1,12 +1,14 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import NonNegativeFloat
 
 from aws_lambda_powertools.utilities.parser.types import Literal
+
+from .event_bridge import EventBridgeModel
 
 
 class S3EventRecordGlacierRestoreEventData(BaseModel):
@@ -43,8 +45,8 @@ class S3Bucket(BaseModel):
 
 class S3Object(BaseModel):
     key: str
-    size: NonNegativeFloat
-    eTag: str
+    size: Optional[NonNegativeFloat]
+    eTag: Optional[str]
     sequencer: str
     versionId: Optional[str]
 
@@ -54,6 +56,37 @@ class S3Message(BaseModel):
     configurationId: str
     bucket: S3Bucket
     object: S3Object  # noqa: A003,VNE003
+
+
+class S3EventNotificationObjectModel(BaseModel):
+    key: str
+    size: Optional[NonNegativeFloat]
+    etag: str
+    version_id: str = Field(None, alias="version-id")
+    sequencer: Optional[str]
+
+
+class S3EventNotificationEventBridgeBucketModel(BaseModel):
+    name: str
+
+
+class S3EventNotificationEventBridgeDetailModel(BaseModel):
+    version: str
+    bucket: S3EventNotificationEventBridgeBucketModel
+    object: S3EventNotificationObjectModel  # noqa: A003,VNE003
+    request_id: str = Field(None, alias="request-id")
+    requester: str
+    source_ip_address: str = Field(None, alias="source-ip-address")
+    reason: Optional[str]
+    deletion_type: Optional[str] = Field(None, alias="deletion-type")
+    restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
+    source_storage_class: Optional[str] = Field(None, alias="source-storage-class")
+    destination_storage_class: Optional[str] = Field(None, alias="destination-storage-class")
+    destination_access_tier: Optional[str] = Field(None, alias="destination-access-tier")
+
+
+class S3EventNotificationEventBridgeModel(EventBridgeModel):
+    detail: S3EventNotificationEventBridgeDetailModel
 
 
 class S3RecordModel(BaseModel):
@@ -67,6 +100,15 @@ class S3RecordModel(BaseModel):
     responseElements: S3ResponseElements
     s3: S3Message
     glacierEventData: Optional[S3EventRecordGlacierEventData]
+
+    @root_validator
+    def validate_s3_object(cls, values):
+        event_name = values.get("eventName")
+        s3_object = values.get("s3").object
+        if "ObjectRemoved" not in event_name:
+            if s3_object.size is None or s3_object.eTag is None:
+                raise ValueError("S3Object.size and S3Object.eTag are required for non-ObjectRemoved events")
+        return values
 
 
 class S3Model(BaseModel):

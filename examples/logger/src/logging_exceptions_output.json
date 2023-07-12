@@ -1,0 +1,9 @@
+{
+    "level": "ERROR",
+    "location": "collect.handler:15",
+    "message": "Received a HTTP 5xx error",
+    "timestamp": "2021-05-03 11:47:12,494+0200",
+    "service": "payment",
+    "exception_name": "RuntimeError",
+    "exception": "Traceback (most recent call last):\n  File \"<input>\", line 2, in <module> RuntimeError: Unable to fullfil request"
+}

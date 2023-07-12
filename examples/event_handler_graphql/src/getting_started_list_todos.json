@@ -1,0 +1,44 @@
+{
+    "arguments": {},
+    "identity": null,
+    "source": null,
+    "request": {
+        "headers": {
+            "x-forwarded-for": "1.2.3.4, 5.6.7.8",
+            "accept-encoding": "gzip, deflate, br",
+            "cloudfront-viewer-country": "NL",
+            "cloudfront-is-tablet-viewer": "false",
+            "referer": "https://eu-west-1.console.aws.amazon.com/appsync/home?region=eu-west-1",
+            "via": "2.0 9fce949f3749407c8e6a75087e168b47.cloudfront.net (CloudFront)",
+            "cloudfront-forwarded-proto": "https",
+            "origin": "https://eu-west-1.console.aws.amazon.com",
+            "x-api-key": "da1-c33ullkbkze3jg5hf5ddgcs4fq",
+            "content-type": "application/json",
+            "x-amzn-trace-id": "Root=1-606eb2f2-1babc433453a332c43fb4494",
+            "x-amz-cf-id": "SJw16ZOPuMZMINx5Xcxa9pB84oMPSGCzNOfrbJLvd80sPa0waCXzYQ==",
+            "content-length": "114",
+            "x-amz-user-agent": "AWS-Console-AppSync/",
+            "x-forwarded-proto": "https",
+            "host": "ldcvmkdnd5az3lm3gnf5ixvcyy.appsync-api.eu-west-1.amazonaws.com",
+            "accept-language": "en-US,en;q=0.5",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0) Gecko/20100101 Firefox/78.0",
+            "cloudfront-is-desktop-viewer": "true",
+            "cloudfront-is-mobile-viewer": "false",
+            "accept": "*/*",
+            "x-forwarded-port": "443",
+            "cloudfront-is-smarttv-viewer": "false"
+        }
+    },
+    "prev": null,
+    "info": {
+        "parentTypeName": "Query",
+        "selectionSetList": [
+            "id",
+            "title"
+        ],
+        "selectionSetGraphQL": "{\n  id\n  title\n}",
+        "fieldName": "listTodos",
+        "variables": {}
+    },
+    "stash": {}
+}

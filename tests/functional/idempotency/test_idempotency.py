@@ -1,16 +1,28 @@
 import copy
+import datetime
 import sys
-from hashlib import md5
+import warnings
 from unittest.mock import MagicMock
 
 import jmespath
 import pytest
 from botocore import stub
+from botocore.config import Config
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEventV2, event_source
-from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer, IdempotencyConfig
-from aws_lambda_powertools.utilities.idempotency.base import _prepare_data
+from aws_lambda_powertools.utilities.data_classes import (
+    APIGatewayProxyEventV2,
+    event_source,
+)
+from aws_lambda_powertools.utilities.idempotency import (
+    DynamoDBPersistenceLayer,
+    IdempotencyConfig,
+)
+from aws_lambda_powertools.utilities.idempotency.base import (
+    MAX_RETRIES,
+    IdempotencyHandler,
+    _prepare_data,
+)
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -19,12 +31,24 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.idempotency import idempotent, idempotent_function
-from aws_lambda_powertools.utilities.idempotency.persistence.base import BasePersistenceLayer, DataRecord
+from aws_lambda_powertools.utilities.idempotency.idempotency import (
+    idempotent,
+    idempotent_function,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    BasePersistenceLayer,
+    DataRecord,
+)
 from aws_lambda_powertools.utilities.validation import envelopes, validator
-from tests.functional.utils import hash_idempotency_key, json_serialize, load_event
+from tests.functional.idempotency.utils import (
+    build_idempotency_put_item_stub,
+    build_idempotency_update_item_stub,
+    hash_idempotency_key,
+)
+from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
+TESTS_MODULE_PREFIX = "test-func.functional.idempotency.test_idempotency"
 
 
 def get_dataclasses_lib():
@@ -48,22 +72,22 @@ def test_idempotent_lambda_already_completed(
     lambda_context,
 ):
     """
-    Test idempotent decorator where event with matching event key has already been succesfully processed
+    Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
         "Item": {
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
 
     expected_params = {
         "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "ConsistentRead": True,
     }
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -95,11 +119,11 @@ def test_idempotent_lambda_in_progress(
     Test idempotent decorator where lambda_handler is already processing an event with matching event key
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     expected_params = {
         "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "ConsistentRead": True,
     }
     ddb_response = {
@@ -107,7 +131,7 @@ def test_idempotent_lambda_in_progress(
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -147,11 +171,11 @@ def test_idempotent_lambda_in_progress_with_cache(
     """
     save_to_cache_spy = mocker.spy(persistence_store, "_save_to_cache")
     retrieve_from_cache_spy = mocker.spy(persistence_store, "_retrieve_from_cache")
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     expected_params = {
         "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "ConsistentRead": True,
     }
     ddb_response = {
@@ -159,7 +183,7 @@ def test_idempotent_lambda_in_progress_with_cache(
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -203,16 +227,13 @@ def test_idempotent_lambda_first_execution(
     expected_params_update_item,
     expected_params_put_item,
     lambda_response,
-    serialized_lambda_response,
-    deserialized_lambda_response,
-    hashed_idempotency_key,
     lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {}
 
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
@@ -247,7 +268,7 @@ def test_idempotent_lambda_first_execution_cached(
     """
     save_to_cache_spy = mocker.spy(persistence_store, "_save_to_cache")
     retrieve_from_cache_spy = mocker.spy(persistence_store, "_retrieve_from_cache")
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {}
 
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
@@ -275,24 +296,60 @@ def test_idempotent_lambda_first_execution_cached(
     stubber.deactivate()
 
 
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True, "event_key_jmespath": "body"}], indirect=True)
+def test_idempotent_lambda_first_execution_event_mutation(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    lambda_response,
+    lambda_context,
+):
+    """
+    Test idempotent decorator where lambda_handler mutates the event.
+    Ensures we're passing data by value, not reference.
+    """
+    event = copy.deepcopy(lambda_apigw_event)
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = {}
+    stubber.add_response(
+        "put_item",
+        ddb_response,
+        build_idempotency_put_item_stub(data=event["body"]),
+    )
+    stubber.add_response(
+        "update_item",
+        ddb_response,
+        build_idempotency_update_item_stub(data=event["body"], handler_response=lambda_response),
+    )
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        event.pop("body")  # remove exact key we're using for idempotency
+        return lambda_response
+
+    lambda_handler(event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_expired(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_expired,
     lambda_response,
     expected_params_update_item,
     expected_params_put_item,
-    hashed_idempotency_key,
     lambda_context,
 ):
     """
-    Test idempotent decorator when lambda is called with an event it succesfully handled already, but outside of the
+    Test idempotent decorator when lambda is called with an event it successfully handled already, but outside of the
     expiry window
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     ddb_response = {}
 
@@ -315,8 +372,6 @@ def test_idempotent_lambda_exception(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
     hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
@@ -329,10 +384,10 @@ def test_idempotent_lambda_exception(
     # Create a new provider
 
     # Stub the boto3 client
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     ddb_response = {}
-    expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": hashed_idempotency_key}}
+    expected_params_delete_item = {"TableName": TABLE_NAME, "Key": {"id": {"S": hashed_idempotency_key}}}
 
     stubber.add_response("put_item", ddb_response, expected_params_put_item)
     stubber.add_response("delete_item", ddb_response, expected_params_delete_item)
@@ -342,7 +397,7 @@ def test_idempotent_lambda_exception(
     def lambda_handler(event, context):
         raise Exception("Something went wrong!")
 
-    with pytest.raises(Exception):
+    with pytest.raises(Exception, match="Something went wrong!"):
         lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
@@ -350,10 +405,15 @@ def test_idempotent_lambda_exception(
 
 
 @pytest.mark.parametrize(
-    "config_with_validation", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext"},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext"},
+    ],
+    indirect=True,
 )
 def test_idempotent_lambda_already_completed_with_validation_bad_payload(
-    config_with_validation: IdempotencyConfig,
+    idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
     timestamp_future,
@@ -366,7 +426,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
         "Item": {
             "id": {"S": hashed_idempotency_key},
@@ -374,16 +434,16 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
             "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "COMPLETED"},
             "validation": {"S": hashed_validation_key},
-        }
+        },
     }
 
-    expected_params = {"TableName": TABLE_NAME, "Key": {"id": hashed_idempotency_key}, "ConsistentRead": True}
+    expected_params = {"TableName": TABLE_NAME, "Key": {"id": {"S": hashed_idempotency_key}}, "ConsistentRead": True}
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_response("get_item", ddb_response, expected_params)
     stubber.activate()
 
-    @idempotent(config=config_with_validation, persistence_store=persistence_store)
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -406,11 +466,11 @@ def test_idempotent_lambda_expired_during_request(
     lambda_context,
 ):
     """
-    Test idempotent decorator when lambda is called with an event it succesfully handled already. Persistence store
+    Test idempotent decorator when lambda is called with an event it successfully handled already. Persistence store
     returns inconsistent/rapidly changing result between put_item and get_item calls.
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     ddb_response_get_item = {
         "Item": {
@@ -418,12 +478,12 @@ def test_idempotent_lambda_expired_during_request(
             "expiration": {"N": timestamp_expired},
             "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
     ddb_response_get_item_missing = {}
     expected_params_get_item = {
         "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key},
+        "Key": {"id": {"S": hashed_idempotency_key}},
         "ConsistentRead": True,
     }
 
@@ -456,9 +516,6 @@ def test_idempotent_persistence_exception_deleting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
 ):
@@ -466,7 +523,7 @@ def test_idempotent_persistence_exception_deleting(
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
     lambda_handler raises an exception which is retryable.
     """
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     ddb_response = {}
 
@@ -491,9 +548,6 @@ def test_idempotent_persistence_exception_updating(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
     expected_params_put_item,
     lambda_context,
 ):
@@ -501,7 +555,7 @@ def test_idempotent_persistence_exception_updating(
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
     lambda_handler raises an exception which is retryable.
     """
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     ddb_response = {}
 
@@ -526,17 +580,13 @@ def test_idempotent_persistence_exception_getting(
     idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
-    timestamp_future,
-    lambda_response,
-    hashed_idempotency_key,
-    expected_params_put_item,
     lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key, but
     lambda_handler raises an exception which is retryable.
     """
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     stubber.add_client_error("get_item", "UnexpectedException")
@@ -555,30 +605,33 @@ def test_idempotent_persistence_exception_getting(
 
 
 @pytest.mark.parametrize(
-    "config_with_validation", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "payload_validation_jmespath": "requestContext"},
+        {"use_local_cache": True, "payload_validation_jmespath": "requestContext"},
+    ],
+    indirect=True,
 )
 def test_idempotent_lambda_first_execution_with_validation(
-    config_with_validation: IdempotencyConfig,
+    idempotency_config: IdempotencyConfig,
     persistence_store: DynamoDBPersistenceLayer,
     lambda_apigw_event,
     expected_params_update_item_with_validation,
     expected_params_put_item_with_validation,
     lambda_response,
-    hashed_idempotency_key,
-    hashed_validation_key,
     lambda_context,
 ):
     """
     Test idempotent decorator when lambda is executed with an event with a previously unknown event key
     """
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {}
 
     stubber.add_response("put_item", ddb_response, expected_params_put_item_with_validation)
     stubber.add_response("update_item", ddb_response, expected_params_update_item_with_validation)
     stubber.activate()
 
-    @idempotent(config=config_with_validation, persistence_store=persistence_store)
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
     def lambda_handler(event, context):
         return lambda_response
 
@@ -589,7 +642,9 @@ def test_idempotent_lambda_first_execution_with_validation(
 
 
 @pytest.mark.parametrize(
-    "config_without_jmespath", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
+    "config_without_jmespath",
+    [{"use_local_cache": False}, {"use_local_cache": True}],
+    indirect=True,
 )
 def test_idempotent_lambda_with_validator_util(
     config_without_jmespath: IdempotencyConfig,
@@ -607,19 +662,19 @@ def test_idempotent_lambda_with_validator_util(
     validator utility to unwrap the event
     """
 
-    stubber = stub.Stubber(persistence_store.table.meta.client)
+    stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
         "Item": {
             "id": {"S": hashed_idempotency_key_with_envelope},
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
 
     expected_params = {
         "TableName": TABLE_NAME,
-        "Key": {"id": hashed_idempotency_key_with_envelope},
+        "Key": {"id": {"S": hashed_idempotency_key_with_envelope}},
         "ConsistentRead": True,
     }
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -640,6 +695,118 @@ def test_idempotent_lambda_with_validator_util(
     stubber.deactivate()
 
 
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_expires_in_progress_before_expire(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    stubber = stub.Stubber(persistence_store.client)
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(seconds=5)
+    timestamp_expires_in_progress = int((now + period).timestamp() * 1000)
+
+    expected_params_get_item = {
+        "TableName": TABLE_NAME,
+        "Key": {"id": {"S": hashed_idempotency_key}},
+        "ConsistentRead": True,
+    }
+    ddb_response_get_item = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_future},
+            "in_progress_expiration": {"N": str(timestamp_expires_in_progress)},
+            "data": {"S": '{"message": "test", "statusCode": 200'},
+            "status": {"S": "INPROGRESS"},
+        },
+    }
+    stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_expires_in_progress_after_expire(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    lambda_response,
+    hashed_idempotency_key,
+    lambda_context,
+):
+    stubber = stub.Stubber(persistence_store.client)
+
+    for _ in range(MAX_RETRIES + 1):
+        stubber.add_client_error("put_item", "ConditionalCheckFailedException")
+
+        one_second_ago = datetime.datetime.now() - datetime.timedelta(seconds=1)
+        expected_params_get_item = {
+            "TableName": TABLE_NAME,
+            "Key": {"id": {"S": hashed_idempotency_key}},
+            "ConsistentRead": True,
+        }
+        ddb_response_get_item = {
+            "Item": {
+                "id": {"S": hashed_idempotency_key},
+                "expiration": {"N": timestamp_future},
+                "in_progress_expiration": {"N": str(int(one_second_ago.timestamp() * 1000))},
+                "data": {"S": '{"message": "test", "statusCode": 200'},
+                "status": {"S": "INPROGRESS"},
+            },
+        }
+        stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
+
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+def test_idempotent_lambda_expires_in_progress_unavailable_remaining_time():
+    mock_event = {"data": "value"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_lambda_expires_in_progress_unavailable_remaining_time.<locals>.function#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def function(record):
+        return expected_result
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        function(record=mock_event)
+        assert len(w) == 1
+        assert (
+            str(w[-1].message)
+            == "Couldn't determine the remaining time left. Did you call register_lambda_context on IdempotencyConfig?"
+        )
+
+
 def test_data_record_invalid_status_value():
     data_record = DataRecord("key", status="UNSUPPORTED_STATUS")
     with pytest.raises(IdempotencyInvalidStatusError) as e:
@@ -651,7 +818,9 @@ def test_data_record_invalid_status_value():
 def test_data_record_json_to_dict_mapping():
     # GIVEN a data record with status "INPROGRESS" and provided response data
     data_record = DataRecord(
-        "key", status="INPROGRESS", response_data='{"body": "execution finished","statusCode": "200"}'
+        "key",
+        status="INPROGRESS",
+        response_data='{"body": "execution finished","statusCode": "200"}',
     )
 
     # WHEN translating response data to dictionary
@@ -672,8 +841,68 @@ def test_data_record_json_to_dict_mapping_when_response_data_none():
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_expired_data_record(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+    data_record = DataRecord("key", status="EXPIRED", response_data=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        idempotency_handler._handle_for_status(data_record)
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_inprogress_data_record_inconsistent(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(milliseconds=100)
+    timestamp = int((now - period).timestamp() * 1000)
+    data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
+
+    with pytest.raises(IdempotencyInconsistentStateError):
+        idempotency_handler._handle_for_status(data_record)
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
+def test_handler_for_status_inprogress_data_record_consistent(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+):
+    idempotency_handler = IdempotencyHandler(
+        function=lambda a: a,
+        function_payload={},
+        config=idempotency_config,
+        persistence_store=persistence_store,
+    )
+
+    now = datetime.datetime.now()
+    period = datetime.timedelta(milliseconds=100)
+    timestamp = int((now + period).timestamp() * 1000)
+    data_record = DataRecord("key", in_progress_expiry_timestamp=timestamp, status="INPROGRESS", response_data=None)
+
+    with pytest.raises(IdempotencyAlreadyInProgressError):
+        idempotency_handler._handle_for_status(data_record)
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_in_progress_never_saved_to_cache(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a data record with status "INPROGRESS"
     # and persistence_store has use_local_cache = True
@@ -709,7 +938,8 @@ def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_delete_from_cache_when_empty(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN use_local_cache is True AND the local cache is empty
     persistence_store.configure(idempotency_config)
@@ -731,11 +961,6 @@ def test_is_missing_idempotency_key():
     assert BasePersistenceLayer.is_missing_idempotency_key({})
     # GIVEN an empty str THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key("")
-    # GIVEN False THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(False)
-    # GIVEN number 0 THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(0)
-
     # GIVEN None THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key(None)
     # GIVEN a list of Nones THEN is_missing_idempotency_key is True
@@ -745,23 +970,34 @@ def test_is_missing_idempotency_key():
     # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
 
+    # GIVEN True THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(True) is False
+    # GIVEN False THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(False) is False
+    # GIVEN number 0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0) is False
+    # GIVEN number 0.0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0.0) is False
     # GIVEN a str THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
     # GIVEN str "False" THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("False") is False
-    # GIVEN an number THEN is_missing_idempotency_key is False
+    # GIVEN a number THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(1000) is False
     # GIVEN a float THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(10.01) is False
-    # GIVEN a list of all not None THEN is_missing_idempotency_key is False
+    # GIVEN a list with some items THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
 
 
 @pytest.mark.parametrize(
-    "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True
+    "idempotency_config",
+    [{"use_local_cache": False, "event_key_jmespath": "body"}],
+    indirect=True,
 )
 def test_default_no_raise_on_missing_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
     function_name = "foo"
@@ -773,15 +1009,19 @@ def test_default_no_raise_on_missing_idempotency_key(
     hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
-    expected_value = f"test-func.{function_name}#" + md5(json_serialize(None).encode()).hexdigest()
-    assert expected_value == hashed_key
+    assert hashed_key is None
 
 
 @pytest.mark.parametrize(
-    "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "[body, x]"}], indirect=True
+    "idempotency_config",
+    [
+        {"use_local_cache": False, "event_key_jmespath": "[body, x]"},
+    ],
+    indirect=True,
 )
 def test_raise_on_no_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
     persistence_store.configure(idempotency_config)
@@ -803,12 +1043,13 @@ def test_raise_on_no_idempotency_key(
         {
             "use_local_cache": False,
             "event_key_jmespath": "[requestContext.authorizer.claims.sub, powertools_json(body).id]",
-        }
+        },
     ],
     indirect=True,
 )
 def test_jmespath_with_powertools_json(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN an event_key_jmespath with powertools_json custom function
     persistence_store.configure(idempotency_config, "handler")
@@ -829,10 +1070,11 @@ def test_jmespath_with_powertools_json(
 
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
-    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer, lambda_context
+    config_with_jmespath_options: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence store with a custom jmespath_options
-    # AND use a builtin powertools custom function
+    # AND use a builtin Powertools for AWS Lambda (Python) custom function
     persistence_store.configure(config_with_jmespath_options)
 
     with pytest.raises(jmespath.exceptions.UnknownFunctionError, match="Unknown function: powertools_json()"):
@@ -844,8 +1086,20 @@ def test_custom_jmespath_function_overrides_builtin_functions(
 def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
     # GIVEN a miss configured persistence layer
     # like no table was created for the idempotency persistence layer
-    stubber = stub.Stubber(persistence_store.table.meta.client)
-    stubber.add_client_error("put_item", "ResourceNotFoundException")
+    stubber = stub.Stubber(persistence_store.client)
+    service_error_code = "ResourceNotFoundException"
+    service_message = "Custom message"
+
+    exception_message = "Failed to save in progress record to idempotency store"
+    exception_details = (
+        f"An error occurred ({service_error_code}) when calling the PutItem operation: {service_message}"
+    )
+
+    stubber.add_client_error(
+        "put_item",
+        service_error_code,
+        service_message,
+    )
     stubber.activate()
 
     @idempotent(persistence_store=persistence_store)
@@ -855,12 +1109,16 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # WHEN handling the idempotent call
     # AND save_inprogress raises a ClientError
     with pytest.raises(IdempotencyPersistenceLayerError) as e:
-        lambda_handler({}, lambda_context)
+        lambda_handler({"data": "some"}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
+    # AND append downstream exception details
     stubber.assert_no_pending_responses()
     stubber.deactivate()
-    assert "Failed to save in progress record to idempotency store" == e.value.args[0]
+    assert exception_message == e.value.args[0]
+    assert isinstance(e.value.args[1], Exception)
+    assert exception_details in e.value.args[1].args
+    assert f"{exception_message} - ({exception_details})" in str(e.value)
 
 
 def test_handler_raise_idempotency_key_error(persistence_store: DynamoDBPersistenceLayer, lambda_context):
@@ -901,7 +1159,8 @@ class MockPersistenceLayer(BasePersistenceLayer):
 def test_idempotent_lambda_event_source(lambda_context):
     # Scenario to validate that we can use the event_source decorator before or after the idempotent decorator
     mock_event = load_event("apiGatewayProxyV2Event.json")
-    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_lambda_event_source.<locals>.lambda_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(idempotency_key)
     expected_result = {"message": "Foo"}
 
     # GIVEN an event_source decorator
@@ -921,7 +1180,9 @@ def test_idempotent_lambda_event_source(lambda_context):
 def test_idempotent_function():
     # Scenario to validate we can use idempotent_function with any function
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = (
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_function.<locals>.record_handler#{hash_idempotency_key(mock_event)}"
+    )
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -939,7 +1200,7 @@ def test_idempotent_function_arbitrary_args_kwargs():
     # Scenario to validate we can use idempotent_function with a function
     # with an arbitrary number of args and kwargs
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_arbitrary_args_kwargs.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -955,7 +1216,7 @@ def test_idempotent_function_arbitrary_args_kwargs():
 
 def test_idempotent_function_invalid_data_kwarg():
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_invalid_data_kwarg.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
     keyword_argument = "payload"
@@ -992,7 +1253,7 @@ def test_idempotent_function_arg_instead_of_kwarg():
 def test_idempotent_function_and_lambda_handler(lambda_context):
     # Scenario to validate we can use both idempotent_function and idempotent decorators
     mock_event = {"data": "value"}
-    idempotency_key = "test-func.record_handler#" + hash_idempotency_key(mock_event)
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_and_lambda_handler.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
     expected_result = {"message": "Foo"}
 
@@ -1000,7 +1261,9 @@ def test_idempotent_function_and_lambda_handler(lambda_context):
     def record_handler(record):
         return expected_result
 
-    persistence_layer = MockPersistenceLayer("test-func.lambda_handler#" + hash_idempotency_key(mock_event))
+    persistence_layer = MockPersistenceLayer(
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_function_and_lambda_handler.<locals>.lambda_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    )
 
     @idempotent(persistence_store=persistence_layer)
     def lambda_handler(event, _):
@@ -1017,11 +1280,54 @@ def test_idempotent_function_and_lambda_handler(lambda_context):
     assert handler_result == expected_result
 
 
+@pytest.mark.parametrize("data", [None, 0, False])
+def test_idempotent_function_falsy_values(data):
+    # Scenario to validate we can use idempotent_function with any function
+    # receiving a falsy value (`None`, `False`, `0`, etc.)
+    # shouldn't cause a RuntimeError
+    mock_event = data
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_falsy_values.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa: E501
+
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return expected_result
+
+    # WHEN calling the function
+    result = record_handler(record=mock_event)
+    # THEN we expect the function to execute successfully
+    assert result == expected_result
+
+
+@pytest.mark.parametrize("data", [None, 0, False])
+def test_idempotent_function_falsy_values_with_raise_on_no_idempotency_key(
+    data,
+    persistence_store: DynamoDBPersistenceLayer,
+):
+    # GIVEN raise_on_no_idempotency_key is True
+    idempotency_config = IdempotencyConfig(event_key_jmespath="idemKey", raise_on_no_idempotency_key=True)
+
+    @idempotent_function(data_keyword_argument="record", persistence_store=persistence_store, config=idempotency_config)
+    def record_handler(record):
+        return ValueError("Should not be raised")
+
+    # WHEN calling the function
+    with pytest.raises(IdempotencyKeyError) as e:
+        record_handler(record=data)
+
+    # THEN we expect an idempotency key error message
+    assert "No data found to create a hashed idempotency_key" == e.value.args[0]
+
+
 def test_idempotent_data_sorting():
     # Scenario to validate same data in different order hashes to the same idempotency key
     data_one = {"data": "test message 1", "more_data": "more data 1"}
     data_two = {"more_data": "more data 1", "data": "test message 1"}
-    idempotency_key = "test-func.dummy#" + hash_idempotency_key(data_one)
+    idempotency_key = (
+        f"{TESTS_MODULE_PREFIX}.test_idempotent_data_sorting.<locals>.dummy#{hash_idempotency_key(data_one)}"
+    )
     # Assertion will happen in MockPersistenceLayer
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
@@ -1038,7 +1344,7 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
     # Scenario to validate no requests sent to dynamodb table when 'POWERTOOLS_IDEMPOTENCY_DISABLED' is set
     mock_event = {"data": "value"}
 
-    persistence_store.table = MagicMock()
+    persistence_store.client = MagicMock()
 
     monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", "1")
 
@@ -1053,16 +1359,17 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
     dummy(data=mock_event)
     dummy_handler(mock_event, lambda_context)
 
-    assert len(persistence_store.table.method_calls) == 0
+    assert len(persistence_store.client.method_calls) == 0
 
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_function_duplicates(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # Scenario to validate the both methods are called
     mock_event = {"data": "value"}
-    persistence_store.table = MagicMock()
+    persistence_store.client = MagicMock()
 
     @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store, config=idempotency_config)
     def one(data):
@@ -1074,7 +1381,7 @@ def test_idempotent_function_duplicates(
 
     assert one(data=mock_event) == "one"
     assert two(data=mock_event) == "two"
-    assert len(persistence_store.table.method_calls) == 4
+    assert len(persistence_store.client.method_calls) == 0
 
 
 def test_invalid_dynamodb_persistence_layer():
@@ -1084,6 +1391,7 @@ def test_invalid_dynamodb_persistence_layer():
             table_name="Foo",
             key_attr="id",
             sort_key_attr="id",
+            boto_config=Config(region_name="eu-west-1"),
         )
     # and raise a ValueError
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
@@ -1129,7 +1437,7 @@ def test_idempotent_function_dataclass_with_jmespath():
     dataclasses = get_dataclasses_lib()
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
-    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_dataclass_with_jmespath.<locals>.collect_payment#{hash_idempotency_key(mock_event['transaction_id'])}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
     @dataclasses.dataclass
@@ -1154,7 +1462,7 @@ def test_idempotent_function_pydantic_with_jmespath():
     # GIVEN
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
-    idempotency_key = "test-func.collect_payment#" + hash_idempotency_key(mock_event["transaction_id"])
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_pydantic_with_jmespath.<locals>.collect_payment#{hash_idempotency_key(mock_event['transaction_id'])}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
     class Payment(BaseModel):
@@ -1188,7 +1496,7 @@ def test_idempotent_lambda_compound_already_completed(
     Test idempotent decorator having a DynamoDBPersistenceLayer with a compound key
     """
 
-    stubber = stub.Stubber(persistence_store_compound.table.meta.client)
+    stubber = stub.Stubber(persistence_store_compound.client)
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
     ddb_response = {
         "Item": {
@@ -1197,11 +1505,11 @@ def test_idempotent_lambda_compound_already_completed(
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
     expected_params = {
         "TableName": TABLE_NAME,
-        "Key": {"id": "idempotency#", "sk": hashed_idempotency_key},
+        "Key": {"id": {"S": "idempotency#"}, "sk": {"S": hashed_idempotency_key}},
         "ConsistentRead": True,
     }
     stubber.add_response("get_item", ddb_response, expected_params)
@@ -1214,6 +1522,37 @@ def test_idempotent_lambda_compound_already_completed(
 
     lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
     assert lambda_resp == deserialized_lambda_response
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}], indirect=True)
+def test_idempotent_lambda_compound_static_pk_value_has_correct_pk(
+    idempotency_config: IdempotencyConfig,
+    persistence_store_compound_static_pk_value: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    expected_params_put_item_compound_key_static_pk_value,
+    expected_params_update_item_compound_key_static_pk_value,
+    lambda_response,
+    lambda_context,
+):
+    """
+    Test idempotent decorator having a DynamoDBPersistenceLayer with a compound key and a static PK value
+    """
+
+    stubber = stub.Stubber(persistence_store_compound_static_pk_value.client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item_compound_key_static_pk_value)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item_compound_key_static_pk_value)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store_compound_static_pk_value)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()

@@ -1,0 +1,53 @@
+ {
+    "arguments": {
+      "title": "Sample todo mutation"
+    },
+    "identity": null,
+    "source": null,
+    "request": {
+      "headers": {
+        "x-forwarded-for": "203.0.113.1, 203.0.113.18",
+        "cloudfront-viewer-country": "NL",
+        "cloudfront-is-tablet-viewer": "false",
+        "x-amzn-requestid": "fdc4f30b-44c2-475d-b2f9-9da0778d5275",
+        "via": "2.0 f655cacd0d6f7c5dc935ea687af6f3c0.cloudfront.net (CloudFront)",
+        "cloudfront-forwarded-proto": "https",
+        "origin": "https://eu-west-1.console.aws.amazon.com",
+        "content-length": "166",
+        "x-forwarded-proto": "https",
+        "accept-language": "en-US,en;q=0.5",
+        "host": "kiuqayvn4jhhzio6whpnk7xj3a.appsync-api.eu-west-1.amazonaws.com",
+        "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:102.0) Gecko/20100101 Firefox/102.0",
+        "cloudfront-is-mobile-viewer": "false",
+        "accept": "application/json, text/plain, */*",
+        "cloudfront-viewer-asn": "1136",
+        "cloudfront-is-smarttv-viewer": "false",
+        "accept-encoding": "gzip, deflate, br",
+        "referer": "https://eu-west-1.console.aws.amazon.com/",
+        "content-type": "application/json",
+        "x-api-key": "da2-vsqnxwyzgzf4nh6kvoaidtvs7y",
+        "sec-fetch-mode": "cors",
+        "x-amz-cf-id": "0kxqijFPsbGSWJ1u3Z_sUS4Wu2hRoG_2T77aJPuoh_Q4bXAB3x0a3g==",
+        "x-amzn-trace-id": "Root=1-63fef2cf-6d566e9f4a35b99e6212388e",
+        "sec-fetch-dest": "empty",
+        "x-amz-user-agent": "AWS-Console-AppSync/",
+        "cloudfront-is-desktop-viewer": "true",
+        "sec-fetch-site": "cross-site",
+        "x-forwarded-port": "443"
+      },
+      "domainName": null
+    },
+    "prev": null,
+    "info": {
+      "selectionSetList": [
+        "id",
+        "title",
+        "completed"
+      ],
+      "selectionSetGraphQL": "{\n  id\n  title\n  completed\n}",
+      "fieldName": "createTodo",
+      "parentTypeName": "Mutation",
+      "variables": {}
+    },
+    "stash": {}
+}

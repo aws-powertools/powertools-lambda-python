@@ -5,6 +5,12 @@ from ... import Logger
 from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
+from .comparators import (
+    compare_datetime_range,
+    compare_days_of_week,
+    compare_modulo_range,
+    compare_time_range,
+)
 from .exceptions import ConfigurationStoreError
 
 
@@ -42,8 +48,6 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
-        if not context_value:
-            return False
         mapping_by_action = {
             schema.RuleAction.EQUALS.value: lambda a, b: a == b,
             schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
@@ -59,6 +63,10 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
+            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
+            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
+            schema.RuleAction.MODULO_RANGE.value: lambda a, b: compare_modulo_range(a, b),
         }
 
         try:
@@ -69,7 +77,11 @@ class FeatureFlags:
             return False
 
     def _evaluate_conditions(
-        self, rule_name: str, feature_name: str, rule: Dict[str, Any], context: Dict[str, Any]
+        self,
+        rule_name: str,
+        feature_name: str,
+        rule: Dict[str, Any],
+        context: Dict[str, Any],
     ) -> bool:
         """Evaluates whether context matches conditions, return False otherwise"""
         rule_match_value = rule.get(schema.RULE_MATCH_VALUE)
@@ -78,19 +90,27 @@ class FeatureFlags:
         if not conditions:
             self.logger.debug(
                 f"rule did not match, no conditions to match, rule_name={rule_name}, rule_value={rule_match_value}, "
-                f"name={feature_name} "
+                f"name={feature_name} ",
             )
             return False
 
         for condition in conditions:
-            context_value = context.get(str(condition.get(schema.CONDITION_KEY)))
+            context_value = context.get(condition.get(schema.CONDITION_KEY, ""))
             cond_action = condition.get(schema.CONDITION_ACTION, "")
             cond_value = condition.get(schema.CONDITION_VALUE)
+
+            # time based rule actions have no user context. the context is the condition key
+            if cond_action in (
+                schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value,
+                schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
+            ):
+                context_value = condition.get(schema.CONDITION_KEY)  # e.g., CURRENT_TIME
 
             if not self._match_by_action(action=cond_action, condition_value=cond_value, context_value=context_value):
                 self.logger.debug(
                     f"rule did not match action, rule_name={rule_name}, rule_value={rule_match_value}, "
-                    f"name={feature_name}, context_value={str(context_value)} "
+                    f"name={feature_name}, context_value={str(context_value)} ",
                 )
                 return False  # context doesn't match condition
 
@@ -112,7 +132,7 @@ class FeatureFlags:
 
             # Context might contain PII data; do not log its value
             self.logger.debug(
-                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
+                f"Evaluating rule matching, rule={rule_name}, feature={feature_name}, default={str(feat_default)}, boolean_feature={boolean_feature}",  # noqa: E501
             )
             if self._evaluate_conditions(rule_name=rule_name, feature_name=feature_name, rule=rule, context=context):
                 # Maintenance: Revisit before going GA.
@@ -120,7 +140,7 @@ class FeatureFlags:
 
         # no rule matched, return default value of feature
         self.logger.debug(
-            f"no rule matched, returning feature default, default={str(feat_default)}, name={feature_name}, boolean_feature={boolean_feature}"  # noqa: E501
+            f"no rule matched, returning feature default, default={str(feat_default)}, name={feature_name}, boolean_feature={boolean_feature}",  # noqa: E501
         )
         return feat_default
 
@@ -169,7 +189,7 @@ class FeatureFlags:
         # parse result conf as JSON, keep in cache for max age defined in store
         self.logger.debug(f"Fetching schema from registered store, store={self.store}")
         config: Dict = self.store.get_configuration()
-        validator = schema.SchemaValidator(schema=config)
+        validator = schema.SchemaValidator(schema=config, logger=self.logger)
         validator.validate()
 
         return config
@@ -227,21 +247,26 @@ class FeatureFlags:
         # get_enabled_features. We can minimize breaking change, despite Beta label, by having a new
         # method `get_matching_features` returning Dict[feature_name, feature_value]
         boolean_feature = feature.get(
-            schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-        )  # backwards compatability ,assume feature flag
+            schema.FEATURE_DEFAULT_VAL_TYPE_KEY,
+            True,
+        )  # backwards compatibility, assume feature flag
         if not rules:
             self.logger.debug(
-                f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
+                f"no rules found, returning feature default, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}",  # noqa: E501
             )
             # Maintenance: Revisit before going GA. We might to simplify customers on-boarding by not requiring it
             # for non-boolean flags.
             return bool(feat_default) if boolean_feature else feat_default
 
         self.logger.debug(
-            f"looking for rule match, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}"  # noqa: E501
+            f"looking for rule match, name={name}, default={str(feat_default)}, boolean_feature={boolean_feature}",  # noqa: E501
         )
         return self._evaluate_rules(
-            feature_name=name, context=context, feat_default=feat_default, rules=rules, boolean_feature=boolean_feature
+            feature_name=name,
+            context=context,
+            feat_default=feat_default,
+            rules=rules,
+            boolean_feature=boolean_feature,
         )
 
     def get_enabled_features(self, *, context: Optional[Dict[str, Any]] = None) -> List[str]:
@@ -286,8 +311,9 @@ class FeatureFlags:
             rules = feature.get(schema.RULES_KEY, {})
             feature_default_value = feature.get(schema.FEATURE_DEFAULT_VAL_KEY)
             boolean_feature = feature.get(
-                schema.FEATURE_DEFAULT_VAL_TYPE_KEY, True
-            )  # backwards compatability ,assume feature flag
+                schema.FEATURE_DEFAULT_VAL_TYPE_KEY,
+                True,
+            )  # backwards compatibility, assume feature flag
 
             if feature_default_value and not rules:
                 self.logger.debug(f"feature is enabled by default and has no defined rules, name={name}")

@@ -1,0 +1,5 @@
+{
+    "resource": "/subscriptions/{subscription}",
+    "path": "/payment/subscriptions/123",
+    "httpMethod": "GET"
+}

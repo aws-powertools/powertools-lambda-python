@@ -1,0 +1,10 @@
+{
+    "level": "INFO",
+    "location": "<module>:19",
+    "message": {
+        "ingestion_time": "2022-06-24T10:12:09.526365",
+        "serialize_me": "<non-serializable: Unserializable>"
+    },
+    "timestamp": "2022-06-24 12:12:09,526+0200",
+    "service": "payment"
+}

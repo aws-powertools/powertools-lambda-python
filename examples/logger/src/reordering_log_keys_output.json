@@ -1,0 +1,17 @@
+[
+    {
+        "message": "hello world",
+        "level": "INFO",
+        "location": "<module>:11",
+        "timestamp": "2022-06-24 11:25:40,143+0200",
+        "service": "payment"
+    },
+    {
+        "request_id": "123",
+        "level": "INFO",
+        "location": "<module>:12",
+        "timestamp": "2022-06-24 11:25:40,144+0200",
+        "service": "order",
+        "message": "hello universe"
+    }
+]

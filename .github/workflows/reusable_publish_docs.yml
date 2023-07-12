@@ -1,0 +1,128 @@
+name: Reusable publish documentation
+
+# see .github/workflows/on_push_docs.yml for docs
+
+env:
+  ORIGIN: aws-powertools/powertools-lambda-python
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: "Version to build and publish docs (1.28.0, develop)"
+        required: true
+        type: string
+      alias:
+        description: "Alias to associate version (latest, stage)"
+        required: true
+        type: string
+      detached_mode:
+        description: "Whether it's running in git detached mode to ensure git is sync'd"
+        required: false
+        default: false
+        type: boolean
+      git_ref:
+        description: "Branch or commit ID to checkout from"
+        required: false
+        type: string
+        default: develop
+
+permissions:
+  contents: read
+
+jobs:
+  publish_docs:
+    # Force Github action to run only a single job at a time (based on the group name)
+    # This is to prevent "race-condition" in publishing a new version of doc to `gh-pages`
+    concurrency:
+      group: on-docs-rebuild
+    runs-on: ubuntu-latest
+    environment: "Docs"
+    permissions:
+      contents: write  # push to gh-pages
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+      pages: write     # uncomment if mike fails as we migrated to S3 hosting
+    steps:
+      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.git_ref }}
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        with:
+          python-version: "3.10"
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
+      - name: Git client setup
+        run: |
+          git config --global user.name Docs deploy
+          git config --global user.email aws-devax-open-source@amazon.com
+      - name: Git refresh tip (detached mode)
+        # Git Detached mode (release notes) doesn't have origin
+        if: ${{ inputs.detached_mode }}
+        run: |
+          git config pull.rebase true
+          git config remote.origin.url >&- || git remote add origin https://github.com/"$ORIGIN"
+          git pull origin "$BRANCH"
+        env:
+          BRANCH: ${{ inputs.git_ref }}
+      - name: Build docs website and API reference
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          make release-docs VERSION="$VERSION" ALIAS="$ALIAS"
+          poetry run mike set-default --push latest
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
+        with:
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
+      - name: Copy API Docs
+        run: |
+          cp -r api site/
+      - name: Deploy Docs (Version)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.VERSION }}/
+      - name: Deploy Docs (Alias)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        run: |
+          aws s3 sync \
+            site/ \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.ALIAS }}/
+      - name: Deploy Docs (Version JSON)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        # We originally used "mike" from PyPi to manage versions for us, but since we moved to S3, we can't use it to manage versions any more.
+        # Instead, we're using some shell script that manages the versions.
+        #
+        # Operations:
+        #   1. Download the versions.json file from S3
+        #   2. Find any reference to the alias and delete it from the versions file
+        #   3. This is voodoo (don't use JQ):
+        #      - we assign the input as $o and the new version/alias as $n,
+        #      - we check if the version number exists in the file already (for republishing docs)
+        #      - if it's an alias (stage/latest/*) or old version, we do nothing and output $o (original input)
+        #      - if it's a new version number, we add it at position 0 in the array.
+        #   4. Once done, we'll upload it back to S3.
+        run: |
+          aws s3 cp \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
+            versions_old.json
+          jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
+          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"] }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == $n[0].title;.) then [($o | .[] | select(.title == $n[0].title).aliases += $n[0].aliases | . )] else $n + $o end' < versions_proc.json > versions.json
+          aws s3 cp \
+            versions.json \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json

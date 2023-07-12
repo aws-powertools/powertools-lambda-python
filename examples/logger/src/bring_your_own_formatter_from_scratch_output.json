@@ -1,0 +1,10 @@
+{
+    "event": "Collecting payment",
+    "timestamp": "2021-05-03 11:47:12,494",
+    "my_default_key": "test",
+    "cold_start": true,
+    "function_name": "test",
+    "function_memory_size": 128,
+    "function_arn": "arn:aws:lambda:eu-west-1:12345678910:function:test",
+    "function_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72"
+}

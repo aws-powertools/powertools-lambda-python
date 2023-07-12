@@ -1,0 +1,7 @@
+{
+    "level": "INFO",
+    "location": "<module>:16",
+    "timestamp": "2021-12-30 13:41:53,413+0100",
+    "service": "payment",
+    "event": "hello"
+}

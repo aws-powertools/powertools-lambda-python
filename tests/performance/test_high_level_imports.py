@@ -1,8 +1,6 @@
 import importlib
-import time
-from contextlib import contextmanager
 from types import ModuleType
-from typing import Generator, Tuple
+from typing import Tuple
 
 import pytest
 
@@ -10,86 +8,88 @@ LOGGER_INIT_SLA: float = 0.005
 METRICS_INIT_SLA: float = 0.005
 TRACER_INIT_SLA: float = 0.5
 IMPORT_INIT_SLA: float = 0.035
+PARENT_PACKAGE = "aws_lambda_powertools"
+TRACING_PACKAGE = "aws_lambda_powertools.tracing"
+LOGGING_PACKAGE = "aws_lambda_powertools.logging"
+METRICS_PACKAGE = "aws_lambda_powertools.metrics"
 
 
-@contextmanager
-def timing() -> Generator:
-    """ "Generator to quickly time operations. It can add 5ms so take that into account in elapsed time
-
-    Examples
-    --------
-
-        with timing() as t:
-            print("something")
-        elapsed = t()
-    """
-    start = time.perf_counter()
-    yield lambda: time.perf_counter() - start  # gen as lambda to calculate elapsed time
+def import_core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
+    """Dynamically imports and return Tracing, Logging, and Metrics modules"""
+    return (
+        importlib.import_module(TRACING_PACKAGE),
+        importlib.import_module(LOGGING_PACKAGE),
+        importlib.import_module(METRICS_PACKAGE),
+    )
 
 
-def core_utilities() -> Tuple[ModuleType, ModuleType, ModuleType]:
-    """Return Tracing, Logging, and Metrics module"""
-    tracing = importlib.import_module("aws_lambda_powertools.tracing")
-    logging = importlib.import_module("aws_lambda_powertools.logging")
-    metrics = importlib.import_module("aws_lambda_powertools.metrics")
+@pytest.fixture(autouse=True)
+def clear_cache():
+    importlib.invalidate_caches()
 
-    return tracing, logging, metrics
+
+def import_init_tracer():
+    tracing = importlib.import_module(TRACING_PACKAGE)
+    tracing.Tracer(disabled=True)
+
+
+def import_init_metrics():
+    metrics = importlib.import_module(METRICS_PACKAGE)
+    metrics.Metrics()
+
+
+def import_init_logger():
+    logging = importlib.import_module(LOGGING_PACKAGE)
+    logging.Logger()
 
 
 @pytest.mark.perf
-def test_import_times_ceiling():
+@pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
+def test_import_times_ceiling(benchmark):
     # GIVEN Core utilities are imported
     # WHEN none are used
     # THEN import and any global initialization perf should be below 30ms
     # though we adjust to 35ms to take into account different CI machines, etc.
     # instead of re-running tests which can lead to false positives
-    with timing() as t:
-        core_utilities()
-
-    elapsed = t()
-    if elapsed > IMPORT_INIT_SLA:
-        pytest.fail(f"High level imports should be below ${IMPORT_INIT_SLA}s: {elapsed}")
+    benchmark.pedantic(import_core_utilities)
+    stat = benchmark.stats.stats.max
+    if stat > IMPORT_INIT_SLA:
+        pytest.fail(f"High level imports should be below {IMPORT_INIT_SLA}s: {stat}")
 
 
 @pytest.mark.perf
-def test_tracer_init():
+@pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
+def test_tracer_init(benchmark):
     # GIVEN Tracer is initialized
     # WHEN default options are used
     # THEN initialization X-Ray SDK perf should be below 450ms
     # though we adjust to 500ms to take into account different CI machines, etc.
     # instead of re-running tests which can lead to false positives
-    with timing() as t:
-        tracing, _, _ = core_utilities()
-        tracing.Tracer(disabled=True)  # boto3 takes ~200ms, and remaining is X-Ray SDK init
-
-    elapsed = t()
-    if elapsed > TRACER_INIT_SLA:
-        pytest.fail(f"High level imports should be below ${TRACER_INIT_SLA}s: {elapsed}")
+    benchmark.pedantic(import_init_tracer)
+    stat = benchmark.stats.stats.max
+    if stat > TRACER_INIT_SLA:
+        pytest.fail(f"High level imports should be below {TRACER_INIT_SLA}s: {stat}")
 
 
 @pytest.mark.perf
-def test_metrics_init():
+@pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
+def test_metrics_init(benchmark):
     # GIVEN Metrics is initialized
     # WHEN default options are used
     # THEN initialization perf should be below 5ms
-    with timing() as t:
-        _, _, metrics = core_utilities()
-        metrics.Metrics()
-
-    elapsed = t()
-    if elapsed > METRICS_INIT_SLA:
-        pytest.fail(f"High level imports should be below ${METRICS_INIT_SLA}s: {elapsed}")
+    benchmark.pedantic(import_init_metrics)
+    stat = benchmark.stats.stats.max
+    if stat > METRICS_INIT_SLA:
+        pytest.fail(f"High level imports should be below ${METRICS_INIT_SLA}s: {stat}")
 
 
 @pytest.mark.perf
-def test_logger_init():
+@pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
+def test_logger_init(benchmark):
     # GIVEN Logger is initialized
     # WHEN default options are used
     # THEN initialization perf should be below 5ms
-    with timing() as t:
-        _, logging, _ = core_utilities()
-        logging.Logger()
-
-    elapsed = t()
-    if elapsed > LOGGER_INIT_SLA:
-        pytest.fail(f"High level imports should be below ${LOGGER_INIT_SLA}s: {elapsed}")
+    benchmark.pedantic(import_init_logger)
+    stat = benchmark.stats.stats.max
+    if stat > LOGGER_INIT_SLA:
+        pytest.fail(f"High level imports should be below ${LOGGER_INIT_SLA}s: {stat}")

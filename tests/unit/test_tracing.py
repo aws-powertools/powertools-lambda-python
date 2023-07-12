@@ -8,6 +8,10 @@ import pytest
 
 from aws_lambda_powertools import Tracer
 
+# Maintenance: This should move to Functional tests and use Fake over mocks.
+
+MODULE_PREFIX = "unit.test_tracing"
+
 
 @pytest.fixture
 def dummy_response():
@@ -56,7 +60,8 @@ def reset_tracing_config(mocker):
     Tracer._reset_config()
     # reset global cold start module
     mocker.patch(
-        "aws_lambda_powertools.tracing.tracer.is_cold_start", new_callable=mocker.PropertyMock(return_value=True)
+        "aws_lambda_powertools.tracing.tracer.is_cold_start",
+        new_callable=mocker.PropertyMock(return_value=True),
     )
     yield
 
@@ -103,7 +108,9 @@ def test_tracer_lambda_handler_subsegment(mocker, dummy_response, provider_stub,
     assert in_subsegment_mock.in_subsegment.call_count == 1
     assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## handler")
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="handler response", value=dummy_response, namespace="booking"
+        key="handler response",
+        value=dummy_response,
+        namespace="booking",
     )
 
 
@@ -123,9 +130,13 @@ def test_tracer_method(mocker, dummy_response, provider_stub, in_subsegment_mock
     # and add its response as trace metadata
     # and use service name as a metadata namespace
     assert in_subsegment_mock.in_subsegment.call_count == 1
-    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(name="## greeting")
+    assert in_subsegment_mock.in_subsegment.call_args == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_method.<locals>.greeting",
+    )
     assert in_subsegment_mock.put_metadata.call_args == mocker.call(
-        key="greeting response", value=dummy_response, namespace="booking"
+        key=f"{MODULE_PREFIX}.test_tracer_method.<locals>.greeting response",
+        value=dummy_response,
+        namespace="booking",
     )
 
 
@@ -145,7 +156,9 @@ def test_tracer_custom_metadata(monkeypatch, mocker, dummy_response, provider_st
     # THEN we should have metadata expected and booking as namespace
     assert put_metadata_mock.call_count == 1
     assert put_metadata_mock.call_args_list[0] == mocker.call(
-        key=annotation_key, value=annotation_value, namespace="booking"
+        key=annotation_key,
+        value=annotation_value,
+        namespace="booking",
     )
 
 
@@ -251,7 +264,10 @@ def test_tracer_method_exception_metadata(mocker, provider_stub, in_subsegment_m
     # THEN we should add the exception using method name as key plus error
     # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
-    assert put_metadata_mock_args["key"] == "greeting error"
+    assert (
+        put_metadata_mock_args["key"]
+        == f"{MODULE_PREFIX}.test_tracer_method_exception_metadata.<locals>.greeting error"
+    )
     assert put_metadata_mock_args["namespace"] == "booking"
 
 
@@ -303,15 +319,23 @@ async def test_tracer_method_nested_async(mocker, dummy_response, provider_stub,
 
     # THEN we should add metadata for each response like we would for a sync decorated method
     assert in_subsegment_mock.in_subsegment.call_count == 2
-    assert in_subsegment_greeting_call_args == mocker.call(name="## greeting")
-    assert in_subsegment_greeting2_call_args == mocker.call(name="## greeting_2")
+    assert in_subsegment_greeting_call_args == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting",
+    )
+    assert in_subsegment_greeting2_call_args == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting_2",
+    )
 
     assert in_subsegment_mock.put_metadata.call_count == 2
     assert put_metadata_greeting2_call_args == mocker.call(
-        key="greeting_2 response", value=dummy_response, namespace="booking"
+        key=f"{MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting_2 response",
+        value=dummy_response,
+        namespace="booking",
     )
     assert put_metadata_greeting_call_args == mocker.call(
-        key="greeting response", value=dummy_response, namespace="booking"
+        key=f"{MODULE_PREFIX}.test_tracer_method_nested_async.<locals>.greeting response",
+        value=dummy_response,
+        namespace="booking",
     )
 
 
@@ -353,7 +377,10 @@ async def test_tracer_method_exception_metadata_async(mocker, provider_stub, in_
     # THEN we should add the exception using method name as key plus error
     # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
-    assert put_metadata_mock_args["key"] == "greeting error"
+    assert (
+        put_metadata_mock_args["key"]
+        == f"{MODULE_PREFIX}.test_tracer_method_exception_metadata_async.<locals>.greeting error"
+    )
     assert put_metadata_mock_args["namespace"] == "booking"
 
 
@@ -385,7 +412,9 @@ def test_tracer_yield_from_context_manager(mocker, provider_stub, in_subsegment_
     assert "test result" in in_subsegment_mock.put_metadata.call_args[1]["value"]
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
-    assert yield_function_trace == mocker.call(name="## yield_with_capture")
+    assert yield_function_trace == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_context_manager.<locals>.yield_with_capture",
+    )
     assert "test result" in result
 
 
@@ -409,7 +438,10 @@ def test_tracer_yield_from_context_manager_exception_metadata(mocker, provider_s
     # THEN we should add the exception using method name as key plus error
     # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
-    assert put_metadata_mock_args["key"] == "yield_with_capture error"
+    assert (
+        put_metadata_mock_args["key"]
+        == f"{MODULE_PREFIX}.test_tracer_yield_from_context_manager_exception_metadata.<locals>.yield_with_capture error"  # noqa E501
+    )
     assert isinstance(put_metadata_mock_args["value"], ValueError)
     assert put_metadata_mock_args["namespace"] == "booking"
 
@@ -451,7 +483,9 @@ def test_tracer_yield_from_nested_context_manager(mocker, provider_stub, in_subs
     assert "test result" in in_subsegment_mock.put_metadata.call_args[1]["value"]
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
-    assert yield_function_trace == mocker.call(name="## yield_with_capture")
+    assert yield_function_trace == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_nested_context_manager.<locals>.yield_with_capture",
+    )
     assert "test result" in result
 
 
@@ -481,7 +515,9 @@ def test_tracer_yield_from_generator(mocker, provider_stub, in_subsegment_mock):
     assert "test result" in in_subsegment_mock.put_metadata.call_args[1]["value"]
     assert in_subsegment_mock.in_subsegment.call_count == 2
     assert handler_trace == mocker.call(name="## handler")
-    assert generator_fn_trace == mocker.call(name="## generator_fn")
+    assert generator_fn_trace == mocker.call(
+        name=f"## {MODULE_PREFIX}.test_tracer_yield_from_generator.<locals>.generator_fn",
+    )
     assert "test result" in result
 
 
@@ -504,7 +540,10 @@ def test_tracer_yield_from_generator_exception_metadata(mocker, provider_stub, i
     # THEN we should add the exception using method name as key plus error
     # and their service name as the namespace
     put_metadata_mock_args = in_subsegment_mock.put_metadata.call_args[1]
-    assert put_metadata_mock_args["key"] == "generator_fn error"
+    assert (
+        put_metadata_mock_args["key"]
+        == f"{MODULE_PREFIX}.test_tracer_yield_from_generator_exception_metadata.<locals>.generator_fn error"
+    )
     assert put_metadata_mock_args["namespace"] == "booking"
     assert isinstance(put_metadata_mock_args["value"], ValueError)
     assert str(put_metadata_mock_args["value"]) == "test"
@@ -613,7 +652,10 @@ def test_tracer_lambda_handler_add_service_annotation(mocker, dummy_response, pr
 
 
 def test_tracer_lambda_handler_do_not_add_service_annotation_when_missing(
-    mocker, dummy_response, provider_stub, in_subsegment_mock
+    mocker,
+    dummy_response,
+    provider_stub,
+    in_subsegment_mock,
 ):
     # GIVEN
     provider = provider_stub(in_subsegment=in_subsegment_mock.in_subsegment)

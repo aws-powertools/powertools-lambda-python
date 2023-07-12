@@ -1,0 +1,28 @@
+{
+    "_aws": {
+        "Timestamp": 1656685750622,
+        "CloudWatchMetrics": [
+            {
+                "Namespace": "ServerlessAirline",
+                "Dimensions": [
+                    [
+                        "environment",
+                        "service"
+                    ]
+                ],
+                "Metrics": [
+                    {
+                        "Name": "TurbineReads",
+                        "Unit": "Count"
+                    }
+                ]
+            }
+        ]
+    },
+    "environment": "dev",
+    "service": "booking",
+    "TurbineReads": [
+        1.0,
+        8.0
+    ]
+}
