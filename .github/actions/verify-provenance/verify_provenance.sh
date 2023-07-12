@@ -3,15 +3,23 @@ set -uo pipefail # prevent accessing unset env vars, prevent masking pipeline er
 
 #docs
 #title              :verify_provenance.sh
-#description        :This script will verify a given Powertools for AWS Lambda release build with SLSA Verifier
+#description        :This script will download and verify a signed Powertools for AWS Lambda (Python) release build with SLSA Verifier
 #author		    :@heitorlessa
 #date               :July 1st 2023
 #version            :0.1
-#usage		    :bash verify_provenance.sh {git_staged_files_or_directories_separated_by_space}
+#usage		    :bash verify_provenance.sh {release version}
 #notes              :Meant to use in GitHub Actions or locally (MacOS, Linux, WSL).
 #os_version         :Ubuntu 22.04.2 LTS
-#todo:              : 1) Receive release version via first input, 2) Update to Prod PyPi after first prod release
 #==============================================================================
+
+# Check if RELEASE_VERSION is provided as a command line argument
+if [[ $# -eq 1 ]]; then
+    export readonly RELEASE_VERSION="$1"
+else
+    echo "ERROR: Please provider Powertools release version as a command line argument."
+    echo "Example: bash verify_provenance.sh 2.20.0"
+    exit 1
+fi
 
 export readonly ARCHITECTURE=$(uname -m | sed 's/x86_64/amd64/g') # arm64, x86_64 ->amd64
 export readonly OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')  # darwin, linux
@@ -19,16 +27,6 @@ export readonly SLSA_VERIFIER_VERSION="2.3.0"
 export readonly SLSA_VERIFIER_CHECKSUM_FILE="SHA256SUM.md"
 export readonly SLSA_VERIFIER_BINARY="./slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
 
-# Check if RELEASE_VERSION is provided as a command line argument
-if [[ $# -eq 1 ]]; then
-    RELEASE_VERSION="$1"
-else
-    echo "ERROR: Please provider Powertools release version as a command line argument."
-    echo "Example: sh verify_provenance.sh 2.20.0"
-    exit 1
-fi
-
-export readonly RELEASE_VERSION="$RELEASE_VERSION"
 export readonly RELEASE_BINARY="aws_lambda_powertools-${RELEASE_VERSION}-py3-none-any.whl"
 export readonly ORG="heitorlessa"
 export readonly REPO="aws-lambda-powertools-test"
@@ -67,20 +65,11 @@ function download_provenance() {
 
 function download_release_artifact() {
     debug "[*] Downloading ${RELEASE_VERSION} release from PyPi"
-    # TODO: Once published to Prod, this will become
-    # python -m pip download \
-    #     --only-binary=:all: \
-    #     --progress-bar on \
-    #     --no-deps \
-    #     --quiet \
-    #     aws-lambda-powertools==${RELEASE_VERSION}
     python -m pip download \
-        --index-url https://test.pypi.org/simple/ \
         --only-binary=:all: \
-        --progress-bar on \
         --no-deps \
         --quiet \
-        aws-lambda-powertools==${RELEASE_VERSION}
+        aws-lambda-powertools=="${RELEASE_VERSION}"
 }
 
 function verify_provenance() {
