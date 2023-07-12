@@ -31,7 +31,7 @@ class RequestContextV2AuthorizerJwt(BaseModel):
 class RequestContextV2Authorizer(BaseModel):
     jwt: Optional[RequestContextV2AuthorizerJwt] = None
     iam: Optional[RequestContextV2AuthorizerIam] = None
-    lambda_value: Union[Dict[str, Any], None] = Field(None, alias="lambda")
+    lambda_value: Optional[Dict[str, Any]] = Field(None, alias="lambda")
 
 
 class RequestContextV2Http(BaseModel):

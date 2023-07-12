@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 from pydantic.types import PositiveInt
@@ -39,7 +39,7 @@ class SesMailCommonHeaders(BaseModel):
     cc: Optional[List[str]] = None
     bcc: Optional[List[str]] = None
     sender: Optional[List[str]] = None
-    reply_to: Union[List[str], None] = Field(None, alias="reply-to")
+    reply_to: Optional[List[str]] = Field(None, alias="reply-to")
     returnPath: str
     messageId: str
     date: str

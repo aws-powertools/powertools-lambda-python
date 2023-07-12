@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional
 
 from pydantic import BaseModel, root_validator
 from pydantic.fields import Field
@@ -78,11 +78,11 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
     requester: str
     source_ip_address: str = Field(None, alias="source-ip-address")
     reason: Optional[str] = None
-    deletion_type: Union[str, None] = Field(None, alias="deletion-type")
-    restore_expiry_time: Union[str, None] = Field(None, alias="restore-expiry-time")
-    source_storage_class: Union[str, None] = Field(None, alias="source-storage-class")
-    destination_storage_class: Union[str, None] = Field(None, alias="destination-storage-class")
-    destination_access_tier: Union[str, None] = Field(None, alias="destination-access-tier")
+    deletion_type: Optional[str] = Field(None, alias="deletion-type")
+    restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
+    source_storage_class: Optional[str] = Field(None, alias="source-storage-class")
+    destination_storage_class: Optional[str] = Field(None, alias="destination-storage-class")
+    destination_access_tier: Optional[str] = Field(None, alias="destination-access-tier")
 
 
 class S3EventNotificationEventBridgeModel(EventBridgeModel):
