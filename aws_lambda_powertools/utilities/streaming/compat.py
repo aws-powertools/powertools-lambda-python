@@ -7,7 +7,6 @@ As soon as the version of botocore included with the Lambda runtime is equal or 
 this file completely. See https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html.
 """
 import logging
-from distutils.version import StrictVersion
 from io import IOBase
 from typing import Optional
 
@@ -24,7 +23,11 @@ from urllib3.exceptions import ReadTimeoutError as URLLib3ReadTimeoutError
 
 logger = logging.getLogger(__name__)
 
-if StrictVersion(botocore.__version__) < StrictVersion("1.29.13"):  # noqa: C901
+# Splitting the botocore version string into major, minor, and patch versions,
+# and performing a conditional check based on the extracted versions.
+major, minor, patch = map(int, botocore.__version__.split("."))
+
+if major == 1 and (minor < 29 or patch < 13):
 
     class PowertoolsStreamingBody(IOBase):
         """Wrapper class for a HTTP response body.
