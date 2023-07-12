@@ -2076,7 +2076,7 @@
     <span class="n">metrics</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;SuccessfulBooking&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <p><strong>Differences between <code>EphemeralMetrics</code> and <code>Metrics</code></strong></p>
-<p><code>EphemeralMetrics</code> has only two differences while keeping nearly the exact same set of features:</p>
+<p><code>EphemeralMetrics</code> has only one difference while keeping nearly the exact same set of features:</p>
 <table>
 <thead>
 <tr>
@@ -2088,11 +2088,6 @@
 <tbody>
 <tr>
 <td><strong>Share data across instances</strong> (metrics, dimensions, metadata, etc.)</td>
-<td>Yes</td>
-<td>-</td>
-</tr>
-<tr>
-<td><strong><a href="#adding-default-dimensions">Default dimensions</a> that persists across Lambda invocations</strong> (metric flush)</td>
 <td>Yes</td>
 <td>-</td>
 </tr>
@@ -2355,7 +2350,7 @@
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-12
     
   </small>
 </div>
