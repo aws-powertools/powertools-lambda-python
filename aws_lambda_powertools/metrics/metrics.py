@@ -128,5 +128,46 @@ class EphemeralMetrics(MetricManager):
     - Create the same metrics with different dimensions more than once
     """
 
+    _dimensions: Dict[str, str] = {}
+    _default_dimensions: Dict[str, Any] = {}
+
     def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+        self.default_dimensions = self._default_dimensions
+        self.dimension_set = self._dimensions
+
+        self.dimension_set.update(**self._default_dimensions)
         super().__init__(namespace=namespace, service=service)
+
+    def set_default_dimensions(self, **dimensions) -> None:
+        """Persist dimensions across Lambda invocations
+
+        Parameters
+        ----------
+        dimensions : Dict[str, Any], optional
+            metric dimensions as key=value
+
+        Example
+        -------
+        **Sets some default dimensions that will always be present across metrics and invocations**
+
+            from aws_lambda_powertools import Metrics
+
+            metrics = Metrics(namespace="ServerlessAirline", service="payment")
+            metrics.set_default_dimensions(environment="demo", another="one")
+
+            @metrics.log_metrics()
+            def lambda_handler():
+                return True
+        """
+        for name, value in dimensions.items():
+            self.add_dimension(name, value)
+
+        self.default_dimensions.update(**dimensions)
+
+    def clear_default_dimensions(self) -> None:
+        self.default_dimensions.clear()
+
+    def clear_metrics(self) -> None:
+        super().clear_metrics()
+        # re-add default dimensions
+        self.set_default_dimensions(**self.default_dimensions)
