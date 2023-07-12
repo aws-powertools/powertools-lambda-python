@@ -28,8 +28,8 @@ export readonly SLSA_VERIFIER_CHECKSUM_FILE="SHA256SUM.md"
 export readonly SLSA_VERIFIER_BINARY="./slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
 
 export readonly RELEASE_BINARY="aws_lambda_powertools-${RELEASE_VERSION}-py3-none-any.whl"
-export readonly ORG="heitorlessa"
-export readonly REPO="aws-lambda-powertools-test"
+export readonly ORG="aws-powertools"
+export readonly REPO="powertools-lambda-python"
 export readonly PROVENANCE_FILE="multiple.intoto.jsonl"
 
 export readonly FILES=("${SLSA_VERIFIER_BINARY}" "${SLSA_VERIFIER_CHECKSUM_FILE}" "${PROVENANCE_FILE}" "${RELEASE_BINARY}")
