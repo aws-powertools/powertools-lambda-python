@@ -10,6 +10,7 @@ nav:
       - Changelog: changelog.md
       - API reference: api/" target="_blank
       - Upgrade guide: upgrade.md
+      - We Made This (Community): we_made_this.md
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -30,7 +31,6 @@ nav:
           - utilities/jmespath_functions.md
           - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
   - Tutorial: tutorial/index.md
-  - We Made This (Community): we_made_this.md
   - Processes:
       - Security: security.md
       - Automation: automation.md
