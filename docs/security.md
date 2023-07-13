@@ -85,26 +85,4 @@ You can do this manually or automated via a shell script. We maintain the latter
           ---8<-- ".github/actions/verify-provenance/verify_provenance.sh"
           ```
 
-### Continuous integration practices
-
-!!! note "We adhere to industry recommendations from the [OSSF Scorecard project](https://bestpractices.coreinfrastructure.org/en/criteria){target="_blank"}, among [others](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions){target="_blank"}."
-
-Since all code changes require a pull request (PR) along with one or more reviewers, we automate quality and security checks **before**, **during**, and **after** a PR is merged to trunk (`develop`).
-
-This is a snapshot of our automated checks at a glance.
-
-<!-- NOTE: mkdocs material doesn't render timeline mermaid diagrams hence png for now -->
-
-![Continuous Integration practices](./media/continuous_integration_practices.png)
-
-### Continuous deployment practices
-
-!!! note "We adhere to industry recommendations from the [OSSF Scorecard project](https://bestpractices.coreinfrastructure.org/en/criteria){target="_blank"}, among [others](https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions){target="_blank"}."
-
-Releases are triggered by maintainers along with a reviewer - [detailed info here](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md#releasing-a-new-version){target="_blank"}. In addition to [checks that run for every code change](#continuous-integration-practices), our pipeline requires a manual approval before releasing.
-
-We use a combination of provenance and signed attestation for our builds, source code sealing, SAST scanners, Python specific static code analysis, ephemeral credentials that last a given job step, and more.
-
-This is a snapshot of our automated checks at a glance.
-
-![Continuous Deployment practices](./media/continuous_deployment_practices.png)
+<!-- markdownlint-disable MD013 -->
