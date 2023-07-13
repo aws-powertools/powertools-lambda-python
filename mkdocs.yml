@@ -5,34 +5,36 @@ repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 
 nav:
-  - Homepage: index.md
-  - Changelog: changelog.md
+  - Homepage:
+      - index.md
+      - Changelog: changelog.md
+      - API reference: api/" target="_blank
+      - Upgrade guide: upgrade.md
+      - Features:
+          - core/tracer.md
+          - core/logger.md
+          - core/metrics.md
+          - Event Handler:
+              - core/event_handler/api_gateway.md
+              - core/event_handler/appsync.md
+          - utilities/parameters.md
+          - utilities/batch.md
+          - utilities/typing.md
+          - utilities/validation.md
+          - utilities/data_classes.md
+          - utilities/parser.md
+          - utilities/idempotency.md
+          - utilities/feature_flags.md
+          - utilities/streaming.md
+          - utilities/middleware_factory.md
+          - utilities/jmespath_functions.md
+          - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
   - Tutorial: tutorial/index.md
-  - Roadmap: roadmap.md
-  - API reference: api/" target="_blank
-  - Upgrade guide: upgrade.md
   - We Made This (Community): we_made_this.md
-  - Security: security.md
-  - Core utilities:
-      - core/tracer.md
-      - core/logger.md
-      - core/metrics.md
-      - Event Handler:
-          - core/event_handler/api_gateway.md
-          - core/event_handler/appsync.md
-  - Utilities:
-      - utilities/parameters.md
-      - utilities/batch.md
-      - utilities/typing.md
-      - utilities/validation.md
-      - utilities/data_classes.md
-      - utilities/parser.md
-      - utilities/idempotency.md
-      - utilities/feature_flags.md
-      - utilities/streaming.md
-      - utilities/middleware_factory.md
-      - utilities/jmespath_functions.md
-      - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+  - Processes:
+      - Security: security.md
+      - Automation: automation.md
+      - Roadmap: roadmap.md
 
 theme:
   name: material
@@ -42,13 +44,13 @@ theme:
     - scheme: default
       primary: deep purple
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/lightbulb
         name: Switch to dark mode
     - scheme: slate
       primary: indigo
       accent: teal
       toggle:
-        icon: material/toggle-switch
+        icon: material/lightbulb-outline
         name: Switch to light mode
   features:
     - header.autohide
@@ -58,6 +60,7 @@ theme:
     - navigation.instant
     - navigation.indexes
     - navigation.tracking
+    - navigation.tabs
     - content.code.annotate
     - content.code.copy
   icon:
