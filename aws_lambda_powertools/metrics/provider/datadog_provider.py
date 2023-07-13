@@ -142,7 +142,7 @@ class DataDogProvider(MetricsProviderBase):
             for metric_item in metrics:
                 print(json.dumps(metric_item, separators=(",", ":")))
 
-    def clear(self):
+    def clear_metrics(self):
         self.metrics = []
 
 
@@ -152,7 +152,7 @@ class DataDogMetrics(MetricsBase):
 
     Parameters
     ----------
-    provider: MetricsProviderBase
+    provider: DataDogProvider
         The datadog provider which will be used to process metrics data
 
     Example
@@ -165,12 +165,12 @@ class DataDogMetrics(MetricsBase):
         metrics = DataDogMetrics(provider=dd_provider)
 
         @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
-        def lambda_handler(event, context)
+        def lambda_handler(event, context):
             metrics.add_metric(name="item_sold",value=1,tags=['product:latte', 'order:online'])
     """
 
     # `log_metrics` and `_add_cold_start_metric` are directly inherited from `MetricsBase`
-    def __init__(self, provider: MetricsProviderBase):
+    def __init__(self, provider: DataDogProvider):
         self.provider = provider
         super().__init__()
 
@@ -229,4 +229,4 @@ class DataDogMetrics(MetricsBase):
         else:
             # will raise on empty metrics
             self.provider.flush(metrics)
-            self.provider.clear()
+            self.provider.clear_metrics()

@@ -1,4 +1,5 @@
 import json
+import os
 import warnings
 from collections import namedtuple
 from typing import Any, Dict, List, Union
@@ -20,7 +21,13 @@ from aws_lambda_powertools.metrics.base import (
     MetricManager,
     reset_cold_start_flag,
 )
-from aws_lambda_powertools.metrics.provider import AmazonCloudWatchEMF, MetricsBase, MetricsProviderBase
+from aws_lambda_powertools.metrics.provider import (
+    AmazonCloudWatchEMF,
+    DataDogMetrics,
+    DataDogProvider,
+    MetricsBase,
+    MetricsProviderBase,
+)
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -1348,3 +1355,58 @@ def test_metric_provider_raise_on_empty_metrics(metrics_provider, metrics_class)
     # and specifically about the lack of Metrics
     with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
         lambda_handler({}, {})
+
+
+def test_datadog_coldstart(capsys):
+    dd_provider = DataDogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DataDogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+
+    lambda_handler({}, LambdaContext("example_fn"))
+    logs = capsys.readouterr().out.strip()
+    assert "ColdStart" in logs
+
+
+def test_datadog_write_to_log(capsys):
+    os.environ["DD_FLUSH_TO_LOG"] = "True"
+    dd_provider = DataDogProvider(namespace="Serverlesspresso")
+    metrics = DataDogMetrics(provider=dd_provider)
+    metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+    metrics.flush_metrics()
+    logs = capture_metrics_output(capsys)
+    logs["e"] = ""
+    assert logs == json.loads('{"m":"Serverlesspresso.item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
+
+
+def test_datadog_namespace(capsys):
+    dd_provider = DataDogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DataDogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+
+    lambda_handler({}, LambdaContext("example_fn"))
+    logs = capsys.readouterr().out.strip()
+    assert "Serverlesspresso" in logs
+
+
+def test_datadog_raise_on_empty():
+    dd_provider = DataDogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DataDogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=False, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        pass
+
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
+        lambda_handler({}, LambdaContext("example_fn"))
