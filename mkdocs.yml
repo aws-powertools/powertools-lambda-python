@@ -35,6 +35,7 @@ nav:
       - Security: security.md
       - Automation: automation.md
       - Roadmap: roadmap.md
+      - Maintainers: maintainers.md
 
 theme:
   name: material
@@ -95,7 +96,7 @@ markdown_extensions:
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
 
-copyright: Copyright &copy; 2022 Amazon Web Services
+copyright: Copyright &copy; 2023 Amazon Web Services
 
 plugins:
   - git-revision-date
