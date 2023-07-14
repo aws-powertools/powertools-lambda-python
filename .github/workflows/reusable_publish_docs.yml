@@ -28,9 +28,7 @@ on:
         default: develop
 
 permissions:
-  id-token: write  # trade JWT token for AWS credentials in AWS Docs account
-  contents: write  # push to gh-pages
-  pages: write     # deploy gh-pages website
+  contents: read
 
 jobs:
   publish_docs:
@@ -40,6 +38,10 @@ jobs:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
     environment: "Docs"
+    permissions:
+      contents: write  # push to gh-pages
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+      pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
       - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
@@ -48,7 +50,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
           python-version: "3.10"
           cache: "poetry"
@@ -110,7 +112,7 @@ jobs:
         #   1. Download the versions.json file from S3
         #   2. Find any reference to the alias and delete it from the versions file
         #   3. This is voodoo (don't use JQ):
-        #      - we assign the input as $o and the new version/alias as $n, 
+        #      - we assign the input as $o and the new version/alias as $n,
         #      - we check if the version number exists in the file already (for republishing docs)
         #      - if it's an alias (stage/latest/*) or old version, we do nothing and output $o (original input)
         #      - if it's a new version number, we add it at position 0 in the array.
@@ -120,7 +122,7 @@ jobs:
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
             versions_old.json
           jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
-          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": "${{env.ALIAS}}" }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == "${{ env.VERSION }}";.) then $o else $n + $o end' < versions_proc.json > versions.json
+          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"] }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == $n[0].title;.) then [($o | .[] | select(.title == $n[0].title).aliases += $n[0].aliases | . )] else $n + $o end' < versions_proc.json > versions.json
           aws s3 cp \
             versions.json \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json

@@ -274,12 +274,11 @@ You can use `EphemeralMetrics` class when looking to isolate multiple instances 
 
 **Differences between `EphemeralMetrics` and `Metrics`**
 
-`EphemeralMetrics` has only two differences while keeping nearly the exact same set of features:
+`EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
 
 | Feature                                                                                                     | Metrics | EphemeralMetrics |
 | ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
 | **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
-| **[Default dimensions](#adding-default-dimensions) that persists across Lambda invocations** (metric flush) | Yes     | -                |
 
 !!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
 
