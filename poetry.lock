@@ -1540,13 +1540,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.28.3"
-description = "Type annotations for boto3.SecretsManager 1.28.3 service generated with mypy-boto3-builder 7.14.6"
+version = "1.28.3.post1"
+description = "Type annotations for boto3.SecretsManager 1.28.3 service generated with mypy-boto3-builder 7.14.7"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.28.3.tar.gz", hash = "sha256:d8e07c8d33392a626b174b6681df3b4c9dfe6ea76de00bda891720d26e63889a"},
-    {file = "mypy_boto3_secretsmanager-1.28.3-py3-none-any.whl", hash = "sha256:c662b6ea74a218c801f692012d1d86e0f7f9f9fc6d3a53e7d6e99fae7d87e2c1"},
+    {file = "mypy-boto3-secretsmanager-1.28.3.post1.tar.gz", hash = "sha256:783edfa92055aa608517f6890bd2ced225cfb3b2ebd0ef481a9b90128101a22b"},
+    {file = "mypy_boto3_secretsmanager-1.28.3.post1-py3-none-any.whl", hash = "sha256:f64a31f76e69ed444620e9ae36502f089b28d18ea3b147d08c62228ba4c1566b"},
 ]
 
 [package.dependencies]
