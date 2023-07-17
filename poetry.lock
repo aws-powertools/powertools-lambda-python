@@ -1526,13 +1526,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.28.0"
-description = "Type annotations for boto3.S3 1.28.0 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.3.post1"
+description = "Type annotations for boto3.S3 1.28.3 service generated with mypy-boto3-builder 7.14.7"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-s3-1.28.0.tar.gz", hash = "sha256:27867ca325a845700a008f3fca995006b32f2e0d18afe676352b49453f477d69"},
-    {file = "mypy_boto3_s3-1.28.0-py3-none-any.whl", hash = "sha256:789a32560ec1882e3a2c5bbb7aa97952b05e54507e2174eab6535ceaffb04cee"},
+    {file = "mypy-boto3-s3-1.28.3.post1.tar.gz", hash = "sha256:a70f0f128791cf4a359adda4d4f0234efc94a9deb98d42ab5c595b1d5c1994fa"},
+    {file = "mypy_boto3_s3-1.28.3.post1-py3-none-any.whl", hash = "sha256:6b5723691c7fd11216f3fcbacc6af3c43c59a3ca74a4bd9aa1fc6fcbf4a538c5"},
 ]
 
 [package.dependencies]
@@ -1540,13 +1540,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.28.0"
-description = "Type annotations for boto3.SecretsManager 1.28.0 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.3.post1"
+description = "Type annotations for boto3.SecretsManager 1.28.3 service generated with mypy-boto3-builder 7.14.7"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.28.0.tar.gz", hash = "sha256:ee2341a09370209b9ed5d96488baf831b1487c931f420fa5f9cf4a18b2e46311"},
-    {file = "mypy_boto3_secretsmanager-1.28.0-py3-none-any.whl", hash = "sha256:160a5bf3cf9b45201f17920472403ed98cdc65256914b167f0539f76e509dbdf"},
+    {file = "mypy-boto3-secretsmanager-1.28.3.post1.tar.gz", hash = "sha256:783edfa92055aa608517f6890bd2ced225cfb3b2ebd0ef481a9b90128101a22b"},
+    {file = "mypy_boto3_secretsmanager-1.28.3.post1-py3-none-any.whl", hash = "sha256:f64a31f76e69ed444620e9ae36502f089b28d18ea3b147d08c62228ba4c1566b"},
 ]
 
 [package.dependencies]
@@ -2330,13 +2330,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.28.0"
+version = "1.28.1"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.28.0.tar.gz", hash = "sha256:2281ba98011cfa9bc9bb15c1074b6dd9f7fdfce94033cd25b50f18f078ffed4c"},
-    {file = "sentry_sdk-1.28.0-py2.py3-none-any.whl", hash = "sha256:b8b363aaa3f3d6a3acc1aa571efa4db29fb440339fed03560bb1276b8d2c2509"},
+    {file = "sentry-sdk-1.28.1.tar.gz", hash = "sha256:dcd88c68aa64dae715311b5ede6502fd684f70d00a7cd4858118f0ba3153a3ae"},
+    {file = "sentry_sdk-1.28.1-py2.py3-none-any.whl", hash = "sha256:6bdb25bd9092478d3a817cb0d01fa99e296aea34d404eac3ca0037faa5c2aa0a"},
 ]
 
 [package.dependencies]
@@ -2749,4 +2749,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "063b702b25c1f2a7dab895b012d91b2f4d7765f806425e8c67726f4255dd1589"
+content-hash = "a5c056fc77c478f4afcacebd74b687f8c8417fe53956fefc0526c407ebfd5424"
