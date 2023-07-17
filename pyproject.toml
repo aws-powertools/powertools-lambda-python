@@ -161,7 +161,7 @@ markers = [
     "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
 ]
 
-# Disable Pydantic v2 warnings
+# MAINTENANCE: Remove these lines when drop support to Pydantic v1
 filterwarnings=[
   "ignore:.*The `parse_obj` method is deprecated*:DeprecationWarning",
   "ignore:.*The `parse_raw` method is deprecated*:DeprecationWarning",
