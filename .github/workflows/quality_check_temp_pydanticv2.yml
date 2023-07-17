@@ -60,8 +60,8 @@ jobs:
           cache: "poetry"
       - name: Removing dev dependencies locked to Pydantic v1
         run: poetry remove cfn-lint
-      - name: Replacing Pydantic v1 with v2
-        run: poetry add "pydantic>=2.0"
+      - name: Replacing Pydantic v1 with v2 > 2.0.3
+        run: poetry add "pydantic=^2.0.3"
       - name: Install dependencies
         run: make dev
       - name: Formatting and Linting

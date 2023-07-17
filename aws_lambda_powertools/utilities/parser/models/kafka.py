@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Dict, List, Type, Union
 
 from pydantic import BaseModel, validator
@@ -33,14 +33,6 @@ class KafkaRecordModel(BaseModel):
             for key, values in header.items():
                 header[key] = bytes(values)
         return value
-
-    # Validator to normalize the timestamp field
-    # Converts the provided timestamp value to a UTC datetime object
-    # See: https://github.com/pydantic/pydantic/issues/6518
-    @validator("timestamp", pre=True)
-    def coerce_timestamp(cls, value):
-        date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
-        return date_utc
 
 
 class KafkaBaseEventModel(BaseModel):

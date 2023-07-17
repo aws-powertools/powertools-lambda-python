@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel, root_validator, validator
+from pydantic import BaseModel, root_validator
 from pydantic.networks import IPvAnyNetwork
 
 from aws_lambda_powertools.utilities.parser.types import Literal
@@ -76,14 +76,6 @@ class APIGatewayEventRequestContext(BaseModel):
         if message_id is not None and event_type != "MESSAGE":
             raise ValueError("messageId is available only when the `eventType` is `MESSAGE`")
         return values
-
-    # Validator to normalize the requestTimeEpoch field
-    # Converts the provided timestamp value to a UTC datetime object
-    # See: https://github.com/pydantic/pydantic/issues/6518
-    @validator("requestTimeEpoch", pre=True)
-    def coerce_timestamp(cls, value):
-        date_utc = datetime.fromtimestamp(int(value) / 1000, tz=timezone.utc)
-        return date_utc
 
 
 class APIGatewayProxyEventModel(BaseModel):

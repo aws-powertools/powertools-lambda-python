@@ -2,7 +2,7 @@ import base64
 import json
 import logging
 import zlib
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Type, Union
 
 from pydantic import BaseModel, Field, validator
@@ -14,14 +14,6 @@ class CloudWatchLogsLogEvent(BaseModel):
     id: str  # noqa AA03 VNE003
     timestamp: datetime
     message: Union[str, Type[BaseModel]]
-
-    # Validator to normalize the timestamp field
-    # Converts the provided timestamp value to a UTC datetime object
-    # See: https://github.com/pydantic/pydantic/issues/6518
-    @validator("timestamp", pre=True)
-    def coerce_timestamp(cls, value):
-        date_utc = datetime.fromtimestamp(value / 1000, tz=timezone.utc)
-        return date_utc
 
 
 class CloudWatchLogsDecode(BaseModel):
