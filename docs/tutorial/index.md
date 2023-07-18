@@ -704,7 +704,7 @@ Let's break it down:
 * **L17-18**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value.
 * **L26-27**: We repeat what we did in L17-18 except we use the value `unknown` since we don't have that information.
 * **L35**: We use `global` to modify our global variable defined in the outer scope.
-* **37-41**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused.
+* **37-41**: We add `ColdStart` annotation and set `cold_start` variable to `false`, so that subsequent requests annotates the value `false` when the sandbox is reused.
 * **L44**: We include the final response under `response` key as part of the `handler` subsegment.
 
 ???+ info
