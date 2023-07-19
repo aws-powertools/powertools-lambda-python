@@ -753,6 +753,7 @@ The following companies, among others, use Powertools:
 * [CyberArk](https://www.cyberark.com/){target="_blank"}
 * [globaldatanet](https://globaldatanet.com/){target="_blank"}
 * [IMS](https://ims.tech/){target="_blank"}
+* [Jit Security](https://www.jit.io/){target="_blank"}
 * [Propellor.ai](https://www.propellor.ai/){target="_blank"}
 * [TopSport](https://www.topsport.com.au/){target="_blank"}
 * [Trek10](https://www.trek10.com/){target="_blank"}
