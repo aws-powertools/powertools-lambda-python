@@ -649,7 +649,7 @@ Within AWS X-Ray, we can answer these questions by using two features: tracing *
 
 Let's put them into action.
 
-```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-42 45"
+```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-41 44"
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from aws_lambda_powertools import Logger
@@ -687,11 +687,10 @@ def lambda_handler(event, context):
     global cold_start
 
     subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation(key="ColdStart", value=cold_start)
+
     if cold_start:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
         cold_start = False
-    else:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
 
     result = app.resolve(event, context)
     subsegment.put_metadata("response", result)
@@ -705,8 +704,8 @@ Let's break it down:
 * **L17-18**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value.
 * **L26-27**: We repeat what we did in L17-18 except we use the value `unknown` since we don't have that information.
 * **L35**: We use `global` to modify our global variable defined in the outer scope.
-* **37-42**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused.
-* **L45**: We include the final response under `response` key as part of the `handler` subsegment.
+* **37-41**: We add `ColdStart` annotation and set `cold_start` variable to `false`, so that subsequent requests annotates the value `false` when the sandbox is reused.
+* **L44**: We include the final response under `response` key as part of the `handler` subsegment.
 
 ???+ info
     If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/){target="_blank"}.
