@@ -2289,8 +2289,7 @@ aws-xray-sdk
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_xray_sdk.core</span> <span class="kn">import</span> <span class="n">patch_all</span><span class="p">,</span> <span class="n">xray_recorder</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_xray_sdk.core</span> <span class="kn">import</span> <span class="n">patch_all</span><span class="p">,</span> <span class="n">xray_recorder</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
@@ -2327,11 +2326,10 @@ aws-xray-sdk
 <span class="hll">    <span class="k">global</span> <span class="n">cold_start</span>
 </span>
 <span class="hll">    <span class="n">subsegment</span> <span class="o">=</span> <span class="n">xray_recorder</span><span class="o">.</span><span class="n">current_subsegment</span><span class="p">()</span>
+</span><span class="hll">    <span class="n">subsegment</span><span class="o">.</span><span class="n">put_annotation</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;ColdStart&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">cold_start</span><span class="p">)</span>
+</span><span class="hll">
 </span><span class="hll">    <span class="k">if</span> <span class="n">cold_start</span><span class="p">:</span>
-</span><span class="hll">        <span class="n">subsegment</span><span class="o">.</span><span class="n">put_annotation</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;ColdStart&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">cold_start</span><span class="p">)</span>
 </span><span class="hll">        <span class="n">cold_start</span> <span class="o">=</span> <span class="kc">False</span>
-</span><span class="hll">    <span class="k">else</span><span class="p">:</span>
-</span><span class="hll">        <span class="n">subsegment</span><span class="o">.</span><span class="n">put_annotation</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;ColdStart&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">cold_start</span><span class="p">)</span>
 </span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 <span class="hll">    <span class="n">subsegment</span><span class="o">.</span><span class="n">put_metadata</span><span class="p">(</span><span class="s2">&quot;response&quot;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
@@ -2344,8 +2342,8 @@ aws-xray-sdk
 <li><strong>L17-18</strong>: We use AWS X-Ray SDK to add <code>User</code> annotation on <code>hello_name</code> subsegment. This will allow us to filter traces using the <code>User</code> value.</li>
 <li><strong>L26-27</strong>: We repeat what we did in L17-18 except we use the value <code>unknown</code> since we don't have that information.</li>
 <li><strong>L35</strong>: We use <code>global</code> to modify our global variable defined in the outer scope.</li>
-<li><strong>37-42</strong>: We add <code>ColdStart</code> annotation and flip the value of <code>cold_start</code> variable, so that subsequent requests annotates the value <code>false</code> when the sandbox is reused.</li>
-<li><strong>L45</strong>: We include the final response under <code>response</code> key as part of the <code>handler</code> subsegment.</li>
+<li><strong>37-41</strong>: We add <code>ColdStart</code> annotation and set <code>cold_start</code> variable to <code>false</code>, so that subsequent requests annotates the value <code>false</code> when the sandbox is reused.</li>
+<li><strong>L44</strong>: We include the final response under <code>response</code> key as part of the <code>handler</code> subsegment.</li>
 </ul>
 <details class="info" open="open">
 <summary>Info</summary>
@@ -2857,7 +2855,7 @@ aws-xray-sdk
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-20
     
   </small>
 </div>
