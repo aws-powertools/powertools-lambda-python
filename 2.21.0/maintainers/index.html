@@ -1,0 +1,2464 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Playbook for active maintainers in Powertools for AWS Lambda (Python)">
+      
+      
+        <meta name="author" content="Amazon Web Services">
+      
+      
+      
+        <link rel="prev" href="../roadmap/">
+      
+      
+      <link rel="icon" href="../media/aws-logo-light.svg">
+      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
+    
+    
+      
+        <title>Maintainers playbook - Powertools for AWS Lambda (Python)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.eebd395e.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ecc896b0.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#overview" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Powertools for AWS Lambda (Python)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Maintainers playbook
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+            
+              <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Z"/></svg>
+              </label>
+            
+          
+            
+            
+            
+            <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+            
+              <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5Z"/></svg>
+              </label>
+            
+          
+        </form>
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        Homepage
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../tutorial/" class="md-tabs__link">
+      Tutorial
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../security/" class="md-tabs__link md-tabs__link--active">
+        Processes
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    Powertools for AWS Lambda (Python)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="..">Homepage</a>
+          
+            <label for="__nav_1">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1">
+          <span class="md-nav__icon md-icon"></span>
+          Homepage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../changelog/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../api/" target="_blank" class="md-nav__link">
+        API reference
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
+        Upgrade guide
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../we_made_this/" class="md-nav__link">
+        We Made This (Community)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+      
+      
+      
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_6" >
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_1_6" id="__nav_1_6_label" tabindex="0">
+          Features
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_6_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_6">
+          <span class="md-nav__icon md-icon"></span>
+          Features
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/tracer/" class="md-nav__link">
+        Tracer
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/logger/" class="md-nav__link">
+        Logger
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/metrics/" class="md-nav__link">
+        Metrics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+        
+      
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_6_4" >
+      
+      
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_1_6_4" id="__nav_1_6_4_label" tabindex="0">
+          Event Handler
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_6_4_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_6_4">
+          <span class="md-nav__icon md-icon"></span>
+          Event Handler
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/event_handler/api_gateway/" class="md-nav__link">
+        REST API
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../core/event_handler/appsync/" class="md-nav__link">
+        GraphQL API
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/parameters/" class="md-nav__link">
+        Parameters
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/batch/" class="md-nav__link">
+        Batch Processing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/typing/" class="md-nav__link">
+        Typing
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/validation/" class="md-nav__link">
+        Validation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/data_classes/" class="md-nav__link">
+        Event Source Data Classes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/parser/" class="md-nav__link">
+        Parser (Pydantic)
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/idempotency/" class="md-nav__link">
+        Idempotency
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/feature_flags/" class="md-nav__link">
+        Feature flags
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/streaming/" class="md-nav__link">
+        Streaming
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/middleware_factory/" class="md-nav__link">
+        Middleware factory
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utilities/jmespath_functions/" class="md-nav__link">
+        JMESPath Functions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/aws-cloudformation/custom-resource-helper" target="_blank" class="md-nav__link">
+        CloudFormation Custom Resources
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tutorial/" class="md-nav__link">
+        Tutorial
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          Processes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Processes
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automation/" class="md-nav__link">
+        Automation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../roadmap/" class="md-nav__link">
+        Roadmap
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Maintainers
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Maintainers
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-maintainers" class="md-nav__link">
+    Current Maintainers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emeritus" class="md-nav__link">
+    Emeritus
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels" class="md-nav__link">
+    Labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintainer-responsibilities" class="md-nav__link">
+    Maintainer Responsibilities
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintainer Responsibilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uphold-code-of-conduct" class="md-nav__link">
+    Uphold Code of Conduct
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prioritize-security" class="md-nav__link">
+    Prioritize Security
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-pull-requests" class="md-nav__link">
+    Review Pull Requests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-new-issues" class="md-nav__link">
+    Triage New Issues
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-bug-reports" class="md-nav__link">
+    Triage Bug Reports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-rfcs" class="md-nav__link">
+    Triage RFCs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-a-new-version" class="md-nav__link">
+    Releasing a new version
+  </a>
+  
+    <nav class="md-nav" aria-label="Releasing a new version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#release-process-visualized" class="md-nav__link">
+    Release process visualized
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drafting-release-notes" class="md-nav__link">
+    Drafting release notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-end-to-end-tests" class="md-nav__link">
+    Run end to end tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-a-documentation-hotfix" class="md-nav__link">
+    Releasing a documentation hotfix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintain-overall-health-of-the-repo" class="md-nav__link">
+    Maintain Overall Health of the Repo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-roadmap" class="md-nav__link">
+    Manage Roadmap
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-continuous-integration-checks" class="md-nav__link">
+    Add Continuous Integration Checks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative-impact-on-the-project" class="md-nav__link">
+    Negative Impact on the Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#becoming-a-maintainer" class="md-nav__link">
+    Becoming a maintainer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-scenarios" class="md-nav__link">
+    Common scenarios
+  </a>
+  
+    <nav class="md-nav" aria-label="Common scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contribution-is-stuck" class="md-nav__link">
+    Contribution is stuck
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insufficient-feedback-or-information" class="md-nav__link">
+    Insufficient feedback or information
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crediting-contributions" class="md-nav__link">
+    Crediting contributions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-that-a-bug" class="md-nav__link">
+    Is that a bug?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mentoring-contributions" class="md-nav__link">
+    Mentoring contributions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-running-issues-or-prs" class="md-nav__link">
+    Long running issues or PRs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e2e-framework" class="md-nav__link">
+    E2E framework
+  </a>
+  
+    <nav class="md-nav" aria-label="E2E framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    Structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanics" class="md-nav__link">
+    Mechanics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authoring-a-new-feature-e2e-test" class="md-nav__link">
+    Authoring a new feature E2E test
+  </a>
+  
+    <nav class="md-nav" aria-label="Authoring a new feature E2E test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-infrastructure" class="md-nav__link">
+    1. Define infrastructure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-deploydelete-infrastructure-when-tests-run" class="md-nav__link">
+    2. Deploy/Delete infrastructure when tests run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-access-stack-outputs-for-e2e-tests" class="md-nav__link">
+    3. Access stack outputs for E2E tests
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    Internals
+  </a>
+  
+    <nav class="md-nav" aria-label="Internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-runner-parallelization" class="md-nav__link">
+    Test runner parallelization
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cdk-cli-parallelization" class="md-nav__link">
+    CDK CLI parallelization
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-maintainers" class="md-nav__link">
+    Current Maintainers
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#emeritus" class="md-nav__link">
+    Emeritus
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#labels" class="md-nav__link">
+    Labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintainer-responsibilities" class="md-nav__link">
+    Maintainer Responsibilities
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintainer Responsibilities">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#uphold-code-of-conduct" class="md-nav__link">
+    Uphold Code of Conduct
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prioritize-security" class="md-nav__link">
+    Prioritize Security
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#review-pull-requests" class="md-nav__link">
+    Review Pull Requests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-new-issues" class="md-nav__link">
+    Triage New Issues
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-bug-reports" class="md-nav__link">
+    Triage Bug Reports
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#triage-rfcs" class="md-nav__link">
+    Triage RFCs
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-a-new-version" class="md-nav__link">
+    Releasing a new version
+  </a>
+  
+    <nav class="md-nav" aria-label="Releasing a new version">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#release-process-visualized" class="md-nav__link">
+    Release process visualized
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#drafting-release-notes" class="md-nav__link">
+    Drafting release notes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#run-end-to-end-tests" class="md-nav__link">
+    Run end to end tests
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-a-documentation-hotfix" class="md-nav__link">
+    Releasing a documentation hotfix
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintain-overall-health-of-the-repo" class="md-nav__link">
+    Maintain Overall Health of the Repo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manage-roadmap" class="md-nav__link">
+    Manage Roadmap
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-continuous-integration-checks" class="md-nav__link">
+    Add Continuous Integration Checks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#negative-impact-on-the-project" class="md-nav__link">
+    Negative Impact on the Project
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#becoming-a-maintainer" class="md-nav__link">
+    Becoming a maintainer
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-scenarios" class="md-nav__link">
+    Common scenarios
+  </a>
+  
+    <nav class="md-nav" aria-label="Common scenarios">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#contribution-is-stuck" class="md-nav__link">
+    Contribution is stuck
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#insufficient-feedback-or-information" class="md-nav__link">
+    Insufficient feedback or information
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crediting-contributions" class="md-nav__link">
+    Crediting contributions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is-that-a-bug" class="md-nav__link">
+    Is that a bug?
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mentoring-contributions" class="md-nav__link">
+    Mentoring contributions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#long-running-issues-or-prs" class="md-nav__link">
+    Long running issues or PRs
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#e2e-framework" class="md-nav__link">
+    E2E framework
+  </a>
+  
+    <nav class="md-nav" aria-label="E2E framework">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#structure" class="md-nav__link">
+    Structure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mechanics" class="md-nav__link">
+    Mechanics
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authoring-a-new-feature-e2e-test" class="md-nav__link">
+    Authoring a new feature E2E test
+  </a>
+  
+    <nav class="md-nav" aria-label="Authoring a new feature E2E test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-define-infrastructure" class="md-nav__link">
+    1. Define infrastructure
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-deploydelete-infrastructure-when-tests-run" class="md-nav__link">
+    2. Deploy/Delete infrastructure when tests run
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-access-stack-outputs-for-e2e-tests" class="md-nav__link">
+    3. Access stack outputs for E2E tests
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#internals" class="md-nav__link">
+    Internals
+  </a>
+  
+    <nav class="md-nav" aria-label="Internals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-runner-parallelization" class="md-nav__link">
+    Test runner parallelization
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cdk-cli-parallelization" class="md-nav__link">
+    CDK CLI parallelization
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Maintainers</h1>
+
+<!--  markdownlint-disable MD043 -->
+
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Please treat this content as a living document.</p>
+</div>
+<p>This is document explains who the maintainers are, their responsibilities, and how they should be doing it. If you're interested in contributing, see <a href="CONTRIBUTING.md">CONTRIBUTING</a>.</p>
+<h2 id="current-maintainers">Current Maintainers<a class="headerlink" href="#current-maintainers" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Maintainer</th>
+<th>GitHub ID</th>
+<th>Affiliation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Heitor Lessa</td>
+<td><a href="https://github.com/heitorlessa">heitorlessa</a></td>
+<td>Amazon</td>
+</tr>
+<tr>
+<td>Simon Thulbourn</td>
+<td><a href="https://github.com/sthulb">sthulb</a></td>
+<td>Amazon</td>
+</tr>
+<tr>
+<td>Ruben Fonseca</td>
+<td><a href="https://github.com/rubenfonseca">rubenfonseca</a></td>
+<td>Amazon</td>
+</tr>
+<tr>
+<td>Leandro Damascena</td>
+<td><a href="https://github.com/leandrodamascena">leandrodamascena</a></td>
+<td>Amazon</td>
+</tr>
+</tbody>
+</table>
+<h2 id="emeritus">Emeritus<a class="headerlink" href="#emeritus" title="Permanent link">&para;</a></h2>
+<p>Previous active maintainers who contributed to this project.</p>
+<table>
+<thead>
+<tr>
+<th>Maintainer</th>
+<th>GitHub ID</th>
+<th>Affiliation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tom McCarthy</td>
+<td><a href="https://github.com/cakepietoast">cakepietoast</a></td>
+<td>MongoDB</td>
+</tr>
+<tr>
+<td>Nicolas Moutschen</td>
+<td><a href="https://github.com/nmoutschen">nmoutschen</a></td>
+<td>Apollo</td>
+</tr>
+<tr>
+<td>Alexander Melnyk</td>
+<td><a href="https://github.com/am29d">am29d</a></td>
+<td>Amazon</td>
+</tr>
+<tr>
+<td>Michal Ploski</td>
+<td><a href="https://github.com/mploski">mploski</a></td>
+<td>Amazon</td>
+</tr>
+</tbody>
+</table>
+<h2 id="labels">Labels<a class="headerlink" href="#labels" title="Permanent link">&para;</a></h2>
+<p>These are the most common labels used by maintainers to triage issues, pull requests (PR), and for project management:</p>
+<table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Usage</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>triage</td>
+<td>New issues that require maintainers review</td>
+<td>Issue template</td>
+</tr>
+<tr>
+<td>bug</td>
+<td>Unexpected, reproducible and unintended software behavior</td>
+<td>PR/Release automation; Doc snippets are excluded;</td>
+</tr>
+<tr>
+<td>not-a-bug</td>
+<td>New and existing bug reports incorrectly submitted as bug</td>
+<td>Analytics</td>
+</tr>
+<tr>
+<td>documentation</td>
+<td>Documentation improvements</td>
+<td>PR/Release automation; Doc additions, fixes, etc.;</td>
+</tr>
+<tr>
+<td>feature-request</td>
+<td>New or enhancements to existing features</td>
+<td>Issue template</td>
+</tr>
+<tr>
+<td>typing</td>
+<td>New or enhancements to static typing</td>
+<td>Issue template</td>
+</tr>
+<tr>
+<td>RFC</td>
+<td>Technical design documents related to a feature request</td>
+<td>Issue template</td>
+</tr>
+<tr>
+<td>bug-upstream</td>
+<td>Bug caused by upstream dependency</td>
+<td></td>
+</tr>
+<tr>
+<td>help wanted</td>
+<td>Tasks you want help from anyone to move forward</td>
+<td>Bandwidth, complex topics, etc.</td>
+</tr>
+<tr>
+<td>need-customer-feedback</td>
+<td>Tasks that need more feedback before proceeding</td>
+<td>80/20% rule, uncertain, etc.</td>
+</tr>
+<tr>
+<td>need-more-information</td>
+<td>Missing information before making any calls</td>
+<td></td>
+</tr>
+<tr>
+<td>need-documentation</td>
+<td>PR is missing or has incomplete documentation</td>
+<td></td>
+</tr>
+<tr>
+<td>need-issue</td>
+<td>PR is missing a related issue for tracking change</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>need-rfc</td>
+<td>Feature request requires a RFC to improve discussion</td>
+<td></td>
+</tr>
+<tr>
+<td>pending-release</td>
+<td>Merged changes that will be available soon</td>
+<td>Release automation auto-closes/notifies it</td>
+</tr>
+<tr>
+<td>revisit-in-3-months</td>
+<td>Blocked issues/PRs that need to be revisited</td>
+<td>Often related to <code>need-customer-feedback</code>, prioritization, etc.</td>
+</tr>
+<tr>
+<td>breaking-change</td>
+<td>Changes that will cause customer impact and need careful triage</td>
+<td></td>
+</tr>
+<tr>
+<td>do-not-merge</td>
+<td>PRs that are blocked for varying reasons</td>
+<td>Timeline is uncertain</td>
+</tr>
+<tr>
+<td>size/XS</td>
+<td>PRs between 0-9 LOC</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>size/S</td>
+<td>PRs between 10-29 LOC</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>size/M</td>
+<td>PRs between 30-99 LOC</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>size/L</td>
+<td>PRs between 100-499 LOC</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>size/XL</td>
+<td>PRs between 500-999 LOC, often PRs that grown with feedback</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>size/XXL</td>
+<td>PRs with 1K+ LOC, largely documentation related</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>tests</td>
+<td>PRs that add or change tests</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td><code>&lt;utility&gt;</code></td>
+<td>PRs related to a Powertools for AWS Lambda (Python) utility, e.g. <code>parameters</code>, <code>tracer</code></td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>feature</td>
+<td>New features or minor changes</td>
+<td>PR/Release automation</td>
+</tr>
+<tr>
+<td>dependencies</td>
+<td>Changes that touch dependencies, e.g. Dependabot, etc.</td>
+<td>PR/ automation</td>
+</tr>
+<tr>
+<td>github-actions</td>
+<td>Changes in GitHub workflows</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>github-templates</td>
+<td>Changes in GitHub issue/PR templates</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>internal</td>
+<td>Changes in governance and chores (linting setup, baseline, etc.)</td>
+<td>PR automation</td>
+</tr>
+<tr>
+<td>tech-debt</td>
+<td>Changes in tech debt</td>
+<td></td>
+</tr>
+<tr>
+<td>customer-reference</td>
+<td>Authorization to use company name in our documentation</td>
+<td>Public Relations</td>
+</tr>
+<tr>
+<td>community-content</td>
+<td>Suggested content to feature in our documentation</td>
+<td>Public Relations</td>
+</tr>
+</tbody>
+</table>
+<h2 id="maintainer-responsibilities">Maintainer Responsibilities<a class="headerlink" href="#maintainer-responsibilities" title="Permanent link">&para;</a></h2>
+<p>Maintainers are active and visible members of the community, and have <a href="https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization">maintain-level permissions on a repository</a>. Use those privileges to serve the community and evolve code as follows.</p>
+<p>Be aware of recurring ambiguous situations and <a href="#common-scenarios">document them</a> to help your fellow maintainers.</p>
+<h3 id="uphold-code-of-conduct">Uphold Code of Conduct<a class="headerlink" href="#uphold-code-of-conduct" title="Permanent link">&para;</a></h3>
+<p>Model the behavior set forward by the <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the <a href="CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
+<p>These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.</p>
+<h3 id="prioritize-security">Prioritize Security<a class="headerlink" href="#prioritize-security" title="Permanent link">&para;</a></h3>
+<p>Security is your number one priority. Maintainer's Github keys must be password protected securely and any reported security vulnerabilities are addressed before features or bugs.</p>
+<p>Note that this repository is monitored and supported 24/7 by Amazon Security, see <a href="SECURITY.md">Reporting a Vulnerability</a> for details.</p>
+<h3 id="review-pull-requests">Review Pull Requests<a class="headerlink" href="#review-pull-requests" title="Permanent link">&para;</a></h3>
+<p>Review pull requests regularly, comment, suggest, reject, merge and close. Accept only high quality pull-requests. Provide code reviews and guidance on incoming pull requests.</p>
+<p>PRs are <a href="#labels">labeled</a> based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.</p>
+<p>Use and enforce <a href="https://semver.org/">semantic versioning</a> pull request titles, as these will be used for <a href="CHANGELOG.md">CHANGELOG</a> and <a href="https://github.com/aws-powertools/powertools-lambda-python/releases">Release notes</a> - make sure they communicate their intent at the human level.</p>
+<blockquote>
+<p>TODO: This is an area we want to automate using the new GitHub GraphQL API.</p>
+</blockquote>
+<p>For issues linked to a PR, make sure <code>pending release</code> label is applied to them when merging. <a href="#releasing-a-new-version">Upon release</a>, these issues will be notified which release version contains their change.</p>
+<p>See <a href="#common-scenarios">Common scenarios</a> section for additional guidance.</p>
+<h3 id="triage-new-issues">Triage New Issues<a class="headerlink" href="#triage-new-issues" title="Permanent link">&para;</a></h3>
+<p>Manage <a href="#labels">labels</a>, review issues regularly, and create new labels as needed by the project. Remove <code>triage</code> label when you're able to confirm the validity of a request, a bug can be reproduced, etc. Give priority to the original author for implementation, unless it is a sensitive task that is best handled by maintainers.</p>
+<blockquote>
+<p>TODO: This is an area we want to automate using the new GitHub GraphQL API.</p>
+</blockquote>
+<p>Make sure issues are assigned to our <a href="https://github.com/orgs/awslabs/projects/51/">board of activities</a> and have the right <a href="https://docs.powertools.aws.dev/lambda/python/latest/roadmap/#roadmap-status-definition">status</a>.</p>
+<p>Use our <a href="#labels">labels</a> to signal good first issues to new community members, and to set expectation that this might need additional feedback from the author, other customers, experienced community members and/or maintainers.</p>
+<p>Be aware of <a href="https://opensource.com/article/17/10/managing-casual-contributors">casual contributors</a> and recurring contributors. Provide the experience and attention you wish you had if you were starting in open source.</p>
+<p>See <a href="#common-scenarios">Common scenarios</a> section for additional guidance.</p>
+<h3 id="triage-bug-reports">Triage Bug Reports<a class="headerlink" href="#triage-bug-reports" title="Permanent link">&para;</a></h3>
+<p>Be familiar with <a href="#is-that-a-bug">our definition of bug</a>. If it's not a bug, you can close it or adjust its title and labels - always communicate the reason accordingly.</p>
+<p>For bugs caused by upstream dependencies, replace <code>bug</code> with <code>bug-upstream</code> label. Ask the author whether they'd like to raise the issue upstream or if they prefer us to do so.</p>
+<p>Assess the impact and make the call on whether we need an emergency release. Contact other <a href="#current-maintainers">maintainers</a> when in doubt.</p>
+<p>See <a href="#common-scenarios">Common scenarios</a> section for additional guidance.</p>
+<h3 id="triage-rfcs">Triage RFCs<a class="headerlink" href="#triage-rfcs" title="Permanent link">&para;</a></h3>
+<p>RFC is a collaborative process to help us get to the most optimal solution given the context. Their purpose is to ensure everyone understands what this context is, their trade-offs, and alternative solutions that were part of the research before implementation begins.</p>
+<p>Make sure you ask these questions in mind when reviewing:</p>
+<ul>
+<li>Does it use our <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=RFC%2Ctriage&amp;template=rfc.yml&amp;title=RFC%3A+TITLE">RFC template</a>?</li>
+<li>Does the match our <a href="https://docs.powertools.aws.dev/lambda/python/latest/#tenets">Tenets</a>?</li>
+<li>Does the proposal address the use case? If so, is the recommended usage explicit?</li>
+<li>Does it focus on the mechanics to solve the use case over fine-grained implementation details?</li>
+<li>Can anyone familiar with the code base implement it?</li>
+<li>If approved, are they interested in contributing? Do they need any guidance?</li>
+<li>Does this significantly increase the overall project maintenance? Do we have the skills to maintain it?</li>
+<li>If we can't take this use case, are there alternative projects we could recommend? Or does it call for a new project altogether?</li>
+</ul>
+<p>When necessary, be upfront that the time to review, approve, and implement a RFC can vary - see <a href="#contribution-is-stuck">Contribution is stuck</a>. Some RFCs may be further updated after implementation, as certain areas become clearer.</p>
+<p>Some examples using our initial and new RFC templates: #92, #94, #95, #991, #1226</p>
+<h3 id="releasing-a-new-version">Releasing a new version<a class="headerlink" href="#releasing-a-new-version" title="Permanent link">&para;</a></h3>
+<p>Firstly, make sure the commit history in the <code>develop</code> branch <strong>(1)</strong> it's up to date, <strong>(2)</strong> commit messages are semantic, and <strong>(3)</strong> commit messages have their respective area, for example <code>feat(logger): &lt;change&gt;</code>, <code>chore(ci): ...</code>).</p>
+<p><strong>Looks good, what's next?</strong></p>
+<p>Kickoff the <code>Release</code> workflow with the intended version - this might take around 25m-30m to complete.</p>
+<p>Once complete, you can start drafting the release notes to let customers know <strong>what changed and what's in it for them (a.k.a why they should care)</strong>. We have guidelines in the release notes section so you know what good looks like.</p>
+<blockquote>
+<p><strong>NOTE</strong>: Documentation might take a few minutes to reflect the latest version due to caching and CDN invalidations.</p>
+</blockquote>
+<h4 id="release-process-visualized">Release process visualized<a class="headerlink" href="#release-process-visualized" title="Permanent link">&para;</a></h4>
+<p>Every release makes hundreds of checks, security scans, canaries and deployments - all of these are automated.</p>
+<p>This is a close visual representation of the main steps (GitHub Actions UI should be the source of truth), along with the approximate time it takes for each key step to complete.</p>
+<!-- use 8s to graph steps faster than 8s like seal/checksum that actually takes 0s -->
+
+<pre class="mermaid"><code>gantt
+
+title      Release process
+dateFormat HH:mm
+axisFormat %H:%M
+
+Release commit   : milestone, m1, 10:00,2m
+
+section Seal
+    Bump release version        : active, 8s
+    Prevent source tampering    : active, 43s
+section QA
+    Quality checks              : active, 2.2m
+section Build
+    Checksum                    : active, 8s
+    Build release artifact      : active, 39s
+    Seal                        : active, 8s
+section Provenance
+    Attest build                : active, 8s
+    Sign attestation            : active, attestation, 10:06, 8s
+
+section Release
+    Checksum                    : active, 8s
+    PyPi temp credentials       : active, 8s
+    Publish PyPi                : active, pypi, 10:07, 29s
+
+PyPi release : milestone, m2, 10:07,1s
+
+section Git release
+    Checksum                    : active, after pypi, 8s
+    Git Tag                     : active, 8s
+    Bump package version        : active, 8s
+    Create PR                   : active, 8s
+    Upload attestation          : active, 8s
+
+section Layer release
+    Build (x86+ARM)             : active, layer_build, 10:08, 6m
+    Deploy Beta                 : active, layer_beta, after layer_build, 6.3m
+    Deploy Prod                 : active, layer_prod, after layer_beta, 6.3m
+
+Layer release : milestone, m3, 10:26,1s
+
+section SAR release
+    Deploy Beta                 : active, sar_beta, after layer_beta, 2.2m
+    Deploy Prod                 : active, sar_prod, after sar_beta, 2.2m
+
+SAR release : milestone, m4, 10:25,1s
+
+section Docs
+    Create PR (Layer ARN)       : active, after layer_prod, 8s
+    Release versioned docs      : active, 2.2m
+
+Documentation release : milestone, m4, 10:28,1m
+
+section Post-release
+    Close pending issues        : active, 8s
+
+Release complete : milestone, m6, 10:31,2m</code></pre>
+<h4 id="drafting-release-notes">Drafting release notes<a class="headerlink" href="#drafting-release-notes" title="Permanent link">&para;</a></h4>
+<p>Visit the <a href="https://github.com/aws-powertools/powertools-lambda-python/releases">Releases page</a> and choose the edit pencil button.</p>
+<p>Make sure the <code>tag</code> field reflects the new version you're releasing, the target branch field is set to <code>develop</code>, and <code>release title</code> matches your tag e.g., <code>v1.26.0</code>.</p>
+<p>You'll notice we group all changes based on their <a href="#labels">labels</a> like <code>feature</code>, <code>bug</code>, <code>documentation</code>, etc.</p>
+<p><strong>I spotted a typo or incorrect grouping - how do I fix it?</strong></p>
+<p>Edit the respective PR title and update their <a href="#labels">labels</a>. Then run the <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml">Release Drafter workflow</a> to update the Draft release.</p>
+<blockquote>
+<p><strong>NOTE</strong>: This won't change the CHANGELOG as the merge commit is immutable. Don't worry about it. We'd only rewrite git history only if this can lead to confusion and we'd pair with another maintainer.</p>
+</blockquote>
+<p><strong>All looking good, what's next?</strong></p>
+<p>The best part comes now. Replace the placeholder <code>[Human readable summary of changes]</code> with what you'd like to communicate to customers what this release is all about. Rule of thumb: always put yourself in the customers shoes.</p>
+<p>These are some questions to keep in mind when drafting your first or future release notes:</p>
+<ul>
+<li>Can customers understand at a high level what changed in this release?</li>
+<li>Is there a link to the documentation where they can read more about each main change?</li>
+<li>Are there any graphics or <a href="carbon.now.sh/">code snippets</a> that can enhance readability?</li>
+<li>Are we calling out any key contributor(s) to this release?<ul>
+<li>All contributors are automatically credited, use this as an exceptional case to feature them</li>
+</ul>
+</li>
+</ul>
+<p>Once you're happy, hit <code>Publish release</code> 🎉🎉🎉.</p>
+<p>This will kick off the <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release.yml">Publishing workflow</a> and within a few minutes you should see the latest version in PyPi, and all issues labeled as <code>pending-release</code> will be closed and notified.</p>
+<h3 id="run-end-to-end-tests">Run end to end tests<a class="headerlink" href="#run-end-to-end-tests" title="Permanent link">&para;</a></h3>
+<p>E2E tests are run on every push to <code>develop</code> or manually via <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml">run-e2e-tests workflow</a>.</p>
+<p>To run locally, you need <a href="https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites">AWS CDK CLI</a> and an <a href="https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html">account bootstrapped</a> (<code>cdk bootstrap</code>). With a default AWS CLI profile configured, or <code>AWS_PROFILE</code> environment variable set, run <code>make e2e tests</code>.</p>
+<h3 id="releasing-a-documentation-hotfix">Releasing a documentation hotfix<a class="headerlink" href="#releasing-a-documentation-hotfix" title="Permanent link">&para;</a></h3>
+<p>You can rebuild the latest documentation without a full release via this <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/rebuild_latest_docs.yml">GitHub Actions Workflow</a>. Choose <code>Run workflow</code>, keep <code>develop</code> as the branch, and input the latest Powertools for AWS Lambda (Python) version available.</p>
+<p>This workflow will update both user guide and API documentation.</p>
+<h3 id="maintain-overall-health-of-the-repo">Maintain Overall Health of the Repo<a class="headerlink" href="#maintain-overall-health-of-the-repo" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>TODO: Coordinate renaming <code>develop</code> to <code>main</code></p>
+</blockquote>
+<p>Keep the <code>develop</code> branch at production quality at all times. Backport features as needed. Cut release branches and tags to enable future patches.</p>
+<h3 id="manage-roadmap">Manage Roadmap<a class="headerlink" href="#manage-roadmap" title="Permanent link">&para;</a></h3>
+<p>See <a href="https://docs.powertools.aws.dev/lambda/python/latest/roadmap/">Roadmap section</a></p>
+<p>Ensure the repo highlights features that should be elevated to the project roadmap. Be clear about the feature’s status, priority, target version, and whether or not it should be elevated to the roadmap.</p>
+<h3 id="add-continuous-integration-checks">Add Continuous Integration Checks<a class="headerlink" href="#add-continuous-integration-checks" title="Permanent link">&para;</a></h3>
+<p>Add integration checks that validate pull requests and pushes to ease the burden on Pull Request reviewers. Continuously revisit areas of improvement to reduce operational burden in all parties involved.</p>
+<h3 id="negative-impact-on-the-project">Negative Impact on the Project<a class="headerlink" href="#negative-impact-on-the-project" title="Permanent link">&para;</a></h3>
+<p>Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be <a href="CODE_OF_CONDUCT.md">Code of Conduct</a> violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.</p>
+<h3 id="becoming-a-maintainer">Becoming a maintainer<a class="headerlink" href="#becoming-a-maintainer" title="Permanent link">&para;</a></h3>
+<p>In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.</p>
+<p>We suspect this process might look similar to the <a href="https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer">OpenSearch project</a>.</p>
+<h2 id="common-scenarios">Common scenarios<a class="headerlink" href="#common-scenarios" title="Permanent link">&para;</a></h2>
+<p>These are recurring ambiguous situations that new and existing maintainers may encounter. They serve as guidance. It is up to each maintainer to follow, adjust, or handle in a different manner as long as <a href="#uphold-code-of-conduct">our conduct is consistent</a></p>
+<h3 id="contribution-is-stuck">Contribution is stuck<a class="headerlink" href="#contribution-is-stuck" title="Permanent link">&para;</a></h3>
+<p>A contribution can get stuck often due to lack of bandwidth and language barrier. For bandwidth issues, check whether the author needs help. Make sure you get their permission before pushing code into their existing PR - do not create a new PR unless strictly necessary.</p>
+<p>For language barrier and others, offer a 1:1 chat to get them unblocked. Often times, English might not be their primary language, and writing in public might put them off, or come across not the way they intended to be.</p>
+<p>In other cases, you may have constrained capacity. Use <code>help wanted</code> label when you want to signal other maintainers and external contributors that you could use a hand to move it forward.</p>
+<h3 id="insufficient-feedback-or-information">Insufficient feedback or information<a class="headerlink" href="#insufficient-feedback-or-information" title="Permanent link">&para;</a></h3>
+<p>When in doubt, use <code>need-more-information</code> or <code>need-customer-feedback</code> labels to signal more context and feedback are necessary before proceeding. You can also use <code>revisit-in-3-months</code> label when you expect it might take a while to gather enough information before you can decide.</p>
+<h3 id="crediting-contributions">Crediting contributions<a class="headerlink" href="#crediting-contributions" title="Permanent link">&para;</a></h3>
+<p>We credit all contributions as part of each <a href="https://github.com/aws-powertools/powertools-lambda-python/releases">release note</a> as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.</p>
+<h3 id="is-that-a-bug">Is that a bug?<a class="headerlink" href="#is-that-a-bug" title="Permanent link">&para;</a></h3>
+<p>A bug produces incorrect or unexpected results at runtime that differ from its intended behavior. Bugs must be reproducible. They directly affect customers experience at runtime despite following its recommended usage.</p>
+<p>Documentation snippets, use of internal components, or unadvertised functionalities are not considered bugs.</p>
+<h3 id="mentoring-contributions">Mentoring contributions<a class="headerlink" href="#mentoring-contributions" title="Permanent link">&para;</a></h3>
+<p>Always favor mentoring issue authors to contribute, unless they're not interested or the implementation is sensitive (<em>e.g., complexity, time to release, etc.</em>).</p>
+<p>Make use of <code>help wanted</code> and <code>good first issue</code> to signal additional contributions the community can help.</p>
+<h3 id="long-running-issues-or-prs">Long running issues or PRs<a class="headerlink" href="#long-running-issues-or-prs" title="Permanent link">&para;</a></h3>
+<p>Try offering a 1:1 call in the attempt to get to a mutual understanding and clarify areas that maintainers could help.</p>
+<p>In the rare cases where both parties don't have the bandwidth or expertise to continue, it's best to use the <code>revisit-in-3-months</code> label. By then, see if it's possible to break the PR or issue in smaller chunks, and eventually close if there is no progress.</p>
+<h2 id="e2e-framework">E2E framework<a class="headerlink" href="#e2e-framework" title="Permanent link">&para;</a></h2>
+<h3 id="structure">Structure<a class="headerlink" href="#structure" title="Permanent link">&para;</a></h3>
+<p>Our E2E framework relies on <a href="https://docs.pytest.org/en/6.2.x/fixture.html">Pytest fixtures</a> to coordinate infrastructure and test parallelization - see <a href="#test-runner-parallelization">Test Parallelization</a> and <a href="#cdk-cli-parallelization">CDK CLI Parallelization</a>.</p>
+<p><strong>tests/e2e structure</strong></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code>.
+├──<span class="w"> </span>__init__.py
+├──<span class="w"> </span>conftest.py<span class="w"> </span><span class="c1"># builds Lambda Layer once</span>
+├──<span class="w"> </span>logger
+│<span class="w">   </span>├──<span class="w"> </span>__init__.py
+│<span class="w">   </span>├──<span class="w"> </span>conftest.py<span class="w">  </span><span class="c1"># deploys LoggerStack</span>
+│<span class="w">   </span>├──<span class="w"> </span>handlers
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>basic_handler.py
+│<span class="w">   </span>├──<span class="w"> </span>infrastructure.py<span class="w"> </span><span class="c1"># LoggerStack definition</span>
+│<span class="w">   </span>└──<span class="w"> </span>test_logger.py
+├──<span class="w"> </span>metrics
+│<span class="w">   </span>├──<span class="w"> </span>__init__.py
+│<span class="w">   </span>├──<span class="w"> </span>conftest.py<span class="w">  </span><span class="c1"># deploys MetricsStack</span>
+│<span class="w">   </span>├──<span class="w"> </span>handlers
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>basic_handler.py
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>cold_start.py
+│<span class="w">   </span>├──<span class="w"> </span>infrastructure.py<span class="w"> </span><span class="c1"># MetricsStack definition</span>
+│<span class="w">   </span>└──<span class="w"> </span>test_metrics.py
+├──<span class="w"> </span>tracer
+│<span class="w">   </span>├──<span class="w"> </span>__init__.py
+│<span class="w">   </span>├──<span class="w"> </span>conftest.py<span class="w">  </span><span class="c1"># deploys TracerStack</span>
+│<span class="w">   </span>├──<span class="w"> </span>handlers
+│<span class="w">   </span>│<span class="w">   </span>├──<span class="w"> </span>async_capture.py
+│<span class="w">   </span>│<span class="w">   </span>└──<span class="w"> </span>basic_handler.py
+│<span class="w">   </span>├──<span class="w"> </span>infrastructure.py<span class="w">  </span><span class="c1"># TracerStack definition</span>
+│<span class="w">   </span>└──<span class="w"> </span>test_tracer.py
+└──<span class="w"> </span>utils
+<span class="w">    </span>├──<span class="w"> </span>__init__.py
+<span class="w">    </span>├──<span class="w"> </span>data_builder<span class="w">  </span><span class="c1"># build_service_name(), build_add_dimensions_input, etc.</span>
+<span class="w">    </span>├──<span class="w"> </span>data_fetcher<span class="w">  </span><span class="c1"># get_traces(), get_logs(), get_lambda_response(), etc.</span>
+<span class="w">    </span>├──<span class="w"> </span>infrastructure.py<span class="w"> </span><span class="c1"># base infrastructure like deploy logic, etc.</span>
+</code></pre></div></td></tr></table></div>
+<p>Where:</p>
+<ul>
+<li><strong><code>&lt;feature&gt;/infrastructure.py</code></strong>. Uses CDK to define the infrastructure a given feature needs.</li>
+<li><strong><code>&lt;feature&gt;/handlers/</code></strong>. Lambda function handlers to build, deploy, and exposed as stack output in PascalCase (e.g., <code>BasicHandler</code>).</li>
+<li><strong><code>utils/</code></strong>. Test utilities to build data and fetch AWS data to ease assertion</li>
+<li><strong><code>conftest.py</code></strong>. Deploys and deletes a given feature infrastructure. Hierarchy matters:<ul>
+<li><strong>Top-level (<code>e2e/conftest</code>)</strong>. Builds Lambda Layer only once and blocks I/O across all CPU workers.</li>
+<li><strong>Feature-level (<code>e2e/&lt;feature&gt;/conftest</code>)</strong>. Deploys stacks in parallel and make them independent of each other.</li>
+</ul>
+</li>
+</ul>
+<h3 id="mechanics">Mechanics<a class="headerlink" href="#mechanics" title="Permanent link">&para;</a></h3>
+<p>Under <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/e2e/utils/infrastructure.py"><code>BaseInfrastructure</code></a>, we hide the complexity of deployment and delete coordination under <code>deploy</code>, <code>delete</code>, and <code>create_lambda_functions</code> methods.</p>
+<p>This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run one, subset, or all tests and only deploy their related infrastructure, without any custom configuration.</p>
+<blockquote>
+<p>Class diagram to understand abstraction built when defining a new stack (<code>LoggerStack</code>)</p>
+</blockquote>
+<pre class="mermaid"><code>classDiagram
+    class InfrastructureProvider {
+        &lt;&lt;interface&gt;&gt;
+        +deploy() Dict
+        +delete()
+        +create_resources()
+        +create_lambda_functions() Dict~Functions~
+    }
+
+    class BaseInfrastructure {
+        +deploy() Dict
+        +delete()
+        +create_lambda_functions() Dict~Functions~
+        +add_cfn_output()
+    }
+
+    class TracerStack {
+        +create_resources()
+    }
+
+    class LoggerStack {
+        +create_resources()
+    }
+
+    class MetricsStack {
+        +create_resources()
+    }
+
+    class EventHandlerStack {
+        +create_resources()
+    }
+
+    InfrastructureProvider &lt;|-- BaseInfrastructure : implement
+    BaseInfrastructure &lt;|-- TracerStack : inherit
+    BaseInfrastructure &lt;|-- LoggerStack : inherit
+    BaseInfrastructure &lt;|-- MetricsStack : inherit
+    BaseInfrastructure &lt;|-- EventHandlerStack : inherit</code></pre>
+<h3 id="authoring-a-new-feature-e2e-test">Authoring a new feature E2E test<a class="headerlink" href="#authoring-a-new-feature-e2e-test" title="Permanent link">&para;</a></h3>
+<p>Imagine you're going to create E2E for Event Handler feature for the first time. Keep the following mental model when reading:</p>
+<pre class="mermaid"><code>graph LR
+    A["1. Define infrastructure"]--&gt;B["2. Deploy/Delete infrastructure"]--&gt;C["3.Access Stack outputs" ]</code></pre>
+<h4 id="1-define-infrastructure">1. Define infrastructure<a class="headerlink" href="#1-define-infrastructure" title="Permanent link">&para;</a></h4>
+<p>We use CDK as our Infrastructure as Code tool of choice. Before you start using CDK, you'd take the following steps:</p>
+<ol>
+<li>Create <code>tests/e2e/event_handler/infrastructure.py</code> file</li>
+<li>Create a new class <code>EventHandlerStack</code> and inherit from <code>BaseInfrastructure</code></li>
+<li>Override <code>create_resources</code> method and define your infrastructure using CDK</li>
+<li>(Optional) Create a Lambda function under <code>handlers/alb_handler.py</code></li>
+</ol>
+<blockquote>
+<p>Excerpt <code>tests/e2e/event_handler/infrastructure.py</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">EventHandlerStack</span><span class="p">(</span><span class="n">BaseInfrastructure</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_resources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">functions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_lambda_functions</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_alb</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="n">functions</span><span class="p">[</span><span class="s2">&quot;AlbHandler&quot;</span><span class="p">])</span>
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">_create_alb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">function</span><span class="p">:</span> <span class="n">Function</span><span class="p">):</span>
+        <span class="n">vpc</span> <span class="o">=</span> <span class="n">ec2</span><span class="o">.</span><span class="n">Vpc</span><span class="o">.</span><span class="n">from_lookup</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">,</span>
+            <span class="s2">&quot;VPC&quot;</span><span class="p">,</span>
+            <span class="n">is_default</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">region</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">region</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">alb</span> <span class="o">=</span> <span class="n">elbv2</span><span class="o">.</span><span class="n">ApplicationLoadBalancer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">,</span> <span class="s2">&quot;ALB&quot;</span><span class="p">,</span> <span class="n">vpc</span><span class="o">=</span><span class="n">vpc</span><span class="p">,</span> <span class="n">internet_facing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">CfnOutput</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stack</span><span class="p">,</span> <span class="s2">&quot;ALBDnsName&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">alb</span><span class="o">.</span><span class="n">load_balancer_dns_name</span><span class="p">)</span>
+        <span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<blockquote>
+<p>Excerpt <code>tests/e2e/event_handler/handlers/alb_handler.py</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">ALBResolver</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">content_types</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">ALBResolver</span><span class="p">()</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span>
+        <span class="n">status_code</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+        <span class="n">content_type</span><span class="o">=</span><span class="n">content_types</span><span class="o">.</span><span class="n">TEXT_PLAIN</span><span class="p">,</span>
+        <span class="n">body</span><span class="o">=</span><span class="s2">&quot;Hello world&quot;</span><span class="p">,</span>
+        <span class="n">cookies</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;CookieMonster&quot;</span><span class="p">,</span> <span class="s2">&quot;MonsterCookie&quot;</span><span class="p">],</span>
+        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Foo&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;bar&quot;</span><span class="p">,</span> <span class="s2">&quot;zbr&quot;</span><span class="p">]},</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="2-deploydelete-infrastructure-when-tests-run">2. Deploy/Delete infrastructure when tests run<a class="headerlink" href="#2-deploydelete-infrastructure-when-tests-run" title="Permanent link">&para;</a></h4>
+<p>We need to create a Pytest fixture for our new feature under <code>tests/e2e/event_handler/conftest.py</code>.</p>
+<p>This will instruct Pytest to deploy our infrastructure when our tests start, and delete it when they complete whether tests are successful or not. Note that this file will not need any modification in the future.</p>
+<blockquote>
+<p>Excerpt <code>conftest.py</code> for Event Handler</p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
+
+<span class="kn">from</span> <span class="nn">tests.e2e.event_handler.infrastructure</span> <span class="kn">import</span> <span class="n">EventHandlerStack</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">scope</span><span class="o">=</span><span class="s2">&quot;module&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">infrastructure</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Setup and teardown logic for E2E test infrastructure</span>
+
+<span class="sd">    Yields</span>
+<span class="sd">    ------</span>
+<span class="sd">    Dict[str, str]</span>
+<span class="sd">        CloudFormation Outputs from deployed infrastructure</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stack</span> <span class="o">=</span> <span class="n">EventHandlerStack</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">stack</span><span class="o">.</span><span class="n">deploy</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">stack</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<h4 id="3-access-stack-outputs-for-e2e-tests">3. Access stack outputs for E2E tests<a class="headerlink" href="#3-access-stack-outputs-for-e2e-tests" title="Permanent link">&para;</a></h4>
+<p>Within our tests, we should now have access to the <code>infrastructure</code> fixture we defined earlier in <code>tests/e2e/event_handler/conftest.py</code>.</p>
+<p>We can access any Stack Output using pytest dependency injection.</p>
+<blockquote>
+<p>Excerpt <code>tests/e2e/event_handler/test_header_serializer.py</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">alb_basic_listener_endpoint</span><span class="p">(</span><span class="n">infrastructure</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">dns_name</span> <span class="o">=</span> <span class="n">infrastructure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALBDnsName&quot;</span><span class="p">)</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">infrastructure</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;ALBBasicListenerPort&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;http://</span><span class="si">{</span><span class="n">dns_name</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s2">&quot;</span>
+
+
+<span class="k">def</span> <span class="nf">test_alb_headers_serializer</span><span class="p">(</span><span class="n">alb_basic_listener_endpoint</span><span class="p">):</span>
+    <span class="c1"># GIVEN</span>
+    <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">alb_basic_listener_endpoint</span><span class="si">}</span><span class="s2">/todos&quot;</span>
+    <span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="internals">Internals<a class="headerlink" href="#internals" title="Permanent link">&para;</a></h3>
+<h4 id="test-runner-parallelization">Test runner parallelization<a class="headerlink" href="#test-runner-parallelization" title="Permanent link">&para;</a></h4>
+<p>Besides speed, we parallelize our end-to-end tests to ease asserting async side-effects may take a while per test too, <em>e.g., traces to become available</em>.</p>
+<p>The following diagram demonstrates the process we take every time you use <code>make e2e</code> locally or at CI:</p>
+<pre class="mermaid"><code>graph TD
+    A[make e2e test] --&gt;Spawn{"Split and group tests &lt;br&gt;by feature and CPU"}
+
+    Spawn --&gt;|Worker0| Worker0_Start["Load tests"]
+    Spawn --&gt;|Worker1| Worker1_Start["Load tests"]
+    Spawn --&gt;|WorkerN| WorkerN_Start["Load tests"]
+
+    Worker0_Start --&gt;|Wait| LambdaLayer["Lambda Layer build"]
+    Worker1_Start --&gt;|Wait| LambdaLayer["Lambda Layer build"]
+    WorkerN_Start --&gt;|Wait| LambdaLayer["Lambda Layer build"]
+
+    LambdaLayer --&gt;|Worker0| Worker0_Deploy["Launch feature stack"]
+    LambdaLayer --&gt;|Worker1| Worker1_Deploy["Launch feature stack"]
+    LambdaLayer --&gt;|WorkerN| WorkerN_Deploy["Launch feature stack"]
+
+    Worker0_Deploy --&gt;|Worker0| Worker0_Tests["Run tests"]
+    Worker1_Deploy --&gt;|Worker1| Worker1_Tests["Run tests"]
+    WorkerN_Deploy --&gt;|WorkerN| WorkerN_Tests["Run tests"]
+
+    Worker0_Tests --&gt; ResultCollection
+    Worker1_Tests --&gt; ResultCollection
+    WorkerN_Tests --&gt; ResultCollection
+
+    ResultCollection{"Wait for workers&lt;br/&gt;Collect test results"}
+    ResultCollection --&gt; TestEnd["Report results"]
+    ResultCollection --&gt; DeployEnd["Delete Stacks"]</code></pre>
+<h4 id="cdk-cli-parallelization">CDK CLI parallelization<a class="headerlink" href="#cdk-cli-parallelization" title="Permanent link">&para;</a></h4>
+<p>For CDK CLI to work with <a href="https://docs.aws.amazon.com/cdk/v2/guide/apps.html">independent CDK Apps</a>, we specify an output directory when synthesizing our stack and deploy from said output directory.</p>
+<pre class="mermaid"><code>flowchart TD
+    subgraph "Deploying distinct CDK Apps"
+        EventHandlerInfra["Event Handler CDK App"] --&gt; EventHandlerSynth
+        TracerInfra["Tracer CDK App"] --&gt; TracerSynth
+       EventHandlerSynth["cdk synth --out cdk.out/event_handler"] --&gt; EventHandlerDeploy["cdk deploy --app cdk.out/event_handler"]
+
+       TracerSynth["cdk synth --out cdk.out/tracer"] --&gt; TracerDeploy["cdk deploy --app cdk.out/tracer"]
+    end</code></pre>
+<p>We create the typical CDK <code>app.py</code> at runtime when tests run, since we know which feature and Python version we're dealing with (locally or at CI).</p>
+<blockquote>
+<p>Excerpt <code>cdk_app_V39.py</code> for Event Handler created at deploy phase</p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">tests.e2e.event_handler.infrastructure</span> <span class="kn">import</span> <span class="n">EventHandlerStack</span>
+<span class="n">stack</span> <span class="o">=</span> <span class="n">EventHandlerStack</span><span class="p">()</span>
+<span class="n">stack</span><span class="o">.</span><span class="n">create_resources</span><span class="p">()</span>
+<span class="n">stack</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">synth</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<p>When we run E2E tests for a single feature or all of them, our <code>cdk.out</code> looks like this:</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code>total<span class="w"> </span><span class="m">8</span>
+drwxr-xr-x<span class="w">  </span><span class="m">18</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">   </span>576B<span class="w"> </span>Sep<span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="m">15</span>:38<span class="w"> </span>event-handler
+drwxr-xr-x<span class="w">   </span><span class="m">3</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">    </span>96B<span class="w"> </span>Sep<span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="m">15</span>:08<span class="w"> </span>layer_build
+-rw-r--r--<span class="w">   </span><span class="m">1</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">    </span>32B<span class="w"> </span>Sep<span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="m">15</span>:08<span class="w"> </span>layer_build.diff
+drwxr-xr-x<span class="w">  </span><span class="m">18</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">   </span>576B<span class="w"> </span>Sep<span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="m">15</span>:38<span class="w"> </span>logger
+drwxr-xr-x<span class="w">  </span><span class="m">18</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">   </span>576B<span class="w"> </span>Sep<span class="w">  </span><span class="m">6</span><span class="w"> </span><span class="m">15</span>:38<span class="w"> </span>metrics
+drwxr-xr-x<span class="w">  </span><span class="m">22</span><span class="w"> </span>lessa<span class="w">  </span>staff<span class="w">   </span>704B<span class="w"> </span>Sep<span class="w">  </span><span class="m">9</span><span class="w"> </span><span class="m">10</span>:52<span class="w"> </span>tracer
+</code></pre></div></td></tr></table></div>
+<pre class="mermaid"><code>classDiagram
+    class CdkOutDirectory {
+        feature_name/
+        layer_build/
+        layer_build.diff
+    }
+
+    class EventHandler {
+        manifest.json
+        stack_outputs.json
+        cdk_app_V39.py
+        asset.uuid/
+        ...
+    }
+
+    class StackOutputsJson {
+        BasicHandlerArn: str
+        ALBDnsName: str
+        ...
+    }
+
+    CdkOutDirectory &lt;|-- EventHandler : feature_name/
+    StackOutputsJson &lt;|-- EventHandler</code></pre>
+<p>Where:</p>
+<ul>
+<li><strong><code>&lt;feature&gt;</code></strong>. Contains CDK Assets, CDK <code>manifest.json</code>, our <code>cdk_app_&lt;PyVersion&gt;.py</code> and <code>stack_outputs.json</code></li>
+<li><strong><code>layer_build</code></strong>. Contains our Lambda Layer source code built once, used by all stacks independently</li>
+<li><strong><code>layer_build.diff</code></strong>. Contains a hash on whether our source code has changed to speed up further deployments and E2E tests</li>
+</ul>
+<p>Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its <a href="https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods">context methods</a> (<code>from_lookup</code>), and use step-through debugging for a single E2E test without any extra configuration.</p>
+<blockquote>
+<p>NOTE: VSCode doesn't support debugging processes spawning sub-processes (like CDK CLI does w/ shell and CDK App). Maybe <a href="https://stackoverflow.com/a/65339352">this works</a>. PyCharm works just fine.</p>
+</blockquote>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2023-07-13
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Amazon Web Services
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
+      
+        
+          <script src="../javascript/aws-amplify.min.js"></script>
+        
+      
+        
+          <script src="../javascript/extra.js"></script>
+        
+      
+    
+  </body>
+</html>
