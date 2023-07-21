@@ -24,6 +24,7 @@ Resources:
       LayerName: <SAR_APP_NAME>
       ContentUri: <LAYER_CONTENT_PATH>
       CompatibleRuntimes:
+        - python3.11
         - python3.10
         - python3.9
         - python3.8

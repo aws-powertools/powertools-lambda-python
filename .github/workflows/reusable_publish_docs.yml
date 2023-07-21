@@ -52,7 +52,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "poetry"
       - name: Install dependencies
         run: make dev

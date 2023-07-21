@@ -257,6 +257,8 @@ class BaseInfrastructure(InfrastructureProvider):
             return Runtime.PYTHON_3_9
         elif version.major == 3 and version.minor == 10:
             return Runtime.PYTHON_3_10
+        elif version.major == 3 and version.minor == 11:
+            return Runtime.PYTHON_3_11
         else:
             raise Exception(f"Unsupported Python version: {version}")
 

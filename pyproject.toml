@@ -13,6 +13,7 @@ classifiers=[
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
 ]
 repository = "https://github.com/aws-powertools/powertools-lambda-python"
 documentation = "https://docs.powertools.aws.dev/lambda/python/"
@@ -50,7 +51,7 @@ xenon = "^0.9.0"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^1.1.2"
 pytest-xdist = "^3.3.1"
-aws-cdk-lib = "^2.75.0"
+aws-cdk-lib = "^2.88.0"
 "aws-cdk.aws-apigatewayv2-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-integrations-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-authorizers-alpha" = "^2.38.1-alpha.0"
