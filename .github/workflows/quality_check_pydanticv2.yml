@@ -74,9 +74,3 @@ jobs:
         run: make security-baseline
       - name: Complexity baseline
         run: make complexity-baseline
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # 3.1.4
-        with:
-          file: ./coverage.xml
-          env_vars: PYTHON
-          name: aws-lambda-powertools-python-codecov
