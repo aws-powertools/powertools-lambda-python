@@ -24,7 +24,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - poc/pydanticv2
+      - develop
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -33,7 +33,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - poc/pydanticv2
+      - develop
 
 permissions:
   contents: read

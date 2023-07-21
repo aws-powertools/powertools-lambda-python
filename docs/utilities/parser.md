@@ -17,7 +17,7 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 ### Install
 
-PowerTools for AWS Lambda (Python) supports Pydantic v1 and v2. See how to use each version in following sections.
+PowerTools for AWS Lambda (Python) supports Pydantic v1 and v2. See how to use each version in the following sections.
 
 #### Using Pydantic v1
 
