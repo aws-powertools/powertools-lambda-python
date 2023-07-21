@@ -1,6 +1,7 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Type, overload
 
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
 from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, Model
 
 from ...middleware_factory import lambda_handler_decorator
@@ -156,6 +157,7 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
             raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
 
     try:
+        disable_pydantic_v2_warning()
         logger.debug("Parsing and validating event model; no envelope used")
         if isinstance(event, str):
             return model.parse_raw(event)

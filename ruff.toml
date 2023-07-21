@@ -68,3 +68,4 @@ split-on-trailing-comma = true
 "tests/e2e/utils/data_builder/__init__.py" = ["F401"]
 "tests/e2e/utils/data_fetcher/__init__.py" = ["F401"]
 "aws_lambda_powertools/utilities/data_classes/s3_event.py" = ["A003"]
+"aws_lambda_powertools/utilities/parser/models/__init__.py" = ["E402"]
