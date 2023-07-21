@@ -92,5 +92,10 @@ def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
     return posts_related[event.source["post_id"]] if event.source else None
 
 
+@app.batch_async_resolver(type_name="Post", field_name="relatedPostsAsync")
+async def related_posts_async(event: AppSyncResolverEvent) -> Optional[list]:
+    return posts_related[event.source["post_id"]] if event.source else None
+
+
 def lambda_handler(event, context: LambdaContext) -> dict:
     return app.resolve(event, context)

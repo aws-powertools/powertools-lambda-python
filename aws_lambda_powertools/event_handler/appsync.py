@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Type, Union
@@ -43,7 +44,7 @@ class BaseResolverRegistry(ABC):
         ...
 
     @abstractmethod
-    def find_resolver(self, type_name: str, field_name: str) -> Callable:
+    def find_resolver(self, type_name: str, field_name: str) -> Optional[Callable]:
         ...
 
 
@@ -91,7 +92,7 @@ class ResolverRegistry(BaseResolverRegistry):
 
         return register
 
-    def find_resolver(self, type_name: str, field_name: str) -> Callable:
+    def find_resolver(self, type_name: str, field_name: str) -> Optional[Callable]:
         """Find resolver based on type_name and field_name
 
         Parameters
@@ -102,10 +103,9 @@ class ResolverRegistry(BaseResolverRegistry):
             Field name
         """
 
-        full_name = f"{type_name}.{field_name}"
-        resolver = self._resolvers.get(full_name, self._resolvers.get(f"*.{field_name}"))
+        resolver = self._resolvers.get(f"{type_name}.{field_name}", self._resolvers.get(f"*.{field_name}"))
         if not resolver:
-            raise ValueError(f"No resolver found for '{full_name}'")
+            return None
         return resolver["func"]
 
 
@@ -113,6 +113,7 @@ class Router(BasePublic):
     def __init__(self):
         self._resolver_registry: BaseResolverRegistry = ResolverRegistry()
         self._batch_resolver_registry: BaseResolverRegistry = ResolverRegistry()
+        self._batch_async_resolver_registry: BaseResolverRegistry = ResolverRegistry()
         self._router_context: RouterContext = RouterContext()
 
     # Interfaces
@@ -121,6 +122,9 @@ class Router(BasePublic):
 
     def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
         return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._batch_async_resolver_registry.resolver(field_name=field_name, type_name=type_name)
 
     def append_context(self, **additional_context) -> None:
         self._router_context.context = additional_context
@@ -165,7 +169,7 @@ class AppSyncResolver(Router):
 
     def resolve(
         self,
-        event: dict,
+        event: Union[dict, List[Dict]],
         context: LambdaContext,
         data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
@@ -263,10 +267,25 @@ class AppSyncResolver(Router):
 
         self.current_event = data_model(event)
         resolver = self._resolver_registry.find_resolver(self.current_event.type_name, self.current_event.field_name)
+        if not resolver:
+            raise ValueError(f"No resolver found for '{self.current_event.type_name}.{self.current_event.field_name}'")
         return resolver(**self.current_event.arguments)
 
+    def _call_sync_batch_resolver(self, sync_resolver: Callable) -> List[Any]:
+        return [
+            sync_resolver(event=appconfig_event, **appconfig_event.arguments)
+            for appconfig_event in self.current_batch_event
+        ]
+
+    async def _call_async_batch_resolver(self, async_resolver: Callable) -> List[Any]:
+        tasks = [
+            asyncio.ensure_future(async_resolver(event=appconfig_event, **appconfig_event.arguments))
+            for appconfig_event in self.current_batch_event
+        ]
+        return await asyncio.gather(*tasks)
+
     def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
-        """Call batch event resolver
+        """Call batch event resolver for sync and async methods
 
         Parameters
         ----------
@@ -282,13 +301,24 @@ class AppSyncResolver(Router):
 
         self.current_batch_event = [data_model(e) for e in event]
 
+        # Check if we have synchronous or asynchronous resolver available
         resolver = self._batch_resolver_registry.find_resolver(
-            self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
+            self.current_batch_event[0].type_name,
+            self.current_batch_event[0].field_name,
         )
-
-        return [
-            resolver(event=appconfig_event, **appconfig_event.arguments) for appconfig_event in self.current_batch_event
-        ]
+        async_resolver = self._batch_async_resolver_registry.find_resolver(
+            self.current_batch_event[0].type_name,
+            self.current_batch_event[0].field_name,
+        )
+        if resolver:
+            return self._call_sync_batch_resolver(resolver)
+        elif async_resolver:
+            return asyncio.run(self._call_async_batch_resolver(async_resolver))
+        else:
+            raise ValueError(
+                f"No resolver found for \
+                    '{self.current_batch_event[0].type_name}.{self.current_batch_event[0].field_name}'",
+            )
 
     def __call__(
         self,
@@ -315,6 +345,7 @@ class AppSyncResolver(Router):
 
         self._resolver_registry.resolvers = router._resolver_registry.resolvers
         self._batch_resolver_registry.resolvers = router._batch_resolver_registry.resolvers
+        self._batch_async_resolver_registry.resolvers = router._batch_async_resolver_registry.resolvers
 
     # Interfaces
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
@@ -322,6 +353,9 @@ class AppSyncResolver(Router):
 
     def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
         return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+
+    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        return self._batch_async_resolver_registry.resolver(field_name=field_name, type_name=type_name)
 
     def append_context(self, **additional_context) -> None:
         self._router_context.context = additional_context

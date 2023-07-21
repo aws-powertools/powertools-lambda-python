@@ -273,7 +273,7 @@ def test_resolver_include_batch_resolver():
             "source": {
                 "id": "1",
             },
-        }
+        },
     ]
     mock_event2 = [
         {
@@ -287,7 +287,7 @@ def test_resolver_include_batch_resolver():
             "source": {
                 "id": "2",
             },
-        }
+        },
     ]
     result1 = app.resolve(mock_event1, LambdaContext())
     result2 = app.resolve(mock_event2, LambdaContext())
@@ -325,7 +325,7 @@ def test_resolver_include_mixed_resolver():
             "source": {
                 "id": "1",
             },
-        }
+        },
     ]
     mock_event2 = {
         "typeName": "Query",
@@ -343,6 +343,203 @@ def test_resolver_include_mixed_resolver():
     # THEN
     assert result1 == ["get_locations#value#1"]
     assert result2 == "get_locations2#value"
+
+
+def test_resolve_async_batch_processing():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": [3, 4],
+            },
+        },
+    ]
+
+    app = AppSyncResolver()
+
+    @app.batch_async_resolver(field_name="listLocations")
+    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        return event.source["id"] if event.source else None
+
+    # Call the implicit handler
+    result = app.resolve(event, LambdaContext())
+    assert result == [appsync_event["source"]["id"] for appsync_event in event]
+
+    assert app.current_batch_event and len(app.current_batch_event) == len(event)
+
+
+def test_resolve_async_and_sync_batch_processing():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.batch_async_resolver(type_name="Query", field_name="listLocations")
+    async def get_locations(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations#" + name + "#" + event.source["id"]
+
+    @app.batch_resolver(field_name="listLocations2")
+    def get_locations2(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations2#" + name + "#" + event.source["id"]
+
+    app.include_router(router)
+
+    # WHEN
+    mock_event1 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listLocations",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+    mock_event2 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations2",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations2",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "2",
+            },
+        },
+    ]
+    result1 = app.resolve(mock_event1, LambdaContext())
+    result2 = app.resolve(mock_event2, LambdaContext())
+
+    # THEN
+    assert result1 == ["get_locations#value#1"]
+    assert result2 == ["get_locations2#value#2"]
+
+
+def test_resolve_async_batch_and_sync_singular_processing():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.batch_async_resolver(type_name="Query", field_name="listLocations")
+    async def get_locations(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations#" + name + "#" + event.source["id"]
+
+    @app.resolver(type_name="Query", field_name="listLocation")
+    def get_location(name: str) -> str:
+        return "get_location#" + name
+
+    app.include_router(router)
+
+    # WHEN
+    mock_event1 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listLocations",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+    mock_event2 = {"typeName": "Query", "fieldName": "listLocation", "arguments": {"name": "value"}}
+
+    result1 = app.resolve(mock_event1, LambdaContext())
+    result2 = app.resolve(mock_event2, LambdaContext())
+
+    # THEN
+    assert result1 == ["get_locations#value#1"]
+    assert result2 == "get_location#value"
+
+
+def test_async_resolver_include_batch_resolver():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.batch_async_resolver(type_name="Query", field_name="listLocations")
+    async def get_locations(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations#" + name + "#" + event.source["id"]
+
+    @app.batch_async_resolver(field_name="listLocations2")
+    async def get_locations2(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations2#" + name + "#" + event.source["id"]
+
+    app.include_router(router)
+
+    # WHEN
+    mock_event1 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listLocations",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+    mock_event2 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations2",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations2",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "2",
+            },
+        },
+    ]
+    result1 = app.resolve(mock_event1, LambdaContext())
+    result2 = app.resolve(mock_event2, LambdaContext())
+
+    # THEN
+    assert result1 == ["get_locations#value#1"]
+    assert result2 == ["get_locations2#value#2"]
 
 
 def test_append_context():

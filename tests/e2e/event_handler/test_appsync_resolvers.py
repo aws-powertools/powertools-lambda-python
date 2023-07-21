@@ -32,7 +32,7 @@ def test_appsync_get_all_posts(appsync_endpoint, appsync_access_key):
             url=appsync_endpoint,
             json=body,
             headers={"x-api-key": appsync_access_key, "Content-Type": "application/json"},
-        )
+        ),
     )
 
     # THEN expect a HTTP 200 response and content return list of Posts
@@ -62,7 +62,7 @@ def test_appsync_get_post(appsync_endpoint, appsync_access_key):
             url=appsync_endpoint,
             json=body,
             headers={"x-api-key": appsync_access_key, "Content-Type": "application/json"},
-        )
+        ),
     )
 
     # THEN expect a HTTP 200 response and content return Post id
@@ -81,7 +81,8 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
     related_posts_ids = ["3", "5"]
 
     body = {
-        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") {{ post_id relatedPosts {{ post_id }} }} }}',
+        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") \
+              {{ post_id relatedPosts {{ post_id }} relatedPostsAsync {{ post_id }} }} }}',
         "variables": None,
         "operationName": "MyQuery",
     }
@@ -93,7 +94,7 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
             url=appsync_endpoint,
             json=body,
             headers={"x-api-key": appsync_access_key, "Content-Type": "application/json"},
-        )
+        ),
     )
 
     # THEN expect a HTTP 200 response and content return Post id with dependent Posts id's
@@ -104,5 +105,8 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
 
     assert data["getPost"]["post_id"] == post_id
     assert len(data["getPost"]["relatedPosts"]) == len(related_posts_ids)
+    assert len(data["getPost"]["relatedPostsAsync"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPosts"]:
+        assert post["post_id"] in related_posts_ids
+    for post in data["getPost"]["relatedPostsAsync"]:
         assert post["post_id"] in related_posts_ids

@@ -109,7 +109,7 @@ class EventHandlerStack(BaseInfrastructure):
                         expires=Expiration.after(Duration.hours(25)),
                         name="API Token",
                     ),
-                )
+                ),
             ),
             xray_enabled=False,
         )
@@ -126,7 +126,17 @@ class EventHandlerStack(BaseInfrastructure):
             field_name="getPost",
         )
         lambda_datasource.create_resolver(
-            "QueryGetPostRelatedResolver", type_name="Post", field_name="relatedPosts", max_batch_size=10
+            "QueryGetPostRelatedResolver",
+            type_name="Post",
+            field_name="relatedPosts",
+            max_batch_size=10,
+        )
+
+        lambda_datasource.create_resolver(
+            "QueryGetPostRelatedAsyncResolver",
+            type_name="Post",
+            field_name="relatedPostsAsync",
+            max_batch_size=10,
         )
 
         CfnOutput(self.stack, "GraphQLHTTPUrl", value=api.graphql_url)
