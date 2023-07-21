@@ -138,7 +138,9 @@ def test_apigw_event_with_invalid_websocket_request():
     errors = err.value.errors()
     assert len(errors) == 1
     expected_msg = "messageId is available only when the `eventType` is `MESSAGE`"
-    assert errors[0]["msg"] == expected_msg
+    # Pydantic v2 adds "Value error," to the error string.
+    # So to maintain compatibility with v1 and v2, we've changed the way we test this.
+    assert expected_msg in errors[0]["msg"]
     assert expected_msg in str(err.value)
 
 

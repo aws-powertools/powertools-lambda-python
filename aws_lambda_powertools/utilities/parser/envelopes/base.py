@@ -2,6 +2,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type, TypeVar, Union
 
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
 from aws_lambda_powertools.utilities.parser.types import Model
 
 logger = logging.getLogger(__name__)
@@ -26,6 +27,8 @@ class BaseEnvelope(ABC):
         Any
             Parsed data
         """
+        disable_pydantic_v2_warning()
+
         if data is None:
             logger.debug("Skipping parsing as event is None")
             return data

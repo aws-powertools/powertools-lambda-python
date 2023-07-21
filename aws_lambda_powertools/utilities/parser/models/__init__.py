@@ -1,3 +1,7 @@
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
+
+disable_pydantic_v2_warning()
+
 from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
 from .apigw import (
     APIGatewayEventAuthorizer,

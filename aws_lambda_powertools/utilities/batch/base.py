@@ -348,6 +348,11 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
+            # If a model is provided, we assume Pydantic is installed and we need to disable v2 warnings
+            from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
+
+            disable_pydantic_v2_warning()
+
             return model.parse_obj(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
 
@@ -500,8 +505,13 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+            model_name = getattr(self.model, "__name__", None)
+
+            if model == self.model or model == model_name:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
@@ -644,8 +654,13 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+            model_name = getattr(self.model, "__name__", None)
+
+            if model == self.model or model == model_name:
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())

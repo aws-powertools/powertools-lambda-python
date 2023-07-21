@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.20.0"
+version = "2.21.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -66,7 +66,7 @@ mypy-boto3-lambda = "^1.28.0"
 mypy-boto3-logs = "^1.28.1"
 mypy-boto3-secretsmanager = "^1.28.3"
 mypy-boto3-ssm = "^1.28.0"
-mypy-boto3-s3 = "^1.28.3"
+mypy-boto3-s3 = "^1.28.8"
 mypy-boto3-xray = "^1.28.0"
 types-requests = "^2.31.0"
 typing-extensions = "^4.6.2"
@@ -162,6 +162,15 @@ addopts = "-ra -vv"
 testpaths = "./tests"
 markers = [
     "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
+]
+
+# MAINTENANCE: Remove these lines when drop support to Pydantic v1
+filterwarnings=[
+  "ignore:.*The `parse_obj` method is deprecated*:DeprecationWarning",
+  "ignore:.*The `parse_raw` method is deprecated*:DeprecationWarning",
+  "ignore:.*load_str_bytes is deprecated*:DeprecationWarning",
+  "ignore:.*The `dict` method is deprecated; use `model_dump` instead*:DeprecationWarning",
+  "ignore:.*Pydantic V1 style `@validator` validators are deprecated*:DeprecationWarning"
 ]
 
 [build-system]

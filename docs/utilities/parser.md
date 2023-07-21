@@ -11,14 +11,19 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
+* Support for Pydantic v1 and v2
 
 ## Getting started
 
 ### Install
 
+Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.
+
+#### Using Pydantic v1
+
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ???+ warning
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
@@ -27,6 +32,12 @@ Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g
     installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank"}:
 
 	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
+
+#### Using Pydantic v2
+
+You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank"} to reduce noise and optimize log costs.
+
+Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ### Defining models
 
@@ -45,7 +56,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 ```
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
@@ -79,7 +90,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 
 
 @event_parser(model=Order)
@@ -124,7 +135,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 
 
 payload = {
