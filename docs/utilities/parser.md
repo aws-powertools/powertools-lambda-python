@@ -17,13 +17,13 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 
 ### Install
 
-PowerTools for AWS Lambda (Python) supports Pydantic v1 and v2. See how to use each version in the following sections.
+Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.
 
 #### Using Pydantic v1
 
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ???+ warning
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
@@ -35,14 +35,9 @@ Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g
 
 #### Using Pydantic v2
 
-???+ info
-	Pydantic v2.0.3 or later is required due to regression.
+You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank"} to reduce noise and optimize log costs.
 
-	Please note that an early version of Pydantic v2 experienced a regression issue with `datetime` fields. To avoid any problems, it is crucial to use Pydantic v2 version 2.0.3 or a more recent release.
-
-To use Powertools for AWS Lambda (Python) with Pydantic v2, you need to bring Pydantic v2 as an external dependency.
-
-Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
+Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ### Defining models
 
