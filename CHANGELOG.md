@@ -4,9 +4,20 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
 
 <a name="v2.21.0"></a>
 ## [v2.21.0] - 2023-07-21
+## Bug Fixes
+
+* **docs:** remove redundant code ([#2796](https://github.com/aws-powertools/powertools-lambda-python/issues/2796))
+
+## Documentation
+
+* **customer-reference:** add Jit Security as a customer reference ([#2801](https://github.com/aws-powertools/powertools-lambda-python/issues/2801))
+
 ## Features
 
 * **parser:** add support for Pydantic v2 ([#2733](https://github.com/aws-powertools/powertools-lambda-python/issues/2733))
@@ -14,6 +25,17 @@
 ## Maintenance
 
 * version bump
+* **deps:** bump squidfunk/mkdocs-material from `a28ed81` to `33e28bd` in /docs ([#2797](https://github.com/aws-powertools/powertools-lambda-python/issues/2797))
+* **deps-dev:** bump mypy-boto3-s3 from 1.28.3.post2 to 1.28.8 ([#2808](https://github.com/aws-powertools/powertools-lambda-python/issues/2808))
+* **deps-dev:** bump types-python-dateutil from 2.8.19.13 to 2.8.19.14 ([#2807](https://github.com/aws-powertools/powertools-lambda-python/issues/2807))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.28.3.post1 to 1.28.3.post2 ([#2794](https://github.com/aws-powertools/powertools-lambda-python/issues/2794))
+* **deps-dev:** bump types-requests from 2.31.0.1 to 2.31.0.2 ([#2806](https://github.com/aws-powertools/powertools-lambda-python/issues/2806))
+* **deps-dev:** bump mypy-boto3-s3 from 1.28.3.post1 to 1.28.3.post2 ([#2793](https://github.com/aws-powertools/powertools-lambda-python/issues/2793))
+* **deps-dev:** bump aws-cdk from 2.87.0 to 2.88.0 ([#2812](https://github.com/aws-powertools/powertools-lambda-python/issues/2812))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.28.3 to 1.28.3.post1 ([#2785](https://github.com/aws-powertools/powertools-lambda-python/issues/2785))
+* **deps-dev:** bump mypy-boto3-s3 from 1.28.3 to 1.28.3.post1 ([#2786](https://github.com/aws-powertools/powertools-lambda-python/issues/2786))
+* **deps-dev:** bump mkdocs-material from 9.1.18 to 9.1.19 ([#2798](https://github.com/aws-powertools/powertools-lambda-python/issues/2798))
+* **security:** improve debugging for provenance script ([#2784](https://github.com/aws-powertools/powertools-lambda-python/issues/2784))
 
 
 <a name="v2.20.0"></a>
