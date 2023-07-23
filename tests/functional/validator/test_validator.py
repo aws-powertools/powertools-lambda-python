@@ -30,7 +30,7 @@ def test_validate_base64_string_envelope(schema, wrapped_event_base64_json_strin
 
 def test_validate_event_does_not_conform_with_schema(schema):
     data = {"message": "hello_world"}
-    message = "data must contain ['message', 'username'] properties"
+    message = "data must contain ['username'] properties"
     with pytest.raises(
         exceptions.SchemaValidationError,
         match=re.escape(f"Failed schema validation. Error: {message}, Path: ['data'], Data: {data}"),
