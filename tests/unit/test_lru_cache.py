@@ -64,7 +64,7 @@ def test_lru_pop_failing():
     cache[key] = "value"
     try:
         cache.pop(key, None)
-        pytest.fail("GitHub #300: LRUDict pop bug has been fixed :)")
+        pytest.fail("GitHub #300: LRUDict pop bug has been fixed.")
     except KeyError as e:
         assert e.args[0] == key
 
