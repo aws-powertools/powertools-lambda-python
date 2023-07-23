@@ -189,7 +189,7 @@ This sample will decompress and decode base64 data from Cloudwatch Logs, then us
 
 For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from `PowertoolsFunctions`.
 
-Here is an example of how to decompress messages using [snappy](https://github.com/andrix/python-snappy){target="_blank"}:
+Here is an example of how to decompress messages using [zlib](https://docs.python.org/3/library/zlib.html){target="_blank"}:
 
 === "powertools_custom_jmespath_function.py"
 
