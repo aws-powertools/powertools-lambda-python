@@ -14,7 +14,7 @@ Metadata:
     SourceCodeUrl: https://github.com/aws-powertools/powertools-lambda-python
 
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Lambda Layer for aws-lambda-powertools with python 3.10, 3.9, 3.8 or 3.7
+Description: AWS Lambda Layer for aws-lambda-powertools with python 3.11, 3.10, 3.9, 3.8 or 3.7
 
 Resources:
   LambdaLayer:
