@@ -626,6 +626,8 @@ def get_parameters(
     """
     Retrieve multiple parameter values from AWS Systems Manager (SSM) Parameter Store
 
+    For readability, we strip the path prefix name in the response.
+
     Parameters
     ----------
     path: str
@@ -664,9 +666,8 @@ def get_parameters(
         >>>
         >>> for key, value in values.items():
         ...     print(key, value)
-        /my/path/prefix/a   Parameter value a
-        /my/path/prefix/b   Parameter value b
-        /my/path/prefix/c   Parameter value c
+        config              Parameter value (/my/path/prefix/config)
+        webhook/config      Parameter value (/my/path/prefix/webhook/config)
 
     **Retrieves parameter values and decodes them using a Base64 decoder**
 
