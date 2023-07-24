@@ -1415,6 +1415,17 @@ def test_datadog_raise_on_empty():
         lambda_handler({}, LambdaContext("example_fn"))
 
 
+def test_datadog_args(capsys):
+    dd_provider = DataDogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DataDogMetrics(provider=dd_provider)
+    metrics.add_metric("order_valve", 12.45, sales="sam")
+    metrics.flush_metrics()
+    logs = capsys.readouterr().out.strip()
+    log_dict = json.loads(logs)
+    tag_list = log_dict.get("t")
+    assert "sales:sam" in tag_list
+
+
 def test_datadog_kwargs(capsys):
     dd_provider = DataDogProvider(namespace="Serverlesspresso", flush_to_log=True)
     metrics = DataDogMetrics(provider=dd_provider)

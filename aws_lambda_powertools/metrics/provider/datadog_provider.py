@@ -63,7 +63,6 @@ class DataDogProvider(MetricsProviderBase):
         value: float,
         timestamp: Optional[int] = None,
         tags: Optional[List] = None,
-        *args: Any,
         **kwargs: Any,
     ) -> None:
         """
@@ -217,7 +216,7 @@ class DataDogMetrics(MetricsBase):
         tags: List[str]
             In format like List["tag:value","tag2:value2"],
         args: Any
-            extra args will be passed into provider and be dropped
+            extra args will be dropped
         kwargs: Any
             extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
 
@@ -232,7 +231,7 @@ class DataDogMetrics(MetricsBase):
             >>>     tags=['product:latte', 'order:online']
             >>> )
         """
-        self.provider.add_metric(*args, name=name, value=value, timestamp=timestamp, tags=tags, **kwargs)
+        self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags, **kwargs)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """
