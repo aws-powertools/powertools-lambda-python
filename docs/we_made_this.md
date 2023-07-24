@@ -37,7 +37,7 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Serverless API Idempotency with AWS Lambda Powertools and CDK](https://www.ranthebuilder.cloud/post/serverless-api-idempotency-with-aws-lambda-powertools-and-cdk){:target="_blank"}
 
-* [Effective Amazon SQS Batch Handling with AWS Lambda Powertools](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){:target="_blank"}
+* [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)(https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){:target="_blank"}
 
 ### Making all your APIs idempotent
 
