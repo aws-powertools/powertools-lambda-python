@@ -53,7 +53,14 @@ For multiple parameters, you can use either:
 * `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, decrypt per parameter.
 
 === "getting_started_recursive_ssm_parameter.py"
-    ```python hl_lines="3 10 13"
+    This is useful when you want to fetch all parameters from a given path, say `/dev`, e.g., `/dev/config`, `/dev/webhook/config`
+
+    To ease readability in deeply nested paths, we strip the path name. For example:
+
+    * `/dev/config` -> `config`
+    * `/dev/webhook/config` -> `webhook/config`
+
+    ```python hl_lines="3 11 18"
     --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
     ```
 
