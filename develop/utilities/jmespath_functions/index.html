@@ -2202,7 +2202,7 @@
 <p>This should only be used for advanced use cases where you have special formats not covered by the built-in functions.</p>
 </details>
 <p>For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own <a href="https://github.com/jmespath/jmespath.py#custom-functions" target="_blank">JMESPath function</a> and any additional option via <code>jmespath_options</code> param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from <code>PowertoolsFunctions</code>.</p>
-<p>Here is an example of how to decompress messages using <a href="https://github.com/andrix/python-snappy" target="_blank">snappy</a>:</p>
+<p>Here is an example of how to decompress messages using <a href="https://docs.python.org/3/library/zlib.html" target="_blank">zlib</a>:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">powertools_custom_jmespath_function.py</label><label for="__tabbed_7_2">powertools_custom_jmespath_function.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2254,8 +2254,8 @@
 <span class="normal">46</span>
 <span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">import</span> <span class="nn">binascii</span>
+<span class="kn">import</span> <span class="nn">zlib</span>
 
-<span class="kn">import</span> <span class="nn">snappy</span>
 <span class="kn">from</span> <span class="nn">jmespath.exceptions</span> <span class="kn">import</span> <span class="n">JMESPathTypeError</span>
 <span class="kn">from</span> <span class="nn">jmespath.functions</span> <span class="kn">import</span> <span class="n">signature</span>
 
@@ -2269,9 +2269,9 @@
 </span>    <span class="c1"># only decode if value is a string</span>
     <span class="c1"># see supported data types: https://jmespath.org/specification.html#built-in-functions</span>
 <span class="hll">    <span class="nd">@signature</span><span class="p">({</span><span class="s2">&quot;types&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;string&quot;</span><span class="p">]})</span>
-</span><span class="hll">    <span class="k">def</span> <span class="nf">_func_decode_snappy_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span class="hll">    <span class="k">def</span> <span class="nf">_func_decode_zlib_compression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 </span>        <span class="n">decoded</span><span class="p">:</span> <span class="nb">bytes</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">snappy</span><span class="o">.</span><span class="n">uncompress</span><span class="p">(</span><span class="n">decoded</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">decoded</span><span class="p">)</span>
 
 
 <span class="hll"><span class="n">custom_jmespath_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;custom_functions&quot;</span><span class="p">:</span> <span class="n">CustomFunctions</span><span class="p">()}</span>
@@ -2284,15 +2284,15 @@
             <span class="n">extract_data_from_envelope</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
                 <span class="c1"># NOTE: Use the prefix `_func_` before the name of the function</span>
-                <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;Records[*].decode_snappy_compression(log)&quot;</span><span class="p">,</span>
+                <span class="n">envelope</span><span class="o">=</span><span class="s2">&quot;Records[*].decode_zlib_compression(log)&quot;</span><span class="p">,</span>
 <span class="hll">                <span class="n">jmespath_options</span><span class="o">=</span><span class="n">custom_jmespath_options</span><span class="p">,</span>
 </span>            <span class="p">),</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;logs&quot;</span><span class="p">:</span> <span class="n">logs</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="s2">&quot;Extracted messages&quot;</span><span class="p">,</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
     <span class="k">except</span> <span class="n">JMESPathTypeError</span><span class="p">:</span>
 <span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;The envelope function must match a valid path.&quot;</span><span class="p">)</span>
-</span>    <span class="k">except</span> <span class="n">snappy</span><span class="o">.</span><span class="n">UncompressError</span><span class="p">:</span>
-<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid snappy compressed binary&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">zlib</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
+<span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid zlib compressed message&quot;</span><span class="p">)</span>
 </span>    <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
 <span class="hll">        <span class="k">return</span> <span class="n">return_error_message</span><span class="p">(</span><span class="s2">&quot;Log must be a valid base64 encoded string&quot;</span><span class="p">)</span>
 </span>
@@ -2302,30 +2302,20 @@
 </code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;Records&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integration-kafka&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;application&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;notification&quot;</span><span class="p">,</span>
 <span class="w">            </span><span class="nt">&quot;datetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-01-01T00:00:00.000Z&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/QGIMjAyMi8wNi8xNiAxNjoyNTowMCBbY3JpdF0gMzA1MTg5MCMNCPBEOiAqMSBjb25uZWN0KCkg\ndG8gMTI3LjAuMC4xOjUwMDAgZmFpbGVkICgxMzogUGVybWlzc2lvbiBkZW5pZWQpIHdoaWxlEUEI\naW5nAUJAdXBzdHJlYW0sIGNsaWVudDoZVKgsIHNlcnZlcjogXywgcmVxdWVzdDogIk9QVElPTlMg\nLyBIVFRQLzEuMSIsFUckOiAiaHR0cDovLzabABQvIiwgaG8FQDAxMjcuMC4wLjE6ODEi\n&quot;</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="p">{</span>
-<span class="w">            </span><span class="nt">&quot;user&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;integration-kafka&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;datetime&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-01-01T00:00:01.000Z&quot;</span><span class="p">,</span>
-<span class="w">            </span><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;tQHwnDEyNy4wLjAuMSAtIC0gWzE2L0p1bi8yMDIyOjE2OjMwOjE5ICswMTAwXSAiT1BUSU9OUyAv\nIEhUVFAvMS4xIiAyMDQgMCAiLSIgIk1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NCkgQXBw\nbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEwMi4BmUwwIFNhZmFy\naS81MzcuMzYiICItIg==\n&quot;</span>
+<span class="w">            </span><span class="nt">&quot;log&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;eJxtUNFOwkAQ/JXN+dJq6e22tMD5ZHwQRYSEJpqQhtRy2AvlWq+tEr/eg6DExOzDJjM7M5tZsgCDgGPMKQaKRRAJRFjmRrUphBjRcIQXpy3gkiCvtJZ567jQVkDBwEc7JCK0sk2mSrkGh0IBc2l2qmlUpWEttZJrFz4LS/8YKP12cOjqpjUy23mQl0rqVpw9PWik+ZBGwMoDI9872ViazebJ/expARzGSTLn5BPzfm0sX7RtLTj/+xq3N0V11J+JITELnwHo2VlSzB86zQ+1CFtIiIJGcIWEmP4bDgH2AYH1GLBp9aXKMuORj+C8EF3Do9LdHvbDeBX3Xbip61I+y9eJankUDvwwBmcyTqaPHpRqK+FO5tvKhdvCVDvJCYPjYwiLbJMZdZKwQxZL02+NI3Vs&quot;</span>
 <span class="w">        </span><span class="p">}</span>
 <span class="w">    </span><span class="p">]</span>
 <span class="p">}</span>
@@ -2339,7 +2329,7 @@
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-24
     
   </small>
 </div>
