@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **deps:** bump actions/setup-python from 4.6.1 to 4.7.0 ([#2821](https://github.com/aws-powertools/powertools-lambda-python/issues/2821))
+* **deps-dev:** bump ruff from 0.0.278 to 0.0.279 ([#2822](https://github.com/aws-powertools/powertools-lambda-python/issues/2822))
+* **deps-dev:** bump cfn-lint from 0.78.1 to 0.78.2 ([#2823](https://github.com/aws-powertools/powertools-lambda-python/issues/2823))
 
 
 <a name="v2.21.0"></a>
