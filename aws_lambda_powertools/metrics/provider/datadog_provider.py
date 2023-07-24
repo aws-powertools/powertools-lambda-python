@@ -6,7 +6,7 @@ import numbers
 import os
 import time
 import warnings
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import MetricsBase, MetricsProviderBase
@@ -57,7 +57,15 @@ class DataDogProvider(MetricsProviderBase):
         super().__init__()
 
     #  adding name,value,timestamp,tags
-    def add_metric(self, name: str, value: float, timestamp: Optional[int] = None, tags: Optional[List] = None):
+    def add_metric(
+        self,
+        name: str,
+        value: float,
+        timestamp: Optional[int] = None,
+        tags: Optional[List] = None,
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         """
         The add_metrics function that will be used by metrics class.
 
@@ -71,19 +79,30 @@ class DataDogProvider(MetricsProviderBase):
             Timestamp in int for the metrics, default = time.time()
         tags: List[str]
             In format like List["tag:value","tag2:value2"]
+        args: Any
+            extra args will be dropped for compatibility
+        kwargs: Any
+            extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
 
         Examples
         --------
-            add_metric(
-                name='coffee_house.order_value',
-                value=12.45,
-                tags=['product:latte', 'order:online']
-            )
+            >>> provider = DataDogProvider()
+            >>>
+            >>> provider.add_metric(
+            >>>     name='coffee_house.order_value',
+            >>>     value=12.45,
+            >>>     tags=['product:latte', 'order:online'],
+            >>>     sales='sam'
+            >>> )
         """
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
+        if tags is None:
+            tags = []
         if not timestamp:
             timestamp = int(time.time())
+        for k, w in kwargs.items():
+            tags.append(f"{k}:{w}")
         self.metrics.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
     def serialize(self) -> List:
@@ -159,14 +178,14 @@ class DataDogMetrics(MetricsBase):
     -------
     **Creates a few metrics and publish at the end of a function execution**
 
-        from aws_lambda_powertools.metrics.provider import DataDogMetrics, DataDogProvider
-
-        dd_provider = DataDogProvider(namespace="Serverlesspresso")
-        metrics = DataDogMetrics(provider=dd_provider)
-
-        @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
-        def lambda_handler(event, context):
-            metrics.add_metric(name="item_sold",value=1,tags=['product:latte', 'order:online'])
+        >>> from aws_lambda_powertools.metrics.provider import DataDogMetrics, DataDogProvider
+        >>>
+        >>> dd_provider = DataDogProvider(namespace="Serverlesspresso")
+        >>> metrics = DataDogMetrics(provider=dd_provider)
+        >>>
+        >>> @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
+        >>> def lambda_handler(event, context):
+        >>>     metrics.add_metric(name="item_sold",value=1,tags=['product:latte', 'order:online'])
     """
 
     # `log_metrics` and `_add_cold_start_metric` are directly inherited from `MetricsBase`
@@ -196,17 +215,24 @@ class DataDogMetrics(MetricsBase):
         timestamp: int
             Timestamp in int for the metrics, default = time.time()
         tags: List[str]
-            In format like List["tag:value","tag2:value2"]
+            In format like List["tag:value","tag2:value2"],
+        args: Any
+            extra args will be passed into provider and be dropped
+        kwargs: Any
+            extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
 
         Examples
         --------
-            add_metric(
-                name='coffee_house.order_value',
-                value=12.45,
-                tags=['product:latte', 'order:online']
-            )
+            >>> from aws_lambda_powertools.metrics.provider import DataDogMetrics, DataDogProvider
+            >>>
+            >>> metrics = DataDogMetrics(provider=DataDogProvider())
+            >>> metrics.add_metric(
+            >>>     name='coffee_house.order_value',
+            >>>     value=12.45,
+            >>>     tags=['product:latte', 'order:online']
+            >>> )
         """
-        self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags)
+        self.provider.add_metric(*args, name=name, value=value, timestamp=timestamp, tags=tags, **kwargs)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """

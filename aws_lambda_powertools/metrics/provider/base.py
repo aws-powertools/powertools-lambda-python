@@ -2,15 +2,14 @@ from __future__ import annotations
 
 import functools
 import logging
-from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Protocol
 
 logger = logging.getLogger(__name__)
 
 is_cold_start = True
 
 
-class MetricsProviderBase(ABC):
+class MetricsProviderBase(Protocol):
     """
     Class for metric provider template.
 
@@ -23,8 +22,7 @@ class MetricsProviderBase(ABC):
         3. Customize the behavior and functionality of the metric provider in your subclass.
     """
 
-    @abstractmethod
-    def add_metric(self, *args, **kwargs):
+    def add_metric(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method for adding a metric.
 
@@ -49,8 +47,7 @@ class MetricsProviderBase(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
-    def serialize(self, *args, **kwargs):
+    def serialize(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method for serialize a metric.
 
@@ -76,8 +73,7 @@ class MetricsProviderBase(ABC):
         raise NotImplementedError
 
     # flush serialized data to output, or send to API directly
-    @abstractmethod
-    def flush(self, *args, **kwargs):
+    def flush(self, *args: Any, **kwargs):
         """
         Abstract method for flushing a metric.
 
@@ -98,7 +94,7 @@ class MetricsProviderBase(ABC):
         raise NotImplementedError
 
 
-class MetricsBase(ABC):
+class MetricsBase(Protocol):
     """
     Class for metric template.
 
@@ -108,7 +104,6 @@ class MetricsBase(ABC):
     NOTE: need to improve this docstring
     """
 
-    @abstractmethod
     def add_metric(self, *args, **kwargs):
         """
         Abstract method for adding a metric.
@@ -134,7 +129,6 @@ class MetricsBase(ABC):
         """
         raise NotImplementedError
 
-    @abstractmethod
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """Manually flushes the metrics. This is normally not necessary,
         unless you're running on other runtimes besides Lambda, where the @log_metrics
@@ -227,3 +221,9 @@ class MetricsBase(ABC):
         self.add_metric(name="ColdStart", value=1, tag=[{"function_name": context.function_name}])
 
         is_cold_start = False
+
+
+def reset_cold_start_flag_provider():
+    global is_cold_start
+    if not is_cold_start:
+        is_cold_start = True
