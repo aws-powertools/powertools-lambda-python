@@ -73,7 +73,7 @@ class MetricsProviderBase(Protocol):
         raise NotImplementedError
 
     # flush serialized data to output, or send to API directly
-    def flush(self, *args: Any, **kwargs):
+    def flush(self, *args: Any, **kwargs) -> Any:
         """
         Abstract method for flushing a metric.
 
