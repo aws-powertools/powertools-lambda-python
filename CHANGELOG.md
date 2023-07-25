@@ -4,8 +4,12 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.22.0"></a>
+## [v2.22.0] - 2023-07-25
 ## Maintenance
 
+* version bump
 
 
 <a name="v2.21.0"></a>
@@ -3581,7 +3585,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.21.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.22.0...HEAD
+[v2.22.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.21.0...v2.22.0
 [v2.21.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.20.0...v2.21.0
 [v2.20.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.19.0...v2.20.0
 [v2.19.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.18.0...v2.19.0

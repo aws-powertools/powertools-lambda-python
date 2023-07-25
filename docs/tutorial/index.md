@@ -20,7 +20,7 @@ Let's clone our sample project before we add one feature at a time.
     Bootstrap directly via SAM CLI:
 
     ```shell
-    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.10 --no-tracing`
+    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.10 --no-tracing
     ```
 
 ```bash title="Use SAM CLI to initialize the sample project"

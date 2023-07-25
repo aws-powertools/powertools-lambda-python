@@ -1,14 +1,9 @@
 {
     "Records": [
         {
-            "user": "integration-kafka",
+            "application": "notification",
             "datetime": "2022-01-01T00:00:00.000Z",
-            "log": "/QGIMjAyMi8wNi8xNiAxNjoyNTowMCBbY3JpdF0gMzA1MTg5MCMNCPBEOiAqMSBjb25uZWN0KCkg\ndG8gMTI3LjAuMC4xOjUwMDAgZmFpbGVkICgxMzogUGVybWlzc2lvbiBkZW5pZWQpIHdoaWxlEUEI\naW5nAUJAdXBzdHJlYW0sIGNsaWVudDoZVKgsIHNlcnZlcjogXywgcmVxdWVzdDogIk9QVElPTlMg\nLyBIVFRQLzEuMSIsFUckOiAiaHR0cDovLzabABQvIiwgaG8FQDAxMjcuMC4wLjE6ODEi\n"
-        },
-        {
-            "user": "integration-kafka",
-            "datetime": "2022-01-01T00:00:01.000Z",
-            "log": "tQHwnDEyNy4wLjAuMSAtIC0gWzE2L0p1bi8yMDIyOjE2OjMwOjE5ICswMTAwXSAiT1BUSU9OUyAv\nIEhUVFAvMS4xIiAyMDQgMCAiLSIgIk1vemlsbGEvNS4wIChYMTE7IExpbnV4IHg4Nl82NCkgQXBw\nbGVXZWJLaXQvNTM3LjM2IChLSFRNTCwgbGlrZSBHZWNrbykgQ2hyb21lLzEwMi4BmUwwIFNhZmFy\naS81MzcuMzYiICItIg==\n"
+            "log": "eJxtUNFOwkAQ/JXN+dJq6e22tMD5ZHwQRYSEJpqQhtRy2AvlWq+tEr/eg6DExOzDJjM7M5tZsgCDgGPMKQaKRRAJRFjmRrUphBjRcIQXpy3gkiCvtJZ567jQVkDBwEc7JCK0sk2mSrkGh0IBc2l2qmlUpWEttZJrFz4LS/8YKP12cOjqpjUy23mQl0rqVpw9PWik+ZBGwMoDI9872ViazebJ/expARzGSTLn5BPzfm0sX7RtLTj/+xq3N0V11J+JITELnwHo2VlSzB86zQ+1CFtIiIJGcIWEmP4bDgH2AYH1GLBp9aXKMuORj+C8EF3Do9LdHvbDeBX3Xbip61I+y9eJankUDvwwBmcyTqaPHpRqK+FO5tvKhdvCVDvJCYPjYwiLbJMZdZKwQxZL02+NI3Vs"
         }
     ]
 }
