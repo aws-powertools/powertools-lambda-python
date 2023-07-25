@@ -27,7 +27,7 @@ from botocore.config import Config
 
 from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
-from aws_lambda_powertools.utilities.parameters.types import RecursiveOptions, TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
 
@@ -123,7 +123,7 @@ class BaseProvider(ABC):
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
         value: Optional[Union[str, bytes, dict]] = None
-        key = self._build_cache_key(name=name, transform_options=transform, is_recursive=False)
+        key = self._build_cache_key(name=name, transform=transform)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -191,7 +191,7 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-        key = self._build_cache_key(name=path, transform_options=transform, is_recursive=True)
+        key = self._build_cache_key(name=path, transform=transform, is_nested=True)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -234,10 +234,26 @@ class BaseProvider(ABC):
     def _build_cache_key(
         self,
         name: str,
-        transform_options: TransformOptions = None,
-        is_recursive: RecursiveOptions = False,
+        transform: TransformOptions = None,
+        is_nested: bool = False,
     ):
-        return (name, transform_options, is_recursive)
+        """Creates cache key for parameters
+
+        Parameters
+        ----------
+        name : str
+            Name of parameter, secret or config
+        transform : TransformOptions, optional
+            Transform method used, by default None
+        is_nested : bool, optional
+            Whether it's a single parameter or multiple nested parameters, by default False
+
+        Returns
+        -------
+        Tuple[str, TransformOptions, bool]
+            Cache key
+        """
+        return (name, transform, is_nested)
 
     @staticmethod
     def _build_boto3_client(
