@@ -27,7 +27,7 @@ from botocore.config import Config
 
 from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
-from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import RecursiveOptions, TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
 
@@ -66,16 +66,16 @@ class BaseProvider(ABC):
     Abstract Base Class for Parameter providers
     """
 
-    store: Dict[Tuple[str, TransformOptions], ExpirableValue]
+    store: Dict[Tuple, ExpirableValue]
 
     def __init__(self):
         """
         Initialize the base provider
         """
 
-        self.store: Dict[Tuple[str, TransformOptions], ExpirableValue] = {}
+        self.store: Dict[Tuple, ExpirableValue] = {}
 
-    def has_not_expired_in_cache(self, key: Tuple[str, TransformOptions]) -> bool:
+    def has_not_expired_in_cache(self, key: Tuple) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
@@ -123,7 +123,7 @@ class BaseProvider(ABC):
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
         value: Optional[Union[str, bytes, dict]] = None
-        key = (name, transform)
+        key = self._build_cache_key(name=name, transform_options=transform, is_recursive=False)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -191,7 +191,7 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-        key = (path, transform)
+        key = self._build_cache_key(name=path, transform_options=transform, is_recursive=True)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
@@ -222,14 +222,22 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
-    def fetch_from_cache(self, key: Tuple[str, TransformOptions]):
+    def fetch_from_cache(self, key: Tuple):
         return self.store[key].value if key in self.store else {}
 
-    def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+    def add_to_cache(self, key: Tuple, value: Any, max_age: int):
         if max_age <= 0:
             return
 
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+
+    def _build_cache_key(
+        self,
+        name: str,
+        transform_options: TransformOptions = None,
+        is_recursive: RecursiveOptions = False,
+    ):
+        return (name, transform_options, is_recursive)
 
     @staticmethod
     def _build_boto3_client(
