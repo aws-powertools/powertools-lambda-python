@@ -129,7 +129,7 @@ class BaseProvider(ABC):
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value
+            return self.fetch_from_cache(key)
 
         try:
             value = self._get(name, **sdk_options)
@@ -142,7 +142,7 @@ class BaseProvider(ABC):
 
         # NOTE: don't cache None, as they might've been failed transforms and may be corrected
         if value is not None:
-            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+            self.add_to_cache(key=key, value=value, max_age=max_age)
 
         return value
 
@@ -197,7 +197,7 @@ class BaseProvider(ABC):
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value  # type: ignore # need to revisit entire typing here
+            return self.fetch_from_cache(key)
 
         try:
             values = self._get_multiple(path, **sdk_options)
@@ -208,7 +208,7 @@ class BaseProvider(ABC):
         if transform:
             values.update(transform_value(values, transform, raise_on_transform_error))
 
-        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
+        self.add_to_cache(key=key, value=values, max_age=max_age)
 
         return values
 
@@ -221,6 +221,9 @@ class BaseProvider(ABC):
 
     def clear_cache(self):
         self.store.clear()
+
+    def fetch_from_cache(self, key: Tuple[str, TransformOptions]):
+        return self.store[key].value if key in self.store else {}
 
     def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
         if max_age <= 0:
