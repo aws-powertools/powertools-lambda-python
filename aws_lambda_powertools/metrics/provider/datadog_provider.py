@@ -9,7 +9,7 @@ import warnings
 from typing import Any, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.provider import MetricsBase, MetricsProviderBase
+from aws_lambda_powertools.metrics.provider import MetricsBase
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +22,7 @@ except ImportError:
 DEFAULT_NAMESPACE = "default"
 
 
-class DataDogProvider(MetricsProviderBase):
+class DataDogProvider:
     """
     Class for datadog provider. This Class should only be used inside DataDogMetrics
     all datadog metric data will be stored as
