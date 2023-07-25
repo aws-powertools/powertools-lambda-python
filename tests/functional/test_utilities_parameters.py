@@ -139,7 +139,8 @@ def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -631,7 +632,8 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SSMProvider(config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1332,7 +1334,8 @@ def test_secrets_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SecretsProvider(config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1734,7 +1737,8 @@ def test_base_provider_get_multiple_cached(mock_name, mock_value):
 
     provider = TestProvider()
 
-    provider.store[(mock_name, None)] = ExpirableValue({"A": mock_value}, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name, is_nested=True)
+    provider.add_to_cache(key=cache_key, value={"A": mock_value}, max_age=60)
 
     value = provider.get_multiple(mock_name)
 
@@ -2500,3 +2504,25 @@ def test_cache_ignores_max_age_zero_or_negative(mock_value, config):
     # THEN they should not be added to the cache
     assert len(provider.store) == 0
     assert provider.has_not_expired_in_cache(cache_key) is False
+
+
+def test_base_provider_single_and_nested_parameters_cached(mock_name, mock_value):
+    # GIVEN a custom provider
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise ValueError("This parameter doesn't exist")
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            return {"A": mock_value}
+
+    provider = TestProvider()
+
+    # WHEN get_multiple is followed by get with the same name
+    # (path vs single parameter name)
+    provider.get_multiple(mock_name)
+
+    # THEN get should raise GetParameterError
+    # since a path will likely not be a valid parameter
+    # see #2438
+    with pytest.raises(parameters.exceptions.GetParameterError):
+        provider.get(mock_name)
