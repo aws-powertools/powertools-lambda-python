@@ -19,7 +19,7 @@ This page describes our security processes and supply chain practices.
 
 ### Verifying signed builds
 
-!!! note "Starting from v2.20.0 releases, builds are [reproducible](https://slsa.dev/spec/v0.1/faq#q-what-about-reproducible-builds){target="_blank"} and signed publicly."
+!!! note "Starting from v2.20.0 releases, builds are [reproducible](https://slsa.dev/spec/v0.1/faq#q-what-about-reproducible-builds){target="_blank" rel="nofollow"} and signed publicly."
 
 <center>
 ![SLSA Supply Chain Threats](https://slsa.dev/images/v1.0/supply-chain-threats.svg)
@@ -29,7 +29,7 @@ This page describes our security processes and supply chain practices.
 
 #### Terminology
 
-We use [SLSA](https://slsa.dev/spec/v1.0/about){target="_blank"} to ensure our builds are reproducible and to adhere to [supply chain security practices](https://slsa.dev/spec/v1.0/threats-overview).
+We use [SLSA](https://slsa.dev/spec/v1.0/about){target="_blank" rel="nofollow"} to ensure our builds are reproducible and to adhere to [supply chain security practices](https://slsa.dev/spec/v1.0/threats-overview).
 
 Within our [releases page](https://github.com/aws-powertools/powertools-lambda-python/releases), you will notice a new metadata file: `multiple.intoto.jsonl`. It's metadata to describe **where**, **when**, and **how** our build artifacts were produced - or simply, **attestation** in SLSA terminology.
 
@@ -79,7 +79,7 @@ You can do this manually or automated via a shell script. We maintain the latter
     5. **Runs SLSA Verifier against attestation**, GitHub Source, and release binary
     6. **Cleanup** by removing downloaded files to keep your current directory tidy
 
-    ??? info "Expand or [click here](https://github.com/heitorlessa/aws-lambda-powertools-python/blob/refactor/ci-seal/.github/actions/verify-provenance/verify_provenance.sh#L95){target="_blank"} to see the script source code"
+    ??? info "Expand or [click here](https://github.com/heitorlessa/aws-lambda-powertools-python/blob/refactor/ci-seal/.github/actions/verify-provenance/verify_provenance.sh#L95){target="_blank" rel="nofollow"} to see the script source code"
 
           ```bash title=".github/actions/verify-provenance/verify_provenance.sh"
           ---8<-- ".github/actions/verify-provenance/verify_provenance.sh"
