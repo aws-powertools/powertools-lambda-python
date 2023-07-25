@@ -28,7 +28,7 @@ from botocore.config import Config
 
 from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
-from aws_lambda_powertools.utilities.parameters.types import RecursiveOptions, TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 from .exceptions import GetParameterError, TransformParameterError
 
