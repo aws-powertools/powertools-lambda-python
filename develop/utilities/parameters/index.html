@@ -1367,7 +1367,7 @@
   <h1>Parameters</h1>
 
 <!-- markdownlint-disable MD013 -->
-<p>The parameters utility provides high-level functions to retrieve one or multiple parameter values from <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html" target="_blank">AWS Systems Manager Parameter Store</a>, <a href="https://aws.amazon.com/secrets-manager/" target="_blank">AWS Secrets Manager</a>, <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html" target="_blank">AWS AppConfig</a>, <a href="https://aws.amazon.com/dynamodb/" target="_blank">Amazon DynamoDB</a>, or bring your own.</p>
+<p>The parameters utility provides high-level functions to retrieve one or multiple parameter values from <a href="https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html" rel="nofollow" target="_blank">AWS Systems Manager Parameter Store</a>, <a href="https://aws.amazon.com/secrets-manager/" rel="nofollow" target="_blank">AWS Secrets Manager</a>, <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html" rel="nofollow" target="_blank">AWS AppConfig</a>, <a href="https://aws.amazon.com/dynamodb/" rel="nofollow" target="_blank">Amazon DynamoDB</a>, or bring your own.</p>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Retrieve one or multiple parameters from the underlying provider</li>
@@ -1378,7 +1378,7 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>By default, we fetch parameters from System Manager Parameter Store, secrets from Secrets Manager, and application configuration from AppConfig.</p>
 <h3 id="iam-permissions">IAM Permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h3>
@@ -3047,7 +3047,7 @@
 <h3 id="create-your-own-provider">Create your own provider<a class="headerlink" href="#create-your-own-provider" title="Permanent link">&para;</a></h3>
 <p>You can create your own custom parameter store provider by inheriting the <code>BaseProvider</code> class, and implementing both <code>_get()</code> and <code>_get_multiple()</code> methods to retrieve a single, or multiple parameters from your custom store.</p>
 <p>All transformation and caching logic is handled by the <code>get()</code> and <code>get_multiple()</code> methods from the base provider class.</p>
-<p>Here are two examples of implementing a custom parameter store. One using an external service like <a href="https://www.vaultproject.io/" target="_blank">Hashicorp Vault</a>, a widely popular key-value and secret storage and the other one using <a href="https://aws.amazon.com/s3/?nc1=h_ls" target="_blank">Amazon S3</a>, a popular object storage.</p>
+<p>Here are two examples of implementing a custom parameter store. One using an external service like <a href="https://www.vaultproject.io/" rel="nofollow" target="_blank">Hashicorp Vault</a>, a widely popular key-value and secret storage and the other one using <a href="https://aws.amazon.com/s3/?nc1=h_ls" rel="nofollow" target="_blank">Amazon S3</a>, a popular object storage.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">working_with_own_provider_vault.py</label><label for="__tabbed_15_2">custom_provider_vault.py</label><label for="__tabbed_15_3">working_with_own_provider_s3.py</label><label for="__tabbed_15_4">custom_provider_s3.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3624,55 +3624,55 @@
 <td>SSM Parameter Store</td>
 <td><code>get_parameter</code></td>
 <td><code>ssm</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter" target="_blank">get_parameter</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter" rel="nofollow" target="_blank">get_parameter</a></td>
 </tr>
 <tr>
 <td>SSM Parameter Store</td>
 <td><code>get_parameters</code></td>
 <td><code>ssm</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path" target="_blank">get_parameters_by_path</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path" rel="nofollow" target="_blank">get_parameters_by_path</a></td>
 </tr>
 <tr>
 <td>SSM Parameter Store</td>
 <td><code>SSMProvider.get</code></td>
 <td><code>ssm</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter" target="_blank">get_parameter</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter" rel="nofollow" target="_blank">get_parameter</a></td>
 </tr>
 <tr>
 <td>SSM Parameter Store</td>
 <td><code>SSMProvider.get_multiple</code></td>
 <td><code>ssm</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path" target="_blank">get_parameters_by_path</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path" rel="nofollow" target="_blank">get_parameters_by_path</a></td>
 </tr>
 <tr>
 <td>Secrets Manager</td>
 <td><code>get_secret</code></td>
 <td><code>secretsmanager</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value" target="_blank">get_secret_value</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value" rel="nofollow" target="_blank">get_secret_value</a></td>
 </tr>
 <tr>
 <td>Secrets Manager</td>
 <td><code>SecretsProvider.get</code></td>
 <td><code>secretsmanager</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value" target="_blank">get_secret_value</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value" rel="nofollow" target="_blank">get_secret_value</a></td>
 </tr>
 <tr>
 <td>DynamoDB</td>
 <td><code>DynamoDBProvider.get</code></td>
 <td><code>dynamodb</code></td>
-<td>(<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" target="_blank">Table resource</a>)</td>
+<td>(<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" rel="nofollow" target="_blank">Table resource</a>)</td>
 </tr>
 <tr>
 <td>DynamoDB</td>
 <td><code>DynamoDBProvider.get_multiple</code></td>
 <td><code>dynamodb</code></td>
-<td>(<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" target="_blank">Table resource</a>)</td>
+<td>(<a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" rel="nofollow" target="_blank">Table resource</a>)</td>
 </tr>
 <tr>
 <td>App Config</td>
 <td><code>get_app_config</code></td>
 <td><code>appconfigdata</code></td>
-<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session" target="_blank">start_configuration_session</a> and <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration" target="_blank">get_latest_configuration</a></td>
+<td><a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session" rel="nofollow" target="_blank">start_configuration_session</a> and <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration" rel="nofollow" target="_blank">get_latest_configuration</a></td>
 </tr>
 </tbody>
 </table>
@@ -3755,7 +3755,7 @@
 <p>Injecting a custom boto3 client can make unit/snapshot testing easier, including SDK customizations.</p>
 </details>
 <h3 id="customizing-boto-configuration">Customizing boto configuration<a class="headerlink" href="#customizing-boto-configuration" title="Permanent link">&para;</a></h3>
-<p>The <strong><code>config</code></strong> , <strong><code>boto3_session</code></strong>, and <strong><code>boto3_client</code></strong>  parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a>, <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a>, or  a <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html" target="_blank">boto3 client</a> when constructing any of the built-in provider classes.</p>
+<p>The <strong><code>config</code></strong> , <strong><code>boto3_session</code></strong>, and <strong><code>boto3_client</code></strong>  parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" rel="nofollow" target="_blank">botocore config object</a>, <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" rel="nofollow" target="_blank">boto3 session</a>, or  a <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html" rel="nofollow" target="_blank">boto3 client</a> when constructing any of the built-in provider classes.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.</p>
@@ -3851,7 +3851,7 @@
 </div>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <h3 id="mocking-parameter-values">Mocking parameter values<a class="headerlink" href="#mocking-parameter-values" title="Permanent link">&para;</a></h3>
-<p>For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the <a href="https://docs.pytest.org/en/latest/how-to/monkeypatch.html" target="_blank">pytest monkeypatch fixture</a> to patch the <code>parameters.get_parameter</code> method:</p>
+<p>For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the <a href="https://docs.pytest.org/en/latest/how-to/monkeypatch.html" rel="nofollow" target="_blank">pytest monkeypatch fixture</a> to patch the <code>parameters.get_parameter</code> method:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">test_single_mock.py</label><label for="__tabbed_22_2">single_mock.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3934,8 +3934,8 @@
 </div>
 </div>
 <p>Alternatively, if we need more fully featured mocking (for example checking the arguments passed to <code>get_parameter</code>), we
-can use <a href="https://docs.python.org/3/library/unittest.mock.html" target="_blank">unittest.mock</a> from the python stdlib instead of pytest's <code>monkeypatch</code> fixture. In this example, we use the
-<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch" target="_blank">patch</a> decorator to replace the <code>aws_lambda_powertools.utilities.parameters.get_parameter</code> function with a <a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.MagicMock" target="_blank">MagicMock</a>
+can use <a href="https://docs.python.org/3/library/unittest.mock.html" rel="nofollow" target="_blank">unittest.mock</a> from the python stdlib instead of pytest's <code>monkeypatch</code> fixture. In this example, we use the
+<a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch" rel="nofollow" target="_blank">patch</a> decorator to replace the <code>aws_lambda_powertools.utilities.parameters.get_parameter</code> function with a <a href="https://docs.python.org/3/library/unittest.mock.html#unittest.mock.MagicMock" rel="nofollow" target="_blank">MagicMock</a>
 object named <code>get_parameter_mock</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:1"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">test_with_monkeypatch.py</label></div>
 <div class="tabbed-content">
@@ -4100,7 +4100,7 @@ object named <code>get_parameter_mock</code>.</p>
   <small>
     
       Last update:
-      2023-07-24
+      2023-07-26
     
   </small>
 </div>

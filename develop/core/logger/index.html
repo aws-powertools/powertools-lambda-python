@@ -1703,7 +1703,7 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>Logger requires two settings:</p>
 <table>
@@ -1817,7 +1817,7 @@
 <tr>
 <td><strong>xray_trace_id</strong>: <code>str</code></td>
 <td><code>1-5759e988-bd862e3fe1be46a994272793</code></td>
-<td>When <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html" target="_blank">tracing is enabled</a>, it shows X-Ray Trace ID</td>
+<td>When <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html" rel="nofollow" target="_blank">tracing is enabled</a>, it shows X-Ray Trace ID</td>
 </tr>
 <tr>
 <td><strong>sampling_rate</strong>: <code>float</code></td>
@@ -1986,7 +1986,7 @@
     <span class="k">return</span> <span class="s2">&quot;hello world&quot;</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="setting-a-correlation-id">Setting a Correlation ID<a class="headerlink" href="#setting-a-correlation-id" title="Permanent link">&para;</a></h3>
-<p>You can set a Correlation ID using <code>correlation_id_path</code> param by passing a <a href="https://jmespath.org/tutorial.html" target="_blank">JMESPath expression</a>.</p>
+<p>You can set a Correlation ID using <code>correlation_id_path</code> param by passing a <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expression</a>.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>You can retrieve correlation IDs via <code>get_correlation_id</code> method</p>
@@ -2062,7 +2062,7 @@
 </div>
 </div>
 <h4 id="set_correlation_id-method">set_correlation_id method<a class="headerlink" href="#set_correlation_id-method" title="Permanent link">&para;</a></h4>
-<p>You can also use <code>set_correlation_id</code> method to inject it anywhere else in your code. Example below uses <a href="../../utilities/data_classes/" target="_blank">Event Source Data Classes utility</a> to easily access events properties.</p>
+<p>You can also use <code>set_correlation_id</code> method to inject it anywhere else in your code. Example below uses <a href="../../utilities/data_classes/" rel="nofollow" target="_blank">Event Source Data Classes utility</a> to easily access events properties.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">set_correlation_id_method.py</label><label for="__tabbed_3_2">set_correlation_id_method.json</label><label for="__tabbed_3_3">set_correlation_id_method_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2214,7 +2214,7 @@
 <h4 id="append_keys-method">append_keys method<a class="headerlink" href="#append_keys-method" title="Permanent link">&para;</a></h4>
 <details class="warning" open="open">
 <summary>Warning</summary>
-<p><code>append_keys</code> is not thread-safe, please see <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/991" target="_blank">RFC</a>.</p>
+<p><code>append_keys</code> is not thread-safe, please see <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/991" rel="nofollow" target="_blank">RFC</a>.</p>
 </details>
 <p>You can append your own keys to your existing Logger via <code>append_keys(**additional_key_values)</code> method.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">append_keys.py</label><label for="__tabbed_5_2">append_keys_output.json</label></div>
@@ -2451,7 +2451,7 @@
 </div>
 </div>
 <h4 id="clearing-all-state">Clearing all state<a class="headerlink" href="#clearing-all-state" title="Permanent link">&para;</a></h4>
-<p>Logger is commonly initialized in the global scope. Due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html" target="_blank">Lambda Execution Context reuse</a>, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use <code>clear_state=True</code> param in <code>inject_lambda_context</code> decorator.</p>
+<p>Logger is commonly initialized in the global scope. Due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html" rel="nofollow" target="_blank">Lambda Execution Context reuse</a>, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use <code>clear_state=True</code> param in <code>inject_lambda_context</code> decorator.</p>
 <details class="tip" open="open">
 <summary>Tip: When is this useful?</summary>
 <p>It is useful when you add multiple custom keys conditionally, instead of setting a default <code>None</code> value if not present. Any key with <code>None</code> value is automatically removed by Logger.</p>
@@ -2632,7 +2632,7 @@
 </div>
 <details class="question">
 <summary>What are uncaught exceptions?</summary>
-<p>It's any raised exception that wasn't handled by the <a href="https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions" target="_blank"><code>except</code> statement</a>, leading a Python program to a non-successful exit.</p>
+<p>It's any raised exception that wasn't handled by the <a href="https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions" rel="nofollow" target="_blank"><code>except</code> statement</a>, leading a Python program to a non-successful exit.</p>
 <p>They are typically raised intentionally to signal a problem (<code>raise ValueError</code>), or a propagated exception from elsewhere in your code that you didn't handle it willingly or not (<code>KeyError</code>, <code>jsonDecoderError</code>, etc.).</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">logging_uncaught_exceptions.py</label><label for="__tabbed_11_2">logging_uncaught_exceptions_output.json</label></div>
@@ -2697,11 +2697,11 @@
 <p>Logger uses Python's standard logging date format with the addition of timezone: <code>2021-05-03 11:47:12,494+0200</code>.</p>
 <p>You can easily change the date format using one of the following parameters:</p>
 <ul>
-<li><strong><code>datefmt</code></strong>. You can pass any <a href="https://strftime.org/" target="_blank">strftime format codes</a>. Use <code>%F</code> if you need milliseconds.</li>
+<li><strong><code>datefmt</code></strong>. You can pass any <a href="https://strftime.org/" rel="nofollow" target="_blank">strftime format codes</a>. Use <code>%F</code> if you need milliseconds.</li>
 <li><strong><code>use_rfc3339</code></strong>. This flag will use a format compliant with both RFC3339 and ISO8601: <code>2022-10-27T16:27:43.738+02:00</code></li>
 </ul>
 <details class="tip" open="open">
-<summary>Prefer using <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" target="_blank">datetime string formats</a>?</summary>
+<summary>Prefer using <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" rel="nofollow" target="_blank">datetime string formats</a>?</summary>
 <p>Use <code>use_datetime_directive</code> flag along with <code>datefmt</code> to instruct Logger to use <code>datetime</code> instead of <code>time.strftime</code>.</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">date_formatting.py</label><label for="__tabbed_12_2">date_formatting_output.json</label></div>
@@ -2806,7 +2806,7 @@
 </tbody>
 </table>
 <h3 id="reusing-logger-across-your-code">Reusing Logger across your code<a class="headerlink" href="#reusing-logger-across-your-code" title="Permanent link">&para;</a></h3>
-<p>Similar to <a href="../tracer/#reusing-tracer-across-your-code" target="_blank">Tracer</a>, a new instance that uses the same <code>service</code> name - env var or explicit parameter - will reuse a previous Logger instance. Just like <code>logging.getLogger("logger_name")</code> would in the standard library if called with the same logger name.</p>
+<p>Similar to <a href="../tracer/#reusing-tracer-across-your-code" rel="nofollow" target="_blank">Tracer</a>, a new instance that uses the same <code>service</code> name - env var or explicit parameter - will reuse a previous Logger instance. Just like <code>logging.getLogger("logger_name")</code> would in the standard library if called with the same logger name.</p>
 <p>Notice in the CloudWatch Logs output how <code>payment_id</code> appeared as expected when logging in <code>collect.py</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">logger_reuse.py</label><label for="__tabbed_13_2">logger_reuse_payment.py</label><label for="__tabbed_13_3">logger_reuse_output.json</label></div>
 <div class="tabbed-content">
@@ -2903,7 +2903,7 @@
 <p>Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.</p>
 <details class="note" open="open">
 <summary>Note</summary>
-<p>Open a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2C+triage&amp;template=feature_request.md&amp;title=" target="_blank">feature request</a> if you want Logger to calculate sampling for every invocation</p>
+<p>Open a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2C+triage&amp;template=feature_request.md&amp;title=" rel="nofollow" target="_blank">feature request</a> if you want Logger to calculate sampling for every invocation</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">sampling_debug_logs.py</label><label for="__tabbed_14_2">sampling_debug_logs_output.json</label></div>
 <div class="tabbed-content">
@@ -3071,9 +3071,9 @@
 </span></code></pre></div></td></tr></table></div>
 <h3 id="observability-providers">Observability providers<a class="headerlink" href="#observability-providers" title="Permanent link">&para;</a></h3>
 <div class="admonition note">
-<p class="admonition-title">In this context, an observability provider is an <a href="https://go.aws/3HtU6CZ" target="_blank">AWS Lambda Partner</a> offering a platform for logging, metrics, traces, etc.</p>
+<p class="admonition-title">In this context, an observability provider is an <a href="https://go.aws/3HtU6CZ" rel="nofollow" target="_blank">AWS Lambda Partner</a> offering a platform for logging, metrics, traces, etc.</p>
 </div>
-<p>You can send logs to the observability provider of your choice via <a href="https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/" target="_blank">Lambda Extensions</a>. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.</p>
+<p>You can send logs to the observability provider of your choice via <a href="https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/" rel="nofollow" target="_blank">Lambda Extensions</a>. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.</p>
 <h4 id="built-in-formatters">Built-in formatters<a class="headerlink" href="#built-in-formatters" title="Permanent link">&para;</a></h4>
 <p>In rare circumstances where JSON logs are not parsed correctly by your provider, we offer built-in formatters to make this transition easier.</p>
 <table>
@@ -3694,7 +3694,7 @@
 </div>
 </div>
 <h4 id="bring-your-own-json-serializer">Bring your own JSON serializer<a class="headerlink" href="#bring-your-own-json-serializer" title="Permanent link">&para;</a></h4>
-<p>By default, Logger uses <code>json.dumps</code> and <code>json.loads</code> as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like <a href="https://github.com/ijl/orjson" target="_blank">orjson</a>.</p>
+<p>By default, Logger uses <code>json.dumps</code> and <code>json.loads</code> as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like <a href="https://github.com/ijl/orjson" rel="nofollow" target="_blank">orjson</a>.</p>
 <p>As parameters don't always translate well between them, you can pass any callable that receives a <code>dict</code> and return a <code>str</code>:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Using Rust orjson library as serializer</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -3813,7 +3813,7 @@
 </div>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>Check out the built-in <a href="https://docs.pytest.org/en/latest/how-to/logging.html" target="_blank">Pytest caplog fixture</a> to assert plain log messages</p>
+<p>Check out the built-in <a href="https://docs.pytest.org/en/latest/how-to/logging.html" rel="nofollow" target="_blank">Pytest caplog fixture</a> to assert plain log messages</p>
 </details>
 <h3 id="pytest-live-log-feature">Pytest live log feature<a class="headerlink" href="#pytest-live-log-feature" title="Permanent link">&para;</a></h3>
 <p>Pytest Live Log feature duplicates emitted log messages in order to style log statements according to their levels, for this to work use <code>POWERTOOLS_LOG_DEDUPLICATION_DISABLED</code> env var.</p>
@@ -3893,7 +3893,7 @@ for the given name and level to the logging module. By default, this logs all bo
 </span><span class="n">external_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;test message&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="how-can-i-add-standard-library-logging-attributes-to-a-log-record">How can I add standard library logging attributes to a log record?<a class="headerlink" href="#how-can-i-add-standard-library-logging-attributes-to-a-log-record" title="Permanent link">&para;</a></h3>
-<p>The Python standard library log records contains a <a href="https://docs.python.org/3/library/logging.html#logrecord-attributes" target="_blank">large set of attributes</a>, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.</p>
+<p>The Python standard library log records contains a <a href="https://docs.python.org/3/library/logging.html#logrecord-attributes" rel="nofollow" target="_blank">large set of attributes</a>, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.</p>
 <p>You can include any of these logging attributes as key value arguments (<code>kwargs</code>) when instantiating <code>Logger</code> or <code>LambdaPowertoolsFormatter</code>.</p>
 <p>You can also add them later anywhere in your code with <code>append_keys</code>, or remove them with <code>remove_keys</code> methods.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">append_and_remove_keys.py</label><label for="__tabbed_24_2">append_and_remove_keys_output.json</label></div>
@@ -4080,14 +4080,14 @@ for the given name and level to the logging module. By default, this logs all bo
 </div>
 <!-- markdownlint-disable MD013 -->
 <h3 id="how-do-i-aggregate-and-search-powertools-for-aws-lambda-python-logs-across-accounts">How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?<a class="headerlink" href="#how-do-i-aggregate-and-search-powertools-for-aws-lambda-python-logs-across-accounts" title="Permanent link">&para;</a></h3>
-<p>As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/460" target="_blank">discussion for more details</a></p>
+<p>As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/460" rel="nofollow" target="_blank">discussion for more details</a></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-26
     
   </small>
 </div>

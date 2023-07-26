@@ -1366,14 +1366,14 @@
 <p>With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:</p>
 <ol>
 <li><code>ReportBatchItemFailures</code> is set in your SQS, Kinesis, or DynamoDB event source properties</li>
-<li><a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" target="_blank">A specific response</a> is returned so Lambda knows which records should not be deleted during partial responses</li>
+<li><a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" rel="nofollow" target="_blank">A specific response</a> is returned so Lambda knows which records should not be deleted during partial responses</li>
 </ol>
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
 <details class="warning" open="open">
 <summary>Warning: This utility lowers the chance of processing records more than once; it does not guarantee it</summary>
-<p>We recommend implementing processing logic in an <a href="../idempotency/" target="_blank">idempotent manner</a> wherever possible.</p>
-<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
+<p>We recommend implementing processing logic in an <a href="../idempotency/" rel="nofollow" target="_blank">idempotent manner</a> wherever possible.</p>
+<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" rel="nofollow" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" rel="nofollow" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" rel="nofollow" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
 </details>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <p>Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use <code>ReportBatchItemFailures</code>.</p>
@@ -1724,7 +1724,7 @@
 <p>Processing batches from SQS works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.SQS</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" rel="nofollow" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <details class="info" open="open">
@@ -2005,7 +2005,7 @@
 </div>
 </div>
 <h4 id="fifo-queues">FIFO queues<a class="headerlink" href="#fifo-queues" title="Permanent link">&para;</a></h4>
-<p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
+<p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" rel="nofollow" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
 This helps preserve the ordering of messages in your queue.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Recommended</label><label for="__tabbed_3_2">As a context manager</label><label for="__tabbed_3_3">As a decorator (legacy)</label></div>
 <div class="tabbed-content">
@@ -2187,7 +2187,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from Kinesis works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.KinesisDataStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" rel="nofollow" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <details class="info" open="open">
@@ -2465,7 +2465,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from DynamoDB Streams works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.DynamoDBStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" rel="nofollow" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <details class="info" open="open">
@@ -2806,7 +2806,7 @@ This helps preserve the ordering of messages in your queue.</p>
 </ul>
 <h3 id="processing-messages-asynchronously">Processing messages asynchronously<a class="headerlink" href="#processing-messages-asynchronously" title="Permanent link">&para;</a></h3>
 <div class="admonition tip">
-<p class="admonition-title">New to AsyncIO? Read this <a href="https://realpython.com/async-io-python/" target="_blank">comprehensive guide first</a>.</p>
+<p class="admonition-title">New to AsyncIO? Read this <a href="https://realpython.com/async-io-python/" rel="nofollow" target="_blank">comprehensive guide first</a>.</p>
 </div>
 <p>You can use <code>AsyncBatchProcessor</code> class and <code>async_process_partial_response</code> function to process messages concurrently.</p>
 <details class="question" open="open">
@@ -2876,7 +2876,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <details class="warning" open="open">
 <summary>Using tracer?</summary>
 <p><code>AsyncBatchProcessor</code> uses <code>asyncio.gather</code> which can cause side effects and reach trace limits at high concurrency.</p>
-<p>See <a href="../../core/tracer/#concurrent-asynchronous-functions" target="_blank">Tracing concurrent asynchronous functions</a>.</p>
+<p>See <a href="../../core/tracer/#concurrent-asynchronous-functions" rel="nofollow" target="_blank">Tracing concurrent asynchronous functions</a>.</p>
 </details>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="pydantic-integration">Pydantic integration<a class="headerlink" href="#pydantic-integration" title="Permanent link">&para;</a></h3>
@@ -3498,7 +3498,7 @@ This helps preserve the ordering of messages in your queue.</p>
 </code></pre></div></td></tr></table></div>
 <h3 id="accessing-lambda-context">Accessing Lambda Context<a class="headerlink" href="#accessing-lambda-context" title="Permanent link">&para;</a></h3>
 <p>Within your <code>record_handler</code> function, you might need access to the Lambda context to determine how much time you have left before your function times out.</p>
-<p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
+<p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" rel="nofollow" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Recommended</label><label for="__tabbed_7_2">As a decorator (legacy)</label><label for="__tabbed_7_3">As a context manager</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3920,7 +3920,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h3>
 <h4 id="tracer-response-auto-capture-for-large-batch-sizes">Tracer response auto-capture for large batch sizes<a class="headerlink" href="#tracer-response-auto-capture-for-large-batch-sizes" title="Permanent link">&para;</a></h4>
 <p>When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your <code>record_handler</code> function, or how big is your batch size.</p>
-<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" target="_blank">Tracer to disable response auto-capturing</a>.</p>
+<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" rel="nofollow" target="_blank">Tracer to disable response auto-capturing</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Disabling Tracer response auto-capturing</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -4218,7 +4218,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="integrating-exception-handling-with-sentryio">Integrating exception handling with Sentry.io<a class="headerlink" href="#integrating-exception-handling-with-sentryio" title="Permanent link">&para;</a></h3>
 <p>When using Sentry.io for error monitoring, you can override <code>failure_handler</code> to capture each processing exception with Sentry SDK:</p>
 <blockquote>
-<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" target="_blank">Charles-Axel Dein</a></p>
+<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" rel="nofollow" target="_blank">Charles-Axel Dein</a></p>
 </blockquote>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Integrating error tracking with Sentry.io</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -4244,7 +4244,7 @@ This helps preserve the ordering of messages in your queue.</p>
   <small>
     
       Last update:
-      2023-07-07
+      2023-07-26
     
   </small>
 </div>

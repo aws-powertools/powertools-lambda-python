@@ -1152,7 +1152,7 @@
 <summary>Tip</summary>
 <p>JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and Powertools for AWS Lambda (Python).</p>
 </details>
-<p>Built-in <a href="https://jmespath.org/" target="_blank">JMESPath</a> Functions to easily deserialize common encoded JSON payloads in Lambda functions.</p>
+<p>Built-in <a href="https://jmespath.org/" rel="nofollow" target="_blank">JMESPath</a> Functions to easily deserialize common encoded JSON payloads in Lambda functions.</p>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Deserialize JSON from JSON strings, base64, and compressed data</li>
@@ -1162,16 +1162,16 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>You might have events that contains encoded JSON payloads as string, base64, or even in compressed format. It is a common use case to decode and extract them partially or fully as part of your Lambda function invocation.</p>
-<p>Powertools for AWS Lambda (Python) also have utilities like <a href="../validation/" target="_blank">validation</a>, <a href="../idempotency/" target="_blank">idempotency</a>, or <a href="../feature_flags/" target="_blank">feature flags</a> where you might need to extract a portion of your data before using them.</p>
+<p>Powertools for AWS Lambda (Python) also have utilities like <a href="../validation/" rel="nofollow" target="_blank">validation</a>, <a href="../idempotency/" rel="nofollow" target="_blank">idempotency</a>, or <a href="../feature_flags/" rel="nofollow" target="_blank">feature flags</a> where you might need to extract a portion of your data before using them.</p>
 <details class="info" open="open">
 <summary>Terminology</summary>
 <p><strong>Envelope</strong> is the terminology we use for the <strong>JMESPath expression</strong> to extract your JSON object from your data input. We might use those two terms interchangeably.</p>
 </details>
 <h3 id="extracting-data">Extracting data<a class="headerlink" href="#extracting-data" title="Permanent link">&para;</a></h3>
-<p>You can use the <code>extract_data_from_envelope</code> function with any <a href="https://jmespath.org/tutorial.html" target="_blank">JMESPath expression</a>.</p>
+<p>You can use the <code>extract_data_from_envelope</code> function with any <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expression</a>.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>Another common use case is to fetch deeply nested data, filter, flatten, and more.</p>
@@ -1621,7 +1621,7 @@
 <blockquote>
 <p><strong>Idempotency scenario</strong></p>
 </blockquote>
-<p>This sample will deserialize the JSON string within the <code>body</code> key before <a href="../idempotency/" target="_blank">Idempotency</a> processes it.</p>
+<p>This sample will deserialize the JSON string within the <code>body</code> key before <a href="../idempotency/" rel="nofollow" target="_blank">Idempotency</a> processes it.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">powertools_json_idempotency_jmespath.py</label><label for="__tabbed_4_2">powertools_json_idempotency_jmespath.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2201,8 +2201,8 @@
 <summary>Warning</summary>
 <p>This should only be used for advanced use cases where you have special formats not covered by the built-in functions.</p>
 </details>
-<p>For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own <a href="https://github.com/jmespath/jmespath.py#custom-functions" target="_blank">JMESPath function</a> and any additional option via <code>jmespath_options</code> param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from <code>PowertoolsFunctions</code>.</p>
-<p>Here is an example of how to decompress messages using <a href="https://docs.python.org/3/library/zlib.html" target="_blank">zlib</a>:</p>
+<p>For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own <a href="https://github.com/jmespath/jmespath.py#custom-functions" rel="nofollow" target="_blank">JMESPath function</a> and any additional option via <code>jmespath_options</code> param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from <code>PowertoolsFunctions</code>.</p>
+<p>Here is an example of how to decompress messages using <a href="https://docs.python.org/3/library/zlib.html" rel="nofollow" target="_blank">zlib</a>:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">powertools_custom_jmespath_function.py</label><label for="__tabbed_7_2">powertools_custom_jmespath_function.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2329,7 +2329,7 @@
   <small>
     
       Last update:
-      2023-07-24
+      2023-07-26
     
   </small>
 </div>

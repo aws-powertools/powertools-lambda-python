@@ -1310,7 +1310,7 @@
 
 <!-- markdownlint-disable MD043 -->
 
-<p>This utility provides data parsing and deep validation using <a href="https://pydantic-docs.helpmanual.io/" target="_blank">Pydantic</a>.</p>
+<p>This utility provides data parsing and deep validation using <a href="https://pydantic-docs.helpmanual.io/" rel="nofollow" target="_blank">Pydantic</a>.</p>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Defines data in pure Python classes, then parse, validate and extract only what you want</li>
@@ -1323,18 +1323,18 @@
 <p>Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.</p>
 <h4 id="using-pydantic-v1">Using Pydantic v1<a class="headerlink" href="#using-pydantic-v1" title="Permanent link">&para;</a></h4>
 <div class="admonition info">
-<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" target="_blank">Lambda Layer/SAR</a></p>
+<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" rel="nofollow" target="_blank">Lambda Layer/SAR</a></p>
 </div>
 <p>Add <code>aws-lambda-powertools[parser]</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>.</p>
 <details class="warning" open="open">
 <summary>Warning</summary>
 <p>This will increase the compressed package size by &gt;10MB due to the Pydantic dependency.</p>
-<p>To reduce the impact on the package size at the expense of 30%-50% of its performance <a href="https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off" target="_blank">Pydantic can also be
+<p>To reduce the impact on the package size at the expense of 30%-50% of its performance <a href="https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off" rel="nofollow" target="_blank">Pydantic can also be
 installed without binary files</a>:</p>
 <p>Pip example: <code>SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]</code></p>
 </details>
 <h4 id="using-pydantic-v2">Using Pydantic v2<a class="headerlink" href="#using-pydantic-v2" title="Permanent link">&para;</a></h4>
-<p>You need to bring Pydantic v2.0.3 or later as an external dependency. Note that <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/2672" target="_blank">we suppress Pydantic v2 deprecation warnings</a> to reduce noise and optimize log costs.</p>
+<p>You need to bring Pydantic v2.0.3 or later as an external dependency. Note that <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/2672" rel="nofollow" target="_blank">we suppress Pydantic v2 deprecation warnings</a> to reduce noise and optimize log costs.</p>
 <p>Add <code>aws-lambda-powertools</code> and <code>pydantic&gt;=2.0.3</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>.</p>
 <h3 id="defining-models">Defining models<a class="headerlink" href="#defining-models" title="Permanent link">&para;</a></h3>
 <p>You can define models to parse incoming events by inheriting from <code>BaseModel</code>.</p>
@@ -1750,7 +1750,7 @@ installed without binary files</a>:</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>When extending a <code>string</code> field containing JSON, you need to wrap the field
-with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target="_blank">Pydantic's Json Type</a>:</p>
+with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" rel="nofollow" target="_blank">Pydantic's Json Type</a>:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -1793,7 +1793,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target
 </span>
     <span class="k">assert</span> <span class="n">cancel_order</span><span class="o">.</span><span class="n">order_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 </code></pre></div></td></tr></table></div>
-<p>Alternatively, you could use a <a href="https://pydantic-docs.helpmanual.io/usage/validators/" target="_blank">Pydantic validator</a> to transform the JSON string into a dict before the mapping:</p>
+<p>Alternatively, you could use a <a href="https://pydantic-docs.helpmanual.io/usage/validators/" rel="nofollow" target="_blank">Pydantic validator</a> to transform the JSON string into a dict before the mapping:</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -2239,14 +2239,14 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target
 <h3 id="advanced-use-cases">Advanced use cases<a class="headerlink" href="#advanced-use-cases" title="Permanent link">&para;</a></h3>
 <details class="tip" open="open">
 <summary>Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?</summary>
-<p>Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator" target="_blank">data model code generation tool for Pydantic</a></p>
+<p>Use Koudai Aono's <a href="https://github.com/koxudaxi/datamodel-code-generator" rel="nofollow" target="_blank">data model code generation tool for Pydantic</a></p>
 </details>
-<p>There are number of advanced use cases well documented in Pydantic's doc such as creating <a href="https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability" target="_blank">immutable models</a>, <a href="https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value" target="_blank">declaring fields with dynamic values</a>.</p>
+<p>There are number of advanced use cases well documented in Pydantic's doc such as creating <a href="https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability" rel="nofollow" target="_blank">immutable models</a>, <a href="https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value" rel="nofollow" target="_blank">declaring fields with dynamic values</a>.</p>
 <details class="tip" open="open">
 <summary>Pydantic helper functions</summary>
-<p>Pydantic also offers <a href="https://pydantic-docs.helpmanual.io/usage/models/#helper-functions" target="_blank">functions</a> to parse models from files, dicts, string, etc.</p>
+<p>Pydantic also offers <a href="https://pydantic-docs.helpmanual.io/usage/models/#helper-functions" rel="nofollow" target="_blank">functions</a> to parse models from files, dicts, string, etc.</p>
 </details>
-<p>Two possible unknown use cases are Models and exception' serialization. Models have methods to <a href="https://pydantic-docs.helpmanual.io/usage/exporting_models/" target="_blank">export them</a> as <code>dict</code>, <code>JSON</code>, <code>JSON Schema</code>, and Validation exceptions can be exported as JSON.</p>
+<p>Two possible unknown use cases are Models and exception' serialization. Models have methods to <a href="https://pydantic-docs.helpmanual.io/usage/exporting_models/" rel="nofollow" target="_blank">export them</a> as <code>dict</code>, <code>JSON</code>, <code>JSON Schema</code>, and Validation exceptions can be exported as JSON.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Converting data models in various formats</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -2325,7 +2325,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" target
   <small>
     
       Last update:
-      2023-07-21
+      2023-07-26
     
   </small>
 </div>

@@ -1603,16 +1603,17 @@
 <ul>
 <li>Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.</li>
 <li>Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer</li>
-<li>Built-in integration with <a href="../../../utilities/data_classes/" target="_blank">Event Source Data Classes utilities</a> for self-documented event schema</li>
+<li>Built-in integration with <a href="../../../utilities/data_classes/" rel="nofollow" target="_blank">Event Source Data Classes utilities</a> for self-documented event schema</li>
 </ul>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
-<p>If you're using any API Gateway integration, you must have an existing <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html" target="_blank">API Gateway Proxy integration</a> or <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html" target="_blank">ALB</a> configured to invoke your Lambda function.</p>
-<p>In case of using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">VPC Lattice</a>, you must have a service network configured to invoke your Lambda function.</p>
+<!-- markdownlint-disable-next-line MD013 -->
+<p>If you're using any API Gateway integration, you must have an existing <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html" rel="nofollow" target="_blank">API Gateway Proxy integration</a> or <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html" rel="nofollow" target="_blank">ALB</a> configured to invoke your Lambda function.</p>
+<p>In case of using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" rel="nofollow" target="_blank">VPC Lattice</a>, you must have a service network configured to invoke your Lambda function.</p>
 <p>This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.</p>
 <details class="info" open="open">
 <summary>There is no additional permissions or dependencies required to use this utility.</summary>
@@ -2175,7 +2176,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="lambda-function-url">Lambda Function URL<a class="headerlink" href="#lambda-function-url" title="Permanent link">&para;</a></h4>
-<p>When using <a href="https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html" target="_blank">AWS Lambda Function URL</a>, you can use <code>LambdaFunctionUrlResolver</code>.</p>
+<p>When using <a href="https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html" rel="nofollow" target="_blank">AWS Lambda Function URL</a>, you can use <code>LambdaFunctionUrlResolver</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">getting_started_lambda_function_url_resolver.py</label><label for="__tabbed_3_2">getting_started_lambda_function_url_resolver.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2343,7 +2344,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </div>
 </div>
 <h4 id="vpc-lattice">VPC Lattice<a class="headerlink" href="#vpc-lattice" title="Permanent link">&para;</a></h4>
-<p>When using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">VPC Lattice with AWS Lambda</a>, you can use <code>VPCLatticeResolver</code>.</p>
+<p>When using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" rel="nofollow" target="_blank">VPC Lattice with AWS Lambda</a>, you can use <code>VPCLatticeResolver</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">getting_started_vpclattice_resolver.py</label><label for="__tabbed_4_2">getting_started_vpclattice_resolver.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2526,7 +2527,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <summary>Note</summary>
 <p>We recommend having explicit routes whenever possible; use catch-all routes sparingly.</p>
 </details>
-<p>You can use a <a href="https://docs.python.org/3/library/re.html#regular-expression-syntax" target="_blank">regex</a> string to handle an arbitrary number of paths within a request, for example <code>.+</code>.</p>
+<p>You can use a <a href="https://docs.python.org/3/library/re.html#regular-expression-syntax" rel="nofollow" target="_blank">regex</a> string to handle an arbitrary number of paths within a request, for example <code>.+</code>.</p>
 <p>You can also combine nested paths with greedy regex to catch in between routes.</p>
 <details class="warning" open="open">
 <summary>Warning</summary>
@@ -2734,7 +2735,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <p>It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.</p>
 </details>
 <h3 id="accessing-request-details">Accessing request details<a class="headerlink" href="#accessing-request-details" title="Permanent link">&para;</a></h3>
-<p>Event Handler integrates with <a href="../../../utilities/data_classes/" target="_blank">Event Source Data Classes utilities</a>, and it exposes their respective resolver request details and convenient methods under <code>app.current_event</code>.</p>
+<p>Event Handler integrates with <a href="../../../utilities/data_classes/" rel="nofollow" target="_blank">Event Source Data Classes utilities</a>, and it exposes their respective resolver request details and convenient methods under <code>app.current_event</code>.</p>
 <p>That is why you see <code>app.resolve(event, context)</code> in every example. This allows Event Handler to resolve requests, and expose data like <code>app.lambda_context</code> and  <code>app.current_event</code>.</p>
 <h4 id="query-strings-and-payload">Query strings and payload<a class="headerlink" href="#query-strings-and-payload" title="Permanent link">&para;</a></h4>
 <p>Within <code>app.current_event</code> property, you can access all available query strings as a dictionary via <code>query_string_parameters</code>, or a specific one via  <code>get_query_string_value</code> method.</p>
@@ -3186,9 +3187,9 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="custom-domain-api-mappings">Custom Domain API Mappings<a class="headerlink" href="#custom-domain-api-mappings" title="Permanent link">&para;</a></h3>
-<p>When using <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-mappings.html" target="_blank">Custom Domain API Mappings feature</a>, you must use <strong><code>strip_prefixes</code></strong> param in the <code>APIGatewayRestResolver</code> constructor.</p>
+<p>When using <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-mappings.html" rel="nofollow" target="_blank">Custom Domain API Mappings feature</a>, you must use <strong><code>strip_prefixes</code></strong> param in the <code>APIGatewayRestResolver</code> constructor.</p>
 <p><strong>Scenario</strong>: You have a custom domain <code>api.mydomain.dev</code>. Then you set <code>/payment</code> API Mapping to forward any payment requests to your Payments API.</p>
-<p><strong>Challenge</strong>: This means your <code>path</code> value for any API requests will always contain <code>/payment/&lt;actual_request&gt;</code>, leading to HTTP 404 as Event Handler is trying to match what's after <code>payment/</code>. This gets further complicated with an <a href="https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34" target="_blank">arbitrary level of nesting</a>.</p>
+<p><strong>Challenge</strong>: This means your <code>path</code> value for any API requests will always contain <code>/payment/&lt;actual_request&gt;</code>, leading to HTTP 404 as Event Handler is trying to match what's after <code>payment/</code>. This gets further complicated with an <a href="https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34" rel="nofollow" target="_blank">arbitrary level of nesting</a>.</p>
 <p>To address this API Gateway behavior, we use <code>strip_prefixes</code> parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">custom_api_mapping.py</label><label for="__tabbed_8_2">custom_api_mapping.json</label></div>
 <div class="tabbed-content">
@@ -3517,32 +3518,32 @@ matches one of the allowed values.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin" target="_blank">allow_origin</a></strong>: <code>str</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin" rel="nofollow" target="_blank">allow_origin</a></strong>: <code>str</code></td>
 <td><code>*</code></td>
 <td>Only use the default value for development. <strong>Never use <code>*</code> for production</strong> unless your use case requires it</td>
 </tr>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin" target="_blank">extra_origins</a></strong>: <code>List[str]</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin" rel="nofollow" target="_blank">extra_origins</a></strong>: <code>List[str]</code></td>
 <td><code>[]</code></td>
 <td>Additional origins to be allowed, in addition to the one specified in <code>allow_origin</code></td>
 </tr>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers" target="_blank">allow_headers</a></strong>: <code>List[str]</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers" rel="nofollow" target="_blank">allow_headers</a></strong>: <code>List[str]</code></td>
 <td><code>[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]</code></td>
 <td>Additional headers will be appended to the default list for your convenience</td>
 </tr>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers" target="_blank">expose_headers</a></strong>: <code>List[str]</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers" rel="nofollow" target="_blank">expose_headers</a></strong>: <code>List[str]</code></td>
 <td><code>[]</code></td>
-<td>Any additional header beyond the <a href="https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header" target="_blank">safe listed by CORS specification</a>.</td>
+<td>Any additional header beyond the <a href="https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header" rel="nofollow" target="_blank">safe listed by CORS specification</a>.</td>
 </tr>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age" target="_blank">max_age</a></strong>: <code>int</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age" rel="nofollow" target="_blank">max_age</a></strong>: <code>int</code></td>
 <td>``</td>
 <td>Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway</td>
 </tr>
 <tr>
-<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials" target="_blank">allow_credentials</a></strong>: <code>bool</code></td>
+<td><strong><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials" rel="nofollow" target="_blank">allow_credentials</a></strong>: <code>bool</code></td>
 <td><code>False</code></td>
 <td>Only necessary when you need to expose cookies, authorization headers or TLS client certificates.</td>
 </tr>
@@ -3557,7 +3558,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </details>
 <details class="warning" open="open">
 <summary>Using multiple values for HTTP headers in ALB?</summary>
-<p>Make sure you <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers" target="_blank">enable the multi value headers feature</a> to serialize response headers correctly.</p>
+<p>Make sure you <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers" rel="nofollow" target="_blank">enable the multi value headers feature</a> to serialize response headers correctly.</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">fine_grained_responses.py</label><label for="__tabbed_10_2">fine_grained_responses_output.json</label></div>
 <div class="tabbed-content">
@@ -4013,7 +4014,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </div>
 </div>
 <h3 id="debug-mode">Debug mode<a class="headerlink" href="#debug-mode" title="Permanent link">&para;</a></h3>
-<p>You can enable debug mode via <code>debug</code> param, or via <code>POWERTOOLS_DEV</code> <a href="../../../#environment-variables" target="_blank">environment variable</a>.</p>
+<p>You can enable debug mode via <code>debug</code> param, or via <code>POWERTOOLS_DEV</code> <a href="../../../#environment-variables" rel="nofollow" target="_blank">environment variable</a>.</p>
 <p>This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.</p>
 <details class="danger" open="open">
 <summary>Danger</summary>
@@ -4678,7 +4679,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </ul>
 <p><em><strong>Downsides</strong></em></p>
 <ul>
-<li><strong>Cold starts</strong>. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html" target="_blank">Lambda scaling model</a>. Always load test to pragmatically balance between your customer experience and development cognitive load.</li>
+<li><strong>Cold starts</strong>. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html" rel="nofollow" target="_blank">Lambda scaling model</a>. Always load test to pragmatically balance between your customer experience and development cognitive load.</li>
 <li><strong>Granular security permissions</strong>. The micro function approach enables you to use fine-grained permissions &amp; access controls, separate external dependencies &amp; code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.<ul>
 <li>Regardless, least privilege can be applied to either approaches.</li>
 </ul>
@@ -4690,13 +4691,13 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <p>A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.</p>
 <p><strong>Benefits</strong></p>
 <ul>
-<li><strong>Granular scaling</strong>. A micro function can benefit from the <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html" target="_blank">Lambda scaling model</a> to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.</li>
+<li><strong>Granular scaling</strong>. A micro function can benefit from the <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html" rel="nofollow" target="_blank">Lambda scaling model</a> to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.</li>
 <li><strong>Discoverability</strong>. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.</li>
-<li><strong>Package size</strong>. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html" target="_blank">Lambda Layers</a> to optimize builds for external dependencies.</li>
+<li><strong>Package size</strong>. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html" rel="nofollow" target="_blank">Lambda Layers</a> to optimize builds for external dependencies.</li>
 </ul>
 <p><strong>Downsides</strong></p>
 <ul>
-<li><strong>Upfront investment</strong>. You need custom build tooling to bundle assets, including <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html" target="_blank">C bindings for runtime compatibility</a>. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.<ul>
+<li><strong>Upfront investment</strong>. You need custom build tooling to bundle assets, including <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html" rel="nofollow" target="_blank">C bindings for runtime compatibility</a>. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.<ul>
 <li>Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.</li>
 </ul>
 </li>
@@ -5230,7 +5231,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">&para;</a></h2>
 <p><strong>What's the difference between this utility and frameworks like Chalice?</strong></p>
 <p>Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.</p>
-<p>That said, <a href="https://aws.github.io/chalice/topics/middleware.html" target="_blank">Chalice has native integration with Lambda Powertools</a> if you're looking for a more opinionated and web framework feature set.</p>
+<p>That said, <a href="https://aws.github.io/chalice/topics/middleware.html" rel="nofollow" target="_blank">Chalice has native integration with Lambda Powertools</a> if you're looking for a more opinionated and web framework feature set.</p>
 <p><strong>What happened to <code>ApiGatewayResolver</code>?</strong></p>
 <p>It's been superseded by more explicit resolvers like <code>APIGatewayRestResolver</code>, <code>APIGatewayHttpResolver</code>, and <code>ALBResolver</code>.</p>
 <p><code>ApiGatewayResolver</code> handled multiple types of event resolvers for convenience via <code>proxy_type</code> param. However,
@@ -5243,7 +5244,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-06-28
+      2023-07-26
     
   </small>
 </div>

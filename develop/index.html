@@ -1065,13 +1065,13 @@
 <p>Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>Powertools for AWS Lambda (Python) is also available for <a href="https://docs.powertools.aws.dev/lambda/java/" target="_blank">Java</a>, <a href="https://docs.powertools.aws.dev/lambda/typescript/latest/" target="_blank">TypeScript</a>, and <a href="https://docs.powertools.aws.dev/lambda/dotnet/" target="_blank">.NET</a></p>
+<p>Powertools for AWS Lambda (Python) is also available for <a href="https://docs.powertools.aws.dev/lambda/java/" rel="nofollow" target="_blank">Java</a>, <a href="https://docs.powertools.aws.dev/lambda/typescript/latest/" rel="nofollow" target="_blank">TypeScript</a>, and <a href="https://docs.powertools.aws.dev/lambda/dotnet/" rel="nofollow" target="_blank">.NET</a></p>
 </details>
 <details class="hint">
 <summary>Support this project by becoming a reference customer, sharing your work, or using Layers/SAR <img alt="❤" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/2764.svg" title=":heart:" /></summary>
 <p>You can choose to support us in three ways:</p>
-<p>1) <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=customer-reference&amp;template=support_powertools.yml&amp;title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E" target="_blank"><strong>Become a reference customer</strong></a>. This gives us permission to list your company in our documentation.</p>
-<p>2) <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=community-content&amp;template=share_your_work.yml&amp;title=%5BI+Made+This%5D%3A+%3CTITLE%3E" target="_blank"><strong>Share your work</strong></a>. Blog posts, video, sample projects you used Powertools!</p>
+<p>1) <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=customer-reference&amp;template=support_powertools.yml&amp;title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E" rel="nofollow" target="_blank"><strong>Become a reference customer</strong></a>. This gives us permission to list your company in our documentation.</p>
+<p>2) <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=community-content&amp;template=share_your_work.yml&amp;title=%5BI+Made+This%5D%3A+%3CTITLE%3E" rel="nofollow" target="_blank"><strong>Share your work</strong></a>. Blog posts, video, sample projects you used Powertools!</p>
 <p>3) Use <a href="#lambda-layer"><strong>Lambda Layers</strong></a> or <a href="#sar"><strong>SAR</strong></a>, if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.</p>
 <p>When using Layers, you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.</p>
 </details>
@@ -1087,7 +1087,7 @@
 </div>
 <details class="question">
 <summary>Using Pip? You might need to install additional dependencies.</summary>
-<p><a href="core/tracer/" target="_blank"><strong>Tracer</strong></a>, <a href="utilities/validation/" target="_blank"><strong>Validation</strong></a> and <a href="utilities/parser/" target="_blank"><strong>Parser</strong></a> require additional dependencies. If you prefer to install all of them, use <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" />.</p>
+<p><a href="core/tracer/" rel="nofollow" target="_blank"><strong>Tracer</strong></a>, <a href="utilities/validation/" rel="nofollow" target="_blank"><strong>Validation</strong></a> and <a href="utilities/parser/" rel="nofollow" target="_blank"><strong>Parser</strong></a> require additional dependencies. If you prefer to install all of them, use <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" />.</p>
 <p>For example:</p>
 <ul>
 <li><strong>Tracer</strong>: <strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[tracer]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></li>
@@ -1100,7 +1100,7 @@
 <div class="admonition info">
 <p class="admonition-title">Using Lambda Layer? Simply add <a class="copyMe" href="#"><strong><code>"aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /> as a development dependency.</p>
 </div>
-<p>Powertools for AWS Lambda (Python) relies on the <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">AWS SDK bundled in the Lambda runtime</a>. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency (not as a production dependency):</p>
+<p>Powertools for AWS Lambda (Python) relies on the <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" rel="nofollow" target="_blank">AWS SDK bundled in the Lambda runtime</a>. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency (not as a production dependency):</p>
 <ul>
 <li><strong>Pip</strong>: <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[aws-sdk]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
 <li><strong>Poetry</strong>: <a class="copyMe" href="#"><strong><code>poetry add "aws-lambda-powertools[aws-sdk]" --group dev</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
@@ -1109,21 +1109,21 @@
 <details class="question">
 <summary>Why is that necessary?</summary>
 <p>Powertools for AWS Lambda (Python) relies on the AWS SDK being available to use in the target runtime (AWS Lambda).</p>
-<p>As a result, it affects your favorite IDE in terms of code auto-completion, or running your tests suite locally with no Lambda emulation such as <a href="https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html" target="_blank">AWS SAM CLI</a>.</p>
+<p>As a result, it affects your favorite IDE in terms of code auto-completion, or running your tests suite locally with no Lambda emulation such as <a href="https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html" rel="nofollow" target="_blank">AWS SAM CLI</a>.</p>
 </details>
 <p><strong>A word about dependency resolution</strong></p>
 <p>In this context, <code>[aws-sdk]</code> is an alias to the <code>boto3</code> package. Due to dependency resolution, it'll either install:</p>
 <ul>
-<li><strong>(A)</strong> the SDK version available in <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">Lambda runtime</a></li>
-<li><strong>(B)</strong> a more up-to-date version if another package you use also depends on <code>boto3</code>, for example <a href="core/tracer/" target="_blank">Powertools for AWS Lambda (Python) Tracer</a></li>
+<li><strong>(A)</strong> the SDK version available in <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" rel="nofollow" target="_blank">Lambda runtime</a></li>
+<li><strong>(B)</strong> a more up-to-date version if another package you use also depends on <code>boto3</code>, for example <a href="core/tracer/" rel="nofollow" target="_blank">Powertools for AWS Lambda (Python) Tracer</a></li>
 </ul>
 <h3 id="lambda-layer">Lambda Layer<a class="headerlink" href="#lambda-layer" title="Permanent link">&para;</a></h3>
 <details class="warning" open="open">
 <summary>As of now, Container Image deployment (OCI) or inline Lambda functions do not support Lambda Layers.</summary>
 </details>
-<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.</p>
-<p>For our Layers, we compile and optimize <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/pyproject.toml#L98" target="_blank">all dependencies</a>, and <a href="https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36" target="_blank">remove duplicate dependencies already available in the Lambda runtime</a> to achieve the most optimal size.</p>
-<p>You can include Powertools for AWS Lambda (Python) Lambda Layer using <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using" target="_blank">AWS Lambda Console</a>, or your preferred deployment framework.</p>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" rel="nofollow" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. Layers promote code sharing and separation of responsibilities so that you can iterate faster on writing business logic.</p>
+<p>For our Layers, we compile and optimize <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/pyproject.toml#L98" rel="nofollow" target="_blank">all dependencies</a>, and <a href="https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36" rel="nofollow" target="_blank">remove duplicate dependencies already available in the Lambda runtime</a> to achieve the most optimal size.</p>
+<p>You can include Powertools for AWS Lambda (Python) Lambda Layer using <a href="https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html#invocation-layers-using" rel="nofollow" target="_blank">AWS Lambda Console</a>, or your preferred deployment framework.</p>
 <details class="note">
 <summary>Note: Click to expand and copy any regional Lambda Layer ARN</summary>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">x86_64</label><label for="__tabbed_1_2">arm64</label></div>
@@ -1902,12 +1902,12 @@ General<span class="w"> </span>information
 </thead>
 <tbody>
 <tr>
-<td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer" target="_blank">aws-lambda-powertools-python-layer</a></td>
+<td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer" rel="nofollow" target="_blank">aws-lambda-powertools-python-layer</a></td>
 <td><a class="copyMe" href="#">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 <td>Contains all extra dependencies (e.g: pydantic).</td>
 </tr>
 <tr>
-<td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64" target="_blank">aws-lambda-powertools-python-layer-arm64</a></td>
+<td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64" rel="nofollow" target="_blank">aws-lambda-powertools-python-layer-arm64</a></td>
 <td><a class="copyMe" href="#">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@14.1.2/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 <td>Contains all extra dependencies (e.g: pydantic). For arm64 functions.</td>
 </tr>
@@ -2048,7 +2048,7 @@ General<span class="w"> </span>information
 </div>
 <div class="tabbed-block">
 <blockquote>
-<p>Credits to <a href="https://github.com/DanyC97" target="_blank">Dani Comnea</a> for providing the Terraform equivalent.</p>
+<p>Credits to <a href="https://github.com/DanyC97" rel="nofollow" target="_blank">Dani Comnea</a> for providing the Terraform equivalent.</p>
 </blockquote>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -2139,7 +2139,7 @@ General<span class="w"> </span>information
 <details class="example">
 <summary>Example: Least-privileged IAM permissions to deploy Layer</summary>
 <blockquote>
-<p>Credits to <a href="https://github.com/mwarkentin" target="_blank">mwarkentin</a> for providing the scoped down IAM permissions.</p>
+<p>Credits to <a href="https://github.com/mwarkentin" rel="nofollow" target="_blank">mwarkentin</a> for providing the scoped down IAM permissions.</p>
 </blockquote>
 <p>The region and the account id for <code>CloudFormationTransform</code> and <code>GetCfnTemplate</code> are fixed.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">template.yml</label></div>
@@ -2279,19 +2279,19 @@ General<span class="w"> </span>information
 </thead>
 <tbody>
 <tr>
-<td><a href="core/tracer/" target="_blank"><strong>Tracing</strong></a></td>
+<td><a href="core/tracer/" rel="nofollow" target="_blank"><strong>Tracing</strong></a></td>
 <td>Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions</td>
 </tr>
 <tr>
-<td><a href="core/logger/" target="_blank"><strong>Logger</strong></a></td>
+<td><a href="core/logger/" rel="nofollow" target="_blank"><strong>Logger</strong></a></td>
 <td>Structured logging made easier, and decorator to enrich structured logging with key Lambda context details</td>
 </tr>
 <tr>
-<td><a href="core/metrics/" target="_blank"><strong>Metrics</strong></a></td>
+<td><a href="core/metrics/" rel="nofollow" target="_blank"><strong>Metrics</strong></a></td>
 <td>Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)</td>
 </tr>
 <tr>
-<td><a href="core/event_handler/appsync/" target="_blank"><strong>Event handler: AppSync</strong></a></td>
+<td><a href="core/event_handler/appsync/" rel="nofollow" target="_blank"><strong>Event handler: AppSync</strong></a></td>
 <td>AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function</td>
 </tr>
 <tr>
@@ -2299,43 +2299,43 @@ General<span class="w"> </span>information
 <td>Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL</td>
 </tr>
 <tr>
-<td><a href="utilities/middleware_factory/" target="_blank"><strong>Middleware factory</strong></a></td>
+<td><a href="utilities/middleware_factory/" rel="nofollow" target="_blank"><strong>Middleware factory</strong></a></td>
 <td>Decorator factory to create your own middleware to run logic before, and after each Lambda invocation</td>
 </tr>
 <tr>
-<td><a href="utilities/parameters/" target="_blank"><strong>Parameters</strong></a></td>
+<td><a href="utilities/parameters/" rel="nofollow" target="_blank"><strong>Parameters</strong></a></td>
 <td>Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time</td>
 </tr>
 <tr>
-<td><a href="utilities/batch/" target="_blank"><strong>Batch processing</strong></a></td>
+<td><a href="utilities/batch/" rel="nofollow" target="_blank"><strong>Batch processing</strong></a></td>
 <td>Handle partial failures for AWS SQS batch processing</td>
 </tr>
 <tr>
-<td><a href="utilities/typing/" target="_blank"><strong>Typing</strong></a></td>
+<td><a href="utilities/typing/" rel="nofollow" target="_blank"><strong>Typing</strong></a></td>
 <td>Static typing classes to speedup development in your IDE</td>
 </tr>
 <tr>
-<td><a href="utilities/validation/" target="_blank"><strong>Validation</strong></a></td>
+<td><a href="utilities/validation/" rel="nofollow" target="_blank"><strong>Validation</strong></a></td>
 <td>JSON Schema validator for inbound events and responses</td>
 </tr>
 <tr>
-<td><a href="utilities/data_classes/" target="_blank"><strong>Event source data classes</strong></a></td>
+<td><a href="utilities/data_classes/" rel="nofollow" target="_blank"><strong>Event source data classes</strong></a></td>
 <td>Data classes describing the schema of common Lambda event triggers</td>
 </tr>
 <tr>
-<td><a href="utilities/parser/" target="_blank"><strong>Parser</strong></a></td>
+<td><a href="utilities/parser/" rel="nofollow" target="_blank"><strong>Parser</strong></a></td>
 <td>Data parsing and deep validation using Pydantic</td>
 </tr>
 <tr>
-<td><a href="utilities/idempotency/" target="_blank"><strong>Idempotency</strong></a></td>
+<td><a href="utilities/idempotency/" rel="nofollow" target="_blank"><strong>Idempotency</strong></a></td>
 <td>Idempotent Lambda handler</td>
 </tr>
 <tr>
-<td><a href="utilities/feature_flags/" target="_blank"><strong>Feature Flags</strong></a></td>
+<td><a href="utilities/feature_flags/" rel="nofollow" target="_blank"><strong>Feature Flags</strong></a></td>
 <td>A simple rule engine to evaluate when one or multiple features should be enabled depending on the input</td>
 </tr>
 <tr>
-<td><a href="utilities/streaming/" target="_blank"><strong>Streaming</strong></a></td>
+<td><a href="utilities/streaming/" rel="nofollow" target="_blank"><strong>Streaming</strong></a></td>
 <td>Streams datasets larger than the available memory as streaming data.</td>
 </tr>
 </tbody>
@@ -2364,61 +2364,61 @@ General<span class="w"> </span>information
 <tr>
 <td><strong>POWERTOOLS_METRICS_NAMESPACE</strong></td>
 <td>Sets namespace used for metrics</td>
-<td><a href="./core/metrics" target="_blank">Metrics</a></td>
+<td><a href="./core/metrics" rel="nofollow" target="_blank">Metrics</a></td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_TRACE_DISABLED</strong></td>
 <td>Explicitly disables tracing</td>
-<td><a href="./core/tracer" target="_blank">Tracing</a></td>
+<td><a href="./core/tracer" rel="nofollow" target="_blank">Tracing</a></td>
 <td><code>false</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_TRACER_CAPTURE_RESPONSE</strong></td>
 <td>Captures Lambda or method return as metadata.</td>
-<td><a href="./core/tracer" target="_blank">Tracing</a></td>
+<td><a href="./core/tracer" rel="nofollow" target="_blank">Tracing</a></td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_TRACER_CAPTURE_ERROR</strong></td>
 <td>Captures Lambda or method exception as metadata.</td>
-<td><a href="./core/tracer" target="_blank">Tracing</a></td>
+<td><a href="./core/tracer" rel="nofollow" target="_blank">Tracing</a></td>
 <td><code>true</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_TRACE_MIDDLEWARES</strong></td>
 <td>Creates sub-segment for each custom middleware</td>
-<td><a href="./utilities/middleware_factory" target="_blank">Middleware factory</a></td>
+<td><a href="./utilities/middleware_factory" rel="nofollow" target="_blank">Middleware factory</a></td>
 <td><code>false</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_LOGGER_LOG_EVENT</strong></td>
 <td>Logs incoming event</td>
-<td><a href="./core/logger" target="_blank">Logging</a></td>
+<td><a href="./core/logger" rel="nofollow" target="_blank">Logging</a></td>
 <td><code>false</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_LOGGER_SAMPLE_RATE</strong></td>
 <td>Debug log sampling</td>
-<td><a href="./core/logger" target="_blank">Logging</a></td>
+<td><a href="./core/logger" rel="nofollow" target="_blank">Logging</a></td>
 <td><code>0</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_LOG_DEDUPLICATION_DISABLED</strong></td>
 <td>Disables log deduplication filter protection to use Pytest Live Log feature</td>
-<td><a href="./core/logger" target="_blank">Logging</a></td>
+<td><a href="./core/logger" rel="nofollow" target="_blank">Logging</a></td>
 <td><code>false</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_PARAMETERS_MAX_AGE</strong></td>
 <td>Adjust how long values are kept in cache (in seconds)</td>
-<td><a href="./utilities/parameters/#adjusting-cache-ttl" target="_blank">Parameters</a></td>
+<td><a href="./utilities/parameters/#adjusting-cache-ttl" rel="nofollow" target="_blank">Parameters</a></td>
 <td><code>5</code></td>
 </tr>
 <tr>
 <td><strong>POWERTOOLS_PARAMETERS_SSM_DECRYPT</strong></td>
 <td>Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store</td>
-<td><a href="./utilities/parameters/#ssmprovider" target="_blank">Parameters</a></td>
+<td><a href="./utilities/parameters/#ssmprovider" rel="nofollow" target="_blank">Parameters</a></td>
 <td><code>false</code></td>
 </tr>
 <tr>
@@ -2430,7 +2430,7 @@ General<span class="w"> </span>information
 <tr>
 <td><strong>LOG_LEVEL</strong></td>
 <td>Sets logging level</td>
-<td><a href="./core/logger" target="_blank">Logging</a></td>
+<td><a href="./core/logger" rel="nofollow" target="_blank">Logging</a></td>
 <td><code>INFO</code></td>
 </tr>
 </tbody>
@@ -2469,22 +2469,22 @@ General<span class="w"> </span>information
 <p>When necessary, you can use <code>POWERTOOLS_DEBUG</code> environment variable to enable debugging. This will provide additional information on every internal operation.</p>
 <h2 id="how-to-support-powertools-for-aws-lambda-python">How to support Powertools for AWS Lambda (Python)?<a class="headerlink" href="#how-to-support-powertools-for-aws-lambda-python" title="Permanent link">&para;</a></h2>
 <h3 id="becoming-a-reference-customer">Becoming a reference customer<a class="headerlink" href="#becoming-a-reference-customer" title="Permanent link">&para;</a></h3>
-<p>Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=customer-reference&amp;template=support_powertools.yml&amp;title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E" target="_blank">Support Powertools for AWS Lambda (Python) (become a reference)</a> issue.</p>
+<p>Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=customer-reference&amp;template=support_powertools.yml&amp;title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E" rel="nofollow" target="_blank">Support Powertools for AWS Lambda (Python) (become a reference)</a> issue.</p>
 <p>The following companies, among others, use Powertools:</p>
 <ul>
-<li><a href="https://www.capitalone.com/" target="_blank">Capital One</a></li>
-<li><a href="https://cpqi.com/" target="_blank">CPQi (Exadel Financial Services)</a></li>
-<li><a href="https://www.cloudzero.com/" target="_blank">CloudZero</a></li>
-<li><a href="https://www.cyberark.com/" target="_blank">CyberArk</a></li>
-<li><a href="https://globaldatanet.com/" target="_blank">globaldatanet</a></li>
-<li><a href="https://ims.tech/" target="_blank">IMS</a></li>
-<li><a href="https://www.jit.io/" target="_blank">Jit Security</a></li>
-<li><a href="https://www.propellor.ai/" target="_blank">Propellor.ai</a></li>
-<li><a href="https://www.topsport.com.au/" target="_blank">TopSport</a></li>
-<li><a href="https://www.trek10.com/" target="_blank">Trek10</a></li>
+<li><a href="https://www.capitalone.com/" rel="nofollow" target="_blank">Capital One</a></li>
+<li><a href="https://cpqi.com/" rel="nofollow" target="_blank">CPQi (Exadel Financial Services)</a></li>
+<li><a href="https://www.cloudzero.com/" rel="nofollow" target="_blank">CloudZero</a></li>
+<li><a href="https://www.cyberark.com/" rel="nofollow" target="_blank">CyberArk</a></li>
+<li><a href="https://globaldatanet.com/" rel="nofollow" target="_blank">globaldatanet</a></li>
+<li><a href="https://ims.tech/" rel="nofollow" target="_blank">IMS</a></li>
+<li><a href="https://www.jit.io/" rel="nofollow" target="_blank">Jit Security</a></li>
+<li><a href="https://www.propellor.ai/" rel="nofollow" target="_blank">Propellor.ai</a></li>
+<li><a href="https://www.topsport.com.au/" rel="nofollow" target="_blank">TopSport</a></li>
+<li><a href="https://www.trek10.com/" rel="nofollow" target="_blank">Trek10</a></li>
 </ul>
 <h3 id="sharing-your-work">Sharing your work<a class="headerlink" href="#sharing-your-work" title="Permanent link">&para;</a></h3>
-<p>Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) <a href="https://docs.powertools.aws.dev/lambda/python/latest/we_made_this/" target="_blank">here</a>.</p>
+<p>Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) <a href="https://docs.powertools.aws.dev/lambda/python/latest/we_made_this/" rel="nofollow" target="_blank">here</a>.</p>
 <h3 id="using-lambda-layer-or-sar">Using Lambda Layer or SAR<a class="headerlink" href="#using-lambda-layer-or-sar" title="Permanent link">&para;</a></h3>
 <p>This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages. When <a href="https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer">using Layers</a>, you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.</p>
 <h2 id="tenets">Tenets<a class="headerlink" href="#tenets" title="Permanent link">&para;</a></h2>
@@ -2503,7 +2503,7 @@ General<span class="w"> </span>information
   <small>
     
       Last update:
-      2023-07-25
+      2023-07-26
     
   </small>
 </div>

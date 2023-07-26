@@ -1786,8 +1786,8 @@ by using the <code>event_source</code> decorator.</p>
 documentation inherently (via autocompletion, types and docstrings).</p>
 </details>
 <h3 id="active-mq">Active MQ<a class="headerlink" href="#active-mq" title="Permanent link">&para;</a></h3>
-<p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" target="_blank">Active MQ payloads</a>, also see
-the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/" target="_blank">AWS blog post</a>
+<p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" rel="nofollow" target="_blank">Active MQ payloads</a>, also see
+the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/" rel="nofollow" target="_blank">AWS blog post</a>
 for more details.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">app.py</label></div>
 <div class="tabbed-content">
@@ -1827,7 +1827,7 @@ for more details.</p>
 <blockquote>
 <p>New in 1.20.0</p>
 </blockquote>
-<p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html" target="_blank">API Gateway Rest API Lambda Authorizer payload</a>.</p>
+<p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html" rel="nofollow" target="_blank">API Gateway Rest API Lambda Authorizer payload</a>.</p>
 <p>Use <strong><code>APIGatewayAuthorizerRequestEvent</code></strong> for type <code>REQUEST</code> and <strong><code>APIGatewayAuthorizerTokenEvent</code></strong> for type <code>TOKEN</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">app_type_request.py</label><label for="__tabbed_5_2">app_type_token.py</label></div>
 <div class="tabbed-content">
@@ -1993,8 +1993,8 @@ for more details.</p>
 <blockquote>
 <p>New in 1.20.0</p>
 </blockquote>
-<p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html" target="_blank">API Gateway HTTP API Lambda Authorizer payload version 2</a>.
-See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/" target="_blank">this blog post</a> for more details.</p>
+<p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html" rel="nofollow" target="_blank">API Gateway HTTP API Lambda Authorizer payload version 2</a>.
+See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/" rel="nofollow" target="_blank">this blog post</a> for more details.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2120,9 +2120,9 @@ See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambd
 <blockquote>
 <p>New in 1.20.0</p>
 </blockquote>
-<p>Used when building an <a href="https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization" target="_blank">AWS_LAMBDA Authorization</a> with AppSync.
-See blog post <a href="https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/" target="_blank">Introducing Lambda authorization for AWS AppSync GraphQL APIs</a>
-or read the Amplify documentation on using <a href="https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda" target="_blank">AWS Lambda for authorization</a> with AppSync.</p>
+<p>Used when building an <a href="https://docs.aws.amazon.com/appsync/latest/devguide/security-authz.html#aws-lambda-authorization" rel="nofollow" target="_blank">AWS_LAMBDA Authorization</a> with AppSync.
+See blog post <a href="https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/" rel="nofollow" target="_blank">Introducing Lambda authorization for AWS AppSync GraphQL APIs</a>
+or read the Amplify documentation on using <a href="https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda" rel="nofollow" target="_blank">AWS Lambda for authorization</a> with AppSync.</p>
 <p>In this example extract the <code>requestId</code> as the <code>correlation_id</code> for logging, used <code>@event_source</code> decorator and builds the AppSync authorizer using the <code>AppSyncAuthorizerResponse</code> helper.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">app.py</label></div>
 <div class="tabbed-content">
@@ -2200,8 +2200,8 @@ or read the Amplify documentation on using <a href="https://docs.amplify.aws/lib
 <blockquote>
 <p>New in 1.12.0</p>
 </blockquote>
-<p>Used when building Lambda GraphQL Resolvers with <a href="https://docs.amplify.aws/cli/graphql-transformer/function" target="_blank">Amplify GraphQL Transform Library</a> (<code>@function</code>),
-and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target="_blank">AppSync Direct Lambda Resolvers</a>.</p>
+<p>Used when building Lambda GraphQL Resolvers with <a href="https://docs.amplify.aws/cli/graphql-transformer/function" rel="nofollow" target="_blank">Amplify GraphQL Transform Library</a> (<code>@function</code>),
+and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" rel="nofollow" target="_blank">AppSync Direct Lambda Resolvers</a>.</p>
 <p>In this example, we also use the new Logger <code>correlation_id</code> and built-in <code>correlation_paths</code> to extract, if available, X-Ray Trace ID in AppSync request headers:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">app.py</label><label for="__tabbed_11_2">Example AppSync Event</label><label for="__tabbed_11_3">Example CloudWatch Log</label></div>
 <div class="tabbed-content">
@@ -2573,7 +2573,7 @@ decompress and parse json data from the event.</p>
 </div>
 </div>
 <h4 id="kinesis-integration">Kinesis integration<a class="headerlink" href="#kinesis-integration" title="Permanent link">&para;</a></h4>
-<p><a href="https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/" target="_blank">When streaming CloudWatch Logs to a Kinesis Data Stream</a> (cross-account or not), you can use <code>extract_cloudwatch_logs_from_event</code> to decode, decompress and extract logs as <code>CloudWatchLogsDecodedData</code> to ease log processing.</p>
+<p><a href="https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/" rel="nofollow" target="_blank">When streaming CloudWatch Logs to a Kinesis Data Stream</a> (cross-account or not), you can use <code>extract_cloudwatch_logs_from_event</code> to decode, decompress and extract logs as <code>CloudWatchLogsDecodedData</code> to ease log processing.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2610,7 +2610,7 @@ decompress and parse json data from the event.</p>
 </div>
 </div>
 </div>
-<p>Alternatively, you can use <code>extract_cloudwatch_logs_from_record</code> to seamless integrate with the <a href="../batch/" target="_blank">Batch utility</a> for more robust log processing.</p>
+<p>Alternatively, you can use <code>extract_cloudwatch_logs_from_record</code> to seamless integrate with the <a href="../batch/" rel="nofollow" target="_blank">Batch utility</a> for more robust log processing.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2742,7 +2742,7 @@ decompress and parse json data from the event.</p>
 </div>
 </div>
 <h3 id="cognito-user-pool">Cognito User Pool<a class="headerlink" href="#cognito-user-pool" title="Permanent link">&para;</a></h3>
-<p>Cognito User Pools have several <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources" target="_blank">different Lambda trigger sources</a>, all of which map to a different data class, which
+<p>Cognito User Pools have several <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources" rel="nofollow" target="_blank">different Lambda trigger sources</a>, all of which map to a different data class, which
 can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_event</code>:</p>
 <table>
 <thead>
@@ -2820,7 +2820,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 <summary>Note</summary>
 <p>In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in <code>event.raw_event</code>.</p>
 </details>
-<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html" target="_blank">Define Auth Challenge Lambda Trigger</a>.</p>
+<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html" rel="nofollow" target="_blank">Define Auth Challenge Lambda Trigger</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="19:4"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><input id="__tabbed_19_4" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">app.py</label><label for="__tabbed_19_2">SPR_A response</label><label for="__tabbed_19_3">PASSWORD_VERIFIER success response</label><label for="__tabbed_19_4">CUSTOM_CHALLENGE success response</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3098,7 +3098,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 </div>
 </div>
 <h4 id="create-auth-challenge-example">Create Auth Challenge Example<a class="headerlink" href="#create-auth-challenge-example" title="Permanent link">&para;</a></h4>
-<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html" target="_blank">Create Auth Challenge Lambda Trigger</a>.</p>
+<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html" rel="nofollow" target="_blank">Create Auth Challenge Lambda Trigger</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="20:1"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3126,7 +3126,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 </div>
 </div>
 <h4 id="verify-auth-challenge-response-example">Verify Auth Challenge Response Example<a class="headerlink" href="#verify-auth-challenge-response-example" title="Permanent link">&para;</a></h4>
-<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html" target="_blank">Verify Auth Challenge Response Lambda Trigger</a>.</p>
+<p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html" rel="nofollow" target="_blank">Verify Auth Challenge Response Lambda Trigger</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="21:1"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3263,7 +3263,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 </div>
 </div>
 <h3 id="kafka">Kafka<a class="headerlink" href="#kafka" title="Permanent link">&para;</a></h3>
-<p>This example is based on the AWS docs for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html" target="_blank">Amazon MSK</a> and <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html" target="_blank">self-managed Apache Kafka</a>.</p>
+<p>This example is based on the AWS docs for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html" rel="nofollow" target="_blank">Amazon MSK</a> and <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html" rel="nofollow" target="_blank">self-managed Apache Kafka</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="25:1"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3402,8 +3402,8 @@ function to access the data either as json or plain text, depending on the origi
 </div>
 </div>
 <h3 id="rabbit-mq">Rabbit MQ<a class="headerlink" href="#rabbit-mq" title="Permanent link">&para;</a></h3>
-<p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" target="_blank">Rabbit MQ payloads</a>, also see
-the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/" target="_blank">blog post</a>
+<p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" rel="nofollow" target="_blank">Rabbit MQ payloads</a>, also see
+the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/" rel="nofollow" target="_blank">blog post</a>
 for more details.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">app.py</label></div>
 <div class="tabbed-content">
@@ -3475,7 +3475,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="s3-object-lambda">S3 Object Lambda<a class="headerlink" href="#s3-object-lambda" title="Permanent link">&para;</a></h3>
-<p>This example is based on the AWS Blog post <a href="https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/" target="_blank">Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3</a>.</p>
+<p>This example is based on the AWS Blog post <a href="https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/" rel="nofollow" target="_blank">Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3</a>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="31:1"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3634,7 +3634,7 @@ for more details.</p>
 </div>
 <h3 id="vpc-lattice">VPC Lattice<a class="headerlink" href="#vpc-lattice" title="Permanent link">&para;</a></h3>
 <p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.</p>
-<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" rel="nofollow" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="36:2"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><input id="__tabbed_36_2" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">app.py</label><label for="__tabbed_36_2">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -3921,7 +3921,7 @@ for more details.</p>
   <small>
     
       Last update:
-      2023-06-22
+      2023-07-26
     
   </small>
 </div>

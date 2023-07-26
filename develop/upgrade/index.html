@@ -1114,7 +1114,7 @@
 <div class="admonition warning">
 <p class="admonition-title">On March 31st, 2023, Powertools for AWS Lambda (Python) v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version.</p>
 </div>
-<p>Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep <a href="https://pypi.org/project/aws-lambda-powertools/" target="_blank">Pypi</a> v1 releases and documentation 1.x versions to prevent any disruption.</p>
+<p>Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep <a href="https://pypi.org/project/aws-lambda-powertools/" rel="nofollow" target="_blank">Pypi</a> v1 releases and documentation 1.x versions to prevent any disruption.</p>
 <h2 id="migrate-to-v2-from-v1">Migrate to v2 from v1<a class="headerlink" href="#migrate-to-v2-from-v1" title="Permanent link">&para;</a></h2>
 <p>We've made minimal breaking changes to make your transition to v2 as smooth as possible.</p>
 <h3 id="quick-summary">Quick summary<a class="headerlink" href="#quick-summary" title="Permanent link">&para;</a></h3>
@@ -1136,13 +1136,13 @@
 </tr>
 <tr>
 <td><strong>Environment variables</strong></td>
-<td>Removed legacy <strong><code>POWERTOOLS_EVENT_HANDLER_DEBUG</code></strong> in favour of <a href="../#optimizing-for-non-production-environments" target="_blank"><code>POWERTOOLS_DEV</code></a>.</td>
+<td>Removed legacy <strong><code>POWERTOOLS_EVENT_HANDLER_DEBUG</code></strong> in favour of <a href="../#optimizing-for-non-production-environments" rel="nofollow" target="_blank"><code>POWERTOOLS_DEV</code></a>.</td>
 <td>-</td>
 <td>-</td>
 </tr>
 <tr>
 <td><strong>Event Handler</strong></td>
-<td>Updated <a href="#event-handler-headers-response-format">headers response format</a> due to <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">multi-value headers and cookie support</a>.</td>
+<td>Updated <a href="#event-handler-headers-response-format">headers response format</a> due to <a href="../core/event_handler/api_gateway/#fine-grained-responses" rel="nofollow" target="_blank">multi-value headers and cookie support</a>.</td>
 <td>Tests only</td>
 <td>-</td>
 </tr>
@@ -1168,12 +1168,12 @@
 </table>
 <h3 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Permanent link">&para;</a></h3>
 <div class="admonition note">
-<p class="admonition-title">All dependencies are optional now. <a href="../core/tracer/#install" target="_blank">Tracer</a>, <a href="../utilities/validation/#install" target="_blank">Validation</a>, and <a href="../utilities/parser/" target="_blank">Parser</a> now require additional dependencies.</p>
+<p class="admonition-title">All dependencies are optional now. <a href="../core/tracer/#install" rel="nofollow" target="_blank">Tracer</a>, <a href="../utilities/validation/#install" rel="nofollow" target="_blank">Validation</a>, and <a href="../utilities/parser/" rel="nofollow" target="_blank">Parser</a> now require additional dependencies.</p>
 </div>
 <p>Before you start, we suggest making a copy of your current working project or create a new branch with git.</p>
 <ol>
 <li><strong>Upgrade</strong> Python to at least v3.7</li>
-<li><strong>Ensure</strong> you have the latest version via <a href="../#install" target="_blank">Lambda Layer or PyPi</a>.</li>
+<li><strong>Ensure</strong> you have the latest version via <a href="../#install" rel="nofollow" target="_blank">Lambda Layer or PyPi</a>.</li>
 <li><strong>Review</strong> the following sections to confirm whether they affect your code</li>
 </ol>
 <h2 id="legacy-sqs-batch-processor">Legacy SQS Batch Processor<a class="headerlink" href="#legacy-sqs-batch-processor" title="Permanent link">&para;</a></h2>
@@ -1182,7 +1182,7 @@
 <ol>
 <li>If you use <strong><code>sqs_batch_decorator</code></strong>, change to <strong><code>batch_processor</code></strong> decorator</li>
 <li>If you use <strong><code>PartialSQSProcessor</code></strong>, change to <strong><code>BatchProcessor</code></strong></li>
-<li><a href="../utilities/batch#required-resources" target="_blank">Enable <strong><code>ReportBatchItemFailures</code></strong> in your Lambda Event Source</a></li>
+<li><a href="../utilities/batch#required-resources" rel="nofollow" target="_blank">Enable <strong><code>ReportBatchItemFailures</code></strong> in your Lambda Event Source</a></li>
 <li>Change your Lambda Handler to return the new response format</li>
 </ol>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">[Before] Decorator</label><label for="__tabbed_1_2">[After] Decorator</label><label for="__tabbed_1_3">[Before] Context manager</label><label for="__tabbed_1_4">[After] Context manager</label></div>
@@ -1325,7 +1325,7 @@
     <span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
-<p>In V2, we add all headers under <code>multiValueHeaders</code> key. This enables seamless support for multi-value headers and cookies in <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">fine grained responses</a>.</p>
+<p>In V2, we add all headers under <code>multiValueHeaders</code> key. This enables seamless support for multi-value headers and cookies in <a href="../core/event_handler/api_gateway/#fine-grained-responses" rel="nofollow" target="_blank">fine grained responses</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">V2 response headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
@@ -1338,7 +1338,7 @@
 </code></pre></div></td></tr></table></div>
 <h2 id="dynamodbstreamevent-in-event-source-data-classes">DynamoDBStreamEvent in Event Source Data Classes<a class="headerlink" href="#dynamodbstreamevent-in-event-source-data-classes" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
-<p class="admonition-title">This also applies if you're using <a href="https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb" target="_blank"><strong>DynamoDB BatchProcessor</strong></a>.</p>
+<p class="admonition-title">This also applies if you're using <a href="https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb" rel="nofollow" target="_blank"><strong>DynamoDB BatchProcessor</strong></a>.</p>
 </div>
 <p>You will now receive native Python types when accessing DynamoDB records via <code>keys</code>, <code>new_image</code>, and <code>old_image</code> attributes in <code>DynamoDBStreamEvent</code>.</p>
 <p>Previously, you'd receive a <code>AttributeValue</code> instance and need to deserialize each item to the type you'd want for convenience, or to the type DynamoDB stored via <code>get_value</code> method.</p>
@@ -1403,7 +1403,7 @@
 <div class="admonition note">
 <p class="admonition-title">No code changes required</p>
 </div>
-<p>We replaced <code>GetConfiguration</code> API (<a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884" target="_blank">now deprecated</a>) with <code>GetLatestConfiguration</code> and <code>StartConfigurationSession</code>.</p>
+<p>We replaced <code>GetConfiguration</code> API (<a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884" rel="nofollow" target="_blank">now deprecated</a>) with <code>GetLatestConfiguration</code> and <code>StartConfigurationSession</code>.</p>
 <p>As such, you must update your IAM Role permissions to allow the following IAM actions:</p>
 <ul>
 <li><code>appconfig:GetLatestConfiguration</code></li>
@@ -1420,7 +1420,7 @@
 </blockquote>
 <p><img alt="Idempotency Before" src="../media/upgrade_idempotency_before.png" /></p>
 <p>In V2, we now distinguish between distinct classes or modules that may have the same function/method name.</p>
-<p><a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1330" target="_blank">For example</a>, an ABC or Protocol class may have multiple implementations of <code>process_payment</code> method and may have different results.</p>
+<p><a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1330" rel="nofollow" target="_blank">For example</a>, an ABC or Protocol class may have multiple implementations of <code>process_payment</code> method and may have different results.</p>
 <!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
 
 <blockquote>
@@ -1433,7 +1433,7 @@
   <small>
     
       Last update:
-      2023-06-23
+      2023-07-26
     
   </small>
 </div>

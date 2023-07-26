@@ -1154,36 +1154,36 @@
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
 <p>This is our public roadmap that outlines the high level direction we are working towards, namely <a href="#themes">Themes</a>. We update this document when our priorities change: security and stability is our top priority.</p>
-<p><a href="https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc" target="_blank">See our latest list of activities »</a></p>
+<p><a href="https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc" rel="nofollow" target="_blank">See our latest list of activities »</a></p>
 <h2 id="themes">Themes<a class="headerlink" href="#themes" title="Permanent link">&para;</a></h2>
 <div class="admonition info">
 <p class="admonition-title">Operational Excellence is priority number 1.</p>
 </div>
-<p>Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest <a href="https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc" target="_blank">under Epics in our public board</a>.</p>
+<p>Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest <a href="https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc" rel="nofollow" target="_blank">under Epics in our public board</a>.</p>
 <h3 id="increased-end-to-end-coverage">Increased end-to-end coverage<a class="headerlink" href="#increased-end-to-end-coverage" title="Permanent link">&para;</a></h3>
 <p>We continue to work on increasing end-to-end coverage for all features. Our main challenge is testing contracts for Lambda Event Sources (Parser, Event Source Data Classes) due to the lack of an official JSON schema.</p>
 <p>Some Lambda Event Sources require clusters (e.g., MSK) leading to additional delays of up to 30m in the end-to-end feedback loop. We need a RFC to start discussing viable options, and whether we should publish JSON Schemas from identified contracts.</p>
 <h3 id="observability-providers">Observability providers<a class="headerlink" href="#observability-providers" title="Permanent link">&para;</a></h3>
-<p>We want to extend Tracer, Metrics, and Logger to support any <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1433" target="_blank">observability provider</a>. We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.</p>
+<p>We want to extend Tracer, Metrics, and Logger to support any <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1433" rel="nofollow" target="_blank">observability provider</a>. We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.</p>
 <h3 id="lambda-layer-in-release-notes">Lambda Layer in release notes<a class="headerlink" href="#lambda-layer-in-release-notes" title="Permanent link">&para;</a></h3>
 <p>We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.</p>
 <p>As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to X86 and ARM64 compilation for smaller binaries and extra speed.</p>
 <p>This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.</p>
 <h3 id="strict-typing">Strict typing<a class="headerlink" href="#strict-typing" title="Permanent link">&para;</a></h3>
 <p>We want to enable MyPy strict mode against the code base. We need a RFC to identify most critical areas to start, and do so gradually as to not impact new features and enhancements in parallel.</p>
-<p>This also means bringing <code>typing-extensions</code> as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with <a href="https://github.com/mypyc/mypyc" target="_blank">MyPyC</a> to compile less performing parts of the code base as a C-Extension.</p>
+<p>This also means bringing <code>typing-extensions</code> as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with <a href="https://github.com/mypyc/mypyc" rel="nofollow" target="_blank">MyPyC</a> to compile less performing parts of the code base as a C-Extension.</p>
 <h3 id="new-utilities">New utilities<a class="headerlink" href="#new-utilities" title="Permanent link">&para;</a></h3>
 <!-- markdownlint-disable MD013 -->
-<p>With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: <strong>(1)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1173" target="_blank">Sensitive Data Masking</a>, <strong>(2)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1169" target="_blank">Integration/End-to-end Testing</a>, and <strong>(3)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1168" target="_blank">Event Bridge</a>.</p>
+<p>With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: <strong>(1)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1173" rel="nofollow" target="_blank">Sensitive Data Masking</a>, <strong>(2)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1169" rel="nofollow" target="_blank">Integration/End-to-end Testing</a>, and <strong>(3)</strong> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1168" rel="nofollow" target="_blank">Event Bridge</a>.</p>
 <h3 id="open-iteration-planning">Open iteration planning<a class="headerlink" href="#open-iteration-planning" title="Permanent link">&para;</a></h3>
-<p>We want to experiment running a bi-weekly audio channel on <a href="https://discord.gg/B8zZKbbyET" target="_blank">Discord</a> to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.</p>
+<p>We want to experiment running a bi-weekly audio channel on <a href="https://discord.gg/B8zZKbbyET" rel="nofollow" target="_blank">Discord</a> to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.</p>
 <h2 id="roadmap-status-definition">Roadmap status definition<a class="headerlink" href="#roadmap-status-definition" title="Permanent link">&para;</a></h2>
 <p><center>
 <pre class="mermaid"><code>graph LR
     Ideas --&gt; Backlog --&gt; Work["Working on it"] --&gt; Merged["Coming soon"] --&gt; Shipped</code></pre>
 <i>Visual representation</i>
 </center></p>
-<p>Within our <a href="https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc" target="_blank">public board</a>, you'll see the following values in the <code>Status</code> column:</p>
+<p>Within our <a href="https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc" rel="nofollow" target="_blank">public board</a>, you'll see the following values in the <code>Status</code> column:</p>
 <ul>
 <li><strong>Ideas</strong>. Incoming and existing feature requests that are not being actively considered yet. These will be reviewed when bandwidth permits.</li>
 <li><strong>Backlog</strong>. Accepted feature requests or enhancements that we want to work on.</li>
@@ -1208,11 +1208,11 @@
 </center></p>
 <p>Our end-to-end mechanism follows four major steps:</p>
 <ul>
-<li><strong>Feature Request</strong>. Ideas start with a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2Ctriage&amp;template=feature_request.yml&amp;title=Feature+request%3A+TITLE" target="_blank">feature request</a> to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.<ul>
-<li>Maintainers review requests based on <a href="../#tenets" target="_blank">project tenets</a>, customers reaction (👍), and use cases.</li>
+<li><strong>Feature Request</strong>. Ideas start with a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2Ctriage&amp;template=feature_request.yml&amp;title=Feature+request%3A+TITLE" rel="nofollow" target="_blank">feature request</a> to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.<ul>
+<li>Maintainers review requests based on <a href="../#tenets" rel="nofollow" target="_blank">project tenets</a>, customers reaction (👍), and use cases.</li>
 </ul>
 </li>
-<li><strong>Request-for-comments (RFC)</strong>. Design proposals use our <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=RFC%2Ctriage&amp;template=rfc.yml&amp;title=RFC%3A+TITLE" target="_blank">RFC issue template</a> to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.<ul>
+<li><strong>Request-for-comments (RFC)</strong>. Design proposals use our <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=RFC%2Ctriage&amp;template=rfc.yml&amp;title=RFC%3A+TITLE" rel="nofollow" target="_blank">RFC issue template</a> to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.<ul>
 <li>This helps refine the initial idea with community feedback before a decision is made.</li>
 </ul>
 </li>
@@ -1220,7 +1220,7 @@
 <li><strong>Implementation</strong>. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.</li>
 </ul>
 <details class="info" open="open">
-<summary>See <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md" target="_blank">Maintainers</a> document to understand how we triage issues and pull requests, labels and governance.</summary>
+<summary>See <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md" rel="nofollow" target="_blank">Maintainers</a> document to understand how we triage issues and pull requests, labels and governance.</summary>
 </details>
 <h2 id="disclaimer">Disclaimer<a class="headerlink" href="#disclaimer" title="Permanent link">&para;</a></h2>
 <p>The Powertools for AWS Lambda (Python) team values feedback and guidance from its community of users, although final decisions on inclusion into the project will be made by AWS.</p>
@@ -1238,7 +1238,7 @@
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-26
     
   </small>
 </div>
