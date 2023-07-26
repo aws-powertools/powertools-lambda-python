@@ -182,14 +182,16 @@ jobs:
           path: layer
       - name: unzip artefact
         run: unzip cdk.out.zip
-      - name: CDK Deploy Layer
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs.json
+      - name: CDK Deploy x86_64 Layer
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --context HasARM64Support=${{ matrix.has_arm64_support }} 'LayerV2Stack' --require-approval never --verbose --outputs-file cdk-outputs-x86.json
+      - name: CDK Deploy ARM64 Layer
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --context HasARM64Support=${{ matrix.has_arm64_support }} 'LayerV2ARM64Stack' --require-approval never --verbose --outputs-file cdk-outputs-arm64.json
       - name: Store latest Layer ARN
         if: ${{ inputs.stage == 'PROD' }}
         run: |
           mkdir cdk-layer-stack
-          jq -r -c '.LayerV2Stack.LatestLayerArn' cdk-outputs.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
-          jq -r -c '.LayerV2Stack.LatestLayerArm64Arn' cdk-outputs.json >> cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          jq -r -c '.LayerV2Stack.LatestLayerArn' cdk-outputs-x86.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          jq -r -c '.LayerV2ARM64Stack.LatestLayerArn' cdk-outputs-arm64.json >> cdk-layer-stack/${{ matrix.region }}-layer-version.txt
           cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
@@ -200,4 +202,4 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: CDK Deploy Canary
-        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose
+        run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --context HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose
