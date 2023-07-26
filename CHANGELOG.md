@@ -4,12 +4,40 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.18.28 to 1.18.29 in /layer/scripts/layer-balancer ([#2844](https://github.com/aws-powertools/powertools-lambda-python/issues/2844))
+* **deps:** bump github.com/aws/aws-sdk-go-v2/service/lambda from 1.37.1 to 1.38.0 in /layer/scripts/layer-balancer ([#2843](https://github.com/aws-powertools/powertools-lambda-python/issues/2843))
+* **deps:** bump pydantic from 1.10.11 to 1.10.12 ([#2846](https://github.com/aws-powertools/powertools-lambda-python/issues/2846))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.28.0 to 1.28.11 ([#2847](https://github.com/aws-powertools/powertools-lambda-python/issues/2847))
+* **deps-dev:** bump mypy-boto3-lambda from 1.28.0 to 1.28.11 ([#2845](https://github.com/aws-powertools/powertools-lambda-python/issues/2845))
+
 
 <a name="v2.22.0"></a>
 ## [v2.22.0] - 2023-07-25
+## Bug Fixes
+
+* **parameters:** distinct cache key for single vs path with same name ([#2839](https://github.com/aws-powertools/powertools-lambda-python/issues/2839))
+
+## Documentation
+
+* **community:** new batch processing article ([#2828](https://github.com/aws-powertools/powertools-lambda-python/issues/2828))
+* **parameters:** improve readability on error handling get_parameter… ([#2833](https://github.com/aws-powertools/powertools-lambda-python/issues/2833))
+
+## Features
+
+* **general:** add support for Python 3.11 ([#2820](https://github.com/aws-powertools/powertools-lambda-python/issues/2820))
+
 ## Maintenance
 
 * version bump
+* **ci:** add baking time for layer build ([#2834](https://github.com/aws-powertools/powertools-lambda-python/issues/2834))
+* **ci:** build changelog on a schedule only ([#2832](https://github.com/aws-powertools/powertools-lambda-python/issues/2832))
+* **deps:** bump actions/setup-python from 4.6.1 to 4.7.0 ([#2821](https://github.com/aws-powertools/powertools-lambda-python/issues/2821))
+* **deps-dev:** bump ruff from 0.0.278 to 0.0.279 ([#2822](https://github.com/aws-powertools/powertools-lambda-python/issues/2822))
+* **deps-dev:** bump cfn-lint from 0.78.1 to 0.78.2 ([#2823](https://github.com/aws-powertools/powertools-lambda-python/issues/2823))
+* **deps-dev:** bump ruff from 0.0.279 to 0.0.280 ([#2836](https://github.com/aws-powertools/powertools-lambda-python/issues/2836))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.28.0 to 1.28.10 ([#2837](https://github.com/aws-powertools/powertools-lambda-python/issues/2837))
 
 
 <a name="v2.21.0"></a>
