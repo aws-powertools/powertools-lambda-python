@@ -86,6 +86,10 @@ Processing batches from SQS works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_sqs.py"
     ```
 
+    1.  **Step 1**. Creates a partial failure batch processor for SQS queues. See [partial failure mechanics for details](#partial-failure-mechanics)
+    2.  **Step 2**. Defines a function to receive one record at a time from the batch
+    3.  **Step 3**. Kicks off processing
+
 === "As a context manager"
 
     ```python hl_lines="4-5 8 14 25-26 29"
@@ -123,6 +127,8 @@ This helps preserve the ordering of messages in your queue.
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo.py"
     ```
 
+    1.  **Step 1**. Creates a partial failure batch processor for SQS FIFO queues. See [partial failure mechanics for details](#partial-failure-mechanics)
+
 === "As a context manager"
 
     ```python hl_lines="4 8"
@@ -151,6 +157,8 @@ Processing batches from Kinesis works in three stages:
     ```python hl_lines="2-9 12 18 27"
     --8<-- "examples/batch_processing/src/getting_started_kinesis.py"
     ```
+
+    1.  **Step 1**. Creates a partial failure batch processor for Kinesis Data Streams. See [partial failure mechanics for details](#partial-failure-mechanics)
 
 === "As a context manager"
 
@@ -194,6 +202,8 @@ Processing batches from DynamoDB Streams works in three stages:
     ```python hl_lines="4-11 14 20 32"
     --8<-- "examples/batch_processing/src/getting_started_dynamodb.py"
     ```
+
+    1.  **Step 1**. Creates a partial failure batch processor for DynamoDB Streams. See [partial failure mechanics for details](#partial-failure-mechanics)
 
 === "As a context manager"
 
