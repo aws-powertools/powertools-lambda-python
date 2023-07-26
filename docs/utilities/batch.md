@@ -253,11 +253,28 @@ By default, we catch any exception raised by your record handler function. This 
 
 ### Partial failure mechanics
 
-All records in the batch will be passed to this handler for processing, even if exceptions are thrown - Here's the behaviour after completing the batch:
+All batch items will be passed to the record handler for processing, even if exceptions are thrown - Here's the behavior after completing the batch:
 
 * **All records successfully processed**. We will return an empty list of item failures `{'batchItemFailures': []}`
 * **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers that failed processing
 * **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions raised when processing
+
+<!-- markdownlint-disable MD040 -->
+<center>
+```mermaid
+graph LR
+    Batch[Batch processed] --> Success{Batch succeeded?}
+    Batch[Batch processed] --> Partial{Partial failure?}
+    Batch[Batch processed] --> Failure{Batch failed?}
+
+    Success --> |Business as usual| SimpleResponse["Return an empty list of item failures"]
+    Partial --> |Collect message ID or sequence numbers| PartialResponse["Return a list of batch items that failed processing"]
+    Failure --> |Aggregate all exceptions raised| FailureResponse["Raise BatchProcessingError exception"]
+
+```
+<i>Visual representation for partial failure mechanics</i>
+</center>
+
 
 ### Processing messages asynchronously
 
