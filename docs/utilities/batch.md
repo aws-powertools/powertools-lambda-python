@@ -16,12 +16,21 @@ The batch processing utility handles partial failures when processing batches fr
 
 When using SQS, Kinesis Data Streams, or DynamoDB Streams as a Lambda event source, your Lambda functions are triggered with a batch of messages.
 
-If your function fails to process any message from the batch, the entire batch returns to your queue or stream. This same batch is then retried until either condition happens first: **a)** your Lambda function returns a successful response, **b)** record reaches maximum retry attempts, or **c)** when records expire.
+If your function fails to process any message from the batch, the entire batch returns to your queue or stream. This same batch is then retried until either condition happens first: **a)** your Lambda function returns a successful response, **b)** record reaches maximum retry attempts, or **c)** records expire.
 
-With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:
+```mermaid
+journey
+  section Conditions
+    Successful response: 5: Success
+    Maximum retries: 3: Failure
+    Records expired: 1: Failure
+```
 
-1. `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
-2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank" rel="nofollow"} is returned so Lambda knows which records should not be deleted during partial responses
+This behavior changes when you enable Report Batch Item Failures feature in your Lambda function event source configuration:
+
+<!-- markdownlint-disable MD013 -->
+* [**SQS queues**](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"}. Only messages reported as failure will return to the queue for a retry, while successful ones will be deleted.
+* [**Kinesis data streams**](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#services-kinesis-batchfailurereporting){target="_blank"} and [**DynamoDB streams**](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html#services-ddb-batchfailurereporting){target="_blank"}. Single reported failure will use its sequence number as the stream checkpoint. Multiple  reported failures will use the lowest sequence number as checkpoint.
 
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
@@ -32,13 +41,15 @@ With this utility, batch records are processed individually – only messages th
 
 ## Getting started
 
-Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use `ReportBatchItemFailures`.
+For this feature to work, you need to **(1)** configure your Lambda function event source to use `ReportBatchItemFailures`, and **(2)** return [a specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank" rel="nofollow"} to report which records failed to be processed.
 
-You do not need any additional IAM permissions to use this utility, except for what each event source requires.
+You use your preferred deployment framework to set the correct configuration while this utility handles the correct response to be returned.
 
 ### Required resources
 
 The remaining sections of the documentation will rely on these samples. For completeness, this demonstrates IAM permissions and Dead Letter Queue where batch records will be sent after 2 retries were attempted.
+
+!!! note "You do not need any additional IAM permissions to use this utility, except for what each event source requires."
 
 === "SQS"
 
