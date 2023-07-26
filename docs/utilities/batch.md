@@ -231,6 +231,26 @@ Processing batches from DynamoDB Streams works in three stages:
     --8<-- "examples/batch_processing/src/getting_started_dynamodb_event.json"
     ```
 
+### Error handling
+
+By default, we catch any exception raised by your record handler function. This allows us to **(1)** continue processing the batch, **(2)** collect each batch item that failed processing, and **(3)** return the appropriate  response correctly without failing your Lambda function execution.
+
+=== "Sample error handling with custom exception"
+
+    ```python title="" hl_lines="24"
+    --8<-- "examples/batch_processing/src/getting_started_error_handling.py"
+    ```
+
+    1. Any exception works here. See [extending BatchProcessor section, if you want to override this behavior.](#extending-batchprocessor)
+
+    2. Exceptions raised in `record_handler` will propagate to `process_partial_response`. <br/><br/> We catch them and include each failed batch item identifier in the response dictionary (see `Sample response` tab).
+
+=== "Sample response"
+
+    ```json
+    --8<-- "examples/batch_processing/src/getting_started_sqs_response.json"
+    ```
+
 ### Partial failure mechanics
 
 All records in the batch will be passed to this handler for processing, even if exceptions are thrown - Here's the behaviour after completing the batch:
