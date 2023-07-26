@@ -259,22 +259,112 @@ All batch items will be passed to the record handler for processing, even if exc
 * **Partial success with some exceptions**. We will return a list of all item IDs/sequence numbers that failed processing
 * **All records failed to be processed**. We will raise `BatchProcessingError` exception with a list of all exceptions raised when processing
 
-<!-- markdownlint-disable MD040 -->
+The following sequence diagrams explain how each Batch processor behaves under different scenarios.
+
+#### SQS Standard
+
+Sequence diagram to explain how [`BatchProcessor` works](#processing-messages-from-sqs) with SQS Standard queues.
+
 <center>
 ```mermaid
-graph LR
-    Batch[Batch processed] --> Success{Batch succeeded?}
-    Batch[Batch processed] --> Partial{Partial failure?}
-    Batch[Batch processed] --> Failure{Batch failed?}
-
-    Success --> |Business as usual| SimpleResponse["Return an empty list of item failures"]
-    Partial --> |Collect message ID or sequence numbers| PartialResponse["Return a list of batch items that failed processing"]
-    Failure --> |Aggregate all exceptions raised| FailureResponse["Raise BatchProcessingError exception"]
-
+sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service->>SQS queue: Poll
+    Lambda service->>Lambda function: Invoke (batch event)
+    Lambda function->>Lambda service: Report some failed messages
+    activate SQS queue
+    Lambda service->>SQS queue: Delete successful messages
+    SQS queue-->>SQS queue: Failed messages return
+    Note over SQS queue,Lambda service: Process repeat
+    deactivate SQS queue
 ```
-<i>Visual representation for partial failure mechanics</i>
+<i>SQS mechanism with Batch Item Failures</i>
 </center>
 
+#### SQS FIFO
+
+Sequence diagram to explain how [`SqsFifoPartialProcessor` works](#fifo-queues) with SQS FIFO queues.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service->>SQS queue: Poll
+    Lambda service->>Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function-->Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function->>Lambda service: Report 3rd batch item and unprocessed messages as failure
+    deactivate Lambda function
+    activate SQS queue
+    Lambda service->>SQS queue: Delete successful messages (1-2)
+    SQS queue-->>SQS queue: Failed messages return (3-10)
+    deactivate SQS queue
+```
+<i>SQS FIFO mechanism with Batch Item Failures</i>
+</center>
+
+#### Kinesis and DynamoDB Streams
+
+Sequence diagram to explain how `BatchProcessor` works with both [Kinesis Data Streams](#processing-messages-from-kinesis) and [DynamoDB Streams](#processing-messages-from-dynamodb).
+
+!!! note "For brevity, we will use "Streams" to refer to either services. For theory on stream checkpoints, see this [blog post](https://aws.amazon.com/blogs/compute/optimizing-batch-processing-with-custom-checkpoints-in-aws-lambda/){target="_blank"}"
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Streams
+    participant Lambda service
+    participant Lambda function
+    Lambda service->>Streams: Poll latest records
+    Lambda service->>Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function-->Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function-->Lambda function: Continue processing batch items (4-10)
+    Lambda function->>Lambda service: Report batch item as failure (3)
+    deactivate Lambda function
+    activate Streams
+    Lambda service->>Streams: Checkpoints to sequence number from 3rd batch item
+    Lambda service->>Streams: Poll records starting from updated checkpoint
+    deactivate Streams
+```
+<i>Kinesis and DynamoDB streams mechanism with single batch item failure</i>
+</center>
+
+The behavior changes slightly when there are multiple item failures. Stream checkpoint is updated to the lowest sequence number reported.
+
+!!! important "Note that the batch item sequence number could be different from batch item number in the illustration."
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Streams
+    participant Lambda service
+    participant Lambda function
+    Lambda service->>Streams: Poll latest records
+    Lambda service->>Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function-->Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3-5 batch items
+    Lambda function-->Lambda function: Continue processing batch items (6-10)
+    Lambda function->>Lambda service: Report batch items as failure (3-5)
+    deactivate Lambda function
+    activate Streams
+    Lambda service->>Streams: Checkpoints to lowest sequence number
+    Lambda service->>Streams: Poll records starting from updated checkpoint
+    deactivate Streams
+```
+<i>Kinesis and DynamoDB streams mechanism with multiple batch item failures</i>
+</center>
 
 ### Processing messages asynchronously
 
