@@ -78,11 +78,11 @@ Processing batches from SQS works in three stages:
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
-    This code example optionally uses Tracer and Logger for completion.
+    This code example uses Tracer and Logger for completion.
 
 === "Recommended"
 
-    ```python hl_lines="4-9 12 18 28"
+    ```python hl_lines="2-7 10 16 24"
     --8<-- "examples/batch_processing/src/getting_started_sqs.py"
     ```
 
@@ -119,7 +119,7 @@ This helps preserve the ordering of messages in your queue.
 
 === "Recommended"
 
-    ```python hl_lines="5-6 11 27"
+    ```python hl_lines="2-6 9 23"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo.py"
     ```
 
@@ -144,7 +144,7 @@ Processing batches from Kinesis works in three stages:
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
-    This code example optionally uses Tracer and Logger for completion.
+    This code example uses Tracer and Logger for completion.
 
 === "Recommended"
 
@@ -187,7 +187,7 @@ Processing batches from DynamoDB Streams works in three stages:
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
-    This code example optionally uses Tracer and Logger for completion.
+    This code example uses Tracer and Logger for completion.
 
 === "Recommended"
 
