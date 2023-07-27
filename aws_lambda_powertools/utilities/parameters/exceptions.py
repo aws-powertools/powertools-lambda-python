@@ -9,3 +9,7 @@ class GetParameterError(Exception):
 
 class TransformParameterError(Exception):
     """When a provider fails to transform a parameter value"""
+
+
+class UpdateSecretError(Exception):
+    """When a provider fails an exception on updating a secret"""

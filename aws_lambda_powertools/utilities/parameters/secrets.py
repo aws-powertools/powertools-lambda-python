@@ -113,6 +113,33 @@ class SecretsProvider(BaseProvider):
         """
         raise NotImplementedError()
 
+    def _update(self, name: str, secret: Optional[str], secret_binary: Optional[str],**sdk_options) -> str:
+        """
+        Modifies the details of a secret, including metadata and the secret value.
+
+        Parameters
+        ----------
+        name: str
+            Name of the parameter
+        sdk_options: dict, optional
+            Dictionary of options that will be passed to the Secrets Manager update_secret API call
+
+        URLs:
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/update_secret.html
+        """
+
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["SecretId"] = name
+        if secret:
+            sdk_options["SecretString"] = secret
+        if secret_binary:
+            sdk_options["SecretBinary"] = secret_binary
+
+        update_secret = self.client.update_secret(**sdk_options)
+
+        return update_secret["VersionId"]
+
+
 
 def get_secret(
     name: str, transform: Optional[str] = None, force_fetch: bool = False, max_age: Optional[int] = None, **sdk_options
@@ -171,4 +198,61 @@ def get_secret(
 
     return DEFAULT_PROVIDERS["secrets"].get(
         name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+    )
+
+
+def update_secret(
+    name: str, transform: Optional[str] = None, force_fetch: bool = False, max_age: Optional[int] = None, **sdk_options
+) -> Union[str, dict, bytes]:
+    """
+    Retrieve a parameter value from AWS Secrets Manager
+
+    Parameters
+    ----------
+    name: str
+        Name of the parameter
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
+    force_fetch: bool, optional
+        Force update even before a cached item has expired, defaults to False
+    max_age: int, optional
+        Maximum age of the cached value
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the get_secret_value call
+
+    Raises
+    ------
+    GetParameterError
+        When the parameter provider fails to retrieve a parameter value for
+        a given name.
+    TransformParameterError
+        When the parameter provider fails to transform a parameter value.
+
+    Example
+    -------
+    **Retrieves a secret***
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secret
+        >>>
+        >>> get_secret("my-secret")
+
+    **Retrieves a secret and transforms using a JSON deserializer***
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secret
+        >>>
+        >>> get_secret("my-secret", transform="json")
+
+    **Retrieves a secret and passes custom arguments to the SDK**
+
+        >>> from aws_lambda_powertools.utilities.parameters import get_secret
+        >>>
+        >>> get_secret("my-secret", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
+    """
+
+    # Only create the provider if this function is called at least once
+    if "secrets" not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
+
+    return DEFAULT_PROVIDERS["secrets"].update(
+        name, transform=transform, force_fetch=force_fetch, **sdk_options
     )
