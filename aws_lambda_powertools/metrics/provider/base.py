@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import functools
 import logging
-from typing import Any, Callable, Dict, Optional, Protocol
+from typing import Any, Callable, Dict, Optional
+
+from typing_extensions import Protocol
 
 logger = logging.getLogger(__name__)
 
