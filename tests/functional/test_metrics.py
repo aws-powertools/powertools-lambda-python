@@ -15,15 +15,14 @@ from aws_lambda_powertools.metrics import (
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.base import (
-    MAX_DIMENSIONS,
-    MetricManager,
-    reset_cold_start_flag,
-)
 from aws_lambda_powertools.metrics.provider import (
-    AmazonCloudWatchEMF,
     MetricsBase,
     MetricsProviderBase,
+)
+from aws_lambda_powertools.metrics.provider.amazon_cloudwatch_emf import (
+    MAX_DIMENSIONS,
+    AmazonCloudWatchEMFProvider,
+    reset_cold_start_flag,
 )
 from aws_lambda_powertools.metrics.provider.base import reset_cold_start_flag_provider
 
@@ -116,7 +115,7 @@ def serialize_metrics(
     metadatas: List[Dict] = None,
 ) -> Dict:
     """Helper function to build EMF object from a list of metrics, dimensions"""
-    my_metrics = MetricManager(namespace=namespace)
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
 
@@ -133,7 +132,7 @@ def serialize_metrics(
 
 def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metadata: Dict = None) -> Dict:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
-    my_metrics = MetricManager(namespace=namespace)
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
 
@@ -230,6 +229,27 @@ def test_single_metric_default_dimensions_inherit(capsys, metric, dimension, nam
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
 
     # THEN we should have default dimension added to the metric
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_log_metrics_preconfigured_provider(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    provider = AmazonCloudWatchEMFProvider(namespace=namespace)
+    my_metrics = Metrics(provider=provider)
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+    for dimension in dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    # WHEN we manually the metrics
+    my_metrics.flush_metrics()
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
+
+    # THEN we should have no exceptions
+    # and a valid EMF object should be flushed correctly
     remove_timestamp(metrics=[output, expected])
     assert expected == output
 
@@ -1016,7 +1036,7 @@ def test_metric_manage_metadata_set():
     expected_dict = {"setting": "On"}
 
     try:
-        metric = MetricManager(metadata_set=expected_dict)
+        metric = AmazonCloudWatchEMFProvider(metadata_set=expected_dict)
         assert metric.metadata_set == expected_dict
     except AttributeError:
         pytest.fail("AttributeError should not be raised")
@@ -1265,10 +1285,6 @@ def metrics_class() -> MetricsBase:
             self.provider.add_metric(name=metric_name, value=1, function_name=function_name)
 
     return MetricsClass
-
-
-def test_cloudwatch_emf(namespace):
-    assert AmazonCloudWatchEMF == Metrics
 
 
 def test_metrics_provider_basic(capsys, metrics_provider, metric):

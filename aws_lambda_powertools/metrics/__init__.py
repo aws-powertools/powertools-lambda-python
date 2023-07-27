@@ -1,18 +1,17 @@
 """CloudWatch Embedded Metric Format utility
 """
-from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.metric import single_metric
 from aws_lambda_powertools.metrics.provider.amazon_cloudwatch_emf import (
-    AmazonCloudWatchEMF,
-    EphemeralAmazonCloudWatchEMF,
     EphemeralMetrics,
+    MetricResolution,
     Metrics,
+    MetricUnit,
+    single_metric,
 )
 
 __all__ = [
@@ -25,6 +24,4 @@ __all__ = [
     "MetricResolutionError",
     "SchemaValidationError",
     "MetricValueError",
-    "AmazonCloudWatchEMF",
-    "EphemeralAmazonCloudWatchEMF",
 ]

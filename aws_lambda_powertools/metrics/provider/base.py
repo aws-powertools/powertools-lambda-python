@@ -49,7 +49,7 @@ class MetricsProviderBase(Protocol):
         """
         raise NotImplementedError
 
-    def serialize(self, *args: Any, **kwargs: Any) -> Any:
+    def serialize_metric_set(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method for serialize a metric.
 
@@ -75,7 +75,7 @@ class MetricsProviderBase(Protocol):
         raise NotImplementedError
 
     # flush serialized data to output, or send to API directly
-    def flush(self, *args: Any, **kwargs) -> Any:
+    def flush_metrics(self, *args: Any, **kwargs) -> Any:
         """
         Abstract method for flushing a metric.
 
