@@ -9,7 +9,7 @@ description: Guide to update between major Powertools for AWS Lambda (Python) ve
 
 !!! warning "On March 31st, 2023, Powertools for AWS Lambda (Python) v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version."
 
-Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/){target="_blank"} v1 releases and documentation 1.x versions to prevent any disruption.
+Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/){target="_blank" rel="nofollow"} v1 releases and documentation 1.x versions to prevent any disruption.
 
 ## Migrate to v2 from v1
 
@@ -20,20 +20,20 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 | Area                               | Change                                                                                                                                                                                                  | Code change required | IAM Permissions change required |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
 | **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                                                                    | Yes                  | -                               |
-| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}.                                              | -                    | -                               |
-| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
+| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank" rel="nofollow"}.                                              | -                    | -                               |
+| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank" rel="nofollow"}. | Tests only           | -                               |
 | **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
 | **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
 | **Idempotency**                    | Updated [partition key](#idempotency-partition-key-format) to include fully qualified function/method names.                                                                                            | -                    | -                               |
 
 ### First Steps
 
-!!! note "All dependencies are optional now. [Tracer](core/tracer.md#install){target="_blank"}, [Validation](./utilities/validation.md#install){target="_blank"}, and [Parser](./utilities/parser.md){target="_blank"} now require additional dependencies."
+!!! note "All dependencies are optional now. [Tracer](core/tracer.md#install){target="_blank" rel="nofollow"}, [Validation](./utilities/validation.md#install){target="_blank" rel="nofollow"}, and [Parser](./utilities/parser.md){target="_blank" rel="nofollow"} now require additional dependencies."
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
 1. **Upgrade** Python to at least v3.7
-2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}.
+2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank" rel="nofollow"}.
 3. **Review** the following sections to confirm whether they affect your code
 
 ## Legacy SQS Batch Processor
@@ -44,7 +44,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank" rel="nofollow"}
 4. Change your Lambda Handler to return the new response format
 
 === "[Before] Decorator"
@@ -139,7 +139,7 @@ Previously, custom headers were available under `headers` key in the Event Handl
 }
 ```
 
-In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}.
+In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank" rel="nofollow"}.
 
 ```python title="V2 response headers" hl_lines="2"
 {
@@ -151,7 +151,7 @@ In V2, we add all headers under `multiValueHeaders` key. This enables seamless s
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank" rel="nofollow"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
@@ -196,7 +196,7 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 !!! note "No code changes required"
 
-We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884){target="_blank" rel="nofollow"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
 
 As such, you must update your IAM Role permissions to allow the following IAM actions:
 
@@ -217,7 +217,7 @@ Previously, we used the function/method name to generate the partition key value
 
 In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
 
-[For example](https://github.com/aws-powertools/powertools-lambda-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+[For example](https://github.com/aws-powertools/powertools-lambda-python/issues/1330){target="_blank" rel="nofollow"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
 
 <!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
 

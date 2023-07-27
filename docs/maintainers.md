@@ -9,27 +9,27 @@ description: Playbook for active maintainers in Powertools for AWS Lambda (Pytho
 
 !!! note "Please treat this content as a living document."
 
-This is document explains who the maintainers are, their responsibilities, and how they should be doing it. If you're interested in contributing, see [CONTRIBUTING](CONTRIBUTING.md).
+This is document explains who the maintainers are, their responsibilities, and how they should be doing it. If you're interested in contributing, see [CONTRIBUTING](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CONTRIBUTING.md){target="_blank" rel="nofollow"}.
 
 ## Current Maintainers
 
-| Maintainer        | GitHub ID                                               | Affiliation |
-| ----------------- | ------------------------------------------------------- | ----------- |
-| Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa)           | Amazon      |
-| Simon Thulbourn   | [sthulb](https://github.com/sthulb)                     | Amazon      |
-| Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca)         | Amazon      |
-| Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena) | Amazon      |
+| Maintainer        | GitHub ID                                                                               | Affiliation |
+| ----------------- | --------------------------------------------------------------------------------------- | ----------- |
+| Heitor Lessa      | [heitorlessa](https://github.com/heitorlessa){target="_blank" rel="nofollow"}           | Amazon      |
+| Simon Thulbourn   | [sthulb](https://github.com/sthulb){target="_blank" rel="nofollow"}                     | Amazon      |
+| Ruben Fonseca     | [rubenfonseca](https://github.com/rubenfonseca){target="_blank" rel="nofollow"}         | Amazon      |
+| Leandro Damascena | [leandrodamascena](https://github.com/leandrodamascena){target="_blank" rel="nofollow"} | Amazon      |
 
 ## Emeritus
 
 Previous active maintainers who contributed to this project.
 
-| Maintainer        | GitHub ID                                       | Affiliation |
-| ----------------- | ----------------------------------------------- | ----------- |
-| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast) | MongoDB     |
-| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen)     | Apollo      |
-| Alexander Melnyk  | [am29d](https://github.com/am29d)               | Amazon      |
-| Michal Ploski     | [mploski](https://github.com/mploski)           | Amazon      |
+| Maintainer        | GitHub ID                                                                       | Affiliation |
+| ----------------- | ------------------------------------------------------------------------------- | ----------- |
+| Tom McCarthy      | [cakepietoast](https://github.com/cakepietoast){target="_blank" rel="nofollow"} | MongoDB     |
+| Nicolas Moutschen | [nmoutschen](https://github.com/nmoutschen){target="_blank" rel="nofollow"}     | Apollo      |
+| Alexander Melnyk  | [am29d](https://github.com/am29d){target="_blank" rel="nofollow"}               | Amazon      |
+| Michal Ploski     | [mploski](https://github.com/mploski){target="_blank" rel="nofollow"}           | Amazon      |
 
 ## Labels
 
@@ -74,13 +74,14 @@ These are the most common labels used by maintainers to triage issues, pull requ
 
 ## Maintainer Responsibilities
 
-Maintainers are active and visible members of the community, and have [maintain-level permissions on a repository](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization). Use those privileges to serve the community and evolve code as follows.
+Maintainers are active and visible members of the community, and have [maintain-level permissions on a repository](https://docs.github.com/en/organizations/managing-access-to-your-organizations-repositories/repository-permission-levels-for-an-organization){target="_blank" rel="nofollow"}. Use those privileges to serve the community and evolve code as follows.
 
 Be aware of recurring ambiguous situations and [document them](#common-scenarios) to help your fellow maintainers.
 
 ### Uphold Code of Conduct
 
-Model the behavior set forward by the [Code of Conduct](CODE_OF_CONDUCT.md) and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](CODE_OF_CONDUCT.md).
+<!-- markdownlint-disable-next-line MD013 -->
+Model the behavior set forward by the [Code of Conduct](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CODE_OF_CONDUCT.md){target="_blank" rel="nofollow"} and raise any violations to other maintainers and admins. There could be unusual circumstances where inappropriate behavior does not immediately fall within the [Code of Conduct](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CODE_OF_CONDUCT.md){target="_blank" rel="nofollow"}.
 
 These might be nuanced and should be handled with extra care - when in doubt, do not engage and reach out to other maintainers and admins.
 
@@ -88,7 +89,7 @@ These might be nuanced and should be handled with extra care - when in doubt, do
 
 Security is your number one priority. Maintainer's Github keys must be password protected securely and any reported security vulnerabilities are addressed before features or bugs.
 
-Note that this repository is monitored and supported 24/7 by Amazon Security, see [Reporting a Vulnerability](SECURITY.md) for details.
+Note that this repository is monitored and supported 24/7 by Amazon Security, see [Reporting a Vulnerability](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/SECURITY.md){target="_blank" rel="nofollow"} for details.
 
 ### Review Pull Requests
 
@@ -96,7 +97,7 @@ Review pull requests regularly, comment, suggest, reject, merge and close. Accep
 
 PRs are [labeled](#labels) based on file changes and semantic title. Pay attention to whether labels reflect the current state of the PR and correct accordingly.
 
-Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](CHANGELOG.md) and [Release notes](https://github.com/aws-powertools/powertools-lambda-python/releases) - make sure they communicate their intent at the human level.
+Use and enforce [semantic versioning](https://semver.org/) pull request titles, as these will be used for [CHANGELOG](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CHANGELOG.md){target="_blank" rel="nofollow"} and [Release notes](https://github.com/aws-powertools/powertools-lambda-python/releases) - make sure they communicate their intent at the human level.
 
 > TODO: This is an area we want to automate using the new GitHub GraphQL API.
 
@@ -287,14 +288,14 @@ Ensure the repo highlights features that should be elevated to the project roadm
 Add integration checks that validate pull requests and pushes to ease the burden on Pull Request reviewers. Continuously revisit areas of improvement to reduce operational burden in all parties involved.
 
 ### Negative Impact on the Project
-
-Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](CODE_OF_CONDUCT.md) violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
+<!-- markdownlint-disable-next-line MD013 -->
+Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CODE_OF_CONDUCT.md){target="_blank" rel="nofollow"} violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
 
 ### Becoming a maintainer
 
 In 2023, we will revisit this. We need to improve our understanding of how other projects are doing, their mechanisms to promote key contributors, and how they interact daily.
 
-We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer).
+We suspect this process might look similar to the [OpenSearch project](https://github.com/opensearch-project/.github/blob/main/MAINTAINERS.md#becoming-a-maintainer){target="_blank" rel="nofollow"}.
 
 ## Common scenarios
 
@@ -314,7 +315,7 @@ When in doubt, use `need-more-information` or `need-customer-feedback` labels to
 
 ### Crediting contributions
 
-We credit all contributions as part of each [release note](https://github.com/aws-powertools/powertools-lambda-python/releases) as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
+We credit all contributions as part of each [release note](https://github.com/aws-powertools/powertools-lambda-python/releases){target="_blank" rel="nofollow"} as an automated process. If you find  contributors are missing from the release note you're producing, please add them manually.
 
 ### Is that a bug?
 
@@ -338,7 +339,7 @@ In the rare cases where both parties don't have the bandwidth or expertise to co
 
 ### Structure
 
-Our E2E framework relies on [Pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html) to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization) and [CDK CLI Parallelization](#cdk-cli-parallelization).
+Our E2E framework relies on [Pytest fixtures](https://docs.pytest.org/en/6.2.x/fixture.html){target="_blank" rel="nofollow"} to coordinate infrastructure and test parallelization - see [Test Parallelization](#test-runner-parallelization) and [CDK CLI Parallelization](#cdk-cli-parallelization).
 
 **tests/e2e structure**
 
@@ -387,7 +388,7 @@ Where:
 
 ### Mechanics
 
-Under [`BaseInfrastructure`](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/e2e/utils/infrastructure.py), we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
+Under [`BaseInfrastructure`](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/e2e/utils/infrastructure.py){target="_blank" rel="nofollow"}, we hide the complexity of deployment and delete coordination under `deploy`, `delete`, and `create_lambda_functions` methods.
 
 This allows us to benefit from test and deployment parallelization, use IDE step-through debugging for a single test, run one, subset, or all tests and only deploy their related infrastructure, without any custom configuration.
 
@@ -589,7 +590,7 @@ graph TD
 
 #### CDK CLI parallelization
 
-For CDK CLI to work with [independent CDK Apps](https://docs.aws.amazon.com/cdk/v2/guide/apps.html), we specify an output directory when synthesizing our stack and deploy from said output directory.
+For CDK CLI to work with [independent CDK Apps](https://docs.aws.amazon.com/cdk/v2/guide/apps.html){target="_blank" rel="nofollow"}, we specify an output directory when synthesizing our stack and deploy from said output directory.
 
 ```mermaid
 flowchart TD
@@ -657,6 +658,6 @@ Where:
 - **`layer_build`**. Contains our Lambda Layer source code built once, used by all stacks independently
 - **`layer_build.diff`**. Contains a hash on whether our source code has changed to speed up further deployments and E2E tests
 
-Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its [context methods](https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods) (`from_lookup`), and use step-through debugging for a single E2E test without any extra configuration.
+Together, all of this allows us to use Pytest like we would for any project, use CDK CLI and its [context methods](https://docs.aws.amazon.com/cdk/v2/guide/context.html#context_methods){target="_blank" rel="nofollow"} (`from_lookup`), and use step-through debugging for a single E2E test without any extra configuration.
 
-> NOTE: VSCode doesn't support debugging processes spawning sub-processes (like CDK CLI does w/ shell and CDK App). Maybe [this works](https://stackoverflow.com/a/65339352). PyCharm works just fine.
+> NOTE: VSCode doesn't support debugging processes spawning sub-processes (like CDK CLI does w/ shell and CDK App). Maybe [this works](https://stackoverflow.com/a/65339352){target="_blank" rel="nofollow"}. PyCharm works just fine.

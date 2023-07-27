@@ -21,14 +21,14 @@ If your function fails to process any message from the batch, the entire batch r
 With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:
 
 1. `ReportBatchItemFailures` is set in your SQS, Kinesis, or DynamoDB event source properties
-2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"} is returned so Lambda knows which records should not be deleted during partial responses
+2. [A specific response](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank" rel="nofollow"} is returned so Lambda knows which records should not be deleted during partial responses
 
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
 ???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
-    We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
+    We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank" rel="nofollow"} wherever possible.
 
-    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"} in the AWS Documentation.
+    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank" rel="nofollow"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank" rel="nofollow"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank" rel="nofollow"} in the AWS Documentation.
 
 ## Getting started
 
@@ -63,7 +63,7 @@ The remaining sections of the documentation will rely on these samples. For comp
 Processing batches from SQS works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.SQS`** for the event type
-2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
@@ -103,7 +103,7 @@ Processing batches from SQS works in three stages:
 
 #### FIFO queues
 
-When using [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, we will stop processing messages after the first failure, and return all failed and unprocessed messages in `batchItemFailures`.
+When using [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank" rel="nofollow"}, we will stop processing messages after the first failure, and return all failed and unprocessed messages in `batchItemFailures`.
 This helps preserve the ordering of messages in your queue.
 
 === "Recommended"
@@ -129,7 +129,7 @@ This helps preserve the ordering of messages in your queue.
 Processing batches from Kinesis works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.KinesisDataStreams`** for the event type
-2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
@@ -172,7 +172,7 @@ Processing batches from Kinesis works in three stages:
 Processing batches from DynamoDB Streams works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
-2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 ???+ info
@@ -220,7 +220,7 @@ All records in the batch will be passed to this handler for processing, even if 
 
 ### Processing messages asynchronously
 
-!!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank"}."
+!!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank" rel="nofollow"}."
 
 You can use `AsyncBatchProcessor` class and `async_process_partial_response` function to process messages concurrently.
 
@@ -238,7 +238,7 @@ You can use `AsyncBatchProcessor` class and `async_process_partial_response` fun
 ???+ warning "Using tracer?"
     `AsyncBatchProcessor` uses `asyncio.gather` which can cause side effects and reach trace limits at high concurrency.
 
-    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions){target="_blank"}.
+    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions){target="_blank" rel="nofollow"}.
 
 ## Advanced
 
@@ -299,7 +299,7 @@ Use the context manager to access a list of all returned values from your `recor
 
 Within your `record_handler` function, you might need access to the Lambda context to determine how much time you have left before your function times out.
 
-We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html){target="_blank"} into your `record_handler` if your function signature has a parameter named `lambda_context`. When using a context manager, you also need to pass the Lambda context object like in the example below.
+We can automatically inject the [Lambda context](https://docs.aws.amazon.com/lambda/latest/dg/python-context.html){target="_blank" rel="nofollow"} into your `record_handler` if your function signature has a parameter named `lambda_context`. When using a context manager, you also need to pass the Lambda context object like in the example below.
 
 === "Recommended"
 
@@ -356,7 +356,7 @@ You can then use this class as a context manager, or pass it to `batch_processor
 
 When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your `record_handler` function, or how big is your batch size.
 
-If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
+If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank" rel="nofollow"}.
 
 ```python hl_lines="17" title="Disabling Tracer response auto-capturing"
 --8<-- "examples/batch_processing/src/disable_tracing.py"
@@ -404,7 +404,7 @@ As 2.12.0, `process_partial_response` and `async_process_partial_response` are t
 
 When using Sentry.io for error monitoring, you can override `failure_handler` to capture each processing exception with Sentry SDK:
 
-> Credits to [Charles-Axel Dein](https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732){target="_blank"}
+> Credits to [Charles-Axel Dein](https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732){target="_blank" rel="nofollow"}
 
 ```python hl_lines="1 7-8" title="Integrating error tracking with Sentry.io"
 --8<-- "examples/batch_processing/src/sentry_error_tracking.py"
