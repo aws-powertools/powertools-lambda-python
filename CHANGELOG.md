@@ -4,12 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **logger:** strip xray_trace_id when explicitly disabled ([#2852](https://github.com/aws-powertools/powertools-lambda-python/issues/2852))
+
+## Documentation
+
+* **navigation:** add nofollow attribute ([#2842](https://github.com/aws-powertools/powertools-lambda-python/issues/2842))
+
 ## Maintenance
 
 * **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.18.28 to 1.18.29 in /layer/scripts/layer-balancer ([#2844](https://github.com/aws-powertools/powertools-lambda-python/issues/2844))
 * **deps:** bump github.com/aws/aws-sdk-go-v2/service/lambda from 1.37.1 to 1.38.0 in /layer/scripts/layer-balancer ([#2843](https://github.com/aws-powertools/powertools-lambda-python/issues/2843))
 * **deps:** bump pydantic from 1.10.11 to 1.10.12 ([#2846](https://github.com/aws-powertools/powertools-lambda-python/issues/2846))
 * **deps-dev:** bump mypy-boto3-dynamodb from 1.28.0 to 1.28.11 ([#2847](https://github.com/aws-powertools/powertools-lambda-python/issues/2847))
+* **deps-dev:** bump cfn-lint from 0.78.2 to 0.79.3 ([#2854](https://github.com/aws-powertools/powertools-lambda-python/issues/2854))
 * **deps-dev:** bump mypy-boto3-lambda from 1.28.0 to 1.28.11 ([#2845](https://github.com/aws-powertools/powertools-lambda-python/issues/2845))
 
 
