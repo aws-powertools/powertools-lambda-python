@@ -1146,14 +1146,14 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>You can validate inbound and outbound events using <a href="#validator-decorator"><code>validator</code> decorator</a>.</p>
 <p>You can also use the standalone <code>validate</code> function, if you want more control over the validation process such as handling a validation error.</p>
 <details class="tip" open="open">
 <summary>Tip: Using JSON Schemas for the first time?</summary>
-<p>Check this <a href="https://json-schema.org/learn/getting-started-step-by-step.html" target="_blank">step-by-step tour in the official JSON Schema website</a>.</p>
-<p>We support any JSONSchema draft supported by <a href="https://horejsek.github.io/python-fastjsonschema/" target="_blank">fastjsonschema</a> library.</p>
+<p>Check this <a href="https://json-schema.org/learn/getting-started-step-by-step.html" rel="nofollow" target="_blank">step-by-step tour in the official JSON Schema website</a>.</p>
+<p>We support any JSONSchema draft supported by <a href="https://horejsek.github.io/python-fastjsonschema/" rel="nofollow" target="_blank">fastjsonschema</a> library.</p>
 </details>
 <details class="warning" open="open">
 <summary>Warning</summary>
@@ -1161,7 +1161,7 @@
 </details>
 <h3 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
-<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" target="_blank">Lambda Layer/SAR</a></p>
+<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" rel="nofollow" target="_blank">Lambda Layer/SAR</a></p>
 </div>
 <p>Add <code>aws-lambda-powertools[validation]</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>. This will ensure you have the required dependencies before using Validation.</p>
 <h3 id="validator-decorator">Validator decorator<a class="headerlink" href="#validator-decorator" title="Permanent link">&para;</a></h3>
@@ -1550,7 +1550,7 @@
 </div>
 <h3 id="unwrapping-events-prior-to-validation">Unwrapping events prior to validation<a class="headerlink" href="#unwrapping-events-prior-to-validation" title="Permanent link">&para;</a></h3>
 <p>You might want to validate only a portion of your event - This is what the <code>envelope</code> parameter is for.</p>
-<p>Envelopes are <a href="https://jmespath.org/tutorial.html" target="_blank">JMESPath expressions</a> to extract a portion of JSON you want before applying JSON Schema validation.</p>
+<p>Envelopes are <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expressions</a> to extract a portion of JSON you want before applying JSON Schema validation.</p>
 <p>Here is a sample custom EventBridge event, where we only validate what's inside the <code>detail</code> key:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">getting_started_validator_unwrapping_function.py</label><label for="__tabbed_3_2">getting_started_validator_unwrapping_schema.py</label><label for="__tabbed_3_3">getting_started_validator_unwrapping_payload.json</label></div>
 <div class="tabbed-content">
@@ -1790,7 +1790,8 @@
 </div>
 </div>
 </div>
-<p>This is quite powerful because you can use JMESPath Query language to extract records from <a href="https://jmespath.org/tutorial.html#list-and-slice-projections" target="_blank">arrays</a>, combine <a href="https://jmespath.org/tutorial.html#pipe-expressions" target="_blank">pipe</a> and <a href="https://jmespath.org/tutorial.html#functions" target="_blank">function expressions</a>.</p>
+<!-- markdownlint-disable-next-line MD013 -->
+<p>This is quite powerful because you can use JMESPath Query language to extract records from <a href="https://jmespath.org/tutorial.html#list-and-slice-projections" rel="nofollow" target="_blank">arrays</a>, combine <a href="https://jmespath.org/tutorial.html#pipe-expressions" rel="nofollow" target="_blank">pipe</a> and <a href="https://jmespath.org/tutorial.html#functions" rel="nofollow" target="_blank">function expressions</a>.</p>
 <p>When combined, these features allow you to extract what you need before validating the actual payload.</p>
 <h3 id="built-in-envelopes">Built-in envelopes<a class="headerlink" href="#built-in-envelopes" title="Permanent link">&para;</a></h3>
 <p>We provide built-in envelopes to easily extract the payload from popular event sources.</p>
@@ -1985,7 +1986,7 @@
 <h3 id="validating-custom-formats">Validating custom formats<a class="headerlink" href="#validating-custom-formats" title="Permanent link">&para;</a></h3>
 <details class="note" open="open">
 <summary>Note</summary>
-<p>JSON Schema DRAFT 7 <a href="https://json-schema.org/understanding-json-schema/reference/string.html#format" target="_blank">has many new built-in formats</a> such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.</p>
+<p>JSON Schema DRAFT 7 <a href="https://json-schema.org/understanding-json-schema/reference/string.html#format" rel="nofollow" target="_blank">has many new built-in formats</a> such as date, time, and specifically a regex format which might be a better replacement for a custom format, if you do have control over the schema.</p>
 </details>
 <p>JSON Schemas with custom formats like <code>awsaccountid</code> will fail validation. If you have these, you can pass them using <code>formats</code> parameter:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">custom_json_schema_type_format.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2141,7 +2142,8 @@
 </div>
 <h3 id="built-in-jmespath-functions">Built-in JMESPath functions<a class="headerlink" href="#built-in-jmespath-functions" title="Permanent link">&para;</a></h3>
 <p>You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.</p>
-<p>You can use our built-in <a href="../jmespath_functions/" target="_blank">JMESPath functions</a> within your expressions to do exactly that to <a href="../jmespath_functions/#powertools_json-function" target="_blank">deserialize JSON Strings</a>, <a href="../jmespath_functions/#powertools_base64-function" target="_blank">decode base64</a>, and <a href="../jmespath_functions/#powertools_base64_gzip-function" target="_blank">decompress gzip data</a>.</p>
+<!-- markdownlint-disable-next-line MD013 -->
+<p>You can use our built-in <a href="../jmespath_functions/" rel="nofollow" target="_blank">JMESPath functions</a> within your expressions to do exactly that to <a href="../jmespath_functions/#powertools_json-function" rel="nofollow" target="_blank">deserialize JSON Strings</a>, <a href="../jmespath_functions/#powertools_base64-function" rel="nofollow" target="_blank">decode base64</a>, and <a href="../jmespath_functions/#powertools_base64_gzip-function" rel="nofollow" target="_blank">decompress gzip data</a>.</p>
 <details class="info" open="open">
 <summary>Info</summary>
 <p>We use these for <a href="#built-in-envelopes">built-in envelopes</a> to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.</p>
@@ -2152,7 +2154,7 @@
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-26
     
   </small>
 </div>

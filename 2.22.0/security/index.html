@@ -1094,14 +1094,14 @@
 <h2 id="supply-chain">Supply chain<a class="headerlink" href="#supply-chain" title="Permanent link">&para;</a></h2>
 <h3 id="verifying-signed-builds">Verifying signed builds<a class="headerlink" href="#verifying-signed-builds" title="Permanent link">&para;</a></h3>
 <div class="admonition note">
-<p class="admonition-title">Starting from v2.20.0 releases, builds are <a href="https://slsa.dev/spec/v0.1/faq#q-what-about-reproducible-builds" target="_blank">reproducible</a> and signed publicly.</p>
+<p class="admonition-title">Starting from v2.20.0 releases, builds are <a href="https://slsa.dev/spec/v0.1/faq#q-what-about-reproducible-builds" rel="nofollow" target="_blank">reproducible</a> and signed publicly.</p>
 </div>
 <p><center>
 <img alt="SLSA Supply Chain Threats" src="https://slsa.dev/images/v1.0/supply-chain-threats.svg" /></p>
 <p><i>Supply Chain Threats visualized by SLSA</i>
 </center></p>
 <h4 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h4>
-<p>We use <a href="https://slsa.dev/spec/v1.0/about" target="_blank">SLSA</a> to ensure our builds are reproducible and to adhere to <a href="https://slsa.dev/spec/v1.0/threats-overview">supply chain security practices</a>.</p>
+<p>We use <a href="https://slsa.dev/spec/v1.0/about" rel="nofollow" target="_blank">SLSA</a> to ensure our builds are reproducible and to adhere to <a href="https://slsa.dev/spec/v1.0/threats-overview">supply chain security practices</a>.</p>
 <p>Within our <a href="https://github.com/aws-powertools/powertools-lambda-python/releases">releases page</a>, you will notice a new metadata file: <code>multiple.intoto.jsonl</code>. It's metadata to describe <strong>where</strong>, <strong>when</strong>, and <strong>how</strong> our build artifacts were produced - or simply, <strong>attestation</strong> in SLSA terminology.</p>
 <p>For this to be useful, we need a <strong>verification tool</strong> - <a href="https://github.com/slsa-framework/slsa-verifier">SLSA Verifier</a>. SLSA Verifier decodes attestation to confirm the authenticity, identity, and the steps we took in our release pipeline (<em>e.g., inputs, git commit/branch, GitHub org/repo, build SHA256, etc.</em>).</p>
 <h4 id="howto">HOWTO<a class="headerlink" href="#howto" title="Permanent link">&para;</a></h4>
@@ -1149,7 +1149,7 @@
 <li><strong>Cleanup</strong> by removing downloaded files to keep your current directory tidy</li>
 </ol>
 <details class="info">
-<summary>Expand or <a href="https://github.com/heitorlessa/aws-lambda-powertools-python/blob/refactor/ci-seal/.github/actions/verify-provenance/verify_provenance.sh#L95" target="_blank">click here</a> to see the script source code</summary>
+<summary>Expand or <a href="https://github.com/heitorlessa/aws-lambda-powertools-python/blob/refactor/ci-seal/.github/actions/verify-provenance/verify_provenance.sh#L95" rel="nofollow" target="_blank">click here</a> to see the script source code</summary>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">.github/actions/verify-provenance/verify_provenance.sh</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
 <span class="normal">  2</span>
 <span class="normal">  3</span>
@@ -1429,7 +1429,7 @@ main
   <small>
     
       Last update:
-      2023-07-13
+      2023-07-26
     
   </small>
 </div>

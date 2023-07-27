@@ -1284,8 +1284,8 @@
 
   <h1>Metrics</h1>
 
-<p>Metrics creates custom metrics asynchronously by logging metrics to standard output following <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html" target="_blank">Amazon CloudWatch Embedded Metric Format (EMF)</a>.</p>
-<p>These metrics can be visualized through <a href="https://console.aws.amazon.com/cloudwatch/" target="_blank">Amazon CloudWatch Console</a>.</p>
+<p>Metrics creates custom metrics asynchronously by logging metrics to standard output following <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html" rel="nofollow" target="_blank">Amazon CloudWatch Embedded Metric Format (EMF)</a>.</p>
+<p>These metrics can be visualized through <a href="https://console.aws.amazon.com/cloudwatch/" rel="nofollow" target="_blank">Amazon CloudWatch Console</a>.</p>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Aggregate up to 100 metrics using a single CloudWatch EMF object (large JSON blob)</li>
@@ -1300,7 +1300,7 @@
 <li><strong>Dimensions</strong>. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example <code>ColdStart</code> metric by Payment <code>service</code>.</li>
 <li><strong>Metric</strong>. It's the name of the metric, for example: <code>SuccessfulBooking</code> or <code>UpdatedBooking</code>.</li>
 <li><strong>Unit</strong>. It's a value representing the unit of measure for the corresponding metric, for example: <code>Count</code> or <code>Seconds</code>.</li>
-<li><strong>Resolution</strong>. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics" target="_blank">here</a>.</li>
+<li><strong>Resolution</strong>. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics" rel="nofollow" target="_blank">here</a>.</li>
 </ul>
 <figure>
   <img src="../../media/metrics_terminology.png" />
@@ -1310,7 +1310,7 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>Metric has two global settings that will be used across all metrics emitted:</p>
 <table>
@@ -1471,7 +1471,7 @@
 <p>Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.</p>
 </details>
 <h3 id="adding-high-resolution-metrics">Adding high-resolution metrics<a class="headerlink" href="#adding-high-resolution-metrics" title="Permanent link">&para;</a></h3>
-<p>You can create <a href="https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/" target="_blank">high-resolution metrics</a> passing <code>resolution</code> parameter to <code>add_metric</code>.</p>
+<p>You can create <a href="https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/" rel="nofollow" target="_blank">high-resolution metrics</a> passing <code>resolution</code> parameter to <code>add_metric</code>.</p>
 <details class="tip" open="open">
 <summary>When is it useful?</summary>
 <p>High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.</p>
@@ -1762,7 +1762,7 @@
 <ul>
 <li>Maximum of 29 user-defined dimensions</li>
 <li>Namespace is set, and no more than one</li>
-<li>Metric units must be <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html" target="_blank">supported by CloudWatch</a></li>
+<li>Metric units must be <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html" rel="nofollow" target="_blank">supported by CloudWatch</a></li>
 </ul>
 </details>
 <h4 id="raising-schemavalidationerror-on-empty-metrics">Raising SchemaValidationError on empty metrics<a class="headerlink" href="#raising-schemavalidationerror-on-empty-metrics" title="Permanent link">&para;</a></h4>
@@ -1881,7 +1881,7 @@
 <p>This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.</p>
 <details class="info" open="open">
 <summary>Info</summary>
-<p>We do not emit 0 as a value for ColdStart metric for cost reasons. <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2C+triage&amp;template=feature_request.md&amp;title=" target="_blank">Let us know</a> if you'd prefer a flag to override it.</p>
+<p>We do not emit 0 as a value for ColdStart metric for cost reasons. <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2C+triage&amp;template=feature_request.md&amp;title=" rel="nofollow" target="_blank">Let us know</a> if you'd prefer a flag to override it.</p>
 </details>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="adding-metadata">Adding metadata<a class="headerlink" href="#adding-metadata" title="Permanent link">&para;</a></h3>
@@ -1980,7 +1980,7 @@
 <p>CloudWatch EMF uses the same dimensions across all your metrics. Use <code>single_metric</code> if you have a metric that should have different dimensions.</p>
 <details class="info" open="open">
 <summary>Info</summary>
-<p>Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing" target="_blank">pay for unique metric</a>. Keep the following formula in mind:</p>
+<p>Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing" rel="nofollow" target="_blank">pay for unique metric</a>. Keep the following formula in mind:</p>
 <p><strong>unique metric = (metric_name + dimension_name + dimension_value)</strong></p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">single_metric.py</label><label for="__tabbed_8_2">single_metric_output.json</label></div>
@@ -2239,14 +2239,15 @@
 <div class="admonition question">
 <p class="admonition-title">Why not changing the default <code>Metrics</code> behaviour to not share data across instances?</p>
 </div>
-<p>This is an intentional design to prevent accidental data deduplication or data loss issues due to <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html" target="_blank">CloudWatch EMF</a> metric dimension constraint.</p>
-<p>In CloudWatch, there are two metric ingestion mechanisms: <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html" target="_blank">EMF (async)</a> and <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data" target="_blank"><code>PutMetricData</code> API (sync)</a>.</p>
+<p>This is an intentional design to prevent accidental data deduplication or data loss issues due to <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html" rel="nofollow" target="_blank">CloudWatch EMF</a> metric dimension constraint.</p>
+<!-- markdownlint-disable-next-line MD013 -->
+<p>In CloudWatch, there are two metric ingestion mechanisms: <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html" rel="nofollow" target="_blank">EMF (async)</a> and <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data" rel="nofollow" target="_blank"><code>PutMetricData</code> API (sync)</a>.</p>
 <p>The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.</p>
 <div class="admonition important">
 <p class="admonition-title">Key concept</p>
-<p>CloudWatch <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric" target="_blank">considers a metric unique</a> by a combination of metric <strong>name</strong>, metric <strong>namespace</strong>, and zero or more metric <strong>dimensions</strong>.</p>
+<p>CloudWatch <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric" rel="nofollow" target="_blank">considers a metric unique</a> by a combination of metric <strong>name</strong>, metric <strong>namespace</strong>, and zero or more metric <strong>dimensions</strong>.</p>
 </div>
-<p>With EMF, metric dimensions are shared with any metrics you define. With <code>PutMetricData</code> API, you can set a <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html" target="_blank">list</a> defining one or more metrics with distinct dimensions.</p>
+<p>With EMF, metric dimensions are shared with any metrics you define. With <code>PutMetricData</code> API, you can set a <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html" rel="nofollow" target="_blank">list</a> defining one or more metrics with distinct dimensions.</p>
 <p>This is a subtle yet important distinction. Imagine you had the following metrics to emit:</p>
 <table>
 <thead>
@@ -2297,7 +2298,7 @@
 </ul>
 <p>For example, <code>Metrics(namespace="ServerlessAirline", service="booking")</code></p>
 </details>
-<p>Make sure to set <code>POWERTOOLS_METRICS_NAMESPACE</code> and <code>POWERTOOLS_SERVICE_NAME</code> before running your tests to prevent failing on <code>SchemaValidation</code> exception. You can set it before you run tests or via pytest plugins like <a href="https://pypi.org/project/pytest-dotenv/" target="_blank">dotenv</a>.</p>
+<p>Make sure to set <code>POWERTOOLS_METRICS_NAMESPACE</code> and <code>POWERTOOLS_SERVICE_NAME</code> before running your tests to prevent failing on <code>SchemaValidation</code> exception. You can set it before you run tests or via pytest plugins like <a href="https://pypi.org/project/pytest-dotenv/" rel="nofollow" target="_blank">dotenv</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Injecting dummy Metric Namespace before running tests</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nv">POWERTOOLS_SERVICE_NAME</span><span class="o">=</span><span class="s2">&quot;booking&quot;</span><span class="w"> </span><span class="nv">POWERTOOLS_METRICS_NAMESPACE</span><span class="o">=</span><span class="s2">&quot;ServerlessAirline&quot;</span><span class="w"> </span>python<span class="w"> </span>-m<span class="w"> </span>pytest
 </code></pre></div></td></tr></table></div>
 <h3 id="clearing-metrics">Clearing metrics<a class="headerlink" href="#clearing-metrics" title="Permanent link">&para;</a></h3>
@@ -2485,7 +2486,7 @@
 </div>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>For more elaborate assertions and comparisons, check out <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py" target="_blank">our functional testing for Metrics utility.</a></p>
+<p>For more elaborate assertions and comparisons, check out <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py" rel="nofollow" target="_blank">our functional testing for Metrics utility.</a></p>
 </details>
 
   <hr>
@@ -2493,7 +2494,7 @@
   <small>
     
       Last update:
-      2023-07-12
+      2023-07-26
     
   </small>
 </div>

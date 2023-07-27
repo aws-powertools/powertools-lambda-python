@@ -710,9 +710,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    Error handling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#partial-failure-mechanics" class="md-nav__link">
     Partial failure mechanics
   </a>
+  
+    <nav class="md-nav" aria-label="Partial failure mechanics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sqs-standard" class="md-nav__link">
+    SQS Standard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sqs-fifo" class="md-nav__link">
+    SQS FIFO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kinesis-and-dynamodb-streams" class="md-nav__link">
+    Kinesis and DynamoDB Streams
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1205,9 +1239,43 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#error-handling" class="md-nav__link">
+    Error handling
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#partial-failure-mechanics" class="md-nav__link">
     Partial failure mechanics
   </a>
+  
+    <nav class="md-nav" aria-label="Partial failure mechanics">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sqs-standard" class="md-nav__link">
+    SQS Standard
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sqs-fifo" class="md-nav__link">
+    SQS FIFO
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kinesis-and-dynamodb-streams" class="md-nav__link">
+    Kinesis and DynamoDB Streams
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -1353,6 +1421,27 @@
   <h1>Batch Processing</h1>
 
 <p>The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, and Amazon DynamoDB Streams.</p>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    BatchSource: Amazon SQS &lt;br/&gt;&lt;br/&gt; Amazon Kinesis Data Streams &lt;br/&gt;&lt;br/&gt; Amazon DynamoDB Streams &lt;br/&gt;&lt;br/&gt;
+    LambdaInit: Lambda invocation
+    BatchProcessor: Batch Processor
+    RecordHandler: Record Handler function
+    YourLogic: Your logic to process each batch item
+    LambdaResponse: Lambda response
+
+    BatchSource --&gt; LambdaInit
+
+    LambdaInit --&gt; BatchProcessor
+    BatchProcessor --&gt; RecordHandler
+
+    state BatchProcessor {
+        [*] --&gt; RecordHandler: Your function
+        RecordHandler --&gt; YourLogic
+    }
+
+    RecordHandler --&gt; BatchProcessor: Collect results
+    BatchProcessor --&gt; LambdaResponse: Report items that failed processing</code></pre>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
 <li>Reports batch item failures to reduce number of retries for a record upon errors</li>
@@ -1362,24 +1451,33 @@
 </ul>
 <h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">&para;</a></h2>
 <p>When using SQS, Kinesis Data Streams, or DynamoDB Streams as a Lambda event source, your Lambda functions are triggered with a batch of messages.</p>
-<p>If your function fails to process any message from the batch, the entire batch returns to your queue or stream. This same batch is then retried until either condition happens first: <strong>a)</strong> your Lambda function returns a successful response, <strong>b)</strong> record reaches maximum retry attempts, or <strong>c)</strong> when records expire.</p>
-<p>With this utility, batch records are processed individually – only messages that failed to be processed return to the queue or stream for a further retry. This works when two mechanisms are in place:</p>
-<ol>
-<li><code>ReportBatchItemFailures</code> is set in your SQS, Kinesis, or DynamoDB event source properties</li>
-<li><a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" target="_blank">A specific response</a> is returned so Lambda knows which records should not be deleted during partial responses</li>
-</ol>
+<p>If your function fails to process any message from the batch, the entire batch returns to your queue or stream. This same batch is then retried until either condition happens first: <strong>a)</strong> your Lambda function returns a successful response, <strong>b)</strong> record reaches maximum retry attempts, or <strong>c)</strong> records expire.</p>
+<pre class="mermaid"><code>journey
+  section Conditions
+    Successful response: 5: Success
+    Maximum retries: 3: Failure
+    Records expired: 1: Failure</code></pre>
+<p>This behavior changes when you enable Report Batch Item Failures feature in your Lambda function event source configuration:</p>
+<!-- markdownlint-disable MD013 -->
+<ul>
+<li><a href="#sqs-standard"><strong>SQS queues</strong></a>. Only messages reported as failure will return to the queue for a retry, while successful ones will be deleted.</li>
+<li><a href="#kinesis-and-dynamodb-streams"><strong>Kinesis data streams</strong></a> and <a href="#kinesis-and-dynamodb-streams"><strong>DynamoDB streams</strong></a>. Single reported failure will use its sequence number as the stream checkpoint. Multiple  reported failures will use the lowest sequence number as checkpoint.</li>
+</ul>
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
 <details class="warning" open="open">
 <summary>Warning: This utility lowers the chance of processing records more than once; it does not guarantee it</summary>
-<p>We recommend implementing processing logic in an <a href="../idempotency/" target="_blank">idempotent manner</a> wherever possible.</p>
-<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
+<p>We recommend implementing processing logic in an <a href="../idempotency/" rel="nofollow" target="_blank">idempotent manner</a> wherever possible.</p>
+<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" rel="nofollow" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" rel="nofollow" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" rel="nofollow" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
 </details>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
-<p>Regardless whether you're using SQS, Kinesis Data Streams or DynamoDB Streams, you must configure your Lambda function event source to use <code>ReportBatchItemFailures</code>.</p>
-<p>You do not need any additional IAM permissions to use this utility, except for what each event source requires.</p>
+<p>For this feature to work, you need to <strong>(1)</strong> configure your Lambda function event source to use <code>ReportBatchItemFailures</code>, and <strong>(2)</strong> return <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" rel="nofollow" target="_blank">a specific response</a> to report which records failed to be processed.</p>
+<p>You use your preferred deployment framework to set the correct configuration while this utility handles the correct response to be returned.</p>
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
 <p>The remaining sections of the documentation will rely on these samples. For completeness, this demonstrates IAM permissions and Dead Letter Queue where batch records will be sent after 2 retries were attempted.</p>
+<div class="admonition note">
+<p class="admonition-title">You do not need any additional IAM permissions to use this utility, except for what each event source requires.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">SQS</label><label for="__tabbed_1_2">Kinesis Data Streams</label><label for="__tabbed_1_3">DynamoDB Streams</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1724,13 +1822,12 @@
 <p>Processing batches from SQS works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.SQS</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" rel="nofollow" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
-<details class="info" open="open">
-<summary>Info</summary>
-<p>This code example optionally uses Tracer and Logger for completion.</p>
-</details>
+<div class="admonition info">
+<p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Recommended</label><label for="__tabbed_2_2">As a context manager</label><label for="__tabbed_2_3">As a decorator (legacy)</label><label for="__tabbed_2_4">Sample response</label><label for="__tabbed_2_5">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1761,9 +1858,8 @@
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span class="hll">    <span class="n">BatchProcessor</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">EventType</span><span class="p">,</span>
@@ -1772,24 +1868,32 @@
 </span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>  <span class="c1"># (1)!</span>
 </span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
-<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
-</span>    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">body</span>
-    <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
-        <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>  <span class="c1"># (2)!</span>
+</span>    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">json_body</span>  <span class="c1"># if json string data, otherwise record.body for str</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+<span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span>  <span class="c1"># (3)!</span>
+</span>        <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+        <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span>
+        <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span>
+        <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li><strong>Step 1</strong>. Creates a partial failure batch processor for SQS queues. See <a href="#partial-failure-mechanics">partial failure mechanics for details</a></li>
+<li><strong>Step 2</strong>. Defines a function to receive one record at a time from the batch</li>
+<li><strong>Step 3</strong>. Kicks off processing</li>
+</ol>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2005,7 +2109,7 @@
 </div>
 </div>
 <h4 id="fifo-queues">FIFO queues<a class="headerlink" href="#fifo-queues" title="Permanent link">&para;</a></h4>
-<p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
+<p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" rel="nofollow" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
 This helps preserve the ordering of messages in your queue.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Recommended</label><label for="__tabbed_3_2">As a context manager</label><label for="__tabbed_3_3">As a decorator (legacy)</label></div>
 <div class="tabbed-content">
@@ -2032,31 +2136,23 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
-<span class="hll">    <span class="n">SqsFifoPartialProcessor</span><span class="p">,</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span class="hll">    <span class="n">SqsFifoPartialProcessor</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">process_partial_response</span><span class="p">,</span>
-</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+</span><span class="hll"><span class="p">)</span>
+</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">SqsFifoPartialProcessor</span><span class="p">()</span>
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">SqsFifoPartialProcessor</span><span class="p">()</span>  <span class="c1"># (1)!</span>
 </span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
 <span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
-    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">body</span>
-    <span class="k">if</span> <span class="n">payload</span><span class="p">:</span>
-        <span class="n">item</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">json_body</span>  <span class="c1"># if json string data, otherwise record.body for str</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
@@ -2064,6 +2160,9 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
+<ol>
+<li><strong>Step 1</strong>. Creates a partial failure batch processor for SQS FIFO queues. See <a href="#partial-failure-mechanics">partial failure mechanics for details</a></li>
+</ol>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2187,13 +2286,12 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from Kinesis works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.KinesisDataStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" rel="nofollow" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
-<details class="info" open="open">
-<summary>Info</summary>
-<p>This code example optionally uses Tracer and Logger for completion.</p>
-</details>
+<div class="admonition info">
+<p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:5"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Recommended</label><label for="__tabbed_4_2">As a context manager</label><label for="__tabbed_4_3">As a decorator (legacy)</label><label for="__tabbed_4_4">Sample response</label><label for="__tabbed_4_5">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2234,7 +2332,7 @@ This helps preserve the ordering of messages in your queue.</p>
 </span><span class="hll"><span class="p">)</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">KinesisDataStreams</span><span class="p">)</span>
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">KinesisDataStreams</span><span class="p">)</span>  <span class="c1"># (1)!</span>
 </span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
@@ -2251,6 +2349,9 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
+<ol>
+<li><strong>Step 1</strong>. Creates a partial failure batch processor for Kinesis Data Streams. See <a href="#partial-failure-mechanics">partial failure mechanics for details</a></li>
+</ol>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2465,13 +2566,12 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from DynamoDB Streams works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.DynamoDBStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" rel="nofollow" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
-<details class="info" open="open">
-<summary>Info</summary>
-<p>This code example optionally uses Tracer and Logger for completion.</p>
-</details>
+<div class="admonition info">
+<p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:5"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><input id="__tabbed_5_4" name="__tabbed_5" type="radio" /><input id="__tabbed_5_5" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Recommended</label><label for="__tabbed_5_2">As a context manager</label><label for="__tabbed_5_3">As a decorator (legacy)</label><label for="__tabbed_5_4">Sample response</label><label for="__tabbed_5_5">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2519,7 +2619,7 @@ This helps preserve the ordering of messages in your queue.</p>
 </span><span class="hll"><span class="p">)</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">DynamoDBStreams</span><span class="p">)</span>
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">DynamoDBStreams</span><span class="p">)</span>  <span class="c1"># (1)!</span>
 </span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
@@ -2539,6 +2639,9 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
+<ol>
+<li><strong>Step 1</strong>. Creates a partial failure batch processor for DynamoDB Streams. See <a href="#partial-failure-mechanics">partial failure mechanics for details</a></li>
+</ol>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2797,22 +2900,220 @@ This helps preserve the ordering of messages in your queue.</p>
 </div>
 </div>
 </div>
+<h3 id="error-handling">Error handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
+<p>By default, we catch any exception raised by your record handler function. This allows us to <strong>(1)</strong> continue processing the batch, <strong>(2)</strong> collect each batch item that failed processing, and <strong>(3)</strong> return the appropriate  response correctly without failing your Lambda function execution.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Sample error handling with custom exception</label><label for="__tabbed_6_2">Sample response</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BatchProcessor</span><span class="p">,</span>
+    <span class="n">EventType</span><span class="p">,</span>
+    <span class="n">process_partial_response</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="k">class</span> <span class="nc">InvalidPayload</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
+<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">body</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">payload</span><span class="p">:</span>
+<span class="hll">        <span class="k">raise</span> <span class="n">InvalidPayload</span><span class="p">(</span><span class="s2">&quot;Payload does not contain minimum information to be processed.&quot;</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+</span>
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span>  <span class="c1"># (2)!</span>
+        <span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span>
+        <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span>
+        <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span>
+        <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">,</span>
+    <span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>
+<p>Any exception works here. See <a href="#extending-batchprocessor">extending BatchProcessor section, if you want to override this behavior.</a></p>
+</li>
+<li>
+<p>Exceptions raised in <code>record_handler</code> will propagate to <code>process_partial_response</code>. <br/><br/> We catch them and include each failed batch item identifier in the response dictionary (see <code>Sample response</code> tab).</p>
+</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;batchItemFailures&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;itemIdentifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;244fc6b4-87a3-44ab-83d2-361172410c3a&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="partial-failure-mechanics">Partial failure mechanics<a class="headerlink" href="#partial-failure-mechanics" title="Permanent link">&para;</a></h3>
-<p>All records in the batch will be passed to this handler for processing, even if exceptions are thrown - Here's the behaviour after completing the batch:</p>
+<p>All batch items will be passed to the record handler for processing, even if exceptions are thrown - Here's the behavior after completing the batch:</p>
 <ul>
 <li><strong>All records successfully processed</strong>. We will return an empty list of item failures <code>{'batchItemFailures': []}</code></li>
 <li><strong>Partial success with some exceptions</strong>. We will return a list of all item IDs/sequence numbers that failed processing</li>
 <li><strong>All records failed to be processed</strong>. We will raise <code>BatchProcessingError</code> exception with a list of all exceptions raised when processing</li>
 </ul>
-<h3 id="processing-messages-asynchronously">Processing messages asynchronously<a class="headerlink" href="#processing-messages-asynchronously" title="Permanent link">&para;</a></h3>
-<div class="admonition tip">
-<p class="admonition-title">New to AsyncIO? Read this <a href="https://realpython.com/async-io-python/" target="_blank">comprehensive guide first</a>.</p>
+<p>The following sequence diagrams explain how each Batch processor behaves under different scenarios.</p>
+<h4 id="sqs-standard">SQS Standard<a class="headerlink" href="#sqs-standard" title="Permanent link">&para;</a></h4>
+<blockquote>
+<p>Read more about <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" target="_blank">Batch Failure Reporting feature in AWS Lambda</a>.</p>
+</blockquote>
+<p>Sequence diagram to explain how <a href="#processing-messages-from-sqs"><code>BatchProcessor</code> works</a> with SQS Standard queues.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service-&gt;&gt;SQS queue: Poll
+    Lambda service-&gt;&gt;Lambda function: Invoke (batch event)
+    Lambda function-&gt;&gt;Lambda service: Report some failed messages
+    activate SQS queue
+    Lambda service-&gt;&gt;SQS queue: Delete successful messages
+    SQS queue--&gt;&gt;SQS queue: Failed messages return
+    Note over SQS queue,Lambda service: Process repeat
+    deactivate SQS queue</code></pre>
+<i>SQS mechanism with Batch Item Failures</i>
+</center></p>
+<h4 id="sqs-fifo">SQS FIFO<a class="headerlink" href="#sqs-fifo" title="Permanent link">&para;</a></h4>
+<blockquote>
+<p>Read more about <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" target="_blank">Batch Failure Reporting feature in AWS Lambda</a>.</p>
+</blockquote>
+<p>Sequence diagram to explain how <a href="#fifo-queues"><code>SqsFifoPartialProcessor</code> works</a> with SQS FIFO queues.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service-&gt;&gt;SQS queue: Poll
+    Lambda service-&gt;&gt;Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function--&gt;Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function-&gt;&gt;Lambda service: Report 3rd batch item and unprocessed messages as failure
+    deactivate Lambda function
+    activate SQS queue
+    Lambda service-&gt;&gt;SQS queue: Delete successful messages (1-2)
+    SQS queue--&gt;&gt;SQS queue: Failed messages return (3-10)
+    deactivate SQS queue</code></pre>
+<i>SQS FIFO mechanism with Batch Item Failures</i>
+</center></p>
+<h4 id="kinesis-and-dynamodb-streams">Kinesis and DynamoDB Streams<a class="headerlink" href="#kinesis-and-dynamodb-streams" title="Permanent link">&para;</a></h4>
+<blockquote>
+<p>Read more about <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#services-kinesis-batchfailurereporting" target="_blank">Batch Failure Reporting feature</a>.</p>
+</blockquote>
+<p>Sequence diagram to explain how <code>BatchProcessor</code> works with both <a href="#processing-messages-from-kinesis">Kinesis Data Streams</a> and <a href="#processing-messages-from-dynamodb">DynamoDB Streams</a>.</p>
+<p>For brevity, we will use <code>Streams</code> to refer to either services. For theory on stream checkpoints, see this <a href="https://aws.amazon.com/blogs/compute/optimizing-batch-processing-with-custom-checkpoints-in-aws-lambda/" target="_blank">blog post</a></p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Streams
+    participant Lambda service
+    participant Lambda function
+    Lambda service-&gt;&gt;Streams: Poll latest records
+    Lambda service-&gt;&gt;Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function--&gt;Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function--&gt;Lambda function: Continue processing batch items (4-10)
+    Lambda function-&gt;&gt;Lambda service: Report batch item as failure (3)
+    deactivate Lambda function
+    activate Streams
+    Lambda service-&gt;&gt;Streams: Checkpoints to sequence number from 3rd batch item
+    Lambda service-&gt;&gt;Streams: Poll records starting from updated checkpoint
+    deactivate Streams</code></pre>
+<i>Kinesis and DynamoDB streams mechanism with single batch item failure</i>
+</center></p>
+<p>The behavior changes slightly when there are multiple item failures. Stream checkpoint is updated to the lowest sequence number reported.</p>
+<div class="admonition important">
+<p class="admonition-title">Note that the batch item sequence number could be different from batch item number in the illustration.</p>
 </div>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Streams
+    participant Lambda service
+    participant Lambda function
+    Lambda service-&gt;&gt;Streams: Poll latest records
+    Lambda service-&gt;&gt;Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function--&gt;Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3-5 batch items
+    Lambda function--&gt;Lambda function: Continue processing batch items (6-10)
+    Lambda function-&gt;&gt;Lambda service: Report batch items as failure (3-5)
+    deactivate Lambda function
+    activate Streams
+    Lambda service-&gt;&gt;Streams: Checkpoints to lowest sequence number
+    Lambda service-&gt;&gt;Streams: Poll records starting from updated checkpoint
+    deactivate Streams</code></pre>
+<i>Kinesis and DynamoDB streams mechanism with multiple batch item failures</i>
+</center></p>
+<h3 id="processing-messages-asynchronously">Processing messages asynchronously<a class="headerlink" href="#processing-messages-asynchronously" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>New to AsyncIO? Read this <a href="https://realpython.com/async-io-python/" rel="nofollow" target="_blank">comprehensive guide first</a>.</p>
+</blockquote>
 <p>You can use <code>AsyncBatchProcessor</code> class and <code>async_process_partial_response</code> function to process messages concurrently.</p>
 <details class="question" open="open">
 <summary>When is this useful?</summary>
 <p>Your use case might be able to process multiple records at the same time without conflicting with one another.</p>
-<p>For example, imagine you need to process multiple loyalty points and incrementally save in a database. While you await the database to confirm your records are saved, you could start processing another request concurrently.</p>
+<p>For example, imagine you need to process multiple loyalty points and incrementally save them in the database. While you await the database to confirm your records are saved, you could start processing another request concurrently.</p>
 <p>The reason this is not the default behaviour is that not all use cases can handle concurrency safely (e.g., loyalty points must be updated in order).</p>
 </details>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">High-concurrency with AsyncBatchProcessor</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2875,14 +3176,13 @@ This helps preserve the ordering of messages in your queue.</p>
 </code></pre></div></td></tr></table></div>
 <details class="warning" open="open">
 <summary>Using tracer?</summary>
-<p><code>AsyncBatchProcessor</code> uses <code>asyncio.gather</code> which can cause side effects and reach trace limits at high concurrency.</p>
-<p>See <a href="../../core/tracer/#concurrent-asynchronous-functions" target="_blank">Tracing concurrent asynchronous functions</a>.</p>
+<p><code>AsyncBatchProcessor</code> uses <code>asyncio.gather</code>. This might cause <a href="../../core/tracer/#concurrent-asynchronous-functions" target="_blank">side effects and reach trace limits at high concurrency</a>.</p>
 </details>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="pydantic-integration">Pydantic integration<a class="headerlink" href="#pydantic-integration" title="Permanent link">&para;</a></h3>
 <p>You can bring your own Pydantic models via <strong><code>model</code></strong> parameter when inheriting from <strong><code>SqsRecordModel</code></strong>, <strong><code>KinesisDataStreamRecord</code></strong>, or <strong><code>DynamoDBStreamRecordModel</code></strong></p>
 <p>Inheritance is importance because we need to access message IDs and sequence numbers from these records in the event of failure. Mypy is fully integrated with this utility, so it should identify whether you're passing the incorrect Model.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:6"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><input id="__tabbed_6_5" name="__tabbed_6" type="radio" /><input id="__tabbed_6_6" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">SQS</label><label for="__tabbed_6_2">SQS - Sample Event </label><label for="__tabbed_6_3">Kinesis Data Streams</label><label for="__tabbed_6_4">Kinesis - Sample Event </label><label for="__tabbed_6_5">DynamoDB Streams</label><label for="__tabbed_6_6">DynamoDB - Sample Event </label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:6"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><input id="__tabbed_7_6" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQS</label><label for="__tabbed_7_2">SQS - Sample Event </label><label for="__tabbed_7_3">Kinesis Data Streams</label><label for="__tabbed_7_4">Kinesis - Sample Event </label><label for="__tabbed_7_5">DynamoDB Streams</label><label for="__tabbed_7_6">DynamoDB - Sample Event </label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2939,8 +3239,8 @@ This helps preserve the ordering of messages in your queue.</p>
 </span>    <span class="n">body</span><span class="p">:</span> <span class="n">Json</span><span class="p">[</span><span class="n">Order</span><span class="p">]</span>  <span class="c1"># deserialize order data from JSON string</span>
 
 
-<span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">OrderSqsRecord</span><span class="p">)</span>
-<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">OrderSqsRecord</span><span class="p">)</span>
+</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
@@ -3415,10 +3715,16 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="accessing-processed-messages">Accessing processed messages<a class="headerlink" href="#accessing-processed-messages" title="Permanent link">&para;</a></h3>
 <p>Use the context manager to access a list of all returned values from your <code>record_handler</code> function.</p>
 <ul>
-<li><strong>When successful</strong>. We will include a tuple with <code>success</code>, the result of <code>record_handler</code>, and the batch record</li>
-<li><strong>When failed</strong>. We will include a tuple with <code>fail</code>, exception as a string, and the batch record</li>
+<li><strong>When successful</strong>. We include a tuple with <strong>1/</strong> <code>success</code>, <strong>2/</strong> the result of <code>record_handler</code>, and <strong>3/</strong> the batch item</li>
+<li><strong>When failed</strong>. We include a tuple with <strong>1/</strong> <code>fail</code>, <strong>2/</strong> exception as a string, and <strong>3/</strong> the batch item serialized as Event Source Data Class or Pydantic model.</li>
 </ul>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Accessing processed messages via context manager</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<div class="admonition note">
+<p class="admonition-title">If a Pydantic model fails validation early, we serialize its failure record as Event Source Data Class to be able to collect message ID/sequence numbers etc.</p>
+</div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Accessing raw processed messages</label><label for="__tabbed_8_2">Sample processed messages</label><label for="__tabbed_8_3">Sample processed messages (Pydantic)</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
 <span class="normal"> 4</span>
@@ -3456,7 +3762,8 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
@@ -3483,23 +3790,100 @@ This helps preserve the ordering of messages in your queue.</p>
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
-<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-</span><span class="hll">    <span class="n">batch</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+<span class="hll">    <span class="n">batch</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>  <span class="c1"># (1)!</span>
 </span><span class="hll">    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="o">=</span><span class="n">batch</span><span class="p">,</span> <span class="n">handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">):</span>
 </span><span class="hll">        <span class="n">processed_messages</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
 </span><span class="hll">
 </span><span class="hll">    <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">processed_messages</span><span class="p">:</span>
-</span>        <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">)</span>
+</span><span class="hll">        <span class="n">status</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;success&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fail&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span class="hll">        <span class="n">cause</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># (2)!</span>
+</span><span class="hll">        <span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span> <span class="o">=</span> <span class="n">message</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">record</span><span class="o">=</span><span class="n">record</span><span class="p">,</span> <span class="n">cause</span><span class="o">=</span><span class="n">cause</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
+<ol>
+<li>Context manager requires the records list. This is typically handled by <code>process_partial_response</code>.</li>
+<li>Cause contains <code>exception</code> str if failed, or <code>success</code> otherwise.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;fail&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;&lt;class &#39;Exception&#39;: Failed to process record&quot;</span><span class="p">,</span>  <span class="c1"># (1)!</span>
+        <span class="o">&lt;</span><span class="n">aws_lambda_powertools</span><span class="o">.</span><span class="n">utilities</span><span class="o">.</span><span class="n">data_classes</span><span class="o">.</span><span class="n">sqs_event</span><span class="o">.</span><span class="n">SQSRecord</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x103c590a0</span><span class="o">&gt;</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;messageId&#39;</span><span class="p">:</span> <span class="s1">&#39;88891c36-32eb-4a25-9905-654a32916893&#39;</span><span class="p">,</span> <span class="s1">&#39;receiptHandle&#39;</span><span class="p">:</span> <span class="s1">&#39;AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a&#39;</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;attributes&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;ApproximateReceiveCount&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;SentTimestamp&#39;</span><span class="p">:</span> <span class="s1">&#39;1545082649183&#39;</span><span class="p">,</span> <span class="s1">&#39;SenderId&#39;</span><span class="p">:</span> <span class="s1">&#39;AIDAIENQZJOLO23YVJ4VO&#39;</span><span class="p">,</span> <span class="s1">&#39;ApproximateFirstReceiveTimestamp&#39;</span><span class="p">:</span> <span class="s1">&#39;1545082649185&#39;</span><span class="p">},</span> <span class="s1">&#39;messageAttributes&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;md5OfBody&#39;</span><span class="p">:</span> <span class="s1">&#39;e4e68fb7bd0e697a0ae8f1bb342846b3&#39;</span><span class="p">,</span> <span class="s1">&#39;eventSource&#39;</span><span class="p">:</span> <span class="s1">&#39;aws:sqs&#39;</span><span class="p">,</span> <span class="s1">&#39;eventSourceARN&#39;</span><span class="p">:</span> <span class="s1">&#39;arn:aws:sqs:us-east-2:123456789012:my-queue&#39;</span><span class="p">,</span> <span class="s1">&#39;awsRegion&#39;</span><span class="p">:</span> <span class="s1">&#39;us-east-1&#39;</span><span class="p">}</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>Sample exception could have raised from within <code>record_handler</code> function.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;fail&quot;</span><span class="p">,</span> <span class="c1"># (1)!</span>
+        <span class="s2">&quot;&lt;class &#39;pydantic.error_wrappers.ValidationError&#39;&gt;:1 validation error for OrderSqs</span><span class="se">\n</span><span class="s2">body</span><span class="se">\n</span><span class="s2">  JSON object must be str, bytes or bytearray (type=type_error.json)&quot;</span><span class="p">,</span>
+        <span class="o">&lt;</span><span class="n">aws_lambda_powertools</span><span class="o">.</span><span class="n">utilities</span><span class="o">.</span><span class="n">data_classes</span><span class="o">.</span><span class="n">sqs_event</span><span class="o">.</span><span class="n">SQSRecord</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x103c590a0</span><span class="o">&gt;</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;success&quot;</span><span class="p">,</span>
+        <span class="p">{</span><span class="s1">&#39;messageId&#39;</span><span class="p">:</span> <span class="s1">&#39;88891c36-32eb-4a25-9905-654a32916893&#39;</span><span class="p">,</span> <span class="s1">&#39;receiptHandle&#39;</span><span class="p">:</span> <span class="s1">&#39;AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a&#39;</span><span class="p">,</span> <span class="s1">&#39;body&#39;</span><span class="p">:</span> <span class="s1">&#39;success&#39;</span><span class="p">,</span> <span class="s1">&#39;attributes&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;ApproximateReceiveCount&#39;</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="s1">&#39;SentTimestamp&#39;</span><span class="p">:</span> <span class="s1">&#39;1545082649183&#39;</span><span class="p">,</span> <span class="s1">&#39;SenderId&#39;</span><span class="p">:</span> <span class="s1">&#39;AIDAIENQZJOLO23YVJ4VO&#39;</span><span class="p">,</span> <span class="s1">&#39;ApproximateFirstReceiveTimestamp&#39;</span><span class="p">:</span> <span class="s1">&#39;1545082649185&#39;</span><span class="p">},</span> <span class="s1">&#39;messageAttributes&#39;</span><span class="p">:</span> <span class="p">{},</span> <span class="s1">&#39;md5OfBody&#39;</span><span class="p">:</span> <span class="s1">&#39;e4e68fb7bd0e697a0ae8f1bb342846b3&#39;</span><span class="p">,</span> <span class="s1">&#39;eventSource&#39;</span><span class="p">:</span> <span class="s1">&#39;aws:sqs&#39;</span><span class="p">,</span> <span class="s1">&#39;eventSourceARN&#39;</span><span class="p">:</span> <span class="s1">&#39;arn:aws:sqs:us-east-2:123456789012:my-queue&#39;</span><span class="p">,</span> <span class="s1">&#39;awsRegion&#39;</span><span class="p">:</span> <span class="s1">&#39;us-east-1&#39;</span><span class="p">}</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="s2">&quot;fail&quot;</span><span class="p">,</span>  <span class="c1"># (2)!</span>
+        <span class="s2">&quot;&lt;class &#39;Exception&#39;&gt;:Failed to process record.&quot;</span><span class="p">,</span>
+        <span class="n">OrderSqs</span><span class="p">(</span><span class="n">messageId</span><span class="o">=</span><span class="s1">&#39;9d0bfba5-d213-4b64-89bd-f4fbd7e58358&#39;</span><span class="p">,</span> <span class="n">receiptHandle</span><span class="o">=</span><span class="s1">&#39;AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a&#39;</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;fail&#39;</span><span class="p">}),</span> <span class="n">attributes</span><span class="o">=</span><span class="n">SqsAttributesModel</span><span class="p">(</span><span class="n">ApproximateReceiveCount</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">ApproximateFirstReceiveTimestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2018</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">185000</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span> <span class="n">MessageDeduplicationId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">MessageGroupId</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">SenderId</span><span class="o">=</span><span class="s1">&#39;AIDAIENQZJOLO23YVJ4VO&#39;</span><span class="p">,</span> <span class="n">SentTimestamp</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2018</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">37</span><span class="p">,</span> <span class="mi">29</span><span class="p">,</span> <span class="mi">183000</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span> <span class="n">SequenceNumber</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">AWSTraceHeader</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">messageAttributes</span><span class="o">=</span><span class="p">{},</span> <span class="n">md5OfBody</span><span class="o">=</span><span class="s1">&#39;e4e68fb7bd0e697a0ae8f1bb342846b3&#39;</span><span class="p">,</span> <span class="n">md5OfMessageAttributes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eventSource</span><span class="o">=</span><span class="s1">&#39;aws:sqs&#39;</span><span class="p">,</span> <span class="n">eventSourceARN</span><span class="o">=</span><span class="s1">&#39;arn:aws:sqs:us-east-2:123456789012:my-queue&#39;</span><span class="p">,</span> <span class="n">awsRegion</span><span class="o">=</span><span class="s1">&#39;us-east-1&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+<span class="p">]</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>Sample when a model fails validation early. <br/><br/> Batch item (3rd item) is serialized to the respective Event Source Data Class event type.</li>
+<li>Sample when model validated successfully but another exception was raised during processing.</li>
+</ol>
+</div>
+</div>
+</div>
 <h3 id="accessing-lambda-context">Accessing Lambda Context<a class="headerlink" href="#accessing-lambda-context" title="Permanent link">&para;</a></h3>
 <p>Within your <code>record_handler</code> function, you might need access to the Lambda context to determine how much time you have left before your function times out.</p>
-<p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:3"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Recommended</label><label for="__tabbed_7_2">As a decorator (legacy)</label><label for="__tabbed_7_3">As a context manager</label></div>
+<p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" rel="nofollow" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Recommended</label><label for="__tabbed_9_2">As a decorator (legacy)</label><label for="__tabbed_9_3">As a context manager</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3762,6 +4146,28 @@ This helps preserve the ordering of messages in your queue.</p>
 </span></code></pre></div></td></tr></table></div>
 <h3 id="create-your-own-partial-processor">Create your own partial processor<a class="headerlink" href="#create-your-own-partial-processor" title="Permanent link">&para;</a></h3>
 <p>You can create your own partial batch processor from scratch by inheriting the <code>BasePartialProcessor</code> class, and implementing <code>_prepare()</code>, <code>_clean()</code>, <code>_process_record()</code> and <code>_async_process_record()</code>.</p>
+<!-- markdownlint-disable MD031 MD040 -->
+<p><center>
+<pre class="mermaid"><code>classDiagram
+    direction LR
+    class BasePartialProcessor {
+        &lt;&lt;interface&gt;&gt;
+        +_prepare()
+        +_clean()
+        +_process_record_(record: Dict)
+        +_async_process_record_()
+    }
+
+    class YourCustomProcessor {
+        +_prepare()
+        +_clean()
+        +_process_record_(record: Dict)
+        +_async_process_record_()
+    }
+
+    BasePartialProcessor &lt;|-- YourCustomProcessor : implement</code></pre>
+<i>Visual representation to bring your own processor</i>
+</center></p>
 <ul>
 <li><strong><code>_process_record()</code></strong> – handles all processing logic for each individual message of a batch, including calling the <code>record_handler</code> (self.handler)</li>
 <li><strong><code>_prepare()</code></strong> – called once as part of the processor initialization</li>
@@ -3920,7 +4326,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h3>
 <h4 id="tracer-response-auto-capture-for-large-batch-sizes">Tracer response auto-capture for large batch sizes<a class="headerlink" href="#tracer-response-auto-capture-for-large-batch-sizes" title="Permanent link">&para;</a></h4>
 <p>When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your <code>record_handler</code> function, or how big is your batch size.</p>
-<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" target="_blank">Tracer to disable response auto-capturing</a>.</p>
+<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" rel="nofollow" target="_blank">Tracer to disable response auto-capturing</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Disabling Tracer response auto-capturing</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -3981,7 +4387,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>As there is no external calls, you can unit test your code with <code>BatchProcessor</code> quite easily.</p>
 <p><strong>Example</strong>:</p>
 <p>Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">getting_started_with_test.py</label><label for="__tabbed_8_2">getting_started_with_test_app.py</label><label for="__tabbed_8_3">Sample SQS event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">getting_started_with_test.py</label><label for="__tabbed_10_2">getting_started_with_test_app.py</label><label for="__tabbed_10_3">Sample SQS event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4218,7 +4624,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="integrating-exception-handling-with-sentryio">Integrating exception handling with Sentry.io<a class="headerlink" href="#integrating-exception-handling-with-sentryio" title="Permanent link">&para;</a></h3>
 <p>When using Sentry.io for error monitoring, you can override <code>failure_handler</code> to capture each processing exception with Sentry SDK:</p>
 <blockquote>
-<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" target="_blank">Charles-Axel Dein</a></p>
+<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" rel="nofollow" target="_blank">Charles-Axel Dein</a></p>
 </blockquote>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Integrating error tracking with Sentry.io</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -4244,7 +4650,7 @@ This helps preserve the ordering of messages in your queue.</p>
   <small>
     
       Last update:
-      2023-07-07
+      2023-07-27
     
   </small>
 </div>

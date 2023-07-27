@@ -1207,20 +1207,20 @@
 <ul>
 <li>Automatically parse API arguments to function arguments</li>
 <li>Choose between strictly match a GraphQL field name or all of them to a function</li>
-<li>Integrates with <a href="../../../utilities/data_classes/" target="_blank">Data classes utilities</a> to access resolver and identity information</li>
+<li>Integrates with <a href="../../../utilities/data_classes/" rel="nofollow" target="_blank">Data classes utilities</a> to access resolver and identity information</li>
 <li>Works with both Direct Lambda Resolver and Amplify GraphQL Transformer <code>@function</code> directive</li>
 <li>Support async Python 3.8+ functions, and generators</li>
 </ul>
 <h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h2>
-<p><strong><a href="https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html" target="_blank">Direct Lambda Resolver</a></strong>. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.</p>
-<p><strong><a href="https://docs.amplify.aws/cli/graphql-transformer/function" target="_blank">Amplify GraphQL Transformer</a></strong>. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.</p>
+<p><strong><a href="https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html" rel="nofollow" target="_blank">Direct Lambda Resolver</a></strong>. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.</p>
+<p><strong><a href="https://docs.amplify.aws/cli/graphql-transformer/function" rel="nofollow" target="_blank">Amplify GraphQL Transformer</a></strong>. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.</p>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
 <p>You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.</p>
 <p>This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.</p>
 <details class="tip" open="open">
 <summary>Tip: Designing GraphQL Schemas for the first time?</summary>
-<p>Visit <a href="https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html" target="_blank">AWS AppSync schema documentation</a> for understanding how to define types, nesting, and pagination.</p>
+<p>Visit <a href="https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html" rel="nofollow" target="_blank">AWS AppSync schema documentation</a> for understanding how to define types, nesting, and pagination.</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">getting_started_schema.graphql</label><label for="__tabbed_1_2">template.yml</label></div>
 <div class="tabbed-content">
@@ -2011,7 +2011,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 </div>
 </div>
 <h3 id="scalar-functions">Scalar functions<a class="headerlink" href="#scalar-functions" title="Permanent link">&para;</a></h3>
-<p>When working with <a href="https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html" target="_blank">AWS AppSync Scalar types</a>, you might want to generate the same values for data validation purposes.</p>
+<p>When working with <a href="https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html" rel="nofollow" target="_blank">AWS AppSync Scalar types</a>, you might want to generate the same values for data validation purposes.</p>
 <p>For convenience, the most commonly used values are available as functions within <code>scalar_types_utils</code> module.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Creating key scalar values with scalar_types_utils</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -2300,7 +2300,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="hll">    <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
 <h3 id="amplify-graphql-transformer">Amplify GraphQL Transformer<a class="headerlink" href="#amplify-graphql-transformer" title="Permanent link">&para;</a></h3>
-<p>Assuming you have <a href="https://docs.amplify.aws/cli/start/install" target="_blank">Amplify CLI installed</a>, create a new API using <code>amplify add api</code> and use the following GraphQL Schema.</p>
+<p>Assuming you have <a href="https://docs.amplify.aws/cli/start/install" rel="nofollow" target="_blank">Amplify CLI installed</a>, create a new API using <code>amplify add api</code> and use the following GraphQL Schema.</p>
 <!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
 
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Example GraphQL Schema</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2349,7 +2349,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="hll"><span class="w">  </span><span class="nx">findMerchant</span><span class="p">(</span><span class="nx">search</span><span class="o">:</span><span class="w"> </span><span class="kt">str</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">[</span><span class="nx">Merchant</span><span class="p">]</span><span class="w"> </span><span class="kd">@function</span><span class="p">(</span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;searchMerchant-${env}&quot;</span><span class="p">)</span>
 </span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
-<p><a href="https://docs.amplify.aws/cli/function#set-up-a-function" target="_blank">Create two new basic Python functions</a> via <code>amplify add function</code>.</p>
+<p><a href="https://docs.amplify.aws/cli/function#set-up-a-function" rel="nofollow" target="_blank">Create two new basic Python functions</a> via <code>amplify add function</code>.</p>
 <details class="note" open="open">
 <summary>Note</summary>
 <p>Amplify CLI generated functions use <code>Pipenv</code> as a dependency manager. Your function source code is located at <strong><code>amplify/backend/function/your-function-name</code></strong>.</p>
@@ -2671,7 +2671,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 </div>
 </div>
 <h3 id="custom-data-models">Custom data models<a class="headerlink" href="#custom-data-models" title="Permanent link">&para;</a></h3>
-<p>You can subclass <a href="../../../utilities/data_classes/#appsync-resolver" target="_blank">AppSyncResolverEvent</a> to bring your own set of methods to handle incoming events, by using <code>data_model</code> param in the <code>resolve</code> method.</p>
+<p>You can subclass <a href="../../../utilities/data_classes/#appsync-resolver" rel="nofollow" target="_blank">AppSyncResolverEvent</a> to bring your own set of methods to handle incoming events, by using <code>data_model</code> param in the <code>resolve</code> method.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:3"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">custom_models.py.py</label><label for="__tabbed_6_2">nested_mappings_schema.graphql</label><label for="__tabbed_6_3">graphql_transformer_list_locations.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2875,7 +2875,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <h3 id="split-operations-with-router">Split operations with Router<a class="headerlink" href="#split-operations-with-router" title="Permanent link">&para;</a></h3>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>Read the <strong><a href="../api_gateway/#considerations" target="_blank">considerations section for trade-offs between monolithic and micro functions</a></strong>, as it's also applicable here.</p>
+<p>Read the <strong><a href="../api_gateway/#considerations" rel="nofollow" target="_blank">considerations section for trade-offs between monolithic and micro functions</a></strong>, as it's also applicable here.</p>
 </details>
 <p>As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's when the <code>Router</code> feature comes handy.</p>
 <p>Let's assume you have <code>split_operation.py</code> as your Lambda function entrypoint and routes in <code>split_operation_module.py</code>. This is how you'd use the <code>Router</code> feature.</p>
@@ -3602,7 +3602,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
   <small>
     
       Last update:
-      2023-05-31
+      2023-07-26
     
   </small>
 </div>

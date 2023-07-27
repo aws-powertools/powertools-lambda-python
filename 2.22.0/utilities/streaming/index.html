@@ -1483,12 +1483,12 @@
 <tbody>
 <tr>
 <td><strong>Gzip</strong></td>
-<td>Gunzips the stream of data using the <a href="https://docs.python.org/3/library/gzip.html" target="_blank">gzip library</a></td>
+<td>Gunzips the stream of data using the <a href="https://docs.python.org/3/library/gzip.html" rel="nofollow" target="_blank">gzip library</a></td>
 <td>GzipTransform</td>
 </tr>
 <tr>
 <td><strong>Zip</strong></td>
-<td>Exposes the stream as a <a href="https://docs.python.org/3/library/zipfile.html" target="_blank">ZipFile object</a></td>
+<td>Exposes the stream as a <a href="https://docs.python.org/3/library/zipfile.html" rel="nofollow" target="_blank">ZipFile object</a></td>
 <td>ZipTransform</td>
 </tr>
 <tr>
@@ -1500,7 +1500,7 @@
 </table>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="skipping-or-reading-backwards">Skipping or reading backwards<a class="headerlink" href="#skipping-or-reading-backwards" title="Permanent link">&para;</a></h3>
-<p><code>S3Object</code> implements <a href="https://docs.python.org/3/tutorial/inputoutput.html" target="_blank">Python I/O interface</a>. This means you can use <code>seek</code> to start reading contents of your file from any particular position, saving you processing time.</p>
+<p><code>S3Object</code> implements <a href="https://docs.python.org/3/tutorial/inputoutput.html" rel="nofollow" target="_blank">Python I/O interface</a>. This means you can use <code>seek</code> to start reading contents of your file from any particular position, saving you processing time.</p>
 <h4 id="reading-backwards">Reading backwards<a class="headerlink" href="#reading-backwards" title="Permanent link">&para;</a></h4>
 <p>For example, let's imagine you have a large CSV file, each row has a non-uniform size (bytes), and you want to read and process the last row only.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">non_uniform_sample.csv</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -1656,15 +1656,15 @@
 <tbody>
 <tr>
 <td><strong>GzipTransform</strong></td>
-<td><a href="https://docs.python.org/3/library/gzip.html#gzip.GzipFile" target="_blank">GzipFile constructor</a></td>
+<td><a href="https://docs.python.org/3/library/gzip.html#gzip.GzipFile" rel="nofollow" target="_blank">GzipFile constructor</a></td>
 </tr>
 <tr>
 <td><strong>ZipTransform</strong></td>
-<td><a href="https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile" target="_blank">ZipFile constructor</a></td>
+<td><a href="https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile" rel="nofollow" target="_blank">ZipFile constructor</a></td>
 </tr>
 <tr>
 <td><strong>CsvTransform</strong></td>
-<td><a href="https://docs.python.org/3/library/csv.html#csv.DictReader" target="_blank">DictReader constructor</a></td>
+<td><a href="https://docs.python.org/3/library/csv.html#csv.DictReader" rel="nofollow" target="_blank">DictReader constructor</a></td>
 </tr>
 </tbody>
 </table>
@@ -1927,7 +1927,7 @@
 </div>
 <h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
 <h3 id="aws-x-ray-segment-size-limit">AWS X-Ray segment size limit<a class="headerlink" href="#aws-x-ray-segment-size-limit" title="Permanent link">&para;</a></h3>
-<p>We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with <a href="../../core/tracer/" target="_blank">Tracer</a>, you can easily hit <a href="https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray" target="_blank">AWS X-Ray 64K segment size</a> when processing large files.</p>
+<p>We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with <a href="../../core/tracer/" rel="nofollow" target="_blank">Tracer</a>, you can easily hit <a href="https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray" rel="nofollow" target="_blank">AWS X-Ray 64K segment size</a> when processing large files.</p>
 <div class="admonition tip">
 <p class="admonition-title">Use tracer decorators in parts where you don't read your <code>S3Object</code> instead.</p>
 </div>
@@ -1937,7 +1937,7 @@
   <small>
     
       Last update:
-      2023-06-22
+      2023-07-26
     
   </small>
 </div>

@@ -1145,7 +1145,7 @@
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" rel="nofollow" target="_blank">project repository</a>.</p>
 </details>
 <p>You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.</p>
 <h3 id="middleware-with-no-params">Middleware with no params<a class="headerlink" href="#middleware-with-no-params" title="Permanent link">&para;</a></h3>
@@ -1570,7 +1570,7 @@
 </div>
 </div>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
-<p>For advanced use cases, you can instantiate <a href="../../core/tracer/" target="_blank">Tracer</a> inside your middleware, and add annotations as well as metadata for additional operational insights.</p>
+<p>For advanced use cases, you can instantiate <a href="../../core/tracer/" rel="nofollow" target="_blank">Tracer</a> inside your middleware, and add annotations as well as metadata for additional operational insights.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">advanced_middleware_tracer_function.py</label><label for="__tabbed_4_2">advanced_middleware_tracer_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -1679,11 +1679,11 @@
 </div>
 <p><img alt="Middleware advanced Tracer" src="../../media/middleware_factory_tracer_2.png" /></p>
 <h3 id="tracing-middleware-execution">Tracing middleware <strong>execution</strong><a class="headerlink" href="#tracing-middleware-execution" title="Permanent link">&para;</a></h3>
-<p>If you are making use of <a href="../../core/tracer/" target="_blank">Tracer</a>, you can trace the execution of your middleware to ease operations.</p>
+<p>If you are making use of <a href="../../core/tracer/" rel="nofollow" target="_blank">Tracer</a>, you can trace the execution of your middleware to ease operations.</p>
 <p>This makes use of an existing Tracer instance that you may have initialized anywhere in your code.</p>
 <details class="warning" open="open">
 <summary>Warning</summary>
-<p>You must <a href="../core/tracer/#permissions" target="_blank">enable Active Tracing</a> in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.</p>
+<p>You must <a href="../core/tracer/#permissions" rel="nofollow" target="_blank">enable Active Tracing</a> in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.</p>
 </details>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">getting_started_middleware_tracer_function.py</label><label for="__tabbed_5_2">getting_started_middleware_tracer_payload.json</label></div>
 <div class="tabbed-content">
@@ -1779,11 +1779,11 @@
 </div>
 </div>
 </div>
-<p>When executed, your middleware name will <a href="../../core/tracer/" target="_blank">appear in AWS X-Ray Trace details as</a> <code>## middleware_name</code>, in this example the middleware name is <code>## middleware_with_tracing</code>.</p>
+<p>When executed, your middleware name will <a href="../../core/tracer/" rel="nofollow" target="_blank">appear in AWS X-Ray Trace details as</a> <code>## middleware_name</code>, in this example the middleware name is <code>## middleware_with_tracing</code>.</p>
 <p><img alt="Middleware simple Tracer" src="../../media/middleware_factory_tracer_1.png" /></p>
 <h3 id="combining-powertools-for-aws-lambda-python-utilities">Combining Powertools for AWS Lambda (Python) utilities<a class="headerlink" href="#combining-powertools-for-aws-lambda-python-utilities" title="Permanent link">&para;</a></h3>
 <!-- markdownlint-disable MD013 -->
-<p>You can create your own middleware and combine many features of Powertools for AWS Lambda (Python) such as <a href="../../core/logger/" target="_blank">trace</a>, <a href="../../core/logger/" target="_blank">logs</a>, <a href="../feature_flags/" target="_blank">feature flags</a>, <a href="../validation/" target="_blank">validation</a>, <a href="../jmespath_functions/" target="_blank">jmespath_functions</a> and others to abstract non-functional code.</p>
+<p>You can create your own middleware and combine many features of Powertools for AWS Lambda (Python) such as <a href="../../core/logger/" rel="nofollow" target="_blank">trace</a>, <a href="../../core/logger/" rel="nofollow" target="_blank">logs</a>, <a href="../feature_flags/" rel="nofollow" target="_blank">feature flags</a>, <a href="../validation/" rel="nofollow" target="_blank">validation</a>, <a href="../jmespath_functions/" rel="nofollow" target="_blank">jmespath_functions</a> and others to abstract non-functional code.</p>
 <p>In the example below, we create a Middleware with the following features:</p>
 <ul>
 <li>Logs and traces</li>
@@ -2527,7 +2527,7 @@
 <ul>
 <li>Use <code>trace_execution</code> to quickly understand the performance impact of your middlewares, and reduce or merge tasks when necessary</li>
 <li>When nesting multiple middlewares, always return the handler with event and context, or response</li>
-<li>Keep in mind <a href="https://realpython.com/primer-on-python-decorators/#nesting-decorators" target="_blank">Python decorators execution order</a>. Lambda handler is actually called once (top-down)</li>
+<li>Keep in mind <a href="https://realpython.com/primer-on-python-decorators/#nesting-decorators" rel="nofollow" target="_blank">Python decorators execution order</a>. Lambda handler is actually called once (top-down)</li>
 <li>Async middlewares are not supported</li>
 </ul>
 
@@ -2536,7 +2536,7 @@
   <small>
     
       Last update:
-      2023-06-19
+      2023-07-26
     
   </small>
 </div>
