@@ -77,8 +77,7 @@ Processing batches from SQS works in three stages:
 2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
-???+ info
-    This code example uses Tracer and Logger for completion.
+!!! info "This code example uses Tracer and Logger for completion."
 
 === "Recommended"
 
@@ -149,8 +148,7 @@ Processing batches from Kinesis works in three stages:
 2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
-???+ info
-    This code example uses Tracer and Logger for completion.
+!!! info "This code example uses Tracer and Logger for completion."
 
 === "Recommended"
 
@@ -194,8 +192,7 @@ Processing batches from DynamoDB Streams works in three stages:
 2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
-???+ info
-    This code example uses Tracer and Logger for completion.
+!!! info "This code example uses Tracer and Logger for completion."
 
 === "Recommended"
 
@@ -314,7 +311,7 @@ sequenceDiagram
 
 Sequence diagram to explain how `BatchProcessor` works with both [Kinesis Data Streams](#processing-messages-from-kinesis) and [DynamoDB Streams](#processing-messages-from-dynamodb).
 
-!!! note "For brevity, we will use "Streams" to refer to either services. For theory on stream checkpoints, see this [blog post](https://aws.amazon.com/blogs/compute/optimizing-batch-processing-with-custom-checkpoints-in-aws-lambda/){target="_blank"}"
+For brevity, we will use `Streams` to refer to either services. For theory on stream checkpoints, see this [blog post](https://aws.amazon.com/blogs/compute/optimizing-batch-processing-with-custom-checkpoints-in-aws-lambda/){target="_blank"}
 
 <center>
 ```mermaid
@@ -368,14 +365,14 @@ sequenceDiagram
 
 ### Processing messages asynchronously
 
-!!! tip "New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank" rel="nofollow"}."
+> New to AsyncIO? Read this [comprehensive guide first](https://realpython.com/async-io-python/){target="_blank" rel="nofollow"}.
 
 You can use `AsyncBatchProcessor` class and `async_process_partial_response` function to process messages concurrently.
 
 ???+ question "When is this useful?"
     Your use case might be able to process multiple records at the same time without conflicting with one another.
 
-    For example, imagine you need to process multiple loyalty points and incrementally save in a database. While you await the database to confirm your records are saved, you could start processing another request concurrently.
+    For example, imagine you need to process multiple loyalty points and incrementally save them in the database. While you await the database to confirm your records are saved, you could start processing another request concurrently.
 
     The reason this is not the default behaviour is that not all use cases can handle concurrency safely (e.g., loyalty points must be updated in order).
 
@@ -384,9 +381,7 @@ You can use `AsyncBatchProcessor` class and `async_process_partial_response` fun
 ```
 
 ???+ warning "Using tracer?"
-    `AsyncBatchProcessor` uses `asyncio.gather` which can cause side effects and reach trace limits at high concurrency.
-
-    See [Tracing concurrent asynchronous functions](../core/tracer.md#concurrent-asynchronous-functions){target="_blank" rel="nofollow"}.
+    `AsyncBatchProcessor` uses `asyncio.gather`. This might cause [side effects and reach trace limits at high concurrency](../core/tracer.md#concurrent-asynchronous-functions){target="_blank"}.
 
 ## Advanced
 
@@ -436,12 +431,36 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 Use the context manager to access a list of all returned values from your `record_handler` function.
 
-* **When successful**. We will include a tuple with `success`, the result of `record_handler`, and the batch record
-* **When failed**. We will include a tuple with `fail`, exception as a string, and the batch record
+* **When successful**. We include a tuple with **1/** `success`, **2/** the result of `record_handler`, and **3/** the batch item
+* **When failed**. We include a tuple with **1/** `fail`, **2/** exception as a string, and **3/** the batch item serialized as Event Source Data Class or Pydantic model.
 
-```python hl_lines="28-33" title="Accessing processed messages via context manager"
---8<-- "examples/batch_processing/src/context_manager_access.py"
-```
+!!! note "If a Pydantic model fails validation early, we serialize its failure record as Event Source Data Class to be able to collect message ID/sequence numbers etc."
+
+=== "Accessing raw processed messages"
+
+    ```python hl_lines="29-36"
+    --8<-- "examples/batch_processing/src/context_manager_access.py"
+    ```
+
+    1. Context manager requires the records list. This is typically handled by `process_partial_response`.
+    2. Cause contains `exception` str if failed, or `success` otherwise.
+
+=== "Sample processed messages"
+
+    ```python
+    --8<-- "examples/batch_processing/src/context_manager_access_output.txt"
+    ```
+
+    1. Sample exception could have raised from within `record_handler` function.
+
+=== "Sample processed messages (Pydantic)"
+
+    ```python
+    --8<-- "examples/batch_processing/src/context_manager_access_output_pydantic.txt"
+    ```
+
+    1.  Sample when a model fails validation early. <br/><br/> Batch item (3rd item) is serialized to the respective Event Source Data Class event type.
+    2.  Sample when model validated successfully but another exception was raised during processing.
 
 ### Accessing Lambda Context
 
