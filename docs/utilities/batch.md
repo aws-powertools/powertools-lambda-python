@@ -5,6 +5,30 @@ description: Utility
 
 The batch processing utility handles partial failures when processing batches from Amazon SQS, Amazon Kinesis Data Streams, and Amazon DynamoDB Streams.
 
+```mermaid
+stateDiagram-v2
+    direction LR
+    BatchSource: Amazon SQS <br/><br/> Amazon Kinesis Data Streams <br/><br/> Amazon DynamoDB Streams <br/><br/>
+    LambdaInit: Lambda invocation
+    BatchProcessor: Batch Processor
+    RecordHandler: Record Handler function
+    YourLogic: Your logic to process each batch item
+    LambdaResponse: Lambda response
+
+    BatchSource --> LambdaInit
+
+    LambdaInit --> BatchProcessor
+    BatchProcessor --> RecordHandler
+
+    state BatchProcessor {
+        [*] --> RecordHandler: Your function
+        RecordHandler --> YourLogic
+    }
+
+    RecordHandler --> BatchProcessor: Collect results
+    BatchProcessor --> LambdaResponse: Report items that failed processing
+```
+
 ## Key features
 
 * Reports batch item failures to reduce number of retries for a record upon errors
@@ -29,8 +53,8 @@ journey
 This behavior changes when you enable Report Batch Item Failures feature in your Lambda function event source configuration:
 
 <!-- markdownlint-disable MD013 -->
-* [**SQS queues**](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"}. Only messages reported as failure will return to the queue for a retry, while successful ones will be deleted.
-* [**Kinesis data streams**](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#services-kinesis-batchfailurereporting){target="_blank"} and [**DynamoDB streams**](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html#services-ddb-batchfailurereporting){target="_blank"}. Single reported failure will use its sequence number as the stream checkpoint. Multiple  reported failures will use the lowest sequence number as checkpoint.
+* [**SQS queues**](#sqs-standard). Only messages reported as failure will return to the queue for a retry, while successful ones will be deleted.
+* [**Kinesis data streams**](#kinesis-and-dynamodb-streams) and [**DynamoDB streams**](#kinesis-and-dynamodb-streams). Single reported failure will use its sequence number as the stream checkpoint. Multiple  reported failures will use the lowest sequence number as checkpoint.
 
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
@@ -260,6 +284,8 @@ The following sequence diagrams explain how each Batch processor behaves under d
 
 #### SQS Standard
 
+> Read more about [Batch Failure Reporting feature in AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"}.
+
 Sequence diagram to explain how [`BatchProcessor` works](#processing-messages-from-sqs) with SQS Standard queues.
 
 <center>
@@ -282,6 +308,8 @@ sequenceDiagram
 </center>
 
 #### SQS FIFO
+
+> Read more about [Batch Failure Reporting feature in AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"}.
 
 Sequence diagram to explain how [`SqsFifoPartialProcessor` works](#fifo-queues) with SQS FIFO queues.
 
@@ -308,6 +336,8 @@ sequenceDiagram
 </center>
 
 #### Kinesis and DynamoDB Streams
+
+> Read more about [Batch Failure Reporting feature](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html#services-kinesis-batchfailurereporting){target="_blank"}.
 
 Sequence diagram to explain how `BatchProcessor` works with both [Kinesis Data Streams](#processing-messages-from-kinesis) and [DynamoDB Streams](#processing-messages-from-dynamodb).
 
@@ -505,6 +535,31 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 ### Create your own partial processor
 
 You can create your own partial batch processor from scratch by inheriting the `BasePartialProcessor` class, and implementing `_prepare()`, `_clean()`, `_process_record()` and `_async_process_record()`.
+
+<!-- markdownlint-disable MD031 MD040 -->
+<center>
+```mermaid
+classDiagram
+    direction LR
+    class BasePartialProcessor {
+        <<interface>>
+        +_prepare()
+        +_clean()
+        +_process_record_(record: Dict)
+        +_async_process_record_()
+    }
+
+    class YourCustomProcessor {
+        +_prepare()
+        +_clean()
+        +_process_record_(record: Dict)
+        +_async_process_record_()
+    }
+
+    BasePartialProcessor <|-- YourCustomProcessor : implement
+```
+<i>Visual representation to bring your own processor</i>
+</center>
 
 * **`_process_record()`** – handles all processing logic for each individual message of a batch, including calling the `record_handler` (self.handler)
 * **`_prepare()`** – called once as part of the processor initialization
