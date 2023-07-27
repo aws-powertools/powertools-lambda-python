@@ -393,7 +393,7 @@ Inheritance is importance because we need to access message IDs and sequence num
 
 === "SQS"
 
-    ```python hl_lines="8 17 27 35"
+    ```python hl_lines="8 17 21 27 35"
     --8<-- "examples/batch_processing/src/pydantic_sqs.py"
     ```
 
