@@ -141,6 +141,19 @@ class MetricsBase(Protocol):
         """
         raise NotImplementedError
 
+    def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
+        """
+        Add a cold start metric for a specific function.
+
+        Parameters
+        ----------
+        metric_name: str
+            The name of the cold start metric to add.
+        function_name: str
+            The name of the function associated with the cold start metric.
+        """
+        raise NotImplementedError
+
     def log_metrics(
         self,
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
@@ -218,7 +231,7 @@ class MetricsBase(Protocol):
             return
 
         logger.debug("Adding cold start metric and function_name dimension")
-        self.add_metric(name="ColdStart", value=1, tag=[{"function_name": context.function_name}])
+        self.add_cold_start_metric(metric_name="ColdStart", function_name=context.function_name)
 
         is_cold_start = False
 

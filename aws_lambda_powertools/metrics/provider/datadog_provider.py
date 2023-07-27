@@ -49,20 +49,19 @@ class DataDogProvider:
             (namespace.metrics_name)
         flush_to_log: bool
             Flush datadog metrics to log (collect with log forwarder) rather than using datadog extension
+            See: https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation
         """
         self.metrics: List = []
         self.namespace: str = namespace
-        # either is true then flush to log
         self.flush_to_log = (os.environ.get("DD_FLUSH_TO_LOG", "").lower() == "true") or flush_to_log
         super().__init__()
 
-    #  adding name,value,timestamp,tags
     def add_metric(
         self,
         name: str,
         value: float,
-        timestamp: Optional[int] = None,
-        tags: Optional[List] = None,
+        timestamp: int | None = None,
+        tags: List | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -71,40 +70,54 @@ class DataDogProvider:
         Parameters
         ----------
         name: str
-            Name/Key for the metrics
+            Name/Key for the metric
         value: float
-            Value for the metrics
+            Value for the metric
         timestamp: int
-            Timestamp in int for the metrics, default = time.time()
+            Timestamp in int for the metrics, default = None
         tags: List[str]
             In format like List["tag:value","tag2:value2"]
-        args: Any
-            extra args will be dropped for compatibility
         kwargs: Any
-            extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
+            extra kwargs will be converted into tags, e.g., add_metrics(sales="sam") -> tags=['sales:sam']
 
         Examples
         --------
+            >>> from aws_lambda_powertools.utilities.typing import LambdaContext
+            >>> from aws_lambda_powertools.metrics.provider import DataDogMetrics
+            >>> from aws_lambda_powertools.metrics.provider import DataDogProvider
+
             >>> provider = DataDogProvider()
-            >>>
-            >>> provider.add_metric(
-            >>>     name='coffee_house.order_value',
-            >>>     value=12.45,
-            >>>     tags=['product:latte', 'order:online'],
-            >>>     sales='sam'
-            >>> )
+            >>> metrics = DataDogMetrics(provider=provider)
+
+            >>> @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
+            >>> def lambda_handler(event: dict, context: LambdaContext):
+            >>>    metrics.add_metric(name="SuccessfulBooking", value=1, product="airline")
         """
+
+        if not tags:
+            tags = []
+
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
-        if tags is None:
-            tags = []
-        if not timestamp:
-            timestamp = int(time.time())
-        for k, w in kwargs.items():
-            tags.append(f"{k}:{w}")
+
+        for tag_key, tag_value in kwargs.items():
+            tags.append(f"{tag_key}:{tag_value}")
+
         self.metrics.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
     def serialize(self) -> List:
+        """
+        Serialize the metrics in the current instance of metrics.
+
+        Returns
+        -------
+        A list of dict, where each dictionary represents a serialized metric with the following keys:
+            - 'm' (str): The metric name. If the namespace is not None, the name will be in the format
+                        'namespace.metric_name', otherwise, it will be just 'metric_name'.
+            - 'v' (float): The value of the metric.
+            - 'e' (float): The timestamp associated with the metric.
+            - 't' (str): The tags of the metric.
+        """
         output_list: List = []
 
         for single_metric in self.metrics:
@@ -112,6 +125,7 @@ class DataDogProvider:
                 metric_name = f"{self.namespace}.{single_metric['m']}"
             else:
                 metric_name = single_metric["m"]
+
             output_list.append(
                 {
                     "m": metric_name,
@@ -123,7 +137,6 @@ class DataDogProvider:
 
         return output_list
 
-    # flush serialized data to output
     def flush(self, metrics: List):
         """
 
@@ -144,6 +157,7 @@ class DataDogProvider:
         """
         if len(metrics) == 0:
             raise SchemaValidationError("Must contain at least one metric.")
+
         # submit through datadog extension
         if lambda_metric and self.flush_to_log is False:
             # use lambda_metric function from datadog package, submit metrics to datadog
@@ -160,7 +174,10 @@ class DataDogProvider:
             for metric_item in metrics:
                 print(json.dumps(metric_item, separators=(",", ":")))
 
+        self.clear_metrics()
+
     def clear_metrics(self):
+        logger.debug("Clearing out existing metric set from memory")
         self.metrics = []
 
 
@@ -184,7 +201,7 @@ class DataDogMetrics(MetricsBase):
         >>>
         >>> @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
         >>> def lambda_handler(event, context):
-        >>>     metrics.add_metric(name="item_sold",value=1,tags=['product:latte', 'order:online'])
+        >>>     metrics.add_metric(name="item_sold",value=1, product="latte", order="online")
     """
 
     # `log_metrics` and `_add_cold_start_metric` are directly inherited from `MetricsBase`
@@ -254,4 +271,6 @@ class DataDogMetrics(MetricsBase):
         else:
             # will raise on empty metrics
             self.provider.flush(metrics)
-            self.provider.clear_metrics()
+
+    def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
+        self.provider.add_metric(name=metric_name, value=1, timestamp=int(time.time()), function_name=function_name)

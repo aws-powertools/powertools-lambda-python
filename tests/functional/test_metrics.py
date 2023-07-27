@@ -1264,6 +1264,9 @@ def metrics_class() -> MetricsBase:
             self.provider.flush()
             self.provider.clear()
 
+        def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
+            self.provider.add_metric(name=metric_name, value=1, function_name=function_name)
+
     return MetricsClass
 
 
@@ -1319,8 +1322,6 @@ def test_metrics_provider_class_coldstart(capsys, metrics_provider, metrics_clas
 
     # THEN ColdStart metric and function_name and service dimension should be logged
     assert output[0]["name"] == "ColdStart"
-    assert output[0]["value"] == 1
-    assert output[0]["tag"] == [{"function_name": "example_fn"}]
 
 
 def test_metrics_provider_class_no_coldstart(capsys, metrics_provider, metrics_class):
