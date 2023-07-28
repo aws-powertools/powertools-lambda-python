@@ -1383,7 +1383,7 @@
 <p>The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.</p>
 <details class="info" open="open">
 <summary>Info</summary>
-<p>When using <code>AppConfigStore</code>, we currently only support AppConfig using <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations" rel="nofollow" target="_blank">freeform configuration profile</a>  .</p>
+<p>When using <code>AppConfigStore</code>, we currently only support AppConfig using <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations" target="_blank">freeform configuration profile</a>  .</p>
 </details>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
 <ul>
@@ -1399,7 +1399,7 @@
 <p><strong>Dynamic flags</strong>. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.</p>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>You can use <a href="../parameters/" rel="nofollow" target="_blank">Parameters utility</a> for static flags while this utility can do both static and dynamic feature flags.</p>
+<p>You can use <a href="../parameters/" target="_blank">Parameters utility</a> for static flags while this utility can do both static and dynamic feature flags.</p>
 </details>
 <details class="warning" open="open">
 <summary>Warning</summary>
@@ -1413,13 +1413,13 @@
 </ul>
 <details class="note" open="open">
 <summary>Note</summary>
-<p>AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html" rel="nofollow" target="_blank">Configuration</a>.</p>
+<p>AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html" target="_blank">Configuration</a>.</p>
 </details>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <h3 id="iam-permissions">IAM Permissions<a class="headerlink" href="#iam-permissions" title="Permanent link">&para;</a></h3>
 <p>When using the default store <code>AppConfigStore</code>, your Lambda function IAM Role must have <code>appconfig:GetLatestConfiguration</code> and <code>appconfig:StartConfigurationSession</code> IAM permissions before using this feature.</p>
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
-<p>By default, this utility provides <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html" rel="nofollow" target="_blank">AWS AppConfig</a> as a configuration store.</p>
+<p>By default, this utility provides <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html" target="_blank">AWS AppConfig</a> as a configuration store.</p>
 <p>The following sample infrastructure will be used throughout this documentation:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">template.yaml</label><label for="__tabbed_1_2">CDK</label></div>
 <div class="tabbed-content">
@@ -3532,7 +3532,7 @@ of the same experiment.</p>
 <tr>
 <td><strong>sdk_config</strong></td>
 <td><code>None</code></td>
-<td><a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" rel="nofollow" target="_blank">Botocore Config object</a></td>
+<td><a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">Botocore Config object</a></td>
 </tr>
 <tr>
 <td><strong>jmespath_options</strong></td>
@@ -3966,13 +3966,13 @@ of the same experiment.</p>
 </thead>
 <tbody>
 <tr>
-<td><strong><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html" rel="nofollow" target="_blank">Environment variables</a></strong></td>
+<td><strong><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html" target="_blank">Environment variables</a></strong></td>
 <td>Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.</td>
 <td>Yes</td>
 <td>Lambda</td>
 </tr>
 <tr>
-<td><strong><a href="../parameters/" rel="nofollow" target="_blank">Parameters utility</a></strong></td>
+<td><strong><a href="../parameters/" target="_blank">Parameters utility</a></strong></td>
 <td>Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB.</td>
 <td>No</td>
 <td>Parameter Store, DynamoDB, Secrets Manager, AppConfig</td>
@@ -3991,7 +3991,7 @@ of the same experiment.</p>
   <small>
     
       Last update:
-      2023-07-26
+      2023-07-28
     
   </small>
 </div>

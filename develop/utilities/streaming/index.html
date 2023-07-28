@@ -1927,7 +1927,7 @@
 </div>
 <h2 id="known-limitations">Known limitations<a class="headerlink" href="#known-limitations" title="Permanent link">&para;</a></h2>
 <h3 id="aws-x-ray-segment-size-limit">AWS X-Ray segment size limit<a class="headerlink" href="#aws-x-ray-segment-size-limit" title="Permanent link">&para;</a></h3>
-<p>We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with <a href="../../core/tracer/" rel="nofollow" target="_blank">Tracer</a>, you can easily hit <a href="https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray" rel="nofollow" target="_blank">AWS X-Ray 64K segment size</a> when processing large files.</p>
+<p>We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with <a href="../../core/tracer/" target="_blank">Tracer</a>, you can easily hit <a href="https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray" target="_blank">AWS X-Ray 64K segment size</a> when processing large files.</p>
 <div class="admonition tip">
 <p class="admonition-title">Use tracer decorators in parts where you don't read your <code>S3Object</code> instead.</p>
 </div>
@@ -1937,7 +1937,7 @@
   <small>
     
       Last update:
-      2023-07-26
+      2023-07-28
     
   </small>
 </div>

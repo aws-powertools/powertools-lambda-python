@@ -1323,7 +1323,7 @@
 <p>Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.</p>
 <h4 id="using-pydantic-v1">Using Pydantic v1<a class="headerlink" href="#using-pydantic-v1" title="Permanent link">&para;</a></h4>
 <div class="admonition info">
-<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" rel="nofollow" target="_blank">Lambda Layer/SAR</a></p>
+<p class="admonition-title">This is not necessary if you're installing Powertools for AWS Lambda (Python) via <a href="../../#lambda-layer" target="_blank">Lambda Layer/SAR</a></p>
 </div>
 <p>Add <code>aws-lambda-powertools[parser]</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>.</p>
 <details class="warning" open="open">
@@ -1334,7 +1334,7 @@ installed without binary files</a>:</p>
 <p>Pip example: <code>SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]</code></p>
 </details>
 <h4 id="using-pydantic-v2">Using Pydantic v2<a class="headerlink" href="#using-pydantic-v2" title="Permanent link">&para;</a></h4>
-<p>You need to bring Pydantic v2.0.3 or later as an external dependency. Note that <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/2672" rel="nofollow" target="_blank">we suppress Pydantic v2 deprecation warnings</a> to reduce noise and optimize log costs.</p>
+<p>You need to bring Pydantic v2.0.3 or later as an external dependency. Note that <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/2672" target="_blank">we suppress Pydantic v2 deprecation warnings</a> to reduce noise and optimize log costs.</p>
 <p>Add <code>aws-lambda-powertools</code> and <code>pydantic&gt;=2.0.3</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>.</p>
 <h3 id="defining-models">Defining models<a class="headerlink" href="#defining-models" title="Permanent link">&para;</a></h3>
 <p>You can define models to parse incoming events by inheriting from <code>BaseModel</code>.</p>
@@ -2325,7 +2325,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" rel="n
   <small>
     
       Last update:
-      2023-07-26
+      2023-07-28
     
   </small>
 </div>
