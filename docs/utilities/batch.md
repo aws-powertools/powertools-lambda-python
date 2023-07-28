@@ -525,7 +525,7 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
 * **`success_handler()`** is called for each successfully processed record
 * **`failure_handler()`** is called for each failed record
 
-???+ warning
+???+ note
     These functions have a common `record` argument. For backward compatibility reasons, their type is not the same:
 
     - `success_handler`: `record` type is `dict[str, Any]`, the raw record data.
