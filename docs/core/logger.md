@@ -15,7 +15,7 @@ Logger provides an opinionated logger with output structured as JSON.
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" rel="nofollow"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Logger requires two settings:
 
@@ -39,7 +39,7 @@ Your Logger will include the following keys to your structured logging:
 | **message**: `Any`         | `Collecting payment`                  | Unserializable JSON values are casted as `str`                                                                                       |
 | **timestamp**: `str`       | `2021-05-03 10:20:19,650+0200`        | Timestamp with milliseconds, by default uses local timezone                                                                          |
 | **service**: `str`         | `payment`                             | Service name defined, by default `service_undefined`                                                                                 |
-| **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank" rel="nofollow"}, it shows X-Ray Trace ID |
+| **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID |
 | **sampling_rate**: `float` | `0.1`                                 | When enabled, it shows sampling rate in percentage e.g. 10%                                                                          |
 | **exception_name**: `str`  | `ValueError`                          | When `logger.exception` is used and there is an exception                                                                            |
 | **exception**: `str`       | `Traceback (most recent call last)..` | When `logger.exception` is used and there is an exception                                                                            |
@@ -163,7 +163,7 @@ You can append additional keys using either mechanism:
 #### append_keys method
 
 ???+ warning
-	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank" rel="nofollow"}.
+	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank"}.
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -242,7 +242,7 @@ You can remove any additional key from Logger state using `remove_keys`.
 
 #### Clearing all state
 
-Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html){target="_blank" rel="nofollow"}, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
+Logger is commonly initialized in the global scope. Due to [Lambda Execution Context reuse](https://docs.aws.amazon.com/lambda/latest/dg/runtimes-context.html){target="_blank"}, this means that custom keys can be persisted across invocations. If you want all custom keys to be deleted, you can use `clear_state=True` param in `inject_lambda_context` decorator.
 
 ???+ tip "Tip: When is this useful?"
     It is useful when you add multiple custom keys conditionally, instead of setting a default `None` value if not present. Any key with `None` value is automatically removed by Logger.
@@ -407,7 +407,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
 ???+ note
-	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank" rel="nofollow"} if you want Logger to calculate sampling for every invocation
+	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
 
 === "sampling_debug_logs.py"
 
@@ -449,7 +449,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 
 !!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc."
 
-You can send logs to the observability provider of your choice via [Lambda Extensions](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/){target="_blank" rel="nofollow"}. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.
+You can send logs to the observability provider of your choice via [Lambda Extensions](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/){target="_blank"}. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.
 
 #### Built-in formatters
 
