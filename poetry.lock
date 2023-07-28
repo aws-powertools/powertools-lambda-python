@@ -1442,13 +1442,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-appconfigdata"
-version = "1.28.0"
-description = "Type annotations for boto3.AppConfigData 1.28.0 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.12"
+description = "Type annotations for boto3.AppConfigData 1.28.12 service generated with mypy-boto3-builder 7.15.2"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-appconfigdata-1.28.0.tar.gz", hash = "sha256:1f0331fcb6642c44d335d08250ee5abcd840030304d480adf85ea017ba941bb4"},
-    {file = "mypy_boto3_appconfigdata-1.28.0-py3-none-any.whl", hash = "sha256:c01ecbbda949497dbb650cc761915a7e14b621db5bc20cc1fd3f49620e74c9bc"},
+    {file = "mypy-boto3-appconfigdata-1.28.12.tar.gz", hash = "sha256:b03bf529d366dd4e3deb2bb096049abfdb903381fb3382f3995be8fac6d48680"},
+    {file = "mypy_boto3_appconfigdata-1.28.12-py3-none-any.whl", hash = "sha256:20c30fef5769479e0ae9ba1726aa15621875523a2a8e3d729db4964f110c1d04"},
 ]
 
 [package.dependencies]
@@ -2692,4 +2692,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "f75331de0d0c9dadeeaf9a0bec41adfe9e124631bb5351d28575aa66c7a0a239"
+content-hash = "791dbdd1002c179bed2c62c06115e9ff31350c2acec932673e3e250cb6965707"
