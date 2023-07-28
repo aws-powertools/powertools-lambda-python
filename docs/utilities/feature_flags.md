@@ -6,7 +6,7 @@ description: Utility
 The feature flags utility provides a simple rule engine to define when one or multiple features should be enabled depending on the input.
 
 ???+ info
-    When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank" rel="nofollow"}  .
+    When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
 ## Key features
 
@@ -37,7 +37,7 @@ If you want to learn more about feature flags, their variations and trade-offs, 
 * [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank" rel="nofollow"}
 
 ???+ note
-    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank" rel="nofollow"}.
+    AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
 
 ## Getting started
 
@@ -47,7 +47,7 @@ When using the default store `AppConfigStore`, your Lambda function IAM Role mus
 
 ### Required resources
 
-By default, this utility provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html){target="_blank" rel="nofollow"} as a configuration store.
+By default, this utility provides [AWS AppConfig](https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html){target="_blank"} as a configuration store.
 
 The following sample infrastructure will be used throughout this documentation:
 
@@ -500,7 +500,7 @@ These are the available options for further customization.
 | **name**             | `""`             | AWS AppConfig Configuration name, e.g `features`                                                                                                       |
 | **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
-| **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank" rel="nofollow"}                            |
+| **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
 | **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} |
 | **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                          |
 
@@ -577,6 +577,6 @@ You can unit test your feature flags locally and independently without setting u
 
 | Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
-| **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank" rel="nofollow"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
+| **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
 | **[Parameters utility](parameters.md){target="_blank"}**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
 | **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |

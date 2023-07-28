@@ -498,7 +498,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 
 | Parameter                       | Default | Description                                                                                                                                                |
 | ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank" rel="nofollow"}        |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank"}        |
 | **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                               |
 | **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                             |
 | **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                   |
@@ -561,7 +561,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
 
 ???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
-    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank" rel="nofollow"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
+    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
 
     We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
 
@@ -636,7 +636,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 <!-- markdownlint-disable-next-line MD013 -->
-The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank" rel="nofollow"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank" rel="nofollow"} when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"} when constructing the persistence store.
 
 === "Custom session"
 
@@ -760,7 +760,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank" rel="nofollow"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "test_with_dynamodb_local.py"
 
@@ -776,7 +776,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 ### How do I mock all DynamoDB I/O operations
 
-The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank" rel="nofollow"} which it uses to access DynamoDB.
+The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"} which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.
 
 === "test_with_io_operations.py"
@@ -794,4 +794,4 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
-[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank" rel="nofollow"}.
+[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank"}.

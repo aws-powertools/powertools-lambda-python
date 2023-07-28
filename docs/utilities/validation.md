@@ -16,7 +16,7 @@ This utility provides JSON Schema validation for events and responses, including
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" rel="nofollow"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
@@ -194,7 +194,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.
 <!-- markdownlint-disable-next-line MD013 -->
-You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank" rel="nofollow"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank" rel="nofollow"}.
+You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank"}.
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
