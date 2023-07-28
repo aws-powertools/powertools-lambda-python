@@ -1568,13 +1568,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-xray"
-version = "1.28.0"
-description = "Type annotations for boto3.XRay 1.28.0 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.15"
+description = "Type annotations for boto3.XRay 1.28.15 service generated with mypy-boto3-builder 7.16.1"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-xray-1.28.0.tar.gz", hash = "sha256:8ce07598f7eeabe66e8dc8cb7e906efb96198b9102f58e9315e6daf166abf3e7"},
-    {file = "mypy_boto3_xray-1.28.0-py3-none-any.whl", hash = "sha256:64cd601a829c274665b977853f85b27464986e9eec1ebc03f5bc4530a400b2f6"},
+    {file = "mypy-boto3-xray-1.28.15.tar.gz", hash = "sha256:ace907f4637a3a65b7645b8813599436940d31bd72ea61f9cd24ccf608a43f0e"},
+    {file = "mypy_boto3_xray-1.28.15-py3-none-any.whl", hash = "sha256:6b5fde53dc8d93b04190792466bc122c83acb8534ce83e3eafdc5d9af1d632af"},
 ]
 
 [package.dependencies]
@@ -2692,4 +2692,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "569cc757c9b5d86c44935c9a48f24e8ca32fdb83a1139e3e1c6673822f676daa"
+content-hash = "c353c640d8de3e8cb93ff363750ac80fcc771cc8cc273b1ba592b9748db045d3"
