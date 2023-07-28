@@ -9,15 +9,15 @@ Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transfo
 
 * Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank" rel="nofollow"} to access resolver and identity information
+* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
 * Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
 * Support async Python 3.8+ functions, and generators
 
 ## Terminology
 
-**[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank" rel="nofollow"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
+**[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
 
-**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank" rel="nofollow"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
 
 ## Getting started
 
@@ -28,7 +28,7 @@ You must have an existing AppSync GraphQL API and IAM permissions to invoke your
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
 
 ???+ tip "Tip: Designing GraphQL Schemas for the first time?"
-    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank" rel="nofollow"} for understanding how to define types, nesting, and pagination.
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
 === "getting_started_schema.graphql"
 
@@ -93,7 +93,7 @@ Here's an example with two separate functions to resolve `getTodo` and `listTodo
 
 ### Scalar functions
 
-When working with [AWS AppSync Scalar types](https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html){target="_blank" rel="nofollow"}, you might want to generate the same values for data validation purposes.
+When working with [AWS AppSync Scalar types](https://docs.aws.amazon.com/appsync/latest/devguide/scalars.html){target="_blank"}, you might want to generate the same values for data validation purposes.
 
 For convenience, the most commonly used values are available as functions within `scalar_types_utils` module.
 
@@ -143,7 +143,7 @@ For Lambda Python3.8+ runtime, this utility supports async functions when you us
 
 ### Amplify GraphQL Transformer
 
-Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/install){target="_blank" rel="nofollow"}, create a new API using `amplify add api` and use the following GraphQL Schema.
+Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/install){target="_blank"}, create a new API using `amplify add api` and use the following GraphQL Schema.
 
 <!-- AppSync resolver decorator is a concise way to create lambda functions to handle AppSync resolvers for multiple `typeName` and `fieldName` declarations. -->
 
@@ -151,7 +151,7 @@ Assuming you have [Amplify CLI installed](https://docs.amplify.aws/cli/start/ins
 --8<-- "examples/event_handler_graphql/src/amplify_graphql_transformer_schema.graphql"
 ```
 
-[Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank" rel="nofollow"} via `amplify add function`.
+[Create two new basic Python functions](https://docs.amplify.aws/cli/function#set-up-a-function){target="_blank"} via `amplify add function`.
 
 ???+ note
     Amplify CLI generated functions use `Pipenv` as a dependency manager. Your function source code is located at **`amplify/backend/function/your-function-name`**.
@@ -192,7 +192,7 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 
 ### Custom data models
 
-You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-resolver){target="_blank" rel="nofollow"} to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
+You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-resolver){target="_blank"} to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
 
 === "custom_models.py.py"
 
@@ -215,7 +215,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 ### Split operations with Router
 
 ???+ tip
-    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank" rel="nofollow"}**, as it's also applicable here.
+    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here.
 
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's when the `Router` feature comes handy.
 
