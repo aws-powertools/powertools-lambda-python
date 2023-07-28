@@ -94,14 +94,14 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
-    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank" rel="nofollow"}.
+    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
     Larger items cannot be written to DynamoDB and will cause exceptions.
 
 ???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
     result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank" rel="nofollow"} to
+    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
     estimate the cost.
 
 ### Idempotent decorator
@@ -212,7 +212,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank" rel="nofollow"},
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
 Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
 ???+ example

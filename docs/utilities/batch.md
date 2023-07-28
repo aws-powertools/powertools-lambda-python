@@ -61,7 +61,7 @@ This behavior changes when you enable Report Batch Item Failures feature in your
 ???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
     We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
-    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank" rel="nofollow"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank" rel="nofollow"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank" rel="nofollow"} in the AWS Documentation.
+    You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank"} in the AWS Documentation.
 
 ## Getting started
 
