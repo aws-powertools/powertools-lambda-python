@@ -9,7 +9,6 @@ import os
 import warnings
 from collections import defaultdict
 from contextlib import contextmanager
-from enum import Enum
 from typing import Any, Callable, Dict, Generator, List, Optional, Union
 
 from aws_lambda_powertools.metrics.exceptions import (
@@ -18,50 +17,20 @@ from aws_lambda_powertools.metrics.exceptions import (
     MetricValueError,
     SchemaValidationError,
 )
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cold_start import (
+    reset_cold_start_flag,  # noqa: F401  # backwards compatibility
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 logger = logging.getLogger(__name__)
 
-MAX_METRICS = 100
-MAX_DIMENSIONS = 29
-
-is_cold_start = True
-
-
-class MetricResolution(Enum):
-    Standard = 60
-    High = 1
-
-
-class MetricUnit(Enum):
-    Seconds = "Seconds"
-    Microseconds = "Microseconds"
-    Milliseconds = "Milliseconds"
-    Bytes = "Bytes"
-    Kilobytes = "Kilobytes"
-    Megabytes = "Megabytes"
-    Gigabytes = "Gigabytes"
-    Terabytes = "Terabytes"
-    Bits = "Bits"
-    Kilobits = "Kilobits"
-    Megabits = "Megabits"
-    Gigabits = "Gigabits"
-    Terabits = "Terabits"
-    Percent = "Percent"
-    Count = "Count"
-    BytesPerSecond = "Bytes/Second"
-    KilobytesPerSecond = "Kilobytes/Second"
-    MegabytesPerSecond = "Megabytes/Second"
-    GigabytesPerSecond = "Gigabytes/Second"
-    TerabytesPerSecond = "Terabytes/Second"
-    BitsPerSecond = "Bits/Second"
-    KilobitsPerSecond = "Kilobits/Second"
-    MegabitsPerSecond = "Megabits/Second"
-    GigabitsPerSecond = "Gigabits/Second"
-    TerabitsPerSecond = "Terabits/Second"
-    CountPerSecond = "Count/Second"
+# Maintenance: alias due to Hyrum's law
+is_cold_start = cold_start.is_cold_start
 
 
 class MetricManager:
@@ -637,9 +606,3 @@ def single_metric(
         metric_set = metric.serialize_metric_set()
     finally:
         print(json.dumps(metric_set, separators=(",", ":")))
-
-
-def reset_cold_start_flag():
-    global is_cold_start
-    if not is_cold_start:
-        is_cold_start = True

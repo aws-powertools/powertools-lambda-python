@@ -8,61 +8,23 @@ import numbers
 import os
 import warnings
 from collections import defaultdict
-from contextlib import contextmanager
-from enum import Enum
-from typing import Any, Callable, Dict, Generator, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from aws_lambda_powertools.metrics.exceptions import (
+from aws_lambda_powertools.metrics.base import single_metric
+from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.provider import MetricsProviderBase
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
     MetricUnitError,
-    MetricValueError,
-    SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.provider.base import MetricsProviderBase
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 logger = logging.getLogger(__name__)
-
-MAX_METRICS = 100
-MAX_DIMENSIONS = 29
-
-is_cold_start = True
-
-
-class MetricResolution(Enum):
-    Standard = 60
-    High = 1
-
-
-class MetricUnit(Enum):
-    Seconds = "Seconds"
-    Microseconds = "Microseconds"
-    Milliseconds = "Milliseconds"
-    Bytes = "Bytes"
-    Kilobytes = "Kilobytes"
-    Megabytes = "Megabytes"
-    Gigabytes = "Gigabytes"
-    Terabytes = "Terabytes"
-    Bits = "Bits"
-    Kilobits = "Kilobits"
-    Megabits = "Megabits"
-    Gigabits = "Gigabits"
-    Terabits = "Terabits"
-    Percent = "Percent"
-    Count = "Count"
-    BytesPerSecond = "Bytes/Second"
-    KilobytesPerSecond = "Kilobytes/Second"
-    MegabytesPerSecond = "Megabytes/Second"
-    GigabytesPerSecond = "Gigabytes/Second"
-    TerabytesPerSecond = "Terabytes/Second"
-    BitsPerSecond = "Bits/Second"
-    KilobitsPerSecond = "Kilobits/Second"
-    MegabitsPerSecond = "Megabits/Second"
-    GigabitsPerSecond = "Gigabits/Second"
-    TerabitsPerSecond = "Terabits/Second"
-    CountPerSecond = "Count/Second"
 
 
 class AmazonCloudWatchEMFProvider(MetricsProviderBase):
@@ -102,15 +64,20 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         namespace: str | None = None,
         metadata_set: Dict[str, Any] | None = None,
         service: str | None = None,
+        default_dimensions: Dict[str, Any] | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
+        self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
+
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
+
+        self.dimension_set.update(**self.default_dimensions)
 
     def add_metric(
         self,
@@ -333,6 +300,7 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         self.metric_set.clear()
         self.dimension_set.clear()
         self.metadata_set.clear()
+        self.set_default_dimensions(**self.default_dimensions)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """Manually flushes the metrics. This is normally not necessary,
@@ -493,154 +461,13 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         context : Any
             Lambda context
         """
-        global is_cold_start
-        if is_cold_start:
+        if cold_start.is_cold_start:
             logger.debug("Adding cold start metric and function_name dimension")
             with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
                 metric.add_dimension(name="function_name", value=context.function_name)
                 if self.service:
                     metric.add_dimension(name="service", value=str(self.service))
-                is_cold_start = False
-
-
-class Metrics(AmazonCloudWatchEMFProvider):
-    """Metrics create an EMF object with up to 100 metrics
-
-    Use Metrics when you need to create multiple metrics that have
-    dimensions in common (e.g. service_name="payment").
-
-    Metrics up to 100 metrics in memory and are shared across
-    all its instances. That means it can be safely instantiated outside
-    of a Lambda function, or anywhere else.
-
-    A decorator (log_metrics) is provided so metrics are published at the end of its execution.
-    If more than 100 metrics are added at a given function execution,
-    these metrics are serialized and published before adding a given metric
-    to prevent metric truncation.
-
-    Example
-    -------
-    **Creates a few metrics and publish at the end of a function execution**
-
-        from aws_lambda_powertools import Metrics
-
-        metrics = Metrics(namespace="ServerlessAirline", service="payment")
-
-        @metrics.log_metrics(capture_cold_start_metric=True)
-        def lambda_handler():
-            metrics.add_metric(name="BookingConfirmation", unit="Count", value=1)
-            metrics.add_dimension(name="function_version", value="$LATEST")
-
-            return True
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
-        metric namespace
-    POWERTOOLS_SERVICE_NAME : str
-        service name used for default dimension
-
-    Parameters
-    ----------
-    service : str, optional
-        service name to be used as metric dimension, by default "service_undefined"
-    namespace : str, optional
-        Namespace for metrics
-
-    Raises
-    ------
-    MetricUnitError
-        When metric unit isn't supported by CloudWatch
-    MetricResolutionError
-        When metric resolution isn't supported by CloudWatch
-    MetricValueError
-        When metric value isn't a number
-    SchemaValidationError
-        When metric object fails EMF schema validation
-    """
-
-    # NOTE: We use class attrs to share metrics data across instances
-    # this allows customers to initialize Metrics() throughout their code base (and middlewares)
-    # and not get caught by accident with metrics data loss, or data deduplication
-    # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
-    # Result: ProductCreated is created twice as we now have 2 different EMF blobs
-    _metrics: Dict[str, Any] = {}
-    _dimensions: Dict[str, str] = {}
-    _metadata: Dict[str, Any] = {}
-    _default_dimensions: Dict[str, Any] = {}
-
-    def __init__(
-        self,
-        service: str | None = None,
-        namespace: str | None = None,
-        provider: AmazonCloudWatchEMFProvider | None = None,
-    ):
-        self.metric_set = self._metrics
-        self.metadata_set = self._metadata
-        self.default_dimensions = self._default_dimensions
-        self.dimension_set = self._dimensions
-
-        self.dimension_set.update(**self._default_dimensions)
-
-        if provider is None:
-            self.provider = AmazonCloudWatchEMFProvider(
-                namespace=namespace,
-                service=service,
-                metric_set=self.metric_set,
-                dimension_set=self.dimension_set,
-                metadata_set=self.metadata_set,
-            )
-        else:
-            self.provider = provider
-
-    def add_metric(
-        self,
-        name: str,
-        unit: MetricUnit | str,
-        value: float,
-        resolution: MetricResolution | int = 60,
-    ) -> None:
-        self.provider.add_metric(name=name, unit=unit, value=value, resolution=resolution)
-
-    def add_dimension(self, name: str, value: str) -> None:
-        self.provider.add_dimension(name=name, value=value)
-
-    def serialize_metric_set(
-        self,
-        metrics: Dict | None = None,
-        dimensions: Dict | None = None,
-        metadata: Dict | None = None,
-    ) -> Dict:
-        return self.provider.serialize_metric_set(metrics=metrics, dimensions=dimensions, metadata=metadata)
-
-    def add_metadata(self, key: str, value: Any) -> None:
-        self.provider.add_metadata(key=key, value=value)
-
-    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        self.provider.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
-
-    def log_metrics(
-        self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
-        capture_cold_start_metric: bool = False,
-        raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
-    ):
-        return self.provider.log_metrics(
-            lambda_handler=lambda_handler,
-            capture_cold_start_metric=capture_cold_start_metric,
-            raise_on_empty_metrics=raise_on_empty_metrics,
-            default_dimensions=default_dimensions,
-        )
-
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
-        return self.provider._extract_metric_resolution_value(resolution=resolution)
-
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
-        return self.provider._extract_metric_unit_value(unit=unit)
-
-    def _add_cold_start_metric(self, context: Any) -> None:
-        self.provider._add_cold_start_metric(context=context)
+                cold_start.is_cold_start = False
 
     def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations
@@ -667,266 +494,3 @@ class Metrics(AmazonCloudWatchEMFProvider):
             self.add_dimension(name, value)
 
         self.default_dimensions.update(**dimensions)
-
-    def clear_default_dimensions(self) -> None:
-        self.default_dimensions.clear()
-
-    def clear_metrics(self) -> None:
-        self.provider.clear_metrics()
-        # re-add default dimensions
-        self.set_default_dimensions(**self.default_dimensions)
-
-
-class EphemeralMetrics(AmazonCloudWatchEMFProvider):
-    """Non-singleton version of Metrics to not persist metrics across instances
-
-    NOTE: This is useful when you want to:
-
-    - Create metrics for distinct namespaces
-    - Create the same metrics with different dimensions more than once
-    """
-
-    _dimensions: Dict[str, str] = {}
-    _default_dimensions: Dict[str, Any] = {}
-
-    def __init__(
-        self,
-        service: str | None = None,
-        namespace: str | None = None,
-        provider: AmazonCloudWatchEMFProvider | None = None,
-    ):
-        self.default_dimensions = self._default_dimensions
-        self.dimension_set = self._dimensions
-
-        self.dimension_set.update(**self._default_dimensions)
-
-        if provider is None:
-            self.provider = AmazonCloudWatchEMFProvider(namespace=namespace, service=service)
-        else:
-            self.provider = provider
-
-    def add_metric(
-        self,
-        name: str,
-        unit: MetricUnit | str,
-        value: float,
-        resolution: MetricResolution | int = 60,
-    ) -> None:
-        return self.provider.add_metric(name=name, unit=unit, value=value, resolution=resolution)
-
-    def add_dimension(self, name: str, value: str) -> None:
-        return self.provider.add_dimension(name=name, value=value)
-
-    def serialize_metric_set(
-        self,
-        metrics: Dict | None = None,
-        dimensions: Dict | None = None,
-        metadata: Dict | None = None,
-    ) -> Dict:
-        return self.provider.serialize_metric_set(metrics=metrics, dimensions=dimensions, metadata=metadata)
-
-    def add_metadata(self, key: str, value: Any) -> None:
-        self.provider.add_metadata(key=key, value=value)
-
-    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        self.provider.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
-
-    def log_metrics(
-        self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
-        capture_cold_start_metric: bool = False,
-        raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
-    ):
-        return self.provider.log_metrics(
-            lambda_handler=lambda_handler,
-            capture_cold_start_metric=capture_cold_start_metric,
-            raise_on_empty_metrics=raise_on_empty_metrics,
-            default_dimensions=default_dimensions,
-        )
-
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
-        return self.provider._extract_metric_resolution_value(resolution=resolution)
-
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
-        return self.provider._extract_metric_unit_value(unit=unit)
-
-    def _add_cold_start_metric(self, context: Any) -> None:
-        self.provider._add_cold_start_metric(context=context)
-
-    def set_default_dimensions(self, **dimensions) -> None:
-        """Persist dimensions across Lambda invocations
-
-        Parameters
-        ----------
-        dimensions : Dict[str, Any], optional
-            metric dimensions as key=value
-
-        Example
-        -------
-        **Sets some default dimensions that will always be present across metrics and invocations**
-
-            from aws_lambda_powertools import Metrics
-
-            metrics = Metrics(namespace="ServerlessAirline", service="payment")
-            metrics.set_default_dimensions(environment="demo", another="one")
-
-            @metrics.log_metrics()
-            def lambda_handler():
-                return True
-        """
-        for name, value in dimensions.items():
-            self.add_dimension(name, value)
-
-        self.default_dimensions.update(**dimensions)
-
-    def clear_default_dimensions(self) -> None:
-        self.default_dimensions.clear()
-
-    def clear_metrics(self) -> None:
-        self.provider.clear_metrics()
-        # re-add default dimensions
-        self.set_default_dimensions(**self.default_dimensions)
-
-
-class SingleMetric(AmazonCloudWatchEMFProvider):
-    """SingleMetric creates an EMF object with a single metric.
-
-    EMF specification doesn't allow metrics with different dimensions.
-    SingleMetric overrides MetricManager's add_metric method to do just that.
-
-    Use `single_metric` when you need to create metrics with different dimensions,
-    otherwise `aws_lambda_powertools.metrics.metrics.Metrics` is
-    a more cost effective option
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
-        metric namespace
-
-    Example
-    -------
-    **Creates cold start metric with function_version as dimension**
-
-        import json
-        from aws_lambda_powertools.metrics import single_metric, MetricUnit, MetricResolution
-        metric = single_metric(namespace="ServerlessAirline")
-
-        metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard)
-        metric.add_dimension(name="function_version", value=47)
-
-        print(json.dumps(metric.serialize_metric_set(), indent=4))
-
-    Parameters
-    ----------
-    MetricManager : MetricManager
-        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
-    """
-
-    def add_metric(
-        self,
-        name: str,
-        unit: MetricUnit | str,
-        value: float,
-        resolution: MetricResolution | int = 60,
-    ) -> None:
-        """Method to prevent more than one metric being created
-
-        Parameters
-        ----------
-        name : str
-            Metric name (e.g. BookingConfirmation)
-        unit : MetricUnit
-            Metric unit (e.g. "Seconds", MetricUnit.Seconds)
-        value : float
-            Metric value
-        resolution : MetricResolution
-            Metric resolution (e.g. 60, MetricResolution.Standard)
-        """
-        if len(self.metric_set) > 0:
-            logger.debug(f"Metric {name} already set, skipping...")
-            return
-        return super().add_metric(name, unit, value, resolution)
-
-
-@contextmanager
-def single_metric(
-    name: str,
-    unit: MetricUnit,
-    value: float,
-    resolution: MetricResolution | int = 60,
-    namespace: str | None = None,
-    default_dimensions: Dict[str, str] | None = None,
-) -> Generator[SingleMetric, None, None]:
-    """Context manager to simplify creation of a single metric
-
-    Example
-    -------
-    **Creates cold start metric with function_version as dimension**
-
-        from aws_lambda_powertools import single_metric
-        from aws_lambda_powertools.metrics import MetricUnit
-        from aws_lambda_powertools.metrics import MetricResolution
-
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric:
-            metric.add_dimension(name="function_version", value="47")
-
-    **Same as above but set namespace using environment variable**
-
-        $ export POWERTOOLS_METRICS_NAMESPACE="ServerlessAirline"
-
-        from aws_lambda_powertools import single_metric
-        from aws_lambda_powertools.metrics import MetricUnit
-        from aws_lambda_powertools.metrics import MetricResolution
-
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric:
-            metric.add_dimension(name="function_version", value="47")
-
-    Parameters
-    ----------
-    name : str
-        Metric name
-    unit : MetricUnit
-        `aws_lambda_powertools.helper.models.MetricUnit`
-    resolution : MetricResolution
-        `aws_lambda_powertools.helper.models.MetricResolution`
-    value : float
-        Metric value
-    namespace: str
-        Namespace for metrics
-
-    Yields
-    -------
-    SingleMetric
-        SingleMetric class instance
-
-    Raises
-    ------
-    MetricUnitError
-        When metric metric isn't supported by CloudWatch
-    MetricResolutionError
-        When metric resolution isn't supported by CloudWatch
-    MetricValueError
-        When metric value isn't a number
-    SchemaValidationError
-        When metric object fails EMF schema validation
-    """  # noqa: E501
-    metric_set: Dict | None = None
-    try:
-        metric: SingleMetric = SingleMetric(namespace=namespace)
-        metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
-
-        if default_dimensions:
-            for dim_name, dim_value in default_dimensions.items():
-                metric.add_dimension(name=dim_name, value=dim_value)
-
-        yield metric
-        metric_set = metric.serialize_metric_set()
-    finally:
-        print(json.dumps(metric_set, separators=(",", ":")))
-
-
-def reset_cold_start_flag():
-    global is_cold_start
-    if not is_cold_start:
-        is_cold_start = True
