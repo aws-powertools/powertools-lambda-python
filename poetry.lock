@@ -1512,13 +1512,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-logs"
-version = "1.28.1"
-description = "Type annotations for boto3.CloudWatchLogs 1.28.1 service generated with mypy-boto3-builder 7.14.5"
+version = "1.28.15"
+description = "Type annotations for boto3.CloudWatchLogs 1.28.15 service generated with mypy-boto3-builder 7.16.1"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-logs-1.28.1.tar.gz", hash = "sha256:e0278a977d68c15120c0f2f4a85b46d0ca3e17c676c7d218dbbb3cfa1b4c8ef1"},
-    {file = "mypy_boto3_logs-1.28.1-py3-none-any.whl", hash = "sha256:0ab3b7b39f1c3b0d530096fe2bfb9df09b989b0ea718e5ecbf823c32b016e319"},
+    {file = "mypy-boto3-logs-1.28.15.tar.gz", hash = "sha256:0208dbb873ad252258cc025e4598a14ef9ecae3623468cf8f82d3d7bcfafae7b"},
+    {file = "mypy_boto3_logs-1.28.15-py3-none-any.whl", hash = "sha256:245cbf1ba6f2bdc8be1260d8991686eda5585f8c6c6c4b783c82b3568950e84c"},
 ]
 
 [package.dependencies]
@@ -2692,4 +2692,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "68e3d74f95dab29887d847838e02827edfe40e95ef91d2c6b13d8f806f53c7cb"
+content-hash = "87dd8a10659154c79e999c181f679a309dcd6891f8e4a3e2f0935d9c9c47e14a"
