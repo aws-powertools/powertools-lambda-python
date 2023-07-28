@@ -1498,13 +1498,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.28.11"
-description = "Type annotations for boto3.Lambda 1.28.11 service generated with mypy-boto3-builder 7.15.1"
+version = "1.28.15"
+description = "Type annotations for boto3.Lambda 1.28.15 service generated with mypy-boto3-builder 7.16.1"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-lambda-1.28.11.tar.gz", hash = "sha256:2df51192be0ff1d37b3d34ffc8e5849e352e812c65fd79b1fa85c439367e478f"},
-    {file = "mypy_boto3_lambda-1.28.11-py3-none-any.whl", hash = "sha256:8449b569b7cb387d2be3b8db584f60789f08fe61866d11f8b8d64b2431989a18"},
+    {file = "mypy-boto3-lambda-1.28.15.tar.gz", hash = "sha256:9f063ddf67be8b5d9d8bb5a6e072d7aff22eebfca25f2d8f7b9cf351e18d9937"},
+    {file = "mypy_boto3_lambda-1.28.15-py3-none-any.whl", hash = "sha256:b189c948e41b86b80f84fe14f438c4cedfb81697039c4b1c01871a2aee3415a8"},
 ]
 
 [package.dependencies]
@@ -2692,4 +2692,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "c353c640d8de3e8cb93ff363750ac80fcc771cc8cc273b1ba592b9748db045d3"
+content-hash = "1c2f547e6ca9176c58c11eedee6a6138304cb5bf5070af981dd98e292378e6fd"
