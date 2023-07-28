@@ -4117,7 +4117,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">42</span>
 <span class="normal">43</span>
 <span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Metrics</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">MetricUnit</span>
@@ -4134,7 +4134,7 @@ This helps preserve the ordering of messages in your queue.</p>
 
 
 <span class="hll"><span class="k">class</span> <span class="nc">MyProcessor</span><span class="p">(</span><span class="n">BatchProcessor</span><span class="p">):</span>
-</span><span class="hll">    <span class="k">def</span> <span class="nf">success_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuccessResponse</span><span class="p">:</span>
+</span><span class="hll">    <span class="k">def</span> <span class="nf">success_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuccessResponse</span><span class="p">:</span>
 </span><span class="hll">        <span class="n">metrics</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;BatchRecordSuccesses&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </span><span class="hll">        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">success_handler</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
 </span><span class="hll">
