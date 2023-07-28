@@ -522,19 +522,19 @@ You might want to bring custom logic to the existing `BatchProcessor` to slightl
 
 For these scenarios, you can subclass `BatchProcessor` and quickly override `success_handler` and `failure_handler` methods:
 
-* **`success_handler()`** – is called for each successfully processed record
-* **`failure_handler()`** – is called for each failed record
+* **`success_handler()`** is called for each successfully processed record
+* **`failure_handler()`** is called for each failed record
 
 ???+ warning
     These functions have a common `record` argument. For backward compatibility reasons, their type is not the same:
 
-    - `success_handler`: `record` type is `dict[str, Any]`, the raw record data
-    - `failure_handler`: `record` type is a Pydantic model, either the parsed record or the  `EventSourceDataClass` record in case of validation error. Refer to [Accessing processed messages](#accessing-processed-messages) for more details
+    - `success_handler`: `record` type is `dict[str, Any]`, the raw record data.
+    - `failure_handler`: `record` type can be an Event Source Data Class or your [Pydantic model](#pydantic-integration). During Pydantic validation errors, we fall back and serialize `record` to Event Source Data Class to not break the processing pipeline.
 
 ???+ example
-	Let's suppose you'd like to add metrics tracking processing successes and failures of your batch records.
+	Let's suppose you'd like to add metrics to track successes and failures of your batch records.
 
-```python hl_lines="8 9 18-25 28 44" title="Extending failure handling mechanism in BatchProcessor"
+```python hl_lines="8-10 18-25 28 44" title="Extending failure handling mechanism in BatchProcessor"
 --8<-- "examples/batch_processing/src/extending_processor_handlers.py"
 ```
 
