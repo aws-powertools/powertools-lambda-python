@@ -79,7 +79,7 @@ You can do this manually or automated via a shell script. We maintain the latter
     5. **Runs SLSA Verifier against attestation**, GitHub Source, and release binary
     6. **Cleanup** by removing downloaded files to keep your current directory tidy
 
-    ??? info "Expand or [click here](https://github.com/heitorlessa/aws-lambda-powertools-python/blob/refactor/ci-seal/.github/actions/verify-provenance/verify_provenance.sh#L95){target="_blank" rel="nofollow"} to see the script source code"
+    ??? info "Expand or [click here](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/.github/actions/verify-provenance/verify_provenance.sh){target="_blank"} to see the script source code"
 
           ```bash title=".github/actions/verify-provenance/verify_provenance.sh"
           ---8<-- ".github/actions/verify-provenance/verify_provenance.sh"
