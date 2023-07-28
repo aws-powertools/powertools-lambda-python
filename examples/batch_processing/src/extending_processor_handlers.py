@@ -1,5 +1,5 @@
 import json
-from typing import Any
+from typing import Any, Dict
 
 from aws_lambda_powertools import Logger, Metrics, Tracer
 from aws_lambda_powertools.metrics import MetricUnit
@@ -16,7 +16,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 class MyProcessor(BatchProcessor):
-    def success_handler(self, record: dict[str, Any], result: Any) -> SuccessResponse:
+    def success_handler(self, record: Dict[str, Any], result: Any) -> SuccessResponse:
         metrics.add_metric(name="BatchRecordSuccesses", unit=MetricUnit.Count, value=1)
         return super().success_handler(record, result)
 
