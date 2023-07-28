@@ -4061,13 +4061,18 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>You might want to bring custom logic to the existing <code>BatchProcessor</code> to slightly override how we handle successes and failures.</p>
 <p>For these scenarios, you can subclass <code>BatchProcessor</code> and quickly override <code>success_handler</code> and <code>failure_handler</code> methods:</p>
 <ul>
-<li><strong><code>success_handler()</code></strong> – Keeps track of successful batch records</li>
-<li><strong><code>failure_handler()</code></strong> – Keeps track of failed batch records</li>
+<li><strong><code>success_handler()</code></strong> is called for each successfully processed record</li>
+<li><strong><code>failure_handler()</code></strong> is called for each failed record</li>
 </ul>
-<details class="example" open="open">
-<summary>Example</summary>
-<p>Let's suppose you'd like to add a metric named <code>BatchRecordFailures</code> for each batch record that failed processing</p>
+<details class="note" open="open">
+<summary>Note</summary>
+<p>These functions have a common <code>record</code> argument. For backward compatibility reasons, their type is not the same:</p>
+<ul>
+<li><code>success_handler</code>: <code>record</code> type is <code>dict[str, Any]</code>, the raw record data.</li>
+<li><code>failure_handler</code>: <code>record</code> type can be an Event Source Data Class or your <a href="#pydantic-integration">Pydantic model</a>. During Pydantic validation errors, we fall back and serialize <code>record</code> to Event Source Data Class to not break the processing pipeline.</li>
+</ul>
 </details>
+<p>Let's suppose you'd like to add metrics to track successes and failures of your batch records.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Extending failure handling mechanism in BatchProcessor</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -4105,22 +4110,34 @@ This helps preserve the ordering of messages in your queue.</p>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Metrics</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">MetricUnit</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">BatchProcessor</span><span class="p">,</span>
-    <span class="n">EventType</span><span class="p">,</span>
-<span class="hll">    <span class="n">ExceptionInfo</span><span class="p">,</span>
+<span class="hll">    <span class="n">EventType</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">ExceptionInfo</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">FailureResponse</span><span class="p">,</span>
 </span>    <span class="n">process_partial_response</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch.base</span> <span class="kn">import</span> <span class="n">SuccessResponse</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 
 <span class="hll"><span class="k">class</span> <span class="nc">MyProcessor</span><span class="p">(</span><span class="n">BatchProcessor</span><span class="p">):</span>
+</span><span class="hll">    <span class="k">def</span> <span class="nf">success_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">result</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SuccessResponse</span><span class="p">:</span>
+</span><span class="hll">        <span class="n">metrics</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;BatchRecordSuccesses&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</span><span class="hll">        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">success_handler</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+</span><span class="hll">
 </span><span class="hll">    <span class="k">def</span> <span class="nf">failure_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">,</span> <span class="n">exception</span><span class="p">:</span> <span class="n">ExceptionInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FailureResponse</span><span class="p">:</span>
 </span><span class="hll">        <span class="n">metrics</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;BatchRecordFailures&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </span><span class="hll">        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">failure_handler</span><span class="p">(</span><span class="n">record</span><span class="p">,</span> <span class="n">exception</span><span class="p">)</span>
