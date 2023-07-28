@@ -531,8 +531,7 @@ For these scenarios, you can subclass `BatchProcessor` and quickly override `suc
     - `success_handler`: `record` type is `dict[str, Any]`, the raw record data.
     - `failure_handler`: `record` type can be an Event Source Data Class or your [Pydantic model](#pydantic-integration). During Pydantic validation errors, we fall back and serialize `record` to Event Source Data Class to not break the processing pipeline.
 
-???+ example
-	Let's suppose you'd like to add metrics to track successes and failures of your batch records.
+Let's suppose you'd like to add metrics to track successes and failures of your batch records.
 
 ```python hl_lines="8-10 18-25 28 44" title="Extending failure handling mechanism in BatchProcessor"
 --8<-- "examples/batch_processing/src/extending_processor_handlers.py"
