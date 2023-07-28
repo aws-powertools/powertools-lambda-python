@@ -32,7 +32,7 @@ You can also use the standalone `validate` function, if you want more control ov
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank" rel="nofollow"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Validation.
 
@@ -194,7 +194,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.
 <!-- markdownlint-disable-next-line MD013 -->
-You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank" rel="nofollow"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank" rel="nofollow"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank" rel="nofollow"}.
+You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank" rel="nofollow"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank" rel="nofollow"}.
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.

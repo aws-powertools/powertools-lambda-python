@@ -9,7 +9,7 @@ Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transfo
 
 * Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank" rel="nofollow"} to access resolver and identity information
+* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
 * Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
 * Support async Python 3.8+ functions, and generators
 
@@ -192,7 +192,7 @@ Use the following code for `merchantInfo` and `searchMerchant` functions respect
 
 ### Custom data models
 
-You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-resolver){target="_blank" rel="nofollow"} to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
+You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-resolver){target="_blank"} to bring your own set of methods to handle incoming events, by using `data_model` param in the `resolve` method.
 
 === "custom_models.py.py"
 
@@ -215,7 +215,7 @@ You can subclass [AppSyncResolverEvent](../../utilities/data_classes.md#appsync-
 ### Split operations with Router
 
 ???+ tip
-    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank" rel="nofollow"}**, as it's also applicable here.
+    Read the **[considerations section for trade-offs between monolithic and micro functions](./api_gateway.md#considerations){target="_blank"}**, as it's also applicable here.
 
 As you grow the number of related GraphQL operations a given Lambda function should handle, it is natural to split them into separate files to ease maintenance - That's when the `Router` feature comes handy.
 

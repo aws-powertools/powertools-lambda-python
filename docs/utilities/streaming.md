@@ -185,6 +185,6 @@ Create an input payload using `io.BytesIO` and assert the response of the transf
 
 ### AWS X-Ray segment size limit
 
-We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with [Tracer](./../core/tracer.md){target="_blank" rel="nofollow"}, you can easily hit [AWS X-Ray 64K segment size](https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray){target="_blank" rel="nofollow"} when processing large files.
+We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with [Tracer](./../core/tracer.md){target="_blank"}, you can easily hit [AWS X-Ray 64K segment size](https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray){target="_blank" rel="nofollow"} when processing large files.
 
 !!! tip "Use tracer decorators in parts where you don't read your `S3Object` instead."

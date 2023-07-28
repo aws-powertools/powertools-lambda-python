@@ -9,7 +9,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
-* Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank" rel="nofollow"} for self-documented event schema
+* Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 
 ## Getting started
 
@@ -210,7 +210,7 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 
 ### Accessing request details
 
-Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank" rel="nofollow"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
+Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
 
 That is why you see `app.resolve(event, context)` in every example. This allows Event Handler to resolve requests, and expose data like `app.lambda_context` and  `app.current_event`.
 
@@ -448,7 +448,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank" rel="nofollow"}.
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank"}.
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 

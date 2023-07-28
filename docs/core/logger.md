@@ -108,7 +108,7 @@ You can set a Correlation ID using `correlation_id_path` param by passing a [JME
 
 #### set_correlation_id method
 
-You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md){target="_blank" rel="nofollow"} to easily access events properties.
+You can also use `set_correlation_id` method to inject it anywhere else in your code. Example below uses [Event Source Data Classes utility](../utilities/data_classes.md){target="_blank"} to easily access events properties.
 
 === "set_correlation_id_method.py"
 
@@ -360,7 +360,7 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank" rel="nofollow"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
 
 Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
 

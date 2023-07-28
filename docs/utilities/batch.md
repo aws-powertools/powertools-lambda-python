@@ -59,7 +59,7 @@ This behavior changes when you enable Report Batch Item Failures feature in your
 <!-- HTML tags are required in admonition content thus increasing line length beyond our limits -->
 <!-- markdownlint-disable MD013 -->
 ???+ warning "Warning: This utility lowers the chance of processing records more than once; it does not guarantee it"
-    We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank" rel="nofollow"} wherever possible.
+    We recommend implementing processing logic in an [idempotent manner](idempotency.md){target="_blank"} wherever possible.
 
     You can find more details on how Lambda works with either [SQS](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html){target="_blank" rel="nofollow"}, [Kinesis](https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html){target="_blank" rel="nofollow"}, or [DynamoDB](https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html){target="_blank" rel="nofollow"} in the AWS Documentation.
 
@@ -98,7 +98,7 @@ The remaining sections of the documentation will rely on these samples. For comp
 Processing batches from SQS works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.SQS`** for the event type
-2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank" rel="nofollow"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`SQSRecord`](data_classes.md#sqs){target="_blank"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 !!! info "This code example uses Tracer and Logger for completion."
@@ -169,7 +169,7 @@ This helps preserve the ordering of messages in your queue.
 Processing batches from Kinesis works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.KinesisDataStreams`** for the event type
-2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`KinesisStreamRecord`](data_classes.md#kinesis-streams){target="_blank"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 !!! info "This code example uses Tracer and Logger for completion."
@@ -213,7 +213,7 @@ Processing batches from Kinesis works in three stages:
 Processing batches from DynamoDB Streams works in three stages:
 
 1. Instantiate **`BatchProcessor`** and choose **`EventType.DynamoDBStreams`** for the event type
-2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank" rel="nofollow"} type annotation for autocompletion
+2. Define your function to handle each batch record, and use [`DynamoDBRecord`](data_classes.md#dynamodb-streams){target="_blank"} type annotation for autocompletion
 3. Use **`process_partial_response`** to kick off processing
 
 !!! info "This code example uses Tracer and Logger for completion."
@@ -578,7 +578,7 @@ You can then use this class as a context manager, or pass it to `batch_processor
 
 When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your `record_handler` function, or how big is your batch size.
 
-If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank" rel="nofollow"}.
+If that's the case, you can configure [Tracer to disable response auto-capturing](../core/tracer.md#disabling-response-auto-capture){target="_blank"}.
 
 ```python hl_lines="17" title="Disabling Tracer response auto-capturing"
 --8<-- "examples/batch_processing/src/disable_tracing.py"

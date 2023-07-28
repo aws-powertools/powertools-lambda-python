@@ -135,7 +135,7 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank" rel="nofollow"}, and our [Event Source Data Classes](./data_classes.md){target="_blank" rel="nofollow"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -154,7 +154,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 #### Batch integration
 
-You can can easily integrate with [Batch utility](batch.md){target="_blank" rel="nofollow"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
+You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
 
 ???+ "Choosing an unique batch record attribute"
     In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
@@ -193,7 +193,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
     The payload extracted by the `event_key_jmespath` is treated as a string by default.
     This means there could be differences in whitespace even when the JSON payload itself is identical.
 
-    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
+    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
 === "Payment function"
 

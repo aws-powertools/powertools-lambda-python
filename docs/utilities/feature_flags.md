@@ -25,7 +25,7 @@ Feature flags are used to modify behaviour without changing the application's co
 **Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
-    You can use [Parameters utility](parameters.md){target="_blank" rel="nofollow"} for static flags while this utility can do both static and dynamic feature flags.
+    You can use [Parameters utility](parameters.md){target="_blank"} for static flags while this utility can do both static and dynamic feature flags.
 
 ???+ warning
     Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
@@ -578,5 +578,5 @@ You can unit test your feature flags locally and independently without setting u
 | Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
 | **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank" rel="nofollow"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
-| **[Parameters utility](parameters.md){target="_blank" rel="nofollow"}**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
+| **[Parameters utility](parameters.md){target="_blank"}**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
 | **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |

@@ -20,20 +20,20 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 | Area                               | Change                                                                                                                                                                                                  | Code change required | IAM Permissions change required |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------- |
 | **Batch**                          | Removed legacy [SQS batch processor](#legacy-sqs-batch-processor) in favour of **`BatchProcessor`**.                                                                                                    | Yes                  | -                               |
-| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank" rel="nofollow"}.                                              | -                    | -                               |
-| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank" rel="nofollow"}. | Tests only           | -                               |
+| **Environment variables**          | Removed legacy **`POWERTOOLS_EVENT_HANDLER_DEBUG`** in favour of [`POWERTOOLS_DEV`](index.md#optimizing-for-non-production-environments){target="_blank"}.                                              | -                    | -                               |
+| **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
 | **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
 | **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
 | **Idempotency**                    | Updated [partition key](#idempotency-partition-key-format) to include fully qualified function/method names.                                                                                            | -                    | -                               |
 
 ### First Steps
 
-!!! note "All dependencies are optional now. [Tracer](core/tracer.md#install){target="_blank" rel="nofollow"}, [Validation](./utilities/validation.md#install){target="_blank" rel="nofollow"}, and [Parser](./utilities/parser.md){target="_blank" rel="nofollow"} now require additional dependencies."
+!!! note "All dependencies are optional now. [Tracer](core/tracer.md#install){target="_blank"}, [Validation](./utilities/validation.md#install){target="_blank"}, and [Parser](./utilities/parser.md){target="_blank"} now require additional dependencies."
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
 1. **Upgrade** Python to at least v3.7
-2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank" rel="nofollow"}.
+2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}.
 3. **Review** the following sections to confirm whether they affect your code
 
 ## Legacy SQS Batch Processor
@@ -44,7 +44,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank" rel="nofollow"}
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
 === "[Before] Decorator"
@@ -139,7 +139,7 @@ Previously, custom headers were available under `headers` key in the Event Handl
 }
 ```
 
-In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank" rel="nofollow"}.
+In V2, we add all headers under `multiValueHeaders` key. This enables seamless support for multi-value headers and cookies in [fine grained responses](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}.
 
 ```python title="V2 response headers" hl_lines="2"
 {
