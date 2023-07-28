@@ -1467,8 +1467,8 @@
 <!-- markdownlint-disable MD013 -->
 <details class="warning" open="open">
 <summary>Warning: This utility lowers the chance of processing records more than once; it does not guarantee it</summary>
-<p>We recommend implementing processing logic in an <a href="../idempotency/" rel="nofollow" target="_blank">idempotent manner</a> wherever possible.</p>
-<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" rel="nofollow" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" rel="nofollow" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" rel="nofollow" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
+<p>We recommend implementing processing logic in an <a href="../idempotency/" target="_blank">idempotent manner</a> wherever possible.</p>
+<p>You can find more details on how Lambda works with either <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html" target="_blank">SQS</a>, <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kinesis.html" target="_blank">Kinesis</a>, or <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-ddb.html" target="_blank">DynamoDB</a> in the AWS Documentation.</p>
 </details>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <p>For this feature to work, you need to <strong>(1)</strong> configure your Lambda function event source to use <code>ReportBatchItemFailures</code>, and <strong>(2)</strong> return <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" rel="nofollow" target="_blank">a specific response</a> to report which records failed to be processed.</p>
@@ -1822,7 +1822,7 @@
 <p>Processing batches from SQS works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.SQS</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" rel="nofollow" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#sqs" target="_blank"><code>SQSRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <div class="admonition info">
@@ -2286,7 +2286,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from Kinesis works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.KinesisDataStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" rel="nofollow" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#kinesis-streams" target="_blank"><code>KinesisStreamRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <div class="admonition info">
@@ -2566,7 +2566,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>Processing batches from DynamoDB Streams works in three stages:</p>
 <ol>
 <li>Instantiate <strong><code>BatchProcessor</code></strong> and choose <strong><code>EventType.DynamoDBStreams</code></strong> for the event type</li>
-<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" rel="nofollow" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
+<li>Define your function to handle each batch record, and use <a href="../data_classes/#dynamodb-streams" target="_blank"><code>DynamoDBRecord</code></a> type annotation for autocompletion</li>
 <li>Use <strong><code>process_partial_response</code></strong> to kick off processing</li>
 </ol>
 <div class="admonition info">
@@ -4326,7 +4326,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h3>
 <h4 id="tracer-response-auto-capture-for-large-batch-sizes">Tracer response auto-capture for large batch sizes<a class="headerlink" href="#tracer-response-auto-capture-for-large-batch-sizes" title="Permanent link">&para;</a></h4>
 <p>When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your <code>record_handler</code> function, or how big is your batch size.</p>
-<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" rel="nofollow" target="_blank">Tracer to disable response auto-capturing</a>.</p>
+<p>If that's the case, you can configure <a href="../../core/tracer/#disabling-response-auto-capture" target="_blank">Tracer to disable response auto-capturing</a>.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Disabling Tracer response auto-capturing</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -4624,7 +4624,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="integrating-exception-handling-with-sentryio">Integrating exception handling with Sentry.io<a class="headerlink" href="#integrating-exception-handling-with-sentryio" title="Permanent link">&para;</a></h3>
 <p>When using Sentry.io for error monitoring, you can override <code>failure_handler</code> to capture each processing exception with Sentry SDK:</p>
 <blockquote>
-<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" rel="nofollow" target="_blank">Charles-Axel Dein</a></p>
+<p>Credits to <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/293#issuecomment-781961732" target="_blank">Charles-Axel Dein</a></p>
 </blockquote>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Integrating error tracking with Sentry.io</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -4650,7 +4650,7 @@ This helps preserve the ordering of messages in your queue.</p>
   <small>
     
       Last update:
-      2023-07-27
+      2023-07-28
     
   </small>
 </div>
