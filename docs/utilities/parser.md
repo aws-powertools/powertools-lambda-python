@@ -21,7 +21,7 @@ Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic ve
 
 #### Using Pydantic v1
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank" rel="nofollow"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
@@ -35,7 +35,7 @@ Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g
 
 #### Using Pydantic v2
 
-You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank" rel="nofollow"} to reduce noise and optimize log costs.
+You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank"} to reduce noise and optimize log costs.
 
 Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
