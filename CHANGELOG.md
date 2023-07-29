@@ -10,23 +10,34 @@
 
 ## Documentation
 
+* **batch:** explain record type discrepancy in failure and success handler ([#2868](https://github.com/aws-powertools/powertools-lambda-python/issues/2868))
 * **batch:** new visuals and error handling section ([#2857](https://github.com/aws-powertools/powertools-lambda-python/issues/2857))
+* **navigation:** remove nofollow attribute for internal links ([#2867](https://github.com/aws-powertools/powertools-lambda-python/issues/2867))
 * **navigation:** add nofollow attribute ([#2842](https://github.com/aws-powertools/powertools-lambda-python/issues/2842))
 * **tutorial:** add support for Python 3.11 ([#2860](https://github.com/aws-powertools/powertools-lambda-python/issues/2860))
 
 ## Maintenance
 
+* **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.18.29 to 1.18.30 in /layer/scripts/layer-balancer ([#2875](https://github.com/aws-powertools/powertools-lambda-python/issues/2875))
+* **deps:** bump github.com/aws/aws-sdk-go-v2/service/lambda from 1.38.0 to 1.38.1 in /layer/scripts/layer-balancer ([#2876](https://github.com/aws-powertools/powertools-lambda-python/issues/2876))
+* **deps:** bump github.com/aws/aws-sdk-go-v2 from 1.19.0 to 1.19.1 in /layer/scripts/layer-balancer ([#2877](https://github.com/aws-powertools/powertools-lambda-python/issues/2877))
+* **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.18.28 to 1.18.29 in /layer/scripts/layer-balancer ([#2844](https://github.com/aws-powertools/powertools-lambda-python/issues/2844))
 * **deps:** bump pydantic from 1.10.11 to 1.10.12 ([#2846](https://github.com/aws-powertools/powertools-lambda-python/issues/2846))
 * **deps:** bump github.com/aws/aws-sdk-go-v2/service/lambda from 1.37.1 to 1.38.0 in /layer/scripts/layer-balancer ([#2843](https://github.com/aws-powertools/powertools-lambda-python/issues/2843))
 * **deps:** bump squidfunk/mkdocs-material from `33e28bd` to `cd3a522` in /docs ([#2859](https://github.com/aws-powertools/powertools-lambda-python/issues/2859))
-* **deps:** bump github.com/aws/aws-sdk-go-v2/config from 1.18.28 to 1.18.29 in /layer/scripts/layer-balancer ([#2844](https://github.com/aws-powertools/powertools-lambda-python/issues/2844))
-* **deps-dev:** bump mypy-boto3-lambda from 1.28.0 to 1.28.11 ([#2845](https://github.com/aws-powertools/powertools-lambda-python/issues/2845))
-* **deps-dev:** bump cfn-lint from 0.78.2 to 0.79.3 ([#2854](https://github.com/aws-powertools/powertools-lambda-python/issues/2854))
-* **deps-dev:** bump mypy-boto3-ssm from 1.28.0 to 1.28.12 ([#2863](https://github.com/aws-powertools/powertools-lambda-python/issues/2863))
-* **deps-dev:** bump mypy-boto3-dynamodb from 1.28.0 to 1.28.11 ([#2847](https://github.com/aws-powertools/powertools-lambda-python/issues/2847))
 * **deps-dev:** bump mypy-boto3-appconfig from 1.28.0 to 1.28.12 ([#2861](https://github.com/aws-powertools/powertools-lambda-python/issues/2861))
 * **deps-dev:** bump cfn-lint from 0.79.3 to 0.79.4 ([#2862](https://github.com/aws-powertools/powertools-lambda-python/issues/2862))
+* **deps-dev:** bump mypy-boto3-ssm from 1.28.0 to 1.28.12 ([#2863](https://github.com/aws-powertools/powertools-lambda-python/issues/2863))
 * **deps-dev:** bump mypy-boto3-cloudwatch from 1.28.0 to 1.28.12 ([#2865](https://github.com/aws-powertools/powertools-lambda-python/issues/2865))
+* **deps-dev:** bump mypy-boto3-cloudformation from 1.28.10 to 1.28.12 ([#2864](https://github.com/aws-powertools/powertools-lambda-python/issues/2864))
+* **deps-dev:** bump cfn-lint from 0.78.2 to 0.79.3 ([#2854](https://github.com/aws-powertools/powertools-lambda-python/issues/2854))
+* **deps-dev:** bump mypy-boto3-lambda from 1.28.0 to 1.28.11 ([#2845](https://github.com/aws-powertools/powertools-lambda-python/issues/2845))
+* **deps-dev:** bump cfn-lint from 0.79.4 to 0.79.5 ([#2870](https://github.com/aws-powertools/powertools-lambda-python/issues/2870))
+* **deps-dev:** bump mypy-boto3-xray from 1.28.0 to 1.28.15 ([#2881](https://github.com/aws-powertools/powertools-lambda-python/issues/2881))
+* **deps-dev:** bump mypy-boto3-dynamodb from 1.28.0 to 1.28.11 ([#2847](https://github.com/aws-powertools/powertools-lambda-python/issues/2847))
+* **deps-dev:** bump mypy-boto3-lambda from 1.28.11 to 1.28.15 ([#2878](https://github.com/aws-powertools/powertools-lambda-python/issues/2878))
+* **deps-dev:** bump mypy-boto3-appconfigdata from 1.28.0 to 1.28.15 ([#2879](https://github.com/aws-powertools/powertools-lambda-python/issues/2879))
+* **deps-dev:** bump mypy-boto3-logs from 1.28.1 to 1.28.15 ([#2880](https://github.com/aws-powertools/powertools-lambda-python/issues/2880))
 
 
 <a name="v2.22.0"></a>
