@@ -26,8 +26,9 @@ def idempotent(
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
-    serializer: Optional[Callable[[Any], Dict]] = None,
-    deserializer: Optional[Callable[[Dict], Any]] = None,
+    input_serializer: Optional[Callable[[Any], Dict]] = None,
+    output_serializer: Optional[Callable[[Any], Dict]] = None,
+    output_deserializer: Optional[Callable[[Dict], Any]] = None,
     **kwargs,
 ) -> Any:
     """
@@ -45,12 +46,15 @@ def idempotent(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    serializer: Optional[Callable[[Any], Dict]]
+    input_serializer: Optional[Callable[[Any], Dict]]
         Custom function to serialize the given object into a dictionary.
         If not supplied, best effort will be done to serialize known object representations
-    deserializer: Optional[Callable[[Dict], Any]]
+    output_serializer: Optional[Callable[[Any], Dict]]
+        Custom function to serialize the returned object into a dictionary.
+        If not supplied, no serialization is done
+    output_deserializer: Optional[Callable[[Dict], Any]]
         Custom function to deserialize dictionary representation into an object.
-        If not supplied, a dictionary is returned 
+        If not supplied, no deserialization is done
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
@@ -79,8 +83,9 @@ def idempotent(
         function_payload=event,
         config=config,
         persistence_store=persistence_store,
-        serializer=serializer,
-        deserializer=deserializer,
+        input_serializer=input_serializer,
+        output_serializer=output_serializer,
+        output_deserializer=output_deserializer,
         function_args=args,
         function_kwargs=kwargs,
     )
@@ -94,9 +99,9 @@ def idempotent_function(
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
-    serializer: Optional[Callable[[Any], Dict]] = None,
-    deserializer: Optional[Callable[[Dict], Any]] = None,
-
+    input_serializer: Optional[Callable[[Any], Dict]] = None,
+    output_serializer: Optional[Callable[[Any], Dict]] = None,
+    output_deserializer: Optional[Callable[[Dict], Any]] = None,
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -111,13 +116,15 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the given object into a dictionary
+    input_serializer: Optional[Callable[[Any], Dict]]
+        Custom function to serialize the given object into a dictionary.
         If not supplied, best effort will be done to serialize known object representations
-    deserializer: Optional[Callable[[Dict], Any]]
-        Custom function to deserialize dictionary representation into an object
-        If not supplied, a dictionary is returned
-
+    output_serializer: Optional[Callable[[Any], Dict]]
+        Custom function to serialize the returned object into a dictionary.
+        If not supplied, no serialization is done
+    output_deserializer: Optional[Callable[[Dict], Any]]
+        Custom function to deserialize dictionary representation into an object.
+        If not supplied, no deserialization is done
     Examples
     --------
     **Processes an order in an idempotent manner**
@@ -165,10 +172,11 @@ def idempotent_function(
             function_payload=payload,
             config=config,
             persistence_store=persistence_store,
+            input_serializer=input_serializer,
+            output_serializer=output_serializer,
+            output_deserializer=output_deserializer,
             function_args=args,
             function_kwargs=kwargs,
-            serializer=serializer,
-            deserializer=deserializer,
         )
 
         return idempotency_handler.handle()

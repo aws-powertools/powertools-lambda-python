@@ -1196,6 +1196,45 @@ def test_idempotent_function():
     assert result == expected_result
 
 
+@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_serialization_pydantic():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        input_serializer=lambda x: x.dict(),
+        output_serializer=lambda x: x.dict(),
+        output_deserializer=PaymentOutput.parse_obj,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput.parse_obj(payment)
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
 def test_idempotent_function_arbitrary_args_kwargs():
     # Scenario to validate we can use idempotent_function with a function
     # with an arbitrary number of args and kwargs

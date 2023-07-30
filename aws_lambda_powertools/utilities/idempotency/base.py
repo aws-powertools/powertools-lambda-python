@@ -51,8 +51,9 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
-        serializer: Optional[Callable[[Any], Dict]] = None,
-        deserializer: Optional[Callable[[Dict], Any]] = None,
+        input_serializer: Optional[Callable[[Any], Dict]] = None,
+        output_serializer: Optional[Callable[[Any], Dict]] = None,
+        output_deserializer: Optional[Callable[[Dict], Any]] = None,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
     ):
@@ -67,22 +68,26 @@ class IdempotencyHandler:
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
-        serializer: Optional[Callable[[Any], Dict]]
-            Custom function to serialize the given object into a dictionary
+        input_serializer: Optional[Callable[[Any], Dict]]
+            Custom function to serialize the given object into a dictionary.
             If not supplied, best effort will be done to serialize known object representations
-        deserializer: Optional[Callable[[Dict], Any]]
-            Custom function to deserialize dictionary representation into an object
-            If not supplied, a dictionary is returned 
+        output_serializer: Optional[Callable[[Any], Dict]]
+            Custom function to serialize the returned object into a dictionary.
+            If not supplied, no serialization is done
+        output_deserializer: Optional[Callable[[Dict], Any]]
+            Custom function to deserialize dictionary representation into an object.
+            If not supplied, no deserialization is done
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]
             Function keyword arguments
-            
+
         """
         self.function = function
-        self.serializer = serializer or _prepare_data
-        self.deserializer = deserializer
-        self.data = deepcopy(self.serializer(function_payload))
+        self.input_serializer = input_serializer or _prepare_data
+        self.output_serializer = output_serializer
+        self.output_deserializer = output_deserializer
+        self.data = deepcopy(self.input_serializer(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
         self.config = config
@@ -217,10 +222,10 @@ class IdempotencyHandler:
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
-        
+
         response_dict: Optional[dict] = data_record.response_json_as_dict()
-        if response_dict and self.deserializer:
-            return self.deserializer(response_dict)
+        if response_dict and self.output_deserializer:
+            return self.output_deserializer(response_dict)
         return response_dict
 
     def _get_function_response(self):
@@ -240,7 +245,8 @@ class IdempotencyHandler:
 
         else:
             try:
-                self.persistence_store.save_success(data=self.data, result=response)
+                saved_response: dict = self.output_serializer(response) if self.output_deserializer else response
+                self.persistence_store.save_success(data=self.data, result=saved_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store",
