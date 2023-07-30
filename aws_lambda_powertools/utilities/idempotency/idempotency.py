@@ -26,6 +26,8 @@ def idempotent(
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
+    serializer: Optional[Callable[[Any], Dict]] = None,
+    deserializer: Optional[Callable[[Dict], Any]] = None,
     **kwargs,
 ) -> Any:
     """
@@ -43,7 +45,10 @@ def idempotent(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-
+    serializer: Optional[Callable[[Any], Dict]]
+        Custom function to serialize the given object into a dictionary
+    deserializer: Optional[Callable[[Dict], Any]]
+        Custom function to deserialize dictionary representation into an object
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
@@ -72,6 +77,8 @@ def idempotent(
         function_payload=event,
         config=config,
         persistence_store=persistence_store,
+        serializer=serializer,
+        deserializer=deserializer,
         function_args=args,
         function_kwargs=kwargs,
     )
@@ -85,6 +92,9 @@ def idempotent_function(
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
+    serializer: Optional[Callable[[Any], Dict]] = None,
+    deserializer: Optional[Callable[[Dict], Any]] = None,
+
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -99,6 +109,10 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
+    serializer: Optional[Callable[[Any], Dict]]
+        Custom function to serialize the given object into a dictionary
+    deserializer: Optional[Callable[[Dict], Any]]
+        Custom function to deserialize dictionary representation into an object
 
     Examples
     --------
@@ -149,6 +163,8 @@ def idempotent_function(
             persistence_store=persistence_store,
             function_args=args,
             function_kwargs=kwargs,
+            serializer=serializer,
+            deserializer=deserializer,
         )
 
         return idempotency_handler.handle()

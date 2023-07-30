@@ -51,6 +51,8 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
+        serializer: Optional[Callable[[Any], Dict]] = None,
+        deserializer: Optional[Callable[[Dict], Any]] = None,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
     ):
@@ -65,13 +67,20 @@ class IdempotencyHandler:
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
+        serializer: Optional[Callable[[Any], Dict]]
+            Custom function to serialize the given object into a dictionary
+        deserializer: Optional[Callable[[Dict], Any]]
+            Custom function to deserialize dictionary representation into an object
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]
             Function keyword arguments
+            
         """
         self.function = function
-        self.data = deepcopy(_prepare_data(function_payload))
+        self.serializer = serializer or _prepare_data
+        self.deserializer = deserializer
+        self.data = deepcopy(self.serializer(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
         self.config = config
@@ -206,8 +215,11 @@ class IdempotencyHandler:
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
-
-        return data_record.response_json_as_dict()
+        
+        response_dict: Optional[dict] = data_record.response_json_as_dict()
+        if response_dict and self.deserializer:
+            return self.deserializer(response_dict)
+        return response_dict
 
     def _get_function_response(self):
         try:
