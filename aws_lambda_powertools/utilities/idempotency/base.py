@@ -69,8 +69,10 @@ class IdempotencyHandler:
             Instance of persistence layer to store idempotency records
         serializer: Optional[Callable[[Any], Dict]]
             Custom function to serialize the given object into a dictionary
+            If not supplied, best effort will be done to serialize known object representations
         deserializer: Optional[Callable[[Dict], Any]]
             Custom function to deserialize dictionary representation into an object
+            If not supplied, a dictionary is returned 
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]

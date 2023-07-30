@@ -46,9 +46,11 @@ def idempotent(
     config: IdempotencyConfig
         Configuration
     serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the given object into a dictionary
+        Custom function to serialize the given object into a dictionary.
+        If not supplied, best effort will be done to serialize known object representations
     deserializer: Optional[Callable[[Dict], Any]]
-        Custom function to deserialize dictionary representation into an object
+        Custom function to deserialize dictionary representation into an object.
+        If not supplied, a dictionary is returned 
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
@@ -111,8 +113,10 @@ def idempotent_function(
         Configuration
     serializer: Optional[Callable[[Any], Dict]]
         Custom function to serialize the given object into a dictionary
+        If not supplied, best effort will be done to serialize known object representations
     deserializer: Optional[Callable[[Dict], Any]]
         Custom function to deserialize dictionary representation into an object
+        If not supplied, a dictionary is returned
 
     Examples
     --------
