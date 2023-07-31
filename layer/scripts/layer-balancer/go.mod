@@ -3,7 +3,7 @@ module layerbalancer
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.19.1
+	github.com/aws/aws-sdk-go-v2 v1.20.0
 	github.com/aws/aws-sdk-go-v2/config v1.18.30
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.38.1
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
@@ -21,6 +21,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.12.14 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.14.14 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.20.1 // indirect
-	github.com/aws/smithy-go v1.13.5 // indirect
+	github.com/aws/smithy-go v1.14.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 )
