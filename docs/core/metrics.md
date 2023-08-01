@@ -317,23 +317,6 @@ These issues are exacerbated when you create **(A)** metric dimensions condition
 
 That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
 
-### Observability providers
-
-!!! In this context, an observability provider is an AWS Lambda Partner offering a platform for logging, metrics, traces, etc.
-
-You can send metrics to the observability provider of your choice via Lambda Extensions. However, the default
-CloudWatch EMF Metrics format will not be accepted for most observability providers.
-
-#### Built-in providers
-
-In this case, we and our AWS Lambda Partners are offering built-in provider to make metrics submission easier.
-
-You can import from metric provider package, init the provider and use them like the default metrics class
-
-```python hl_lines="1 3 4" title="Using built-in Datadog Metrics Provider"
---8<-- "examples/metrics/src/use_providers.py"
-```
-
 ## Testing your code
 
 ### Environment variables
