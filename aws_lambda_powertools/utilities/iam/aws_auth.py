@@ -8,6 +8,15 @@ import botocore.session
 
 
 class AWSServicePrefix(Enum):
+    """
+    AWS Service Prefixes
+
+    URLs:
+        https://docs.aws.amazon.com/service-authorization/latest/reference/reference_policies_actions-resources-contextkeys.html
+
+    Args:
+        Enum (_type_): _description_
+    """
     LATTICE = "vpc-lattice-svcs"
     RESTAPI = "execute-api"
     HTTPAPI = "apigateway"
@@ -19,8 +28,13 @@ class AWSSigV4Auth:
     Authenticating Requests (AWS Signature Version 4)
 
     Args:
+        url (str): URL
         region (str): AWS region
-        service (str): AWS service
+        body (str, optional): Request body
+        params (dict, optional): Request parameters
+        headers (dict, optional): Request headers
+        method (str, optional): Request method
+        service (str, optional): AWS service
         access_key (str, optional): AWS access key
         secret_key (str, optional): AWS secret key
         token (str, optional): AWS session token
