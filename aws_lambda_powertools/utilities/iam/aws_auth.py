@@ -45,8 +45,8 @@ class AWSSigV4Auth:
     Examples
     --------
     **Using default credentials**
-    >>> from aws_lambda_powertools.utilities.iam import SigV4AuthFactory
-    >>> auth = SigV4AuthFactory(region="us-east-2", service="vpc-lattice-svcs")
+    >>> from aws_lambda_powertools.utilities.iam import AWSSigV4Auth
+    >>> auth = AWSSigV4Auth(region="us-east-2", service=AWSServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
 
