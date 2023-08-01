@@ -1077,6 +1077,20 @@ def test_clear_default_dimensions(namespace):
     assert not my_metrics.default_dimensions
 
 
+def test_clear_default_dimensions_with_provider(namespace):
+    # GIVEN Metrics is initialized with provider and we persist a set of default dimensions
+    my_provider = AmazonCloudWatchEMFProvider(namespace=namespace)
+    my_metrics = Metrics(provider=my_provider)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN they are removed via clear_default_dimensions method
+    my_metrics.clear_default_dimensions()
+
+    # THEN there should be no default dimensions in provider and metrics
+    assert not my_metrics.default_dimensions
+    assert not my_provider.default_dimensions
+
+
 def test_default_dimensions_across_instances(namespace):
     # GIVEN Metrics is initialized and we persist a set of default dimensions
     my_metrics = Metrics(namespace=namespace)
