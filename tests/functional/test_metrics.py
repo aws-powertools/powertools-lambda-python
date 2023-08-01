@@ -1,4 +1,5 @@
 import json
+import os
 import warnings
 from collections import namedtuple
 from typing import Any, Dict, List, Union
@@ -17,6 +18,8 @@ from aws_lambda_powertools.metrics import (
     single_metric,
 )
 from aws_lambda_powertools.metrics.provider import (
+    DatadogMetrics,
+    DatadogProvider,
     MetricsBase,
     MetricsProviderBase,
 )
@@ -1407,3 +1410,92 @@ def test_log_metrics_capture_cold_start_metric_once_with_provider_and_ephemeral(
     assert output["ColdStart"] == [1.0]
     assert output["function_name"] == "example_fn"
     assert output["service"] == service
+
+
+def test_datadog_coldstart(capsys):
+    reset_cold_start_flag_provider()
+    dd_provider = DatadogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+
+    lambda_handler({}, LambdaContext("example_fn2"))
+    logs = capsys.readouterr().out.strip()
+    assert "ColdStart" in logs
+
+
+def test_datadog_write_to_log(capsys):
+    os.environ["DD_FLUSH_TO_LOG"] = "True"
+    dd_provider = DatadogProvider(namespace="Serverlesspresso")
+    metrics = DatadogMetrics(provider=dd_provider)
+    metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+    metrics.flush_metrics()
+    logs = capture_metrics_output(capsys)
+    logs["e"] = ""
+    assert logs == json.loads('{"m":"Serverlesspresso.item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
+
+
+def test_datadog_namespace(capsys):
+    dd_provider = DatadogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+
+    lambda_handler({}, LambdaContext("example_fn"))
+    logs = capsys.readouterr().out.strip()
+    assert "Serverlesspresso" in logs
+
+
+def test_datadog_raise_on_empty():
+    dd_provider = DatadogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    @metrics.log_metrics(capture_cold_start_metric=False, raise_on_empty_metrics=True)
+    def lambda_handler(event, context):
+        pass
+
+    with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
+        lambda_handler({}, LambdaContext("example_fn"))
+
+
+def test_datadog_args(capsys):
+    dd_provider = DatadogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+    metrics.add_metric("order_valve", 12.45, sales="sam")
+    metrics.flush_metrics()
+    logs = capsys.readouterr().out.strip()
+    log_dict = json.loads(logs)
+    tag_list = log_dict.get("t")
+    assert "sales:sam" in tag_list
+
+
+def test_datadog_kwargs(capsys):
+    dd_provider = DatadogProvider(namespace="Serverlesspresso", flush_to_log=True)
+    metrics = DatadogMetrics(provider=dd_provider)
+    metrics.add_metric(
+        name="order_valve",
+        value=12.45,
+        tags=["test:kwargs"],
+        str="str",
+        int=123,
+        float=45.6,
+        dict={"type": "termination identified"},
+    )
+    metrics.flush_metrics()
+    logs = capsys.readouterr().out.strip()
+    log_dict = json.loads(logs)
+    tag_list = log_dict.get("t")
+    assert "test:kwargs" in tag_list
+    assert "str:str" in tag_list
+    assert "int:123" in tag_list
+    assert "float:45.6" in tag_list

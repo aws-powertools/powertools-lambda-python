@@ -11,8 +11,8 @@ from collections import defaultdict
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from aws_lambda_powertools.metrics.base import single_metric
-from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import MetricsProviderBase
+from aws_lambda_powertools.metrics.provider.base.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
