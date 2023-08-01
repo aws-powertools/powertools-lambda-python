@@ -83,7 +83,7 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 ### Setting a Correlation ID
 
-You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
 
 ???+ tip
 	You can retrieve correlation IDs via `get_correlation_id` method
@@ -301,7 +301,7 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 ??? question "What are uncaught exceptions?"
 
-    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank"}, leading a Python program to a non-successful exit.
+    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"}, leading a Python program to a non-successful exit.
 
     They are typically raised intentionally to signal a problem (`raise ValueError`), or a propagated exception from elsewhere in your code that you didn't handle it willingly or not (`KeyError`, `jsonDecoderError`, etc.).
 
@@ -323,10 +323,10 @@ Logger uses Python's standard logging date format with the addition of timezone:
 
 You can easily change the date format using one of the following parameters:
 
-* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank"}. Use `%F` if you need milliseconds.
+* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank" rel="nofollow"}. Use `%F` if you need milliseconds.
 * **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
 
-???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}?"
+???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank" rel="nofollow"}?"
 	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
 
 === "date_formatting.py"
@@ -447,7 +447,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 
 ### Observability providers
 
-!!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank"} offering a platform for logging, metrics, traces, etc."
+!!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc."
 
 You can send logs to the observability provider of your choice via [Lambda Extensions](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/){target="_blank"}. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.
 
@@ -634,7 +634,7 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 #### Bring your own JSON serializer
 
-By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank"}.
+By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank" rel="nofollow"}.
 
 As parameters don't always translate well between them, you can pass any callable that receives a `dict` and return a `str`:
 
@@ -664,7 +664,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
     ```
 
 ???+ tip
-	Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"} to assert plain log messages
+	Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank" rel="nofollow"} to assert plain log messages
 
 ### Pytest live log feature
 
@@ -703,7 +703,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank" rel="nofollow"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 

@@ -147,5 +147,5 @@ In the example below, we create a Middleware with the following features:
 
 * Use `trace_execution` to quickly understand the performance impact of your middlewares, and reduce or merge tasks when necessary
 * When nesting multiple middlewares, always return the handler with event and context, or response
-* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators){target="_blank"}. Lambda handler is actually called once (top-down)
+* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators){target="_blank" rel="nofollow"}. Lambda handler is actually called once (top-down)
 * Async middlewares are not supported

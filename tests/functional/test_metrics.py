@@ -1115,6 +1115,46 @@ def test_metrics_reuse_metadata_set(metric, dimension, namespace):
     assert my_metrics_2.metadata_set == my_metrics.metadata_set
 
 
+def test_log_ephemeral_metrics_with_default_dimensions(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    my_metrics = EphemeralMetrics(namespace=namespace)
+    default_dimensions = {"environment": "test", "log_group": "/lambda/test"}
+
+    # WHEN we utilize log_metrics with default dimensions to serialize
+    # and flush metrics and clear all metrics and dimensions from memory
+    # at the end of a function execution
+    @my_metrics.log_metrics(default_dimensions=default_dimensions)
+    def lambda_handler(evt, ctx):
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    first_invocation = capture_metrics_output(capsys)
+
+    lambda_handler({}, {})
+    second_invocation = capture_metrics_output(capsys)
+
+    # THEN we should have default dimensions in both outputs
+    assert "environment" in first_invocation
+    assert "environment" in second_invocation
+
+
+def test_ephemeral_metrics_isolated_data_set_with_default_dimension(metric, dimension, namespace, capsys):
+    # GIVEN two EphemeralMetrics instances are initialized
+    # One with default dimension and another without
+    my_metrics = EphemeralMetrics(namespace=namespace)
+    my_metrics.set_default_dimensions(dev="powertools")
+    isolated_metrics = EphemeralMetrics(namespace=namespace)
+
+    # WHEN metrics added to the both instances
+    my_metrics.add_metric(**metric)
+    isolated_metrics.add_metric(**metric)
+
+    # THEN the second instance should not have dimensions
+    assert my_metrics.metric_set == isolated_metrics.metric_set
+    assert my_metrics.dimension_set != isolated_metrics.dimension_set
+
+
 def test_ephemeral_metrics_isolates_data_set(metric, dimension, namespace, metadata):
     # GIVEN two EphemeralMetrics instances are initialized
     my_metrics = EphemeralMetrics(namespace=namespace)

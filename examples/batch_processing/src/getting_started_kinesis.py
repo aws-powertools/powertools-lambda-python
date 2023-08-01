@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = BatchProcessor(event_type=EventType.KinesisDataStreams)
+processor = BatchProcessor(event_type=EventType.KinesisDataStreams)  # (1)!
 tracer = Tracer()
 logger = Logger()
 

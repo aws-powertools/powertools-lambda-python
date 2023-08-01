@@ -8,7 +8,7 @@ description: Utility
 ???+ tip
     JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and Powertools for AWS Lambda (Python).
 
-Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily deserialize common encoded JSON payloads in Lambda functions.
+Built-in [JMESPath](https://jmespath.org/){target="_blank" rel="nofollow"} Functions to easily deserialize common encoded JSON payloads in Lambda functions.
 
 ## Key features
 
@@ -30,7 +30,7 @@ Powertools for AWS Lambda (Python) also have utilities like [validation](validat
 
 ### Extracting data
 
-You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
 
 ???+ tip
 	Another common use case is to fetch deeply nested data, filter, flatten, and more.
@@ -187,9 +187,9 @@ This sample will decompress and decode base64 data from Cloudwatch Logs, then us
 ???+ warning
     This should only be used for advanced use cases where you have special formats not covered by the built-in functions.
 
-For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from `PowertoolsFunctions`.
+For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} and any additional option via `jmespath_options` param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from `PowertoolsFunctions`.
 
-Here is an example of how to decompress messages using [snappy](https://github.com/andrix/python-snappy){target="_blank"}:
+Here is an example of how to decompress messages using [zlib](https://docs.python.org/3/library/zlib.html){target="_blank" rel="nofollow"}:
 
 === "powertools_custom_jmespath_function.py"
 

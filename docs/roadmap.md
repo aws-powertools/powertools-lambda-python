@@ -4,13 +4,13 @@
 
 This is our public roadmap that outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
 
-[See our latest list of activities »](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
+[See our latest list of activities »](https://github.com/orgs/aws-powertools/projects/3?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
 
 ## Themes
 
 !!! info "Operational Excellence is priority number 1."
 
-Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/awslabs/projects/51/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
+Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/aws-powertools/projects/3/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
 
 ### Increased end-to-end coverage
 
@@ -34,7 +34,7 @@ This means we have room to include a JSON map for Lambda Layers and facilitate a
 
 We want to enable MyPy strict mode against the code base. We need a RFC to identify most critical areas to start, and do so gradually as to not impact new features and enhancements in parallel.
 
-This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc){target="_blank"} to compile less performing parts of the code base as a C-Extension.
+This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc){target="_blank" rel="nofollow"} to compile less performing parts of the code base as a C-Extension.
 
 ### New utilities
 <!-- markdownlint-disable MD013 -->
@@ -42,7 +42,7 @@ With V2 launched, we want to resume working on new utilities, specifically but n
 
 ### Open iteration planning
 
-We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET){target="_blank"} to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
+We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"} to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
 
 ## Roadmap status definition
 
@@ -54,7 +54,7 @@ graph LR
 <i>Visual representation</i>
 </center>
 
-Within our [public board](https://github.com/orgs/awslabs/projects/51/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}, you'll see the following values in the `Status` column:
+Within our [public board](https://github.com/orgs/aws-powertools/projects/3/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}, you'll see the following values in the `Status` column:
 
 * **Ideas**. Incoming and existing feature requests that are not being actively considered yet. These will be reviewed when bandwidth permits.
 * **Backlog**. Accepted feature requests or enhancements that we want to work on.

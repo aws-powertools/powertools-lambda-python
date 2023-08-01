@@ -236,8 +236,12 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             "timestamp": "%(asctime)s",
         }
 
-    @staticmethod
-    def _get_latest_trace_id():
+    def _get_latest_trace_id(self):
+        xray_trace_id_key = self.log_format.get("xray_trace_id", "")
+        if xray_trace_id_key is None:
+            # key is explicitly disabled; ignore it. e.g., Logger(xray_trace_id=None)
+            return None
+
         xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 
