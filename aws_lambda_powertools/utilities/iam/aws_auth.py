@@ -1,12 +1,20 @@
 
 from typing import Optional
+from enum import Enum
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials
 import botocore.session
 
 
-class AwsSignedRequest:
+class AWSServicePrefix(Enum):
+    LATTICE = "vpc-lattice-svcs"
+    RESTAPI = "execute-api"
+    HTTPAPI = "apigateway"
+    APPSYNC = "appsync"
+
+
+class AWSSigV4Auth:
     """
     Authenticating Requests (AWS Signature Version 4)
 
@@ -30,44 +38,48 @@ class AwsSignedRequest:
 
     def __init__(
         self,
-        service: str,
-        method: str,
         url: str,
-        data: Optional[str],
-        params: Optional[str],
-        headers: Optional[str],
-        access_key: Optional[str],
-        secret_key: Optional[str],
         region: Optional[str],
+        body: Optional[str] = None,
+        params: Optional[dict] = None,
+        headers: Optional[dict] = None,
+        method: Optional[str] = "GET",
+        service: Enum = AWSServicePrefix.LATTICE,
+        access_key: Optional[str] = None,
+        secret_key: Optional[str] = None,
         token: Optional[str] = None,
-        sign_payload: Optional[bool] = False,
     ):
 
-        self._service = service
-        self._method = method
-        self._url = url
-        self._data = data
-        self._params = params
-        self._headers = headers
+        self.service = service.value
+        self.region = region
+        self.method = method
+        self.url = url
+        self.data = body
+        self.params = params
+        self.headers = headers
 
-        if not region:
-            self._region = botocore.session.Session().get_config_variable("region")
-        else:
-            self._region = region
-
-        if access_key and secret_key:
-            self._access_key = access_key
-            self._secret_key = secret_key
-            self._token = token
-            self._credentials = Credentials(access_key=self._access_key, secret_key=self._secret_key, token=self._token)
+        if access_key and secret_key and token:
+            self.access_key = access_key
+            self.secret_key = secret_key
+            self.token = token
+            self.credentials = Credentials(access_key=self.access_key, secret_key=self.secret_key, token=self.token)
         else:
             credentials = botocore.session.Session().get_credentials()
-            self._credentials = credentials.get_frozen_credentials()
+            self.credentials = credentials.get_frozen_credentials()
+
+        if self.headers is None:
+            self.headers = {"Content-Type": "application/json"}
+
+        sigv4 = SigV4Auth(credentials=self.credentials, service_name=self.service, region_name=self.region)
+
+        request = AWSRequest(method=self.method, url=self.url, data=self.data, params=self.params, headers=self.headers)
+
+        if self.service == AWSServicePrefix.LATTICE.value:
+            # payload signing is not supported for vpc-lattice-svcs
+            request.context["payload_signing_enabled"] = False
+
+        sigv4.add_auth(request)
+        self.signed_request = request.prepare()
 
         def __call__(self):
-            request = AWSRequest(method=self._method, url=self._url, data=self._data, params=self._params, headers=self._headers)
-            if sign_payload is False:
-                request.context["payload_signing_enabled"] = False
-
-            signed_request = SigV4Auth(credentials=self._credentials, service_name=self._service, region_name=self._region).add_auth(request)
-            return signed_request.prepare()
+            return self.signed_request
