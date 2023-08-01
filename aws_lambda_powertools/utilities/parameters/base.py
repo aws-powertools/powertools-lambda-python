@@ -231,7 +231,6 @@ class BaseProvider(ABC):
         self,
         name: str,
         transform: TransformOptions = None,
-        # force_fetch: bool = False,
         **sdk_options,
     ) -> Optional[Union[str, dict, bytes]]:
         """
