@@ -8,20 +8,17 @@ import numbers
 import os
 import warnings
 from collections import defaultdict
-from contextlib import contextmanager
-from typing import Any, Callable, Dict, Generator, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
-from aws_lambda_powertools.metrics.exceptions import (
+from aws_lambda_powertools.metrics.base import single_metric
+from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.provider import MetricsProviderBase
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
     MetricUnitError,
-    MetricValueError,
-    SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cold_start import (
-    reset_cold_start_flag,  # noqa: F401  # backwards compatibility
-)
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
@@ -29,11 +26,8 @@ from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 
 logger = logging.getLogger(__name__)
 
-# Maintenance: alias due to Hyrum's law
-is_cold_start = cold_start.is_cold_start
 
-
-class MetricManager:
+class AmazonCloudWatchEMFProvider(MetricsProviderBase):
     """Base class for metric functionality (namespace, metric, dimension, serialization)
 
     MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
@@ -70,15 +64,20 @@ class MetricManager:
         namespace: str | None = None,
         metadata_set: Dict[str, Any] | None = None,
         service: str | None = None,
+        default_dimensions: Dict[str, Any] | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else {}
         self.dimension_set = dimension_set if dimension_set is not None else {}
+        self.default_dimensions = default_dimensions or {}
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
+
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
         self._metric_resolutions = [resolution.value for resolution in MetricResolution]
+
+        self.dimension_set.update(**self.default_dimensions)
 
     def add_metric(
         self,
@@ -301,6 +300,7 @@ class MetricManager:
         self.metric_set.clear()
         self.dimension_set.clear()
         self.metadata_set.clear()
+        self.set_default_dimensions(**self.default_dimensions)
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         """Manually flushes the metrics. This is normally not necessary,
@@ -461,148 +461,36 @@ class MetricManager:
         context : Any
             Lambda context
         """
-        global is_cold_start
-        if is_cold_start:
+        if cold_start.is_cold_start:
             logger.debug("Adding cold start metric and function_name dimension")
             with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
                 metric.add_dimension(name="function_name", value=context.function_name)
                 if self.service:
                     metric.add_dimension(name="service", value=str(self.service))
-                is_cold_start = False
+                cold_start.is_cold_start = False
 
-
-class SingleMetric(MetricManager):
-    """SingleMetric creates an EMF object with a single metric.
-
-    EMF specification doesn't allow metrics with different dimensions.
-    SingleMetric overrides MetricManager's add_metric method to do just that.
-
-    Use `single_metric` when you need to create metrics with different dimensions,
-    otherwise `aws_lambda_powertools.metrics.metrics.Metrics` is
-    a more cost effective option
-
-    Environment variables
-    ---------------------
-    POWERTOOLS_METRICS_NAMESPACE : str
-        metric namespace
-
-    Example
-    -------
-    **Creates cold start metric with function_version as dimension**
-
-        import json
-        from aws_lambda_powertools.metrics import single_metric, MetricUnit, MetricResolution
-        metric = single_metric(namespace="ServerlessAirline")
-
-        metric.add_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard)
-        metric.add_dimension(name="function_version", value=47)
-
-        print(json.dumps(metric.serialize_metric_set(), indent=4))
-
-    Parameters
-    ----------
-    MetricManager : MetricManager
-        Inherits from `aws_lambda_powertools.metrics.base.MetricManager`
-    """
-
-    def add_metric(
-        self,
-        name: str,
-        unit: MetricUnit | str,
-        value: float,
-        resolution: MetricResolution | int = 60,
-    ) -> None:
-        """Method to prevent more than one metric being created
+    def set_default_dimensions(self, **dimensions) -> None:
+        """Persist dimensions across Lambda invocations
 
         Parameters
         ----------
-        name : str
-            Metric name (e.g. BookingConfirmation)
-        unit : MetricUnit
-            Metric unit (e.g. "Seconds", MetricUnit.Seconds)
-        value : float
-            Metric value
-        resolution : MetricResolution
-            Metric resolution (e.g. 60, MetricResolution.Standard)
+        dimensions : Dict[str, Any], optional
+            metric dimensions as key=value
+
+        Example
+        -------
+        **Sets some default dimensions that will always be present across metrics and invocations**
+
+            from aws_lambda_powertools import Metrics
+
+            metrics = Metrics(namespace="ServerlessAirline", service="payment")
+            metrics.set_default_dimensions(environment="demo", another="one")
+
+            @metrics.log_metrics()
+            def lambda_handler():
+                return True
         """
-        if len(self.metric_set) > 0:
-            logger.debug(f"Metric {name} already set, skipping...")
-            return
-        return super().add_metric(name, unit, value, resolution)
+        for name, value in dimensions.items():
+            self.add_dimension(name, value)
 
-
-@contextmanager
-def single_metric(
-    name: str,
-    unit: MetricUnit,
-    value: float,
-    resolution: MetricResolution | int = 60,
-    namespace: str | None = None,
-    default_dimensions: Dict[str, str] | None = None,
-) -> Generator[SingleMetric, None, None]:
-    """Context manager to simplify creation of a single metric
-
-    Example
-    -------
-    **Creates cold start metric with function_version as dimension**
-
-        from aws_lambda_powertools import single_metric
-        from aws_lambda_powertools.metrics import MetricUnit
-        from aws_lambda_powertools.metrics import MetricResolution
-
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard, namespace="ServerlessAirline") as metric:
-            metric.add_dimension(name="function_version", value="47")
-
-    **Same as above but set namespace using environment variable**
-
-        $ export POWERTOOLS_METRICS_NAMESPACE="ServerlessAirline"
-
-        from aws_lambda_powertools import single_metric
-        from aws_lambda_powertools.metrics import MetricUnit
-        from aws_lambda_powertools.metrics import MetricResolution
-
-        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, resolution=MetricResolution.Standard) as metric:
-            metric.add_dimension(name="function_version", value="47")
-
-    Parameters
-    ----------
-    name : str
-        Metric name
-    unit : MetricUnit
-        `aws_lambda_powertools.helper.models.MetricUnit`
-    resolution : MetricResolution
-        `aws_lambda_powertools.helper.models.MetricResolution`
-    value : float
-        Metric value
-    namespace: str
-        Namespace for metrics
-
-    Yields
-    -------
-    SingleMetric
-        SingleMetric class instance
-
-    Raises
-    ------
-    MetricUnitError
-        When metric metric isn't supported by CloudWatch
-    MetricResolutionError
-        When metric resolution isn't supported by CloudWatch
-    MetricValueError
-        When metric value isn't a number
-    SchemaValidationError
-        When metric object fails EMF schema validation
-    """  # noqa: E501
-    metric_set: Dict | None = None
-    try:
-        metric: SingleMetric = SingleMetric(namespace=namespace)
-        metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
-
-        if default_dimensions:
-            for dim_name, dim_value in default_dimensions.items():
-                metric.add_dimension(name=dim_name, value=dim_value)
-
-        yield metric
-        metric_set = metric.serialize_metric_set()
-    finally:
-        print(json.dumps(metric_set, separators=(",", ":")))
+        self.default_dimensions.update(**dimensions)

@@ -93,17 +93,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-alpha"
-version = "2.88.0a0"
+version = "2.89.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.88.0a0.tar.gz", hash = "sha256:87f746336687ba519263ced055912eff8bef643629d5f1eb17f3cdef2408d441"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.88.0a0-py3-none-any.whl", hash = "sha256:be0da36994bedbbc4b82db245fa5f3fae59f95665c9d60527f7ece5e9b4df6a4"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.89.0a0.tar.gz", hash = "sha256:8300431d4ef9d869066ad5dba955a6b9eca4825eb4ffcdb03d9ce34f82509d6a"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.89.0a0-py3-none-any.whl", hash = "sha256:64a84542822bd085b03ac40e39f15c3fee1aaf649a0df34ecf0f288f7bc84c78"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = "2.88.0"
+aws-cdk-lib = "2.89.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
@@ -111,18 +111,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
-version = "2.88.0a0"
+version = "2.89.0a0"
 description = "Authorizers for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.88.0a0.tar.gz", hash = "sha256:60f3a0ac560b6f3ff729b50110841f134eecd842bf69d02602e750589a35cbff"},
-    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.88.0a0-py3-none-any.whl", hash = "sha256:85e57c5a7a86829a594634f82448c95443d4d29c30baf361257e57fd4df24efc"},
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.89.0a0.tar.gz", hash = "sha256:efa23f021efdca83f037569d41d7e96023c3750417fc976023688397f7f57715"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.89.0a0-py3-none-any.whl", hash = "sha256:7b56ea2889e8a340bfd4feb67f0798827bf58090d368763a59cd0223fe2dd916"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.88.0.a0"
-aws-cdk-lib = "2.88.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.89.0.a0"
+aws-cdk-lib = "2.89.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
@@ -130,18 +130,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
-version = "2.88.0a0"
+version = "2.89.0a0"
 description = "Integrations for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.88.0a0.tar.gz", hash = "sha256:a604acb1dde9840ccc24c23aba542b42764c826c8100b787e16198113d6b6e89"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.88.0a0-py3-none-any.whl", hash = "sha256:ff06fc8192bece85f82f7b008c93e5ada8af1466612b0b76287edce8c5415c47"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.89.0a0.tar.gz", hash = "sha256:81469d688a611d9ab10d528923692eba685cbb04a5d3401c02a4530b001a6a77"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.89.0a0-py3-none-any.whl", hash = "sha256:3367cf5fa8e4bb1939fcd60e919af00ecc6d97a1d046938af25b9c5bef26b4c1"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.88.0.a0"
-aws-cdk-lib = "2.88.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.89.0.a0"
+aws-cdk-lib = "2.89.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
@@ -149,19 +149,19 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.88.0"
+version = "2.89.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.88.0.tar.gz", hash = "sha256:6514217e6485133b30848f11b6c78ec955d41bed4e39e5ba4bea49c379830e56"},
-    {file = "aws_cdk_lib-2.88.0-py3-none-any.whl", hash = "sha256:db4716689cb94e249b8c672139221f1d7866b7d6caca314b52552fa3bacab22c"},
+    {file = "aws-cdk-lib-2.89.0.tar.gz", hash = "sha256:8fbd1d4ee0ffeb67bcc845bef5a10575dbc678ad07f74cdb3cb4243afc433db7"},
+    {file = "aws_cdk_lib-2.89.0-py3-none-any.whl", hash = "sha256:92eeebd77fe17b36029fae20f46eb601710485ea7c808c3d33fe1c71fee125bd"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = ">=2.2.200,<3.0.0"
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
-"aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.165,<3.0.0"
+"aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.166,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
@@ -183,13 +183,13 @@ requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.71.0"
+version = "1.72.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.71.0.tar.gz", hash = "sha256:a3ea80aeb116d7978b26ac916d2a5a24d012b742bf28262b17769c4b886e8fba"},
-    {file = "aws_sam_translator-1.71.0-py3-none-any.whl", hash = "sha256:17fb87c8137d8d49e7a978396b2b3b279211819dee44618415aab1e99c2cb659"},
+    {file = "aws-sam-translator-1.72.0.tar.gz", hash = "sha256:e688aac30943bfe0352147b792d8bbe7c1b5ed648747cd7ef6280875b249e2d8"},
+    {file = "aws_sam_translator-1.72.0-py3-none-any.whl", hash = "sha256:69fe3914d61ae6690034c3fc1055743e5415d83c59c35ec5ec9ceb26cc65c8a1"},
 ]
 
 [package.dependencies]
@@ -291,17 +291,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.9"
+version = "1.28.16"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.9-py3-none-any.whl", hash = "sha256:01f078047eb4d238c6b9c6cc623f2af33b4ae67980c5326691e35cb5493ff6c7"},
-    {file = "boto3-1.28.9.tar.gz", hash = "sha256:4cc0c6005be910e52077227e670930ab55a41ba86cdb6d1c052571d08cd4d32c"},
+    {file = "boto3-1.28.16-py3-none-any.whl", hash = "sha256:d8e31f69fb919025a5961f8fbeb51fe92e2f753beb37fc1853138667a231cdaa"},
+    {file = "boto3-1.28.16.tar.gz", hash = "sha256:aea48aedf3e8676e598e3202e732295064a4fcad5f2d2d2a699368b8c3ab492c"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.9,<1.32.0"
+botocore = ">=1.31.16,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -310,13 +310,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.9"
+version = "1.31.16"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.9-py3-none-any.whl", hash = "sha256:e56ccd3536a90094ea5b176b5dd33bfe4f049efdf71af468ea1661bd424c787d"},
-    {file = "botocore-1.31.9.tar.gz", hash = "sha256:bd849d3ac95f1781385ed831d753a04a3ec870a59d6598175aaedd71dc2baf5f"},
+    {file = "botocore-1.31.16-py3-none-any.whl", hash = "sha256:92b240e2cb7b3afae5361651d2f48ee582f45d2dab53aef76eef7eec1d3ce582"},
+    {file = "botocore-1.31.16.tar.gz", hash = "sha256:563e15979e763b93d78de58d0fc065f8615be12f41bab42f5ad9f412b6a224b3"},
 ]
 
 [package.dependencies]
@@ -1143,19 +1143,20 @@ restructuredtext = ["rst2ansi"]
 
 [[package]]
 name = "markdown"
-version = "3.3.7"
-description = "Python implementation of Markdown."
+version = "3.4.4"
+description = "Python implementation of John Gruber's Markdown."
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.7"
 files = [
-    {file = "Markdown-3.3.7-py3-none-any.whl", hash = "sha256:f5da449a6e1c989a4cea2631aa8ee67caa5a2ef855d551c88f9e309f4634c621"},
-    {file = "Markdown-3.3.7.tar.gz", hash = "sha256:cbb516f16218e643d8e0a95b309f77eb118cb138d39a4f27851e6a63581db874"},
+    {file = "Markdown-3.4.4-py3-none-any.whl", hash = "sha256:a4c1b65c0957b4bd9e7d86ddc7b3c9868fb9670660f6f99f6d1bca8954d5a941"},
+    {file = "Markdown-3.4.4.tar.gz", hash = "sha256:225c6123522495d4119a90b3a3ba31a1e87a70369e03f14799ea9c0d7183a3d6"},
 ]
 
 [package.dependencies]
 importlib-metadata = {version = ">=4.4", markers = "python_version < \"3.10\""}
 
 [package.extras]
+docs = ["mdx-gh-links (>=0.2)", "mkdocs (>=1.0)", "mkdocs-nature (>=0.4)"]
 testing = ["coverage", "pyyaml"]
 
 [[package]]
@@ -1625,13 +1626,13 @@ files = [
 
 [[package]]
 name = "pathspec"
-version = "0.11.1"
+version = "0.11.2"
 description = "Utility library for gitignore style pattern matching of file paths."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pathspec-0.11.1-py3-none-any.whl", hash = "sha256:d8af70af76652554bd134c22b3e8a1cc46ed7d91edcdd721ef1a0c51a84a5293"},
-    {file = "pathspec-0.11.1.tar.gz", hash = "sha256:2798de800fa92780e33acca925945e9a19a133b715067cf165b8866c15a31687"},
+    {file = "pathspec-0.11.2-py3-none-any.whl", hash = "sha256:1d6ed233af05e679efb96b1851550ea95bbb64b7c490b0f5aa52996c11e92a20"},
+    {file = "pathspec-0.11.2.tar.gz", hash = "sha256:e0d8d0ac2f12da61956eb2306b69f9469b42f4deb0f3cb6ed47b9cce9996ced3"},
 ]
 
 [[package]]
@@ -1673,21 +1674,21 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "3.9.1"
+version = "3.10.0"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "platformdirs-3.9.1-py3-none-any.whl", hash = "sha256:ad8291ae0ae5072f66c16945166cb11c63394c7a3ad1b1bc9828ca3162da8c2f"},
-    {file = "platformdirs-3.9.1.tar.gz", hash = "sha256:1b42b450ad933e981d56e59f1b97495428c9bd60698baab9f3eb3d00d5822421"},
+    {file = "platformdirs-3.10.0-py3-none-any.whl", hash = "sha256:d7c24979f292f916dc9cbf8648319032f551ea8c49a4c9bf2fb556a02070ec1d"},
+    {file = "platformdirs-3.10.0.tar.gz", hash = "sha256:b45696dab2d7cc691a3226759c0d3b00c47c8b6e293d96f6436f733303f77f6d"},
 ]
 
 [package.dependencies]
-typing-extensions = {version = ">=4.6.3", markers = "python_version < \"3.8\""}
+typing-extensions = {version = ">=4.7.1", markers = "python_version < \"3.8\""}
 
 [package.extras]
-docs = ["furo (>=2023.5.20)", "proselint (>=0.13)", "sphinx (>=7.0.1)", "sphinx-autodoc-typehints (>=1.23,!=1.23.4)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.3.1)", "pytest-cov (>=4.1)", "pytest-mock (>=3.10)"]
+docs = ["furo (>=2023.7.26)", "proselint (>=0.13)", "sphinx (>=7.1.1)", "sphinx-autodoc-typehints (>=1.24)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4)", "pytest-cov (>=4.1)", "pytest-mock (>=3.11.1)"]
 
 [[package]]
 name = "pluggy"
@@ -2199,13 +2200,13 @@ decorator = ">=3.4.2"
 
 [[package]]
 name = "rich"
-version = "13.4.2"
+version = "13.5.2"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.4.2-py3-none-any.whl", hash = "sha256:8f87bc7ee54675732fa66a05ebfe489e27264caeeff3728c945d25971b6485ec"},
-    {file = "rich-13.4.2.tar.gz", hash = "sha256:d653d6bccede5844304c605d5aac802c7cf9621efd700b46c7ec2b51ea914898"},
+    {file = "rich-13.5.2-py3-none-any.whl", hash = "sha256:146a90b3b6b47cac4a73c12866a499e9817426423f57c5a66949c086191a8808"},
+    {file = "rich-13.5.2.tar.gz", hash = "sha256:fb9d6c0a0f643c99eed3875b5377a184132ba9be4d61516a55273d3554d75a39"},
 ]
 
 [package.dependencies]
@@ -2276,13 +2277,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.29.0"
+version = "1.29.2"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.29.0.tar.gz", hash = "sha256:5053aa7647533b207417cea5f3ee2d5e13aea7001dbb711f46348d7a72597d60"},
-    {file = "sentry_sdk-1.29.0-py2.py3-none-any.whl", hash = "sha256:78c764cbec1967c41e24967e9a4a5d1e67a7bc960d125d905f94c068a0300ac9"},
+    {file = "sentry-sdk-1.29.2.tar.gz", hash = "sha256:a99ee105384788c3f228726a88baf515fe7b5f1d2d0f215a03d194369f158df7"},
+    {file = "sentry_sdk-1.29.2-py2.py3-none-any.whl", hash = "sha256:3e17215d8006612e2df02b0e73115eb8376c37e3f586d8436fa41644e605074d"},
 ]
 
 [package.dependencies]
