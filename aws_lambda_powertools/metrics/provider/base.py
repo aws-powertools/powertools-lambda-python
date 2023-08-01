@@ -13,9 +13,9 @@ is_cold_start = True
 
 class MetricsProviderBase(Protocol):
     """
-    Class for metric provider template.
+    Class for metric provider interface.
 
-    This class serves as a template for creating your own metric provider. Inherit from this class
+    This class serves as an interface for creating your own metric provider. Inherit from this class
     and implement the required methods to define your specific metric provider.
 
     Usage:
