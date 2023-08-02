@@ -10,7 +10,7 @@ from aws_encryption_sdk import (
 )
 
 from aws_lambda_powertools.utilities.data_masking.provider import Provider
-
+from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 
 class SingletonMeta(type):
     """Metaclass to cache class instances to optimize encryption"""
@@ -33,7 +33,7 @@ MAX_MESSAGES: int = 200
 class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
     cache = LocalCryptoMaterialsCache(CACHE_CAPACITY)
     session = botocore.session.Session()
-
+register_feature_to_botocore_session(session, "data-masking")
     def __init__(self, keys: List[str], client: Optional[EncryptionSDKClient] = None) -> None:
         self.client = client or EncryptionSDKClient()
         self.keys = keys
