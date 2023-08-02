@@ -37,6 +37,20 @@ Data Masking will be a new utility to mask/unmask sensitive data using encryptio
 - [ ] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
 - [ ] Documentation to guide customers how to bring their own provider (e.g., `ItsDangerous`)
 
+### Revamp Event Handler
+
+Event Handler provides lightweight routing for both [**REST**: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL](./core/event_handler/api_gateway.md), and [**GraphQL**: AWS AppSync](./core/event_handler/appsync.md).
+
+Based on customers feedback, we want to provide middleware authoring support for cross-cutting concerns. For REST APIs, we are also looking into auto-generate OpenAPI Schemas and a SwaggerUI route. For GraphQL, we are working on supporting batch invocations (N+1 problem) along with partial failure support.
+
+**Major updates**
+
+- [x] [Agree on experience for middleware support](https://github.com/aws-powertools/powertools-lambda-python/issues/953#issuecomment-1450223155)
+- [x] [RFC to outline initial thoughts on OpenAPI integration](https://github.com/aws-powertools/powertools-lambda-python/issues/2421)
+- [ ] MVP for REST middleware
+- [ ] MVP for OpenAPI and SwaggerUI
+- [ ] [MVP for AppSync Batch invoke and partial failure support](https://github.com/aws-powertools/powertools-lambda-python/pull/1998)
+
 ### Lambda Layer in release notes
 
 We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
