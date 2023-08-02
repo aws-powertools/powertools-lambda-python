@@ -251,7 +251,7 @@ These are some questions to keep in mind when drafting your first or future rele
 
 - Can customers understand at a high level what changed in this release?
 - Is there a link to the documentation where they can read more about each main change?
-- Are there any graphics or [code snippets](carbon.now.sh/) that can enhance readability?
+- Are there any graphics or [code snippets](https://carbon.now.sh/) that can enhance readability?
 - Are we calling out any key contributor(s) to this release?
     - All contributors are automatically credited, use this as an exceptional case to feature them
 

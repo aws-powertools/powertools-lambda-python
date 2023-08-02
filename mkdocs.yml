@@ -11,6 +11,7 @@ nav:
       - API reference: api/" target="_blank
       - Upgrade guide: upgrade.md
       - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
       - Features:
           - core/tracer.md
           - core/logger.md
@@ -95,6 +96,8 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
 
 copyright: Copyright &copy; 2023 Amazon Web Services
 
