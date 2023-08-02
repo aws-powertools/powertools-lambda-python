@@ -54,6 +54,17 @@ This means we have room to include a JSON map for Lambda Layers and facilitate a
 
 We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"} to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
 
+### Authentication (SigV4)
+
+[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect), we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html) could be easier.
+
+Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
+
+**Major updates**
+
+- [ ] RFC to outline challenges, alternative solutions and desired experience
+- [ ] MVP based off RFC
+
 ## Roadmap status definition
 
 <center>
