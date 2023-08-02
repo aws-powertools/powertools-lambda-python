@@ -181,6 +181,26 @@ class Metrics:
     def clear_metrics(self) -> None:
         self.provider.clear_metrics()
 
+    # We now allow customers to bring their own instance
+    # of the AmazonCloudWatchEMFProvider provider
+    # So we need to define getter/setter for namespace and service properties
+    # To access these attributes on the provider instance.
+    @property
+    def namespace(self):
+        return self.provider.namespace
+
+    @namespace.setter
+    def namespace(self, namespace):
+        self.provider.namespace = namespace
+
+    @property
+    def service(self):
+        return self.provider.service
+
+    @service.setter
+    def service(self, service):
+        self.provider.service = service
+
 
 # Maintenance: until v3, we can't afford to break customers.
 # AmazonCloudWatchEMFProvider has the exact same functionality (non-singleton)
