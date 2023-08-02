@@ -64,9 +64,17 @@ This means we have room to include a JSON map for Lambda Layers and facilitate a
 - [x] Create secure mechanism to upload signed assets to GitHub Release Notes
 - [ ] Create feature request to agree on JSON structure and asset name
 
-### Open iteration planning
+### Office hours
 
-We want to experiment running a bi-weekly audio channel on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"} to help us prioritize backlog in real-time. Depending on attendance, we might switch to run an office hours instead.
+We heard from [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} that Powertools for AWS Lambda and its community can move faster than they are able to catch up. While documentation and release notes take these into account, they notice they don't always know advanced tricks, or what other customers tend to do in similar situations.
+
+We want to run a monthly office hours to start addressing that, and learn from customers how they're using Powertools and whether or not they need a closer support.
+
+Timezones being tricky, we plan to experiment with an afternoon slot in Central European that would also cover Middle East, US east coast, and South America. Depending on attendance, we plan to A/B test an Asia friendly one too.
+
+**Major updates**
+
+- [ ] Decide whether to use Amazon Chime or Zoom (we had audio setup issues on Discord)
 
 ### Authentication (SigV4)
 
