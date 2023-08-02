@@ -70,7 +70,7 @@ We want to experiment running a bi-weekly audio channel on [Discord](https://dis
 
 ### Authentication (SigV4)
 
-[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect), we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html) could be easier.
+[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html){target="_blank"} could be easier.
 
 Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
 
@@ -78,6 +78,21 @@ Since JWT is a close second, this new utility would cover higher level functions
 
 - [ ] RFC to outline challenges, alternative solutions and desired experience
 - [ ] MVP based off RFC
+
+### Enhanced operational metrics
+
+[Through customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}, and [1:1 customer enablement](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we noticed customers often create the same set of custom operational metrics.
+
+We want to make this easier by extending certain utilities to accept a `metrics` instance and metrics configuration (what metrics to create). It would be opt-in due to costs associated with creating metrics.
+
+!!! question "Got ideas for custom metrics? Open up a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE)"
+
+**Major updates**
+
+- [ ] RFC to outline metrics for Batch (_e.g., Failed items, Batch size_)
+- [ ] RFC to outline metrics for Feature flags (_e.g., matched rules_)
+- [ ] RFC to outline metrics for Event Handler (_e.g., validation errors_ )
+- [ ] RFC to outline metrics for Idempotency (_e.g., cache hit_)
 
 ## Roadmap status definition
 
