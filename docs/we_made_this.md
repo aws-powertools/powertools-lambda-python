@@ -82,7 +82,7 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 
 ### Designing for Idempotency
 
-> **Author: [Valentin Dreismann](linkedin.com/in/valentin-dreismann-69694b16a){target="_blank" rel="nofollow"}** :material-linkedin:
+> **Author: [Valentin Dreismann](https://linkedin.com/in/valentin-dreismann-69694b16a){target="_blank" rel="nofollow"}** :material-linkedin:
 
 This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
 
