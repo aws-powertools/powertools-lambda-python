@@ -35,10 +35,10 @@ As of V2, we prioritize Lambda Layers being available before release notes are o
 
 This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
 
-### New utilities
+**Major updates**
 
-<!-- markdownlint-disable MD013 -->
-With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/aws-powertools/powertools-lambda-python/issues/1173){target="_blank"}, **(2)** [Integration/End-to-end Testing](https://github.com/aws-powertools/powertools-lambda-python/issues/1169){target="_blank"}, and **(3)** [Event Bridge](https://github.com/aws-powertools/powertools-lambda-python/issues/1168){target="_blank"}.
+- [x] Create secure mechanism to upload signed assets to GitHub Release Notes
+- [ ] Create feature request to agree on JSON structure and asset name
 
 ### Open iteration planning
 
