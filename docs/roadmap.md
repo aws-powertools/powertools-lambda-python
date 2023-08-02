@@ -27,12 +27,6 @@ At launch, we will support the top [two most requested observability providers](
 - [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
 - [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
-### Increased end-to-end coverage
-
-We continue to work on increasing end-to-end coverage for all features. Our main challenge is testing contracts for Lambda Event Sources (Parser, Event Source Data Classes) due to the lack of an official JSON schema.
-
-Some Lambda Event Sources require clusters (e.g., MSK) leading to additional delays of up to 30m in the end-to-end feedback loop. We need a RFC to start discussing viable options, and whether we should publish JSON Schemas from identified contracts.
-
 ### Lambda Layer in release notes
 
 We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
@@ -41,13 +35,8 @@ As of V2, we prioritize Lambda Layers being available before release notes are o
 
 This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
 
-### Strict typing
-
-We want to enable MyPy strict mode against the code base. We need a RFC to identify most critical areas to start, and do so gradually as to not impact new features and enhancements in parallel.
-
-This also means bringing `typing-extensions` as a runtime dependency to ensure complete coverage across all Python versions. Future wise, we might be able to experiment with [MyPyC](https://github.com/mypyc/mypyc){target="_blank" rel="nofollow"} to compile less performing parts of the code base as a C-Extension.
-
 ### New utilities
+
 <!-- markdownlint-disable MD013 -->
 With V2 launched, we want to resume working on new utilities, specifically but not limited to the most commonly asked: **(1)** [Sensitive Data Masking](https://github.com/aws-powertools/powertools-lambda-python/issues/1173){target="_blank"}, **(2)** [Integration/End-to-end Testing](https://github.com/aws-powertools/powertools-lambda-python/issues/1169){target="_blank"}, and **(3)** [Event Bridge](https://github.com/aws-powertools/powertools-lambda-python/issues/1168){target="_blank"}.
 
