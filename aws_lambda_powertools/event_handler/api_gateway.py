@@ -25,6 +25,7 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.middleware import registered_api_middleware
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -210,6 +211,8 @@ class Response:
 class Route:
     """Internally used Route Configuration"""
 
+    _middleware_built = False
+
     def __init__(
         self,
         method: str,
@@ -218,6 +221,7 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
+        middleware: Optional[List[Callable]],
     ):
         self.method = method.upper()
         self.rule = rule
@@ -225,6 +229,23 @@ class Route:
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
+        self.middleware = middleware or []
+
+    def __call__(self, app, args: Dict[str, str]):
+        """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
+        if not self._middleware_built:
+            all_middleware = list(self.middleware)
+
+            # IMPORTANT: # this must be the last mdidleware in the stack to avoid breaking changes
+            # for the registered API call signature (Maintain Backward Compatibility)
+            all_middleware.append(registered_api_middleware)
+
+            for handler in reversed(all_middleware):
+                self.func = MiddlewareHandler(handler=handler, next_handler=self.func)
+
+            self._middleware_built = True
+
+        return self.func(app, **args)
 
 
 class ResponseBuilder:
@@ -322,6 +343,7 @@ class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
+    middleware: List[Callable] = []
 
     @abstractmethod
     def route(
@@ -331,10 +353,21 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         raise NotImplementedError()
 
-    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def use(self, middleware: List[Callable]):
+        self.middleware.append(middleware)
+
+    def get(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
+    ):
         """Get route decorator with GET `method`
 
         Examples
@@ -357,9 +390,16 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "GET", cors, compress, cache_control)
+        return self.route(rule, "GET", cors, compress, cache_control, middleware)
 
-    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def post(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
+    ):
         """Post route decorator with POST `method`
 
         Examples
@@ -383,9 +423,16 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "POST", cors, compress, cache_control)
+        return self.route(rule, "POST", cors, compress, cache_control, middleware)
 
-    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def put(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
+    ):
         """Put route decorator with PUT `method`
 
         Examples
@@ -409,7 +456,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PUT", cors, compress, cache_control)
+        return self.route(rule, "PUT", cors, compress, cache_control, middleware)
 
     def delete(
         self,
@@ -417,6 +464,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -440,7 +488,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "DELETE", cors, compress, cache_control)
+        return self.route(rule, "DELETE", cors, compress, cache_control, middleware)
 
     def patch(
         self,
@@ -448,6 +496,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -474,7 +523,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PATCH", cors, compress, cache_control)
+        return self.route(rule, "PATCH", cors, compress, cache_control, middleware)
 
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""
@@ -483,6 +532,21 @@ class BaseRouter(ABC):
     def clear_context(self):
         """Resets routing context"""
         self.context.clear()
+
+
+class MiddlewareHandler:
+    """Represents a callable Middleware function used to build a middleware stack when a route is resolved"""
+
+    def __init__(
+        self,
+        handler: Callable[..., Any],
+        next_handler: Callable[..., Any],
+    ) -> None:
+        self.handler: Callable[..., Any] = handler
+        self.next_handler: Callable[..., Any] = next_handler
+
+    def __call__(self, app: BaseRouter, **kwargs) -> Any:
+        return self.handler(app, self.next_handler, **kwargs)
 
 
 class ApiGatewayResolver(BaseRouter):
@@ -561,6 +625,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -573,7 +638,7 @@ class ApiGatewayResolver(BaseRouter):
                 cors_enabled = cors
 
             for item in methods:
-                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
+                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control, middleware)
 
                 # The more specific route wins.
                 # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
@@ -768,7 +833,7 @@ class ApiGatewayResolver(BaseRouter):
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            return ResponseBuilder(self._to_response(route.func(**args)), route)
+            return ResponseBuilder(self._to_response(route(app=self, args=args)), route)
         except Exception as exc:
             response_builder = self._call_exception_handler(exc, route)
             if response_builder:
@@ -895,6 +960,7 @@ class Router(BaseRouter):
 
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
+        self._routes_with_middleware: Dict[tuple, List[Callable]] = {}
         self.api_resolver: Optional[BaseRouter] = None
         self.context = {}  # early init as customers might add context before event resolution
 
@@ -905,11 +971,25 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
             methods = (method,) if isinstance(method, str) else tuple(method)
-            self._routes[(rule, methods, cors, compress, cache_control)] = func
+
+            tuple_key = (rule, methods, cors, compress, cache_control)
+
+            # Collate Middleware for routes
+            if middleware is not None:
+                for handler in middleware:
+                    self._routes_with_middleware[tuple_key] = self._routes_with_middleware.get(tuple_key, []).append(
+                        handler,
+                    )
+            else:
+                self._routes_with_middleware[tuple_key] = []
+
+            self._routes[tuple_key] = func
+
             return func
 
         return register_route
@@ -933,6 +1013,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         self,
         rule: str,
         method: Union[str, Union[List[str], Tuple[str]]],
+        middleware: Optional[List[Callable]] = None,
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
