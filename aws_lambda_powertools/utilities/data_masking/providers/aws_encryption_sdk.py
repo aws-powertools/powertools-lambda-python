@@ -17,9 +17,9 @@ class SingletonMeta(type):
 
     _instances: Dict["AwsEncryptionSdkProvider", Any] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args, **provider_options):
         if cls not in cls._instances:
-            instance = super().__call__(*args, **kwargs)
+            instance = super().__call__(*args, **provider_options)
             cls._instances[cls] = instance
         return cls._instances[cls]
 
@@ -45,12 +45,14 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
             max_messages_encrypted=MAX_MESSAGES,
         )
 
-    def encrypt(self, data: Union[bytes, str], *args, **kwargs) -> str:
-        ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, *args, **kwargs)
+    def encrypt(self, data: Union[bytes, str], **provider_options) -> str:
+        ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, **provider_options)
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
-    def decrypt(self, data: str, *args, **kwargs) -> bytes:
+    def decrypt(self, data: str, **provider_options) -> bytes:
         ciphertext_decoded = base64.b64decode(data)
-        ciphertext, _ = self.client.decrypt(source=ciphertext_decoded, key_provider=self.key_provider, *args, **kwargs)
+        ciphertext, _ = self.client.decrypt(
+            source=ciphertext_decoded, key_provider=self.key_provider, **provider_options
+        )
         return ciphertext
