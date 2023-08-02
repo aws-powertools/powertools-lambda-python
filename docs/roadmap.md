@@ -27,6 +27,16 @@ At launch, we will support the top [two most requested observability providers](
 - [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
 - [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
+### Sensitive Data Masking
+
+Data Masking will be a new utility to mask/unmask sensitive data using encryption providers. It's the second most voted feature request (behind [Observability Providers](#observability-providers)).
+
+**Major updates**
+
+- [x] [RFC to agree on design and MVP](https://github.com/aws-powertools/powertools-lambda-python/issues/1858)
+- [ ] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
+- [ ] Documentation to guide customers how to bring their own provider (e.g., `ItsDangerous`)
+
 ### Lambda Layer in release notes
 
 We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
