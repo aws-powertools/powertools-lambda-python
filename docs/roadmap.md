@@ -2,25 +2,36 @@
 
 ## Overview
 
-This is our public roadmap that outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
+Our public roadmap outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
 
-[See our latest list of activities »](https://github.com/orgs/aws-powertools/projects/3?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}
+!!! info "For most up-to-date information, see our [board of activities](https://github.com/orgs/aws-powertools/projects/3/views/2?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}."
 
 ## Themes
 
-!!! info "Operational Excellence is priority number 1."
+Operational Excellence is priority number 1. This means bug fixing, stability, security, customer's support, and governance will take precedence above all else.
 
-Themes are key activities maintainers are focusing on, besides bug reports. These are updated periodically and you can find the latest [under Epics in our public board](https://github.com/orgs/aws-powertools/projects/3/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
+**What are themes?**
+
+They are key activities maintainers are focusing on. These are updated periodically and you can find the latest [under Themes in our public board](https://github.com/orgs/aws-powertools/projects/3/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
+
+### Observability providers
+
+We want to extend Tracer, Metrics, and Logger to support any [AWS Lambda certified observability partner](https://go.aws/3HtU6CZ){target="_blank"}, along with OpenTelemetry.
+
+At launch, we will support the top [two most requested observability providers](https://github.com/aws-powertools/powertools-lambda-python/issues/1433). OpenTelemetry will be a fast follow-up as we need to decide on a stable solution to cold start penalty.
+
+**Major updates**
+
+- [x] [Document how customers can use any provider with Logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#observability-providers)
+- [x] [Extend Metrics to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2194)
+- [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
+- [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
 ### Increased end-to-end coverage
 
 We continue to work on increasing end-to-end coverage for all features. Our main challenge is testing contracts for Lambda Event Sources (Parser, Event Source Data Classes) due to the lack of an official JSON schema.
 
 Some Lambda Event Sources require clusters (e.g., MSK) leading to additional delays of up to 30m in the end-to-end feedback loop. We need a RFC to start discussing viable options, and whether we should publish JSON Schemas from identified contracts.
-
-### Observability providers
-
-We want to extend Tracer, Metrics, and Logger to support any [observability provider](https://github.com/aws-powertools/powertools-lambda-python/issues/1433){target="_blank"}. We need a RFC to define a contract and to identify two most requested observability providers that we can work with as an initial step.
 
 ### Lambda Layer in release notes
 
@@ -56,11 +67,11 @@ graph LR
 
 Within our [public board](https://github.com/orgs/aws-powertools/projects/3/views/1?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}, you'll see the following values in the `Status` column:
 
-* **Ideas**. Incoming and existing feature requests that are not being actively considered yet. These will be reviewed when bandwidth permits.
-* **Backlog**. Accepted feature requests or enhancements that we want to work on.
-* **Working on it**. Features or enhancements we're currently either researching or implementing it.
-* **Coming soon**. Any feature, enhancement, or bug fixes that have been merged and are coming in the next release.
-* **Shipped**. Features or enhancements that are now available in the most recent release.
+- **Ideas**. Incoming and existing feature requests that are not being actively considered yet. These will be reviewed when bandwidth permits.
+- **Backlog**. Accepted feature requests or enhancements that we want to work on.
+- **Working on it**. Features or enhancements we're currently either researching or implementing it.
+- **Coming soon**. Any feature, enhancement, or bug fixes that have been merged and are coming in the next release.
+- **Shipped**. Features or enhancements that are now available in the most recent release.
 
 > Tasks or issues with empty `Status` will be categorized in upcoming review cycles.
 
@@ -82,12 +93,12 @@ graph LR
 
 Our end-to-end mechanism follows four major steps:
 
-* **Feature Request**. Ideas start with a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.
-    * Maintainers review requests based on [project tenets](index.md#tenets){target="_blank"}, customers reaction (👍), and use cases.
-* **Request-for-comments (RFC)**. Design proposals use our [RFC issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE){target="_blank"} to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.
-    * This helps refine the initial idea with community feedback before a decision is made.
-* **Decision**. After carefully reviewing and discussing them, maintainers make a final decision on whether to start implementation, defer or reject it, and update everyone with the next steps.
-* **Implementation**. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.
+- **Feature Request**. Ideas start with a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"} to outline their use case at a high level. For complex use cases, maintainers might ask for/write a RFC.
+    - Maintainers review requests based on [project tenets](index.md#tenets){target="_blank"}, customers reaction (👍), and use cases.
+- **Request-for-comments (RFC)**. Design proposals use our [RFC issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&template=rfc.yml&title=RFC%3A+TITLE){target="_blank"} to describe its implementation, challenges, developer experience, dependencies, and alternative solutions.
+    - This helps refine the initial idea with community feedback before a decision is made.
+- **Decision**. After carefully reviewing and discussing them, maintainers make a final decision on whether to start implementation, defer or reject it, and update everyone with the next steps.
+- **Implementation**. For approved features, maintainers give priority to the original authors for implementation unless it is a sensitive task that is best handled by maintainers.
 
 ???+ info "See [Maintainers](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md){target="_blank"} document to understand how we triage issues and pull requests, labels and governance."
 
