@@ -226,7 +226,7 @@ For this to work, we could create a new Lambda function to handle incoming reque
 We could group similar routes and intents, separate read and write operations resulting in fewer functions. It doesn't address the boilerplate routing code, but maybe it will be easier to add additional URLs.
 
 ???+ info "Info: You might be already asking yourself about mono vs micro-functions"
-    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway/#considerations){target="_blank"} later.
+    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway.md#considerations){target="_blank"} later.
 
 A first attempt at the routing logic might look similar to the following code snippet.
 
@@ -773,7 +773,7 @@ Another subtle difference is that you can now run your Lambda functions and unit
 Powertools for AWS Lambda (Python) optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
 
 ???+ tip
-    You can [opt-out some of these behaviours](../core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
+    You can [opt-out some of these behaviours](../core/tracer.md#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
