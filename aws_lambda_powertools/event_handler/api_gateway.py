@@ -235,7 +235,7 @@ class Route:
         """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
         if not self._middleware_built:
             # prepend global router middleware first
-            all_middleware = list(router_middleware) + list(self.middleware)
+            all_middlewares = router_middlewares + self.middlewares
 
             # IMPORTANT: # this must be the last mdidleware in the stack to avoid breaking changes
             # for the registered API call signature (Maintain Backward Compatibility)
