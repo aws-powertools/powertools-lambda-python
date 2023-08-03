@@ -229,7 +229,7 @@ class Route:
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
-        self.middleware = middleware or []
+        self.middlewares = middlewares or []
 
     def __call__(self, router_middleware: List[Callable], app, args: Dict[str, str]):
         """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
