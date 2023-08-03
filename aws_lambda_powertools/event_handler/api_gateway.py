@@ -344,7 +344,7 @@ class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
-    router_middleware: List[Callable] = []
+    router_middlewares: List[Callable] = []
 
     @abstractmethod
     def route(
