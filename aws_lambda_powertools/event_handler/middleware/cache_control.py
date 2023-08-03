@@ -15,6 +15,6 @@ class CacheControlMiddleware:
 
         # Modify Response from Handler here before returning
         cache_control = self.cache_control if result.status_code == 200 else "no-cache"
-        result.headers["Cache-Control"] = cache_control
+        result.headers["Cache-Control"] = cache_control or ""
 
         return result

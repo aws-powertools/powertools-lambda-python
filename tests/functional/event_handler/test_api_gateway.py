@@ -1879,7 +1879,7 @@ def test_route_cors_middleware():
     assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
 
     # THEN for routes without cors flag return no cors headers
-    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    mock_event = {"path": "/without-cors", "httpMethod": "GET"}
     result = handler(mock_event, None)
     assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
 

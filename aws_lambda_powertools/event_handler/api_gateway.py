@@ -989,9 +989,10 @@ class Router(BaseRouter):
             # Collate Middleware for routes
             if middleware is not None:
                 for handler in middleware:
-                    self._routes_with_middleware[tuple_key] = self._routes_with_middleware.get(tuple_key, []).append(
-                        handler,
-                    )
+                    if self._routes_with_middleware.get(tuple_key) is None:
+                        self._routes_with_middleware[tuple_key] = [handler]
+                    else:
+                        self._routes_with_middleware[tuple_key].append(handler)
             else:
                 self._routes_with_middleware[tuple_key] = []
 
@@ -1020,10 +1021,10 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         self,
         rule: str,
         method: Union[str, Union[List[str], Tuple[str]]],
-        middleware: Optional[List[Callable]] = None,
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middleware: Optional[List[Callable]] = None,
     ):
         # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
