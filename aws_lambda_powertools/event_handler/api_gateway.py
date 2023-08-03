@@ -370,7 +370,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middleware: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable]] = None,
     ):
         """Get route decorator with GET `method`
 
