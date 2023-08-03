@@ -221,7 +221,7 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
-        middleware: Optional[List[Callable]],
+        middlewares: Optional[List[Callable]],
     ):
         self.method = method.upper()
         self.rule = rule
