@@ -231,7 +231,7 @@ class Route:
         self.cache_control = cache_control
         self.middlewares = middlewares or []
 
-    def __call__(self, router_middlewares: List[Callable], app, args: Dict[str, str]):
+    def __call__(self, router_middlewares: List[Callable], app, route_arguments: Dict[str, str]):
         """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
         if not self._middleware_built:
             # prepend global router middleware first
@@ -246,7 +246,7 @@ class Route:
 
             self._middleware_built = True
 
-        return self.func(app, **args)
+        return self.func(app, **route_arguments)
 
 
 class ResponseBuilder:
@@ -842,11 +842,13 @@ class ApiGatewayResolver(BaseRouter):
             ),
         )
 
-    def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
+    def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
             return ResponseBuilder(
-                self._to_response(route(router_middlewares=self.router_middlewares, app=self, args=args)),
+                self._to_response(
+                    route(router_middlewares=self.router_middlewares, app=self, route_arguments=route_arguments),
+                ),
                 route,
             )
         except Exception as exc:
