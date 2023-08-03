@@ -231,7 +231,7 @@ class Route:
         self.cache_control = cache_control
         self.middlewares = middlewares or []
 
-    def __call__(self, router_middleware: List[Callable], app, args: Dict[str, str]):
+    def __call__(self, router_middlewares: List[Callable], app, args: Dict[str, str]):
         """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
         if not self._middleware_built:
             # prepend global router middleware first
@@ -239,9 +239,9 @@ class Route:
 
             # IMPORTANT: # this must be the last mdidleware in the stack to avoid breaking changes
             # for the registered API call signature (Maintain Backward Compatibility)
-            all_middleware.append(registered_api_middleware)
+            all_middlewares.append(registered_api_middleware)
 
-            for handler in reversed(all_middleware):
+            for handler in reversed(all_middlewares):
                 self.func = MiddlewareHandler(handler=handler, next_handler=self.func)
 
             self._middleware_built = True
@@ -358,11 +358,11 @@ class BaseRouter(ABC):
     ):
         raise NotImplementedError()
 
-    def use(self, middleware: Union[Callable, List[Callable]]):
+    def use(self, middlewares: Union[Callable, List[Callable]]):
         """Add a middleware to the router"""
-        if not isinstance(middleware, list):
-            middleware = [middleware]
-        self.router_middleware = list(self.router_middleware) + list(middleware)
+        if not isinstance(middlewares, list):
+            middlewares = [middlewares]
+        self.router_middlewares = self.router_middlewares + middlewares
 
     def get(
         self,
@@ -642,7 +642,15 @@ class ApiGatewayResolver(BaseRouter):
                 cors_enabled = cors
 
             for item in methods:
-                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control, middlewares)
+                _route = Route(
+                    item,
+                    self._compile_regex(rule),
+                    func,
+                    cors_enabled,
+                    compress,
+                    cache_control,
+                    middlewares,
+                )
 
                 # The more specific route wins.
                 # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
@@ -838,7 +846,7 @@ class ApiGatewayResolver(BaseRouter):
         """Actually call the matching route with any provided keyword arguments."""
         try:
             return ResponseBuilder(
-                self._to_response(route(router_middleware=self.router_middlewares, app=self, args=args)),
+                self._to_response(route(router_middlewares=self.router_middlewares, app=self, args=args)),
                 route,
             )
         except Exception as exc:
@@ -987,16 +995,16 @@ class Router(BaseRouter):
             route_key = (rule, methods, cors, compress, cache_control)
 
             # Collate Middleware for routes
-            if middleware is not None:
-                for handler in middleware:
-                    if self._routes_with_middleware.get(tuple_key) is None:
-                        self._routes_with_middleware[tuple_key] = [handler]
+            if middlewares is not None:
+                for handler in middlewares:
+                    if self._routes_with_middleware.get(route_key) is None:
+                        self._routes_with_middleware[route_key] = [handler]
                     else:
-                        self._routes_with_middleware[tuple_key].append(handler)
+                        self._routes_with_middleware[route_key].append(handler)
             else:
-                self._routes_with_middleware[tuple_key] = []
+                self._routes_with_middleware[route_key] = []
 
-            self._routes[tuple_key] = func
+            self._routes[route_key] = func
 
             return func
 
@@ -1024,7 +1032,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middleware: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable]] = None,
     ):
         # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control)

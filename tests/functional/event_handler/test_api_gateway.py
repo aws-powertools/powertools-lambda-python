@@ -1771,7 +1771,7 @@ def test_route_with_middleware():
 
         return response
 
-    @app.get("/my/path", middleware=[middleware_1, middleware_2])
+    @app.get("/my/path", middlewares=[middleware_1, middleware_2])
     def get_lambda(another_one: int, custom: str) -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert another_one == 6
@@ -1835,7 +1835,7 @@ def test_dynamic_route_with_middleware():
 
         return response
 
-    @app.get("/<name>/<my_id>", middleware=[middleware_one])
+    @app.get("/<name>/<my_id>", middlewares=[middleware_one])
     def get_lambda(my_id: str, name: str, injected: str) -> Response:
         assert name == "my"
         assert injected == "injected_value"
@@ -1856,7 +1856,7 @@ def test_route_cors_middleware():
     # AND http method set to GET
     app = ApiGatewayResolver()
 
-    @app.get("/my/path", middleware=[CORSMiddleware()])
+    @app.get("/my/path", middlewares=[CORSMiddleware()])
     def with_cors() -> Response:
         return Response(200, content_types.TEXT_HTML, "test")
 
@@ -1922,7 +1922,7 @@ def test_cache_control_middleware_200():
     # GIVEN a function with cache_control set
     app = ApiGatewayResolver()
 
-    @app.get("/success", middleware=[CacheControlMiddleware("max-age=600")])
+    @app.get("/success", middlewares=[CacheControlMiddleware("max-age=600")])
     def with_cache_control() -> Response:
         return Response(200, content_types.TEXT_HTML, "has 200 response")
 
@@ -1943,7 +1943,7 @@ def test_cache_control_middleware_non_200():
     # GIVEN a function with cache_control set
     app = ApiGatewayResolver()
 
-    @app.delete("/fails", middleware=[CacheControlMiddleware("max-age=600")])
+    @app.delete("/fails", middlewares=[CacheControlMiddleware("max-age=600")])
     def with_cache_control_has_500() -> Response:
         return Response(503, content_types.TEXT_HTML, "has 503 response")
 
