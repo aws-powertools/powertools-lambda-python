@@ -30,6 +30,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
     ServiceError,
     UnauthorizedError,
 )
+from aws_lambda_powertools.event_handler.middleware.cache_control import CacheControlMiddleware
+from aws_lambda_powertools.event_handler.middleware.cors import CORSMiddleware
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -1749,3 +1751,210 @@ def test_route_match_prioritize_full_match():
     # THEN the static_handler should have been called, because it fully matches the path directly
     response_body = json.loads(response["body"])
     assert response_body["hello"] == "static"
+
+
+def test_route_with_middleware():
+    # GIVEN a Rest API Gateway proxy type event
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    # define custom middleware to inject new argument - "custom"
+    def middleware_1(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, custom="custom", **kwargs)
+
+        return response
+
+    # define custom middleware to inject new argument - "another_one"
+    def middleware_2(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, another_one=6, **kwargs)
+
+        return response
+
+    @app.get("/my/path", middleware=[middleware_1, middleware_2])
+    def get_lambda(another_one: int, custom: str) -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        assert another_one == 6
+        assert custom == "custom"
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "foo"
+
+
+def test_with_router_middleware():
+    # GIVEN a Rest API Gateway proxy type event
+    app = ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent)
+
+    # define custom middleware to inject new argument - "custom"
+    def middleware_1(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, custom="custom", **kwargs)
+
+        return response
+
+    # define custom middleware to inject new argument - "another_one"
+    def middleware_2(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, another_one=6, **kwargs)
+
+        return response
+
+    app.use([middleware_1, middleware_2])
+
+    @app.get("/my/path")
+    def get_lambda(another_one: int, custom: str) -> Response:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        assert another_one == 6
+        assert custom == "custom"
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "foo"
+
+
+def test_dynamic_route_with_middleware():
+    # GIVEN
+    app = ApiGatewayResolver()
+
+    def middleware_one(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, injected="injected_value", **kwargs)
+
+        return response
+
+    @app.get("/<name>/<my_id>", middleware=[middleware_one])
+    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+        assert name == "my"
+        assert injected == "injected_value"
+
+        return Response(200, content_types.TEXT_HTML, my_id)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "path"
+
+
+def test_route_cors_middleware():
+    # GIVEN a function with cors middleware (class definition)
+    # AND http method set to GET
+    app = ApiGatewayResolver()
+
+    @app.get("/my/path", middleware=[CORSMiddleware()])
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    @app.get("/without-cors")
+    def without_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(LOAD_GW_EVENT, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
+    assert "Access-Control-Allow-Credentials" not in headers
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
+
+    # THEN for routes without cors flag return no cors headers
+    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    result = handler(mock_event, None)
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_router_cors_middleware():
+    # GIVEN a function with cors middleware (class definition)
+    # AND http method set to GET
+    app = ApiGatewayResolver()
+    app.use(CORSMiddleware())
+
+    @app.get("/my/path")
+    def with_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    @app.get("/without-cors")
+    def without_cors() -> Response:
+        return Response(200, content_types.TEXT_HTML, "test")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(LOAD_GW_EVENT, None)
+
+    # THEN the headers should include cors headers
+    assert "multiValueHeaders" in result
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Access-Control-Allow-Origin"] == ["https://aws.amazon.com"]
+    assert "Access-Control-Allow-Credentials" not in headers
+    assert headers["Access-Control-Allow-Headers"] == [",".join(sorted(CORSConfig._REQUIRED_HEADERS))]
+
+    # THEN for routes without cors flag return no cors headers
+    mock_event = {"path": "/my/request", "httpMethod": "GET"}
+    result = handler(mock_event, None)
+    assert "Access-Control-Allow-Origin" not in result["multiValueHeaders"]
+
+
+def test_cache_control_middleware_200():
+    # GIVEN a function with cache_control set
+    app = ApiGatewayResolver()
+
+    @app.get("/success", middleware=[CacheControlMiddleware("max-age=600")])
+    def with_cache_control() -> Response:
+        return Response(200, content_types.TEXT_HTML, "has 200 response")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    # AND the function returns a 200 status code
+    result = handler({"path": "/success", "httpMethod": "GET"}, None)
+
+    # THEN return the set Cache-Control
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Cache-Control"] == ["max-age=600"]
+
+
+def test_cache_control_middleware_non_200():
+    # GIVEN a function with cache_control set
+    app = ApiGatewayResolver()
+
+    @app.delete("/fails", middleware=[CacheControlMiddleware("max-age=600")])
+    def with_cache_control_has_500() -> Response:
+        return Response(503, content_types.TEXT_HTML, "has 503 response")
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    # AND the function returns a 503 status code
+    result = handler({"path": "/fails", "httpMethod": "DELETE"}, None)
+
+    # THEN return a Cache-Control of "no-cache"
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Type"] == [content_types.TEXT_HTML]
+    assert headers["Cache-Control"] == ["no-cache"]

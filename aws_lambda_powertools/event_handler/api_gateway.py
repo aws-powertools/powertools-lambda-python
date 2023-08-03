@@ -25,7 +25,7 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.middleware import registered_api_middleware
+from aws_lambda_powertools.event_handler.middleware.registered_api import registered_api_middleware
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -231,10 +231,11 @@ class Route:
         self.cache_control = cache_control
         self.middleware = middleware or []
 
-    def __call__(self, app, args: Dict[str, str]):
+    def __call__(self, router_middleware: List[Callable], app, args: Dict[str, str]):
         """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
         if not self._middleware_built:
-            all_middleware = list(self.middleware)
+            # prepend global router middleware first
+            all_middleware = list(router_middleware) + list(self.middleware)
 
             # IMPORTANT: # this must be the last mdidleware in the stack to avoid breaking changes
             # for the registered API call signature (Maintain Backward Compatibility)
@@ -343,7 +344,7 @@ class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
-    middleware: List[Callable] = []
+    router_middleware: List[Callable] = []
 
     @abstractmethod
     def route(
@@ -357,8 +358,11 @@ class BaseRouter(ABC):
     ):
         raise NotImplementedError()
 
-    def use(self, middleware: List[Callable]):
-        self.middleware.append(middleware)
+    def use(self, middleware: Union[Callable, List[Callable]]):
+        """Add a middleware to the router"""
+        if not isinstance(middleware, list):
+            middleware = [middleware]
+        self.router_middleware = list(self.router_middleware) + list(middleware)
 
     def get(
         self,
@@ -833,7 +837,10 @@ class ApiGatewayResolver(BaseRouter):
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            return ResponseBuilder(self._to_response(route(app=self, args=args)), route)
+            return ResponseBuilder(
+                self._to_response(route(router_middleware=self.router_middleware, app=self, args=args)),
+                route,
+            )
         except Exception as exc:
             response_builder = self._call_exception_handler(exc, route)
             if response_builder:
