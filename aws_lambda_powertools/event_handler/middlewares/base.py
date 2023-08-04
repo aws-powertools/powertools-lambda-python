@@ -46,6 +46,26 @@ class BaseMiddlewareHandler(ABC):
     return result
     ```
 
+    To short-circuit the middleware execution chain you can either raise an exception to cause
+    the function call stack to unwind naturally OR you can simple not call the `get_response`
+    handler to get the response from the next middleware handler in the chain.
+
+    for example:
+    ============
+    If you wanted to ensure API callers cannot call a DELETE verb on your API (regardless of defined routes)
+    you could do so with the following middleware implementation.
+
+    ```python
+    # If invalid http_method is used - return a 405 error
+    # and return early to short-circuit the middleware execution chain
+    if app.current_event.http_method == "DELETE":
+        return Response(status_code=405, body={"message": "DELETE verb not allowed"})
+
+
+    # Call the next middleware in the chain (needed for when condition above is valid)
+    return get_response(app, **kwargs)
+
+
     :param app: The ApiGatewayResolver object
     :param get_response: The next middleware handler in the chain
     :param kwargs: Any additional arguments to pass to the next middleware handler

@@ -301,7 +301,7 @@ class Route:
         #
         # Start with the route function and wrap from last to the first Middleware handler.
         for handler in reversed(all_middlewares):
-            self.func = MiddlewareStackWrapper(handler=handler, get_response=self.func)
+            self.func = MiddlewareStackWrapper(handler=handler, next_middleware=self.func)
 
         self.middleware_stack_built = True
 
@@ -597,20 +597,34 @@ class BaseRouter(ABC):
 
 class MiddlewareStackWrapper:
     """
-    MiddlewareStackWrapper
-    ---------------------
+    creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
+    middleware functions.  Each instance contains the current middleware to be executed and the next
+    middleware function to be called in the stack.
 
-    This class is the core Middle wrapper that contains the context of each middleware
-    frame in the constructed middlewar call-stack.
+    In this way the middleware stack is constructed in a recursive fashion, with each middleware
+    calling the next as a simple function call.  The actual Python call-stack will contain
+    each MiddlewareStackWrapper "Frame", meaning any Middleware function can cause the
+    entire Middleware call chain to be exited early (short-circuited) by raising an exception
+    or by simply returning early with a custom Response.  The decision to short-circuit the middleware
+    chain is at the user's discretion but instantly available due to the Wrapped nature of the
+    callable constructs in the Middleware stack and each Middleware function having complete control over
+    whether the "Next" handler in the stack is called or not.
+
+    Parameters
+    ----------
+    handler : Callable
+        The API route handler to be invoked when this class is executed.
+    next_middleware : Callable
+        The next middleware in the middleware stack.
     """
 
     def __init__(
         self,
         handler: Callable,
-        get_response: Callable,
+        next_middleware: Callable,
     ) -> None:
         self.handler: Callable = handler
-        self.get_response: Callable = get_response
+        self.next_middleware: Callable = next_middleware
 
     def __call__(self, app: BaseRouter, **kwargs) -> Any:
         """
@@ -631,7 +645,7 @@ class MiddlewareStackWrapper:
             is executed which will return one of 3 outputs.
 
         """
-        return self.handler(app, self.get_response, **kwargs)
+        return self.handler(app, self.next_middleware, **kwargs)
 
 
 class ApiGatewayResolver(BaseRouter):
