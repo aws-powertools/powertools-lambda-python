@@ -18,6 +18,9 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.base import (
+    BaseDictSerializer,
+)
 
 MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
@@ -51,9 +54,7 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
-        input_serializer: Optional[Callable[[Any], Dict]] = None,
-        output_serializer: Optional[Callable[[Any], Dict]] = None,
-        output_deserializer: Optional[Callable[[Dict], Any]] = None,
+        output_serializer: Optional[BaseDictSerializer] = None,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
     ):
@@ -67,16 +68,9 @@ class IdempotencyHandler:
         config: IdempotencyConfig
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
-            Instance of persistence layer to store idempotency records
-        input_serializer: Optional[Callable[[Any], Dict]]
-            Custom function to serialize the given object into a dictionary.
-            If not supplied, best effort will be done to serialize known object representations
-        output_serializer: Optional[Callable[[Any], Dict]]
-            Custom function to serialize the returned object into a dictionary.
+        output_serializer: Optional[BaseDictSerializer]
+            Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done
-        output_deserializer: Optional[Callable[[Dict], Any]]
-            Custom function to deserialize dictionary representation into an object.
-            If not supplied, no deserialization is done
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]
@@ -84,10 +78,8 @@ class IdempotencyHandler:
 
         """
         self.function = function
-        self.input_serializer = input_serializer or _prepare_data
         self.output_serializer = output_serializer
-        self.output_deserializer = output_deserializer
-        self.data = deepcopy(self.input_serializer(function_payload))
+        self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
         self.config = config
@@ -224,8 +216,8 @@ class IdempotencyHandler:
             )
 
         response_dict: Optional[dict] = data_record.response_json_as_dict()
-        if response_dict and self.output_deserializer:
-            return self.output_deserializer(response_dict)
+        if response_dict and self.output_serializer:
+            return self.output_serializer.from_dict(response_dict)
         return response_dict
 
     def _get_function_response(self):
@@ -245,7 +237,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                saved_response: dict = self.output_serializer(response) if self.output_deserializer else response
+                saved_response: dict = self.output_serializer.to_dict(response) if self.output_serializer else response
                 self.persistence_store.save_success(data=self.data, result=saved_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(

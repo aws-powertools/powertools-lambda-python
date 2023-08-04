@@ -14,6 +14,7 @@ from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseDictSerializer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -26,9 +27,6 @@ def idempotent(
     context: LambdaContext,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
-    input_serializer: Optional[Callable[[Any], Dict]] = None,
-    output_serializer: Optional[Callable[[Any], Dict]] = None,
-    output_deserializer: Optional[Callable[[Dict], Any]] = None,
     **kwargs,
 ) -> Any:
     """
@@ -46,15 +44,6 @@ def idempotent(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    input_serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the given object into a dictionary.
-        If not supplied, best effort will be done to serialize known object representations
-    output_serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the returned object into a dictionary.
-        If not supplied, no serialization is done
-    output_deserializer: Optional[Callable[[Dict], Any]]
-        Custom function to deserialize dictionary representation into an object.
-        If not supplied, no deserialization is done
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
@@ -83,9 +72,6 @@ def idempotent(
         function_payload=event,
         config=config,
         persistence_store=persistence_store,
-        input_serializer=input_serializer,
-        output_serializer=output_serializer,
-        output_deserializer=output_deserializer,
         function_args=args,
         function_kwargs=kwargs,
     )
@@ -99,9 +85,7 @@ def idempotent_function(
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
-    input_serializer: Optional[Callable[[Any], Dict]] = None,
-    output_serializer: Optional[Callable[[Any], Dict]] = None,
-    output_deserializer: Optional[Callable[[Dict], Any]] = None,
+    output_serializer: Optional[BaseDictSerializer] = None,
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -116,15 +100,9 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    input_serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the given object into a dictionary.
-        If not supplied, best effort will be done to serialize known object representations
-    output_serializer: Optional[Callable[[Any], Dict]]
-        Custom function to serialize the returned object into a dictionary.
-        If not supplied, no serialization is done
-    output_deserializer: Optional[Callable[[Dict], Any]]
-        Custom function to deserialize dictionary representation into an object.
-        If not supplied, no deserialization is done
+    output_serializer: Optional[BaseDictSerializer]
+            Serializer to transform the data to and from a dictionary.
+            If not supplied, no serialization is done
     Examples
     --------
     **Processes an order in an idempotent manner**
@@ -172,9 +150,7 @@ def idempotent_function(
             function_payload=payload,
             config=config,
             persistence_store=persistence_store,
-            input_serializer=input_serializer,
             output_serializer=output_serializer,
-            output_deserializer=output_deserializer,
             function_args=args,
             function_kwargs=kwargs,
         )

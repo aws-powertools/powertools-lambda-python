@@ -15,8 +15,12 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from aws_lambda_powertools.utilities.idempotency import (
+    CustomDictSerializer,
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
+    PydanticSerializer,
+    idempotent,
+    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.base import (
     MAX_RETRIES,
@@ -30,10 +34,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyKeyError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
-)
-from aws_lambda_powertools.utilities.idempotency.idempotency import (
-    idempotent,
-    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
@@ -1196,7 +1196,45 @@ def test_idempotent_function():
     assert result == expected_result
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
+def test_idempotent_function_serialization_custom_dict():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=CustomDictSerializer(
+            to_dict=lambda x: x.dict(),
+            from_dict=PaymentOutput.parse_obj,
+        ),
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput.parse_obj(payment)
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
 def test_idempotent_function_serialization_pydantic():
     # GIVEN
     config = IdempotencyConfig(use_local_cache=True)
@@ -1216,9 +1254,9 @@ def test_idempotent_function_serialization_pydantic():
         data_keyword_argument="payment",
         persistence_store=persistence_layer,
         config=config,
-        input_serializer=lambda x: x.dict(),
-        output_serializer=lambda x: x.dict(),
-        output_deserializer=PaymentOutput.parse_obj,
+        output_serializer=PydanticSerializer(
+            model=PaymentOutput,
+        ),
     )
     def collect_payment(payment: PaymentInput) -> PaymentOutput:
         return PaymentOutput.parse_obj(payment)
