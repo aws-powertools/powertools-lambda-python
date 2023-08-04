@@ -100,6 +100,7 @@ You can include Powertools for AWS Lambda (Python) Lambda Layer using [AWS Lambd
         | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:      |
         | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:      |
         | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:      |
+        | `il-central-1`   | [arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:   |
         | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:   |
         | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:     |
         | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:40](#){: .copyMe}:clipboard:      |
