@@ -19,6 +19,16 @@ Middleware factory provides a decorator factory to create your own middleware to
 
 You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.
 
+### Environment variables
+
+The following environment variable is available to configure the middleware factory at a global scope:
+
+| Setting              | Description                                                                  | Environment variable                    | Default |
+|----------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Middleware Trace** | Creates sub-segment for each custom middleware.                              | `POWERTOOLS_TRACE_MIDDLEWARES`          | `false` |
+
+You can also use [`POWERTOOLS_TRACE_MIDDLEWARES`](#tracing-middleware-execution) on a per-method basis, which will consequently override the environment variable value.
+
 ### Middleware with no params
 
 You can create your own middleware using `lambda_handler_decorator`. The decorator factory expects 3 arguments in your function signature:
