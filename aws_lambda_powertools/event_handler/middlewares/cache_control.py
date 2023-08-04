@@ -1,9 +1,14 @@
 from typing import Callable, Optional
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler.middlewares.base import BaseMiddlewareHandler
 
 
-class CacheControlMiddleware:
+class CacheControlMiddleware(BaseMiddlewareHandler):
+    """
+    CacheControlMiddleware adds Cache-Control header to responses with status code 200.
+    """
+
     def __init__(self, cache_control: Optional[str] = None):
         self.cache_control = cache_control
 

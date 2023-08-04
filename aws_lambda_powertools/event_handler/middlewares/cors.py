@@ -1,9 +1,14 @@
 from typing import Callable, Optional
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, CORSConfig, Response
+from aws_lambda_powertools.event_handler.middlewares.base import BaseMiddlewareHandler
 
 
-class CORSMiddleware:
+class CORSMiddleware(BaseMiddlewareHandler):
+    """
+    CORSMiddleware adds CORS headers to the response.
+    """
+
     def __init__(self, config: Optional[CORSConfig] = None):
         self.cors = config or CORSConfig()
 

@@ -25,7 +25,7 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.middleware.registered_api import registered_api_middleware
+from aws_lambda_powertools.event_handler.middlewares.registered_api import registered_api_adapter
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -211,8 +211,6 @@ class Response:
 class Route:
     """Internally used Route Configuration"""
 
-    _middleware_built = False
-
     def __init__(
         self,
         method: str,
@@ -231,22 +229,81 @@ class Route:
         self.cache_control = cache_control
         self.middlewares = middlewares or []
 
-    def __call__(self, router_middlewares: List[Callable], app, route_arguments: Dict[str, str]):
-        """Builds the middleware stack using global and route middlewares, redefining the original handler function"""
-        if not self._middleware_built:
-            # prepend global router middleware first
-            all_middlewares = router_middlewares + self.middlewares
+        self.middleware_stack_built = False
 
-            # IMPORTANT: # this must be the last mdidleware in the stack to avoid breaking changes
-            # for the registered API call signature (Maintain Backward Compatibility)
-            all_middlewares.append(registered_api_middleware)
+    def __call__(
+        self,
+        router_middlewares: List[Callable],
+        app,
+        route_arguments: Dict[str, str],
+    ) -> Union[Dict, Tuple, Response]:
+        """Calling the Router class instance will trigger the following actions:
+            1. If Route Middleware execution stack has not been built, build it
+            2. Execute the Route Middleware execution stack wrapping the original function
+                handler with the app and route arguments.
 
-            for handler in reversed(all_middlewares):
-                self.func = MiddlewareHandler(handler=handler, next_handler=self.func)
+        Parameters
+        ----------
+        router_middlewares: List[Callable]
+            The list of Router Middlewares (assigned to ALL routes)
+        app: Callable
+            The ApiGatewayResolver instance to pass into the middleware execution stack
+        route_arguments: Dict[str, str]
+            The route arguments to pass to the app function (extracted from the Api Gateway
+            Lambda Message structure from AWS)
 
-            self._middleware_built = True
+        Returns
+        -------
+        Union[Dict, Tuple, Response]
+            Returns an API Response object in ALL cases, excepting when the original API route
+            handler is executed which may also return a Dict or Tuple response.
+        """
+        if not self.middleware_stack_built:
+            self.build_middleware_stack(router_middlewares=router_middlewares)
 
         return self.func(app, **route_arguments)
+
+    def build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
+        """
+        Builds the middleware execution stack for the handler by wrapping each
+        handler in an instance of MiddlewareWrapper which is used to contain the state
+        of each middleware step.
+
+        Middleware is represented by a standard Python Callable construct.  Any Middleware
+        handler wanting to short-circuit the middlware call chain should raise an execution
+        to force the Python call stack created by the handler call-chain to naturally un-wind.
+
+        This becomes a simple concept for Users ot understand and reason with - no additional
+        gymanstics other than plain old try ... except.
+
+        Notes
+        -----
+        The Route Middleware execution stack is executed in reverse order. This is so the stack of
+        middleware handlers is applied in the order of being added to the handler.
+        """
+        all_middlewares = router_middlewares + self.middlewares
+
+        # IMPORTANT:
+        # this must be the last middleware in the stack (tech debt for backward
+        # compatability purposes)
+        #
+        # This adapter will call the registered API using **kwargs only and not the middleware
+        # param list of get_response(app: ApiGatewayResolver, **kwargs)
+        # to ensure the call signature of existing defined routes of Users do not
+        # need to change (avoid breaking changes)
+        # This adapter will adapt the response type of the route handler (Union[Dict, Tuple, Response])
+        # and normalise into a Resposne object so middleware will always have a constant signature
+        all_middlewares.append(registered_api_adapter)
+
+        # Wrap the original route handler function in the middleware handlers
+        # using the MiddlewareWrapper class callable construct in reverse order to
+        # ensure middleware is applied in the order the user defined.
+        #
+        # Start with the route function and wrap from last to the first Middleware handler.
+        for handler in reversed(all_middlewares):
+            self.func = MiddlewareStackWrapper(handler=handler, get_response=self.func)
+
+        self.middleware_stack_built = True
 
 
 class ResponseBuilder:
@@ -538,19 +595,43 @@ class BaseRouter(ABC):
         self.context.clear()
 
 
-class MiddlewareHandler:
-    """Represents a callable Middleware function used to build a middleware stack when a route is resolved"""
+class MiddlewareStackWrapper:
+    """
+    MiddlewareStackWrapper
+    ---------------------
+
+    This class is the core Middle wrapper that contains the context of each middleware
+    frame in the constructed middlewar call-stack.
+    """
 
     def __init__(
         self,
-        handler: Callable[..., Any],
-        next_handler: Callable[..., Any],
+        handler: Callable,
+        get_response: Callable,
     ) -> None:
-        self.handler: Callable[..., Any] = handler
-        self.next_handler: Callable[..., Any] = next_handler
+        self.handler: Callable = handler
+        self.get_response: Callable = get_response
 
     def __call__(self, app: BaseRouter, **kwargs) -> Any:
-        return self.handler(app, self.next_handler, **kwargs)
+        """
+        Call the middleware stack wrapper
+
+        Parameters
+        ----------
+        app: BaseRouter
+            The router instance
+        **kwargs
+            Any additional arguments to pass to the middleware stack wrapper
+
+        Returns
+        -------
+        Any
+            (tech-debt for backward compatability).  The resposne type should be a
+            Resposne object in all cases excepting when the oiginal API rout handler
+            is executed which will return one of 3 outputs.
+
+        """
+        return self.handler(app, self.get_response, **kwargs)
 
 
 class ApiGatewayResolver(BaseRouter):

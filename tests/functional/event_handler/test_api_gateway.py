@@ -30,8 +30,8 @@ from aws_lambda_powertools.event_handler.exceptions import (
     ServiceError,
     UnauthorizedError,
 )
-from aws_lambda_powertools.event_handler.middleware.cache_control import CacheControlMiddleware
-from aws_lambda_powertools.event_handler.middleware.cors import CORSMiddleware
+from aws_lambda_powertools.event_handler.middlewares.cache_control import CacheControlMiddleware
+from aws_lambda_powertools.event_handler.middlewares.cors import CORSMiddleware
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
