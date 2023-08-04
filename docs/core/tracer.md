@@ -21,6 +21,16 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 
 !!! note "Tracer relies on AWS X-Ray SDK over [OpenTelememetry Distro (ADOT)](https://aws-otel.github.io/docs/getting-started/lambda){target="_blank" rel="nofollow"} for optimal cold start (lower latency)."
 
+Tracer uses the following environment variables to globally set its configuration:
+
+| Setting               | Description                                      | Environment variable                 | Default |
+|-----------------------|--------------------------------------------------|--------------------------------------|---------|
+| **Disable Tracing**   | Explicitly disables all tracing.                 | `POWERTOOLS_TRACE_DISABLED`          | `false` |
+| **Response Capture**  | Captures Lambda or method return as metadata.    | `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | `true`  |
+| **Exception Capture** | Captures Lambda or method exception as metadata. | `POWERTOOLS_TRACER_CAPTURE_ERROR`    | `true`  |
+
+Both `POWERTOOLS_TRACER_CAPTURE_RESPONSE` and `POWERTOOLS_TRACER_CAPTURE_ERROR` can be set on a per-method basis (see [Advanced](#advanced)), overriding the environment variable value.
+
 ### Install
 
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
