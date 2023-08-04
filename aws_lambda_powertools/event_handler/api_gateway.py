@@ -626,7 +626,7 @@ class MiddlewareStackWrapper:
         self.handler: Callable = handler
         self.next_middleware: Callable = next_middleware
 
-    def __call__(self, app: BaseRouter, **kwargs) -> Any:
+    def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
         """
         Call the middleware stack wrapper
 
@@ -639,9 +639,9 @@ class MiddlewareStackWrapper:
 
         Returns
         -------
-        Any
-            (tech-debt for backward compatability).  The resposne type should be a
-            Resposne object in all cases excepting when the oiginal API rout handler
+        Union[Dict, Tuple, Response]
+            (tech-debt for backward compatability).  The response type should be a
+            Response object in all cases excepting when the oiginal API rout handler
             is executed which will return one of 3 outputs.
 
         """
