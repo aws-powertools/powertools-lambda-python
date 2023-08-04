@@ -1806,8 +1806,10 @@
 </div>
 </div>
 </div>
-<!-- markdownlint-disable-next-line MD013 -->
+<!-- markdownlint-disable MD013 -->
 <p>This is quite powerful because you can use JMESPath Query language to extract records from <a href="https://jmespath.org/tutorial.html#list-and-slice-projections" rel="nofollow" target="_blank">arrays</a>, combine <a href="https://jmespath.org/tutorial.html#pipe-expressions" rel="nofollow" target="_blank">pipe</a> and <a href="https://jmespath.org/tutorial.html#functions" rel="nofollow" target="_blank">function expressions</a>.</p>
+<!-- markdownlint-enable MD013 -->
+
 <p>When combined, these features allow you to extract what you need before validating the actual payload.</p>
 <h3 id="built-in-envelopes">Built-in envelopes<a class="headerlink" href="#built-in-envelopes" title="Permanent link">&para;</a></h3>
 <p>We provide built-in envelopes to easily extract the payload from popular event sources.</p>
@@ -1978,7 +1980,7 @@
 </tr>
 <tr>
 <td><strong><code>CLOUDWATCH_LOGS</code></strong></td>
-<td><code>awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]</code></td>
+<td><code>awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]</code></td>
 </tr>
 <tr>
 <td><strong><code>EVENTBRIDGE</code></strong></td>
@@ -1990,7 +1992,7 @@
 </tr>
 <tr>
 <td><strong><code>SNS</code></strong></td>
-<td><code>Records[0].Sns.Message | powertools_json(@)</code></td>
+<td><code>Records[0].Sns.Message                                       | powertools_json(@)</code></td>
 </tr>
 <tr>
 <td><strong><code>SQS</code></strong></td>
@@ -2170,7 +2172,7 @@
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-04
     
   </small>
 </div>
