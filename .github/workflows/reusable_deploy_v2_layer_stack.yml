@@ -120,6 +120,8 @@ jobs:
             has_arm64_support: "true"
           - region: "eu-west-3"
             has_arm64_support: "true"
+          - region: "il-central-1"
+            has_arm64_support: "false"
           - region: "me-central-1"
             has_arm64_support: "false"
           - region: "me-south-1"
