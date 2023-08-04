@@ -341,6 +341,18 @@ You can easily change the date format using one of the following parameters:
     --8<-- "examples/logger/src/date_formatting_output.json"
     ```
 
+### Environment variables
+
+The following environment variables are available to configure Logger at a global scope:
+
+| Setting                   | Description                                                                  | Environment variable                    | Default |
+|---------------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
+| **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
+| **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+
+[`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value. 
+
 ## Advanced
 
 ### Built-in Correlation ID expressions
