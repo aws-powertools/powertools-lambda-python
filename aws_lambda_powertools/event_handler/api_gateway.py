@@ -25,7 +25,6 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.middlewares.registered_api import registered_api_adapter
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -646,6 +645,23 @@ class MiddlewareStackWrapper:
 
         """
         return self.handler(app, self.next_middleware, **kwargs)
+
+
+# No type checking possible due to Dependency order of definition ()
+def registered_api_adapter(app, get_response: Callable, **kwargs) -> Union[Dict, Tuple, Response]:
+    """
+    Calls the registered API using ONLY the **kwargs provided to ensure the
+    call signature of existing defined router of Users does not create a breaking change.
+
+    :param app: The API Gateway resolver
+    :param get_response: The function to handle the API
+    :param kwargs: The arguments to pass to the API
+    :return: The API Response Object
+
+    This middleware enables backward compatibility for the existing API routes model in Powertools
+    and it MUST BE THE LAST middleware in the middleware stack.
+    """
+    return app._to_response(get_response(**kwargs))
 
 
 class ApiGatewayResolver(BaseRouter):
