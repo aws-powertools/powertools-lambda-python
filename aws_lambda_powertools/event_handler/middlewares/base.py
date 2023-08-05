@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Callable
+from typing import Any, Callable
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
 
@@ -74,7 +74,14 @@ class BaseMiddlewareHandler(ABC):
     """
 
     @abstractmethod
-    def __call__(self, app: ApiGatewayResolver, get_response: Callable, **kwargs) -> Response:
+    def handler(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
+        """
+        The Middleware Handler
+
+        """
+        raise NotImplementedError()
+
+    def __call__(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
         """
         The Middleware handler function.
 
@@ -83,4 +90,4 @@ class BaseMiddlewareHandler(ABC):
         :param kwargs: Any additional arguments to pass to the next middleware handler
         :return: The response from the next middleware handler in the chain
         """
-        raise NotImplementedError()
+        return self.handler(app, get_response, **kwargs)

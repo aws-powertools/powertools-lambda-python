@@ -1847,3 +1847,34 @@ def test_dynamic_route_with_middleware():
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
     assert result["body"] == "path"
+
+
+def test_middleware_early_return():
+    # GIVEN
+    app = ApiGatewayResolver()
+
+    def middleware_one(app, get_response, **kwargs):
+        # inject a variable into the kwargs
+        response = get_response(app, injected="injected_value", **kwargs)
+
+        return response
+
+    def early_return_middleware(app, get_response, **kwargs):
+        assert kwargs.get("injected") == "injected_value"
+
+        return Response(400, content_types.TEXT_HTML, "bad_response")
+
+    @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware])
+    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+        assert name == "my"
+        assert injected == "injected_value"
+
+        return Response(200, content_types.TEXT_HTML, my_id)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN
+    assert result["statusCode"] == 400
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "bad_response"

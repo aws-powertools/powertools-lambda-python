@@ -1,1 +1,4 @@
-# Unable to import specific modules due to Cyclic dependency created with api_gateway.py module :-(
+from aws_lambda_powertools.event_handler.middlewares.base import BaseMiddlewareHandler
+from aws_lambda_powertools.event_handler.middlewares.schema_validation import SchemaValidationMiddleware
+
+__all__ = ["BaseMiddlewareHandler", "SchemaValidationMiddleware"]

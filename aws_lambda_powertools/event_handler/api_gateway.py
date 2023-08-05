@@ -218,7 +218,7 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
-        middlewares: Optional[List[Callable]],
+        middlewares: Optional[List[Callable[..., Any]]],
     ):
         self.method = method.upper()
         self.rule = rule
@@ -410,14 +410,17 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
 
-    def use(self, middlewares: Union[Callable, List[Callable]]):
-        """Add a middleware to the router"""
-        if not isinstance(middlewares, list):
-            middlewares = [middlewares]
+    def use(self, middlewares: List[Callable[..., Any]]):
+        """
+        Add a List of middlewares to the global routetr middleware list
+
+        These Middleware handlers will be executed in order of adding to the array and will
+        be executed before any specific middleware applied at the actual route level.
+        """
         self.router_middlewares = self.router_middlewares + middlewares
 
     def get(
@@ -426,7 +429,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
 
@@ -458,7 +461,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
 
@@ -491,7 +494,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
 
@@ -524,7 +527,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -648,7 +651,7 @@ class MiddlewareStackWrapper:
 
 
 # No type checking possible due to Dependency order of definition ()
-def registered_api_adapter(app, get_response: Callable, **kwargs) -> Union[Dict, Tuple, Response]:
+def registered_api_adapter(app, get_response: Callable[..., Any], **kwargs) -> Union[Dict, Tuple, Response]:
     """
     Calls the registered API using ONLY the **kwargs provided to ensure the
     call signature of existing defined router of Users does not create a breaking change.
@@ -740,7 +743,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -1099,7 +1102,7 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
@@ -1145,7 +1148,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
