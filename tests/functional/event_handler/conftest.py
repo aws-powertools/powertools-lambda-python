@@ -12,8 +12,8 @@ def json_dump():
 @pytest.fixture
 def validation_schema():
     return {
-        "$schema": "http://json-schema.org/draft-07/schema",
-        "$id": "http://example.com/example.json",
+        "$schema": "https://json-schema.org/draft-07/schema",
+        "$id": "https://example.com/example.json",
         "type": "object",
         "title": "Sample schema",
         "description": "The root schema comprises the entire JSON document.",
