@@ -4,16 +4,17 @@ import functools
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from typing_extensions import Protocol
+from typing_extensions import Protocol, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
 is_cold_start = True
 
 
+@runtime_checkable
 class MetricsProviderBase(Protocol):
     """
-    Class for metric provider interface.
+    Interface for MetricsProvider.
 
     This class serves as an interface for creating your own metric provider. Inherit from this class
     and implement the required methods to define your specific metric provider.
@@ -25,80 +26,19 @@ class MetricsProviderBase(Protocol):
     """
 
     def add_metric(self, *args: Any, **kwargs: Any) -> Any:
-        """
-        Abstract method for adding a metric.
-
-        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
-
-        Parameters
-        ----------
-        *args:
-            Positional arguments.
-        *kwargs:
-            Keyword arguments.
-
-        Returns
-        ----------
-        Dict
-            A combined metrics dictionary.
-
-        Raises
-        ----------
-        NotImplementedError
-            This method must be implemented in subclasses.
-        """
-        raise NotImplementedError
+        ...
 
     def serialize_metric_set(self, *args: Any, **kwargs: Any) -> Any:
-        """
-        Abstract method for serialize a metric.
+        ...
 
-        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
-
-        Parameters
-        ----------
-        *args:
-            Positional arguments.
-        *kwargs:
-            Keyword arguments.
-
-        Returns
-        ----------
-        Dict
-            Serialized metrics
-
-        Raises
-        ----------
-        NotImplementedError
-            This method must be implemented in subclasses.
-        """
-        raise NotImplementedError
-
-    # flush serialized data to output, or send to API directly
     def flush_metrics(self, *args: Any, **kwargs) -> Any:
-        """
-        Abstract method for flushing a metric.
-
-        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
-
-        Parameters
-        ----------
-        *args:
-            Positional arguments.
-        *kwargs:
-            Keyword arguments.
-
-        Raises
-        ----------
-        NotImplementedError
-            This method must be implemented in subclasses.
-        """
-        raise NotImplementedError
+        ...
 
 
+@runtime_checkable
 class MetricsBase(Protocol):
     """
-    Class for metric template.
+    Interface for metric template.
 
     This class serves as a template for creating your own metric class. Inherit from this class
     and implement the necessary methods to define your specific metric.
@@ -107,54 +47,13 @@ class MetricsBase(Protocol):
     """
 
     def add_metric(self, *args, **kwargs):
-        """
-        Abstract method for adding a metric.
-
-        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
-
-        Parameters
-        ----------
-        *args:
-            Positional arguments.
-        *kwargs:
-            Keyword arguments.
-
-        Returns
-        ----------
-        Dict
-            A combined metrics dictionary.
-
-        Raises
-        ----------
-        NotImplementedError
-            This method must be implemented in subclasses.
-        """
-        raise NotImplementedError
+        ...
 
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        """Manually flushes the metrics. This is normally not necessary,
-        unless you're running on other runtimes besides Lambda, where the @log_metrics
-        decorator already handles things for you.
-
-        Parameters
-        ----------
-        raise_on_empty_metrics : bool, optional
-            raise exception if no metrics are emitted, by default False
-        """
-        raise NotImplementedError
+        ...
 
     def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
-        """
-        Add a cold start metric for a specific function.
-
-        Parameters
-        ----------
-        metric_name: str
-            The name of the cold start metric to add.
-        function_name: str
-            The name of the function associated with the cold start metric.
-        """
-        raise NotImplementedError
+        ...
 
     def log_metrics(
         self,

@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.provider import MetricsProviderBase
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
@@ -27,7 +26,7 @@ from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 logger = logging.getLogger(__name__)
 
 
-class AmazonCloudWatchEMFProvider(MetricsProviderBase):
+class AmazonCloudWatchEMFProvider:
     """Base class for metric functionality (namespace, metric, dimension, serialization)
 
     MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
