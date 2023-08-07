@@ -8,18 +8,18 @@ import numbers
 import os
 import warnings
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import MetricsProviderBase
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
-    MetricResolutionError,
-    MetricUnitError,
-)
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
+from aws_lambda_powertools.metrics.shared import (
+    extract_cloudwatch_metric_resolution_value,
+    extract_cloudwatch_metric_unit_value,
+)
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
@@ -123,8 +123,15 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
-        unit = self._extract_metric_unit_value(unit=unit)
-        resolution = self._extract_metric_resolution_value(resolution=resolution)
+        unit = extract_cloudwatch_metric_unit_value(
+            metric_units=self._metric_units,
+            metric_valid_options=self._metric_unit_valid_options,
+            unit=unit,
+        )
+        resolution = extract_cloudwatch_metric_resolution_value(
+            metric_resolutions=self._metric_resolutions,
+            resolution=resolution,
+        )
         metric: Dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
@@ -391,67 +398,6 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
             return response
 
         return decorate
-
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
-        """Return metric value from metric unit whether that's str or MetricResolution enum
-
-        Parameters
-        ----------
-        unit : Union[int, MetricResolution]
-            Metric resolution
-
-        Returns
-        -------
-        int
-            Metric resolution value must be 1 or 60
-
-        Raises
-        ------
-        MetricResolutionError
-            When metric resolution is not supported by CloudWatch
-        """
-        if isinstance(resolution, MetricResolution):
-            return resolution.value
-
-        if isinstance(resolution, int) and resolution in self._metric_resolutions:
-            return resolution
-
-        raise MetricResolutionError(
-            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}",  # noqa: E501
-        )
-
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
-        """Return metric value from metric unit whether that's str or MetricUnit enum
-
-        Parameters
-        ----------
-        unit : Union[str, MetricUnit]
-            Metric unit
-
-        Returns
-        -------
-        str
-            Metric unit value (e.g. "Seconds", "Count/Second")
-
-        Raises
-        ------
-        MetricUnitError
-            When metric unit is not supported by CloudWatch
-        """
-
-        if isinstance(unit, str):
-            if unit in self._metric_unit_valid_options:
-                unit = MetricUnit[unit].value
-
-            if unit not in self._metric_units:
-                raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}",
-                )
-
-        if isinstance(unit, MetricUnit):
-            unit = unit.value
-
-        return unit
 
     def _add_cold_start_metric(self, context: Any) -> None:
         """Add cold start metric and function_name dimension

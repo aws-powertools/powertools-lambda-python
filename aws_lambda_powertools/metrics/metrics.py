@@ -1,7 +1,7 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional
 
 from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
@@ -137,12 +137,6 @@ class Metrics:
             raise_on_empty_metrics=raise_on_empty_metrics,
             default_dimensions=default_dimensions,
         )
-
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
-        return self.provider._extract_metric_resolution_value(resolution=resolution)
-
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
-        return self.provider._extract_metric_unit_value(unit=unit)
 
     def _add_cold_start_metric(self, context: Any) -> None:
         self.provider._add_cold_start_metric(context=context)
