@@ -289,8 +289,9 @@ Add integration checks that validate pull requests and pushes to ease the burden
 
 ### Negative Impact on the Project
 
-<!-- markdownlint-disable-next-line MD013 -->
+<!-- markdownlint-disable MD013 -->
 Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CODE_OF_CONDUCT.md){target="_blank"} violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
+<!-- markdownlint-enable MD013 -->
 
 ### Becoming a maintainer
 

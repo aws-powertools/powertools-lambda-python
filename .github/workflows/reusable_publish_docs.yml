@@ -32,6 +32,7 @@ permissions:
 
 jobs:
   publish_docs:
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     # Force Github action to run only a single job at a time (based on the group name)
     # This is to prevent "race-condition" in publishing a new version of doc to `gh-pages`
     concurrency:
