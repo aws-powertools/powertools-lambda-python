@@ -8,7 +8,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import Ama
 
 
 class Metrics:
-    """Metrics create an EMF object with up to 100 metrics
+    """Metrics create an CloudWatch EMF object with up to 100 metrics
 
     Use Metrics when you need to create multiple metrics that have
     dimensions in common (e.g. service_name="payment").
