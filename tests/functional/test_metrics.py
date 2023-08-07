@@ -1080,6 +1080,25 @@ def test_clear_default_dimensions(namespace):
     assert not my_metrics.default_dimensions
 
 
+def test_get_and_set_namespace_and_service_properties(namespace, service, metrics, capsys):
+    # GIVEN Metrics instance is initialized without namespace and service
+    my_metrics = Metrics()
+
+    # WHEN we set service and namespace before flushing the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.namespace = namespace
+        my_metrics.service = service
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    invocation = capture_metrics_output(capsys)
+
+    assert service in json.dumps(invocation)
+    assert namespace in json.dumps(invocation)
+
+
 def test_clear_default_dimensions_with_provider(namespace):
     # GIVEN Metrics is initialized with provider and we persist a set of default dimensions
     my_provider = AmazonCloudWatchEMFProvider(namespace=namespace)
