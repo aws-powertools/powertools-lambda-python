@@ -2,19 +2,17 @@ from __future__ import annotations
 
 import functools
 import logging
+from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
-from typing_extensions import Protocol, runtime_checkable
+from aws_lambda_powertools.metrics.provider import cold_start
 
 logger = logging.getLogger(__name__)
 
-is_cold_start = True
 
-
-@runtime_checkable
-class MetricsProviderBase(Protocol):
+class BaseProvider(ABC):
     """
-    Interface for MetricsProvider.
+    Class for metric provider interface.
 
     This class serves as an interface for creating your own metric provider. Inherit from this class
     and implement the required methods to define your specific metric provider.
@@ -25,41 +23,127 @@ class MetricsProviderBase(Protocol):
         3. Customize the behavior and functionality of the metric provider in your subclass.
     """
 
+    @abstractmethod
     def add_metric(self, *args: Any, **kwargs: Any) -> Any:
-        ...
+        """
+        Abstract method for adding a metric.
 
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Returns
+        ----------
+        Dict
+            A combined metrics dictionary.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def serialize_metric_set(self, *args: Any, **kwargs: Any) -> Any:
-        ...
+        """
+        Abstract method for serialize a metric.
 
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Returns
+        ----------
+        Dict
+            Serialized metrics
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def flush_metrics(self, *args: Any, **kwargs) -> Any:
-        ...
+        """
+        Abstract method for flushing a metric.
 
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
 
-@runtime_checkable
-class MetricsBase(Protocol):
-    """
-    Interface for metric template.
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
 
-    This class serves as a template for creating your own metric class. Inherit from this class
-    and implement the necessary methods to define your specific metric.
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
 
-    NOTE: need to improve this docstring
-    """
+    @abstractmethod
+    def clear_metrics(self, *args: Any, **kwargs) -> Any:
+        """
+        Abstract method for clear metric instance.
 
-    def add_metric(self, *args, **kwargs):
-        ...
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
 
-    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        ...
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
 
-    def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
-        ...
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_cold_start_metric(self, context: Any) -> Any:
+        """
+        Abstract method for clear metric instance.
+
+        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
 
     def log_metrics(
         self,
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
+        **kwargs,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -96,6 +180,8 @@ class MetricsBase(Protocol):
             Propagate error received
         """
 
+        default_dimensions = kwargs.get("default_dimensions")
+
         # If handler is None we've been called with parameters
         # Return a partial function with args filled
         if lambda_handler is None:
@@ -104,11 +190,14 @@ class MetricsBase(Protocol):
                 self.log_metrics,
                 capture_cold_start_metric=capture_cold_start_metric,
                 raise_on_empty_metrics=raise_on_empty_metrics,
+                default_dimensions=default_dimensions,
             )
 
         @functools.wraps(lambda_handler)
         def decorate(event, context):
             try:
+                if default_dimensions:
+                    self.set_default_dimensions(**default_dimensions)
                 response = lambda_handler(event, context)
                 if capture_cold_start_metric:
                     self._add_cold_start_metric(context=context)
@@ -127,17 +216,15 @@ class MetricsBase(Protocol):
         context : Any
             Lambda context
         """
-        global is_cold_start
-        if not is_cold_start:
+        if not cold_start.is_cold_start:
             return
 
         logger.debug("Adding cold start metric and function_name dimension")
-        self.add_cold_start_metric(metric_name="ColdStart", function_name=context.function_name)
+        self.add_cold_start_metric(context=context)
 
-        is_cold_start = False
+        cold_start.is_cold_start = False
 
 
 def reset_cold_start_flag_provider():
-    global is_cold_start
-    if not is_cold_start:
-        is_cold_start = True
+    if not cold_start.is_cold_start:
+        cold_start.is_cold_start = True

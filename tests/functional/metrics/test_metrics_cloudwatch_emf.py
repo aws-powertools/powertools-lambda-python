@@ -16,14 +16,11 @@ from aws_lambda_powertools.metrics import (
     SchemaValidationError,
     single_metric,
 )
-from aws_lambda_powertools.metrics.provider import (
-    MetricsBase,
-    MetricsProviderBase,
-)
+from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.metrics.provider.base import reset_cold_start_flag_provider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cold_start import reset_cold_start_flag
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS
+from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_flag
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -1273,7 +1270,7 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
 
 
 @pytest.fixture
-def metrics_provider() -> MetricsProviderBase:
+def metrics_provider() -> BaseProvider:
     class MetricsProvider:
         def __init__(self):
             self.metric_store: List = []
@@ -1283,7 +1280,7 @@ def metrics_provider() -> MetricsProviderBase:
         def add_metric(self, name: str, value: float, tag: List = None, *args, **kwargs):
             self.metric_store.append({"name": name, "value": value, "tag": tag})
 
-        def serialize(self, raise_on_empty_metrics: bool = False, *args, **kwargs):
+        def serialize_metric_set(self, raise_on_empty_metrics: bool = False, *args, **kwargs):
             if raise_on_empty_metrics and len(self.metric_store) == 0:
                 raise SchemaValidationError("Must contain at least one metric.")
 
@@ -1300,8 +1297,8 @@ def metrics_provider() -> MetricsProviderBase:
 
 
 @pytest.fixture
-def metrics_class() -> MetricsBase:
-    class MetricsClass(MetricsBase):
+def metrics_class() -> BaseProvider:
+    class MetricsClass(BaseProvider):
         def __init__(self, provider):
             self.provider = provider
             super().__init__()
@@ -1310,12 +1307,21 @@ def metrics_class() -> MetricsBase:
             self.provider.add_metric(name=name, value=value, tag=tag)
 
         def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-            self.provider.serialize(raise_on_empty_metrics=raise_on_empty_metrics)
+            self.provider.serialize_metric_set(raise_on_empty_metrics=raise_on_empty_metrics)
             self.provider.flush()
             self.provider.clear()
 
-        def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
-            self.provider.add_metric(name=metric_name, value=1, function_name=function_name)
+        def add_cold_start_metric(self, context: Any) -> None:
+            self.provider.add_metric(name="ColdStart", value=1, function_name=context.function_name)
+
+        def serialize_metric_set(self, raise_on_empty_metrics: bool = False, *args, **kwargs):
+            if raise_on_empty_metrics and len(self.metric_store) == 0:
+                raise SchemaValidationError("Must contain at least one metric.")
+
+            self.result = self.provider.flush()
+
+        def clear_metrics(self) -> None:
+            self.provider.clear_metrics()
 
     return MetricsClass
 
@@ -1323,7 +1329,7 @@ def metrics_class() -> MetricsBase:
 def test_metrics_provider_basic(capsys, metrics_provider, metric):
     provider = metrics_provider()
     provider.add_metric(**metric)
-    provider.serialize()
+    provider.serialize_metric_set()
     provider.flush()
     output = capture_metrics_output(capsys)
     assert output[0]["name"] == metric["name"]

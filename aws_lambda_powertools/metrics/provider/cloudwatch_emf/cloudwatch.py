@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import datetime
-import functools
 import json
 import logging
 import numbers
@@ -12,7 +11,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
+from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.shared import (
@@ -26,7 +25,7 @@ from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 logger = logging.getLogger(__name__)
 
 
-class AmazonCloudWatchEMFProvider:
+class AmazonCloudWatchEMFProvider(BaseProvider):
     """Base class for metric functionality (namespace, metric, dimension, serialization)
 
     MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
@@ -335,7 +334,7 @@ class AmazonCloudWatchEMFProvider:
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
+        **kwargs,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -372,33 +371,14 @@ class AmazonCloudWatchEMFProvider:
             Propagate error received
         """
 
-        # If handler is None we've been called with parameters
-        # Return a partial function with args filled
-        if lambda_handler is None:
-            logger.debug("Decorator called with parameters")
-            return functools.partial(
-                self.log_metrics,
-                capture_cold_start_metric=capture_cold_start_metric,
-                raise_on_empty_metrics=raise_on_empty_metrics,
-                default_dimensions=default_dimensions,
-            )
+        return super().log_metrics(
+            lambda_handler=lambda_handler,
+            capture_cold_start_metric=capture_cold_start_metric,
+            raise_on_empty_metrics=raise_on_empty_metrics,
+            **kwargs,
+        )
 
-        @functools.wraps(lambda_handler)
-        def decorate(event, context):
-            try:
-                if default_dimensions:
-                    self.set_default_dimensions(**default_dimensions)
-                response = lambda_handler(event, context)
-                if capture_cold_start_metric:
-                    self._add_cold_start_metric(context=context)
-            finally:
-                self.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
-
-            return response
-
-        return decorate
-
-    def _add_cold_start_metric(self, context: Any) -> None:
+    def add_cold_start_metric(self, context: Any) -> None:
         """Add cold start metric and function_name dimension
 
         Parameters
@@ -406,13 +386,11 @@ class AmazonCloudWatchEMFProvider:
         context : Any
             Lambda context
         """
-        if cold_start.is_cold_start:
-            logger.debug("Adding cold start metric and function_name dimension")
-            with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
-                metric.add_dimension(name="function_name", value=context.function_name)
-                if self.service:
-                    metric.add_dimension(name="service", value=str(self.service))
-                cold_start.is_cold_start = False
+        logger.debug("Adding cold start metric and function_name dimension")
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
+            metric.add_dimension(name="function_name", value=context.function_name)
+            if self.service:
+                metric.add_dimension(name="service", value=str(self.service))
 
     def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations

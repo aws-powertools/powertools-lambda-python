@@ -17,12 +17,12 @@ from aws_lambda_powertools.metrics.exceptions import (
     MetricValueError,
     SchemaValidationError,
 )
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cold_start import (
-    reset_cold_start_flag,  # noqa: F401  # backwards compatibility
-)
+from aws_lambda_powertools.metrics.provider import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
+from aws_lambda_powertools.metrics.provider.cold_start import (
+    reset_cold_start_flag,  # noqa: F401  # backwards compatibility
+)
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
