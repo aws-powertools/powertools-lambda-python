@@ -13,10 +13,19 @@ name: Build changelog
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
+#  push:
+#    branches:
+#      - develop
+  schedule:
+    # Note: run daily at 7am UTC time until upstream git-chlog uses stable sorting
+    - cron: "0 7 * * *"
+
+permissions:
+  contents: read
 
 jobs:
   changelog:
+    permissions:
+      contents: write       # create temporary branch to store changelog changes
+      pull-requests: write  # create PR with changelog changes
     uses: ./.github/workflows/reusable_publish_changelog.yml

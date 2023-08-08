@@ -24,9 +24,9 @@ def findCaller(stack_info=False, stacklevel=2):  # pragma: no cover
             ## If we want to use the last (deepest) frame:
             break
             ## If we want to mimic the warnings module:
-            # return ("sys", 1, "(unknown function)", None) # noqa: E800
-            ## If we want to be pedantic:  # noqa: E800
-            # raise ValueError("call stack is not deep enough") # noqa: E800
+            # return ("sys", 1, "(unknown function)", None) # noqa: ERA001
+            ## If we want to be pedantic:  # noqa: ERA001
+            # raise ValueError("call stack is not deep enough") # noqa: ERA001
         f = next_f  # noqa: VNE001
         if not _is_internal_frame(f):
             stacklevel -= 1

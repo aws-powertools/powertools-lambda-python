@@ -251,6 +251,27 @@ def test_log_dict_xray_is_updated_when_tracing_id_changes(stdout, monkeypatch, s
     monkeypatch.delenv(name="_X_AMZN_TRACE_ID")
 
 
+def test_log_dict_xray_is_not_present_when_explicitly_disabled(
+    stdout: io.StringIO,
+    monkeypatch: pytest.MonkeyPatch,
+    service_name: str,
+):
+    # GIVEN a logger is initialized within a Lambda function with X-Ray enabled
+    # and X-Ray Trace ID key is explicitly disabled
+    trace_id = "1-5759e988-bd862e3fe1be46a994272793"
+    trace_header = f"Root={trace_id};Parent=53995c3f42cd8ad8;Sampled=1"
+    monkeypatch.setenv(name="_X_AMZN_TRACE_ID", value=trace_header)
+    logger = Logger(service=service_name, stream=stdout, xray_trace_id=None)
+
+    # WHEN logging a message
+    logger.info("foo")
+
+    log_dict: dict = json.loads(stdout.getvalue())
+
+    # THEN `xray_trace_id`` key should not be present
+    assert "xray_trace_id" not in log_dict
+
+
 def test_log_custom_std_log_attribute(stdout, service_name):
     # GIVEN a logger where we have a standard log attr process
     # https://docs.python.org/3/library/logging.html#logrecord-attributes

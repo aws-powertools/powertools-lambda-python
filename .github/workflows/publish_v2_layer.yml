@@ -24,6 +24,8 @@ name: Deploy v2 layer to all regions
 #   with:
 #     latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
 #     pre_release: ${{ inputs.pre_release }}
+#     source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
+#     source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
 
 
 on:
@@ -31,6 +33,14 @@ on:
     inputs:
       latest_published_version:
         description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, 2.0.0a1 (pre-release)"
+        required: true
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
         required: true
       pre_release:
         description: "Publishes documentation using a pre-release tag (2.0.0a1)."
@@ -48,6 +58,21 @@ on:
         default: false
         type: boolean
         required: false
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+
+env:
+  RELEASE_COMMIT: ${{ github.sha }}
 
 jobs:
   build-layer:
@@ -57,7 +82,7 @@ jobs:
       id-token: write
       pages: none
       pull-requests: none
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     defaults:
       run:
         working-directory: ./layer
@@ -65,41 +90,57 @@ jobs:
       - name: checkout
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
-          fetch-depth: 0
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@2b82ce82d56a2a04d2637cd93a637ae1b359c0a7 # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
+
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@ecf95283f03858871ff00b787d79c419715afc34 # v2.7.0
+        uses: docker/setup-buildx-action@4c0219f9ac95b02789c1075625400b2acbff50b1 # v2.9.1
         with:
           install: true
           driver: docker
           platforms: linux/amd64,linux/arm64
-      - name: install cdk and deps
+
+      - name: Install CDK
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
+
+      # Baking time for PyPi eventual consistency; 60s seemed more than enough
+      # https://github.com/aws-powertools/powertools-lambda-python/issues/2491
+      - name: Baking time (PyPi)
+        run: sleep 60
+
       - name: CDK build
         run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out
       - name: zip output
@@ -125,6 +166,8 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
       latest_published_version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   prod:
     needs: beta
@@ -141,6 +184,8 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
       latest_published_version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   sar-beta:
     needs: beta  # canaries run on Layer Beta env
@@ -157,6 +202,9 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
       package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+
 
   sar-prod:
     needs: sar-beta
@@ -173,6 +221,9 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
       package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+
 
   # Updating the documentation with the latest Layer ARNs is a two-phase process
   #
@@ -198,7 +249,14 @@ jobs:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
         with:
-          fetch-depth: 0
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
       - name: Download CDK layer artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:

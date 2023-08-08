@@ -127,7 +127,10 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             constants.PRETTY_INDENT if powertools_dev_is_set() else constants.COMPACT_INDENT
         )  # indented json serialization when in AWS SAM Local
         self.json_serializer = json_serializer or partial(
-            json.dumps, default=self.json_default, separators=(",", ":"), indent=self.json_indent
+            json.dumps,
+            default=self.json_default,
+            separators=(",", ":"),
+            indent=self.json_indent,
         )
 
         self.datefmt = datefmt
@@ -233,8 +236,12 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             "timestamp": "%(asctime)s",
         }
 
-    @staticmethod
-    def _get_latest_trace_id():
+    def _get_latest_trace_id(self):
+        xray_trace_id_key = self.log_format.get("xray_trace_id", "")
+        if xray_trace_id_key is None:
+            # key is explicitly disabled; ignore it. e.g., Logger(xray_trace_id=None)
+            return None
+
         xray_trace_id = os.getenv(constants.XRAY_TRACE_ID_ENV)
         return xray_trace_id.split(";")[0].replace("Root=", "") if xray_trace_id else None
 

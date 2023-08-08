@@ -32,7 +32,7 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Metric has two global settings that will be used across all metrics emitted:
 
@@ -191,7 +191,7 @@ If it's a cold start invocation, this feature will:
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
 ???+ info
-    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
+    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
 ## Advanced
 
@@ -274,17 +274,17 @@ You can use `EphemeralMetrics` class when looking to isolate multiple instances 
 
 **Differences between `EphemeralMetrics` and `Metrics`**
 
-`EphemeralMetrics` has only two differences while keeping nearly the exact same set of features:
+`EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
 
 | Feature                                                                                                     | Metrics | EphemeralMetrics |
 | ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
 | **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
-| **[Default dimensions](#adding-default-dimensions) that persists across Lambda invocations** (metric flush) | Yes     | -                |
 
 !!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
 
 This is an intentional design to prevent accidental data deduplication or data loss issues due to [CloudWatch EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} metric dimension constraint.
 
+<!-- markdownlint-disable-next-line MD013 -->
 In CloudWatch, there are two metric ingestion mechanisms: [EMF (async)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} and [`PutMetricData` API (sync)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data){target="_blank"}.
 
 The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.
@@ -329,7 +329,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank"}.
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
 --8<-- "examples/metrics/src/run_tests_env_var.sh"
@@ -374,4 +374,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}

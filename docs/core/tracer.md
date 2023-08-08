@@ -3,7 +3,7 @@ title: Tracer
 description: Core utility
 ---
 
-Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.com/aws/aws-xray-sdk-python/){target="_blank"}.
+Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.com/aws/aws-xray-sdk-python/){target="_blank" rel="nofollow"}.
 
 ![Tracer showcase](../media/tracer_utility_showcase.png)
 
@@ -17,9 +17,9 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
-!!! note "Tracer relies on AWS X-Ray SDK over [OpenTelememetry Distro (ADOT)](https://aws-otel.github.io/docs/getting-started/lambda){target="_blank"} for optimal cold start (lower latency)."
+!!! note "Tracer relies on AWS X-Ray SDK over [OpenTelememetry Distro (ADOT)](https://aws-otel.github.io/docs/getting-started/lambda){target="_blank" rel="nofollow"} for optimal cold start (lower latency)."
 
 ### Install
 
@@ -162,7 +162,7 @@ You can use `ignore_endpoint` method with the hostname and/or URLs you'd like it
 ???+ info
 	This snippet assumes you have aiohttp as a dependency
 
-You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html){target="_blank"}. This is necessary since X-Ray utilizes [aiohttp](https://docs.aiohttp.org/en/stable/){target="_blank"} trace hooks to capture requests end-to-end.
+You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_config object](https://docs.aiohttp.org/en/stable/tracing_reference.html){target="_blank" rel="nofollow"}. This is necessary since X-Ray utilizes [aiohttp](https://docs.aiohttp.org/en/stable/){target="_blank" rel="nofollow"} trace hooks to capture requests end-to-end.
 
 ```python hl_lines="7 17" title="Tracing aiohttp requests"
 --8<-- "examples/tracer/src/tracing_aiohttp.py"

@@ -1,0 +1,31 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  IdempotencyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiration
+        Enabled: true
+      BillingMode: PAY_PER_REQUEST
+
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.10
+      Handler: app.py
+      Policies:
+        - Statement:
+          - Sid: AllowDynamodbReadWrite
+            Effect: Allow
+            Action:
+              - dynamodb:PutItem
+              - dynamodb:GetItem
+              - dynamodb:UpdateItem
+              - dynamodb:DeleteItem
+            Resource: !GetAtt IdempotencyTable.Arn

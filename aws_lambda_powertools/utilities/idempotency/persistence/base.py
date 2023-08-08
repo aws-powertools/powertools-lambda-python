@@ -194,8 +194,10 @@ class BasePersistenceLayer(ABC):
 
     @staticmethod
     def is_missing_idempotency_key(data) -> bool:
-        if type(data).__name__ in ("tuple", "list", "dict"):
+        if isinstance(data, (tuple, list, dict)):
             return all(x is None for x in data)
+        elif isinstance(data, (int, float, bool)):
+            return False
         return not data
 
     def _get_hashed_payload(self, data: Dict[str, Any]) -> str:
@@ -323,7 +325,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         response_data = json.dumps(result, cls=Encoder, sort_keys=True)
@@ -337,7 +339,7 @@ class BasePersistenceLayer(ABC):
         )
         logger.debug(
             f"Function successfully executed. Saving record to persistence store with "
-            f"idempotency key: {data_record.idempotency_key}"
+            f"idempotency key: {data_record.idempotency_key}",
         )
         self._update_record(data_record=data_record)
 
@@ -358,7 +360,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(
@@ -403,14 +405,14 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         data_record = DataRecord(idempotency_key=idempotency_key)
 
         logger.debug(
             f"Function raised an exception ({type(exception).__name__}). Clearing in progress record in persistence "
-            f"store for idempotency key: {data_record.idempotency_key}"
+            f"store for idempotency key: {data_record.idempotency_key}",
         )
         self._delete_record(data_record=data_record)
 
@@ -441,7 +443,7 @@ class BasePersistenceLayer(ABC):
         idempotency_key = self._get_hashed_idempotency_key(data=data)
         if idempotency_key is None:
             # If the idempotency key is None, no data will be saved in the Persistence Layer.
-            # See: https://github.com/awslabs/aws-lambda-powertools-python/issues/2465
+            # See: https://github.com/aws-powertools/powertools-lambda-python/issues/2465
             return None
 
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)

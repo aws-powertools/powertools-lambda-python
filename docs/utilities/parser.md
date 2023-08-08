@@ -4,29 +4,40 @@ description: Utility
 ---
 <!-- markdownlint-disable MD043 -->
 
-This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/){target="_blank"}.
+This utility provides data parsing and deep validation using [Pydantic](https://pydantic-docs.helpmanual.io/){target="_blank" rel="nofollow"}.
 
 ## Key features
 
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
+* Support for Pydantic v1 and v2
 
 ## Getting started
 
 ### Install
 
+Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.
+
+#### Using Pydantic v1
+
 !!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Parser.
+Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ???+ warning
     This will increase the compressed package size by >10MB due to the Pydantic dependency.
 
     To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
-    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank"}:
+    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank" rel="nofollow"}:
 
 	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
+
+#### Using Pydantic v2
+
+You need to bring Pydantic v2.0.3 or later as an external dependency. Note that [we suppress Pydantic v2 deprecation warnings](https://github.com/aws-powertools/powertools-lambda-python/issues/2672){target="_blank"} to reduce noise and optimize log costs.
+
+Add `aws-lambda-powertools` and `pydantic>=2.0.3` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
 
 ### Defining models
 
@@ -45,7 +56,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 ```
 
 These are simply Python classes that inherit from BaseModel. **Parser** enforces type hints declared in your model at runtime.
@@ -79,7 +90,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 
 
 @event_parser(model=Order)
@@ -124,7 +135,7 @@ class Order(BaseModel):
 	id: int
 	description: str
 	items: List[OrderItem] # nesting models are supported
-	optional_field: Optional[str] # this field may or may not be available when parsing
+	optional_field: Optional[str] = None # this field may or may not be available when parsing
 
 
 payload = {
@@ -180,6 +191,7 @@ Parser comes with the following built-in models:
 | **SesModel**                                | Lambda Event Source payload for Amazon Simple Email Service                           |
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
+| **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
 
 #### Extending built-in models
 
@@ -248,13 +260,13 @@ for order_item in ret.detail.items:
 
 ???+ tip
     When extending a `string` field containing JSON, you need to wrap the field
-    with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type){target="_blank"}:
+    with [Pydantic's Json Type](https://pydantic-docs.helpmanual.io/usage/types/#json-type){target="_blank" rel="nofollow"}:
 
     ```python hl_lines="14 18-19"
     --8<-- "examples/parser/src/extending_built_in_models_with_json_mypy.py"
     ```
 
-    Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpmanual.io/usage/validators/){target="_blank"} to transform the JSON string into a dict before the mapping:
+    Alternatively, you could use a [Pydantic validator](https://pydantic-docs.helpmanual.io/usage/validators/){target="_blank" rel="nofollow"} to transform the JSON string into a dict before the mapping:
 
     ```python hl_lines="18-20 24-25"
     --8<-- "examples/parser/src/extending_built_in_models_with_json_validator.py"
@@ -336,6 +348,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **ApiGatewayV2Envelope**      | 1. Parses data using `APIGatewayProxyEventV2Model`. <br/> 2. Parses `body` key using your model and returns it.                                                                                             | `Model`                            |
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
+| **VpcLatticeEnvelope**        | 1. Parses data using `VpcLatticeModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 
 #### Bringing your own envelope
 
@@ -498,14 +511,14 @@ parse(model=UserModel, event=payload)
 ### Advanced use cases
 
 ???+ tip "Tip: Looking to auto-generate models from JSON, YAML, JSON Schemas, OpenApi, etc?"
-    Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator){target="_blank"}
+    Use Koudai Aono's [data model code generation tool for Pydantic](https://github.com/koxudaxi/datamodel-code-generator){target="_blank" rel="nofollow"}
 
-There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability){target="_blank"}, [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value){target="_blank"}.
+There are number of advanced use cases well documented in Pydantic's doc such as creating [immutable models](https://pydantic-docs.helpmanual.io/usage/models/#faux-immutability){target="_blank" rel="nofollow"}, [declaring fields with dynamic values](https://pydantic-docs.helpmanual.io/usage/models/#field-with-dynamic-default-value){target="_blank" rel="nofollow"}.
 
 ???+ tip "Pydantic helper functions"
-	Pydantic also offers [functions](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions){target="_blank"} to parse models from files, dicts, string, etc.
+	Pydantic also offers [functions](https://pydantic-docs.helpmanual.io/usage/models/#helper-functions){target="_blank" rel="nofollow"} to parse models from files, dicts, string, etc.
 
-Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/){target="_blank"} as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
+Two possible unknown use cases are Models and exception' serialization. Models have methods to [export them](https://pydantic-docs.helpmanual.io/usage/exporting_models/){target="_blank" rel="nofollow"} as `dict`, `JSON`, `JSON Schema`, and Validation exceptions can be exported as JSON.
 
 ```python hl_lines="21 28-31" title="Converting data models in various formats"
 from aws_lambda_powertools.utilities import Logger

@@ -17,16 +17,9 @@ repos:
         entry: poetry run black
         language: system
         types: [python]
-      - id: isort
-        name: formatting::isort
-        entry: poetry run isort
-        language: system
-        types: [python]
-  - repo: local
-    hooks:
-      - id: flake8
-        name: linting::flake8
-        entry: poetry run flake8
+      - id: ruff
+        name: linting-format::ruff
+        entry: poetry run ruff
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli
@@ -47,3 +40,13 @@ repos:
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: 3420134c37197c21edffc7e6093b14ffae8402f2 # v1.81.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-recursive
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: "7804d652c0460f0b61ea9bb2c1f202bfcdbbf144" # v8.16.3
+    hooks:
+      - id: gitleaks

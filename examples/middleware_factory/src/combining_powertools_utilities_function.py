@@ -27,7 +27,6 @@ feature_flags = FeatureFlags(store=app_config)
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_custom(handler: Callable, event: dict, context: LambdaContext):
-
     # validating the INPUT with the given schema
     # X-Customer-Id header must be informed in all requests
     try:
@@ -66,10 +65,9 @@ def middleware_custom(handler: Callable, event: dict, context: LambdaContext):
 
 @tracer.capture_method
 def save_api_execution_history(path: str, headers: dict, request_context: dict) -> None:
-
     try:
         # using the feature flags utility to check if the new feature "save api call to history" is enabled by default
-        # see: https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/feature_flags/#static-flags
+        # see: https://docs.powertools.aws.dev/lambda/python/latest/utilities/feature_flags/#static-flags
         save_history: JSONType = feature_flags.evaluate(name="save_history", default=False)
         if save_history:
             # saving history in dynamodb table
@@ -82,7 +80,7 @@ def save_api_execution_history(path: str, headers: dict, request_context: dict) 
                     "request_time": request_context.get("requestTime"),
                     "source_ip": request_context.get("identity", {}).get("sourceIp"),
                     "http_method": request_context.get("httpMethod"),
-                }
+                },
             )
 
         return None

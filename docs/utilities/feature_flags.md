@@ -8,6 +8,14 @@ The feature flags utility provides a simple rule engine to define when one or mu
 ???+ info
     When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
+## Key features
+
+* Define simple feature flags to dynamically decide when to enable a feature
+* Fetch one or all feature flags enabled for a given application context
+* Support for static feature flags to simply turn on/off a feature without rules
+* Support for time based feature flags
+* Bring your own Feature Flags Store Provider
+
 ## Terminology
 
 Feature flags are used to modify behaviour without changing the application's code. These flags can be **static** or **dynamic**.
@@ -24,20 +32,12 @@ Feature flags are used to modify behaviour without changing the application's co
 
 If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
-* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html){target="_blank"}
-* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233){target="_blank"}
-* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank"}
+* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html){target="_blank" rel="nofollow"}
+* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233){target="_blank" rel="nofollow"}
+* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank" rel="nofollow"}
 
 ???+ note
     AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
-
-## Key features
-
-* Define simple feature flags to dynamically decide when to enable a feature
-* Fetch one or all feature flags enabled for a given application context
-* Support for static feature flags to simply turn on/off a feature without rules
-* Support for time based feature flags
-* Bring your own Feature Flags Store Provider
 
 ## Getting started
 
@@ -255,8 +255,8 @@ You can also have features enabled only at specific days, for example: enable ch
     ```
 
 ???+ info "How should I use timezones?"
-    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
-    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
+    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank" rel="nofollow"} (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank" rel="nofollow"}) as part of your rules definition.
     Powertools for AWS Lambda (Python) takes care of converting and calculate the correct timestamps for you.
 
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
@@ -448,7 +448,7 @@ The `action` configuration can have the following values, where the expressions 
     | Key                 | Meaning                                                                                   |
     | ------------------- | ----------------------------------------------------------------------------------------- |
     | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                                  |
-    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601){target="_blank"}) |
+    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601){target="_blank" rel="nofollow"}) |
     | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                                               |
 
     If not specified, the timezone used for calculations will be UTC.
@@ -501,7 +501,7 @@ These are the available options for further customization.
 | **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
-| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
+| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} |
 | **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                          |
 
 === "appconfig_provider_options.py"

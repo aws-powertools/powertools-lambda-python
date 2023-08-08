@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -303,9 +302,9 @@ class AWSConfigRuleEvent(DictWrapper):
     ) -> AWSConfigConfigurationChanged | AWSConfigScheduledNotification | AWSConfigOversizedConfiguration:
         """The invoking payload of the event."""
         if self._invoking_event is None:
-            self._invoking_event = self["invokingEvent"]
+            self._invoking_event = self._json_deserializer(self["invokingEvent"])
 
-        return get_invoke_event(json.loads(self._invoking_event))
+        return get_invoke_event(self._invoking_event)
 
     @property
     def raw_invoking_event(self) -> str:
@@ -316,9 +315,9 @@ class AWSConfigRuleEvent(DictWrapper):
     def rule_parameters(self) -> Dict:
         """The parameters of the event."""
         if self._rule_parameters is None:
-            self._rule_parameters = self["ruleParameters"]
+            self._rule_parameters = self._json_deserializer(self["ruleParameters"])
 
-        return json.loads(self._rule_parameters)
+        return self._rule_parameters
 
     @property
     def result_token(self) -> str:

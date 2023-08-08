@@ -1,6 +1,5 @@
 version: 2
 updates:
-
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -20,6 +19,10 @@ updates:
     ignore:
       # 2022-04-23: Ignoring boto3 changes until we need to care about them.
       - dependency-name: "boto3"
+    groups:
+      boto-typing:
+        patterns:
+          - "mypy-boto3-*"
 
   - package-ecosystem: "npm"
     directory: "/"
@@ -33,16 +36,54 @@ updates:
       # Allow updates for AWS CDK
       - dependency-name: "aws-cdk"
 
-#   - package-ecosystem: "pip"
-#     directory: "/"
-#     schedule:
-#       interval: "daily"
-#     target-branch: "develop"
-#     update_types:
-#       - "semver:major"
-#     labels:
-#       - "do-not-merge"
-#       - "dependencies"
-#     commit-message:
-#       prefix: chore
-#       include: scope
+  - package-ecosystem: pip
+    directory: /benchmark/src/instrumented
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /benchmark/src/reference
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+
+  - package-ecosystem: docker
+    directory: /docs
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /docs
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+
+  - package-ecosystem: pip
+    directory: /examples/event_handler_graphql/src
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+
+  - package-ecosystem: gomod
+    directory: /layer/scripts/layer-balancer
+    commit-message:
+      prefix: chore
+      include: scope
+    schedule:
+      interval: daily
+    groups:
+      layer-balancer:
+        patterns:
+          - "*"

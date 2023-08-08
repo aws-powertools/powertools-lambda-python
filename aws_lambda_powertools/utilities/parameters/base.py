@@ -66,16 +66,16 @@ class BaseProvider(ABC):
     Abstract Base Class for Parameter providers
     """
 
-    store: Dict[Tuple[str, TransformOptions], ExpirableValue]
+    store: Dict[Tuple, ExpirableValue]
 
     def __init__(self):
         """
         Initialize the base provider
         """
 
-        self.store: Dict[Tuple[str, TransformOptions], ExpirableValue] = {}
+        self.store: Dict[Tuple, ExpirableValue] = {}
 
-    def has_not_expired_in_cache(self, key: Tuple[str, TransformOptions]) -> bool:
+    def has_not_expired_in_cache(self, key: Tuple) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
@@ -123,13 +123,13 @@ class BaseProvider(ABC):
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
         value: Optional[Union[str, bytes, dict]] = None
-        key = (name, transform)
+        key = self._build_cache_key(name=name, transform=transform)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value
+            return self.fetch_from_cache(key)
 
         try:
             value = self._get(name, **sdk_options)
@@ -142,7 +142,7 @@ class BaseProvider(ABC):
 
         # NOTE: don't cache None, as they might've been failed transforms and may be corrected
         if value is not None:
-            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+            self.add_to_cache(key=key, value=value, max_age=max_age)
 
         return value
 
@@ -191,13 +191,13 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-        key = (path, transform)
+        key = self._build_cache_key(name=path, transform=transform, is_nested=True)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value  # type: ignore # need to revisit entire typing here
+            return self.fetch_from_cache(key)
 
         try:
             values = self._get_multiple(path, **sdk_options)
@@ -208,7 +208,7 @@ class BaseProvider(ABC):
         if transform:
             values.update(transform_value(values, transform, raise_on_transform_error))
 
-        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
+        self.add_to_cache(key=key, value=values, max_age=max_age)
 
         return values
 
@@ -222,11 +222,38 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
-    def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+    def fetch_from_cache(self, key: Tuple):
+        return self.store[key].value if key in self.store else {}
+
+    def add_to_cache(self, key: Tuple, value: Any, max_age: int):
         if max_age <= 0:
             return
 
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+
+    def _build_cache_key(
+        self,
+        name: str,
+        transform: TransformOptions = None,
+        is_nested: bool = False,
+    ):
+        """Creates cache key for parameters
+
+        Parameters
+        ----------
+        name : str
+            Name of parameter, secret or config
+        transform : TransformOptions, optional
+            Transform method used, by default None
+        is_nested : bool, optional
+            Whether it's a single parameter or multiple nested parameters, by default False
+
+        Returns
+        -------
+        Tuple[str, TransformOptions, bool]
+            Cache key
+        """
+        return (name, transform, is_nested)
 
     @staticmethod
     def _build_boto3_client(

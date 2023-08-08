@@ -41,12 +41,6 @@ from aws_lambda_powertools.utilities.data_classes import (
 from tests.functional.utils import load_event
 
 
-@pytest.fixture
-def json_dump():
-    # our serializers reduce length to save on costs; fixture to replicate separators
-    return lambda obj: json.dumps(obj, separators=(",", ":"))
-
-
 def read_media(file_name: str) -> bytes:
     path = Path(str(Path(__file__).parent.parent.parent.parent) + "/docs/media/" + file_name)
     return path.read_bytes()
@@ -364,6 +358,58 @@ def test_cors_preflight_body_is_empty_not_null():
 
     # THEN there body should be empty strings
     assert result["body"] == ""
+
+
+def test_override_route_compress_parameter():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=False
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request", compress=True)
+    def with_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=False)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then the response is not compressed
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+    assert result["multiValueHeaders"].get("Content-Encoding") is None
+
+
+def test_response_with_compress_enabled():
+    # GIVEN a function
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=True
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request")
+    def route_without_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=True)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then gzip the response and base64 encode as a string
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
 
 
 def test_compress():
@@ -871,17 +917,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -907,17 +953,17 @@ def test_similar_dynamic_routes_with_whitespaces():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested account"

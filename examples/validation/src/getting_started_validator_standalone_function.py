@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import SchemaValidationError, validate
 
 # we can get list of allowed IPs from AWS Parameter Store using Parameters Utility
-# See: https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/parameters/
+# See: https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/
 ALLOWED_IPS = parameters.get_parameter("/lambda-powertools/allowed_ips")
 
 

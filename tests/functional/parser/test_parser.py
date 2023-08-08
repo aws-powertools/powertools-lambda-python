@@ -1,6 +1,7 @@
 import json
 from typing import Dict, Union
 
+import pydantic
 import pytest
 
 from aws_lambda_powertools.utilities.parser import (
@@ -22,7 +23,8 @@ def test_parser_unsupported_event(dummy_schema, invalid_value):
 
 
 @pytest.mark.parametrize(
-    "invalid_envelope,expected", [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)]
+    "invalid_envelope,expected",
+    [(True, ""), (["dummy"], ""), (object, exceptions.InvalidEnvelopeError)],
 )
 def test_parser_invalid_envelope_type(dummy_event, dummy_schema, invalid_envelope, expected):
     @event_parser(model=dummy_schema, envelope=invalid_envelope)
@@ -50,6 +52,27 @@ def test_parser_schema_no_envelope(dummy_event, dummy_schema):
         return event
 
     handle_no_envelope(dummy_event["payload"], LambdaContext())
+
+
+@pytest.mark.usefixtures("pydanticv2_only")
+def test_pydanticv2_validation():
+    class FakeModel(pydantic.BaseModel):
+        region: str
+        event_name: str
+        version: int
+
+        # WHEN using the validator for v2
+        @pydantic.field_validator("version", mode="before")
+        def validate_field(cls, value):
+            return int(value)
+
+    event_raw = {"region": "us-east-1", "event_name": "aws-powertools", "version": "10"}
+    event_parsed = FakeModel(**event_raw)
+
+    # THEN parse the event as expected
+    assert event_parsed.region == event_raw["region"]
+    assert event_parsed.event_name == event_raw["event_name"]
+    assert event_parsed.version == int(event_raw["version"])
 
 
 @pytest.mark.parametrize("invalid_schema", [None, str, bool(), [], (), object])
