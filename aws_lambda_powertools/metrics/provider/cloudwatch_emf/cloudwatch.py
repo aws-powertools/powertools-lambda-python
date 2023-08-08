@@ -26,15 +26,16 @@ logger = logging.getLogger(__name__)
 
 
 class AmazonCloudWatchEMFProvider(BaseProvider):
-    """Base class for metric functionality (namespace, metric, dimension, serialization)
+    """
+    AmazonCloudWatchEMFProvider class (namespace, metric, dimension, serialization)
 
-    MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
+    AmazonCloudWatchEMFProvider creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
     CloudWatch EMF can create up to 100 metrics per EMF object
-    and metrics, dimensions, and namespace created via MetricManager
+    and metrics, dimensions, and namespace created via AmazonCloudWatchEMFProvider
     will adhere to the schema, will be serialized and validated against EMF Schema.
 
-    **Use `aws_lambda_powertools.metrics.metrics.Metrics` or
-    `aws_lambda_powertools.metrics.metric.single_metric` to create EMF metrics.**
+    **Use `aws_lambda_powertools.Metrics` or
+    `aws_lambda_powertools.single_metric` to create EMF metrics.**
 
     Environment variables
     ---------------------
@@ -362,8 +363,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             captures cold start metric, by default False
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
-        default_dimensions: Dict[str, str], optional
-            metric dimensions as key=value that will always be present
+        **kwargs
 
         Raises
         ------

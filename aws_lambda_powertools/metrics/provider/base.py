@@ -209,7 +209,8 @@ class BaseProvider(ABC):
         return decorate
 
     def _add_cold_start_metric(self, context: Any) -> None:
-        """Add cold start metric and function_name dimension
+        """
+        Check if it's cold start and add a metric if yes
 
         Parameters
         ----------

@@ -138,9 +138,6 @@ class Metrics:
             default_dimensions=default_dimensions,
         )
 
-    def _add_cold_start_metric(self, context: Any) -> None:
-        self.provider._add_cold_start_metric(context=context)
-
     def set_default_dimensions(self, **dimensions) -> None:
         self.provider.set_default_dimensions(**dimensions)
         """Persist dimensions across Lambda invocations
