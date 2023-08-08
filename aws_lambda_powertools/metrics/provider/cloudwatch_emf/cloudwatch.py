@@ -11,13 +11,13 @@ from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.provider.base import BaseProvider
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
-from aws_lambda_powertools.metrics.shared import (
+from aws_lambda_powertools.metrics.functions import (
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
 )
+from aws_lambda_powertools.metrics.provider.base import BaseProvider
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
