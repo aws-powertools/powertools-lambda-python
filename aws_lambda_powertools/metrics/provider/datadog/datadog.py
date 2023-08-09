@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 # Check if using datadog layer
 try:
     from datadog_lambda.metric import lambda_metric  # type: ignore
-except ImportError:
-    lambda_metric = None
+except ImportError:  # pragma: no cover
+    lambda_metric = None  # pragma: no cover
 
 DEFAULT_NAMESPACE = "default"
 
@@ -40,7 +40,13 @@ class DatadogProvider(BaseProvider):
 
     """
 
-    def __init__(self, metric_set: List | None = None, namespace: str = DEFAULT_NAMESPACE, flush_to_log: bool = False):
+    def __init__(
+        self,
+        metric_set: List | None = None,
+        namespace: str = DEFAULT_NAMESPACE,
+        flush_to_log: bool = False,
+        default_tags: List | None = None,
+    ):
         """
 
         Parameters
@@ -53,6 +59,7 @@ class DatadogProvider(BaseProvider):
         """
         self.metric_set = metric_set if metric_set is not None else []
         self.namespace: str = namespace
+        self.default_tags = default_tags or []
         # either is true then flush to log
         self.flush_to_log = (os.environ.get("DD_FLUSH_TO_LOG", "").lower() == "true") or flush_to_log
 
@@ -96,12 +103,16 @@ class DatadogProvider(BaseProvider):
         """
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
+
         if tags is None:
             tags = []
+
         if not timestamp:
             timestamp = int(time.time())
-        for k, w in kwargs.items():
-            tags.append(f"{k}:{w}")
+
+        for tag_key, tag_value in kwargs.items():
+            tags.append(f"{tag_key}:{tag_value}")
+
         self.metric_set.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
     def serialize_metric_set(self, metrics: List | None = None) -> List:
@@ -146,7 +157,7 @@ class DatadogProvider(BaseProvider):
                     "m": metric_name,
                     "v": single_metric["v"],
                     "e": single_metric["e"],
-                    "t": single_metric["t"],
+                    "t": single_metric["t"] or list(self.default_tags),
                 },
             )
 
@@ -192,8 +203,8 @@ class DatadogProvider(BaseProvider):
             # submit through datadog extension
             if lambda_metric and self.flush_to_log is False:
                 # use lambda_metric function from datadog package, submit metrics to datadog
-                for metric_item in metrics:
-                    lambda_metric(
+                for metric_item in metrics:  # pragma: no cover
+                    lambda_metric(  # pragma: no cover
                         metric_name=metric_item["m"],
                         value=metric_item["v"],
                         timestamp=metric_item["e"],
@@ -263,9 +274,38 @@ class DatadogProvider(BaseProvider):
             Propagate error received
         """
 
+        default_dimensions = kwargs.get("default_tags")
+
+        if default_dimensions:
+            self.set_default_tags(**default_dimensions)
+
         return super().log_metrics(
             lambda_handler=lambda_handler,
             capture_cold_start_metric=capture_cold_start_metric,
             raise_on_empty_metrics=raise_on_empty_metrics,
             **kwargs,
         )
+
+    def set_default_tags(self, **kwargs) -> None:
+        """Persist dimensions across Lambda invocations
+
+        Parameters
+        ----------
+        dimensions : Dict[str, Any], optional
+            metric dimensions as key=value
+
+        Example
+        -------
+        **Sets some default dimensions that will always be present across metrics and invocations**
+
+            from aws_lambda_powertools import Metrics
+
+            metrics = Metrics(namespace="ServerlessAirline", service="payment")
+            metrics.set_default_dimensions(environment="demo", another="one")
+
+            @metrics.log_metrics()
+            def lambda_handler():
+                return True
+        """
+        for tag_key, tag_value in kwargs.items():
+            self.default_tags.append(f"{tag_key}:{tag_value}")

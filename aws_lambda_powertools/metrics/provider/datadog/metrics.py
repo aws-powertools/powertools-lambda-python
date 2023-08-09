@@ -13,9 +13,7 @@ class DatadogMetrics:
     # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
     # Result: ProductCreated is created twice as we now have 2 different EMF blobs
     _metrics: List = []
-    _default_tags: Dict[str, Any] = {}
-    _metadata: Dict[str, Any] = {}
-    _default_dimensions: Dict[str, Any] = {}
+    _default_tags: List = []
 
     def __init__(
         self,
@@ -56,15 +54,46 @@ class DatadogMetrics:
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
+        default_tags: List | None = None,
     ):
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,
             capture_cold_start_metric=capture_cold_start_metric,
             raise_on_empty_metrics=raise_on_empty_metrics,
+            default_tags=default_tags,
         )
+
+    def set_default_tags(self, **kwargs) -> None:
+        """Persist dimensions across Lambda invocations
+
+        Parameters
+        ----------
+        dimensions : Dict[str, Any], optional
+            metric dimensions as key=value
+
+        Example
+        -------
+        **Sets some default dimensions that will always be present across metrics and invocations**
+
+            from aws_lambda_powertools import Metrics
+
+            metrics = Metrics(namespace="ServerlessAirline", service="payment")
+            metrics.set_default_dimensions(environment="demo", another="one")
+
+            @metrics.log_metrics()
+            def lambda_handler():
+                return True
+        """
+        self.provider.set_default_tags(**kwargs)
+        for tag_key, tag_value in kwargs.items():
+            self.default_tags.append(f"{tag_key}:{tag_value}")
 
     def clear_metrics(self) -> None:
         self.provider.clear_metrics()
+
+    def clear_default_tags(self) -> None:
+        self.provider.default_tags.clear()
+        self.default_tags.clear()
 
     # We now allow customers to bring their own instance
     # of the AmazonCloudWatchEMFProvider provider
