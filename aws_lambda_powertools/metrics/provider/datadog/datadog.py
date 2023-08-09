@@ -6,10 +6,11 @@ import numbers
 import os
 import time
 import warnings
-from typing import Any, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 
-from aws_lambda_powertools.metrics.provider import MetricsBase
-from aws_lambda_powertools.metrics.provider.base.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.provider import BaseProvider
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ except ImportError:
 DEFAULT_NAMESPACE = "default"
 
 
-class DatadogProvider:
+class DatadogProvider(BaseProvider):
     """
     Class for datadog provider. This Class should only be used inside DatadogMetrics
     all datadog metric data will be stored as
@@ -39,7 +40,7 @@ class DatadogProvider:
 
     """
 
-    def __init__(self, namespace: str = DEFAULT_NAMESPACE, flush_to_log: bool = False):
+    def __init__(self, metric_set: List | None = None, namespace: str = DEFAULT_NAMESPACE, flush_to_log: bool = False):
         """
 
         Parameters
@@ -50,19 +51,18 @@ class DatadogProvider:
         flush_to_log: bool
             Flush datadog metrics to log (collect with log forwarder) rather than using datadog extension
         """
-        self.metrics: List = []
+        self.metric_set = metric_set if metric_set is not None else []
         self.namespace: str = namespace
         # either is true then flush to log
         self.flush_to_log = (os.environ.get("DD_FLUSH_TO_LOG", "").lower() == "true") or flush_to_log
-        super().__init__()
 
     #  adding name,value,timestamp,tags
     def add_metric(
         self,
         name: str,
         value: float,
-        timestamp: Optional[int] = None,
-        tags: Optional[List] = None,
+        timestamp: int | None = None,
+        tags: List | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -102,12 +102,41 @@ class DatadogProvider:
             timestamp = int(time.time())
         for k, w in kwargs.items():
             tags.append(f"{k}:{w}")
-        self.metrics.append({"m": name, "v": value, "e": timestamp, "t": tags})
+        self.metric_set.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
-    def serialize(self) -> List:
+    def serialize_metric_set(self, metrics: List | None = None) -> List:
+        """Serializes metrics
+
+        Example
+        -------
+        **Serialize metrics into Datadog format**
+
+            metrics = DatadogMetric()
+            # ...add metrics, dimensions, namespace
+            ret = metrics.serialize_metric_set()
+
+        Returns
+        -------
+        List
+            Serialized metrics following Datadog specification
+
+        Raises
+        ------
+        SchemaValidationError
+            Raised when serialization fail schema validation
+        """
+
+        if metrics is None:  # pragma: no cover
+            metrics = self.metric_set
+
+        if len(metrics) == 0:
+            raise SchemaValidationError("Must contain at least one metric.")
+
         output_list: List = []
 
-        for single_metric in self.metrics:
+        logger.debug({"details": "Serializing metrics", "metrics": metrics})
+
+        for single_metric in metrics:
             if self.namespace != DEFAULT_NAMESPACE:
                 metric_name = f"{self.namespace}.{single_metric['m']}"
             else:
@@ -124,7 +153,16 @@ class DatadogProvider:
         return output_list
 
     # flush serialized data to output
-    def flush(self, metrics: List):
+    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
+        """Manually flushes the metrics. This is normally not necessary,
+        unless you're running on other runtimes besides Lambda, where the @log_metrics
+        decorator already handles things for you.
+
+        Parameters
+        ----------
+        raise_on_empty_metrics : bool, optional
+            raise exception if no metrics are emitted, by default False
+        """
         """
 
         Parameters
@@ -142,120 +180,92 @@ class DatadogProvider:
         SchemaValidationError
             When metric object fails EMF schema validation
         """
-        if len(metrics) == 0:
-            raise SchemaValidationError("Must contain at least one metric.")
-        # submit through datadog extension
-        if lambda_metric and self.flush_to_log is False:
-            # use lambda_metric function from datadog package, submit metrics to datadog
-            for metric_item in metrics:
-                lambda_metric(
-                    metric_name=metric_item["m"],
-                    value=metric_item["v"],
-                    timestamp=metric_item["e"],
-                    tags=metric_item["t"],
-                )
-        else:
-            # dd module not found: flush to log, this format can be recognized via datadog log forwarder
-            # https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
-            for metric_item in metrics:
-                print(json.dumps(metric_item, separators=(",", ":")))
-
-    def clear_metrics(self):
-        self.metrics = []
-
-
-class DatadogMetrics(MetricsBase):
-    """
-    Class for datadog metrics
-
-    Parameters
-    ----------
-    provider: DatadogProvider
-        The datadog provider which will be used to process metrics data
-
-    Example
-    -------
-    **Creates a few metrics and publish at the end of a function execution**
-
-        >>> from aws_lambda_powertools.metrics.provider import DatadogMetrics, DatadogProvider
-        >>>
-        >>> dd_provider = DatadogProvider(namespace="Serverlesspresso")
-        >>> metrics = DatadogMetrics(provider=dd_provider)
-        >>>
-        >>> @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=False)
-        >>> def lambda_handler(event, context):
-        >>>     metrics.add_metric(name="item_sold",value=1,tags=['product:latte', 'order:online'])
-    """
-
-    # `log_metrics` and `_add_cold_start_metric` are directly inherited from `MetricsBase`
-    def __init__(self, provider: DatadogProvider):
-        self.provider = provider
-        super().__init__()
-
-    # drop additional kwargs to keep same experience
-    def add_metric(
-        self,
-        name: str,
-        value: float,
-        timestamp: Optional[int] = None,
-        tags: Optional[List] = None,
-        *args,
-        **kwargs,
-    ):
-        """
-        The add_metrics function that will be used by metrics class.
-
-        Parameters
-        ----------
-        name: str
-            Name/Key for the metrics
-        value: float
-            Value for the metrics
-        timestamp: int
-            Timestamp in int for the metrics, default = time.time()
-        tags: List[str]
-            In format like List["tag:value","tag2:value2"],
-        args: Any
-            extra args will be dropped
-        kwargs: Any
-            extra kwargs will be converted into tags, e.g., add_metrics(sales=sam) -> tags=['sales:sam']
-
-        Examples
-        --------
-            >>> from aws_lambda_powertools.metrics.provider import DatadogMetrics, DatadogProvider
-            >>>
-            >>> metrics = DatadogMetrics(provider=DatadogProvider())
-            >>> metrics.add_metric(
-            >>>     name='coffee_house.order_value',
-            >>>     value=12.45,
-            >>>     tags=['product:latte', 'order:online']
-            >>> )
-        """
-        self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags, **kwargs)
-
-    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        """
-        Manually flushes the metrics. This is normally not necessary,
-        unless you're running on other runtimes besides Lambda, where the @log_metrics
-        decorator already handles things for you.
-
-        Parameters
-        ----------
-        raise_on_empty_metrics: bool
-            raise exception if no metrics are emitted, by default False
-        """
-        metrics = self.provider.serialize()
-        if not metrics and not raise_on_empty_metrics:
+        if not raise_on_empty_metrics and len(self.metric_set) == 0:
             warnings.warn(
                 "No application metrics to publish. The cold-start metric may be published if enabled. "
                 "If application metrics should never be empty, consider using 'raise_on_empty_metrics'",
                 stacklevel=2,
             )
-        else:
-            # will raise on empty metrics
-            self.provider.flush(metrics)
-            self.provider.clear_metrics()
 
-    def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
+        else:
+            metrics = self.serialize_metric_set()
+            # submit through datadog extension
+            if lambda_metric and self.flush_to_log is False:
+                # use lambda_metric function from datadog package, submit metrics to datadog
+                for metric_item in metrics:
+                    lambda_metric(
+                        metric_name=metric_item["m"],
+                        value=metric_item["v"],
+                        timestamp=metric_item["e"],
+                        tags=metric_item["t"],
+                    )
+            else:
+                # dd module not found: flush to log, this format can be recognized via datadog log forwarder
+                # https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
+                for metric_item in metrics:
+                    print(json.dumps(metric_item, separators=(",", ":")))
+
+        self.clear_metrics()
+
+    def clear_metrics(self):
+        logger.debug("Clearing out existing metric set from memory")
+        self.metric_set.clear()
+
+    def add_cold_start_metric(self, context: LambdaContext) -> None:
+        """Add cold start metric and function_name dimension
+
+        Parameters
+        ----------
+        context : Any
+            Lambda context
+        """
         logger.debug("Adding cold start metric and function_name tagging")
-        self.add_metric(name="ColdStart", value=1, function_name=function_name)
+        self.add_metric(name="ColdStart", value=1, function_name=context.function_name)
+
+    def log_metrics(
+        self,
+        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        capture_cold_start_metric: bool = False,
+        raise_on_empty_metrics: bool = False,
+        **kwargs,
+    ):
+        """Decorator to serialize and publish metrics at the end of a function execution.
+
+        Be aware that the log_metrics **does call* the decorated function (e.g. lambda_handler).
+
+        Example
+        -------
+        **Lambda function using tracer and metrics decorators**
+
+            from aws_lambda_powertools import Metrics, Tracer
+
+            metrics = Metrics(service="payment")
+            tracer = Tracer(service="payment")
+
+            @tracer.capture_lambda_handler
+            @metrics.log_metrics
+            def handler(event, context):
+                    ...
+
+        Parameters
+        ----------
+        lambda_handler : Callable[[Any, Any], Any], optional
+            lambda function handler, by default None
+        capture_cold_start_metric : bool, optional
+            captures cold start metric, by default False
+        raise_on_empty_metrics : bool, optional
+            raise exception if no metrics are emitted, by default False
+        **kwargs
+
+        Raises
+        ------
+        e
+            Propagate error received
+        """
+
+        return super().log_metrics(
+            lambda_handler=lambda_handler,
+            capture_cold_start_metric=capture_cold_start_metric,
+            raise_on_empty_metrics=raise_on_empty_metrics,
+            **kwargs,
+        )

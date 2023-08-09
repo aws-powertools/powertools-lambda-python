@@ -1,42 +1,42 @@
 from __future__ import annotations
 
 import datetime
-import functools
 import json
 import logging
 import numbers
 import os
 import warnings
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.base import single_metric
-from aws_lambda_powertools.metrics.provider import MetricsProviderBase
-from aws_lambda_powertools.metrics.provider.base.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf import cold_start
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
-    MetricResolutionError,
-    MetricUnitError,
+from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.functions import (
+    extract_cloudwatch_metric_resolution_value,
+    extract_cloudwatch_metric_unit_value,
 )
+from aws_lambda_powertools.metrics.provider.base import BaseProvider
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
 
-class AmazonCloudWatchEMFProvider(MetricsProviderBase):
-    """Base class for metric functionality (namespace, metric, dimension, serialization)
+class AmazonCloudWatchEMFProvider(BaseProvider):
+    """
+    AmazonCloudWatchEMFProvider creates metrics asynchronously via CloudWatch Embedded Metric Format (EMF).
 
-    MetricManager creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
     CloudWatch EMF can create up to 100 metrics per EMF object
-    and metrics, dimensions, and namespace created via MetricManager
+    and metrics, dimensions, and namespace created via AmazonCloudWatchEMFProvider
     will adhere to the schema, will be serialized and validated against EMF Schema.
 
-    **Use `aws_lambda_powertools.metrics.metrics.Metrics` or
-    `aws_lambda_powertools.metrics.metric.single_metric` to create EMF metrics.**
+    **Use `aws_lambda_powertools.Metrics` or
+    `aws_lambda_powertools.single_metric` to create EMF metrics.**
 
     Environment variables
     ---------------------
@@ -123,8 +123,15 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         if not isinstance(value, numbers.Number):
             raise MetricValueError(f"{value} is not a valid number")
 
-        unit = self._extract_metric_unit_value(unit=unit)
-        resolution = self._extract_metric_resolution_value(resolution=resolution)
+        unit = extract_cloudwatch_metric_unit_value(
+            metric_units=self._metric_units,
+            metric_valid_options=self._metric_unit_valid_options,
+            unit=unit,
+        )
+        resolution = extract_cloudwatch_metric_resolution_value(
+            metric_resolutions=self._metric_resolutions,
+            resolution=resolution,
+        )
         metric: Dict = self.metric_set.get(name, defaultdict(list))
         metric["Unit"] = unit
         metric["StorageResolution"] = resolution
@@ -146,7 +153,7 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         metrics: Dict | None = None,
         dimensions: Dict | None = None,
         metadata: Dict | None = None,
-    ) -> Dict:
+    ) -> CloudWatchEMFOutput:
         """Serializes metric and dimensions set
 
         Parameters
@@ -232,7 +239,8 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
                     },
                 ],
             },
-            **dimensions,  # "service": "test_service"
+            # NOTE: Mypy doesn't recognize splats '** syntax' in TypedDict
+            **dimensions,  # type: ignore[misc] # "service": "test_service"
             **metadata,  # "username": "test"
             **metric_names_and_values,  # "single_metric": 1.0
         }
@@ -329,7 +337,7 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_dimensions: Dict[str, str] | None = None,
+        **kwargs,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -357,8 +365,7 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
             captures cold start metric, by default False
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
-        default_dimensions: Dict[str, str], optional
-            metric dimensions as key=value that will always be present
+        **kwargs
 
         Raises
         ------
@@ -366,94 +373,19 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
             Propagate error received
         """
 
-        # If handler is None we've been called with parameters
-        # Return a partial function with args filled
-        if lambda_handler is None:
-            logger.debug("Decorator called with parameters")
-            return functools.partial(
-                self.log_metrics,
-                capture_cold_start_metric=capture_cold_start_metric,
-                raise_on_empty_metrics=raise_on_empty_metrics,
-                default_dimensions=default_dimensions,
-            )
+        default_dimensions = kwargs.get("default_dimensions")
 
-        @functools.wraps(lambda_handler)
-        def decorate(event, context):
-            try:
-                if default_dimensions:
-                    self.set_default_dimensions(**default_dimensions)
-                response = lambda_handler(event, context)
-                if capture_cold_start_metric:
-                    self._add_cold_start_metric(context=context)
-            finally:
-                self.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
+        if default_dimensions:
+            self.set_default_dimensions(**default_dimensions)
 
-            return response
-
-        return decorate
-
-    def _extract_metric_resolution_value(self, resolution: Union[int, MetricResolution]) -> int:
-        """Return metric value from metric unit whether that's str or MetricResolution enum
-
-        Parameters
-        ----------
-        unit : Union[int, MetricResolution]
-            Metric resolution
-
-        Returns
-        -------
-        int
-            Metric resolution value must be 1 or 60
-
-        Raises
-        ------
-        MetricResolutionError
-            When metric resolution is not supported by CloudWatch
-        """
-        if isinstance(resolution, MetricResolution):
-            return resolution.value
-
-        if isinstance(resolution, int) and resolution in self._metric_resolutions:
-            return resolution
-
-        raise MetricResolutionError(
-            f"Invalid metric resolution '{resolution}', expected either option: {self._metric_resolutions}",  # noqa: E501
+        return super().log_metrics(
+            lambda_handler=lambda_handler,
+            capture_cold_start_metric=capture_cold_start_metric,
+            raise_on_empty_metrics=raise_on_empty_metrics,
+            **kwargs,
         )
 
-    def _extract_metric_unit_value(self, unit: Union[str, MetricUnit]) -> str:
-        """Return metric value from metric unit whether that's str or MetricUnit enum
-
-        Parameters
-        ----------
-        unit : Union[str, MetricUnit]
-            Metric unit
-
-        Returns
-        -------
-        str
-            Metric unit value (e.g. "Seconds", "Count/Second")
-
-        Raises
-        ------
-        MetricUnitError
-            When metric unit is not supported by CloudWatch
-        """
-
-        if isinstance(unit, str):
-            if unit in self._metric_unit_valid_options:
-                unit = MetricUnit[unit].value
-
-            if unit not in self._metric_units:
-                raise MetricUnitError(
-                    f"Invalid metric unit '{unit}', expected either option: {self._metric_unit_valid_options}",
-                )
-
-        if isinstance(unit, MetricUnit):
-            unit = unit.value
-
-        return unit
-
-    def _add_cold_start_metric(self, context: Any) -> None:
+    def add_cold_start_metric(self, context: LambdaContext) -> None:
         """Add cold start metric and function_name dimension
 
         Parameters
@@ -461,13 +393,11 @@ class AmazonCloudWatchEMFProvider(MetricsProviderBase):
         context : Any
             Lambda context
         """
-        if cold_start.is_cold_start:
-            logger.debug("Adding cold start metric and function_name dimension")
-            with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
-                metric.add_dimension(name="function_name", value=context.function_name)
-                if self.service:
-                    metric.add_dimension(name="service", value=str(self.service))
-                cold_start.is_cold_start = False
+        logger.debug("Adding cold start metric and function_name dimension")
+        with single_metric(name="ColdStart", unit=MetricUnit.Count, value=1, namespace=self.namespace) as metric:
+            metric.add_dimension(name="function_name", value=context.function_name)
+            if self.service:
+                metric.add_dimension(name="service", value=str(self.service))
 
     def set_default_dimensions(self, **dimensions) -> None:
         """Persist dimensions across Lambda invocations

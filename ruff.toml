@@ -35,6 +35,7 @@ ignore = [
     "PLW0603", #https://beta.ruff.rs/docs/rules/global-statement/
     "B904", # raise-without-from-inside-except - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
+    "PYI024"
     ]
 
 # Exclude files and directories
