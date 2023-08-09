@@ -11,104 +11,88 @@ from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_f
 from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics, DatadogProvider
 
 
-def test_datadog_coldstart(capsys, namespace):
+def test_datadog_coldstart(capsys):
     reset_cold_start_flag()
-    dd_provider = DatadogProvider(namespace=namespace, flush_to_log=True)
+
+    # GIVEN DatadogMetrics is initialized
+    dd_provider = DatadogProvider(flush_to_log=True)
     metrics = DatadogMetrics(provider=dd_provider)
 
     LambdaContext = namedtuple("LambdaContext", "function_name")
 
-    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    # WHEN log_metrics is used with capture_cold_start_metric
+    @metrics.log_metrics(capture_cold_start_metric=True)
     def lambda_handler(event, context):
         metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
 
     lambda_handler({}, LambdaContext("example_fn2"))
     logs = capsys.readouterr().out.strip()
+
+    # THEN ColdStart metric and function_name and service dimension should be logged
     assert "ColdStart" in logs
+    assert "example_fn2" in logs
 
 
-def test_datadog_write_to_log_with_env_variable(capsys, namespace):
+def test_datadog_write_to_log_with_env_variable(capsys):
+    # GIVEN DD_FLUSH_TO_LOG env is configured
     os.environ["DD_FLUSH_TO_LOG"] = "True"
-    metrics = DatadogMetrics(namespace=namespace)
+    metrics = DatadogMetrics()
+
+    # WHEN we add a metric
     metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
     metrics.flush_metrics()
     logs = capture_metrics_output(capsys)
+
+    # THEN metrics is flushed to log
     logs["e"] = ""
-    assert logs == json.loads('{"m":"test_namespace.item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
+    assert logs == json.loads('{"m":"item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
 
 
-def test_datadog_with_invalid_value(capsys, namespace):
-    dd_provider = DatadogProvider(namespace=namespace)
-    metrics = DatadogMetrics(provider=dd_provider)
+def test_datadog_with_invalid_value():
+    # GIVEN DatadogMetrics is initialized
+    metrics = DatadogMetrics()
 
+    # WHEN we pass an incorrect metric value (non-numeric)
+    # WHEN we attempt to serialize a valid Datadog metric
+    # THEN it should fail validation and raise MetricValueError
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
         metrics.add_metric(name="item_sold", value="a", tags=["product:latte", "order:online"])
 
 
-def test_datadog_with_namespace(capsys, namespace):
-    metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_datadog_raise_on_empty():
+    # GIVEN DatadogMetrics is initialized
+    metrics = DatadogMetrics()
 
     LambdaContext = namedtuple("LambdaContext", "function_name")
 
-    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
-    def lambda_handler(event, context):
-        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
-
-    lambda_handler({}, LambdaContext("example_fn"))
-    logs = capsys.readouterr().out.strip()
-    assert namespace in logs
-
-
-def test_datadog_raise_on_empty(namespace):
-    dd_provider = DatadogProvider(namespace=namespace, flush_to_log=True)
-    metrics = DatadogMetrics(provider=dd_provider)
-
-    LambdaContext = namedtuple("LambdaContext", "function_name")
-
-    @metrics.log_metrics(capture_cold_start_metric=False, raise_on_empty_metrics=True)
+    # WHEN we set raise_on_empty_metrics to True
+    @metrics.log_metrics(raise_on_empty_metrics=True)
     def lambda_handler(event, context):
         pass
 
+    # THEN it should fail with no metric serialized
     with pytest.raises(SchemaValidationError, match="Must contain at least one metric."):
         lambda_handler({}, LambdaContext("example_fn"))
 
 
-def test_datadog_args(capsys, namespace):
-    dd_provider = DatadogProvider(namespace=namespace, flush_to_log=True)
-    metrics = DatadogMetrics(provider=dd_provider)
+def test_datadog_tags_using_kwargs(capsys):
+    # GIVEN DatadogMetrics is initialized
+    metrics = DatadogMetrics()
+
+    # WHEN we add tags using kwargs
     metrics.add_metric("order_valve", 12.45, sales="sam")
     metrics.flush_metrics()
     logs = capsys.readouterr().out.strip()
     log_dict = json.loads(logs)
     tag_list = log_dict.get("t")
+
+    # THEN tags must be present
     assert "sales:sam" in tag_list
 
 
-def test_datadog_kwargs(capsys, namespace):
-    dd_provider = DatadogProvider(namespace=namespace, flush_to_log=True)
-    metrics = DatadogMetrics(provider=dd_provider)
-    metrics.add_metric(
-        name="order_valve",
-        value=12.45,
-        tags=["test:kwargs"],
-        str="str",
-        int=123,
-        float=45.6,
-        dict={"type": "termination identified"},
-    )
-    metrics.flush_metrics()
-    logs = capsys.readouterr().out.strip()
-    log_dict = json.loads(logs)
-    tag_list = log_dict.get("t")
-    assert "test:kwargs" in tag_list
-    assert "str:str" in tag_list
-    assert "int:123" in tag_list
-    assert "float:45.6" in tag_list
-
-
-def test_metrics_clear_metrics_after_invocation(metric, service, namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_metrics_clear_metrics_after_invocation(metric):
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(flush_to_log=True)
     my_metrics.add_metric(**metric)
 
     # WHEN log_metrics is used to flush metrics from memory
@@ -122,9 +106,9 @@ def test_metrics_clear_metrics_after_invocation(metric, service, namespace):
     assert my_metrics.metric_set == []
 
 
-def test_metrics_decorator_with_metrics_warning(dimensions, namespace, service):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_metrics_decorator_with_metrics_warning():
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(flush_to_log=True)
 
     # WHEN using the log_metrics decorator and no metrics have been added
     @my_metrics.log_metrics
@@ -143,35 +127,56 @@ def test_metrics_decorator_with_metrics_warning(dimensions, namespace, service):
 
 
 def test_metrics_with_default_namespace(capsys, namespace):
-    # GIVEN Metrics is initialized
-    dd_provider = DatadogProvider(flush_to_log=True)
-    metrics = DatadogMetrics(provider=dd_provider)
+    # GIVEN DatadogMetrics is initialized with default namespace
+    metrics = DatadogMetrics(flush_to_log=True)
 
     LambdaContext = namedtuple("LambdaContext", "function_name")
 
-    @metrics.log_metrics(capture_cold_start_metric=True, raise_on_empty_metrics=True)
+    # WHEN we add metrics
+    @metrics.log_metrics
     def lambda_handler(event, context):
         metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
 
     lambda_handler({}, LambdaContext("example_fn2"))
     logs = capsys.readouterr().out.strip()
+
+    # THEN default namespace must be assumed
     assert namespace not in logs
 
 
-def test_serialize_metrics(metric, namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_datadog_with_non_default_namespace(capsys, namespace):
+    # GIVEN DatadogMetrics is initialized with a non-default namespace
+    metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+
+    LambdaContext = namedtuple("LambdaContext", "function_name")
+
+    # WHEN log_metrics is used
+    @metrics.log_metrics
+    def lambda_handler(event, context):
+        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+
+    lambda_handler({}, LambdaContext("example_fn"))
+    logs = capsys.readouterr().out.strip()
+
+    # THEN namespace must be present in logs
+    assert namespace in logs
+
+
+def test_serialize_metrics(metric):
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(flush_to_log=True)
     my_metrics.add_metric(**metric)
 
+    # WHEN we serialize metrics
     my_metrics.serialize_metric_set()
 
     # THEN metric set should be empty after function has been run
     assert my_metrics.metric_set[0]["m"] == "single_metric"
 
 
-def test_clear_metrics(metric, namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_clear_metrics(metric):
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(flush_to_log=True)
     my_metrics.add_metric(**metric)
     my_metrics.clear_metrics()
 
@@ -180,27 +185,32 @@ def test_clear_metrics(metric, namespace):
 
 
 def test_get_namespace_property(namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(namespace=namespace)
 
+    # WHEN we try to access the namespace property
+    # THEN namespace property must be present
     assert my_metrics.namespace == namespace
 
 
 def test_set_namespace_property(namespace):
-    # GIVEN Metrics is initialized
+    # GIVEN DatadogMetrics is initialized
     my_metrics = DatadogMetrics()
+
+    # WHEN we set the namespace property after ther initialization
     my_metrics.namespace = namespace
 
+    # THEN namespace property must be present
     assert my_metrics.namespace == namespace
 
 
-def test_persist_default_tags(capsys, namespace):
-    # GIVEN Metrics is initialized and we persist a set of default dimensions
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_persist_default_tags(capsys):
+    # GIVEN DatadogMetrics is initialized and we persist a set of default tags
+    my_metrics = DatadogMetrics(flush_to_log=True)
     my_metrics.set_default_tags(environment="test", log_group="/lambda/test")
 
     # WHEN we utilize log_metrics to serialize
-    # and flush metrics and clear all metrics and dimensions from memory
+    # and flush metrics and clear all metrics and tags from memory
     # at the end of a function execution
     @my_metrics.log_metrics
     def lambda_handler(evt, ctx):
@@ -212,18 +222,18 @@ def test_persist_default_tags(capsys, namespace):
     lambda_handler({}, {})
     second_invocation = capsys.readouterr().out.strip()
 
-    # THEN we should have default dimensions in both outputs
+    # THEN we should have default tags in both outputs
     assert "environment" in first_invocation
     assert "environment" in second_invocation
 
 
-def test_log_metrics_with_default_tags(capsys, namespace):
-    # GIVEN Metrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+def test_log_metrics_with_default_tags(capsys):
+    # GIVEN DatadogMetrics is initialized and we persist a set of default tags
+    my_metrics = DatadogMetrics(flush_to_log=True)
     default_tags = {"environment": "test", "log_group": "/lambda/test"}
 
     # WHEN we utilize log_metrics with default dimensions to serialize
-    # and flush metrics and clear all metrics and dimensions from memory
+    # and flush metrics and clear all metrics and tags from memory
     # at the end of a function execution
     @my_metrics.log_metrics(default_tags=default_tags)
     def lambda_handler(evt, ctx):
@@ -235,18 +245,18 @@ def test_log_metrics_with_default_tags(capsys, namespace):
     lambda_handler({}, {})
     second_invocation = capsys.readouterr().out.strip()
 
-    # THEN we should have default dimensions in both outputs
+    # THEN we should have default tags in both outputs
     assert "environment" in first_invocation
     assert "environment" in second_invocation
 
 
-def test_clear_default_tags(namespace):
-    # GIVEN Metrics is initialized and we persist a set of default dimensions
-    my_metrics = DatadogMetrics(namespace=namespace)
+def test_clear_default_tags():
+    # GIVEN DatadogMetrics is initialized and we persist a set of default tags
+    my_metrics = DatadogMetrics()
     my_metrics.set_default_tags(environment="test", log_group="/lambda/test")
 
-    # WHEN they are removed via clear_default_dimensions method
+    # WHEN they are removed via clear_default_tags method
     my_metrics.clear_default_tags()
 
-    # THEN there should be no default dimensions
+    # THEN there should be no default tags
     assert not my_metrics.default_tags
