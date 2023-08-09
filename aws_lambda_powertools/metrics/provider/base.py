@@ -2,21 +2,20 @@ from __future__ import annotations
 
 import functools
 import logging
+from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
-from typing_extensions import Protocol
+from aws_lambda_powertools.metrics.provider import cold_start
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
-is_cold_start = True
 
-
-class MetricsProviderBase(Protocol):
+class BaseProvider(ABC):
     """
-    Class for metric provider interface.
+    Interface to create a metrics provider.
 
-    This class serves as an interface for creating your own metric provider. Inherit from this class
-    and implement the required methods to define your specific metric provider.
+    BaseProvider implements `log_metrics` decorator for every provider as a value add feature.
 
     Usage:
         1. Inherit from this class.
@@ -24,6 +23,7 @@ class MetricsProviderBase(Protocol):
         3. Customize the behavior and functionality of the metric provider in your subclass.
     """
 
+    @abstractmethod
     def add_metric(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method for adding a metric.
@@ -49,6 +49,7 @@ class MetricsProviderBase(Protocol):
         """
         raise NotImplementedError
 
+    @abstractmethod
     def serialize_metric_set(self, *args: Any, **kwargs: Any) -> Any:
         """
         Abstract method for serialize a metric.
@@ -74,7 +75,7 @@ class MetricsProviderBase(Protocol):
         """
         raise NotImplementedError
 
-    # flush serialized data to output, or send to API directly
+    @abstractmethod
     def flush_metrics(self, *args: Any, **kwargs) -> Any:
         """
         Abstract method for flushing a metric.
@@ -95,20 +96,31 @@ class MetricsProviderBase(Protocol):
         """
         raise NotImplementedError
 
-
-class MetricsBase(Protocol):
-    """
-    Class for metric template.
-
-    This class serves as a template for creating your own metric class. Inherit from this class
-    and implement the necessary methods to define your specific metric.
-
-    NOTE: need to improve this docstring
-    """
-
-    def add_metric(self, *args, **kwargs):
+    @abstractmethod
+    def clear_metrics(self, *args: Any, **kwargs) -> None:
         """
-        Abstract method for adding a metric.
+        Abstract method for clear metric instance.
+
+        This method must be implemented in subclasses to clear the metric instance
+
+        Parameters
+        ----------
+        *args:
+            Positional arguments.
+        *kwargs:
+            Keyword arguments.
+
+        Raises
+        ----------
+        NotImplementedError
+            This method must be implemented in subclasses.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_cold_start_metric(self, context: LambdaContext) -> Any:
+        """
+        Abstract method for clear metric instance.
 
         This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
 
@@ -119,40 +131,10 @@ class MetricsBase(Protocol):
         *kwargs:
             Keyword arguments.
 
-        Returns
-        ----------
-        Dict
-            A combined metrics dictionary.
-
         Raises
         ----------
         NotImplementedError
             This method must be implemented in subclasses.
-        """
-        raise NotImplementedError
-
-    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
-        """Manually flushes the metrics. This is normally not necessary,
-        unless you're running on other runtimes besides Lambda, where the @log_metrics
-        decorator already handles things for you.
-
-        Parameters
-        ----------
-        raise_on_empty_metrics : bool, optional
-            raise exception if no metrics are emitted, by default False
-        """
-        raise NotImplementedError
-
-    def add_cold_start_metric(self, metric_name: str, function_name: str) -> None:
-        """
-        Add a cold start metric for a specific function.
-
-        Parameters
-        ----------
-        metric_name: str
-            The name of the cold start metric to add.
-        function_name: str
-            The name of the function associated with the cold start metric.
         """
         raise NotImplementedError
 
@@ -161,6 +143,7 @@ class MetricsBase(Protocol):
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
+        **kwargs,
     ):
         """Decorator to serialize and publish metrics at the end of a function execution.
 
@@ -197,6 +180,8 @@ class MetricsBase(Protocol):
             Propagate error received
         """
 
+        default_dimensions = kwargs.get("default_dimensions")
+
         # If handler is None we've been called with parameters
         # Return a partial function with args filled
         if lambda_handler is None:
@@ -205,6 +190,7 @@ class MetricsBase(Protocol):
                 self.log_metrics,
                 capture_cold_start_metric=capture_cold_start_metric,
                 raise_on_empty_metrics=raise_on_empty_metrics,
+                default_dimensions=default_dimensions,
             )
 
         @functools.wraps(lambda_handler)
@@ -221,24 +207,23 @@ class MetricsBase(Protocol):
         return decorate
 
     def _add_cold_start_metric(self, context: Any) -> None:
-        """Add cold start metric and function_name dimension
+        """
+        Add cold start metric
 
         Parameters
         ----------
         context : Any
             Lambda context
         """
-        global is_cold_start
-        if not is_cold_start:
+        if not cold_start.is_cold_start:
             return
 
         logger.debug("Adding cold start metric and function_name dimension")
-        self.add_cold_start_metric(metric_name="ColdStart", function_name=context.function_name)
+        self.add_cold_start_metric(context=context)
 
-        is_cold_start = False
+        cold_start.is_cold_start = False
 
 
 def reset_cold_start_flag_provider():
-    global is_cold_start
-    if not is_cold_start:
-        is_cold_start = True
+    if not cold_start.is_cold_start:
+        cold_start.is_cold_start = True
