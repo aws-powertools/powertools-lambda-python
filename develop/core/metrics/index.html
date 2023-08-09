@@ -641,6 +641,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -696,8 +703,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    Environment variables
+  <a href="#setting-environment-variables" class="md-nav__link">
+    Setting environment variables
   </a>
   
 </li>
@@ -1200,6 +1207,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1255,8 +1269,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    Environment variables
+  <a href="#setting-environment-variables" class="md-nav__link">
+    Setting environment variables
   </a>
   
 </li>
@@ -1899,6 +1913,27 @@
 <summary>Info</summary>
 <p>We do not emit 0 as a value for ColdStart metric for cost reasons. <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2C+triage&amp;template=feature_request.md&amp;title=" target="_blank">Let us know</a> if you'd prefer a flag to override it.</p>
 </details>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>The following environment variable is available to configure Metrics at a global scope:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Environment variable</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Namespace Name</strong></td>
+<td>Sets namespace used for metrics.</td>
+<td><code>POWERTOOLS_METRICS_NAMESPACE</code></td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>POWERTOOLS_METRICS_NAMESPACE</code> is also available on a per-instance basis with the <code>namespace</code> parameter, which will consequently override the environment variable value.</p>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="adding-metadata">Adding metadata<a class="headerlink" href="#adding-metadata" title="Permanent link">&para;</a></h3>
 <p>You can add high-cardinality data as part of your Metrics log with <code>add_metadata</code> method. This is useful when you want to search highly contextual information along with your metrics in your logs.</p>
@@ -2304,7 +2339,7 @@
 <p><strong>On 2</strong>, you can use <code>EphemeralMetrics</code> to create an additional EMF JSON Blob from your application metric (<code>SuccessfulBooking</code>). This ensures that <code>IntegrationLatency</code> operational metric data points aren't tied to any dynamic dimension values like <code>tenant_id</code>.</p>
 <p>That is why <code>Metrics</code> shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate <code>Metrics</code> in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.</p>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
-<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<h3 id="setting-environment-variables">Setting environment variables<a class="headerlink" href="#setting-environment-variables" title="Permanent link">&para;</a></h3>
 <details class="tip" open="open">
 <summary>Tip</summary>
 <p>Ignore this section, if:</p>
@@ -2510,7 +2545,7 @@
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-10
     
   </small>
 </div>

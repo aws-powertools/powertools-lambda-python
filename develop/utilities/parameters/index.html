@@ -691,6 +691,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1203,6 +1210,13 @@
           <li class="md-nav__item">
   <a href="#fetching-app-configurations" class="md-nav__link">
     Fetching app configurations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
   </a>
   
 </li>
@@ -1768,6 +1782,33 @@
 </div>
 </div>
 </div>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>The following environment variables are available to configure the parameter utility at a global scope:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Environment variable</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Max Age</strong></td>
+<td>Adjusts for how long values are kept in cache (in seconds).</td>
+<td><code>POWERTOOLS_PARAMETERS_MAX_AGE</code></td>
+<td><code>5</code></td>
+</tr>
+<tr>
+<td><strong>Debug Sample Rate</strong></td>
+<td>Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store.</td>
+<td><code>POWERTOOLS_PARAMETERS_SSM_DECRYPT</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>You can also use <a href="#adjusting-cache-ttl"><code>POWERTOOLS_PARAMETERS_MAX_AGE</code></a> through the <code>max_age</code> parameter and <a href="#ssmprovider"><code>POWERTOOLS_PARAMETERS_SSM_DECRYPT</code></a> through the <code>decrypt</code> parameter to override the environment variable values.</p>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="adjusting-cache-ttl">Adjusting cache TTL<a class="headerlink" href="#adjusting-cache-ttl" title="Permanent link">&para;</a></h3>
 <details class="tip" open="open">
@@ -4116,7 +4157,7 @@ object named <code>get_parameter_mock</code>.</p>
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-10
     
   </small>
 </div>

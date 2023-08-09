@@ -694,6 +694,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1471,6 +1478,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1746,6 +1760,7 @@
 </tr>
 </tbody>
 </table>
+<p>There are some <a href="#environment-variables">other environment variables</a> which can be set to modify Logger's settings at a global scope.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">AWS Serverless Application Model (SAM) example</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -2778,6 +2793,39 @@
 </div>
 </div>
 </div>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>The following environment variables are available to configure Logger at a global scope:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Environment variable</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Event Logging</strong></td>
+<td>Whether to log the incoming event.</td>
+<td><code>POWERTOOLS_LOGGER_LOG_EVENT</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><strong>Debug Sample Rate</strong></td>
+<td>Sets the debug log sampling.</td>
+<td><code>POWERTOOLS_LOGGER_SAMPLE_RATE</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><strong>Disable Deduplication</strong></td>
+<td>Disables log deduplication filter protection to use Pytest Live Log feature.</td>
+<td><code>POWERTOOLS_LOG_DEDUPLICATION_DISABLED</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p><a href="#logging-incoming-event"><code>POWERTOOLS_LOGGER_LOG_EVENT</code></a> can also be set on a per-method basis, and <a href="#sampling-debug-logs"><code>POWERTOOLS_LOGGER_SAMPLE_RATE</code></a> on a per-instance basis. These parameter values will override the environment variable value.</p>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="built-in-correlation-id-expressions">Built-in Correlation ID expressions<a class="headerlink" href="#built-in-correlation-id-expressions" title="Permanent link">&para;</a></h3>
 <p>You can use any of the following built-in JMESPath expressions as part of <a href="#setting-a-correlation-id">inject_lambda_context decorator</a>.</p>
@@ -4103,7 +4151,7 @@ for the given name and level to the logging module. By default, this logs all bo
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-10
     
   </small>
 </div>

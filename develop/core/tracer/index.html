@@ -593,6 +593,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1168,6 +1175,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1641,6 +1655,39 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 </div>
 </div>
 </div>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>The following environment variables are available to configure Tracer at a global scope:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Environment variable</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Disable Tracing</strong></td>
+<td>Explicitly disables all tracing.</td>
+<td><code>POWERTOOLS_TRACE_DISABLED</code></td>
+<td><code>false</code></td>
+</tr>
+<tr>
+<td><strong>Response Capture</strong></td>
+<td>Captures Lambda or method return as metadata.</td>
+<td><code>POWERTOOLS_TRACER_CAPTURE_RESPONSE</code></td>
+<td><code>true</code></td>
+</tr>
+<tr>
+<td><strong>Exception Capture</strong></td>
+<td>Captures Lambda or method exception as metadata.</td>
+<td><code>POWERTOOLS_TRACER_CAPTURE_ERROR</code></td>
+<td><code>true</code></td>
+</tr>
+</tbody>
+</table>
+<p>Both <a href="#disabling-response-auto-capture"><code>POWERTOOLS_TRACER_CAPTURE_RESPONSE</code></a> and <a href="#disabling-exception-auto-capture"><code>POWERTOOLS_TRACER_CAPTURE_ERROR</code></a> can be set on a per-method basis, consequently overriding the environment variable value.</p>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <h3 id="patching-modules">Patching modules<a class="headerlink" href="#patching-modules" title="Permanent link">&para;</a></h3>
 <p>Tracer automatically patches all <a href="https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python-patching.html" target="_blank">supported libraries by X-Ray</a> during initialization, by default. Underneath, AWS X-Ray SDK checks whether a supported library has been imported before patching.</p>
@@ -2168,7 +2215,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
   <small>
     
       Last update:
-      2023-07-28
+      2023-08-10
     
   </small>
 </div>

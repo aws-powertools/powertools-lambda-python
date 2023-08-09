@@ -817,6 +817,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1087,6 +1094,13 @@
           <li class="md-nav__item">
   <a href="#middleware-with-params" class="md-nav__link">
     Middleware with params
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-variables" class="md-nav__link">
+    Environment variables
   </a>
   
 </li>
@@ -1585,6 +1599,27 @@
 </div>
 </div>
 </div>
+<h3 id="environment-variables">Environment variables<a class="headerlink" href="#environment-variables" title="Permanent link">&para;</a></h3>
+<p>The following environment variable is available to configure the middleware factory at a global scope:</p>
+<table>
+<thead>
+<tr>
+<th>Setting</th>
+<th>Description</th>
+<th>Environment variable</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Middleware Trace</strong></td>
+<td>Creates sub-segment for each custom middleware.</td>
+<td><code>POWERTOOLS_TRACE_MIDDLEWARES</code></td>
+<td><code>false</code></td>
+</tr>
+</tbody>
+</table>
+<p>You can also use <a href="#tracing-middleware-execution"><code>POWERTOOLS_TRACE_MIDDLEWARES</code></a> on a per-method basis, which will consequently override the environment variable value.</p>
 <h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
 <p>For advanced use cases, you can instantiate <a href="../../core/tracer/" target="_blank">Tracer</a> inside your middleware, and add annotations as well as metadata for additional operational insights.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">advanced_middleware_tracer_function.py</label><label for="__tabbed_4_2">advanced_middleware_tracer_payload.json</label></div>
@@ -2552,7 +2587,7 @@
   <small>
     
       Last update:
-      2023-08-02
+      2023-08-10
     
   </small>
 </div>
