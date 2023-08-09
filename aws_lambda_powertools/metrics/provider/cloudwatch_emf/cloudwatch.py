@@ -18,6 +18,7 @@ from aws_lambda_powertools.metrics.functions import (
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
@@ -153,7 +154,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         metrics: Dict | None = None,
         dimensions: Dict | None = None,
         metadata: Dict | None = None,
-    ) -> Dict:
+    ) -> CloudWatchEMFOutput:
         """Serializes metric and dimensions set
 
         Parameters
@@ -239,7 +240,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                     },
                 ],
             },
-            **dimensions,  # "service": "test_service"
+            # NOTE: Mypy doesn't recognize splats '** syntax' in TypedDict
+            **dimensions,  # type: ignore[misc] # "service": "test_service"
             **metadata,  # "username": "test"
             **metric_names_and_values,  # "single_metric": 1.0
         }

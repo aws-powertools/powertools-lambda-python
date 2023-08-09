@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import warnings
 from collections import namedtuple
@@ -16,16 +18,23 @@ from aws_lambda_powertools.metrics import (
     SchemaValidationError,
     single_metric,
 )
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
-from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
+    AmazonCloudWatchEMFProvider,
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
+    MAX_DIMENSIONS,
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
+    CloudWatchEMFOutput,
+)
 
 
 def serialize_metrics(
     metrics: List[Dict],
     dimensions: List[Dict],
     namespace: str,
-    metadatas: List[Dict] = None,
-) -> Dict:
+    metadatas: List[Dict] | None = None,
+) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a list of metrics, dimensions"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     for dimension in dimensions:
@@ -42,7 +51,12 @@ def serialize_metrics(
         return my_metrics.serialize_metric_set()
 
 
-def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metadata: Dict = None) -> Dict:
+def serialize_single_metric(
+    metric: Dict,
+    dimension: Dict,
+    namespace: str,
+    metadata: Dict | None = None,
+) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     my_metrics.add_metric(**metric)
@@ -64,7 +78,7 @@ def capture_metrics_output(capsys):
     return json.loads(capsys.readouterr().out.strip())
 
 
-def capture_metrics_output_multiple_emf_objects(capsys):
+def capture_metrics_output_multiple_emf_objects(capsys) -> List[CloudWatchEMFOutput]:
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 

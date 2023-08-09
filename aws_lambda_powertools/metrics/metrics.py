@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, Optional
 
 from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
 
 
 class Metrics:
@@ -115,7 +116,7 @@ class Metrics:
         metrics: Dict | None = None,
         dimensions: Dict | None = None,
         metadata: Dict | None = None,
-    ) -> Dict:
+    ) -> CloudWatchEMFOutput:
         return self.provider.serialize_metric_set(metrics=metrics, dimensions=dimensions, metadata=metadata)
 
     def add_metadata(self, key: str, value: Any) -> None:
