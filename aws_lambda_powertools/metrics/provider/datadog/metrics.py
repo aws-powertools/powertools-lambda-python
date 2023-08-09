@@ -3,10 +3,50 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Optional
 
-from aws_lambda_powertools.metrics.provider.datadog.datadog import DEFAULT_NAMESPACE, DatadogProvider
+from aws_lambda_powertools.metrics.provider.datadog.datadog import DatadogProvider
 
 
 class DatadogMetrics:
+    """
+    DatadogProvider creates metrics asynchronously via Datadog extension or exporter.
+
+    **Use `aws_lambda_powertools.DatadogMetrics` to create and metrics to Datadog.**
+
+    Example
+    -------
+    **Creates a few metrics and publish at the end of a function execution**
+
+        from aws_lambda_powertools import DatadogMetrics
+
+        metrics = DatadogMetrics(namespace="ServerlessAirline")
+
+        @metrics.log_metrics(capture_cold_start_metric=True)
+        def lambda_handler():
+            metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+            return True
+
+    Environment variables
+    ---------------------
+    POWERTOOLS_METRICS_NAMESPACE : str
+        metric namespace
+
+    Parameters
+    ----------
+    flush_to_log : bool, optional
+        Used when using export instead of extension
+    namespace : str, optional
+        Namespace for metrics
+    provider: DatadogProvider, optional
+        Pre-configured DatadogProvider provider
+
+    Raises
+    ------
+    MetricValueError
+        When metric value isn't a number
+    SchemaValidationError
+        When metric object fails EMF schema validation
+    """
+
     # NOTE: We use class attrs to share metrics data across instances
     # this allows customers to initialize Metrics() throughout their code base (and middlewares)
     # and not get caught by accident with metrics data loss, or data deduplication
@@ -17,8 +57,8 @@ class DatadogMetrics:
 
     def __init__(
         self,
-        namespace: str = DEFAULT_NAMESPACE,
-        flush_to_log: bool = False,
+        namespace: str | None = None,
+        flush_to_log: bool | None = None,
         provider: DatadogProvider | None = None,
     ):
         self.metric_set = self._metrics
@@ -64,26 +104,6 @@ class DatadogMetrics:
         )
 
     def set_default_tags(self, **kwargs) -> None:
-        """Persist dimensions across Lambda invocations
-
-        Parameters
-        ----------
-        dimensions : Dict[str, Any], optional
-            metric dimensions as key=value
-
-        Example
-        -------
-        **Sets some default dimensions that will always be present across metrics and invocations**
-
-            from aws_lambda_powertools import Metrics
-
-            metrics = Metrics(namespace="ServerlessAirline", service="payment")
-            metrics.set_default_dimensions(environment="demo", another="one")
-
-            @metrics.log_metrics()
-            def lambda_handler():
-                return True
-        """
         self.provider.set_default_tags(**kwargs)
         for tag_key, tag_value in kwargs.items():
             self.default_tags.append(f"{tag_key}:{tag_value}")
@@ -96,9 +116,9 @@ class DatadogMetrics:
         self.default_tags.clear()
 
     # We now allow customers to bring their own instance
-    # of the AmazonCloudWatchEMFProvider provider
-    # So we need to define getter/setter for namespace and service properties
-    # To access these attributes on the provider instance.
+    # of the DatadogProvider provider
+    # So we need to define getter/setter for namespace property
+    # To access this attribute on the provider instance.
     @property
     def namespace(self):
         return self.provider.namespace

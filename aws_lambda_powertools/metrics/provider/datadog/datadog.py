@@ -10,6 +10,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import BaseProvider
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -25,43 +27,36 @@ DEFAULT_NAMESPACE = "default"
 
 class DatadogProvider(BaseProvider):
     """
-    Class for datadog provider. This Class should only be used inside DatadogMetrics
-    all datadog metric data will be stored as
-    {
-        "m": metric_name,
-        "v": value,
-        "e": timestamp
-        "t": List["tag:value","tag2:value2"]
-    }
-    see https://github.com/Datadog/datadog-lambda-python/blob/main/datadog_lambda/metric.py#L77
+    DatadogProvider creates metrics asynchronously via Datadog extension or exporter.
 
-    Examples
-    --------
+    **Use `aws_lambda_powertools.DatadogMetrics` to create and metrics to Datadog.**
 
+    Environment variables
+    ---------------------
+    POWERTOOLS_METRICS_NAMESPACE : str
+        metric namespace to be set for all metrics
+
+    Raises
+    ------
+    MetricValueError
+        When metric value isn't a number
+    SchemaValidationError
+        When metric object fails EMF schema validation
     """
 
     def __init__(
         self,
         metric_set: List | None = None,
-        namespace: str = DEFAULT_NAMESPACE,
-        flush_to_log: bool = False,
+        namespace: str | None = None,
+        flush_to_log: bool | None = None,
         default_tags: List | None = None,
     ):
-        """
-
-        Parameters
-        ----------
-        namespace: str
-            For datadog, namespace will be appended in front of the metrics name in metrics exported.
-            (namespace.metrics_name)
-        flush_to_log: bool
-            Flush datadog metrics to log (collect with log forwarder) rather than using datadog extension
-        """
         self.metric_set = metric_set if metric_set is not None else []
-        self.namespace: str = namespace
+        self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
+        if self.namespace is None:
+            self.namespace = DEFAULT_NAMESPACE
         self.default_tags = default_tags or []
-        # either is true then flush to log
-        self.flush_to_log = (os.environ.get("DD_FLUSH_TO_LOG", "").lower() == "true") or flush_to_log
+        self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
 
     #  adding name,value,timestamp,tags
     def add_metric(
@@ -123,7 +118,7 @@ class DatadogProvider(BaseProvider):
         **Serialize metrics into Datadog format**
 
             metrics = DatadogMetric()
-            # ...add metrics, dimensions, namespace
+            # ...add metrics, tags, namespace
             ret = metrics.serialize_metric_set()
 
         Returns
@@ -173,23 +168,6 @@ class DatadogProvider(BaseProvider):
         ----------
         raise_on_empty_metrics : bool, optional
             raise exception if no metrics are emitted, by default False
-        """
-        """
-
-        Parameters
-        ----------
-        metrics: List[Dict]
-        [{
-            "m": metric_name,
-            "v": value,
-            "e": timestamp
-            "t": List["tag:value","tag2:value2"]
-        }]
-
-        Raises
-        -------
-        SchemaValidationError
-            When metric object fails EMF schema validation
         """
         if not raise_on_empty_metrics and len(self.metric_set) == 0:
             warnings.warn(
@@ -248,9 +226,9 @@ class DatadogProvider(BaseProvider):
         -------
         **Lambda function using tracer and metrics decorators**
 
-            from aws_lambda_powertools import Metrics, Tracer
+            from aws_lambda_powertools import DatadogMetrics, Tracer
 
-            metrics = Metrics(service="payment")
+            metrics = DatadogMetrics(namespace="powertools")
             tracer = Tracer(service="payment")
 
             @tracer.capture_lambda_handler
@@ -287,12 +265,12 @@ class DatadogProvider(BaseProvider):
         )
 
     def set_default_tags(self, **kwargs) -> None:
-        """Persist dimensions across Lambda invocations
+        """Persist tags across Lambda invocations
 
         Parameters
         ----------
-        dimensions : Dict[str, Any], optional
-            metric dimensions as key=value
+        tags : **kwargs
+            tags as key=value
 
         Example
         -------
@@ -301,7 +279,7 @@ class DatadogProvider(BaseProvider):
             from aws_lambda_powertools import Metrics
 
             metrics = Metrics(namespace="ServerlessAirline", service="payment")
-            metrics.set_default_dimensions(environment="demo", another="one")
+            metrics.set_default_tags(environment="demo", another="one")
 
             @metrics.log_metrics()
             def lambda_handler():

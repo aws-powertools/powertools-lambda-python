@@ -1,5 +1,4 @@
 import json
-import os
 import warnings
 from collections import namedtuple
 
@@ -33,9 +32,9 @@ def test_datadog_coldstart(capsys):
     assert "example_fn2" in logs
 
 
-def test_datadog_write_to_log_with_env_variable(capsys):
+def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     # GIVEN DD_FLUSH_TO_LOG env is configured
-    os.environ["DD_FLUSH_TO_LOG"] = "True"
+    monkeypatch.setenv("DD_FLUSH_TO_LOG", "True")
     metrics = DatadogMetrics()
 
     # WHEN we add a metric
@@ -260,3 +259,32 @@ def test_clear_default_tags():
 
     # THEN there should be no default tags
     assert not my_metrics.default_tags
+
+
+def test_namespace_var_precedence(monkeypatch, namespace):
+    # GIVEN we use POWERTOOLS_METRICS_NAMESPACE
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", "a_namespace")
+    my_metrics = DatadogMetrics(namespace=namespace, flush_to_log=True)
+
+    # WHEN creating a metric and explicitly set a namespace
+    my_metrics.add_metric(name="item_sold", value=1)
+
+    output = my_metrics.serialize_metric_set()
+
+    # THEN namespace should match the explicitly passed variable and not the env var
+    assert output[0]["m"] == f"{namespace}.item_sold"
+
+
+def test_namespace_env_var(monkeypatch):
+    # GIVEN POWERTOOLS_METRICS_NAMESPACE is set
+    env_namespace = "a_namespace"
+    monkeypatch.setenv("POWERTOOLS_METRICS_NAMESPACE", env_namespace)
+    my_metrics = DatadogMetrics(flush_to_log=True)
+
+    # WHEN creating a metric and explicitly set a namespace
+    my_metrics.add_metric(name="item_sold", value=1)
+
+    output = my_metrics.serialize_metric_set()
+
+    # THEN namespace should match the explicitly passed variable and not the env var
+    assert output[0]["m"] == f"{env_namespace}.item_sold"
