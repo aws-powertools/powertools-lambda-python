@@ -179,7 +179,7 @@ class DatadogProvider(BaseProvider):
         else:
             metrics = self.serialize_metric_set()
             # submit through datadog extension
-            if lambda_metric and self.flush_to_log is False:
+            if lambda_metric and not self.flush_to_log:
                 # use lambda_metric function from datadog package, submit metrics to datadog
                 for metric_item in metrics:  # pragma: no cover
                     lambda_metric(  # pragma: no cover
@@ -252,10 +252,10 @@ class DatadogProvider(BaseProvider):
             Propagate error received
         """
 
-        default_dimensions = kwargs.get("default_tags")
+        default_tags = kwargs.get("default_tags")
 
-        if default_dimensions:
-            self.set_default_tags(**default_dimensions)
+        if default_tags:
+            self.set_default_tags(**default_tags)
 
         return super().log_metrics(
             lambda_handler=lambda_handler,
@@ -286,4 +286,6 @@ class DatadogProvider(BaseProvider):
                 return True
         """
         for tag_key, tag_value in kwargs.items():
-            self.default_tags.append(f"{tag_key}:{tag_value}")
+            tag = f"{tag_key}:{tag_value}"
+            if tag not in self.default_tags:
+                self.default_tags.append(tag)

@@ -76,7 +76,7 @@ def test_datadog_raise_on_empty():
 
 def test_datadog_tags_using_kwargs(capsys):
     # GIVEN DatadogMetrics is initialized
-    metrics = DatadogMetrics()
+    metrics = DatadogMetrics(flush_to_log=True)
 
     # WHEN we add tags using kwargs
     metrics.add_metric("order_valve", 12.45, sales="sam")

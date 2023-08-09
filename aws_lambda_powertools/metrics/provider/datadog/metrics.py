@@ -106,7 +106,9 @@ class DatadogMetrics:
     def set_default_tags(self, **kwargs) -> None:
         self.provider.set_default_tags(**kwargs)
         for tag_key, tag_value in kwargs.items():
-            self.default_tags.append(f"{tag_key}:{tag_value}")
+            tag = f"{tag_key}:{tag_value}"
+            if tag not in self.default_tags:
+                self.default_tags.append(tag)
 
     def clear_metrics(self) -> None:
         self.provider.clear_metrics()
