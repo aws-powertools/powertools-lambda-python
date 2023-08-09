@@ -31,7 +31,6 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
     """
     AmazonCloudWatchEMFProvider creates metrics asynchronously via CloudWatch Embedded Metric Format (EMF).
 
-    AmazonCloudWatchEMFProvider creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
     CloudWatch EMF can create up to 100 metrics per EMF object
     and metrics, dimensions, and namespace created via AmazonCloudWatchEMFProvider
     will adhere to the schema, will be serialized and validated against EMF Schema.
