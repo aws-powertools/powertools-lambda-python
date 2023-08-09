@@ -6,16 +6,16 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Optional
 
 from aws_lambda_powertools.metrics.provider import cold_start
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
 
 class BaseProvider(ABC):
     """
-    Class for metric provider interface.
+    Interface to create a metrics provider.
 
-    This class serves as an interface for creating your own metric provider. Inherit from this class
-    and implement the required methods to define your specific metric provider.
+    BaseProvider implements `log_metrics` decorator for every provider as a value add feature.
 
     Usage:
         1. Inherit from this class.
@@ -97,11 +97,11 @@ class BaseProvider(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def clear_metrics(self, *args: Any, **kwargs) -> Any:
+    def clear_metrics(self, *args: Any, **kwargs) -> None:
         """
         Abstract method for clear metric instance.
 
-        This method must be implemented in subclasses to add a metric and return a combined metrics dictionary.
+        This method must be implemented in subclasses to clear the metric instance
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ class BaseProvider(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add_cold_start_metric(self, context: Any) -> Any:
+    def add_cold_start_metric(self, context: LambdaContext) -> Any:
         """
         Abstract method for clear metric instance.
 
@@ -196,8 +196,6 @@ class BaseProvider(ABC):
         @functools.wraps(lambda_handler)
         def decorate(event, context):
             try:
-                if default_dimensions:
-                    self.set_default_dimensions(**default_dimensions)
                 response = lambda_handler(event, context)
                 if capture_cold_start_metric:
                     self._add_cold_start_metric(context=context)
@@ -210,7 +208,7 @@ class BaseProvider(ABC):
 
     def _add_cold_start_metric(self, context: Any) -> None:
         """
-        Check if it's cold start and add a metric if yes
+        Add cold start metric
 
         Parameters
         ----------

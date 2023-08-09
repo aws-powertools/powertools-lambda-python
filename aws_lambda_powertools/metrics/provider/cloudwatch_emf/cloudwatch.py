@@ -21,13 +21,14 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties imp
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
 
 class AmazonCloudWatchEMFProvider(BaseProvider):
     """
-    AmazonCloudWatchEMFProvider class (namespace, metric, dimension, serialization)
+    AmazonCloudWatchEMFProvider creates metrics asynchronously via CloudWatch Embedded Metric Format (EMF).
 
     AmazonCloudWatchEMFProvider creates metrics asynchronously thanks to CloudWatch Embedded Metric Format (EMF).
     CloudWatch EMF can create up to 100 metrics per EMF object
@@ -371,6 +372,11 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             Propagate error received
         """
 
+        default_dimensions = kwargs.get("default_dimensions")
+
+        if default_dimensions:
+            self.set_default_dimensions(**default_dimensions)
+
         return super().log_metrics(
             lambda_handler=lambda_handler,
             capture_cold_start_metric=capture_cold_start_metric,
@@ -378,7 +384,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             **kwargs,
         )
 
-    def add_cold_start_metric(self, context: Any) -> None:
+    def add_cold_start_metric(self, context: LambdaContext) -> None:
         """Add cold start metric and function_name dimension
 
         Parameters
