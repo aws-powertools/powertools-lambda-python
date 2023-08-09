@@ -68,6 +68,16 @@ You can also have your own keyword arguments after the mandatory arguments.
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
     ```
 
+### Environment variables
+
+The following environment variable is available to configure the middleware factory at a global scope:
+
+| Setting              | Description                                                                  | Environment variable                    | Default |
+|----------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Middleware Trace** | Creates sub-segment for each custom middleware.                              | `POWERTOOLS_TRACE_MIDDLEWARES`          | `false` |
+
+You can also use [`POWERTOOLS_TRACE_MIDDLEWARES`](#tracing-middleware-execution) on a per-method basis, which will consequently override the environment variable value.
+
 ## Advanced
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md){target="_blank"} inside your middleware, and add annotations as well as metadata for additional operational insights.
