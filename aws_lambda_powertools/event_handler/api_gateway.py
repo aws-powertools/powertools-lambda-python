@@ -220,6 +220,27 @@ class Route:
         cache_control: Optional[str],
         middlewares: Optional[List[Callable[..., Any]]],
     ):
+        """
+
+        Parameters
+        ----------
+
+        method: str
+            The HTTP method, example "GET"
+        rule: Pattern
+            The route rule, example "/my/path"
+        func: Callable
+            The route handler function
+        cors: bool
+            Whether or not to enable CORS for this route
+        compress: bool
+            Whether or not to enable gzip compression for this route
+        cache_control: Optional[str]
+            The cache control header value, example "max-age=3600"
+        middlewares: Optional[List[Callable[..., Any]]]
+            The list of route middlewares to execute. These are executed in the order they are
+            provided.
+        """
         self.method = method.upper()
         self.rule = rule
         self.func = func
@@ -228,7 +249,10 @@ class Route:
         self.cache_control = cache_control
         self.middlewares = middlewares or []
 
-        self.middleware_stack_built = False
+        """
+        _middleware_stack_built is used to ensure the middleware stack is only built once.
+        """
+        self._middleware_stack_built = False
 
     def __call__(
         self,
@@ -257,12 +281,18 @@ class Route:
             Returns an API Response object in ALL cases, excepting when the original API route
             handler is executed which may also return a Dict or Tuple response.
         """
-        if not self.middleware_stack_built:
-            self.build_middleware_stack(router_middlewares=router_middlewares)
 
+        """
+        Check self._middleware_stack_built to ensure the middleware stack is only built once.
+        This will save CPU execution time when API route is executed multiple times.
+        """
+        if not self._middleware_stack_built:
+            self._build_middleware_stack(router_middlewares=router_middlewares)
+
+        # Call the Middleware Wrapped route function handler with the app and route arguments
         return self.func(app, **route_arguments)
 
-    def build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
+    def _build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
         """
         Builds the middleware execution stack for the handler by wrapping each
         handler in an instance of MiddlewareWrapper which is used to contain the state
@@ -292,7 +322,7 @@ class Route:
         # need to change (avoid breaking changes)
         # This adapter will adapt the response type of the route handler (Union[Dict, Tuple, Response])
         # and normalise into a Resposne object so middleware will always have a constant signature
-        all_middlewares.append(registered_api_adapter)
+        all_middlewares.append(_registered_api_adapter)
 
         # Wrap the original route handler function in the middleware handlers
         # using the MiddlewareWrapper class callable construct in reverse order to
@@ -300,9 +330,9 @@ class Route:
         #
         # Start with the route function and wrap from last to the first Middleware handler.
         for handler in reversed(all_middlewares):
-            self.func = MiddlewareStackWrapper(handler=handler, next_middleware=self.func)
+            self.func = MiddlewareFrame(current_middleware=handler, next_middleware=self.func)
 
-        self.middleware_stack_built = True
+        self._middleware_stack_built = True
 
 
 class ResponseBuilder:
@@ -418,7 +448,7 @@ class BaseRouter(ABC):
         """
         Add a list of middlewares to the global router middleware list
 
-        These middlewares will be called in insertion order and 
+        These middlewares will be called in insertion order and
         before any middleware registered at the route level.
         """
         self.router_middlewares = self.router_middlewares + middlewares
@@ -622,22 +652,21 @@ class MiddlewareFrame:
 
     def __init__(
         self,
-        current_middleware: Callable,
-        next_middleware: Callable,
+        current_middleware: Callable[..., Any],
+        next_middleware: Callable[..., Any],
     ) -> None:
-        self.handler: Callable = handler
-        self.next_middleware: Callable = next_middleware
+        self.current_middleware: Callable[..., Any] = current_middleware
+        self.next_middleware: Callable[..., Any] = next_middleware
         self._next_middleware_name = next_middleware.__name__
 
-
     @property
-    def __name__():
+    def __name__(self):  # noqa: A003
         """Current middleware name
-        
+
         It ensures backward compatibility with view functions being callable. This
         improves debugging since we need both current and next middlewares/callable names.
         """
-        return self.handler.__name__
+        return self.current_middleware.__name__
 
     def __str__(self) -> str:
         """Identify current middleware identity and call chain for debugging purposes."""
@@ -666,7 +695,11 @@ class MiddlewareFrame:
         return self.current_middleware(app, self.next_middleware, **kwargs)
 
 
-def registered_api_adapter(app: "ApiGatewayResolver", get_response: Callable[..., Any], **kwargs) -> Union[Dict, Tuple, Response]:
+def _registered_api_adapter(
+    app: "ApiGatewayResolver",
+    get_response: Callable[..., Any],
+    **kwargs,
+) -> Union[Dict, Tuple, Response]:
     """
     Calls the registered API using ONLY the **kwargs provided to ensure the
     call signature of existing defined router of Users does not create a breaking change.

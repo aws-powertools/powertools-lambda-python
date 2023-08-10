@@ -1855,12 +1855,12 @@ def test_middleware_early_return():
 
     def middleware_one(app, get_response, **context):
         # inject a variable into the kwargs
-        response = get_response(app, injected="injected_value", **kwargs)
+        response = get_response(app, injected="injected_value", **context)
 
         return response
 
-    def early_return_middleware(app, get_response, **kwargs):
-        assert kwargs.get("injected") == "injected_value"
+    def early_return_middleware(app, get_response, **context):
+        assert context.get("injected") == "injected_value"
 
         return Response(400, content_types.TEXT_HTML, "bad_response")
 
