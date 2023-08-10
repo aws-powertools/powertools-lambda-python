@@ -22,7 +22,7 @@ class DatadogMetrics:
 
         @metrics.log_metrics(capture_cold_start_metric=True)
         def lambda_handler():
-            metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+            metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
             return True
 
     Environment variables
@@ -44,7 +44,7 @@ class DatadogMetrics:
     MetricValueError
         When metric value isn't a number
     SchemaValidationError
-        When metric object fails EMF schema validation
+        When metric object fails Datadog schema validation
     """
 
     # NOTE: We use class attrs to share metrics data across instances
@@ -53,7 +53,7 @@ class DatadogMetrics:
     # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
     # Result: ProductCreated is created twice as we now have 2 different EMF blobs
     _metrics: List = []
-    _default_tags: List = []
+    _default_tags: Dict = {}
 
     def __init__(
         self,
@@ -78,10 +78,9 @@ class DatadogMetrics:
         name: str,
         value: float,
         timestamp: int | None = None,
-        tags: List | None = None,
-        **kwargs: Any,
+        **tags: Any,
     ) -> None:
-        self.provider.add_metric(name=name, value=value, timestamp=timestamp, tags=tags, **kwargs)
+        self.provider.add_metric(name=name, value=value, timestamp=timestamp, **tags)
 
     def serialize_metric_set(self, metrics: List | None = None) -> List:
         return self.provider.serialize_metric_set(metrics=metrics)
@@ -103,12 +102,9 @@ class DatadogMetrics:
             default_tags=default_tags,
         )
 
-    def set_default_tags(self, **kwargs) -> None:
-        self.provider.set_default_tags(**kwargs)
-        for tag_key, tag_value in kwargs.items():
-            tag = f"{tag_key}:{tag_value}"
-            if tag not in self.default_tags:
-                self.default_tags.append(tag)
+    def set_default_tags(self, **tags) -> None:
+        self.provider.set_default_tags(**tags)
+        self.default_tags.update(**tags)
 
     def clear_metrics(self) -> None:
         self.provider.clear_metrics()

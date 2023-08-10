@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List
+from typing import Any, Dict, List
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -70,3 +70,9 @@ def extract_cloudwatch_metric_unit_value(metric_units: List, metric_valid_option
         unit = unit.value
 
     return unit
+
+
+def serialize_datadog_tags(metric_tags: Dict[str, Any], default_tags: Dict[str, Any]) -> List[str]:
+    tags = metric_tags or default_tags
+
+    return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]

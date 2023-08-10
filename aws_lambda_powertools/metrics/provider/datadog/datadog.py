@@ -9,6 +9,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
+from aws_lambda_powertools.metrics.functions import serialize_datadog_tags
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
@@ -49,13 +50,13 @@ class DatadogProvider(BaseProvider):
         metric_set: List | None = None,
         namespace: str | None = None,
         flush_to_log: bool | None = None,
-        default_tags: List | None = None,
+        default_tags: Dict | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else []
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         if self.namespace is None:
             self.namespace = DEFAULT_NAMESPACE
-        self.default_tags = default_tags or []
+        self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
 
     #  adding name,value,timestamp,tags
@@ -64,8 +65,7 @@ class DatadogProvider(BaseProvider):
         name: str,
         value: float,
         timestamp: int | None = None,
-        tags: List | None = None,
-        **kwargs: Any,
+        **tags,
     ) -> None:
         """
         The add_metrics function that will be used by metrics class.
@@ -99,14 +99,8 @@ class DatadogProvider(BaseProvider):
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
 
-        if tags is None:
-            tags = []
-
         if not timestamp:
             timestamp = int(time.time())
-
-        for tag_key, tag_value in kwargs.items():
-            tags.append(f"{tag_key}:{tag_value}")
 
         self.metric_set.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
@@ -152,7 +146,7 @@ class DatadogProvider(BaseProvider):
                     "m": metric_name,
                     "v": single_metric["v"],
                     "e": single_metric["e"],
-                    "t": single_metric["t"] or list(self.default_tags),
+                    "t": serialize_datadog_tags(metric_tags=single_metric["t"], default_tags=self.default_tags),
                 },
             )
 
@@ -264,7 +258,7 @@ class DatadogProvider(BaseProvider):
             **kwargs,
         )
 
-    def set_default_tags(self, **kwargs) -> None:
+    def set_default_tags(self, **tags) -> None:
         """Persist tags across Lambda invocations
 
         Parameters
@@ -285,7 +279,4 @@ class DatadogProvider(BaseProvider):
             def lambda_handler():
                 return True
         """
-        for tag_key, tag_value in kwargs.items():
-            tag = f"{tag_key}:{tag_value}"
-            if tag not in self.default_tags:
-                self.default_tags.append(tag)
+        self.default_tags.update(**tags)

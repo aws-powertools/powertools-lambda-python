@@ -38,7 +38,7 @@ def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     metrics = DatadogMetrics()
 
     # WHEN we add a metric
-    metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+    metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
     metrics.flush_metrics()
     logs = capture_metrics_output(capsys)
 
@@ -89,10 +89,10 @@ def test_datadog_tags_using_kwargs(capsys):
     assert "sales:sam" in tag_list
 
 
-def test_metrics_clear_metrics_after_invocation(metric):
+def test_metrics_clear_metrics_after_invocation(metric_datadog):
     # GIVEN DatadogMetrics is initialized
     my_metrics = DatadogMetrics(flush_to_log=True)
-    my_metrics.add_metric(**metric)
+    my_metrics.add_metric(**metric_datadog)
 
     # WHEN log_metrics is used to flush metrics from memory
     @my_metrics.log_metrics
@@ -161,10 +161,10 @@ def test_datadog_with_non_default_namespace(capsys, namespace):
     assert namespace in logs
 
 
-def test_serialize_metrics(metric):
+def test_serialize_metrics(metric_datadog):
     # GIVEN DatadogMetrics is initialized
     my_metrics = DatadogMetrics(flush_to_log=True)
-    my_metrics.add_metric(**metric)
+    my_metrics.add_metric(**metric_datadog)
 
     # WHEN we serialize metrics
     my_metrics.serialize_metric_set()
