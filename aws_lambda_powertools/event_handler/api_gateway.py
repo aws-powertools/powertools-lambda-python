@@ -704,13 +704,23 @@ def _registered_api_adapter(
     Calls the registered API using ONLY the **kwargs provided to ensure the
     call signature of existing defined router of Users does not create a breaking change.
 
-    :param app: The API Gateway resolver
-    :param get_response: The function to handle the API
-    :param kwargs: The arguments to pass to the API
-    :return: The API Response Object
-
-    This middleware enables backward compatibility for the existing API routes model in Powertools
+    **IMPORTANT: This middleware enables backward compatibility for the existing API routes model in Powertools
     and it MUST BE THE LAST middleware in the middleware stack.
+
+    Parameters
+    ----------
+    app: ApiGatewayResolver
+        The API Gateway resolver
+    get_response: Callable[..., Any]
+        The function to handle the API
+    **kwargs:
+        The arguments to pass to the API
+
+    Returns
+    -------
+    Response
+        The API Response Object
+
     """
     return app._to_response(get_response(**kwargs))
 
