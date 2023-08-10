@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import zlib
 from copy import deepcopy
 from decimal import Decimal
@@ -1074,6 +1075,26 @@ def test_remove_prefix(path: str):
     response = app({"httpMethod": "GET", "path": path}, None)
 
     # THEN a route for `/foo` should be found
+    assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/stg/foo", id="path matched pay prefix"),
+        pytest.param("/dev/foo", id="path matched pay prefix with multiple numbers"),
+        pytest.param("/foo", id="path does not start with any of the prefixes"),
+    ],
+)
+def test_remove_prefix_by_regex(path: str):
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/foo")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": path}, None)
+
     assert response["statusCode"] == 200
 
 

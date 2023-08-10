@@ -520,7 +520,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """
         Parameters
@@ -534,9 +534,9 @@ class ApiGatewayResolver(BaseRouter):
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        strip_prefixes: List[str], optional
+        strip_prefixes: List[Union[str, Pattern]], optional
             optional list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings.
+            with api gateways with multiple custom mappings. Each prefix can be a static string or a compiled regex
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
@@ -713,10 +713,18 @@ class ApiGatewayResolver(BaseRouter):
             return path
 
         for prefix in self._strip_prefixes:
-            if path == prefix:
-                return "/"
-            path = re.sub(rf"^/?({prefix})/", r"/", path)
+            if isinstance(prefix, str):
+                if path == prefix:
+                    return "/"
 
+                if self._path_starts_with(path, prefix):
+                    return path[len(prefix) :]
+
+            if isinstance(prefix, Pattern):
+                path = re.sub(prefix, "", path)
+
+        # When using regexes, we might get into a point where everything is removed
+        # from the string, so we check if it's empty and change it accordingly.
         if not path:
             path = "/"
 
