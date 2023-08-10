@@ -1942,16 +1942,20 @@
 <span class="normal">39</span>
 <span class="normal">40</span>
 <span class="normal">41</span>
-<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="hll">
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.feature_flags</span> <span class="kn">import</span> <span class="n">AppConfigStore</span><span class="p">,</span> <span class="n">FeatureFlags</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
 
-<span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="s2">&quot;product-catalogue&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">)</span>
-
-<span class="hll"><span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
+<span class="hll"><span class="n">app_config</span> <span class="o">=</span> <span class="n">AppConfigStore</span><span class="p">(</span><span class="n">environment</span><span class="o">=</span><span class="s2">&quot;dev&quot;</span><span class="p">,</span> <span class="n">application</span><span class="o">=</span><span class="s2">&quot;product-catalogue&quot;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;features&quot;</span><span class="p">)</span>
 </span>
+<span class="n">feature_flags</span> <span class="o">=</span> <span class="n">FeatureFlags</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">app_config</span><span class="p">)</span>
+
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/products&quot;</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">list_products</span><span class="p">():</span>
@@ -1965,10 +1969,10 @@
     <span class="c1"># getting price from payload</span>
     <span class="n">price</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">json_body</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;price&quot;</span><span class="p">))</span>
     <span class="n">percent_discount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="hll">
+</span>    <span class="c1"># all_features is evaluated to [&quot;premium_features&quot;, &quot;geo_customer_campaign&quot;, &quot;ten_percent_off_campaign&quot;]</span>
+    <span class="n">all_features</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">get_enabled_features</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
 
-    <span class="c1"># all_features is evaluated to [&quot;premium_features&quot;, &quot;geo_customer_campaign&quot;, &quot;ten_percent_off_campaign&quot;]</span>
-<span class="hll">    <span class="n">all_features</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">feature_flags</span><span class="o">.</span><span class="n">get_enabled_features</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">ctx</span><span class="p">)</span>
-</span>
     <span class="k">if</span> <span class="s2">&quot;geo_customer_campaign&quot;</span> <span class="ow">in</span> <span class="n">all_features</span><span class="p">:</span>
         <span class="c1"># apply 20% discounts for customers in NL</span>
         <span class="n">percent_discount</span> <span class="o">+=</span> <span class="mi">20</span>

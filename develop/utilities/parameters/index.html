@@ -1602,10 +1602,14 @@
 <span class="normal">14</span>
 <span class="normal">15</span>
 <span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parameters.ssm</span> <span class="kn">import</span> <span class="n">get_parameters_by_name</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 </span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parameters.ssm</span> <span class="kn">import</span> <span class="n">get_parameters_by_name</span>
+
 <span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s2">&quot;/develop/service/commons/telemetry/config&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_age&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
     <span class="s2">&quot;/no_cache_param&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_age&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span>
@@ -1614,10 +1618,10 @@
 <span class="p">}</span>
 
 
-<span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="c1"># This returns a dict with the parameter name as key</span>
-<span class="hll">    <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_parameters_by_name</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
-</span>    <span class="k">for</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+<span class="hll"><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+</span>    <span class="c1"># This returns a dict with the parameter name as key</span>
+    <span class="n">response</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_parameters_by_name</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">max_age</span><span class="o">=</span><span class="mi">60</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">response</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>
@@ -1652,24 +1656,28 @@
 <span class="normal">18</span>
 <span class="normal">19</span>
 <span class="normal">20</span>
-<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="hll"><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parameters.ssm</span> <span class="kn">import</span> <span class="n">get_parameters_by_name</span>
 </span>
-<span class="hll"><span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
-</span>    <span class="s2">&quot;/develop/service/commons/telemetry/config&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_age&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
+<span class="n">parameters</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;/develop/service/commons/telemetry/config&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;max_age&quot;</span><span class="p">:</span> <span class="mi">300</span><span class="p">,</span> <span class="s2">&quot;transform&quot;</span><span class="p">:</span> <span class="s2">&quot;json&quot;</span><span class="p">},</span>
     <span class="c1"># it would fail by default</span>
     <span class="s2">&quot;/this/param/does/not/exist&quot;</span><span class="p">:</span> <span class="p">{},</span>
 <span class="p">}</span>
 
-
-<span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="hll">    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_parameters_by_name</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">raise_on_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="hll">
+</span><span class="hll"><span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+</span><span class="hll">    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_parameters_by_name</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">raise_on_error</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </span><span class="hll">    <span class="n">errors</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_errors&quot;</span><span class="p">,</span> <span class="p">[])</span>
 </span><span class="hll">
-</span><span class="hll">    <span class="c1"># Handle gracefully, since &#39;/this/param/does/not/exist&#39; will only be available in `_errors`</span>
-</span><span class="hll">    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
-</span>        <span class="o">...</span>
+</span>    <span class="c1"># Handle gracefully, since &#39;/this/param/does/not/exist&#39; will only be available in `_errors`</span>
+    <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
+        <span class="o">...</span>
 
     <span class="k">for</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>

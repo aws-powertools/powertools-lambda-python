@@ -3146,13 +3146,17 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="hll">
+</span><span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">from</span> <span class="nn">assert_graphql_response_module</span> <span class="kn">import</span> <span class="n">Location</span><span class="p">,</span> <span class="n">app</span>  <span class="c1"># instance of AppSyncResolver</span>
 
-<span class="kn">import</span> <span class="nn">pytest</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">assert_graphql_response_module</span> <span class="kn">import</span> <span class="n">Location</span><span class="p">,</span> <span class="n">app</span>  <span class="c1"># instance of AppSyncResolver</span>
-</span>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
 <span class="k">def</span> <span class="nf">lambda_context</span><span class="p">():</span>
@@ -3169,13 +3173,13 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="k">def</span> <span class="nf">test_direct_resolver</span><span class="p">(</span><span class="n">lambda_context</span><span class="p">):</span>
     <span class="c1"># GIVEN</span>
     <span class="n">fake_event</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;assert_graphql_response.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-
-    <span class="c1"># WHEN</span>
-<span class="hll">    <span class="n">result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="p">(</span><span class="n">fake_event</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">)</span>
-</span>
-    <span class="c1"># THEN</span>
-<span class="hll">    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Perkins-Reed&quot;</span>
-</span></code></pre></div></td></tr></table></div>
+<span class="hll">
+</span>    <span class="c1"># WHEN</span>
+    <span class="n">result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="p">(</span><span class="n">fake_event</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">)</span>
+<span class="hll">
+</span>    <span class="c1"># THEN</span>
+    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Perkins-Reed&quot;</span>
+</code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
