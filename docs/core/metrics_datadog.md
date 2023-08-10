@@ -1,85 +1,71 @@
 ---
-title: CloudWatch EMF
+title: Datadog
 description: Core utility
 ---
+<!-- markdownlint-disable-next-line MD013 -->
+Datadog provider creates custom metrics by flushing metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"} or flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK.
 
-Metrics creates custom metrics asynchronously by logging metrics to standard output following [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"}.
-
-These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/){target="_blank"}.
+These metrics can be visualized through [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
 
 ## Key features
 
-* Aggregate up to 100 metrics using a single CloudWatch EMF object (large JSON blob)
-* Validate against common metric definitions mistakes (metric unit, values, max dimensions, max metrics, etc)
-* Metrics are created asynchronously by CloudWatch service, no custom stacks needed
-* Context manager to create a one off metric with a different dimension
+* Flush metrics to standard output
+* Flush metrics to Datadog extension
+* Validate against common metric definitions mistakes (values)
+* Support to add default tags to all created metrics
 
 ## Terminologies
 
-If you're new to Amazon CloudWatch, there are two terminologies you must be aware of before using this utility:
-
-* **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
-* **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
-* **Metric**. It's the name of the metric, for example: `SuccessfulBooking` or `UpdatedBooking`.
-* **Unit**. It's a value representing the unit of measure for the corresponding metric, for example: `Count` or `Seconds`.
-* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
-
-<figure>
-  <img src="../../media/metrics_terminology.png" />
-  <figcaption>Metric terminology, visually explained</figcaption>
-</figure>
+If you're new to Datadog custom metrics, we suggest you read the Datadog [official documentation](https://docs.datadoghq.com/metrics/custom_metrics/){target="_blank" rel="nofollow"} for custom metrics.
 
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" }.
 
-Metric has two global settings that will be used across all metrics emitted:
+Datadog provider has two global settings that will be used across all metrics emitted:
 
 | Setting              | Description                                                                     | Environment variable           | Constructor parameter |
 | -------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
 | **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Service**          | Optionally, sets **service** metric dimension across all metrics e.g. `payment` | `POWERTOOLS_SERVICE_NAME`      | `service`             |
+| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder| `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
 
-???+ tip
-    Use your application or main service as the metric namespace to easily group all metrics.
+Experiment to use your application or main service as the metric namespace to easily group all metrics.
 
-```yaml hl_lines="13" title="AWS Serverless Application Model (SAM) example"
---8<-- "examples/metrics/sam/template.yaml"
-```
+### Install
 
 ???+ note
-    For brevity, all code snippets in this page will rely on environment variables above being set.
+    If you are using Datadog Forwarder, you can skip this step step.
 
-    This ensures we instantiate `metrics = Metrics()` over `metrics = Metrics(service="booking", namespace="ServerlessAirline")`, etc.
+To adhere to Lambda best practices and effectively minimize the size of your development package, we recommend using the official Datadog layers built specifically for the SDK and extension components. Below is the template that demonstrates how to configure a SAM template with this information.
+
+```yaml hl_lines="13" title="AWS Serverless Application Model (SAM) example"
+--8<-- "examples/metrics_datadog/sam/template.yaml"
+```
+
+If you prefer not to utilize the Datadog SDK provided through the Datadog layer, add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Datadog provider.
 
 ### Creating metrics
 
-You can create metrics using `add_metric`, and you can create dimensions for all your aggregate metrics using `add_dimension` method.
+You can create metrics using `add_metric`.
 
 ???+ tip
-	You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
+	You can initialize DadatadogMetrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
 
-=== "add_metrics.py"
+=== "add_metrics_with_provider.py"
 
     ```python hl_lines="10"
-    --8<-- "examples/metrics/src/add_metrics.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_with_provider.py"
     ```
 
-=== "add_dimension.py"
+=== "add_metrics_without_provider.py"
 
     ```python hl_lines="13"
-    --8<-- "examples/metrics/src/add_dimension.py"
+    --8<-- "examples/metrics_datadog/src/add_dimension_without_provider.py"
     ```
 
-???+ tip "Tip: Autocomplete Metric Units"
-    `MetricUnit` enum facilitate finding a supported metric unit by CloudWatch. Alternatively, you can pass the value as a string if you already know them _e.g. `unit="Count"`_.
-
-???+ note "Note: Metrics overflow"
-    CloudWatch EMF supports a max of 100 metrics per batch. Metrics utility will flush all metrics when adding the 100th metric. Subsequent metrics (101th+) will be aggregated into a new EMF object, for your convenience.
-
-???+ warning "Warning: Do not create metrics or dimensions outside the handler"
-    Metrics or dimensions added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
+???+ warning "Warning: Do not create metrics outside the handler"
+    Metrics added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
 
 ### Adding high-resolution metrics
 
@@ -326,6 +312,31 @@ These issues are exacerbated when you create **(A)** metric dimensions condition
 **On 2**, you can use `EphemeralMetrics` to create an additional EMF JSON Blob from your application metric (`SuccessfulBooking`). This ensures that `IntegrationLatency` operational metric data points aren't tied to any dynamic dimension values like `tenant_id`.
 
 That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
+
+### Observability providers
+
+!!! note "In this context, an observability provider is an AWS Lambda Partner offering a platform for logging, metrics, traces, etc."
+
+You can choose an Observability provider other than CloudWatch EMF Metrics. Powertools offers seamless metric streaming via Lambda Extensions, SDKs, or other methods. Keep in mind, some providers may not support CloudWatch EMF's default Metrics format.
+
+#### Datadog provider
+
+Add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Tracer.
+
+To use Datadog as an external observability provider you will need to configure your Lambda to add an `API_KEY` and the `Datadog Endpoint`. [Check here](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} the Datadog documentation on how to do this.
+
+You can import from metric provider package, init the provider and use them as default metrics class
+
+```python title="Using built-in Datadog Metrics Provider"
+from aws_lambda_powertools.metrics.provider.datadog_provider_draft import DataDogProvider,DataDogMetrics
+
+dd_provider = DataDogProvider(namespace="default")
+metrics = DataDogMetrics(provider=dd_provider)
+
+@metrics.log_metrics(capture_cold_start_metric: bool = True, raise_on_empty_metrics: bool = False)
+def lambda_handler(event, context)
+    metrics.add_metric(name="item_sold",value=1,tags=["category:online"])
+```
 
 ## Testing your code
 

@@ -15,7 +15,9 @@ nav:
       - Features:
           - core/tracer.md
           - core/logger.md
-          - core/metrics.md
+          - Metrics:
+              - core/metrics.md
+              - core/metrics_datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md
