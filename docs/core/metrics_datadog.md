@@ -39,7 +39,7 @@ Experiment to use your application or main service as the metric namespace to ea
 
 To adhere to Lambda best practices and effectively minimize the size of your development package, we recommend using the official Datadog layers built specifically for the SDK and extension components. Below is the template that demonstrates how to configure a SAM template with this information.
 
-```yaml hl_lines="13" title="AWS Serverless Application Model (SAM) example"
+```yaml hl_lines="13 14 22 24" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/metrics_datadog/sam/template.yaml"
 ```
 
@@ -54,13 +54,13 @@ You can create metrics using `add_metric`. Optional parameter such as timestamp 
 
 === "add_metrics_with_provider.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="6 12"
     --8<-- "examples/metrics_datadog/src/add_metrics_with_provider.py"
     ```
 
 === "add_metrics_without_provider.py"
 
-    ```python hl_lines="13"
+    ```python hl_lines="11"
     --8<-- "examples/metrics_datadog/src/add_metrics_without_provider.py"
     ```
 
@@ -73,7 +73,7 @@ Datadog offers the flexibility to configure tags per metric. To provider a bette
 
 === "add_metrics_with_tags.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="9"
     --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
 
@@ -88,13 +88,13 @@ If you'd like to remove them at some point, you can use `clear_default_tags` met
 
 === "set_default_tags.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="5"
     --8<-- "examples/metrics_datadog/src/set_default_tags.py"
     ```
 
 === "set_default_tags_log_metrics.py"
 
-    ```python hl_lines="9 13"
+    ```python hl_lines="6 9"
     --8<-- "examples/metrics_datadog/src/set_default_tags_log_metrics.py"
     ```
 
@@ -104,7 +104,7 @@ You have the option to flush metrics to the standard output for exporting, which
 
 === "flush_metrics_to_standard_output.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="4"
     --8<-- "examples/metrics_datadog/src/flush_metrics_to_standard_output.py"
     ```
 
@@ -116,13 +116,13 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
 === "add_metrics.py"
 
-    ```python hl_lines="8"
+    ```python hl_lines="7"
     --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
 
 === "log_metrics_output.json"
 
-    ```json hl_lines="6 9 14 21-23"
+    ```json hl_lines="2 6 7"
     --8<-- "examples/metrics_datadog/src/log_metrics_output.json"
     ```
 
@@ -149,7 +149,7 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 
 === "capture_cold_start_metric_output.json"
 
-    ```json hl_lines="9 15 22 24-25"
+    ```json hl_lines="2 6"
     --8<-- "examples/metrics_datadog/src/capture_cold_start_metric_output.json"
     ```
 
@@ -184,7 +184,7 @@ If you are using the AWS Lambda Web Adapter project, or a middleware with custom
 
 Contrary to the `log_metrics` decorator, you are now also responsible to flush metrics in the event of an exception.
 
-```python hl_lines="18" title="Manually flushing and clearing metrics from memory"
+```python hl_lines="17" title="Manually flushing and clearing metrics from memory"
 --8<-- "examples/metrics_datadog/src/flush_metrics.py"
 ```
 
@@ -220,7 +220,7 @@ You can read standard output and assert whether metrics have been flushed. Here'
 
 === "assert_single_datadog_metric.py"
 
-    ```python hl_lines="6 9-10 23-34"
+    ```python hl_lines="7"
     --8<-- "examples/metrics_datadog/src/assert_single_datadog_metric.py"
     ```
 
