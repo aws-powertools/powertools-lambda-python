@@ -64,18 +64,26 @@ class BaseMiddlewareHandler(ABC):
     # Call the next middleware in the chain (needed for when condition above is valid)
     return get_response(app, **kwargs)
 
-
-    :param app: The ApiGatewayResolver object
-    :param get_response: The next middleware handler in the chain
-    :param kwargs: Any additional arguments to pass to the next middleware handler
-    :return: The response from the next middleware handler in the chain
-
     """
 
     @abstractmethod
     def handler(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
         """
         The Middleware Handler
+
+        Parameters
+        ----------
+        app: ApiGatewayResolver
+            The ApiGatewayResolver object
+        get_response: Callable[..., Any]
+            The next middleware handler in the chain
+        kwargs: Any
+            Any additional arguments to pass to the next middleware handler
+
+        Returns
+        -------
+        Response
+            The response from the next middleware handler in the chain
 
         """
         raise NotImplementedError()
@@ -84,9 +92,18 @@ class BaseMiddlewareHandler(ABC):
         """
         The Middleware handler function.
 
-        :param app: The ApiGatewayResolver object
-        :param get_response: The next middleware handler in the chain
-        :param kwargs: Any additional arguments to pass to the next middleware handler
-        :return: The response from the next middleware handler in the chain
+        Parameters
+        ----------
+        app: ApiGatewayResolver
+            The ApiGatewayResolver object
+        get_response: Callable[...,Any]
+            The next middleware handler in the chain
+        kwargs:
+            Any additional arguments to pass to the next middleware handler
+
+        Returns
+        -------
+        Response
+            The response from the next middleware handler in the chain
         """
         return self.handler(app, get_response, **kwargs)
