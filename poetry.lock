@@ -93,69 +93,69 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.90.0a0.tar.gz", hash = "sha256:b81e8321a2a76594fd6d79725eb6136dad844aef9122fe666b7bc5f11bb18de7"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:154f146d5a88c602aa477869aea0109c0691437e9a0f6a9d61d98b9b52c83b51"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.91.0a0.tar.gz", hash = "sha256:a7b0e78862f3dd81cf13740df2ecda1c877545500872dc476f2dbf3807632a32"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:e3d606055c2fe268d80f96052b583060a25fadcdee79d89a75f2eac4354f2e69"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = "2.90.0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "Authorizers for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.90.0a0.tar.gz", hash = "sha256:7aeda815ca63f14362c2d08b06c8e85a4694fc07b8c7ba2a1c20b9346792c74c"},
-    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:ebaeaeddbdcb16b4130ce948f3d8db42254a68372b497700643bd654331207b6"},
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.91.0a0.tar.gz", hash = "sha256:cafd747af66f92755f188172f0e892503bc73c26f0d6d95e5f733c67b0307fa8"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:972393ad1c220708616322946ba3f8936cbe143a69e543762295c1ea02d69849"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.90.0.a0"
-aws-cdk-lib = "2.90.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "Integrations for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.90.0a0.tar.gz", hash = "sha256:558f12d2e951ae424f828ea8e2bfecc5c4271b4eb0c583feadd7420fdaca7cc7"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:b26ee8a02b06f99110383dc4ad9a4542415cc5c50c35aaccc90c63d80aeeb1fd"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.91.0a0.tar.gz", hash = "sha256:db607df2563f0b839795a41218a59e3ebc29e906dd08aed7b0b59aceba0bde02"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:34d0f103846613a72cfae8419be2e4302863a1e8f6e81951b0a51c2f62ab80b3"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.90.0.a0"
-aws-cdk-lib = "2.90.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.90.0"
+version = "2.91.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.90.0.tar.gz", hash = "sha256:d99e304f96f1b04c41922cfa2fc98c1cdd7c88e45c6ebb980ecfc367cdc77e87"},
-    {file = "aws_cdk_lib-2.90.0-py3-none-any.whl", hash = "sha256:ef481a40c3ece38aeaf15706ecbfeea19860b8a7b789ea7b28056a9f456c65d1"},
+    {file = "aws-cdk-lib-2.91.0.tar.gz", hash = "sha256:1163926527a8b7da931cddea77a4824b929b3f775447c3b7427ecdef7701ce74"},
+    {file = "aws_cdk_lib-2.91.0-py3-none-any.whl", hash = "sha256:ec2cadeb5727ea8259ad8a54ac9ff40502032cd2572c81f4594df93365da39da"},
 ]
 
 [package.dependencies]
@@ -163,7 +163,7 @@ files = [
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.166,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -291,17 +291,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.23"
+version = "1.28.24"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.23-py3-none-any.whl", hash = "sha256:807d4a4698ba9a76d5901a1663ff1943d13efbc388908f38b60f209c3511f1d6"},
-    {file = "boto3-1.28.23.tar.gz", hash = "sha256:839deb868d1278dd5a3f87208cfc4a8e259c95ca3cbe607cc322d435f02f63b0"},
+    {file = "boto3-1.28.24-py3-none-any.whl", hash = "sha256:0300ca6ec8bc136eb316b32cc1e30c66b85bc497f5a5fe42e095ae4280569708"},
+    {file = "boto3-1.28.24.tar.gz", hash = "sha256:9d1b4713c888e53a218648ad71522bee9bec9d83f2999fff2494675af810b632"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.23,<1.32.0"
+botocore = ">=1.31.24,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -310,13 +310,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.23"
+version = "1.31.24"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.23-py3-none-any.whl", hash = "sha256:d0a95f74eb6bd99e8f52f16af0a430ba6cd1526744f40ffdd3fcccceeaf961c2"},
-    {file = "botocore-1.31.23.tar.gz", hash = "sha256:f3258feaebce48f138eb2675168c4d33cc3d99e9f45af13cb8de47bdc2b9c573"},
+    {file = "botocore-1.31.24-py3-none-any.whl", hash = "sha256:8c7ba9b09e9104e2d473214e1ffcf84b77e04cf6f5f2344942c1eed9e299f947"},
+    {file = "botocore-1.31.24.tar.gz", hash = "sha256:2d8f412c67f9285219f52d5dbbb6ef0dfa9f606da29cbdd41b6d6474bcc4bbd4"},
 ]
 
 [package.dependencies]
@@ -1748,13 +1748,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.9\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.28.16"
-description = "Type annotations for boto3.SecretsManager 1.28.16 service generated with mypy-boto3-builder 7.17.1"
+version = "1.28.24"
+description = "Type annotations for boto3.SecretsManager 1.28.24 service generated with mypy-boto3-builder 7.17.2"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.28.16.tar.gz", hash = "sha256:07f443b31d2114ac363cfbdbc5f4b97934ca48fb99734bbd06d5c39bce244b83"},
-    {file = "mypy_boto3_secretsmanager-1.28.16-py3-none-any.whl", hash = "sha256:05508c3a96d96e482e5aff21b508319a1911e6662aea5be96aa7f7089b8dbfd4"},
+    {file = "mypy-boto3-secretsmanager-1.28.24.tar.gz", hash = "sha256:13461d8d2891ec0e430437dbb71c0879ee431ddfedb6b21c265878642faeb2a7"},
+    {file = "mypy_boto3_secretsmanager-1.28.24-py3-none-any.whl", hash = "sha256:e224809e28d99c1360bfe6428e8b567bb4a43c38a71263eba0ff4de7fa321142"},
 ]
 
 [package.dependencies]

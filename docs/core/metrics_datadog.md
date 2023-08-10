@@ -47,7 +47,7 @@ If you prefer not to utilize the Datadog SDK provided through the Datadog layer,
 
 ### Creating metrics
 
-You can create metrics using `add_metric`.
+You can create metrics using `add_metric`. Optional parameter such as timestamp can be included, but if not provided, the Datadog Provider will automatically use the current timestamp by default.
 
 ???+ tip
 	You can initialize DadatadogMetrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
@@ -61,60 +61,51 @@ You can create metrics using `add_metric`.
 === "add_metrics_without_provider.py"
 
     ```python hl_lines="13"
-    --8<-- "examples/metrics_datadog/src/add_dimension_without_provider.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_without_provider.py"
     ```
 
 ???+ warning "Warning: Do not create metrics outside the handler"
     Metrics added in the global scope will only be added during cold start. Disregard if you that's the intended behavior.
 
-### Adding high-resolution metrics
+### Adding tags
 
-You can create [high-resolution metrics](https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/){target="_blank"} passing `resolution` parameter to `add_metric`.
+Datadog offers the flexibility to configure tags per metric. To provider a better experience for our customers, you can pass an arbitrary number of keyword arguments (kwargs) that can be user as a tag.
 
-???+ tip "When is it useful?"
-    High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.
-
-=== "add_high_resolution_metrics.py"
+=== "add_metrics_with_tags.py"
 
     ```python hl_lines="10"
-    --8<-- "examples/metrics/src/add_high_resolution_metric.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
 
-???+ tip "Tip: Autocomplete Metric Resolutions"
-    `MetricResolution` enum facilitates finding a supported metric resolution by CloudWatch. Alternatively, you can pass the values 1 or 60 (must be one of them) as an integer _e.g. `resolution=1`_.
+### Adding default tags
 
-### Adding multi-value metrics
+If you want to set the same tags for all metrics, you can use the `set_default_tags` method or the `default_tags` parameter in the `log_metrics` decorator and then persist tags across the Lambda invocations.
 
-You can call `add_metric()` with the same metric name multiple times. The values will be grouped together in a list.
+If you'd like to remove them at some point, you can use `clear_default_tags` method.
 
-=== "add_multi_value_metrics.py"
+???+ note
+    When default tags are configured and an additional specific tag is assigned to a metric, the metric will exclusively contain that specific tag.
 
-    ```python hl_lines="14-15"
-    --8<-- "examples/metrics/src/add_multi_value_metrics.py"
-    ```
-
-=== "add_multi_value_metrics_output.json"
-
-    ```python hl_lines="15 24-26"
-    --8<-- "examples/metrics/src/add_multi_value_metrics_output.json"
-    ```
-
-### Adding default dimensions
-
-You can use `set_default_dimensions` method, or `default_dimensions` parameter in `log_metrics` decorator, to persist dimensions across Lambda invocations.
-
-If you'd like to remove them at some point, you can use `clear_default_dimensions` method.
-
-=== "set_default_dimensions.py"
+=== "set_default_tags.py"
 
     ```python hl_lines="9"
-    --8<-- "examples/metrics/src/set_default_dimensions.py"
+    --8<-- "examples/metrics_datadog/src/set_default_tags.py"
     ```
 
-=== "set_default_dimensions_log_metrics.py"
+=== "set_default_tags_log_metrics.py"
 
     ```python hl_lines="9 13"
-    --8<-- "examples/metrics/src/set_default_dimensions_log_metrics.py"
+    --8<-- "examples/metrics_datadog/src/set_default_tags_log_metrics.py"
+    ```
+
+### Flushing metrics to standard output
+
+You have the option to flush metrics to the standard output for exporting, which can then be seamlessly processed through the [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
+
+=== "flush_metrics_to_standard_output.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/metrics_datadog/src/flush_metrics_to_standard_output.py"
     ```
 
 ### Flushing metrics
@@ -126,28 +117,21 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 === "add_metrics.py"
 
     ```python hl_lines="8"
-    --8<-- "examples/metrics/src/add_metrics.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
 
 === "log_metrics_output.json"
 
     ```json hl_lines="6 9 14 21-23"
-    --8<-- "examples/metrics/src/log_metrics_output.json"
+    --8<-- "examples/metrics_datadog/src/log_metrics_output.json"
     ```
-
-???+ tip "Tip: Metric validation"
-    If metrics are provided, and any of the following criteria are not met, **`SchemaValidationError`** exception will be raised:
-
-    * Maximum of 29 user-defined dimensions
-    * Namespace is set, and no more than one
-    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"}
 
 #### Raising SchemaValidationError on empty metrics
 
 If you want to ensure at least one metric is always emitted, you can pass `raise_on_empty_metrics` to the **log_metrics** decorator:
 
 ```python hl_lines="7" title="Raising SchemaValidationError exception if no metrics are added"
---8<-- "examples/metrics/src/raise_on_empty_metrics.py"
+--8<-- "examples/metrics_datadog/src/raise_on_empty_metrics.py"
 ```
 
 ???+ tip "Suppressing warning messages on empty metrics"
@@ -160,19 +144,19 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 === "capture_cold_start_metric.py"
 
     ```python hl_lines="7"
-    --8<-- "examples/metrics/src/capture_cold_start_metric.py"
+    --8<-- "examples/metrics_datadog/src/capture_cold_start_metric.py"
     ```
 
 === "capture_cold_start_metric_output.json"
 
     ```json hl_lines="9 15 22 24-25"
-    --8<-- "examples/metrics/src/capture_cold_start_metric_output.json"
+    --8<-- "examples/metrics_datadog/src/capture_cold_start_metric_output.json"
     ```
 
 If it's a cold start invocation, this feature will:
 
-* Create a separate EMF blob solely containing a metric named `ColdStart`
-* Add `function_name` and `service` dimensions
+* Create a separate Datadog metric solely containing a metric named `ColdStart`
+* Add `function_name` as a tag
 
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
@@ -191,60 +175,6 @@ The following environment variable is available to configure Metrics at a global
 
 ## Advanced
 
-### Adding metadata
-
-You can add high-cardinality data as part of your Metrics log with `add_metadata` method. This is useful when you want to search highly contextual information along with your metrics in your logs.
-
-???+ info
-    **This will not be available during metrics visualization** - Use **dimensions** for this purpose
-
-=== "add_metadata.py"
-
-    ```python hl_lines="14"
-    --8<-- "examples/metrics/src/add_metadata.py"
-    ```
-
-=== "add_metadata_output.json"
-
-    ```json hl_lines="22"
-    --8<-- "examples/metrics/src/add_metadata_output.json"
-    ```
-
-### Single metric with a different dimension
-
-CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
-
-???+ info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}. Keep the following formula in mind:
-
-    **unique metric = (metric_name + dimension_name + dimension_value)**
-
-=== "single_metric.py"
-
-    ```python hl_lines="11"
-    --8<-- "examples/metrics/src/single_metric.py"
-    ```
-
-=== "single_metric_output.json"
-
-    ```json hl_lines="15"
-    --8<-- "examples/metrics/src/single_metric_output.json"
-    ```
-
-By default it will skip all previously defined dimensions including default dimensions. Use `default_dimensions` keyword argument if you want to reuse default dimensions or specify custom dimensions from a dictionary.
-
-=== "single_metric_default_dimensions_inherit.py"
-
-    ```python hl_lines="10 15"
-    --8<-- "examples/metrics/src/single_metric_default_dimensions_inherit.py"
-    ```
-
-=== "single_metric_default_dimensions.py"
-
-    ```python hl_lines="12"
-    --8<-- "examples/metrics/src/single_metric_default_dimensions.py"
-    ```
-
 ### Flushing metrics manually
 
 If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
@@ -255,87 +185,7 @@ If you are using the AWS Lambda Web Adapter project, or a middleware with custom
 Contrary to the `log_metrics` decorator, you are now also responsible to flush metrics in the event of an exception.
 
 ```python hl_lines="18" title="Manually flushing and clearing metrics from memory"
---8<-- "examples/metrics/src/flush_metrics.py"
-```
-
-### Metrics isolation
-
-You can use `EphemeralMetrics` class when looking to isolate multiple instances of metrics with distinct namespaces and/or dimensions.
-
-!!! note "This is a typical use case is for multi-tenant, or emitting same metrics for distinct applications."
-
-```python hl_lines="1 4" title="EphemeralMetrics usage"
---8<-- "examples/metrics/src/ephemeral_metrics.py"
-```
-
-**Differences between `EphemeralMetrics` and `Metrics`**
-
-`EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
-
-| Feature                                                                                                     | Metrics | EphemeralMetrics |
-| ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
-| **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
-
-!!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
-
-This is an intentional design to prevent accidental data deduplication or data loss issues due to [CloudWatch EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} metric dimension constraint.
-
-<!-- markdownlint-disable-next-line MD013 -->
-In CloudWatch, there are two metric ingestion mechanisms: [EMF (async)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} and [`PutMetricData` API (sync)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data){target="_blank"}.
-
-The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.
-
-!!! important "Key concept"
-    CloudWatch [considers a metric unique](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric){target="_blank"} by a combination of metric **name**, metric **namespace**, and zero or more metric **dimensions**.
-
-With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"} defining one or more metrics with distinct dimensions.
-
-This is a subtle yet important distinction. Imagine you had the following metrics to emit:
-
-| Metric Name            | Dimension                                 | Intent             |
-| ---------------------- | ----------------------------------------- | ------------------ |
-| **SuccessfulBooking**  | service="booking", **tenant_id**="sample" | Application metric |
-| **IntegrationLatency** | service="booking", function_name="sample" | Operational metric |
-| **ColdStart**          | service="booking", function_name="sample" | Operational metric |
-
-The `tenant_id` dimension could vary leading to two common issues:
-
-1. `ColdStart` metric will be created multiple times (N * number of unique tenant_id dimension value), despite the `function_name` being the same
-2. `IntegrationLatency` metric will be also created multiple times due to `tenant_id` as well as `function_name` (may or not be intentional)
-
-These issues are exacerbated when you create **(A)** metric dimensions conditionally, **(B)** multiple metrics' instances throughout your code  instead of reusing them (globals). Subsequent metrics' instances will have (or lack) different metric dimensions resulting in different metrics and data points with the same name.
-
-!!! note "Intentional design to address these scenarios"
-
-**On 1**, when you enable [capture_start_metric feature](#capturing-cold-start-metric), we transparently create and flush an additional EMF JSON Blob that is independent from your application metrics. This prevents data pollution.
-
-**On 2**, you can use `EphemeralMetrics` to create an additional EMF JSON Blob from your application metric (`SuccessfulBooking`). This ensures that `IntegrationLatency` operational metric data points aren't tied to any dynamic dimension values like `tenant_id`.
-
-That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
-
-### Observability providers
-
-!!! note "In this context, an observability provider is an AWS Lambda Partner offering a platform for logging, metrics, traces, etc."
-
-You can choose an Observability provider other than CloudWatch EMF Metrics. Powertools offers seamless metric streaming via Lambda Extensions, SDKs, or other methods. Keep in mind, some providers may not support CloudWatch EMF's default Metrics format.
-
-#### Datadog provider
-
-Add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Tracer.
-
-To use Datadog as an external observability provider you will need to configure your Lambda to add an `API_KEY` and the `Datadog Endpoint`. [Check here](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} the Datadog documentation on how to do this.
-
-You can import from metric provider package, init the provider and use them as default metrics class
-
-```python title="Using built-in Datadog Metrics Provider"
-from aws_lambda_powertools.metrics.provider.datadog_provider_draft import DataDogProvider,DataDogMetrics
-
-dd_provider = DataDogProvider(namespace="default")
-metrics = DataDogMetrics(provider=dd_provider)
-
-@metrics.log_metrics(capture_cold_start_metric: bool = True, raise_on_empty_metrics: bool = False)
-def lambda_handler(event, context)
-    metrics.add_metric(name="item_sold",value=1,tags=["category:online"])
+--8<-- "examples/metrics_datadog/src/flush_metrics.py"
 ```
 
 ## Testing your code
@@ -345,54 +195,40 @@ def lambda_handler(event, context)
 ???+ tip
 	Ignore this section, if:
 
-    * You are explicitly setting namespace/default dimension via `namespace` and `service` parameters
-    * You're not instantiating `Metrics` in the global namespace
+    * You are explicitly setting namespace via `namespace` parameter
+    * You're not instantiating `DatadogMetrics` in the global namespace
 
-	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
+	For example, `DatadogMetrics(namespace="ServerlessAirline")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
---8<-- "examples/metrics/src/run_tests_env_var.sh"
+--8<-- "examples/metrics_datadog/src/run_tests_env_var.sh"
 ```
 
 ### Clearing metrics
 
-`Metrics` keep metrics in memory across multiple instances. If you need to test this behavior, you can use the following Pytest fixture to ensure metrics are reset incl. cold start:
+`DatadogMetrics` keep metrics in memory across multiple instances. If you need to test this behavior, you can use the following Pytest fixture to ensure metrics are reset incl. cold start:
 
 ```python title="Clearing metrics between tests"
---8<-- "examples/metrics/src/clear_metrics_in_tests.py"
+--8<-- "examples/metrics_datadog/src/clear_metrics_in_tests.py"
 ```
 
 ### Functional testing
 
 You can read standard output and assert whether metrics have been flushed. Here's an example using `pytest` with `capsys` built-in fixture:
 
-=== "assert_single_emf_blob.py"
+=== "assert_single_datadog_metric.py"
 
     ```python hl_lines="6 9-10 23-34"
-    --8<-- "examples/metrics/src/assert_single_emf_blob.py"
+    --8<-- "examples/metrics_datadog/src/assert_single_datadog_metric.py"
     ```
 
 === "add_metrics.py"
 
     ```python
-    --8<-- "examples/metrics/src/add_metrics.py"
-    ```
-
-=== "assert_multiple_emf_blobs.py"
-
-    This will be needed when using `capture_cold_start_metric=True`, or when both `Metrics` and `single_metric` are used.
-
-    ```python hl_lines="20-21 27"
-    --8<-- "examples/metrics/src/assert_multiple_emf_blobs.py"
-    ```
-
-=== "assert_multiple_emf_blobs_module.py"
-
-    ```python
-    --8<-- "examples/metrics/src/assert_multiple_emf_blobs_module.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_without_provider.py"
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for DatadogMetrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_datadog.py){target="_blank"}
