@@ -14,16 +14,31 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
 
     """
 
-    def __init__(self, schema: Dict, formats: Optional[Dict] = None):
+    def __init__(
+        self,
+        inbound_schema: Dict,
+        inbound_formats: Optional[Dict] = None,
+        outbound_schema: Optional[Dict] = None,
+        outbound_formats: Optional[Dict] = None,
+    ):
         super().__init__()
-        self.schema = schema
-        self.formats = formats
+        self.inbound_schema = inbound_schema
+        self.inbound_formats = inbound_formats
+        self.outbound_schema = outbound_schema
+        self.outbound_formats = outbound_formats
+
+    def bad_response(self, error: SchemaValidationError) -> Response:
+        return Response(
+            status_code=400,
+            content_type=content_types.APPLICATION_JSON,
+            body=json.dumps({"message": f"Bad Response: {error.message}"}),
+        )
 
     def bad_request(self, error: SchemaValidationError) -> Response:
         return Response(
             status_code=400,
             content_type=content_types.APPLICATION_JSON,
-            body=json.dumps({"message": error.message}),
+            body=json.dumps({"message": f"Bad Request: {error.message}"}),
         )
 
     def bad_config(self, error: InvalidSchemaFormatError) -> Response:
@@ -49,11 +64,21 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
 
         """
         try:
-            validate(event=app.current_event.json_body, schema=self.schema, formats=self.formats)
+            validate(event=app.current_event.json_body, schema=self.inbound_schema, formats=self.inbound_formats)
         except SchemaValidationError as error:
             return self.bad_request(error)
         except InvalidSchemaFormatError as error:
             return self.bad_config(error)
 
         # return next middleware response if validation passes.
-        return get_response(app, **kwargs)
+        result: Response = get_response(app, **kwargs)
+
+        if self.outbound_formats is not None:
+            try:
+                validate(event=result.body, schema=self.inbound_schema, formats=self.inbound_formats)
+            except SchemaValidationError as error:
+                return self.bad_response(error)
+            except InvalidSchemaFormatError as error:
+                return self.bad_config(error)
+
+        return result

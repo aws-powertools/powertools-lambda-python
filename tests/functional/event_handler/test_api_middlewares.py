@@ -38,7 +38,7 @@ def test_fail_schema_validation(validation_schema):
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert (
         result["body"]
-        == "{\"message\": \"Failed schema validation. Error: data must contain ['message'] properties, Path: ['data'], Data: {'username': 'lessa'}\"}"  # noqa: E501
+        == "{\"message\": \"Bad Request: Failed schema validation. Error: data must contain ['message'] properties, Path: ['data'], Data: {'username': 'lessa'}\"}"  # noqa: E501
     )
 
 
@@ -46,7 +46,7 @@ def test_invalid_schema_validation():
     # GIVEN
     app = ApiGatewayResolver()
 
-    @app.post("/my/path", middlewares=[SchemaValidationMiddleware(schema="schema.json")])
+    @app.post("/my/path", middlewares=[SchemaValidationMiddleware(inbound_schema="schema.json")])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
 
