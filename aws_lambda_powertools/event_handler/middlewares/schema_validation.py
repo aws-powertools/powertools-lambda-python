@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Any, Callable, Dict, Optional
 
 from aws_lambda_powertools.event_handler import content_types
@@ -6,6 +7,8 @@ from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, 
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.utilities.validation import validate
 from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
+
+logger = logging.getLogger(__name__)
 
 
 class SchemaValidationMiddleware(BaseMiddlewareHandler):
@@ -42,10 +45,11 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         )
 
     def bad_config(self, error: InvalidSchemaFormatError) -> Response:
+        logger.debug(f"Invalid Schema Format: {error}")
         return Response(
             status_code=500,
             content_type=content_types.APPLICATION_JSON,
-            body=json.dumps({"message": str(error)}),
+            body=json.dumps({"message": "Internal Server Error"}),
         )
 
     def handler(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
