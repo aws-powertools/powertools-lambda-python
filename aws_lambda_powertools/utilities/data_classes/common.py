@@ -30,7 +30,7 @@ class DictWrapper(Mapping):
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, DictWrapper):
             return False
 
