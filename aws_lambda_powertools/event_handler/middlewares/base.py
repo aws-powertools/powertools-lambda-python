@@ -16,13 +16,13 @@ class BaseMiddlewareHandler(ABC):
     ```python
 
     # Place code here for actions BEFORE the next middleware handler is called
-    # or optionally raise an excpetion to short-circuit the middleware execution chain
+    # or optionally raise an exception to short-circuit the middleware execution chain
 
     # Get the response from the NEXT middleware handler (optionally injecting custom
     # arguments into the get_response call)
     result: Response = get_response(app, my_custom_arg="handled", **kwargs)
 
-    # Place code ehre for actions AFTER the next middleware handler is called
+    # Place code here for actions AFTER the next middleware handler is called
 
     return result
     ```
@@ -32,16 +32,16 @@ class BaseMiddlewareHandler(ABC):
     specific types of exceptions.
 
     for example:
-    ============
 
     ```python
 
     try:
         result: Response = get_response(app, my_custom_arg="handled", **kwargs)
     except MyCustomValidationException as e:
-        # Make sure we send back a 400 resposne for any Custom Validation Exceptions.
+        # Make sure we send back a 400 response for any Custom Validation Exceptions.
         result.status_code = 400
-        result.body = {"message": str(e)}
+        result.body = {"message": "Failed validation"}
+        logger.exception(f"Failed validation when handling route: {app.current_event.path}")
 
     return result
     ```
@@ -51,7 +51,6 @@ class BaseMiddlewareHandler(ABC):
     handler to get the response from the next middleware handler in the chain.
 
     for example:
-    ============
     If you wanted to ensure API callers cannot call a DELETE verb on your API (regardless of defined routes)
     you could do so with the following middleware implementation.
 

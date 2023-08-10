@@ -272,7 +272,7 @@ class Route:
         handler wanting to short-circuit the middlware call chain should raise an execution
         to force the Python call stack created by the handler call-chain to naturally un-wind.
 
-        This becomes a simple concept for Users ot understand and reason with - no additional
+        This becomes a simple concept for Users to understand and reason with - no additional
         gymanstics other than plain old try ... except.
 
         Notes
@@ -416,10 +416,10 @@ class BaseRouter(ABC):
 
     def use(self, middlewares: List[Callable[..., Any]]):
         """
-        Add a List of middlewares to the global routetr middleware list
+        Add a list of middlewares to the global router middleware list
 
-        These Middleware handlers will be executed in order of adding to the array and will
-        be executed before any specific middleware applied at the actual route level.
+        These middlewares will be called in insertion order and 
+        before any middleware registered at the route level.
         """
         self.router_middlewares = self.router_middlewares + middlewares
 
@@ -597,7 +597,7 @@ class BaseRouter(ABC):
         self.context.clear()
 
 
-class MiddlewareStackWrapper:
+class MiddlewareFrame:
     """
     creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
     middleware functions.  Each instance contains the current middleware to be executed and the next
@@ -622,11 +622,27 @@ class MiddlewareStackWrapper:
 
     def __init__(
         self,
-        handler: Callable,
+        current_middleware: Callable,
         next_middleware: Callable,
     ) -> None:
         self.handler: Callable = handler
         self.next_middleware: Callable = next_middleware
+        self._next_middleware_name = next_middleware.__name__
+
+
+    @property
+    def __name__():
+        """Current middleware name
+        
+        It ensures backward compatibility with view functions being callable. This
+        improves debugging since we need both current and next middlewares/callable names.
+        """
+        return self.handler.__name__
+
+    def __str__(self) -> str:
+        """Identify current middleware identity and call chain for debugging purposes."""
+        middleware_name = self.__name__
+        return f"Middleware '{middleware_name}'. Call chain is: {middleware_name} -> {self._next_middleware_name}"
 
     def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
         """
@@ -642,16 +658,15 @@ class MiddlewareStackWrapper:
         Returns
         -------
         Union[Dict, Tuple, Response]
-            (tech-debt for backward compatability).  The response type should be a
-            Response object in all cases excepting when the oiginal API rout handler
+            (tech-debt for backward compatibility).  The response type should be a
+            Response object in all cases excepting when the original API rout handler
             is executed which will return one of 3 outputs.
 
         """
-        return self.handler(app, self.next_middleware, **kwargs)
+        return self.current_middleware(app, self.next_middleware, **kwargs)
 
 
-# No type checking possible due to Dependency order of definition ()
-def registered_api_adapter(app, get_response: Callable[..., Any], **kwargs) -> Union[Dict, Tuple, Response]:
+def registered_api_adapter(app: "ApiGatewayResolver", get_response: Callable[..., Any], **kwargs) -> Union[Dict, Tuple, Response]:
     """
     Calls the registered API using ONLY the **kwargs provided to ensure the
     call signature of existing defined router of Users does not create a breaking change.

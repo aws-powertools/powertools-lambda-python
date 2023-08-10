@@ -1853,7 +1853,7 @@ def test_middleware_early_return():
     # GIVEN
     app = ApiGatewayResolver()
 
-    def middleware_one(app, get_response, **kwargs):
+    def middleware_one(app, get_response, **context):
         # inject a variable into the kwargs
         response = get_response(app, injected="injected_value", **kwargs)
 
