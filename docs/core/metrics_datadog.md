@@ -2,8 +2,9 @@
 title: Datadog
 description: Core utility
 ---
-<!-- markdownlint-disable-next-line MD013 -->
+<!-- markdownlint-disable MD013 -->
 Datadog provider creates custom metrics by flushing metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"} or flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK.
+<!-- markdownlint-enable MD013 -->
 
 These metrics can be visualized through [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
 
@@ -131,7 +132,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 If you want to ensure at least one metric is always emitted, you can pass `raise_on_empty_metrics` to the **log_metrics** decorator:
 
 ```python hl_lines="7" title="Raising SchemaValidationError exception if no metrics are added"
---8<-- "examples/metrics_datadog/src/raise_on_empty_metrics.py"
+--8<-- "examples/metrics_datadog/src/raise_on_empty_datadog_metrics.py"
 ```
 
 ???+ tip "Suppressing warning messages on empty metrics"
@@ -144,7 +145,7 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 === "capture_cold_start_metric.py"
 
     ```python hl_lines="7"
-    --8<-- "examples/metrics_datadog/src/capture_cold_start_metric.py"
+    --8<-- "examples/metrics_datadog/src/capture_cold_start_datadog_metric.py"
     ```
 
 === "capture_cold_start_metric_output.json"
@@ -185,7 +186,7 @@ If you are using the AWS Lambda Web Adapter project, or a middleware with custom
 Contrary to the `log_metrics` decorator, you are now also responsible to flush metrics in the event of an exception.
 
 ```python hl_lines="17" title="Manually flushing and clearing metrics from memory"
---8<-- "examples/metrics_datadog/src/flush_metrics.py"
+--8<-- "examples/metrics_datadog/src/flush_datadog_metrics.py"
 ```
 
 ## Testing your code
@@ -211,7 +212,7 @@ Make sure to set `POWERTOOLS_METRICS_NAMESPACE` before running your tests to pre
 `DatadogMetrics` keep metrics in memory across multiple instances. If you need to test this behavior, you can use the following Pytest fixture to ensure metrics are reset incl. cold start:
 
 ```python title="Clearing metrics between tests"
---8<-- "examples/metrics_datadog/src/clear_metrics_in_tests.py"
+--8<-- "examples/metrics_datadog/src/clear_datadog_metrics_in_tests.py"
 ```
 
 ### Functional testing

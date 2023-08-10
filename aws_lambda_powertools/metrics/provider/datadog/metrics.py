@@ -93,7 +93,7 @@ class DatadogMetrics:
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_tags: List | None = None,
+        default_tags: Dict | None = None,
     ):
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,
