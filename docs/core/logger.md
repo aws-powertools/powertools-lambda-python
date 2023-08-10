@@ -24,6 +24,8 @@ Logger requires two settings:
 | **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `LOG_LEVEL`               | `level`               |
 | **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`             |
 
+There are some [other environment variables](#environment-variables) which can be set to modify Logger's settings at a global scope.
+
 ```yaml hl_lines="12-13" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/logger/sam/template.yaml"
 ```
@@ -340,6 +342,18 @@ You can easily change the date format using one of the following parameters:
     ```json hl_lines="6 13"
     --8<-- "examples/logger/src/date_formatting_output.json"
     ```
+
+### Environment variables
+
+The following environment variables are available to configure Logger at a global scope:
+
+| Setting                   | Description                                                                  | Environment variable                    | Default |
+|---------------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
+| **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
+| **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+
+[`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value.
 
 ## Advanced
 

@@ -103,6 +103,18 @@ You can trace asynchronous functions and generator functions (including context 
     --8<-- "examples/tracer/src/capture_method_generators.py"
     ```
 
+### Environment variables
+
+The following environment variables are available to configure Tracer at a global scope:
+
+| Setting               | Description                                      | Environment variable                 | Default |
+|-----------------------|--------------------------------------------------|--------------------------------------|---------|
+| **Disable Tracing**   | Explicitly disables all tracing.                 | `POWERTOOLS_TRACE_DISABLED`          | `false` |
+| **Response Capture**  | Captures Lambda or method return as metadata.    | `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | `true`  |
+| **Exception Capture** | Captures Lambda or method exception as metadata. | `POWERTOOLS_TRACER_CAPTURE_ERROR`    | `true`  |
+
+Both [`POWERTOOLS_TRACER_CAPTURE_RESPONSE`](#disabling-response-auto-capture) and [`POWERTOOLS_TRACER_CAPTURE_ERROR`](#disabling-exception-auto-capture) can be set on a per-method basis, consequently overriding the environment variable value.
+
 ## Advanced
 
 ### Patching modules
