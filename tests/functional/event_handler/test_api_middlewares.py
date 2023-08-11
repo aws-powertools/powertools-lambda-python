@@ -57,7 +57,4 @@ def test_invalid_schema_validation():
     # THEN
     assert result["statusCode"] == 500
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert (
-        result["body"]
-        == "{\"message\": \"Schema received: schema.json, Formats: {}. Error: 'str' object has no attribute 'items'\"}"
-    )
+    assert result["body"] == '{"message": "Internal Server Error"}'
