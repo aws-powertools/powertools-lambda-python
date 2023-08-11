@@ -47,7 +47,7 @@ def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     assert logs == json.loads('{"m":"item_sold","v":1,"e":"","t":["product:latte","order:online"]}')
 
 
-def test_datadog_with_invalid_value():
+def test_datadog_with_invalid_metric_value():
     # GIVEN DatadogMetrics is initialized
     metrics = DatadogMetrics()
 
@@ -56,6 +56,17 @@ def test_datadog_with_invalid_value():
     # THEN it should fail validation and raise MetricValueError
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
         metrics.add_metric(name="item_sold", value="a", tags=["product:latte", "order:online"])
+
+
+def test_datadog_with_invalid_metric_name():
+    # GIVEN DatadogMetrics is initialized
+    metrics = DatadogMetrics()
+
+    # WHEN we a metric name starting with a number
+    # WHEN we attempt to serialize a valid Datadog metric
+    # THEN it should fail validation and raise MetricValueError
+    with pytest.raises(SchemaValidationError, match="Invalid metric name.*"):
+        metrics.add_metric(name="1_item_sold", value="a", tags=["product:latte", "order:online"])
 
 
 def test_datadog_raise_on_empty():

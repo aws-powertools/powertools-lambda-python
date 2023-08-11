@@ -53,7 +53,7 @@ class DatadogMetrics:
     # e.g., m1 and m2 add metric ProductCreated, however m1 has 'version' dimension  but m2 doesn't
     # Result: ProductCreated is created twice as we now have 2 different EMF blobs
     _metrics: List = []
-    _default_tags: Dict = {}
+    _default_tags: Dict[str, Any] = {}
 
     def __init__(
         self,
@@ -93,7 +93,7 @@ class DatadogMetrics:
         lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
-        default_tags: Dict | None = None,
+        default_tags: Dict[str, Any] | None = None,
     ):
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,

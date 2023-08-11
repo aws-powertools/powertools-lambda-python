@@ -9,7 +9,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.functions import serialize_datadog_tags
+from aws_lambda_powertools.metrics.functions import serialize_datadog_tags, validate_datadog_metric_name
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
@@ -50,12 +50,13 @@ class DatadogProvider(BaseProvider):
         metric_set: List | None = None,
         namespace: str | None = None,
         flush_to_log: bool | None = None,
-        default_tags: Dict | None = None,
+        default_tags: Dict[str, Any] | None = None,
     ):
         self.metric_set = metric_set if metric_set is not None else []
-        self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
-        if self.namespace is None:
-            self.namespace = DEFAULT_NAMESPACE
+        self.namespace = (
+            resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
+            or DEFAULT_NAMESPACE
+        )
         self.default_tags = default_tags or {}
         self.flush_to_log = resolve_env_var_choice(choice=flush_to_log, env=os.getenv(constants.DATADOG_FLUSH_TO_LOG))
 
@@ -96,12 +97,22 @@ class DatadogProvider(BaseProvider):
             >>>     sales='sam'
             >>> )
         """
+
+        # validating metric name
+        if not validate_datadog_metric_name(name):
+            docs = "https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics"
+            raise SchemaValidationError(
+                f"Invalid metric name. Please ensure the metric {name} follows the requirements. \n"
+                f"See Datadog documentation here: \n {docs}",
+            )
+
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
 
         if not timestamp:
             timestamp = int(time.time())
 
+        logger.debug({"details": "Appending metric", "metrics": name})
         self.metric_set.append({"m": name, "v": value, "e": timestamp, "t": tags})
 
     def serialize_metric_set(self, metrics: List | None = None) -> List:
@@ -141,6 +152,7 @@ class DatadogProvider(BaseProvider):
                 metric_name = f"{self.namespace}.{single_metric['m']}"
             else:
                 metric_name = single_metric["m"]
+
             output_list.append(
                 {
                     "m": metric_name,
@@ -171,6 +183,7 @@ class DatadogProvider(BaseProvider):
             )
 
         else:
+            logger.debug("Flushing existing metrics")
             metrics = self.serialize_metric_set()
             # submit through datadog extension
             if lambda_metric and not self.flush_to_log:
@@ -188,7 +201,7 @@ class DatadogProvider(BaseProvider):
                 for metric_item in metrics:
                     print(json.dumps(metric_item, separators=(",", ":")))
 
-        self.clear_metrics()
+            self.clear_metrics()
 
     def clear_metrics(self):
         logger.debug("Clearing out existing metric set from memory")
