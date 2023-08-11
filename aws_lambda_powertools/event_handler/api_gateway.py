@@ -535,8 +535,9 @@ class ApiGatewayResolver(BaseRouter):
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
         strip_prefixes: List[Union[str, Pattern]], optional
-            optional list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings. Each prefix can be a static string or a compiled regex
+            optional list of prefixes to be removed from the request path before doing the routing.
+            This is often used with api gateways with multiple custom mappings.
+            Each prefix can be a static string or a compiled regex pattern
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
