@@ -1098,6 +1098,18 @@ def test_remove_prefix_by_regex(path: str):
     assert response["statusCode"] == 200
 
 
+def test_empty_path_when_using_regexes():
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": "/dev"}, None)
+
+    assert response["statusCode"] == 200
+
+
 @pytest.mark.parametrize(
     "prefix",
     [

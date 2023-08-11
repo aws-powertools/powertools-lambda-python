@@ -724,10 +724,11 @@ class ApiGatewayResolver(BaseRouter):
             if isinstance(prefix, Pattern):
                 path = re.sub(prefix, "", path)
 
-        # When using regexes, we might get into a point where everything is removed
-        # from the string, so we check if it's empty and change it accordingly.
-        if not path:
-            path = "/"
+                # When using regexes, we might get into a point where everything is removed
+                # from the string, so we check if it's empty and return /, since there's nothing
+                # else to strip anymore.
+                if not path:
+                    return "/"
 
         return path
 
