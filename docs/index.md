@@ -673,7 +673,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 ## Quick getting started
 
 ```bash title="Hello world example using SAM CLI"
-sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.10 --no-tracing
+sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.11 --no-tracing
 ```
 
 ## Features

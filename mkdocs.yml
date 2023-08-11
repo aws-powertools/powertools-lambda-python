@@ -16,8 +16,9 @@ nav:
           - core/tracer.md
           - core/logger.md
           - Metrics:
-              - core/metrics.md
-              - core/metrics_datadog.md
+              - core/metrics/index.md
+              - Amazon CloudWatch EMF: core/metrics.md
+              - Datadog: core/metrics_datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md

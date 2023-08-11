@@ -36,7 +36,7 @@ Experiment to use your application or main service as the metric namespace to ea
 ### Install
 
 ???+ note
-    If you are using Datadog Forwarder, you can skip this step step.
+    If you are using Datadog Forwarder, you can skip this step.
 
 To adhere to Lambda best practices and effectively minimize the size of your development package, we recommend using the official Datadog layers built specifically for the SDK and extension components. Below is the template that demonstrates how to configure a SAM template with this information.
 
@@ -178,7 +178,7 @@ The following environment variable is available to configure Metrics at a global
 
 ### Flushing metrics manually
 
-If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
+If you are using the [AWS Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter){target="_blank"} project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
 
 ???+ warning
     This does not capture Cold Start metrics, and metric data validation still applies.
