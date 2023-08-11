@@ -3,8 +3,21 @@ title: Datadog
 description: Core utility
 ---
 <!-- markdownlint-disable MD013 -->
-Datadog provider creates custom metrics by flushing metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"} or flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK.
+Datadog provider creates custom metrics by flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK. Alternatively you can flush metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}
 <!-- markdownlint-enable MD013 -->
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaCode: Lambda code with Powertools
+    DatadogSDK: Datadog SDK
+    DatadogExtension: Datadog Extension async
+    Datadog: Datadog Dashboard
+
+    LambdaCode --> DatadogSDK
+    DatadogSDK --> DatadogExtension
+    DatadogExtension --> Datadog
+```
 
 These metrics can be visualized through [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
 
@@ -78,6 +91,8 @@ Datadog offers the flexibility to configure tags per metric. To provider a bette
     --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
 
+We recommend [read](https://docs.datadoghq.com/getting_started/tagging/){target="_blank" rel="nofollow"} the official Datadog documentation for comprehensive insights into the best practices for effectively utilizing tags.
+
 ### Adding default tags
 
 If you want to set the same tags for all metrics, you can use the `set_default_tags` method or the `default_tags` parameter in the `log_metrics` decorator and then persist tags across the Lambda invocations.
@@ -99,7 +114,7 @@ If you'd like to remove them at some point, you can use `clear_default_tags` met
     --8<-- "examples/metrics_datadog/src/set_default_tags_log_metrics.py"
     ```
 
-### Flushing metrics to standard output
+### Exporting to Datadog Log Forwarder
 
 You have the option to flush metrics to the standard output for exporting, which can then be seamlessly processed through the [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
 
@@ -107,6 +122,12 @@ You have the option to flush metrics to the standard output for exporting, which
 
     ```python hl_lines="4"
     --8<-- "examples/metrics_datadog/src/flush_metrics_to_standard_output.py"
+    ```
+
+=== "log_metrics_standard_output.json"
+
+    ```json hl_lines="2 6 7"
+    --8<-- "examples/metrics_datadog/src/log_metrics_standard_output.json"
     ```
 
 ### Flushing metrics

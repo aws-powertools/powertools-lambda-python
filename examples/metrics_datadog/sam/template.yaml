@@ -10,6 +10,9 @@ Globals:
     Environment:
       Variables:
         POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+        # Configuring the API_KEY and DD_SITE can be achieved through various methods.
+        # An functional approach involves utilizing these two environment variables.
+        # Further details can be found at: https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli
         DD_API_KEY: "<YOUR DATADOG API KEY>"
         DD_SITE: datadoghq.com
 
@@ -18,9 +21,13 @@ Globals:
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
       - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40
       # Find the latest Layer version in the Datadog official documentation
-      # See https://github.com/DataDog/datadog-lambda-python/releases
+
+      # You can use the Datadog layer to bring the Datadog SDK
+      # Further details can be found at: https://github.com/DataDog/datadog-lambda-python/releases
       - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python310:78
-      # See https://github.com/DataDog/datadog-lambda-extension/releases
+
+      # You can use the Datadog extension to export logs directly to Datadog
+      # Further details can be found at: https://github.com/DataDog/datadog-lambda-extension/releases
       - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:45
 
 Resources:
