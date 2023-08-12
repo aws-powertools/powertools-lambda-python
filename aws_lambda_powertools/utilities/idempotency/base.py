@@ -214,7 +214,6 @@ class IdempotencyHandler:
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
-
         response_dict: Optional[dict] = data_record.response_json_as_dict()
         if response_dict and self.output_serializer:
             return self.output_serializer.from_dict(response_dict)

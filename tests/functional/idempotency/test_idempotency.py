@@ -1200,39 +1200,41 @@ def test_idempotent_function_serialization_custom_dict():
     # GIVEN
     config = IdempotencyConfig(use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
-    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_custom_dict.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
     persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
 
-    class PaymentInput(BaseModel):
-        customer_id: str
-        transaction_id: str
+    to_dict_called = False
+    from_dict_called = False
 
-    class PaymentOutput(BaseModel):
-        customer_id: str
-        transaction_id: str
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    expected_result = {"message": "Foo"}
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
 
     @idempotent_function(
-        data_keyword_argument="payment",
         persistence_store=persistence_layer,
+        data_keyword_argument="record",
         config=config,
-        output_serializer=CustomDictSerializer(
-            to_dict=lambda x: x.dict(),
-            from_dict=PaymentOutput.parse_obj,
-        ),
+        output_serializer=output_serializer,
     )
-    def collect_payment(payment: PaymentInput) -> PaymentOutput:
-        return PaymentOutput.parse_obj(payment)
+    def record_handler(record):
+        return expected_result
 
-    # WHEN
-    payment = PaymentInput(**mock_event)
-    first_call: PaymentOutput = collect_payment(payment=payment)
-    assert first_call.customer_id == payment.customer_id
-    assert first_call.transaction_id == payment.transaction_id
-    assert isinstance(first_call, PaymentOutput)
-    second_call: PaymentOutput = collect_payment(payment=payment)
-    assert isinstance(second_call, PaymentOutput)
-    assert second_call.customer_id == payment.customer_id
-    assert second_call.transaction_id == payment.transaction_id
+    record_handler(record=mock_event)
+    assert to_dict_called
+    record_handler(record=mock_event)
+    assert from_dict_called
 
 
 def test_idempotent_function_serialization_pydantic():

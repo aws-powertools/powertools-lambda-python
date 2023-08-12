@@ -127,6 +127,7 @@ def idempotent_function(
                 data_keyword_argument=data_keyword_argument,
                 persistence_store=persistence_store,
                 config=config,
+                output_serializer=output_serializer,
             ),
         )
 
@@ -144,7 +145,6 @@ def idempotent_function(
             )
 
         payload = kwargs.get(data_keyword_argument)
-
         idempotency_handler = IdempotencyHandler(
             function=function,
             function_payload=payload,
