@@ -39,7 +39,7 @@ class S3ObjectSessionContext(BaseModel):
 
 
 class S3ObjectUserIdentity(BaseModel):
-    type: str  # noqa003
+    type: str  # noqa: A003
     accountId: str
     accessKeyId: str
     userName: Optional[str] = None

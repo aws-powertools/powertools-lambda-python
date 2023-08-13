@@ -1,116 +1,42 @@
+from __future__ import annotations
+
 import json
 import warnings
 from collections import namedtuple
-from typing import Any, Dict, List, Union
+from typing import Dict, List
 
 import pytest
 
-from aws_lambda_powertools import Metrics, single_metric
 from aws_lambda_powertools.metrics import (
     EphemeralMetrics,
     MetricResolution,
     MetricResolutionError,
+    Metrics,
     MetricUnit,
     MetricUnitError,
     MetricValueError,
     SchemaValidationError,
+    single_metric,
 )
-from aws_lambda_powertools.metrics.base import (
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import (
+    AmazonCloudWatchEMFProvider,
+)
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import (
     MAX_DIMENSIONS,
-    MetricManager,
-    reset_cold_start_flag,
 )
-
-
-@pytest.fixture(scope="function", autouse=True)
-def reset_metric_set():
-    metrics = Metrics()
-    metrics.clear_metrics()
-    metrics.clear_default_dimensions()
-    reset_cold_start_flag()  # ensure each test has cold start
-    yield
-
-
-@pytest.fixture
-def metric_with_resolution() -> Dict[str, Union[str, int]]:
-    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1, "resolution": MetricResolution.High}
-
-
-@pytest.fixture
-def metric() -> Dict[str, str]:
-    return {"name": "single_metric", "unit": MetricUnit.Count, "value": 1}
-
-
-@pytest.fixture
-def metrics() -> List[Dict[str, str]]:
-    return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
-        {"name": "metric_two", "unit": MetricUnit.Count, "value": 1},
-    ]
-
-
-@pytest.fixture
-def metrics_same_name() -> List[Dict[str, str]]:
-    return [
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},
-        {"name": "metric_one", "unit": MetricUnit.Count, "value": 5},
-    ]
-
-
-@pytest.fixture
-def dimension() -> Dict[str, str]:
-    return {"name": "test_dimension", "value": "test"}
-
-
-@pytest.fixture
-def dimensions() -> List[Dict[str, str]]:
-    return [
-        {"name": "test_dimension", "value": "test"},
-        {"name": "test_dimension_2", "value": "test"},
-    ]
-
-
-@pytest.fixture
-def non_str_dimensions() -> List[Dict[str, Any]]:
-    return [
-        {"name": "test_dimension", "value": True},
-        {"name": "test_dimension_2", "value": 3},
-    ]
-
-
-@pytest.fixture
-def namespace() -> str:
-    return "test_namespace"
-
-
-@pytest.fixture
-def service() -> str:
-    return "test_service"
-
-
-@pytest.fixture
-def metadata() -> Dict[str, str]:
-    return {"key": "username", "value": "test"}
-
-
-@pytest.fixture
-def a_hundred_metrics() -> List[Dict[str, str]]:
-    return [{"name": f"metric_{i}", "unit": "Count", "value": 1} for i in range(100)]
-
-
-@pytest.fixture
-def a_hundred_metric_values() -> List[Dict[str, str]]:
-    return [{"name": "metric", "unit": "Count", "value": i} for i in range(100)]
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import (
+    CloudWatchEMFOutput,
+)
 
 
 def serialize_metrics(
     metrics: List[Dict],
     dimensions: List[Dict],
     namespace: str,
-    metadatas: List[Dict] = None,
-) -> Dict:
+    metadatas: List[Dict] | None = None,
+) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a list of metrics, dimensions"""
-    my_metrics = MetricManager(namespace=namespace)
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     for dimension in dimensions:
         my_metrics.add_dimension(**dimension)
 
@@ -125,9 +51,14 @@ def serialize_metrics(
         return my_metrics.serialize_metric_set()
 
 
-def serialize_single_metric(metric: Dict, dimension: Dict, namespace: str, metadata: Dict = None) -> Dict:
+def serialize_single_metric(
+    metric: Dict,
+    dimension: Dict,
+    namespace: str,
+    metadata: Dict | None = None,
+) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
-    my_metrics = MetricManager(namespace=namespace)
+    my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
     my_metrics.add_metric(**metric)
     my_metrics.add_dimension(**dimension)
 
@@ -147,7 +78,7 @@ def capture_metrics_output(capsys):
     return json.loads(capsys.readouterr().out.strip())
 
 
-def capture_metrics_output_multiple_emf_objects(capsys):
+def capture_metrics_output_multiple_emf_objects(capsys) -> List[CloudWatchEMFOutput]:
     return [json.loads(line.strip()) for line in capsys.readouterr().out.split("\n") if line]
 
 
@@ -224,6 +155,27 @@ def test_single_metric_default_dimensions_inherit(capsys, metric, dimension, nam
     expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace)
 
     # THEN we should have default dimension added to the metric
+    remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_log_metrics_preconfigured_provider(capsys, metrics, dimensions, namespace):
+    # GIVEN Metrics is initialized
+    provider = AmazonCloudWatchEMFProvider(namespace=namespace)
+    my_metrics = Metrics(provider=provider)
+    for metric in metrics:
+        my_metrics.add_metric(**metric)
+    for dimension in dimensions:
+        my_metrics.add_dimension(**dimension)
+
+    # WHEN we manually the metrics
+    my_metrics.flush_metrics()
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_metrics(metrics=metrics, dimensions=dimensions, namespace=namespace)
+
+    # THEN we should have no exceptions
+    # and a valid EMF object should be flushed correctly
     remove_timestamp(metrics=[output, expected])
     assert expected == output
 
@@ -1010,7 +962,7 @@ def test_metric_manage_metadata_set():
     expected_dict = {"setting": "On"}
 
     try:
-        metric = MetricManager(metadata_set=expected_dict)
+        metric = AmazonCloudWatchEMFProvider(metadata_set=expected_dict)
         assert metric.metadata_set == expected_dict
     except AttributeError:
         pytest.fail("AttributeError should not be raised")
@@ -1050,6 +1002,39 @@ def test_clear_default_dimensions(namespace):
 
     # THEN there should be no default dimensions
     assert not my_metrics.default_dimensions
+
+
+def test_get_and_set_namespace_and_service_properties(namespace, service, metrics, capsys):
+    # GIVEN Metrics instance is initialized without namespace and service
+    my_metrics = Metrics()
+
+    # WHEN we set service and namespace before flushing the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.namespace = namespace
+        my_metrics.service = service
+        for metric in metrics:
+            my_metrics.add_metric(**metric)
+
+    lambda_handler({}, {})
+    invocation = capture_metrics_output(capsys)
+
+    assert service in json.dumps(invocation)
+    assert namespace in json.dumps(invocation)
+
+
+def test_clear_default_dimensions_with_provider(namespace):
+    # GIVEN Metrics is initialized with provider and we persist a set of default dimensions
+    my_provider = AmazonCloudWatchEMFProvider(namespace=namespace)
+    my_metrics = Metrics(provider=my_provider)
+    my_metrics.set_default_dimensions(environment="test", log_group="/lambda/test")
+
+    # WHEN they are removed via clear_default_dimensions method
+    my_metrics.clear_default_dimensions()
+
+    # THEN there should be no default dimensions in provider and metrics
+    assert not my_metrics.default_dimensions
+    assert not my_provider.default_dimensions
 
 
 def test_default_dimensions_across_instances(namespace):
@@ -1143,6 +1128,7 @@ def test_ephemeral_metrics_isolated_data_set_with_default_dimension(metric, dime
     # GIVEN two EphemeralMetrics instances are initialized
     # One with default dimension and another without
     my_metrics = EphemeralMetrics(namespace=namespace)
+
     my_metrics.set_default_dimensions(dev="powertools")
     isolated_metrics = EphemeralMetrics(namespace=namespace)
 
