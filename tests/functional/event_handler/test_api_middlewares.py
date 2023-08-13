@@ -260,22 +260,22 @@ def test_api_gateway_app_router_with_middlewares():
 
     router.use(middlewares=[router_middleware])
 
+    to_inject: str = "injected_value"
+
     def middleware_one(app, get_response, **context):
         # inject a variable into the kwargs of the middleware chain
-        response = get_response(app, injected="injected_value", **context)
+        response = get_response(app, injected=to_inject, **context)
 
         return response
 
     @router.get("/my/path", middlewares=[middleware_one])
-    def foo(app_injected: str, router_injected: str, injected: str):
+    def get_api_route(app_injected: str, router_injected: str, injected: str):
         # make sure value is injected by middleware_one
-        assert injected == "injected_value"
+        assert injected == to_inject
         assert router_injected == "router_value"
         assert app_injected == "app_value"
 
-        return Response(200, content_types.TEXT_HTML, "foo")
-
-        return {}
+        return Response(200, content_types.TEXT_HTML, injected)
 
     app.include_router(router)
     # WHEN calling the event handler after applying routes from router object
@@ -284,4 +284,4 @@ def test_api_gateway_app_router_with_middlewares():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
-    assert result["body"] == "foo"
+    assert result["body"] == to_inject
