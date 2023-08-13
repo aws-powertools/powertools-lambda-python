@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 class BaseDictSerializer(ABC):
     """
     Abstract Base Class for Idempotency serialization layer, supporting dict operations.
+    This interface not be inherited by end user implementation.
     """
 
     @abstractmethod

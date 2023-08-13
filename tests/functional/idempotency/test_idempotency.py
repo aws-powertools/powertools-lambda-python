@@ -1261,7 +1261,7 @@ def test_idempotent_function_serialization_pydantic():
         ),
     )
     def collect_payment(payment: PaymentInput) -> PaymentOutput:
-        return PaymentOutput.parse_obj(payment)
+        return PaymentOutput(**payment.dict())
 
     # WHEN
     payment = PaymentInput(**mock_event)

@@ -152,6 +152,22 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
+#### Output Serialization
+
+By supplying an output serializer, you can control the return type of the function, allowing cleaner integration with the rest of your code base.
+
+=== "Using A Custom Type (Dataclasses)"
+
+    ```python hl_lines="3-8 26-28 32-35 42 48"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass_output_serializer.py"
+    ```
+
+=== "Using Pydantic"
+
+    ```python hl_lines="3-8 23-24 32 35"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
+    ```
+
 #### Batch integration
 
 You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
