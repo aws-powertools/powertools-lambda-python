@@ -1185,6 +1185,11 @@ class ApiGatewayResolver(BaseRouter):
             # Middlewares are stored by route seperately - must grab them to include
             middlewares = router._routes_with_middleware.get(new_route)
 
+            # Need to use "type: ignore" here since mypy does not like a named parameter after
+            # tuple expansion since may cause duplicate named parameters in the function signature.
+            # In this case this is not possible since the tuple expansion is from a hashable source
+            # and the `middlewares` List is a non-hashable structure so will never be included.
+            # Still need to ignore for mypy checks or will cause failures (false-positive)
             self.route(*new_route, middlewares=middlewares)(func)  # type: ignore
 
 
