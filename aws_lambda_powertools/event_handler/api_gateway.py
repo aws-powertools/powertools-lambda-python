@@ -257,7 +257,7 @@ class Route:
     def __call__(
         self,
         router_middlewares: List[Callable],
-        app,
+        app: "ApiGatewayResolver",
         route_arguments: Dict[str, str],
     ) -> Union[Dict, Tuple, Response]:
         """Calling the Router class instance will trigger the following actions:
@@ -288,6 +288,9 @@ class Route:
         """
         if not self._middleware_stack_built:
             self._build_middleware_stack(router_middlewares=router_middlewares)
+
+        # Keep track of executed middleware
+        app._append_executed_middleware(self.func.__name__)
 
         # Call the Middleware Wrapped route function handler with the app and route arguments
         return self.func(app, **route_arguments)
@@ -430,7 +433,7 @@ class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
-    router_middlewares: List[Callable] = []
+    _router_middlewares: List[Callable] = []
 
     @abstractmethod
     def route(
@@ -444,14 +447,35 @@ class BaseRouter(ABC):
     ):
         raise NotImplementedError()
 
-    def use(self, middlewares: List[Callable[..., Any]]):
+    def use(self, middlewares: List[Callable[..., Any]]) -> None:
         """
         Add a list of middlewares to the global router middleware list
 
         These middlewares will be called in insertion order and
         before any middleware registered at the route level.
+
+        Example
+        -------
+        Add middlewares to be used for every reuqest processed by the Router.
+
+        ```
+        my_custom_middleware = new CustomMiddleware()
+
+        app.use([my_custom_middleware])
+
+        ```
+
+        Parameters
+        ----------
+        middlewares - List of middlewares to be used
+
+        Returns
+        -------
+        None
+
+
         """
-        self.router_middlewares = self.router_middlewares + middlewares
+        self._router_middlewares = self._router_middlewares + middlewares
 
     def get(
         self,
@@ -644,8 +668,8 @@ class MiddlewareFrame:
 
     Parameters
     ----------
-    handler : Callable
-        The API route handler to be invoked when this class is executed.
+    current_middleware : Callable
+        The current middleware function to be called as a request is processed.
     next_middleware : Callable
         The next middleware in the middleware stack.
     """
@@ -675,24 +699,30 @@ class MiddlewareFrame:
 
     def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
         """
-        Call the middleware stack wrapper
+        Call the middleware Frame to process the request.
 
         Parameters
         ----------
         app: BaseRouter
             The router instance
         **kwargs
-            Any additional arguments to pass to the middleware stack wrapper
+            Any additional arguments to pass to the middleware Frame
 
         Returns
         -------
         Union[Dict, Tuple, Response]
             (tech-debt for backward compatibility).  The response type should be a
-            Response object in all cases excepting when the original API rout handler
+            Response object in all cases excepting when the original API route handler
             is executed which will return one of 3 outputs.
 
         """
-        return self.current_middleware(app, self.next_middleware, **kwargs)
+        logger.debug(f"MiddlewareFrame: {self}")
+        try:
+            return self.current_middleware(app, self.next_middleware, **kwargs)
+        except Exception as error:
+            # Log the exception and raise it back to the caller
+            logger.exception(error)
+            raise error
 
 
 def _registered_api_adapter(
@@ -701,11 +731,11 @@ def _registered_api_adapter(
     **kwargs,
 ) -> Union[Dict, Tuple, Response]:
     """
-    Calls the registered API using ONLY the **kwargs provided to ensure the
-    call signature of existing defined router of Users does not create a breaking change.
+    Calls the registered API using ONLY the **kwargs provided to ensure the last call
+    in the chain will match the API route function signature.
 
-    **IMPORTANT: This middleware enables backward compatibility for the existing API routes model in Powertools
-    and it MUST BE THE LAST middleware in the middleware stack.
+    **IMPORTANT: This middleware ensures the actual API route is called with the correct call signature
+    and it MUST be the final frame in the middleware stack.
 
     Parameters
     ----------
@@ -722,6 +752,7 @@ def _registered_api_adapter(
         The API Response Object
 
     """
+    logger.debug(f"Calling API Route Handler: {kwargs}")
     return app._to_response(get_response(**kwargs))
 
 
@@ -789,6 +820,7 @@ class ApiGatewayResolver(BaseRouter):
         self._cors_methods: Set[str] = {"OPTIONS"}
         self._debug = self._has_debug(debug)
         self._strip_prefixes = strip_prefixes
+        self._executed_middlewares: List[str] = []
         self.context: Dict = {}  # early init as customers might add context before event resolution
 
         # Allow for a custom serializer or a concise json serialization
@@ -879,6 +911,9 @@ class ApiGatewayResolver(BaseRouter):
         response = self._resolve().build(self.current_event, self._cors)
         self.clear_context()
         return response
+
+    def _append_executed_middleware(self, name: str):
+        self._executed_middlewares.append(name)
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
@@ -1017,9 +1052,11 @@ class ApiGatewayResolver(BaseRouter):
     def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
+            # Reset Executed Middleware (for debugging purposes)
+            self._executed_middlewares = []
             return ResponseBuilder(
                 self._to_response(
-                    route(router_middlewares=self.router_middlewares, app=self, route_arguments=route_arguments),
+                    route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
                 route,
             )
@@ -1130,6 +1167,10 @@ class ApiGatewayResolver(BaseRouter):
 
         # Merge app and router context
         self.context.update(**router.context)
+
+        # Add router middlewares to parent ApiGatewayResolver
+        self._router_middlewares = self._router_middlewares + router._router_middlewares
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
@@ -1141,7 +1182,10 @@ class ApiGatewayResolver(BaseRouter):
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
                 new_route = (rule, *route[1:])
 
-            self.route(*new_route)(func)
+            # Middlewares are stored by route seperately - must grab them to include
+            middlewares = router._routes_with_middleware.get(new_route)
+
+            self.route(*new_route, middlewares=middlewares)(func)  # type: ignore
 
 
 class Router(BaseRouter):
@@ -1209,7 +1253,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
-        return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
+        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares)
 
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod

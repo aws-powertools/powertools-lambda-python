@@ -3,7 +3,9 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     ApiGatewayResolver,
     ProxyEventType,
     Response,
+    Router,
 )
+from aws_lambda_powertools.event_handler.exceptions import BadRequestError
 from aws_lambda_powertools.event_handler.middlewares import SchemaValidationMiddleware
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
@@ -66,9 +68,9 @@ def test_with_router_middleware():
 
         return response
 
-    app.use([middleware_1, middleware_2])
+    app.use([middleware_1])
 
-    @app.get("/my/path")
+    @app.get("/my/path", middlewares=[middleware_2])
     def get_lambda(another_one: int, custom: str) -> Response:
         assert isinstance(app.current_event, APIGatewayProxyEvent)
         assert another_one == 6
@@ -126,7 +128,11 @@ def test_middleware_early_return():
 
         return Response(400, content_types.TEXT_HTML, "bad_response")
 
-    @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware])
+    def not_executed_middleware(app, get_response, **context):
+        # This should never be executed - if it is an excpetion will be raised
+        raise NotImplementedError()
+
+    @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware, not_executed_middleware])
     def get_lambda(my_id: str, name: str, injected: str) -> Response:
         assert name == "my"
         assert injected == "injected_value"
@@ -176,7 +182,7 @@ def test_fail_schema_validation(validation_schema):
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     assert (
         result["body"]
-        == "{\"message\": \"Bad Request: Failed schema validation. Error: data must contain ['message'] properties, Path: ['data'], Data: {'username': 'lessa'}\"}"  # noqa: E501
+        == "{\"statusCode\":400,\"message\":\"Bad Request: Failed schema validation. Error: data must contain ['message'] properties, Path: ['data'], Data: {'username': 'lessa'}\"}"  # noqa: E501
     )
 
 
@@ -195,4 +201,87 @@ def test_invalid_schema_validation():
     # THEN
     assert result["statusCode"] == 500
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert result["body"] == '{"message": "Internal Server Error"}'
+    assert result["body"] == '{"statusCode":500,"message":"Internal Server Error"}'
+
+
+def test_middleware_short_circuit_via_httperrors():
+    # GIVEN
+    app = ApiGatewayResolver()
+
+    def middleware_one(app, get_response, **context):
+        # inject a variable into the kwargs of the middleware chain
+        response = get_response(app, injected="injected_value", **context)
+
+        return response
+
+    def early_return_middleware(app, get_response, **context):
+        # ensure "injected" context variable is passed in by middleware_one
+        assert context.get("injected") == "injected_value"
+        raise BadRequestError("bad_response")
+
+    def not_executed_middleware(app, get_response, **context):
+        # This should never be executed - if it is an excpetion will be raised
+        raise NotImplementedError()
+
+    @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware, not_executed_middleware])
+    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+        assert name == "my"
+        assert injected == "injected_value"
+
+        return Response(200, content_types.TEXT_HTML, my_id)
+
+    # WHEN calling the event handler
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN
+    assert result["statusCode"] == 400
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert result["body"] == '{"statusCode":400,"message":"bad_response"}'
+
+
+def test_api_gateway_app_router_with_middlewares():
+    # GIVEN a Router with registered routes
+    app = ApiGatewayResolver()
+    router = Router()
+
+    def app_middleware(app, get_response, **context):
+        # inject a variable into the kwargs of the middleware chain
+        response = get_response(app, app_injected="app_value", **context)
+
+        return response
+
+    app.use(middlewares=[app_middleware])
+
+    def router_middleware(app, get_response, **context):
+        # inject a variable into the kwargs of the middleware chain
+        response = get_response(app, router_injected="router_value", **context)
+
+        return response
+
+    router.use(middlewares=[router_middleware])
+
+    def middleware_one(app, get_response, **context):
+        # inject a variable into the kwargs of the middleware chain
+        response = get_response(app, injected="injected_value", **context)
+
+        return response
+
+    @router.get("/my/path", middlewares=[middleware_one])
+    def foo(app_injected: str, router_injected: str, injected: str):
+        # make sure value is injected by middleware_one
+        assert injected == "injected_value"
+        assert router_injected == "router_value"
+        assert app_injected == "app_value"
+
+        return Response(200, content_types.TEXT_HTML, "foo")
+
+        return {}
+
+    app.include_router(router)
+    # WHEN calling the event handler after applying routes from router object
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "foo"

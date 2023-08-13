@@ -88,6 +88,10 @@ class BaseMiddlewareHandler(ABC):
         """
         raise NotImplementedError()
 
+    @property
+    def __name__(self) -> str:  # noqa A003
+        return str(self.__class__.__name__)
+
     def __call__(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
         """
         The Middleware handler function.
