@@ -44,7 +44,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](./utilities/batch.md#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
 === "[Before] Decorator"

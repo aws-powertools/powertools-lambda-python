@@ -15,6 +15,7 @@ jobs:
   analysis:
     name: Scorecard analysis
     runs-on: ubuntu-latest
+    environment: scorecard
     permissions:
       security-events: write  # update code-scanning dashboard
       id-token: write  # confirm org+repo identity before publish results
@@ -31,6 +32,7 @@ jobs:
           results_file: results.sarif
           results_format: sarif
           publish_results: true  # publish to OSSF Scorecard REST API
+          repo_token: ${{ secrets.SCORECARD_TOKEN }}  # read-only fine-grained token to read branch protection settings
 
       - name: "Upload results"
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2

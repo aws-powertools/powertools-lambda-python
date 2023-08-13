@@ -68,6 +68,16 @@ You can also have your own keyword arguments after the mandatory arguments.
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
     ```
 
+### Environment variables
+
+The following environment variable is available to configure the middleware factory at a global scope:
+
+| Setting              | Description                                                                  | Environment variable                    | Default |
+|----------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Middleware Trace** | Creates sub-segment for each custom middleware.                              | `POWERTOOLS_TRACE_MIDDLEWARES`          | `false` |
+
+You can also use [`POWERTOOLS_TRACE_MIDDLEWARES`](#tracing-middleware-execution) on a per-method basis, which will consequently override the environment variable value.
+
 ## Advanced
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md){target="_blank"} inside your middleware, and add annotations as well as metadata for additional operational insights.
@@ -92,7 +102,7 @@ If you are making use of [Tracer](../core/tracer.md){target="_blank"}, you can t
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
 ???+ warning
-    You must [enable Active Tracing](../core/tracer/#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
+    You must [enable Active Tracing](../core/tracer.md#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
 === "getting_started_middleware_tracer_function.py"
     ```python hl_lines="8 14 15 36"

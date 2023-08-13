@@ -193,6 +193,16 @@ This has the advantage of keeping cold start metric separate from your applicati
 ???+ info
     We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
+### Environment variables
+
+The following environment variable is available to configure Metrics at a global scope:
+
+| Setting            | Description                                                                  | Environment variable                    | Default |
+|--------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Namespace Name** | Sets namespace used for metrics.                                             | `POWERTOOLS_METRICS_NAMESPACE`          | `None`  |
+
+`POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
+
 ## Advanced
 
 ### Adding metadata
@@ -319,7 +329,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 ## Testing your code
 
-### Environment variables
+### Setting environment variables
 
 ???+ tip
 	Ignore this section, if:
