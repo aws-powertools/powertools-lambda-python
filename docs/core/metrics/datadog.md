@@ -55,20 +55,17 @@ Datadog provider has two global settings that will be used across all metrics em
 | **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
 | **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
 
-Experiment to use your application or main service as the metric namespace to easily group all metrics.
-
 ### Install
 
-???+ note
-    If you are using Datadog Forwarder, you can skip this step.
+> **Using Datadog Forwarder?** You can skip this step.
 
-To adhere to Lambda best practices and effectively minimize the size of your development package, we recommend using the official Datadog layers built specifically for the SDK and extension components. Below is the template that demonstrates how to configure a SAM template with this information.
+We recommend using Datadog SDK and Datadog Lambda Extension with this feature for optimal results.
 
-```yaml hl_lines="13 14 22 24" title="AWS Serverless Application Model (SAM) example"
+For Datadog SDK, you can add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool, or as a Lambda Layer in the following example:
+
+```yaml hl_lines="16-17 27 31" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/metrics_datadog/sam/template.yaml"
 ```
-
-If you prefer not to utilize the Datadog SDK provided through the Datadog layer, add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Datadog provider.
 
 ### Creating metrics
 
