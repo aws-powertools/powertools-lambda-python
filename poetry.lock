@@ -3061,18 +3061,18 @@ files = [
 
 [[package]]
 name = "xenon"
-version = "0.9.0"
+version = "0.9.1"
 description = "Monitor code metrics for Python on your CI server"
 optional = false
 python-versions = "*"
 files = [
-    {file = "xenon-0.9.0-py2.py3-none-any.whl", hash = "sha256:994c80c7f1c6d40596b600b93734d85a5739208f31895ef99f1e4d362caf9e35"},
-    {file = "xenon-0.9.0.tar.gz", hash = "sha256:d2b9cb6c6260f771a432c1e588e51fddb17858f88f73ef641e7532f7a5f58fb8"},
+    {file = "xenon-0.9.1-py2.py3-none-any.whl", hash = "sha256:b2888a5764ebd57a1f9f1624fde86e8303cb30c686e492f19d98867c458f7870"},
+    {file = "xenon-0.9.1.tar.gz", hash = "sha256:d6745111c3e258b749a4fd424b1b899d99ea183cea232365ee2f88fe7d80c03b"},
 ]
 
 [package.dependencies]
 PyYAML = ">=4.2b1,<7.0"
-radon = ">=4,<6"
+radon = ">=4,<7"
 requests = ">=2.0,<3.0"
 
 [[package]]
