@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Pattern, Union
 
 from aws_lambda_powertools.event_handler import CORSConfig
 from aws_lambda_powertools.event_handler.api_gateway import (
@@ -51,6 +51,6 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         super().__init__(ProxyEventType.LambdaFunctionUrlEvent, cors, debug, serializer, strip_prefixes)
