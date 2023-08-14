@@ -1,26 +1,33 @@
 ---
 title: Datadog
-description: Core utility
+description: Metrics provider
 ---
 
-In this context, a metric provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} that provides an integration via SDK where Powertools for AWS Lambda (Python) can create a wrapper around this one. If you are an AWS Lambda partner and would like to add support in Powertools for AWS Lambda (Python), open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}.
-
 <!-- markdownlint-disable MD013 -->
-Datadog provider creates custom metrics by flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK. Alternatively you can flush metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}
+This observability provider creates custom metrics by flushing metrics to [Datadog Lambda extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"}, or to standard output via [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
 <!-- markdownlint-enable MD013 -->
 
 ```mermaid
 stateDiagram-v2
     direction LR
-    LambdaCode: Lambda code with Powertools for AWS Lambda
+    LambdaFn: Your Lambda function
+    LambdaCode: DatadogMetrics
     DatadogSDK: Datadog SDK
     DatadogExtension: Datadog Lambda Extension
     Datadog: Datadog Dashboard
+    LambdaExtension: Lambda Extension
 
+    LambdaFn --> LambdaCode
     LambdaCode --> DatadogSDK
     DatadogSDK --> DatadogExtension
-    DatadogExtension --> Datadog
+
+    state LambdaExtension {
+        DatadogExtension --> Datadog: async
+    }
+
 ```
+
+In this context, a metric provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} that provides an integration via SDK where Powertools for AWS Lambda (Python) can create a wrapper around this one. If you are an AWS Lambda partner and would like to add support in Powertools for AWS Lambda (Python), open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}.
 
 These metrics can be visualized through [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
 
@@ -42,10 +49,10 @@ If you're new to Datadog custom metrics, we suggest you read the Datadog [offici
 
 Datadog provider has two global settings that will be used across all metrics emitted:
 
-| Setting              | Description                                                                     | Environment variable           | Constructor parameter |
-| -------------------- | ------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
-| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`     | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder| `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
+| Setting              | Description                                                                      | Environment variable           | Constructor parameter |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
 
 Experiment to use your application or main service as the metric namespace to easily group all metrics.
 
@@ -192,9 +199,9 @@ This has the advantage of keeping cold start metric separate from your applicati
 
 The following environment variable is available to configure Metrics at a global scope:
 
-| Setting            | Description                                                                  | Environment variable                    | Default |
-|--------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
-| **Namespace Name** | Sets namespace used for metrics.                                             | `POWERTOOLS_METRICS_NAMESPACE`          | `None`  |
+| Setting            | Description                      | Environment variable           | Default |
+| ------------------ | -------------------------------- | ------------------------------ | ------- |
+| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
 
 `POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
 
