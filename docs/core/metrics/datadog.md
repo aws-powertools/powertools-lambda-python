@@ -48,13 +48,6 @@ You can read more details in the [Datadog official documentation](https://docs.d
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" }.
 
-Datadog provider has two global settings that will be used across all metrics emitted:
-
-| Setting              | Description                                                                      | Environment variable           | Constructor parameter |
-| -------------------- | -------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
-| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
-| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
-
 ### Install
 
 > **Using Datadog Forwarder?** You can skip this step.
@@ -178,13 +171,12 @@ This has the advantage of keeping cold start metric separate from your applicati
 
 ### Environment variables
 
-The following environment variable is available to configure Metrics at a global scope:
+You can use any of the following environment variables to configure `DatadogMetrics`:
 
-| Setting            | Description                      | Environment variable           | Default |
-| ------------------ | -------------------------------- | ------------------------------ | ------- |
-| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
-
-`POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
+| Setting              | Description                                                                      | Environment variable           | Constructor parameter |
+| -------------------- | -------------------------------------------------------------------------------- | ------------------------------ | --------------------- |
+| **Metric namespace** | Logical container where all metrics will be placed e.g. `ServerlessAirline`      | `POWERTOOLS_METRICS_NAMESPACE` | `namespace`           |
+| **Flush to log**     | Use this when you want to flush metrics to be exported through Datadog Forwarder | `DD_FLUSH_TO_LOG`              | `flush_to_log`        |
 
 ## Advanced
 
@@ -233,9 +225,11 @@ This will serialize and flush metrics to standard output.
 
 Make sure to set `POWERTOOLS_METRICS_NAMESPACE` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
 
-```bash title="Injecting dummy Metric Namespace before running tests"
+```bash title="Injecting dummy metric namespace before running tests"
 --8<-- "examples/metrics_datadog/src/run_tests_env_var.sh"
 ```
+
+1. **`DD_FLUSH_TO_LOG=True`** makes it easier to test by flushing final metrics to standard output.
 
 ### Clearing metrics
 
