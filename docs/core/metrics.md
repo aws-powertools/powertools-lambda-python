@@ -16,7 +16,7 @@ These metrics can be visualized through [Amazon CloudWatch Console](https://cons
 
 ## Terminologies
 
-If you're new to Amazon CloudWatch, there are two terminologies you must be aware of before using this utility:
+If you're new to Amazon CloudWatch, there are five terminologies you must be aware of before using this utility:
 
 * **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
