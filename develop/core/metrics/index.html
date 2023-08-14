@@ -16,10 +16,10 @@
         <link rel="prev" href="../logger/">
       
       
-        <link rel="next" href="../event_handler/api_gateway/">
+        <link rel="next" href="./">
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -536,202 +536,76 @@
     
   
   
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Metrics
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" checked>
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index md-nav__link--active">
+          <a href="./">Metrics</a>
+          
+            <label for="__nav_1_7_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="true">
+        <label class="md-nav__title" for="__nav_1_7_3">
           <span class="md-nav__icon md-icon"></span>
+          Metrics
         </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Metrics
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="./" class="md-nav__link">
+        Amazon CloudWatch EMF
       </a>
-      
-        
+    </li>
+  
 
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+            
+          
+            
+              
   
   
   
+    <li class="md-nav__item">
+      <a href="datadog/" class="md-nav__link">
+        Datadog
+      </a>
+    </li>
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#key-features" class="md-nav__link">
-    Key features
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#terminologies" class="md-nav__link">
-    Terminologies
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#getting-started" class="md-nav__link">
-    Getting started
-  </a>
-  
-    <nav class="md-nav" aria-label="Getting started">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#creating-metrics" class="md-nav__link">
-    Creating metrics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-high-resolution-metrics" class="md-nav__link">
-    Adding high-resolution metrics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-multi-value-metrics" class="md-nav__link">
-    Adding multi-value metrics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#adding-default-dimensions" class="md-nav__link">
-    Adding default dimensions
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flushing-metrics" class="md-nav__link">
-    Flushing metrics
-  </a>
-  
-    <nav class="md-nav" aria-label="Flushing metrics">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#raising-schemavalidationerror-on-empty-metrics" class="md-nav__link">
-    Raising SchemaValidationError on empty metrics
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#capturing-cold-start-metric" class="md-nav__link">
-    Capturing cold start metric
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#environment-variables" class="md-nav__link">
-    Environment variables
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#advanced" class="md-nav__link">
-    Advanced
-  </a>
-  
-    <nav class="md-nav" aria-label="Advanced">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#adding-metadata" class="md-nav__link">
-    Adding metadata
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#single-metric-with-a-different-dimension" class="md-nav__link">
-    Single metric with a different dimension
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#flushing-metrics-manually" class="md-nav__link">
-    Flushing metrics manually
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#metrics-isolation" class="md-nav__link">
-    Metrics isolation
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-your-code" class="md-nav__link">
-    Testing your code
-  </a>
-  
-    <nav class="md-nav" aria-label="Testing your code">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#setting-environment-variables" class="md-nav__link">
-    Setting environment variables
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#clearing-metrics" class="md-nav__link">
-    Clearing metrics
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#functional-testing" class="md-nav__link">
-    Functional testing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -748,9 +622,7 @@
       
       
       
-        
-      
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_7_4" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
       
       
         
@@ -1016,9 +888,7 @@
       
       
       
-        
-      
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
       
       
         
@@ -1255,6 +1125,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#observability-providers" class="md-nav__link">
+    Observability providers
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1324,7 +1201,7 @@
 <li>Context manager to create a one off metric with a different dimension</li>
 </ul>
 <h2 id="terminologies">Terminologies<a class="headerlink" href="#terminologies" title="Permanent link">&para;</a></h2>
-<p>If you're new to Amazon CloudWatch, there are two terminologies you must be aware of before using this utility:</p>
+<p>If you're new to Amazon CloudWatch, there are five terminologies you must be aware of before using this utility:</p>
 <ul>
 <li><strong>Namespace</strong>. It's the highest level container that will group multiple metrics from multiple services for a given application, for example <code>ServerlessEcommerce</code>.</li>
 <li><strong>Dimensions</strong>. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example <code>ColdStart</code> metric by Payment <code>service</code>.</li>
@@ -1402,7 +1279,7 @@
 <span class="nt">Globals</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">Function</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.10</span>
+<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
 <span class="w">    </span><span class="nt">Tracing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Active</span>
 <span class="w">    </span><span class="nt">Environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Variables</span><span class="p">:</span>
@@ -2204,7 +2081,7 @@
 </div>
 </div>
 <h3 id="flushing-metrics-manually">Flushing metrics manually<a class="headerlink" href="#flushing-metrics-manually" title="Permanent link">&para;</a></h3>
-<p>If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use <code>flush_metrics()</code>. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.</p>
+<p>If you are using the <a href="https://github.com/awslabs/aws-lambda-web-adapter" target="_blank">AWS Lambda Web Adapter</a> project, or a middleware with custom metric logic, you can use <code>flush_metrics()</code>. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.</p>
 <details class="warning" open="open">
 <summary>Warning</summary>
 <p>This does not capture Cold Start metrics, and metric data validation still applies.</p>
@@ -2338,6 +2215,29 @@
 <p><strong>On 1</strong>, when you enable <a href="#capturing-cold-start-metric">capture_start_metric feature</a>, we transparently create and flush an additional EMF JSON Blob that is independent from your application metrics. This prevents data pollution.</p>
 <p><strong>On 2</strong>, you can use <code>EphemeralMetrics</code> to create an additional EMF JSON Blob from your application metric (<code>SuccessfulBooking</code>). This ensures that <code>IntegrationLatency</code> operational metric data points aren't tied to any dynamic dimension values like <code>tenant_id</code>.</p>
 <p>That is why <code>Metrics</code> shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate <code>Metrics</code> in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.</p>
+<h3 id="observability-providers">Observability providers<a class="headerlink" href="#observability-providers" title="Permanent link">&para;</a></h3>
+<blockquote>
+<p>An <abbr title="An AWS Lambda Observability Partner">observability provider</abbr> is an <a href="https://docs.aws.amazon.com/lambda/latest/dg/extensions-api-partners.html" rel="nofollow" target="_blank">AWS Lambda Partner</a> offering a platform for logging, metrics, traces, etc.</p>
+</blockquote>
+<p>We provide a thin-wrapper on top of the most requested observability providers. We strive to keep a similar UX as close as possible while keeping our value add features.</p>
+<div class="admonition tip">
+<p class="admonition-title">Missing your preferred provider? Please create a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2Ctriage&amp;projects=&amp;template=feature_request.yml&amp;title=Feature+request%3A+TITLE" target="_blank">feature request</a>.</p>
+</div>
+<p>Current providers:</p>
+<table>
+<thead>
+<tr>
+<th>Provider</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="./datadog" target="_blank">Datadog</a></td>
+<td>Uses Datadog SDK and Datadog Lambda Extension by default</td>
+</tr>
+</tbody>
+</table>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <h3 id="setting-environment-variables">Setting environment variables<a class="headerlink" href="#setting-environment-variables" title="Permanent link">&para;</a></h3>
 <details class="tip" open="open">
@@ -2370,7 +2270,7 @@
 <span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">pytest</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Metrics</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">metrics</span> <span class="k">as</span> <span class="n">metrics_global</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics.provider</span> <span class="kn">import</span> <span class="n">cold_start</span>
 
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span><span class="p">(</span><span class="n">scope</span><span class="o">=</span><span class="s2">&quot;function&quot;</span><span class="p">,</span> <span class="n">autouse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -2378,7 +2278,7 @@
     <span class="c1"># Clear out every metric data prior to every test</span>
     <span class="n">metrics</span> <span class="o">=</span> <span class="n">Metrics</span><span class="p">()</span>
     <span class="n">metrics</span><span class="o">.</span><span class="n">clear_metrics</span><span class="p">()</span>
-    <span class="n">metrics_global</span><span class="o">.</span><span class="n">is_cold_start</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># ensure each test has cold start</span>
+    <span class="n">cold_start</span><span class="o">.</span><span class="n">is_cold_start</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># ensure each test has cold start</span>
     <span class="n">metrics</span><span class="o">.</span><span class="n">clear_default_dimensions</span><span class="p">()</span>  <span class="c1"># remove persisted default dimensions, if any</span>
     <span class="k">yield</span>
 </code></pre></div></td></tr></table></div>
@@ -2537,7 +2437,7 @@
 </div>
 <details class="tip" open="open">
 <summary>Tip</summary>
-<p>For more elaborate assertions and comparisons, check out <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py" target="_blank">our functional testing for Metrics utility.</a></p>
+<p>For more elaborate assertions and comparisons, check out <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_cloudwatch_emf.py" target="_blank">our functional testing for Metrics utility.</a></p>
 </details>
 
   <hr>
@@ -2545,7 +2445,7 @@
   <small>
     
       Last update:
-      2023-08-10
+      2023-08-14
     
   </small>
 </div>
@@ -2595,7 +2495,7 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>

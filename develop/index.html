@@ -17,7 +17,7 @@
         <link rel="next" href="changelog/">
       
       <link rel="icon" href="media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.1, mkdocs-material-9.1.21">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -447,9 +447,7 @@
       
       
       
-        
-      
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_7" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
       
       
         
@@ -532,10 +530,76 @@
   
   
   
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="core/metrics/">Metrics</a>
+          
+            <label for="__nav_1_7_3">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_1_7_3">
+          <span class="md-nav__icon md-icon"></span>
+          Metrics
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
     <li class="md-nav__item">
       <a href="core/metrics/" class="md-nav__link">
-        Metrics
+        Amazon CloudWatch EMF
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="core/metrics/datadog/" class="md-nav__link">
+        Datadog
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
     </li>
   
 
@@ -552,9 +616,7 @@
       
       
       
-        
-      
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_7_4" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
       
       
         
@@ -820,9 +882,7 @@
       
       
       
-        
-      
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
       
       
         
@@ -2286,7 +2346,7 @@ General<span class="w"> </span>information
 </code></pre></div></td></tr></table></div>
 </details>
 <h2 id="quick-getting-started">Quick getting started<a class="headerlink" href="#quick-getting-started" title="Permanent link">&para;</a></h2>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Hello world example using SAM CLI</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>sam<span class="w"> </span>init<span class="w"> </span>--app-template<span class="w"> </span>hello-world-powertools-python<span class="w"> </span>--name<span class="w"> </span>sam-app<span class="w"> </span>--package-type<span class="w"> </span>Zip<span class="w"> </span>--runtime<span class="w"> </span>python3.10<span class="w"> </span>--no-tracing
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Hello world example using SAM CLI</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>sam<span class="w"> </span>init<span class="w"> </span>--app-template<span class="w"> </span>hello-world-powertools-python<span class="w"> </span>--name<span class="w"> </span>sam-app<span class="w"> </span>--package-type<span class="w"> </span>Zip<span class="w"> </span>--runtime<span class="w"> </span>python3.11<span class="w"> </span>--no-tracing
 </code></pre></div></td></tr></table></div>
 <h2 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h2>
 <p>Core utilities such as Tracing, Logging, Metrics, and Event Handler will be available across all Powertools for AWS Lambda languages. Additional utilities are subjective to each language ecosystem and customer demand.</p>
@@ -2523,7 +2583,7 @@ General<span class="w"> </span>information
   <small>
     
       Last update:
-      2023-08-04
+      2023-08-14
     
   </small>
 </div>
@@ -2573,7 +2633,7 @@ General<span class="w"> </span>information
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["header.autohide", "navigation.sections", "navigation.expand", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="assets/javascripts/bundle.220ee61c.min.js"></script>
