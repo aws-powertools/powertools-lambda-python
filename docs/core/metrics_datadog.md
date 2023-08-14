@@ -2,6 +2,9 @@
 title: Datadog
 description: Core utility
 ---
+
+In this context, a metric provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} that provides an integration via SDK where Powertools for AWS Lambda (Python) can create a wrapper around this one. If you are an AWS Lambda partner and would like to add support in Powertools for AWS Lambda (Python), open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}.
+
 <!-- markdownlint-disable MD013 -->
 Datadog provider creates custom metrics by flushing metrics to [Datadog extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"} using Datadog SDK. Alternatively you can flush metrics to standard output and exporting metrics using [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}
 <!-- markdownlint-enable MD013 -->
@@ -9,9 +12,9 @@ Datadog provider creates custom metrics by flushing metrics to [Datadog extensio
 ```mermaid
 stateDiagram-v2
     direction LR
-    LambdaCode: Lambda code with Powertools
+    LambdaCode: Lambda code with Powertools for AWS Lambda
     DatadogSDK: Datadog SDK
-    DatadogExtension: Datadog Extension async
+    DatadogExtension: Datadog Lambda Extension
     Datadog: Datadog Dashboard
 
     LambdaCode --> DatadogSDK
