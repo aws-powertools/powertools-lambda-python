@@ -169,9 +169,9 @@ You can optionally capture cold start metrics with `log_metrics` decorator via `
 If it's a cold start invocation, this feature will:
 
 * Create a separate Datadog metric solely containing a metric named `ColdStart`
-* Add `function_name` as a tag
+* Add `function_name` metric tag
 
-This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
+This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated tags.
 
 ???+ info
     We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
