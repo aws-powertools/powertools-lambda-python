@@ -4,7 +4,7 @@ description: Metrics provider
 ---
 
 <!-- markdownlint-disable MD013 -->
-This observability provider creates custom metrics by flushing metrics to [Datadog Lambda extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"}, or to standard output via [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
+This observability provider creates custom metrics by flushing metrics to [Datadog Lambda extension](https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli){target="_blank" rel="nofollow"}, or to standard output via [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}. These metrics can be visualized in the [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
 <!-- markdownlint-enable MD013 -->
 
 ```mermaid
@@ -27,20 +27,21 @@ stateDiagram-v2
 
 ```
 
-In this context, a metric provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} that provides an integration via SDK where Powertools for AWS Lambda (Python) can create a wrapper around this one. If you are an AWS Lambda partner and would like to add support in Powertools for AWS Lambda (Python), open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}.
-
-These metrics can be visualized through [Datadog console](https://app.datadoghq.com/metric/explore){target="_blank" rel="nofollow"}.
-
 ## Key features
 
-* Flush metrics to standard output
-* Flush metrics to Datadog extension
-* Validate against common metric definitions mistakes (values)
-* Support to add default tags to all created metrics
+* Flush metrics to Datadog extension or standard output
+* Validate against common metric definitions mistakes
+* Support to add default tags
 
 ## Terminologies
 
-If you're new to Datadog custom metrics, we suggest you read the Datadog [official documentation](https://docs.datadoghq.com/metrics/custom_metrics/){target="_blank" rel="nofollow"} for custom metrics.
+If you're new to Datadog Metrics, there are three terminologies you must be aware of before using this utility:
+
+* **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
+* **Metric**. It's the name of the metric, for example: SuccessfulBooking or UpdatedBooking.
+* **Tags**. Metrics metadata in key-value pair format. They help provide contextual information, and filter org organize metrics.
+
+You can read more details in the [Datadog official documentation](https://docs.datadoghq.com/metrics/custom_metrics/){target="_blank" rel="nofollow"}.
 
 ## Getting started
 
