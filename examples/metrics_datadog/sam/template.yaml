@@ -22,12 +22,12 @@ Globals:
       - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40
       # Find the latest Layer version in the Datadog official documentation
 
-      # You can use the Datadog layer to bring the Datadog SDK
-      # Further details can be found at: https://github.com/DataDog/datadog-lambda-python/releases
+      # Datadog SDK
+      # Latest versions: https://github.com/DataDog/datadog-lambda-python/releases
       - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python310:78
 
-      # You can use the Datadog extension to export logs directly to Datadog
-      # Further details can be found at: https://github.com/DataDog/datadog-lambda-extension/releases
+      # Datadog Lambda Extension
+      # Latest versions: https://github.com/DataDog/datadog-lambda-extension/releases
       - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:45
 
 Resources:
