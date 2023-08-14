@@ -60,7 +60,6 @@ theme:
   features:
     - header.autohide
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.instant
     - navigation.indexes
