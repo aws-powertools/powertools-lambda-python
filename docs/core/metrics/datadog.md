@@ -102,12 +102,12 @@ You can add any number of tags to your metrics via keyword arguments (`key=value
 
 ### Adding default tags
 
-If you want to set the same tags for all metrics, you can use the `set_default_tags` method or the `default_tags` parameter in the `log_metrics` decorator and then persist tags across the Lambda invocations.
+You can persist tags across Lambda invocations and `DatadogMetrics` instances via `set_default_tags` method, or `default_tags` parameter in the `log_metrics` decorator.
 
-If you'd like to remove them at some point, you can use `clear_default_tags` method.
+If you'd like to remove them at some point, you can use the `clear_default_tags` method.
 
-???+ note
-    When default tags are configured and an additional specific tag is assigned to a metric, the metric will exclusively contain that specific tag.
+???+ note "Metric tag takes precedence over default tags of the same name"
+    When adding tags with the same name via `add_metric` and `set_default_tags`, `add_metric` takes precedence.
 
 === "set_default_tags.py"
 
