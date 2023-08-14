@@ -121,22 +121,6 @@ If you'd like to remove them at some point, you can use the `clear_default_tags`
     --8<-- "examples/metrics_datadog/src/set_default_tags_log_metrics.py"
     ```
 
-### Exporting to Datadog Log Forwarder
-
-You have the option to flush metrics to the standard output for exporting, which can then be seamlessly processed through the [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
-
-=== "flush_metrics_to_standard_output.py"
-
-    ```python hl_lines="4"
-    --8<-- "examples/metrics_datadog/src/flush_metrics_to_standard_output.py"
-    ```
-
-=== "log_metrics_standard_output.json"
-
-    ```json hl_lines="2 6 7"
-    --8<-- "examples/metrics_datadog/src/log_metrics_standard_output.json"
-    ```
-
 ### Flushing metrics
 
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the `log_metrics` decorator.
@@ -216,6 +200,24 @@ Contrary to the `log_metrics` decorator, you are now also responsible to flush m
 ```python hl_lines="17" title="Manually flushing and clearing metrics from memory"
 --8<-- "examples/metrics_datadog/src/flush_datadog_metrics.py"
 ```
+
+### Integrating with Datadog Forwarder
+
+Use `flush_to_log=True` in `DatadogMetrics` to integrate with the legacy [Datadog Forwarder](https://docs.datadoghq.com/logs/guide/forwarder/?tab=cloudformation){target="_blank" rel="nofollow"}.
+
+This will serialize and flush metrics to standard output.
+
+=== "flush_metrics_to_standard_output.py"
+
+    ```python hl_lines="4"
+    --8<-- "examples/metrics_datadog/src/flush_metrics_to_standard_output.py"
+    ```
+
+=== "log_metrics_standard_output.json"
+
+    ```json
+    --8<-- "examples/metrics_datadog/src/log_metrics_standard_output.json"
+    ```
 
 ## Testing your code
 
