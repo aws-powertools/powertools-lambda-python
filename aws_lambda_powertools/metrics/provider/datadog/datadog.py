@@ -4,16 +4,18 @@ import json
 import logging
 import numbers
 import os
+import re
 import time
 import warnings
 from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
-from aws_lambda_powertools.metrics.functions import serialize_datadog_tags, validate_datadog_metric_name
 from aws_lambda_powertools.metrics.provider import BaseProvider
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+METRIC_NAME_REGEX = re.compile(r"^[a-zA-Z0-9_.]+$")
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +101,7 @@ class DatadogProvider(BaseProvider):
         """
 
         # validating metric name
-        if not validate_datadog_metric_name(name):
+        if not self._validate_datadog_metric_name(name):
             docs = "https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics"
             raise SchemaValidationError(
                 f"Invalid metric name. Please ensure the metric {name} follows the requirements. \n"
@@ -158,7 +160,7 @@ class DatadogProvider(BaseProvider):
                     "m": metric_name,
                     "v": single_metric["v"],
                     "e": single_metric["e"],
-                    "t": serialize_datadog_tags(metric_tags=single_metric["t"], default_tags=self.default_tags),
+                    "t": self._serialize_datadog_tags(metric_tags=single_metric["t"], default_tags=self.default_tags),
                 },
             )
 
@@ -293,3 +295,64 @@ class DatadogProvider(BaseProvider):
                 return True
         """
         self.default_tags.update(**tags)
+
+    @staticmethod
+    def _serialize_datadog_tags(metric_tags: Dict[str, Any], default_tags: Dict[str, Any]) -> List[str]:
+        """
+        Serialize metric tags into a list of formatted strings for Datadog integration.
+
+        This function takes a dictionary of metric-specific tags or default tags.
+        It parse these tags and converts them into a list of strings in the format "tag_key:tag_value".
+
+        Parameters
+        ----------
+        metric_tags: Dict[str, Any]
+            A dictionary containing metric-specific tags.
+        default_tags: Dict[str, Any]
+            A dictionary containing default tags applicable to all metrics.
+
+        Returns:
+        -------
+        List[str]
+            A list of formatted tag strings, each in the "tag_key:tag_value" format.
+
+        Example:
+            >>> metric_tags = {'environment': 'production', 'service': 'web'}
+            >>> serialize_datadog_tags(metric_tags, None)
+            ['environment:production', 'service:web']
+        """
+        tags = metric_tags or default_tags
+
+        return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]
+
+    @staticmethod
+    def _validate_datadog_metric_name(metric_name: str) -> bool:
+        """
+        Validate a metric name according to specific requirements.
+
+        Metric names must start with a letter.
+        Metric names must only contain ASCII alphanumerics, underscores, and periods.
+        Other characters, including spaces, are converted to underscores.
+        Unicode is not supported.
+        Metric names must not exceed 200 characters. Fewer than 100 is preferred from a UI perspective.
+
+        More information here: https://docs.datadoghq.com/metrics/custom_metrics/#naming-custom-metrics
+
+        Parameters:
+        ----------
+        metric_name: str
+            The metric name to be validated.
+
+        Returns:
+        -------
+        bool
+            True if the metric name is valid, False otherwise.
+        """
+
+        # Check if the metric name starts with a letter
+        # Check if the metric name contains more than 200 characters
+        # Check if the resulting metric name only contains ASCII alphanumerics, underscores, and periods
+        if not metric_name[0].isalpha() or len(metric_name) > 200 or not METRIC_NAME_REGEX.match(metric_name):
+            return False
+
+        return True
