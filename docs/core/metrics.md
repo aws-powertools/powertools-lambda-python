@@ -327,6 +327,20 @@ These issues are exacerbated when you create **(A)** metric dimensions condition
 
 That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
 
+### Observability providers
+
+> An observability provider is an [AWS Lambda Partner](https://docs.aws.amazon.com/lambda/latest/dg/extensions-api-partners.html){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc.
+
+We provide a thin-wrapper on top of the most requested observability providers. We strive to keep a similar UX as close as possible while keeping our value add features.
+
+!!! tip "Missing your preferred provider? Please create a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}."
+
+Current providers:
+
+| Provider                              | Notes                                                    |
+| ------------------------------------- | -------------------------------------------------------- |
+| [Datadog](./datadog){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
+
 ## Testing your code
 
 ### Setting environment variables
