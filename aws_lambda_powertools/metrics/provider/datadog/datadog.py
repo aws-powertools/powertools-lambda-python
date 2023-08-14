@@ -11,6 +11,7 @@ from typing import Any, Callable, Dict, List, Optional
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider import BaseProvider
+from aws_lambda_powertools.metrics.provider.datadog.warnings import DatadogDataValidationWarning
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -107,6 +108,9 @@ class DatadogProvider(BaseProvider):
                 f"Invalid metric name. Please ensure the metric {name} follows the requirements. \n"
                 f"See Datadog documentation here: \n {docs}",
             )
+
+        # validating metric tag
+        self._validate_datadog_tags_name(**tags)
 
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
@@ -235,7 +239,8 @@ class DatadogProvider(BaseProvider):
         -------
         **Lambda function using tracer and metrics decorators**
 
-            from aws_lambda_powertools import DatadogMetrics, Tracer
+            from aws_lambda_powertools import Tracer
+            from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics
 
             metrics = DatadogMetrics(namespace="powertools")
             tracer = Tracer(service="payment")
@@ -294,6 +299,7 @@ class DatadogProvider(BaseProvider):
             def lambda_handler():
                 return True
         """
+        self._validate_datadog_tags_name(**tags)
         self.default_tags.update(**tags)
 
     @staticmethod
@@ -324,6 +330,33 @@ class DatadogProvider(BaseProvider):
         tags = metric_tags or default_tags
 
         return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]
+
+    @staticmethod
+    def _validate_datadog_tags_name(**tags):
+        """
+        Validate a metric tag according to specific requirements.
+
+        Metric tags must start with a letter.
+        Metric tags must not exceed 200 characters. Fewer than 100 is preferred from a UI perspective.
+
+        More information here: https://docs.datadoghq.com/getting_started/tagging/#define-tags
+
+        Parameters:
+        ----------
+        tags: Dict
+            The metric tags to be validated.
+        """
+        for tag_key, tag_value in tags.items():
+            tag = f"{tag_key}:{tag_value}"
+            if not tag[0].isalpha() or len(tag) > 200:
+                docs = "https://docs.datadoghq.com/getting_started/tagging/#define-tags"
+                warnings.warn(
+                    f"Invalid tag value. Please ensure the specific tag {tag} follows the requirements. \n"
+                    f"May incur data loss for metrics. \n"
+                    f"See Datadog documentation here: \n {docs}",
+                    DatadogDataValidationWarning,
+                    stacklevel=2,
+                )
 
     @staticmethod
     def _validate_datadog_metric_name(metric_name: str) -> bool:

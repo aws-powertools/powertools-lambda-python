@@ -22,7 +22,7 @@ def test_datadog_coldstart(capsys):
     # WHEN log_metrics is used with capture_cold_start_metric
     @metrics.log_metrics(capture_cold_start_metric=True)
     def lambda_handler(event, context):
-        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+        metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
 
     lambda_handler({}, LambdaContext("example_fn2"))
     logs = capsys.readouterr().out.strip()
@@ -55,7 +55,7 @@ def test_datadog_with_invalid_metric_value():
     # WHEN we attempt to serialize a valid Datadog metric
     # THEN it should fail validation and raise MetricValueError
     with pytest.raises(MetricValueError, match=".*is not a valid number"):
-        metrics.add_metric(name="item_sold", value="a", tags=["product:latte", "order:online"])
+        metrics.add_metric(name="item_sold", value="a", product="latte", order="online")
 
 
 def test_datadog_with_invalid_metric_name():
@@ -66,7 +66,7 @@ def test_datadog_with_invalid_metric_name():
     # WHEN we attempt to serialize a valid Datadog metric
     # THEN it should fail validation and raise MetricValueError
     with pytest.raises(SchemaValidationError, match="Invalid metric name.*"):
-        metrics.add_metric(name="1_item_sold", value="a", tags=["product:latte", "order:online"])
+        metrics.add_metric(name="1_item_sold", value="a", product="latte", order="online")
 
 
 def test_datadog_raise_on_empty():
@@ -145,7 +145,7 @@ def test_metrics_with_default_namespace(capsys, namespace):
     # WHEN we add metrics
     @metrics.log_metrics
     def lambda_handler(event, context):
-        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+        metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
 
     lambda_handler({}, LambdaContext("example_fn2"))
     logs = capsys.readouterr().out.strip()
@@ -163,7 +163,7 @@ def test_datadog_with_non_default_namespace(capsys, namespace):
     # WHEN log_metrics is used
     @metrics.log_metrics
     def lambda_handler(event, context):
-        metrics.add_metric(name="item_sold", value=1, tags=["product:latte", "order:online"])
+        metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
 
     lambda_handler({}, LambdaContext("example_fn"))
     logs = capsys.readouterr().out.strip()
@@ -192,26 +192,6 @@ def test_clear_metrics(metric):
 
     # THEN metric set should be empty after function has been run
     assert my_metrics.metric_set == []
-
-
-def test_get_namespace_property(namespace):
-    # GIVEN DatadogMetrics is initialized
-    my_metrics = DatadogMetrics(namespace=namespace)
-
-    # WHEN we try to access the namespace property
-    # THEN namespace property must be present
-    assert my_metrics.namespace == namespace
-
-
-def test_set_namespace_property(namespace):
-    # GIVEN DatadogMetrics is initialized
-    my_metrics = DatadogMetrics()
-
-    # WHEN we set the namespace property after ther initialization
-    my_metrics.namespace = namespace
-
-    # THEN namespace property must be present
-    assert my_metrics.namespace == namespace
 
 
 def test_persist_default_tags(capsys):

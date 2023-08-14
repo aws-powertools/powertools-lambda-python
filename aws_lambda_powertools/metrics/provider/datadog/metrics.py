@@ -16,7 +16,7 @@ class DatadogMetrics:
     -------
     **Creates a few metrics and publish at the end of a function execution**
 
-        from aws_lambda_powertools import DatadogMetrics
+        from aws_lambda_powertools.metrics.provider.datadog import DatadogMetrics
 
         metrics = DatadogMetrics(namespace="ServerlessAirline")
 
@@ -33,7 +33,7 @@ class DatadogMetrics:
     Parameters
     ----------
     flush_to_log : bool, optional
-        Used when using export instead of extension
+        Used when using export instead of Lambda Extension
     namespace : str, optional
         Namespace for metrics
     provider: DatadogProvider, optional
