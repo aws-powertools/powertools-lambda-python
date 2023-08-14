@@ -1,8 +1,8 @@
-import add_metrics_without_provider
+import add_datadog_metrics
 
 
 def test_log_metrics(capsys):
-    add_metrics_without_provider.lambda_handler({}, {})
+    add_datadog_metrics.lambda_handler({}, {})
 
     log = capsys.readouterr().out.strip()  # remove any extra line
 

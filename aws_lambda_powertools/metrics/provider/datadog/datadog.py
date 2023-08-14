@@ -110,7 +110,7 @@ class DatadogProvider(BaseProvider):
             )
 
         # validating metric tag
-        self._validate_datadog_tags_name(**tags)
+        self._validate_datadog_tags_name(tags)
 
         if not isinstance(value, numbers.Real):
             raise MetricValueError(f"{value} is not a valid number")
@@ -299,7 +299,7 @@ class DatadogProvider(BaseProvider):
             def lambda_handler():
                 return True
         """
-        self._validate_datadog_tags_name(**tags)
+        self._validate_datadog_tags_name(tags)
         self.default_tags.update(**tags)
 
     @staticmethod
@@ -332,7 +332,7 @@ class DatadogProvider(BaseProvider):
         return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]
 
     @staticmethod
-    def _validate_datadog_tags_name(**tags):
+    def _validate_datadog_tags_name(tags: Dict):
         """
         Validate a metric tag according to specific requirements.
 
