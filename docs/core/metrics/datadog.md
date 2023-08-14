@@ -66,10 +66,10 @@ You can create metrics using `add_metric`.
 
 By default, we will generate the current timestamp for you. Alternatively, you can use the `timestamp` parameter to set a custom one in epoch time.
 
-=== "add_metrics.py"
+=== "add_datadog_metrics.py"
 
     ```python hl_lines="4 7 9"
-    --8<-- "examples/metrics_datadog/src/add_metrics.py"
+    --8<-- "examples/metrics_datadog/src/add_datadog_metrics.py"
     ```
 
 === "add_metrics_with_timestamp.py"
@@ -249,10 +249,10 @@ You can read standard output and assert whether metrics have been flushed. Here'
     --8<-- "examples/metrics_datadog/src/assert_single_datadog_metric.py"
     ```
 
-=== "add_metrics.py"
+=== "add_datadog_metrics.py"
 
     ```python
-    --8<-- "examples/metrics_datadog/src/add_metrics.py"
+    --8<-- "examples/metrics_datadog/src/add_datadog_metrics.py"
     ```
 
 ???+ tip
