@@ -52,11 +52,11 @@ You can read more details in the [Datadog official documentation](https://docs.d
 
 > **Using Datadog Forwarder?** You can skip this step.
 
-We recommend using Datadog SDK and Datadog Lambda Extension with this feature for optimal results.
+We recommend using [Datadog SDK](https://docs.datadoghq.com/serverless/installation/python/){target="_blank" rel="nofollow"} and Datadog Lambda Extension with this feature for optimal results.
 
 For Datadog SDK, you can add `aws-lambda-powertools[datadog]` as a dependency in your preferred tool, or as a Lambda Layer in the following example:
 
-```yaml hl_lines="16-17 27 31" title="AWS Serverless Application Model (SAM) example"
+```yaml hl_lines="15-16 28 32" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/metrics_datadog/sam/template.yaml"
 ```
 

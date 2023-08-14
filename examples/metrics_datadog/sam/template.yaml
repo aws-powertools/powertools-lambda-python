@@ -10,10 +10,11 @@ Globals:
     Environment:
       Variables:
         POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
-        # Configuring the API_KEY and DD_SITE can be achieved through various methods.
-        # An functional approach involves utilizing these two environment variables.
-        # Further details can be found at: https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli
+        # [Production setup]
+        # DATADOG_API_KEY_SECRET_ARN: "<AWS Secrets Manager Secret ARN containing Datadog API key>"
+        # [Development only]
         DD_API_KEY: "<YOUR DATADOG API KEY>"
+        # Configuration details: https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli
         DD_SITE: datadoghq.com
 
     Layers:
