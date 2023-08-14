@@ -93,17 +93,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.90.0a0.tar.gz", hash = "sha256:b81e8321a2a76594fd6d79725eb6136dad844aef9122fe666b7bc5f11bb18de7"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:154f146d5a88c602aa477869aea0109c0691437e9a0f6a9d61d98b9b52c83b51"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.91.0a0.tar.gz", hash = "sha256:a7b0e78862f3dd81cf13740df2ecda1c877545500872dc476f2dbf3807632a32"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:e3d606055c2fe268d80f96052b583060a25fadcdee79d89a75f2eac4354f2e69"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = "2.90.0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.86.0,<2.0.0"
 publication = ">=0.0.3"
@@ -111,18 +111,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "Authorizers for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.90.0a0.tar.gz", hash = "sha256:7aeda815ca63f14362c2d08b06c8e85a4694fc07b8c7ba2a1c20b9346792c74c"},
-    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:ebaeaeddbdcb16b4130ce948f3d8db42254a68372b497700643bd654331207b6"},
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.91.0a0.tar.gz", hash = "sha256:cafd747af66f92755f188172f0e892503bc73c26f0d6d95e5f733c67b0307fa8"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:972393ad1c220708616322946ba3f8936cbe143a69e543762295c1ea02d69849"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.90.0.a0"
-aws-cdk-lib = "2.90.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.86.0,<2.0.0"
 publication = ">=0.0.3"
@@ -130,18 +130,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
-version = "2.90.0a0"
+version = "2.91.0a0"
 description = "Integrations for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.90.0a0.tar.gz", hash = "sha256:558f12d2e951ae424f828ea8e2bfecc5c4271b4eb0c583feadd7420fdaca7cc7"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.90.0a0-py3-none-any.whl", hash = "sha256:b26ee8a02b06f99110383dc4ad9a4542415cc5c50c35aaccc90c63d80aeeb1fd"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.91.0a0.tar.gz", hash = "sha256:db607df2563f0b839795a41218a59e3ebc29e906dd08aed7b0b59aceba0bde02"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:34d0f103846613a72cfae8419be2e4302863a1e8f6e81951b0a51c2f62ab80b3"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.90.0.a0"
-aws-cdk-lib = "2.90.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
+aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.86.0,<2.0.0"
 publication = ">=0.0.3"
@@ -149,13 +149,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.90.0"
+version = "2.91.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.90.0.tar.gz", hash = "sha256:d99e304f96f1b04c41922cfa2fc98c1cdd7c88e45c6ebb980ecfc367cdc77e87"},
-    {file = "aws_cdk_lib-2.90.0-py3-none-any.whl", hash = "sha256:ef481a40c3ece38aeaf15706ecbfeea19860b8a7b789ea7b28056a9f456c65d1"},
+    {file = "aws-cdk-lib-2.91.0.tar.gz", hash = "sha256:1163926527a8b7da931cddea77a4824b929b3f775447c3b7427ecdef7701ce74"},
+    {file = "aws_cdk_lib-2.91.0-py3-none-any.whl", hash = "sha256:ec2cadeb5727ea8259ad8a54ac9ff40502032cd2572c81f4594df93365da39da"},
 ]
 
 [package.dependencies]
@@ -201,10 +201,13 @@ requests = ">=0.14.0"
 [[package]]
 name = "aws-sam-translator"
 version = "1.73.0"
+version = "1.73.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
+    {file = "aws-sam-translator-1.73.0.tar.gz", hash = "sha256:bfa7cad3a78f002edeec5e39fd61b616cf84f34f61010c5dc2f7a76845fe7a02"},
+    {file = "aws_sam_translator-1.73.0-py3-none-any.whl", hash = "sha256:c0132b065d743773fcd2573ed1ae60e0129fa46043fad76430261b098a811924"},
     {file = "aws-sam-translator-1.73.0.tar.gz", hash = "sha256:bfa7cad3a78f002edeec5e39fd61b616cf84f34f61010c5dc2f7a76845fe7a02"},
     {file = "aws_sam_translator-1.73.0-py3-none-any.whl", hash = "sha256:c0132b065d743773fcd2573ed1ae60e0129fa46043fad76430261b098a811924"},
 ]
@@ -308,17 +311,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.23"
+version = "1.28.24"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.23-py3-none-any.whl", hash = "sha256:807d4a4698ba9a76d5901a1663ff1943d13efbc388908f38b60f209c3511f1d6"},
-    {file = "boto3-1.28.23.tar.gz", hash = "sha256:839deb868d1278dd5a3f87208cfc4a8e259c95ca3cbe607cc322d435f02f63b0"},
+    {file = "boto3-1.28.24-py3-none-any.whl", hash = "sha256:0300ca6ec8bc136eb316b32cc1e30c66b85bc497f5a5fe42e095ae4280569708"},
+    {file = "boto3-1.28.24.tar.gz", hash = "sha256:9d1b4713c888e53a218648ad71522bee9bec9d83f2999fff2494675af810b632"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.23,<1.32.0"
+botocore = ">=1.31.24,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -327,13 +330,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.23"
+version = "1.31.24"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.23-py3-none-any.whl", hash = "sha256:d0a95f74eb6bd99e8f52f16af0a430ba6cd1526744f40ffdd3fcccceeaf961c2"},
-    {file = "botocore-1.31.23.tar.gz", hash = "sha256:f3258feaebce48f138eb2675168c4d33cc3d99e9f45af13cb8de47bdc2b9c573"},
+    {file = "botocore-1.31.24-py3-none-any.whl", hash = "sha256:8c7ba9b09e9104e2d473214e1ffcf84b77e04cf6f5f2344942c1eed9e299f947"},
+    {file = "botocore-1.31.24.tar.gz", hash = "sha256:2d8f412c67f9285219f52d5dbbb6ef0dfa9f606da29cbdd41b6d6474bcc4bbd4"},
 ]
 
 [package.dependencies]
@@ -343,6 +346,31 @@ urllib3 = ">=1.25.4,<1.27"
 
 [package.extras]
 crt = ["awscrt (==0.16.26)"]
+
+[[package]]
+name = "bytecode"
+version = "0.13.0"
+description = "Python module to generate and modify bytecode"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "bytecode-0.13.0-py3-none-any.whl", hash = "sha256:e69f92e7d27f99d5d7d76e6a824bd3d9ff857c72b59927aaf87e1a620f67fe50"},
+    {file = "bytecode-0.13.0.tar.gz", hash = "sha256:6af3c2f0a31ce05dce41f7eea5cc380e33f5e8fbb7dcee3b52467a00acd52fcd"},
+]
+
+[[package]]
+name = "bytecode"
+version = "0.14.2"
+description = "Python module to generate and modify bytecode"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "bytecode-0.14.2-py3-none-any.whl", hash = "sha256:e368a2b9bbd7c986133c951250db94fb32f774cfc49752a9db9073bcf9899762"},
+    {file = "bytecode-0.14.2.tar.gz", hash = "sha256:386378d9025d68ddb144870ae74330a492717b11b8c9164c4034e88add808f0c"},
+]
+
+[package.dependencies]
+typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
 
 [[package]]
 name = "cattrs"
@@ -737,6 +765,154 @@ test = ["pretend", "pytest (>=6.2.0)", "pytest-benchmark", "pytest-cov", "pytest
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "datadog"
+version = "0.46.0"
+description = "The Datadog Python library"
+optional = false
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,>=2.7"
+files = [
+    {file = "datadog-0.46.0-py2.py3-none-any.whl", hash = "sha256:3d7bcda6177b43be4cdb52e16b4bdd4f9005716c0dd7cfea009e018c36bb7a3d"},
+    {file = "datadog-0.46.0.tar.gz", hash = "sha256:e4fbc92a85e2b0919a226896ae45fc5e4b356c0c57f1c2659659dfbe0789c674"},
+]
+
+[package.dependencies]
+requests = ">=2.6.0"
+
+[[package]]
+name = "datadog-lambda"
+version = "4.78.0"
+description = "The Datadog AWS Lambda Library"
+optional = false
+python-versions = ">=3.7.0,<4"
+files = [
+    {file = "datadog_lambda-4.78.0-py3-none-any.whl", hash = "sha256:660bae6057f3b2033b0c035e9d542af491e40f9ce57b97b4891c491262b9148c"},
+    {file = "datadog_lambda-4.78.0.tar.gz", hash = "sha256:3e57faa8f80ddd43b595355b92045fde8f9ed87efe8619133e82cebb87cbe434"},
+]
+
+[package.dependencies]
+datadog = ">=0.41.0,<1.0.0"
+ddtrace = "1.15.2"
+importlib_metadata = {version = "*", markers = "python_version < \"3.8\""}
+typing_extensions = {version = ">=4.0,<5.0", markers = "python_version < \"3.8\""}
+urllib3 = "<2.0.0"
+wrapt = ">=1.11.2,<2.0.0"
+
+[package.extras]
+dev = ["boto3 (>=1.10.33,<2.0.0)", "flake8 (>=3.7.9,<4.0.0)", "httpretty (>=0.9.7,<0.10.0)", "nose2 (>=0.9.1,<0.10.0)", "requests (>=2.22.0,<3.0.0)"]
+
+[[package]]
+name = "ddsketch"
+version = "2.0.4"
+description = "Distributed quantile sketches"
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "ddsketch-2.0.4-py3-none-any.whl", hash = "sha256:3227a270fd686a29d3a7128f9352ccf852314410380fc11384356f1ae2a75938"},
+    {file = "ddsketch-2.0.4.tar.gz", hash = "sha256:32f7314077fec8747d4faebaec2c854b5ffc399c5f552f73fa94024f48d74d64"},
+]
+
+[package.dependencies]
+protobuf = {version = ">=3.0.0", markers = "python_version >= \"3.7\""}
+six = "*"
+
+[[package]]
+name = "ddtrace"
+version = "1.15.2"
+description = "Datadog APM client library"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+files = [
+    {file = "ddtrace-1.15.2-cp27-cp27m-macosx_11_0_x86_64.whl", hash = "sha256:ca0411333fbdb0fafa06d412bbd76ab8d2647cc9dcb8a7833952ce4fe09eb421"},
+    {file = "ddtrace-1.15.2-cp27-cp27m-manylinux2010_i686.whl", hash = "sha256:e2603749f97a5191b32f710c8ec5248bb58f4f9a1cb337559f93c5f0f8cea33b"},
+    {file = "ddtrace-1.15.2-cp27-cp27m-manylinux2010_x86_64.whl", hash = "sha256:8392087809e047f701e38ecc4f2990bcfe399a22c516a1dbcbdff50fb7382a79"},
+    {file = "ddtrace-1.15.2-cp27-cp27mu-manylinux2010_i686.whl", hash = "sha256:2f7649c24a7463be9b86d5f11ac6eaa2014896eaf409e67f3dc813a6bb0ed8b6"},
+    {file = "ddtrace-1.15.2-cp27-cp27mu-manylinux2010_x86_64.whl", hash = "sha256:dbdbc5bf3b2b56b8e61b241ee372d897b295344e269475f38e837c9bfe03ae2c"},
+    {file = "ddtrace-1.15.2-cp310-cp310-macosx_11_0_universal2.whl", hash = "sha256:23d39c72ad1844977a80d79206d773c3ec1f1346816b9e45427c25ef88597b4e"},
+    {file = "ddtrace-1.15.2-cp310-cp310-macosx_11_0_x86_64.whl", hash = "sha256:da458bbbc4de14dd8e8f60aefe42a66c551a9f50c69c6e361acc7edab579a3e4"},
+    {file = "ddtrace-1.15.2-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:d07bb0c50d2df7ff9281bea83534db5127cee8ac2f94111c9544d03d49f60613"},
+    {file = "ddtrace-1.15.2-cp310-cp310-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:499b3e3d0359e492792ecf8ab6efcf4b1991fbaa523338774333e9a2a66d9d37"},
+    {file = "ddtrace-1.15.2-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:eedd0937f83e0d7b261960365fec5771f39ced599c90f589548a1738a586799d"},
+    {file = "ddtrace-1.15.2-cp310-cp310-musllinux_1_1_aarch64.whl", hash = "sha256:7643d20991cd7e1c21e65d8b5c292a9dca8d124f69f9e96cc2b5fb8d47802c3a"},
+    {file = "ddtrace-1.15.2-cp310-cp310-musllinux_1_1_i686.whl", hash = "sha256:3f6bb76fe33c2e4842236036f78b1bbdd4da0f2b846627ca7d72b01ac49b3076"},
+    {file = "ddtrace-1.15.2-cp310-cp310-musllinux_1_1_x86_64.whl", hash = "sha256:ebc9b89501c8a557dab43170e4a12e90358130413a87a0276ccaa0038b0636a4"},
+    {file = "ddtrace-1.15.2-cp310-cp310-win32.whl", hash = "sha256:c10ca0e3a63310d314ec7fa55d53f4b4434f06c4d321d64d757814679161bf5d"},
+    {file = "ddtrace-1.15.2-cp310-cp310-win_amd64.whl", hash = "sha256:6208635442ea52ff3f97b9fc64ac25772cda8f105a607a385e55bf524bceefc5"},
+    {file = "ddtrace-1.15.2-cp311-cp311-macosx_11_0_universal2.whl", hash = "sha256:8524f460be02b402f63b11ad3b1177955c8608f814e1758b87f53f15bf9a7599"},
+    {file = "ddtrace-1.15.2-cp311-cp311-macosx_11_0_x86_64.whl", hash = "sha256:5a2dd127a65e12189055818ab72d44d80587acaaf450c65624e0482d63ff9970"},
+    {file = "ddtrace-1.15.2-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:b3350c647120fbc3355eb35ce054c88e63bc073d71949f377d59b1152a2ed0f4"},
+    {file = "ddtrace-1.15.2-cp311-cp311-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:adb76713207f0ef688f68a539f9cb63e19cd149d48d36befb835f67f49395ed7"},
+    {file = "ddtrace-1.15.2-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8f8ff5c250c5abfbbbd76a7d3167308a2373ad7e55ecf3c7c26a62fcd2be8a57"},
+    {file = "ddtrace-1.15.2-cp311-cp311-musllinux_1_1_aarch64.whl", hash = "sha256:264bed998870b63f548b96f57dd771014cd02ef0b21bb382e745900a7b72ef28"},
+    {file = "ddtrace-1.15.2-cp311-cp311-musllinux_1_1_i686.whl", hash = "sha256:20bfd8db155167d2ccfddc25b50649338534b12cb00f7ed08514af1eb6a4956e"},
+    {file = "ddtrace-1.15.2-cp311-cp311-musllinux_1_1_x86_64.whl", hash = "sha256:72479172bd10f5998188a05b0b4a109ccb2a93467a0aa1e6656d5396c83fb253"},
+    {file = "ddtrace-1.15.2-cp311-cp311-win32.whl", hash = "sha256:23bee3d0eb971cc1565caa429620b82f2d69ef648e9c792046b9481188dba9ab"},
+    {file = "ddtrace-1.15.2-cp311-cp311-win_amd64.whl", hash = "sha256:65a29d23ecfbc7cc4ca1069a5586aa836ae3978e64251414933432078bc29bc2"},
+    {file = "ddtrace-1.15.2-cp35-cp35m-manylinux2010_i686.whl", hash = "sha256:3a2852da4a76503211ca8b77a50fc86df36ba15fab04b45a6a17faa386f53839"},
+    {file = "ddtrace-1.15.2-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:244180c6decb244c7fda929dc5969b3a510e5a4857239063de1fae139fac9837"},
+    {file = "ddtrace-1.15.2-cp35-cp35m-manylinux2014_aarch64.whl", hash = "sha256:46f9ba0c282a62953f03d1add8eae8c80613244bb93a1ff997dad71d07ce6c72"},
+    {file = "ddtrace-1.15.2-cp35-cp35m-win32.whl", hash = "sha256:a39dbf1ca657cc3a876143301e5d775e2f9bcf2ed1e9b4366fb3cf9d6a345a82"},
+    {file = "ddtrace-1.15.2-cp35-cp35m-win_amd64.whl", hash = "sha256:7cfd9514e82871321e86897fe567c7548fc45da523df591f3e5adc6633a5781c"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-macosx_11_0_x86_64.whl", hash = "sha256:3a2978b07d19d4ebf936fde1e455c61b3d88f103f1f9e360b9269fe1a1dc608a"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:6e7795a7f65a6e844ab57a0b31d400e79c4a1f69d174fab8edc69e6d2db56962"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:aae5306b3b0ec48cb8ade3362629c31bd25999244addff0f4a2f6f3934509894"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:14fb33bd6d9fa70638d43de7b5170e1c9961d3fbc277314609941e108c45716d"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-musllinux_1_1_aarch64.whl", hash = "sha256:745ce3c9559fa331ef30208ff1ccaafe3ab3c02f2e01177c560c94acd6f4de27"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-musllinux_1_1_i686.whl", hash = "sha256:7706d35215d2cca0a89581ec11da56e25742914ae0865b928034ee9ad7278cf3"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-musllinux_1_1_x86_64.whl", hash = "sha256:0bc18e900d1495deb61093f1af38d94af6a1ca66dd541fd47bd093c3f3b80b4a"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-win32.whl", hash = "sha256:b13f4042ef3f391714aca5ca1f03ff3c24c1d201ab5af02f0405335aa5602ff5"},
+    {file = "ddtrace-1.15.2-cp36-cp36m-win_amd64.whl", hash = "sha256:eb32e3b3d0f472447b3d427a075007135b3c39488c1fe0f1e097863f326a439b"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-macosx_11_0_x86_64.whl", hash = "sha256:0953fd9a2555801d68674bb4905f64805efe1e02b3f11def21eb7655be046717"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:9436ec9cc00b70730d2c1777f11aca7f4863a49ddd27d0b1478e84c1a7667b6f"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:f7215b21c1eaf56b38bf46c66193db3736ecadeb9ae1b9ca780a91addbaa9853"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:15a5f7155b99fe9393bfa4f0e4ef2610ddf59e70aefcf99a95acae8b31e29cc4"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-musllinux_1_1_aarch64.whl", hash = "sha256:df103a600c2901dc54929ef58dee41887a0bb558efbf7e41a7489bd6264fcf44"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-musllinux_1_1_i686.whl", hash = "sha256:d51a73238ad8ceff4232ffa94b860d61187b325e7fab746044dafa312d6bc415"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-musllinux_1_1_x86_64.whl", hash = "sha256:bfc5777204c0c34465fc4ce38d8d1268d9f95ffcbf7e4025e9a5d3e87d3e17c3"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-win32.whl", hash = "sha256:9516dbfc974af9632d75e9c32b38e695b88ea18ebfa4580dd0f768bc05272fba"},
+    {file = "ddtrace-1.15.2-cp37-cp37m-win_amd64.whl", hash = "sha256:a510252a3d5be6c29db2c69cbd2535268532e8d568fae06b295a06041e1b969d"},
+    {file = "ddtrace-1.15.2-cp38-cp38-macosx_11_0_universal2.whl", hash = "sha256:82995243719c87aefc85d7df0e1ae61bba8ae1f805d48cbaf2132beb215f1968"},
+    {file = "ddtrace-1.15.2-cp38-cp38-macosx_11_0_x86_64.whl", hash = "sha256:ca5dd51910a81451d236fccdbf5d3ca8e284aa3be56f08db92644f85ef88c56e"},
+    {file = "ddtrace-1.15.2-cp38-cp38-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:5d76f485769c035df3ede4ad9830bac06aa8b69ac4617f2eb1251b1094468009"},
+    {file = "ddtrace-1.15.2-cp38-cp38-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:4dd5f5e477021b8810b2b685e1e16ba5a99f31239e22abc71794688b7f3e6e4d"},
+    {file = "ddtrace-1.15.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b4ec73676c60cc3cf08430f19a59daccbbb5770edc74ad15a99bf4237a40d0fb"},
+    {file = "ddtrace-1.15.2-cp38-cp38-musllinux_1_1_aarch64.whl", hash = "sha256:6b140f11b89d902174df05e8b9c1eb1b522a63e6c60c5d68ccac8913bb371bbb"},
+    {file = "ddtrace-1.15.2-cp38-cp38-musllinux_1_1_i686.whl", hash = "sha256:c7c8a0e140d28e49cf8cd96cdec8e17232c5525ed5c154729b8afb6cb93a8e2b"},
+    {file = "ddtrace-1.15.2-cp38-cp38-musllinux_1_1_x86_64.whl", hash = "sha256:0112d258c3a681a63e5f057b9e3ee8504b60d773d95baf195462d9ff4096caa9"},
+    {file = "ddtrace-1.15.2-cp38-cp38-win32.whl", hash = "sha256:6ea7b80eb8019a70c999ef8cfd34fd6078a2ae154007d124d5e642531bf1a9d6"},
+    {file = "ddtrace-1.15.2-cp38-cp38-win_amd64.whl", hash = "sha256:282b8c9b46d7a8450325299cf348a0f1d8f9f34d174a0ea402bc1a1df4ad7cf3"},
+    {file = "ddtrace-1.15.2-cp39-cp39-macosx_11_0_universal2.whl", hash = "sha256:53b171404b59c1e030ea614e194d1483fb42437a02ffdd7f4a45175613dd7cb4"},
+    {file = "ddtrace-1.15.2-cp39-cp39-macosx_11_0_x86_64.whl", hash = "sha256:9ba06236dd8bd64776b7b734dd9421709670fef090857448e75c97acb30cdce7"},
+    {file = "ddtrace-1.15.2-cp39-cp39-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e6abe5ba4396c9f7633cab68d0e81c5fd94f7c77b046b3ee969eded068a522d7"},
+    {file = "ddtrace-1.15.2-cp39-cp39-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:61a1b48f97a07e2f422ec01bb23861716300cebe4afd917ab36bb4db68904da4"},
+    {file = "ddtrace-1.15.2-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:86e186dc66802e2d71b94330c1635fd4c3f881a1bb71747be162a57b7602daaa"},
+    {file = "ddtrace-1.15.2-cp39-cp39-musllinux_1_1_aarch64.whl", hash = "sha256:762b5a0777454299c4ac62177578969ed551c973063f87a8825d9d073e5250ce"},
+    {file = "ddtrace-1.15.2-cp39-cp39-musllinux_1_1_i686.whl", hash = "sha256:889d359f4382fde41893ba5c00b412cbea8502e1b6bb6c83bf87fa6e63cbfabe"},
+    {file = "ddtrace-1.15.2-cp39-cp39-musllinux_1_1_x86_64.whl", hash = "sha256:c4d3c9ce3456181e535b9da42bde7c850dc7224039fd083e95b05010c2ff9748"},
+    {file = "ddtrace-1.15.2-cp39-cp39-win32.whl", hash = "sha256:69e47d28327a7afb263c16cc6bf1227e1b2bf1fdb2d559dce913a138a3f36807"},
+    {file = "ddtrace-1.15.2-cp39-cp39-win_amd64.whl", hash = "sha256:da780fbfe6dd749ee571a468b8e86f1fd4f51626d35626c2356f8a440efe0dfa"},
+    {file = "ddtrace-1.15.2.tar.gz", hash = "sha256:e5c1a5965ea8d8260586769102d79522bc7d9758a271252bb58ee05d6c5cd9a8"},
+]
+
+[package.dependencies]
+attrs = {version = ">=20", markers = "python_version > \"2.7\""}
+bytecode = [
+    {version = ">=0.13.0,<0.14.0", markers = "python_version == \"3.7\""},
+    {version = "*", markers = "python_version >= \"3.8\""},
+]
+cattrs = {version = "*", markers = "python_version >= \"3.7\""}
+ddsketch = ">=2.0.1"
+envier = "*"
+importlib-metadata = {version = "*", markers = "python_version < \"3.8\""}
+opentelemetry-api = {version = ">=1", markers = "python_version >= \"3.7\""}
+protobuf = {version = ">=3", markers = "python_version >= \"3.7\""}
+six = ">=1.12.0"
+typing-extensions = "*"
+xmltodict = ">=0.12"
+
+[package.extras]
+opentracing = ["opentracing (>=2.0.0)"]
+
+[[package]]
 name = "decorator"
 version = "5.1.1"
 description = "Decorators for Humans"
@@ -746,6 +922,37 @@ files = [
     {file = "decorator-5.1.1-py3-none-any.whl", hash = "sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186"},
     {file = "decorator-5.1.1.tar.gz", hash = "sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330"},
 ]
+
+[[package]]
+name = "deprecated"
+version = "1.2.14"
+description = "Python @deprecated decorator to deprecate old python classes, functions or methods."
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+files = [
+    {file = "Deprecated-1.2.14-py2.py3-none-any.whl", hash = "sha256:6fac8b097794a90302bdbb17b9b815e732d3c4720583ff1b198499d78470466c"},
+    {file = "Deprecated-1.2.14.tar.gz", hash = "sha256:e5323eb936458dccc2582dc6f9c322c852a775a27065ff2b0c4970b9d53d01b3"},
+]
+
+[package.dependencies]
+wrapt = ">=1.10,<2"
+
+[package.extras]
+dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "sphinx (<2)", "tox"]
+
+[[package]]
+name = "envier"
+version = "0.4.0"
+description = "Python application configuration via the environment"
+optional = false
+python-versions = ">=2.7"
+files = [
+    {file = "envier-0.4.0-py3-none-any.whl", hash = "sha256:7b91af0f16ea3e56d91ec082f038987e81b441fc19c657a8b8afe0909740a706"},
+    {file = "envier-0.4.0.tar.gz", hash = "sha256:e68dcd1ed67d8b6313883e27dff3e701b7fba944d2ed4b7f53d0cc2e12364a82"},
+]
+
+[package.extras]
+mypy = ["mypy"]
 
 [[package]]
 name = "exceptiongroup"
@@ -1763,6 +1970,21 @@ extra = ["lxml (>=4.5)", "pydot (>=1.4.1)", "pygraphviz (>=1.7)"]
 test = ["codecov (>=2.1)", "pytest (>=6.2)", "pytest-cov (>=2.12)"]
 
 [[package]]
+name = "opentelemetry-api"
+version = "1.19.0"
+description = "OpenTelemetry Python API"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "opentelemetry_api-1.19.0-py3-none-any.whl", hash = "sha256:dcd2a0ad34b691964947e1d50f9e8c415c32827a1d87f0459a72deb9afdf5597"},
+    {file = "opentelemetry_api-1.19.0.tar.gz", hash = "sha256:db374fb5bea00f3c7aa290f5d94cea50b659e6ea9343384c5f6c2bb5d5e8db65"},
+]
+
+[package.dependencies]
+deprecated = ">=1.2.6"
+importlib-metadata = ">=6.0,<7.0"
+
+[[package]]
 name = "packaging"
 version = "23.1"
 description = "Core utilities for Python packages"
@@ -1856,6 +2078,28 @@ importlib-metadata = {version = ">=0.12", markers = "python_version < \"3.8\""}
 [package.extras]
 dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
+
+[[package]]
+name = "protobuf"
+version = "4.24.0"
+description = ""
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "protobuf-4.24.0-cp310-abi3-win32.whl", hash = "sha256:81cb9c4621d2abfe181154354f63af1c41b00a4882fb230b4425cbaed65e8f52"},
+    {file = "protobuf-4.24.0-cp310-abi3-win_amd64.whl", hash = "sha256:6c817cf4a26334625a1904b38523d1b343ff8b637d75d2c8790189a4064e51c3"},
+    {file = "protobuf-4.24.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:ae97b5de10f25b7a443b40427033e545a32b0e9dda17bcd8330d70033379b3e5"},
+    {file = "protobuf-4.24.0-cp37-abi3-manylinux2014_aarch64.whl", hash = "sha256:567fe6b0647494845d0849e3d5b260bfdd75692bf452cdc9cb660d12457c055d"},
+    {file = "protobuf-4.24.0-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:a6b1ca92ccabfd9903c0c7dde8876221dc7d8d87ad5c42e095cc11b15d3569c7"},
+    {file = "protobuf-4.24.0-cp37-cp37m-win32.whl", hash = "sha256:a38400a692fd0c6944c3c58837d112f135eb1ed6cdad5ca6c5763336e74f1a04"},
+    {file = "protobuf-4.24.0-cp37-cp37m-win_amd64.whl", hash = "sha256:5ab19ee50037d4b663c02218a811a5e1e7bb30940c79aac385b96e7a4f9daa61"},
+    {file = "protobuf-4.24.0-cp38-cp38-win32.whl", hash = "sha256:e8834ef0b4c88666ebb7c7ec18045aa0f4325481d724daa624a4cf9f28134653"},
+    {file = "protobuf-4.24.0-cp38-cp38-win_amd64.whl", hash = "sha256:8bb52a2be32db82ddc623aefcedfe1e0eb51da60e18fcc908fb8885c81d72109"},
+    {file = "protobuf-4.24.0-cp39-cp39-win32.whl", hash = "sha256:ae7a1835721086013de193311df858bc12cd247abe4ef9710b715d930b95b33e"},
+    {file = "protobuf-4.24.0-cp39-cp39-win_amd64.whl", hash = "sha256:44825e963008f8ea0d26c51911c30d3e82e122997c3c4568fd0385dd7bacaedf"},
+    {file = "protobuf-4.24.0-py3-none-any.whl", hash = "sha256:82e6e9ebdd15b8200e8423676eab38b774624d6a1ad696a60d86a2ac93f18201"},
+    {file = "protobuf-4.24.0.tar.gz", hash = "sha256:5d0ceb9de6e08311832169e601d1fc71bd8e8c779f3ee38a97a78554945ecb85"},
+]
 
 [[package]]
 name = "publication"
@@ -2735,7 +2979,7 @@ watchmedo = ["PyYAML (>=3.10)"]
 name = "wrapt"
 version = "1.15.0"
 description = "Module for decorators, wrappers and monkey patching."
-optional = true
+optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 files = [
     {file = "wrapt-1.15.0-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:ca1cccf838cd28d5a0883b342474c630ac48cac5df0ee6eacc9c7290f76b11c1"},
@@ -2832,6 +3076,17 @@ radon = ">=4,<6"
 requests = ">=2.0,<3.0"
 
 [[package]]
+name = "xmltodict"
+version = "0.13.0"
+description = "Makes working with XML feel like you are working with JSON"
+optional = false
+python-versions = ">=3.4"
+files = [
+    {file = "xmltodict-0.13.0-py2.py3-none-any.whl", hash = "sha256:aa89e8fd76320154a40d19a0df04a4695fb9dc5ba977cbb68ab3e4eb225e7852"},
+    {file = "xmltodict-0.13.0.tar.gz", hash = "sha256:341595a488e3e01a85a9d8911d8912fd922ede5fecc4dce437eb4b6c8d037e56"},
+]
+
+[[package]]
 name = "zipp"
 version = "3.15.0"
 description = "Backport of pathlib-compatible object wrapper for zip files"
@@ -2852,6 +3107,7 @@ aws-sdk = ["boto3"]
 datamasking-all = ["aws-encryption-sdk", "itsdangerous"]
 datamasking-aws-sdk = ["aws-encryption-sdk"]
 datamasking-itsdangerous = ["itsdangerous"]
+datadog = []
 parser = ["pydantic"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]

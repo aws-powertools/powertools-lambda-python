@@ -179,8 +179,13 @@ class BaseProvider(ABC):
         e
             Propagate error received
         """
+        extra_args = {}
 
-        default_dimensions = kwargs.get("default_dimensions")
+        if kwargs.get("default_dimensions"):
+            extra_args.update({"default_dimensions": kwargs.get("default_dimensions")})
+
+        if kwargs.get("default_tags"):
+            extra_args.update({"default_tags": kwargs.get("default_tags")})
 
         # If handler is None we've been called with parameters
         # Return a partial function with args filled
@@ -190,7 +195,7 @@ class BaseProvider(ABC):
                 self.log_metrics,
                 capture_cold_start_metric=capture_cold_start_metric,
                 raise_on_empty_metrics=raise_on_empty_metrics,
-                default_dimensions=default_dimensions,
+                **extra_args,
             )
 
         @functools.wraps(lambda_handler)
