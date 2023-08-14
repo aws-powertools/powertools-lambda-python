@@ -1,5 +1,5 @@
 ---
-title: CloudWatch EMF
+title: Amazon CloudWatch EMF Metrics
 description: Core utility
 ---
 
@@ -197,9 +197,9 @@ This has the advantage of keeping cold start metric separate from your applicati
 
 The following environment variable is available to configure Metrics at a global scope:
 
-| Setting            | Description                                                                  | Environment variable                    | Default |
-|--------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
-| **Namespace Name** | Sets namespace used for metrics.                                             | `POWERTOOLS_METRICS_NAMESPACE`          | `None`  |
+| Setting            | Description                      | Environment variable           | Default |
+| ------------------ | -------------------------------- | ------------------------------ | ------- |
+| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
 
 `POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
 
@@ -286,9 +286,9 @@ You can use `EphemeralMetrics` class when looking to isolate multiple instances 
 
 `EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
 
-| Feature                                                                                                     | Metrics | EphemeralMetrics |
-| ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
-| **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
+| Feature                                                               | Metrics | EphemeralMetrics |
+| --------------------------------------------------------------------- | ------- | ---------------- |
+| **Share data across instances** (metrics, dimensions, metadata, etc.) | Yes     | -                |
 
 !!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
 

@@ -75,6 +75,7 @@ theme:
 
 markdown_extensions:
   - admonition
+  - abbr
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight:
@@ -84,6 +85,8 @@ markdown_extensions:
       base_path: "."
       check_paths: true
       restrict_base_path: false
+      auto_append:
+        - includes/abbreviations.md
   - meta
   - toc:
       permalink: true
