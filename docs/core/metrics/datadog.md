@@ -90,15 +90,15 @@ By default, we will generate the current timestamp for you. Alternatively, you c
 
 ### Adding tags
 
-Datadog offers the flexibility to configure tags per metric. To provider a better experience for our customers, you can pass an arbitrary number of keyword arguments (kwargs) that can be user as a tag.
+You can add any number of tags to your metrics via keyword arguments (`key=value`). They are helpful to filter, organize, and aggregate your metrics later.
+
+!!! info "We will emit a warning for tags [beyond the 200 chars limit](https://docs.datadoghq.com/getting_started/tagging/){target="_blank" rel="nofollow"}."
 
 === "add_metrics_with_tags.py"
 
     ```python hl_lines="9"
     --8<-- "examples/metrics_datadog/src/add_metrics_with_tags.py"
     ```
-
-We recommend [read](https://docs.datadoghq.com/getting_started/tagging/){target="_blank" rel="nofollow"} the official Datadog documentation for comprehensive insights into the best practices for effectively utilizing tags.
 
 ### Adding default tags
 
