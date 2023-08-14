@@ -123,9 +123,9 @@ If you'd like to remove them at some point, you can use the `clear_default_tags`
 
 ### Flushing metrics
 
-As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the `log_metrics` decorator.
+Use `log_metrics` decorator to automatically serialize and flush your metrics (SDK or Forwarder) at the end of your invocation.
 
-This decorator also **validates**, **serializes**, and **flushes** all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised.
+This decorator also ensures metrics are flushed in the event of an exception, including warning you in case you forgot to add metrics.
 
 === "add_metrics.py"
 
@@ -141,9 +141,9 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
 #### Raising SchemaValidationError on empty metrics
 
-If you want to ensure at least one metric is always emitted, you can pass `raise_on_empty_metrics` to the **log_metrics** decorator:
+Use `raise_on_empty_metrics=True` if you want to ensure at least one metric is always emitted.
 
-```python hl_lines="7" title="Raising SchemaValidationError exception if no metrics are added"
+```python hl_lines="7" title="Failing fast if no metrics are added"
 --8<-- "examples/metrics_datadog/src/raise_on_empty_datadog_metrics.py"
 ```
 
