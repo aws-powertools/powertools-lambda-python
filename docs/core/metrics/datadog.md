@@ -69,21 +69,20 @@ For Datadog SDK, you can add `aws-lambda-powertools[datadog]` as a dependency in
 
 ### Creating metrics
 
-You can create metrics using `add_metric`. Optional parameter such as timestamp can be included, but if not provided, the Datadog Provider will automatically use the current timestamp by default.
+You can create metrics using `add_metric`.
 
-???+ tip
-	You can initialize DadatadogMetrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).
+By default, we will generate the current timestamp for you. Alternatively, you can use the `timestamp` parameter to set a custom one in epoch time.
 
-=== "add_metrics_with_provider.py"
+=== "add_metrics.py"
 
-    ```python hl_lines="6 12"
-    --8<-- "examples/metrics_datadog/src/add_metrics_with_provider.py"
+    ```python hl_lines="4 7 9"
+    --8<-- "examples/metrics_datadog/src/add_metrics.py"
     ```
 
-=== "add_metrics_without_provider.py"
+=== "add_metrics_with_timestamp.py"
 
     ```python hl_lines="11"
-    --8<-- "examples/metrics_datadog/src/add_metrics_without_provider.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics_with_timestamp.py"
     ```
 
 ???+ warning "Warning: Do not create metrics outside the handler"
@@ -257,7 +256,7 @@ You can read standard output and assert whether metrics have been flushed. Here'
 === "add_metrics.py"
 
     ```python
-    --8<-- "examples/metrics_datadog/src/add_metrics_without_provider.py"
+    --8<-- "examples/metrics_datadog/src/add_metrics.py"
     ```
 
 ???+ tip
