@@ -1,5 +1,5 @@
 ---
-title: Metrics
+title: Amazon CloudWatch EMF Metrics
 description: Core utility
 ---
 
@@ -16,7 +16,7 @@ These metrics can be visualized through [Amazon CloudWatch Console](https://cons
 
 ## Terminologies
 
-If you're new to Amazon CloudWatch, there are two terminologies you must be aware of before using this utility:
+If you're new to Amazon CloudWatch, there are five terminologies you must be aware of before using this utility:
 
 * **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
@@ -193,6 +193,16 @@ This has the advantage of keeping cold start metric separate from your applicati
 ???+ info
     We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
 
+### Environment variables
+
+The following environment variable is available to configure Metrics at a global scope:
+
+| Setting            | Description                      | Environment variable           | Default |
+| ------------------ | -------------------------------- | ------------------------------ | ------- |
+| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
+
+`POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
+
 ## Advanced
 
 ### Adding metadata
@@ -251,7 +261,7 @@ By default it will skip all previously defined dimensions including default dime
 
 ### Flushing metrics manually
 
-If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
+If you are using the [AWS Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter){target="_blank"} project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
 
 ???+ warning
     This does not capture Cold Start metrics, and metric data validation still applies.
@@ -276,14 +286,15 @@ You can use `EphemeralMetrics` class when looking to isolate multiple instances 
 
 `EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
 
-| Feature                                                                                                     | Metrics | EphemeralMetrics |
-| ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
-| **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
+| Feature                                                               | Metrics | EphemeralMetrics |
+| --------------------------------------------------------------------- | ------- | ---------------- |
+| **Share data across instances** (metrics, dimensions, metadata, etc.) | Yes     | -                |
 
 !!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
 
 This is an intentional design to prevent accidental data deduplication or data loss issues due to [CloudWatch EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} metric dimension constraint.
 
+<!-- markdownlint-disable-next-line MD013 -->
 In CloudWatch, there are two metric ingestion mechanisms: [EMF (async)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} and [`PutMetricData` API (sync)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data){target="_blank"}.
 
 The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.
@@ -316,9 +327,23 @@ These issues are exacerbated when you create **(A)** metric dimensions condition
 
 That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
 
+### Observability providers
+
+> An observability provider is an [AWS Lambda Partner](https://docs.aws.amazon.com/lambda/latest/dg/extensions-api-partners.html){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc.
+
+We provide a thin-wrapper on top of the most requested observability providers. We strive to keep a similar UX as close as possible while keeping our value add features.
+
+!!! tip "Missing your preferred provider? Please create a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}."
+
+Current providers:
+
+| Provider                              | Notes                                                    |
+| ------------------------------------- | -------------------------------------------------------- |
+| [Datadog](./datadog){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
+
 ## Testing your code
 
-### Environment variables
+### Setting environment variables
 
 ???+ tip
 	Ignore this section, if:
@@ -328,7 +353,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank"}.
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
 --8<-- "examples/metrics/src/run_tests_env_var.sh"
@@ -373,4 +398,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/test_metrics.py){target="_blank"}
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_cloudwatch_emf.py){target="_blank"}

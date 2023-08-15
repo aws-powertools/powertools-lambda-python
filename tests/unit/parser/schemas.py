@@ -22,8 +22,8 @@ class MyDynamoBusiness(BaseModel):
 
 
 class MyDynamoScheme(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[MyDynamoBusiness]
-    OldImage: Optional[MyDynamoBusiness]
+    NewImage: Optional[MyDynamoBusiness] = None
+    OldImage: Optional[MyDynamoBusiness] = None
 
 
 class MyDynamoDBStreamRecordModel(DynamoDBStreamRecordModel):

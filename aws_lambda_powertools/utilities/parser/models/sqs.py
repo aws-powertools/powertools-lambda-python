@@ -9,17 +9,17 @@ from aws_lambda_powertools.utilities.parser.types import Literal
 class SqsAttributesModel(BaseModel):
     ApproximateReceiveCount: str
     ApproximateFirstReceiveTimestamp: datetime
-    MessageDeduplicationId: Optional[str]
-    MessageGroupId: Optional[str]
+    MessageDeduplicationId: Optional[str] = None
+    MessageGroupId: Optional[str] = None
     SenderId: str
     SentTimestamp: datetime
-    SequenceNumber: Optional[str]
-    AWSTraceHeader: Optional[str]
+    SequenceNumber: Optional[str] = None
+    AWSTraceHeader: Optional[str] = None
 
 
 class SqsMsgAttributeModel(BaseModel):
-    stringValue: Optional[str]
-    binaryValue: Optional[str]
+    stringValue: Optional[str] = None
+    binaryValue: Optional[str] = None
     stringListValues: List[str] = []
     binaryListValues: List[str] = []
     dataType: str
@@ -56,7 +56,7 @@ class SqsRecordModel(BaseModel):
     attributes: SqsAttributesModel
     messageAttributes: Dict[str, SqsMsgAttributeModel]
     md5OfBody: str
-    md5OfMessageAttributes: Optional[str]
+    md5OfMessageAttributes: Optional[str] = None
     eventSource: Literal["aws:sqs"]
     eventSourceARN: str
     awsRegion: str

@@ -133,7 +133,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "poetry"
       - name: Install dependencies
         run: make dev
@@ -171,7 +171,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "poetry"
 
       - name: Build python package and wheel
@@ -206,7 +206,7 @@ jobs:
     # NOTE: provenance fails if we use action pinning... it's a Github limitation
     # because SLSA needs to trace & attest it came from a given branch; pinning doesn't expose that information
     # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#referencing-the-slsa-generator
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.7.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.8.0
     with:
       base64-subjects: ${{ needs.build.outputs.attestation_hashes }}
       upload-assets: false  # we upload its attestation in create_tag job, otherwise it creates a new release
@@ -237,12 +237,12 @@ jobs:
 
       - name: Upload to PyPi prod
         if: ${{ !inputs.skip_pypi }}
-        uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8 # v1.8.8
+        uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # v1.8.10
 
       # PyPi test maintenance affected us numerous times, leaving for history purposes
       # - name: Upload to PyPi test
       #   if: ${{ !inputs.skip_pypi }}
-      #   uses: pypa/gh-action-pypi-publish@f8c70e705ffc13c3b4d1221169b84f12a75d6ca8 # v1.8.8
+      #   uses: pypa/gh-action-pypi-publish@b7f401de30cb6434a1e19f805ff006643653240e # v1.8.10
       #   with:
       #     repository-url: https://test.pypi.org/legacy/
 

@@ -79,6 +79,7 @@ var singleArchitectureRegions = []string{
 	"eu-central-2",
 	"eu-south-2",
 	"me-central-1",
+	"il-central-1",
 }
 
 // getLayerVersion returns the latest version of a layer in a region

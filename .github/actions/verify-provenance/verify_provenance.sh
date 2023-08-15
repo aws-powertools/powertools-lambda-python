@@ -36,35 +36,58 @@ export readonly FILES=("${SLSA_VERIFIER_BINARY}" "${SLSA_VERIFIER_CHECKSUM_FILE}
 
 function debug() {
     TIMESTAMP=$(date -u "+%FT%TZ") # 2023-05-10T07:53:59Z
-    echo ""${TIMESTAMP}" DEBUG - $1"
+    echo ""${TIMESTAMP}" DEBUG - [*] $1"
+}
+
+function error() {
+    cleanup
+    TIMESTAMP=$(date -u "+%FT%TZ") # 2023-05-10T07:53:59Z
+    echo ""${TIMESTAMP}" ERROR - [!] $1"
+    echo ""${TIMESTAMP}" ERROR - [!] exiting"
+    exit 1
 }
 
 function download_slsa_verifier() {
-    debug "[*] Downloading SLSA Verifier for - Binary: slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
-    curl --location --silent -O "https://github.com/slsa-framework/slsa-verifier/releases/download/v${SLSA_VERIFIER_VERSION}/slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
+    readonly SLSA_URL="https://github.com/slsa-framework/slsa-verifier/releases/download/v${SLSA_VERIFIER_VERSION}/slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
+    # debug "Downloading SLSA Verifier for - Binary: slsa-verifier-${OS_NAME}-${ARCHITECTURE}"
+    debug "Downloading SLSA Verifier binary: ${SLSA_URL}"
+    curl \
+        --location \
+        --fail \
+        --silent \
+        -O "${SLSA_URL}" || error "Failed to download SLSA Verifier binary"
 
-    debug "[*] Downloading SLSA Verifier checksums"
-    curl --location --silent -O "https://raw.githubusercontent.com/slsa-framework/slsa-verifier/f59b55ef2190581d40fc1a5f3b7a51cab2f4a652/${SLSA_VERIFIER_CHECKSUM_FILE}"
+    readonly SLSA_CHECKSUM_URL="https://raw.githubusercontent.com/slsa-framework/slsa-verifier/f59b55ef2190581d40fc1a5f3b7a51cab2f4a652/${SLSA_VERIFIER_CHECKSUM_FILE}"
+    debug "Downloading SLSA Verifier checksums"
+    curl \
+        --location \
+        --fail \
+        --silent \
+        -O "${SLSA_CHECKSUM_URL}" || error "Failed to download SLSA Verifier binary checksum file"
 
-    debug "[*] Verifying SLSA Verifier binary integrity"
+    debug "Verifying SLSA Verifier binary integrity"
     CURRENT_HASH=$(sha256sum "${SLSA_VERIFIER_BINARY}" | awk '{print $1}')
     if [[ $(grep "${CURRENT_HASH}" "${SLSA_VERIFIER_CHECKSUM_FILE}") ]]; then
-        debug "[*] SLSA Verifier binary integrity confirmed"
+        debug "SLSA Verifier binary integrity confirmed"
         chmod +x "${SLSA_VERIFIER_BINARY}"
     else
-        debug "[!] Failed integrity check for SLSA Verifier binary: ${SLSA_VERIFIER_BINARY}"
-        exit 1
+        error "Failed integrity check for SLSA Verifier binary: ${SLSA_VERIFIER_BINARY}"
     fi
 }
 
 function download_provenance() {
-    debug "[*] Downloading attestation for - Release: https://github.com/${ORG}/${REPO}/releases/v${RELEASE_VERSION}"
+    readonly PROVENANCE_URL="https://github.com/${ORG}/${REPO}/releases/download/v${RELEASE_VERSION}/${PROVENANCE_FILE}"
+    debug "Downloading attestation: ${PROVENANCE_URL}"
 
-    curl --location --silent -O "https://github.com/${ORG}/${REPO}/releases/download/v${RELEASE_VERSION}/${PROVENANCE_FILE}"
+    curl \
+        --location \
+        --fail \
+        --silent \
+        -O ${PROVENANCE_URL} || error "Failed to download provenance. Does the release already exist?"
 }
 
 function download_release_artifact() {
-    debug "[*] Downloading ${RELEASE_VERSION} release from PyPi"
+    debug "Downloading ${RELEASE_VERSION} release from PyPi"
     python -m pip download \
         --only-binary=:all: \
         --no-deps \
@@ -73,7 +96,7 @@ function download_release_artifact() {
 }
 
 function verify_provenance() {
-    debug "[*] Verifying attestation with slsa-verifier"
+    debug "Verifying attestation with slsa-verifier"
     "${SLSA_VERIFIER_BINARY}" verify-artifact \
         --provenance-path "${PROVENANCE_FILE}" \
         --source-uri github.com/${ORG}/${REPO} \
@@ -81,11 +104,11 @@ function verify_provenance() {
 }
 
 function cleanup() {
-    debug "[*] Cleaning up previously downloaded files"
-    rm "${SLSA_VERIFIER_BINARY}"
-    rm "${SLSA_VERIFIER_CHECKSUM_FILE}"
-    rm "${PROVENANCE_FILE}"
-    rm "${RELEASE_BINARY}"
+    debug "Cleaning up previously downloaded files"
+    rm -f "${SLSA_VERIFIER_BINARY}"
+    rm -f "${SLSA_VERIFIER_CHECKSUM_FILE}"
+    rm -f "${PROVENANCE_FILE}"
+    rm -f "${RELEASE_BINARY}"
     echo "${FILES[@]}" | xargs -n1 echo "Removed file: "
 }
 

@@ -120,6 +120,8 @@ jobs:
             has_arm64_support: "true"
           - region: "eu-west-3"
             has_arm64_support: "true"
+          - region: "il-central-1"
+            has_arm64_support: "false"
           - region: "me-central-1"
             has_arm64_support: "false"
           - region: "me-south-1"
@@ -154,13 +156,13 @@ jobs:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@e33196f7422957bea03ed53f6fbb155025ffc7b8 # v3.7.0
+        uses: actions/setup-node@bea5baf987ba7aa777a8a0b4ace377a21c45c381 # v3.8.0
         with:
           node-version: "16.12"
       - name: Setup python
         uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
-          python-version: "3.10"
+          python-version: "3.11"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack

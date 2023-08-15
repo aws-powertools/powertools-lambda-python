@@ -35,6 +35,8 @@ ignore = [
     "PLW0603", #https://beta.ruff.rs/docs/rules/global-statement/
     "B904", # raise-without-from-inside-except - disabled temporarily
     "PLC1901", # Compare-to-empty-string - disabled temporarily
+    "PYI024",
+    "FA100" # Enable this rule when drop support to Python 3.7
     ]
 
 # Exclude files and directories
@@ -68,3 +70,6 @@ split-on-trailing-comma = true
 "tests/e2e/utils/data_builder/__init__.py" = ["F401"]
 "tests/e2e/utils/data_fetcher/__init__.py" = ["F401"]
 "aws_lambda_powertools/utilities/data_classes/s3_event.py" = ["A003"]
+"aws_lambda_powertools/utilities/parser/models/__init__.py" = ["E402"]
+# Maintenance: we're keeping EphemeralMetrics code in case of Hyrum's law so we can quickly revert it
+"aws_lambda_powertools/metrics/metrics.py" = ["ERA001"]

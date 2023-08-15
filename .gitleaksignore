@@ -1,0 +1,3 @@
+examples/batch_processing/src/context_manager_access_output_pydantic.txt:aws-access-token:10
+examples/batch_processing/src/context_manager_access_output_pydantic.txt:aws-access-token:15
+examples/batch_processing/src/context_manager_access_output.txt:aws-access-token:10

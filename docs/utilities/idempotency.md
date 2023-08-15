@@ -74,7 +74,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 | TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
 
 ???+ tip "Tip: You can share a single state table for all functions"
-    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank"} in addition to the idempotency key as a hash key.
+    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} in addition to the idempotency key as a hash key.
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -135,7 +135,7 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -496,15 +496,15 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-| Parameter                       | Default | Description                                                                                                                                                |
-| ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank"}        |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                               |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                             |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                   |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                               |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                |
-| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank"} in the standard library. |
+| Parameter                       | Default | Description                                                                                                                                                               |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"} |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                              |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                            |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                  |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                              |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                               |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library. |
 
 ### Handling concurrent executions with the same payload
 
@@ -635,7 +635,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
     ```
 
 ### Customizing boto configuration
-
+<!-- markdownlint-disable-next-line MD013 -->
 The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"} when constructing the persistence store.
 
 === "Custom session"
@@ -744,7 +744,7 @@ The idempotency utility provides several routes to test your code.
 ### Disabling the idempotency utility
 
 When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable `POWERTOOLS_IDEMPOTENCY_DISABLED`
-with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html){target="_blank"} fixture:
+with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use [monkeypatch](https://docs.pytest.org/en/latest/monkeypatch.html){target="_blank" rel="nofollow"} fixture:
 
 === "test_disabling_idempotency_utility.py"
 

@@ -63,6 +63,13 @@ def test_apigw_v2_event_jwt_authorizer():
     assert parsed_event.stageVariables == raw_event["stageVariables"]
 
 
+def test_apigw_v2_event_empty_jwt_scopes():
+    raw_event = load_event("apiGatewayProxyV2Event.json")
+    raw_event["requestContext"]["authorizer"]["jwt"]["scopes"] = None
+
+    APIGatewayProxyEventV2Model(**raw_event)
+
+
 def test_api_gateway_proxy_v2_event_lambda_authorizer():
     raw_event = load_event("apiGatewayProxyV2LambdaAuthorizerEvent.json")
     parsed_event: APIGatewayProxyEventV2Model = APIGatewayProxyEventV2Model(**raw_event)
