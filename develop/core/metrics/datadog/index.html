@@ -1366,9 +1366,10 @@
     LambdaFn --&gt; LambdaCode
     LambdaCode --&gt; DatadogSDK
     DatadogSDK --&gt; DatadogExtension
+    DatadogExtension --&gt; Datadog: async
 
     state LambdaExtension {
-        DatadogExtension --&gt; Datadog: async
+        DatadogExtension 
     }
 </code></pre>
 <h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
@@ -1956,7 +1957,7 @@
   <small>
     
       Last update:
-      2023-08-14
+      2023-08-15
     
   </small>
 </div>
