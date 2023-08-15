@@ -20,9 +20,10 @@ stateDiagram-v2
     LambdaFn --> LambdaCode
     LambdaCode --> DatadogSDK
     DatadogSDK --> DatadogExtension
+    DatadogExtension --> Datadog: async
 
     state LambdaExtension {
-        DatadogExtension --> Datadog: async
+        DatadogExtension 
     }
 
 ```
