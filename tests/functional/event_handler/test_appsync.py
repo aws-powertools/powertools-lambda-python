@@ -273,7 +273,7 @@ def test_resolver_batch_resolver_many_fields_with_different_name():
         {
             "typeName": "Query",
             "info": {
-                "fieldName": "listLocationsDifferente",
+                "fieldName": "listLocationsDifferent",
                 "parentTypeName": "Query",
             },
             "fieldName": "listLocations",
@@ -285,6 +285,39 @@ def test_resolver_batch_resolver_many_fields_with_different_name():
     ]
 
     with pytest.raises(ValueError):
+        app.resolve(mock_event1, LambdaContext())
+
+
+def test_resolver_batch_with_resolver_not_found():
+    # GIVEN a AppSyncResolver
+    app = AppSyncResolver()
+    router = Router()
+
+    # WHEN we have an event
+    # WHEN the event field_name doesn't match with the resolver field_name
+    mock_event1 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listCars",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listCars",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+
+    @router.batch_resolver(type_name="Query", field_name="listLocations")
+    def get_locations(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations#" + name + "#" + event.source["id"]
+
+    app.include_router(router)
+
+    # THEN must fail with ValueError
+    with pytest.raises(ValueError, match="No resolver found for.*"):
         app.resolve(mock_event1, LambdaContext())
 
 
