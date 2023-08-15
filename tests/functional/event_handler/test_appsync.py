@@ -245,6 +245,49 @@ def test_resolver_include_resolver():
     assert result2 == "get_locations2#value"
 
 
+def test_resolver_batch_resolver_many_fields_with_different_name():
+    # GIVEN
+    app = AppSyncResolver()
+    router = Router()
+
+    @router.batch_resolver(type_name="Query", field_name="listLocations")
+    def get_locations(event: AppSyncResolverEvent, name: str) -> str:
+        return "get_locations#" + name + "#" + event.source["id"]
+
+    app.include_router(router)
+
+    # WHEN
+    mock_event1 = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listLocations",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocationsDifferente",
+                "parentTypeName": "Query",
+            },
+            "fieldName": "listLocations",
+            "arguments": {"name": "value"},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+
+    with pytest.raises(ValueError):
+        app.resolve(mock_event1, LambdaContext())
+
+
 def test_resolver_include_batch_resolver():
     # GIVEN
     app = AppSyncResolver()
