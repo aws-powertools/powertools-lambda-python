@@ -518,6 +518,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lambda-layer-in-govcloud-and-china-region" class="md-nav__link">
+    Lambda Layer in GovCloud and China region
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#v3" class="md-nav__link">
     V3
   </a>
@@ -1170,6 +1177,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lambda-layer-in-govcloud-and-china-region" class="md-nav__link">
+    Lambda Layer in GovCloud and China region
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#v3" class="md-nav__link">
     V3
   </a>
@@ -1327,6 +1341,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#lambda-layer-in-govcloud-and-china-region" class="md-nav__link">
+    Lambda Layer in GovCloud and China region
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#v3" class="md-nav__link">
     V3
   </a>
@@ -1457,13 +1478,27 @@
 <h3 id="enhanced-operational-metrics">Enhanced operational metrics<a class="headerlink" href="#enhanced-operational-metrics" title="Permanent link">&para;</a></h3>
 <p><a href="https://github.com/aws-powertools/powertools-lambda-python#connect" target="_blank">Through customers interview</a>, <a href="https://discord.gg/B8zZKbbyET" rel="nofollow" target="_blank">Discord</a>, and <a href="https://github.com/aws-powertools/powertools-lambda-python#connect" target="_blank">1:1 customer enablement</a>, we noticed customers often create the same set of custom operational metrics.</p>
 <p>We want to make this easier by extending certain utilities to accept a <code>metrics</code> instance and metrics configuration (what metrics to create). It would be opt-in due to costs associated with creating metrics.</p>
-<p>!!! question "Got ideas for custom metrics? Open up a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2Ctriage&amp;projects=&amp;template=feature_request.yml&amp;title=Feature+request%3A+TITLE">feature request</a>"{target="_blank"}</p>
+<div class="admonition question">
+<p class="admonition-title">Got ideas for custom metrics? Open up a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=feature-request%2Ctriage&amp;projects=&amp;template=feature_request.yml&amp;title=Feature+request%3A+TITLE">feature request</a></p>
+</div>
 <p><strong>Major updates</strong></p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> RFC to outline metrics for Batch (<em>e.g., Failed items, Batch size</em>)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> RFC to outline metrics for Feature flags (<em>e.g., matched rules</em>)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> RFC to outline metrics for Event Handler (<em>e.g., validation errors</em> )</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> RFC to outline metrics for Idempotency (<em>e.g., cache hit</em>)</li>
+</ul>
+<h3 id="lambda-layer-in-govcloud-and-china-region">Lambda Layer in GovCloud and China region<a class="headerlink" href="#lambda-layer-in-govcloud-and-china-region" title="Permanent link">&para;</a></h3>
+<p>We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.</p>
+<div class="admonition note">
+<p class="admonition-title">Help us prioritize it by reaching out to your AWS representatives or <a href="mailto:aws-lambda-powertools-feedback@amazon.com">via email</a>.</p>
+</div>
+<p><strong>Major updates</strong></p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Gather agencies and customers name to prioritize it</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Investigate security requirements for special regions</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update CDK Layer construct to include regions</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create additional infrastructure for special regions</li>
 </ul>
 <h3 id="v3">V3<a class="headerlink" href="#v3" title="Permanent link">&para;</a></h3>
 <p>With Python 3.7 reaching <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html">end-of-life in AWS Lambda by the end of the year</a>, we want to plan some breaking changes. As always, we plan on having ample notice, a detailed upgrade guide, and keep breaking changes to a minimum to ease transition (e.g., it took ~7 months from v2 to surpass v1 downloads).</p>
@@ -1545,7 +1580,7 @@
   <small>
     
       Last update:
-      2023-08-02
+      2023-08-15
     
   </small>
 </div>
