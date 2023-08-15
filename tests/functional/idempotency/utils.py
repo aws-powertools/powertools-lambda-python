@@ -72,5 +72,5 @@ def build_idempotency_update_item_stub(
         },
         "Key": {"id": {"S": idempotency_key_hash}},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, #expiry = :expiry, #status = :status",
     }

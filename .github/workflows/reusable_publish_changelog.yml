@@ -10,8 +10,12 @@ env:
   PULL_REQUEST_TITLE: "chore(ci): changelog rebuild"
   FILES_TO_COMMIT: "CHANGELOG.md"
 
+permissions:
+  contents: read
+
 jobs:
   publish_changelog:
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     # Force Github action to run only a single job at a time (based on the group name)
     # This is to prevent race-condition and inconsistencies with changelog push
     concurrency:

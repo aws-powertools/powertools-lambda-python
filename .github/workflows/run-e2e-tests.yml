@@ -35,6 +35,9 @@ env:
 
 concurrency: e2e
 
+permissions:
+  contents: read
+
 jobs:
   run:
     runs-on: aws-powertools_ubuntu-latest_8-core
@@ -44,26 +47,26 @@ jobs:
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
-        version: ["3.7", "3.8", "3.9", "3.10"]
-    if: ${{ github.actor != 'dependabot[bot]' }}
+        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
           cache: "poetry"
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@bea5baf987ba7aa777a8a0b4ace377a21c45c381 # v3.8.0
         with:
           node-version: "16.12"
       - name: Install CDK CLI
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: Install dependencies
         run: make dev

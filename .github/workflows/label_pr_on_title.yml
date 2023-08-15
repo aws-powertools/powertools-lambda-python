@@ -26,10 +26,14 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   get_pr_details:
     permissions:
       actions: read  # download PR artifact
+      contents: read # checkout code
     # Guardrails to only ever run if PR recording workflow was indeed
     # run in a PR event and ran successfully
     if: ${{ github.event.workflow_run.conclusion == 'success' }}

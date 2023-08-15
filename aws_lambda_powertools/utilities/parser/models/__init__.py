@@ -1,3 +1,7 @@
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
+
+disable_pydantic_v2_warning()
+
 from .alb import AlbModel, AlbRequestContext, AlbRequestContextData
 from .apigw import (
     APIGatewayEventAuthorizer,
@@ -84,6 +88,7 @@ from .ses import (
 )
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
+from .vpc_lattice import VpcLatticeModel
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
@@ -157,4 +162,5 @@ __all__ = [
     "CloudFormationCustomResourceDeleteModel",
     "CloudFormationCustomResourceCreateModel",
     "CloudFormationCustomResourceBaseModel",
+    "VpcLatticeModel",
 ]

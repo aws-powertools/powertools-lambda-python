@@ -57,7 +57,11 @@ def get_metrics(
     end_date = end_date or start_date + timedelta(minutes=2)
 
     metric_query = build_metric_query_data(
-        namespace=namespace, metric_name=metric_name, period=period, stat=stat, dimensions=dimensions
+        namespace=namespace,
+        metric_name=metric_name,
+        period=period,
+        stat=stat,
+        dimensions=dimensions,
     )
 
     response = cw_client.get_metric_data(

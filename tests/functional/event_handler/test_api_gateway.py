@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import zlib
 from copy import deepcopy
 from decimal import Decimal
@@ -39,12 +40,6 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from tests.functional.utils import load_event
-
-
-@pytest.fixture
-def json_dump():
-    # our serializers reduce length to save on costs; fixture to replicate separators
-    return lambda obj: json.dumps(obj, separators=(",", ":"))
 
 
 def read_media(file_name: str) -> bytes:
@@ -923,17 +918,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -959,17 +954,17 @@ def test_similar_dynamic_routes_with_whitespaces():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested account"
@@ -1080,6 +1075,38 @@ def test_remove_prefix(path: str):
     response = app({"httpMethod": "GET", "path": path}, None)
 
     # THEN a route for `/foo` should be found
+    assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/stg/foo", id="path matched pay prefix"),
+        pytest.param("/dev/foo", id="path matched pay prefix with multiple numbers"),
+        pytest.param("/foo", id="path does not start with any of the prefixes"),
+    ],
+)
+def test_remove_prefix_by_regex(path: str):
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/foo")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    assert response["statusCode"] == 200
+
+
+def test_empty_path_when_using_regexes():
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": "/dev"}, None)
+
     assert response["statusCode"] == 200
 
 

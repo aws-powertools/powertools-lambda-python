@@ -105,7 +105,7 @@ def test_code_pipeline_event_non_json_user_parameters():
     assert configuration.user_parameters is not None
 
     with pytest.raises(json.decoder.JSONDecodeError):
-        configuration.decoded_user_parameters
+        assert configuration.decoded_user_parameters is not None
 
 
 def test_code_pipeline_event_decoded_data():
@@ -181,6 +181,6 @@ def test_code_pipeline_get_artifact(mocker: MockerFixture):
             "aws_access_key_id": event.data.artifact_credentials.access_key_id,
             "aws_secret_access_key": event.data.artifact_credentials.secret_access_key,
             "aws_session_token": event.data.artifact_credentials.session_token,
-        }
+        },
     )
     assert artifact_str == file_contents

@@ -13,9 +13,15 @@ name: Build changelog
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - develop
+#  push:
+#    branches:
+#      - develop
+  schedule:
+    # Note: run daily at 7am UTC time until upstream git-chlog uses stable sorting
+    - cron: "0 7 * * *"
+
+permissions:
+  contents: read
 
 jobs:
   changelog:

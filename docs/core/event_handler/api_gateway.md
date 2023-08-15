@@ -3,7 +3,7 @@ title: REST API
 description: Core utility
 ---
 
-Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Balancer (ALB), and Lambda Function URLs.
+Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Balancer (ALB), Lambda Function URLs, and VPC Lattice.
 
 ## Key Features
 
@@ -18,7 +18,10 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 ### Required resources
 
+<!-- markdownlint-disable-next-line MD013 -->
 If you're using any API Gateway integration, you must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function.
+
+In case of using [VPC Lattice](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you must have a service network configured to invoke your Lambda function.
 
 This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.
 
@@ -42,7 +45,7 @@ Before you decorate your functions to handle a given path and HTTP method(s), yo
 
 A resolver will handle request resolution, including [one or more routers](#split-routes-with-router), and give you access to the current event via typed properties.
 
-For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, and `LambdaFunctionUrlResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
+For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, `LambdaFunctionUrlResolver`, and `VPCLatticeResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
     We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
@@ -116,6 +119,22 @@ When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/d
     --8<-- "examples/event_handler_lambda_function_url/src/getting_started_lambda_function_url_resolver.json"
     ```
 
+#### VPC Lattice
+
+When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you can use `VPCLatticeResolver`.
+
+=== "getting_started_vpclattice_resolver.py"
+
+    ```python hl_lines="5 11" title="Using VPC Lattice resolver"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.py"
+    ```
+
+=== "getting_started_vpclattice_resolver.json"
+
+    ```json hl_lines="2 3" title="Example payload delivered to the handler"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.json"
+    ```
+
 ### Dynamic routes
 
 You can use `/todos/<todo_id>` to configure dynamic URL paths, where `<todo_id>` will be resolved at runtime.
@@ -145,7 +164,7 @@ Each dynamic route you set must be part of your function signature. This allows 
 ???+ note
     We recommend having explicit routes whenever possible; use catch-all routes sparingly.
 
-You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank"} string to handle an arbitrary number of paths within a request, for example `.+`.
+You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} string to handle an arbitrary number of paths within a request, for example `.+`.
 
 You can also combine nested paths with greedy regex to catch in between routes.
 
@@ -253,7 +272,7 @@ When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apig
 
 **Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda-roadmap/issues/34){target="_blank"}.
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda/issues/34){target="_blank"}.
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
@@ -273,6 +292,14 @@ To address this API Gateway behavior, we use `strip_prefixes` parameter to accou
     After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`.
 
 	For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
+
+For added flexibility, you can use regexes to strip a prefix. This is helpful when you have many options due to different combinations of prefixes (e.g: multiple environments, multiple versions).
+
+=== "strip_route_prefix_regex.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/event_handler_rest/src/strip_route_prefix_regex.py"
+    ```
 
 ## Advanced
 
@@ -328,12 +355,12 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 
 | Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
-| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
-| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
-| **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank"}. |
-| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
-| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
+| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
+| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
+| **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank" rel="nofollow"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank" rel="nofollow"}. |
+| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
+| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
 
 ### Fine grained responses
 
@@ -675,7 +702,7 @@ You can test your routes by passing a proxy event request with required params.
 
 Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.
 
-That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank"} if you're looking for a more opinionated and web framework feature set.
+That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank" rel="nofollow"} if you're looking for a more opinionated and web framework feature set.
 
 **What happened to `ApiGatewayResolver`?**
 

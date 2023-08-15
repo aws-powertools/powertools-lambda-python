@@ -33,6 +33,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
     LambdaFunctionUrlEvent,
+    VPCLatticeEvent,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -53,6 +54,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEvent = "APIGatewayProxyEvent"
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
+    VPCLatticeEvent = "VPCLatticeEvent"
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
@@ -209,7 +211,13 @@ class Route:
     """Internally used Route Configuration"""
 
     def __init__(
-        self, method: str, rule: Pattern, func: Callable, cors: bool, compress: bool, cache_control: Optional[str]
+        self,
+        method: str,
+        rule: Pattern,
+        func: Callable,
+        cors: bool,
+        compress: bool,
+        cache_control: Optional[str],
     ):
         self.method = method.upper()
         self.rule = rule
@@ -237,7 +245,9 @@ class ResponseBuilder:
 
     @staticmethod
     def _has_compression_enabled(
-        route_compression: bool, response_compression: Optional[bool], event: BaseProxyEvent
+        route_compression: bool,
+        response_compression: Optional[bool],
+        event: BaseProxyEvent,
     ) -> bool:
         """
         Checks if compression is enabled.
@@ -285,7 +295,9 @@ class ResponseBuilder:
         if self.route.cache_control:
             self._add_cache_control(self.route.cache_control)
         if self._has_compression_enabled(
-            route_compression=self.route.compress, response_compression=self.response.compress, event=event
+            route_compression=self.route.compress,
+            response_compression=self.response.compress,
+            event=event,
         ):
             self._compress()
 
@@ -400,7 +412,11 @@ class BaseRouter(ABC):
         return self.route(rule, "PUT", cors, compress, cache_control)
 
     def delete(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -427,7 +443,11 @@ class BaseRouter(ABC):
         return self.route(rule, "DELETE", cors, compress, cache_control)
 
     def patch(
-        self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -500,7 +520,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """
         Parameters
@@ -514,9 +534,10 @@ class ApiGatewayResolver(BaseRouter):
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        strip_prefixes: List[str], optional
-            optional list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings.
+        strip_prefixes: List[Union[str, Pattern]], optional
+            optional list of prefixes to be removed from the request path before doing the routing.
+            This is often used with api gateways with multiple custom mappings.
+            Each prefix can be a static string or a compiled regex pattern
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
@@ -566,7 +587,8 @@ class ApiGatewayResolver(BaseRouter):
                 route_key = item + rule
                 if route_key in self._route_keys:
                     warnings.warn(
-                        f"A route like this was already registered. method: '{item}' rule: '{rule}'", stacklevel=2
+                        f"A route like this was already registered. method: '{item}' rule: '{rule}'",
+                        stacklevel=2,
                     )
                 self._route_keys.append(route_key)
                 if cors_enabled:
@@ -664,6 +686,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
             logger.debug("Converting event to Lambda Function URL contract")
             return LambdaFunctionUrlEvent(event)
+        if self._proxy_type == ProxyEventType.VPCLatticeEvent:
+            logger.debug("Converting event to VPC Lattice contract")
+            return VPCLatticeEvent(event)
         logger.debug("Converting event to ALB contract")
         return ALBEvent(event)
 
@@ -671,6 +696,7 @@ class ApiGatewayResolver(BaseRouter):
         """Resolves the response or return the not found response"""
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
+
         for route in self._static_routes + self._dynamic_routes:
             if method != route.method:
                 continue
@@ -688,10 +714,21 @@ class ApiGatewayResolver(BaseRouter):
             return path
 
         for prefix in self._strip_prefixes:
-            if path == prefix:
-                return "/"
-            if self._path_starts_with(path, prefix):
-                return path[len(prefix) :]
+            if isinstance(prefix, str):
+                if path == prefix:
+                    return "/"
+
+                if self._path_starts_with(path, prefix):
+                    return path[len(prefix) :]
+
+            if isinstance(prefix, Pattern):
+                path = re.sub(prefix, "", path)
+
+                # When using regexes, we might get into a point where everything is removed
+                # from the string, so we check if it's empty and return /, since there's nothing
+                # else to strip anymore.
+                if not path:
+                    return "/"
 
         return path
 
@@ -725,7 +762,7 @@ class ApiGatewayResolver(BaseRouter):
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
                 body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
-            )
+            ),
         )
 
     def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
@@ -843,12 +880,14 @@ class ApiGatewayResolver(BaseRouter):
         router.context = self.context
 
         for route, func in router._routes.items():
+            new_route = route
+
             if prefix:
                 rule = route[0]
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
-                route = (rule, *route[1:])
+                new_route = (rule, *route[1:])
 
-            self.route(*route)(func)
+            self.route(*new_route)(func)
 
 
 class Router(BaseRouter):
@@ -884,7 +923,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
@@ -915,7 +954,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
@@ -929,7 +968,7 @@ class ALBResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)

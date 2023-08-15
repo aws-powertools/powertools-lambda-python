@@ -80,7 +80,7 @@ def save_api_execution_history(path: str, headers: dict, request_context: dict) 
                     "request_time": request_context.get("requestTime"),
                     "source_ip": request_context.get("identity", {}).get("sourceIp"),
                     "http_method": request_context.get("httpMethod"),
-                }
+                },
             )
 
         return None

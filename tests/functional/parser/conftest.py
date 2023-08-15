@@ -7,6 +7,15 @@ from aws_lambda_powertools.utilities.parser import BaseEnvelope
 
 
 @pytest.fixture
+def pydanticv2_only():
+    from pydantic import __version__
+
+    version = __version__.split(".")
+    if version[0] != "2":
+        pytest.skip("pydanticv2 test only")
+
+
+@pytest.fixture
 def dummy_event():
     return {"payload": {"message": "hello world"}}
 

@@ -159,13 +159,13 @@ class BasePartialProcessor(ABC):
         #
         #   Scenario: Injects Lambda context
         #
-        #   def record_handler(record, lambda_context): ... # noqa: E800
-        #   with processor(records=batch, handler=record_handler, lambda_context=context): ... # noqa: E800
+        #   def record_handler(record, lambda_context): ... # noqa: ERA001
+        #   with processor(records=batch, handler=record_handler, lambda_context=context): ... # noqa: ERA001
         #
         #   Scenario: Does NOT inject Lambda context (default)
         #
-        #   def record_handler(record): pass # noqa: E800
-        #   with processor(records=batch, handler=record_handler): ... # noqa: E800
+        #   def record_handler(record): pass # noqa: ERA001
+        #   with processor(records=batch, handler=record_handler): ... # noqa: ERA001
         #
         if lambda_context is None:
             self._handler_accepts_lambda_context = False
@@ -348,6 +348,11 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
+            # If a model is provided, we assume Pydantic is installed and we need to disable v2 warnings
+            from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
+
+            disable_pydantic_v2_warning()
+
             return model.parse_obj(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
 
@@ -449,7 +454,7 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
         logger.info(record.dynamodb.new_image)
         payload: dict = json.loads(record.dynamodb.new_image.get("item"))
         # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: ERA001
         # payload = change.get("Message") -> "<payload>"
         ...
 
@@ -500,8 +505,13 @@ class BatchProcessor(BasePartialBatchProcessor):  # Keep old name for compatibil
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+            model_name = getattr(self.model, "__name__", None)
+
+            if model in (self.model, model_name):
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())
@@ -593,7 +603,7 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
         logger.info(record.dynamodb.new_image)
         payload: dict = json.loads(record.dynamodb.new_image.get("item"))
         # alternatively:
-        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: E800
+        # changes: Dict[str, Any] = record.dynamodb.new_image  # noqa: ERA001
         # payload = change.get("Message") -> "<payload>"
         ...
 
@@ -644,8 +654,13 @@ class AsyncBatchProcessor(BasePartialBatchProcessor):
             # we need to handle that exception differently.
             # We check for a public attr in validation errors coming from Pydantic exceptions (subclass or not)
             # and we compare if it's coming from the same model that trigger the exception in the first place
-            model = getattr(exc, "model", None)
-            if model == self.model:
+
+            # Pydantic v1 raises a ValidationError with ErrorWrappers and store the model instance in a class variable.
+            # Pydantic v2 simplifies this by adding a title variable to store the model name directly.
+            model = getattr(exc, "model", None) or getattr(exc, "title", None)
+            model_name = getattr(self.model, "__name__", None)
+
+            if model in (self.model, model_name):
                 return self._register_model_validation_error_record(record)
 
             return self.failure_handler(record=data, exception=sys.exc_info())

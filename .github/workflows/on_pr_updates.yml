@@ -1,0 +1,36 @@
+# Fail PR check if do-not-merge label is present
+name: PR requirements
+
+# PROCESS
+#
+# 1. Verify whether 'do-not-merge' label is present
+# 2. Fail PR to prevent merging until resolved
+# 3. Pass PR if do-not-merge label is removed by a maintainer
+
+# USAGE
+#
+# Always triggered on PR labeling changes.
+
+# NOTES
+#
+# PR requirements are checked async in on_opened_pr.yml and enforced here synchronously
+# due to limitations in GH API.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - labeled
+      - unlabeled
+
+permissions: {}  # no permission required
+
+jobs:
+  check-requirements:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block if it doesn't minimum requirements
+        if: contains(github.event.pull_request.labels.*.name, 'do-not-merge')
+        run: |
+          echo "This PR does not meet minimum requirements (check PR comments)."
+          exit 1
