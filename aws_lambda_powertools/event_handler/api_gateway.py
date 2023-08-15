@@ -1070,8 +1070,12 @@ class ApiGatewayResolver(BaseRouter):
                 route,
             )
         except Exception as exc:
-            logger.exception(exc)
+            # If exception is handled then return the response builder to reduce noise
+            response_builder = self._call_exception_handler(exc, route)
+            if response_builder:
+                return response_builder
 
+            logger.exception(exc)
             if self._debug:
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate so
@@ -1084,12 +1088,6 @@ class ApiGatewayResolver(BaseRouter):
                     ),
                     route,
                 )
-
-            # Moved this to prioritise powertools debug mode
-            #
-            response_builder = self._call_exception_handler(exc, route)
-            if response_builder:
-                return response_builder
 
             raise
 
