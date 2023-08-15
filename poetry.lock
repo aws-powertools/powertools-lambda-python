@@ -105,7 +105,7 @@ files = [
 [package.dependencies]
 aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -124,7 +124,7 @@ files = [
 "aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
 aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -143,7 +143,7 @@ files = [
 "aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
 aws-cdk-lib = "2.91.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -163,7 +163,7 @@ files = [
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.166,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.86.0,<2.0.0"
+jsii = ">=1.85.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -201,13 +201,10 @@ requests = ">=0.14.0"
 [[package]]
 name = "aws-sam-translator"
 version = "1.73.0"
-version = "1.73.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.73.0.tar.gz", hash = "sha256:bfa7cad3a78f002edeec5e39fd61b616cf84f34f61010c5dc2f7a76845fe7a02"},
-    {file = "aws_sam_translator-1.73.0-py3-none-any.whl", hash = "sha256:c0132b065d743773fcd2573ed1ae60e0129fa46043fad76430261b098a811924"},
     {file = "aws-sam-translator-1.73.0.tar.gz", hash = "sha256:bfa7cad3a78f002edeec5e39fd61b616cf84f34f61010c5dc2f7a76845fe7a02"},
     {file = "aws_sam_translator-1.73.0-py3-none-any.whl", hash = "sha256:c0132b065d743773fcd2573ed1ae60e0129fa46043fad76430261b098a811924"},
 ]
@@ -311,17 +308,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.24"
+version = "1.28.26"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.24-py3-none-any.whl", hash = "sha256:0300ca6ec8bc136eb316b32cc1e30c66b85bc497f5a5fe42e095ae4280569708"},
-    {file = "boto3-1.28.24.tar.gz", hash = "sha256:9d1b4713c888e53a218648ad71522bee9bec9d83f2999fff2494675af810b632"},
+    {file = "boto3-1.28.26-py3-none-any.whl", hash = "sha256:63619ffa44bc7f799b525c86d73bdb7f7a70994942bbff78253585bf64084e6e"},
+    {file = "boto3-1.28.26.tar.gz", hash = "sha256:a15841c7d04f87c63c9f2587b2b48198bec04d307d7b9950cbe4a021f845a5ba"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.24,<1.32.0"
+botocore = ">=1.31.26,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -330,13 +327,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.24"
+version = "1.31.26"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.24-py3-none-any.whl", hash = "sha256:8c7ba9b09e9104e2d473214e1ffcf84b77e04cf6f5f2344942c1eed9e299f947"},
-    {file = "botocore-1.31.24.tar.gz", hash = "sha256:2d8f412c67f9285219f52d5dbbb6ef0dfa9f606da29cbdd41b6d6474bcc4bbd4"},
+    {file = "botocore-1.31.26-py3-none-any.whl", hash = "sha256:74d1c26144915312004a9f0232cdbe08946dfec9fc7dcd854456d2b73be9bfd9"},
+    {file = "botocore-1.31.26.tar.gz", hash = "sha256:e68a50ba76425ede8693fdf1f95b8411e283bc7619c03d7eb666db9f1de48153"},
 ]
 
 [package.dependencies]
@@ -956,13 +953,13 @@ mypy = ["mypy"]
 
 [[package]]
 name = "exceptiongroup"
-version = "1.1.2"
+version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "exceptiongroup-1.1.2-py3-none-any.whl", hash = "sha256:e346e69d186172ca7cf029c8c1d16235aa0e04035e5750b4b95039e65204328f"},
-    {file = "exceptiongroup-1.1.2.tar.gz", hash = "sha256:12c3e887d6485d16943a309616de20ae5582633e0a2eda17f4e10fd61c1e8af5"},
+    {file = "exceptiongroup-1.1.3-py3-none-any.whl", hash = "sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3"},
+    {file = "exceptiongroup-1.1.3.tar.gz", hash = "sha256:097acd85d473d75af5bb98e41b61ff7fe35efe6675e4f9370ec6ec5126d160e9"},
 ]
 
 [package.extras]
@@ -1361,13 +1358,13 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.86.1"
+version = "1.87.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "jsii-1.86.1-py3-none-any.whl", hash = "sha256:32eb46ed4c9a35bc92b892ef049ed1996f13be38ffef964d607e8fe930471b3e"},
-    {file = "jsii-1.86.1.tar.gz", hash = "sha256:44f9a820eea92c9508693f72d3129b5a080421c949c32303f4f7b2cc98a81f59"},
+    {file = "jsii-1.87.0-py3-none-any.whl", hash = "sha256:4b7c1331e950af10ba7b71d1c9d2e634b17716b3d1b2bf61e0382ff524d8aafb"},
+    {file = "jsii-1.87.0.tar.gz", hash = "sha256:ba6860c827551901a8c43c7b09a9bb901d5f1231fc4693f2f4bf87b3db200064"},
 ]
 
 [package.dependencies]
@@ -1395,13 +1392,13 @@ jsonpointer = ">=1.9"
 
 [[package]]
 name = "jsonpickle"
-version = "3.0.1"
+version = "3.0.2"
 description = "Python library for serializing any arbitrary object graph into JSON"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "jsonpickle-3.0.1-py2.py3-none-any.whl", hash = "sha256:130d8b293ea0add3845de311aaba55e6d706d0bb17bc123bd2c8baf8a39ac77c"},
-    {file = "jsonpickle-3.0.1.tar.gz", hash = "sha256:032538804795e73b94ead410800ac387fdb6de98f8882ac957fcd247e3a85200"},
+    {file = "jsonpickle-3.0.2-py3-none-any.whl", hash = "sha256:4a8442d97ca3f77978afa58068768dba7bff2dbabe79a9647bc3cdafd4ef019f"},
+    {file = "jsonpickle-3.0.2.tar.gz", hash = "sha256:e37abba4bfb3ca4a4647d28bb9f4706436f7b46c8a8333b4a718abafa8e46b37"},
 ]
 
 [package.dependencies]
@@ -3102,12 +3099,12 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["aws-encryption-sdk", "aws-xray-sdk", "fastjsonschema", "pydantic"]
+all = ["aws-encryption-sdk", "aws-xray-sdk", "fastjsonschema", "itsdangerous", "pydantic"]
 aws-sdk = ["boto3"]
+datadog = []
 datamasking-all = ["aws-encryption-sdk", "itsdangerous"]
 datamasking-aws-sdk = ["aws-encryption-sdk"]
 datamasking-itsdangerous = ["itsdangerous"]
-datadog = []
 parser = ["pydantic"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]
@@ -3115,4 +3112,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "287b2aff9a85ab1983ec41515388f72b9a048b53c1af42e957b29c968c69056d"
+content-hash = "70c335b6477d58702df0f0f6821ab7ed0cc592553bb92d698359518193570b10"
