@@ -94,14 +94,14 @@ If you're not [changing the default configuration for the DynamoDB persistence l
     ```
 
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
-    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank" rel="nofollow"}.
+    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
     Larger items cannot be written to DynamoDB and will cause exceptions.
 
 ???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
     result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank" rel="nofollow"} to
+    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
     estimate the cost.
 
 ### Idempotent decorator
@@ -135,7 +135,7 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank" rel="nofollow"}, and our [Event Source Data Classes](./data_classes.md){target="_blank" rel="nofollow"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -154,7 +154,7 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 #### Batch integration
 
-You can can easily integrate with [Batch utility](batch.md){target="_blank" rel="nofollow"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
+You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
 
 ???+ "Choosing an unique batch record attribute"
     In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
@@ -193,7 +193,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
     The payload extracted by the `event_key_jmespath` is treated as a string by default.
     This means there could be differences in whitespace even when the JSON payload itself is identical.
 
-    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
+    To alter this behaviour, we can use the [JMESPath built-in function](jmespath_functions.md#powertools_json-function){target="_blank"} `powertools_json()` to treat the payload as a JSON object (dict) rather than a string.
 
 === "Payment function"
 
@@ -212,7 +212,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 ???+ note
     This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
 
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank" rel="nofollow"},
+To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
 Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
 ???+ example
@@ -496,14 +496,14 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-| Parameter                       | Default | Description                                                                                                                                                |
-| ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](/utilities/jmespath_functions){target="_blank" rel="nofollow"}        |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                               |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                             |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                   |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                               |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                |
+| Parameter                       | Default | Description                                                                                                                                                               |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"} |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                              |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                            |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                  |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                              |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                               |
 | **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library. |
 
 ### Handling concurrent executions with the same payload
@@ -561,7 +561,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
 
 ???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
-    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank" rel="nofollow"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
+    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
 
     We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
 
@@ -636,7 +636,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 ### Customizing boto configuration
 <!-- markdownlint-disable-next-line MD013 -->
-The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank" rel="nofollow"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank" rel="nofollow"} when constructing the persistence store.
+The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"} or a custom [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"} when constructing the persistence store.
 
 === "Custom session"
 
@@ -760,7 +760,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 
 ### Testing with DynamoDB Local
 
-To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank" rel="nofollow"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
+To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html){target="_blank"}, you can replace the `DynamoDB client` used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.
 
 === "test_with_dynamodb_local.py"
 
@@ -776,7 +776,7 @@ To test with [DynamoDB Local](https://docs.aws.amazon.com/amazondynamodb/latest/
 
 ### How do I mock all DynamoDB I/O operations
 
-The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank" rel="nofollow"} which it uses to access DynamoDB.
+The idempotency utility lazily creates the dynamodb [Table](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"} which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.
 
 === "test_with_io_operations.py"
@@ -794,4 +794,4 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 ## Extra resources
 
 If you're interested in a deep dive on how Amazon uses idempotency when building our APIs, check out
-[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank" rel="nofollow"}.
+[this article](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/){target="_blank"}.

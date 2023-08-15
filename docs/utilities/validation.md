@@ -16,7 +16,7 @@ This utility provides JSON Schema validation for events and responses, including
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" rel="nofollow"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You can validate inbound and outbound events using [`validator` decorator](#validator-decorator).
 
@@ -32,7 +32,7 @@ You can also use the standalone `validate` function, if you want more control ov
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank" rel="nofollow"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[validation]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Validation.
 
@@ -112,8 +112,9 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
     ```json
     --8<-- "examples/validation/src/getting_started_validator_unwrapping_payload.json"
     ```
-<!-- markdownlint-disable-next-line MD013 -->
+<!-- markdownlint-disable MD013 -->
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections){target="_blank" rel="nofollow"}, combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions){target="_blank" rel="nofollow"} and [function expressions](https://jmespath.org/tutorial.html#functions){target="_blank" rel="nofollow"}.
+<!-- markdownlint-enable MD013 -->
 
 When combined, these features allow you to extract what you need before validating the actual payload.
 
@@ -141,16 +142,16 @@ We provide built-in envelopes to easily extract the payload from popular event s
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
-| Envelope                          | JMESPath expression                                                      |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                  |
-| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                  |
-| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                 |
-| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]` |
-| **`EVENTBRIDGE`**                 | `detail`                                                                 |
-| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`            |
-| **`SNS`**                         | `Records[0].Sns.Message | powertools_json(@)`                            |
-| **`SQS`**                         | `Records[*].powertools_json(body)`                                       |
+| Envelope                          | JMESPath expression                                           |
+| --------------------------------- | ------------------------------------------------------------- |
+| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                       |
+| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                       |
+| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                      |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]` |
+| **`EVENTBRIDGE`**                 | `detail`                                                      |
+| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))` |
+| **`SNS`**                         | `Records[0].Sns.Message                                       | powertools_json(@)`              |
+| **`SQS`**                         | `Records[*].powertools_json(body)`                            |
 
 ## Advanced
 
@@ -194,7 +195,7 @@ For each format defined in a dictionary key, you must use a regex, or a function
 
 You might have events or responses that contain non-encoded JSON, where you need to decode before validating them.
 <!-- markdownlint-disable-next-line MD013 -->
-You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank" rel="nofollow"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank" rel="nofollow"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank" rel="nofollow"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank" rel="nofollow"}.
+You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_blank"} within your expressions to do exactly that to [deserialize JSON Strings](./jmespath_functions.md#powertools_json-function){target="_blank"}, [decode base64](./jmespath_functions.md#powertools_base64-function){target="_blank"}, and [decompress gzip data](./jmespath_functions.md#powertools_base64_gzip-function){target="_blank"}.
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.

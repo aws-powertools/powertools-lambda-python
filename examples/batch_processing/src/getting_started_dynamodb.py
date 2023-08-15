@@ -11,7 +11,7 @@ from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import 
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-processor = BatchProcessor(event_type=EventType.DynamoDBStreams)
+processor = BatchProcessor(event_type=EventType.DynamoDBStreams)  # (1)!
 tracer = Tracer()
 logger = Logger()
 

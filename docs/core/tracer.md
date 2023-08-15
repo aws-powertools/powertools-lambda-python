@@ -17,19 +17,19 @@ Tracer is an opinionated thin wrapper for [AWS X-Ray Python SDK](https://github.
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank" rel="nofollow"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 !!! note "Tracer relies on AWS X-Ray SDK over [OpenTelememetry Distro (ADOT)](https://aws-otel.github.io/docs/getting-started/lambda){target="_blank" rel="nofollow"} for optimal cold start (lower latency)."
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank" rel="nofollow"}"
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
 Add `aws-lambda-powertools[tracer]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will ensure you have the required dependencies before using Tracer.
 
 ### Permissions
 
-Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions){target="_blank" rel="nofollow"} to send traces to AWS X-Ray.
+Before your use this utility, your AWS Lambda function [must have permissions](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html#services-xray-permissions){target="_blank"} to send traces to AWS X-Ray.
 
 ```yaml hl_lines="9 12" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/tracer/sam/template.yaml"
@@ -51,7 +51,7 @@ You can quickly start by initializing `Tracer` and use `capture_lambda_handler` 
 
 ### Annotations & Metadata
 
-**Annotations** are key-values associated with traces and indexed by AWS X-Ray. You can use them to filter traces and to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/){target="_blank" rel="nofollow"} to slice and dice your transactions.
+**Annotations** are key-values associated with traces and indexed by AWS X-Ray. You can use them to filter traces and to create [Trace Groups](https://aws.amazon.com/about-aws/whats-new/2018/11/aws-xray-adds-the-ability-to-group-traces/){target="_blank"} to slice and dice your transactions.
 
 ```python hl_lines="8" title="Adding annotations with put_annotation method"
 --8<-- "examples/tracer/src/put_trace_annotations.py"
@@ -103,11 +103,23 @@ You can trace asynchronous functions and generator functions (including context 
     --8<-- "examples/tracer/src/capture_method_generators.py"
     ```
 
+### Environment variables
+
+The following environment variables are available to configure Tracer at a global scope:
+
+| Setting               | Description                                      | Environment variable                 | Default |
+|-----------------------|--------------------------------------------------|--------------------------------------|---------|
+| **Disable Tracing**   | Explicitly disables all tracing.                 | `POWERTOOLS_TRACE_DISABLED`          | `false` |
+| **Response Capture**  | Captures Lambda or method return as metadata.    | `POWERTOOLS_TRACER_CAPTURE_RESPONSE` | `true`  |
+| **Exception Capture** | Captures Lambda or method exception as metadata. | `POWERTOOLS_TRACER_CAPTURE_ERROR`    | `true`  |
+
+Both [`POWERTOOLS_TRACER_CAPTURE_RESPONSE`](#disabling-response-auto-capture) and [`POWERTOOLS_TRACER_CAPTURE_ERROR`](#disabling-exception-auto-capture) can be set on a per-method basis, consequently overriding the environment variable value.
+
 ## Advanced
 
 ### Patching modules
 
-Tracer automatically patches all [supported libraries by X-Ray](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python-patching.html){target="_blank" rel="nofollow"} during initialization, by default. Underneath, AWS X-Ray SDK checks whether a supported library has been imported before patching.
+Tracer automatically patches all [supported libraries by X-Ray](https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk-python-patching.html){target="_blank"} during initialization, by default. Underneath, AWS X-Ray SDK checks whether a supported library has been imported before patching.
 
 If you're looking to shave a few microseconds, or milliseconds depending on your function memory configuration, you can patch specific modules using `patch_modules` param:
 
@@ -172,7 +184,7 @@ You can use `aiohttp_trace_config` function to create a valid [aiohttp trace_con
 
 You can use `tracer.provider` attribute to access all methods provided by AWS X-Ray `xray_recorder` object.
 
-This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor){target="_blank" rel="nofollow"}, or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment){target="_blank" rel="nofollow"}.
+This is useful when you need a feature available in X-Ray that is not available in the Tracer utility, for example [thread-safe](https://github.com/aws/aws-xray-sdk-python/#user-content-trace-threadpoolexecutor){target="_blank"}, or [context managers](https://github.com/aws/aws-xray-sdk-python/#user-content-start-a-custom-segmentsubsegment){target="_blank"}.
 
 ```python hl_lines="14" title="Tracing a code block with in_subsegment escape hatch"
 --8<-- "examples/tracer/src/sdk_escape_hatch.py"
@@ -181,7 +193,7 @@ This is useful when you need a feature available in X-Ray that is not available 
 ### Concurrent asynchronous functions
 
 ???+ warning
-	[X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164){target="_blank" rel="nofollow"} when async functions are run and traced concurrently
+	[X-Ray SDK will raise an exception](https://github.com/aws/aws-xray-sdk-python/issues/164){target="_blank"} when async functions are run and traced concurrently
 
 A safe workaround mechanism is to use `in_subsegment_async` available via Tracer escape hatch (`tracer.provider`).
 
@@ -221,4 +233,4 @@ Tracer is disabled by default when not running in the AWS Lambda environment - T
 
 * Use annotations on key operations to slice and dice traces, create unique views, and create metrics from it via Trace Groups
 * Use a namespace when adding metadata to group data more easily
-* Annotations and metadata are added to the current subsegment opened. If you want them in a specific subsegment, use a [context manager](https://github.com/aws/aws-xray-sdk-python/#start-a-custom-segmentsubsegment){target="_blank" rel="nofollow"} via the escape hatch mechanism
+* Annotations and metadata are added to the current subsegment opened. If you want them in a specific subsegment, use a [context manager](https://github.com/aws/aws-xray-sdk-python/#start-a-custom-segmentsubsegment){target="_blank"} via the escape hatch mechanism
