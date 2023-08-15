@@ -95,7 +95,7 @@ Since JWT is a close second, this new utility would cover higher level functions
 
 We want to make this easier by extending certain utilities to accept a `metrics` instance and metrics configuration (what metrics to create). It would be opt-in due to costs associated with creating metrics.
 
-!!! question "Got ideas for custom metrics? Open up a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE)"{target="_blank"}
+!!! question "Got ideas for custom metrics? Open up a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE)"
 
 **Major updates**
 
