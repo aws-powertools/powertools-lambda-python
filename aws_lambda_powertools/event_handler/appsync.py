@@ -297,7 +297,7 @@ class AppSyncResolver(Router):
 
         # Check if all events have the same field name
         if len({x["info"]["fieldName"] for x in event}) > 1:
-            ValueError("batch with different field names. It shouldn't happen!")
+            raise ValueError("batch with different field names. It shouldn't happen!")
 
         self.current_batch_event = [data_model(e) for e in event]
 
