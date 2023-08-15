@@ -1,6 +1,6 @@
 .PHONY: target dev format lint test coverage-html pr  build build-docs build-docs-api build-docs-website
 .PHONY: docs-local docs-api-local security-baseline complexity-baseline release-prod release-test release
-.PHONY: int-test-idem
+.PHONY: test-idempotency-redis
 
 target:
 	@$(MAKE) pr
@@ -36,9 +36,9 @@ test:
 unit-test:
 	poetry run pytest tests/unit
 
-int-test-idem:
-	docker run --name int-test-idem -d -p 63005:6379 redis
-	poetry run pytest tests/integration/idempotency;docker stop int-test-idem;docker rm int-test-idem
+test-idempotency-redis:
+	docker run --name test-idempotency-redis -d -p 63005:6379 redis
+	poetry run pytest tests/integration/idempotency;docker stop test-idempotency-redis;docker rm test-idempotency-redis
 
 e2e-test:
 	python parallel_run_e2e.py
