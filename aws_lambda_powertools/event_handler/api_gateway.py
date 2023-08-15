@@ -282,15 +282,11 @@ class Route:
             handler is executed which may also return a Dict or Tuple response.
         """
 
-        """
-        Check self._middleware_stack_built to ensure the middleware stack is only built once.
-        This will save CPU execution time when API route is executed multiple times.
-        """
+        # Check self._middleware_stack_built to ensure the middleware stack is only built once.
+        # This will save CPU execution time when API route is executed multiple times.
+        #
         if not self._middleware_stack_built:
             self._build_middleware_stack(router_middlewares=router_middlewares)
-
-        # Keep track of executed middleware
-        app._append_executed_middleware(self.func.__name__)
 
         # Call the Middleware Wrapped route function handler with the app and route arguments
         return self.func(app, **route_arguments)
@@ -434,6 +430,7 @@ class BaseRouter(ABC):
     lambda_context: LambdaContext
     context: dict
     _router_middlewares: List[Callable] = []
+    _processed_stack_frames: List[str] = []
 
     @abstractmethod
     def route(
@@ -642,6 +639,18 @@ class BaseRouter(ABC):
         """
         return self.route(rule, "PATCH", cors, compress, cache_control, middlewares)
 
+    def _push_processed_stack_frame(self, frame: str):
+        """
+        Add Current Middleware to the Middleware Stack Frames
+        The stack frames will be used when excpetions are thrown and Powertools
+        debug is enabled by developers.
+        """
+        self._processed_stack_frames.append(frame)
+
+    def _reset_processed_stack(self):
+        """Reset the Processed Stack Frames"""
+        self._processed_stack_frames = []
+
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""
         self.context.update(**additional_context)
@@ -695,7 +704,7 @@ class MiddlewareFrame:
     def __str__(self) -> str:
         """Identify current middleware identity and call chain for debugging purposes."""
         middleware_name = self.__name__
-        return f"Middleware '{middleware_name}'. Call chain is: {middleware_name} -> {self._next_middleware_name}"
+        return f"Middleware '{middleware_name}'. Next call chain is: {middleware_name} -> {self._next_middleware_name}"
 
     def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
         """
@@ -716,13 +725,12 @@ class MiddlewareFrame:
             is executed which will return one of 3 outputs.
 
         """
-        logger.debug(f"MiddlewareFrame: {self}")
-        try:
-            return self.current_middleware(app, self.next_middleware, **kwargs)
-        except Exception as error:
-            # Log the exception and raise it back to the caller
-            logger.exception(error)
-            raise error
+        # Do debug printing and push processed stack frame AFTER calling middleware
+        # else the stack frame text of `current calling next` is confusing.
+        logger.debug("MiddlewareFrame: %s", self)
+        app._push_processed_stack_frame(str(self))
+
+        return self.current_middleware(app, self.next_middleware, **kwargs)
 
 
 def _registered_api_adapter(
@@ -734,8 +742,9 @@ def _registered_api_adapter(
     Calls the registered API using ONLY the **kwargs provided to ensure the last call
     in the chain will match the API route function signature.
 
-    **IMPORTANT: This middleware ensures the actual API route is called with the correct call signature
-    and it MUST be the final frame in the middleware stack.
+    **IMPORTANT: This internal middleware ensures the actual API route is called with the correct call signature
+    and it MUST be the final frame in the middleware stack.  This can only be removed when the API Route
+    function accepts `app: BaseRouter` as the first argument - which is the breaking change.
 
     Parameters
     ----------
@@ -753,6 +762,7 @@ def _registered_api_adapter(
 
     """
     logger.debug(f"Calling API Route Handler: {kwargs}")
+
     return app._to_response(get_response(**kwargs))
 
 
@@ -820,7 +830,6 @@ class ApiGatewayResolver(BaseRouter):
         self._cors_methods: Set[str] = {"OPTIONS"}
         self._debug = self._has_debug(debug)
         self._strip_prefixes = strip_prefixes
-        self._executed_middlewares: List[str] = []
         self.context: Dict = {}  # early init as customers might add context before event resolution
 
         # Allow for a custom serializer or a concise json serialization
@@ -875,6 +884,7 @@ class ApiGatewayResolver(BaseRouter):
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
                     self._cors_methods.add(item.upper())
+
             return func
 
         return register_resolver
@@ -910,10 +920,8 @@ class ApiGatewayResolver(BaseRouter):
 
         response = self._resolve().build(self.current_event, self._cors)
         self.clear_context()
-        return response
 
-    def _append_executed_middleware(self, name: str):
-        self._executed_middlewares.append(name)
+        return response
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
@@ -1052,8 +1060,9 @@ class ApiGatewayResolver(BaseRouter):
     def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            # Reset Executed Middleware (for debugging purposes)
-            self._executed_middlewares = []
+            # Reset Processed stack for Middleware (for debugging purposes)
+            self._reset_processed_stack()
+
             return ResponseBuilder(
                 self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
@@ -1061,9 +1070,7 @@ class ApiGatewayResolver(BaseRouter):
                 route,
             )
         except Exception as exc:
-            response_builder = self._call_exception_handler(exc, route)
-            if response_builder:
-                return response_builder
+            logger.exception(exc)
 
             if self._debug:
                 # If the user has turned on debug mode,
@@ -1077,6 +1084,12 @@ class ApiGatewayResolver(BaseRouter):
                     ),
                     route,
                 )
+
+            # Moved this to prioritise powertools debug mode
+            #
+            response_builder = self._call_exception_handler(exc, route)
+            if response_builder:
+                return response_builder
 
             raise
 
