@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Type, Union
+from typing import Literal, Optional, Type, Union
 
 try:
     import redis  # type:ignore
@@ -21,6 +21,7 @@ class RedisConnection(BaseConnectionSync):
         password: Optional[str] = None,
         db_index: Optional[int] = None,
         url: Optional[str] = None,
+        mode: Optional[Literal["standalone", "cluster"]] = "standalone",
         **extra_options,
     ) -> None:
         """
@@ -38,6 +39,8 @@ class RedisConnection(BaseConnectionSync):
             redis password
         db_index: str, optional
             redis db index
+        mode: str, Literal["standalone","cluster"]
+            set redis client mode, choose from standalone/cluster
         url: str, optional
             redis connection string, using url will override the host/port in the previous parameters
         extra_options: **kwargs, optional
@@ -51,6 +54,7 @@ class RedisConnection(BaseConnectionSync):
         self.username = username
         self.password = password
         self.db_index = db_index
+        self.mode = mode
         self.extra_options.update(**extra_options)
         self._cluster_connection = None
         self._standalone_connection = None
@@ -78,31 +82,23 @@ class RedisConnection(BaseConnectionSync):
             raise RedisConnectionError("Could not to connect to Redis", exc) from exc
 
     # simplified to use different func to get each connection.
-    def get_standalone_connection(self) -> redis.Redis:
+    def get_connection(self) -> Type[Union[redis.Redis, redis.cluster.RedisCluster]]:
         """
         return a standalone redis client based on class's init parameter
 
         Returns
         -------
         Client:
-            redis.Redis
+            Union[redis.Redis, redis.cluster.RedisCluster]
         """
-        if self._standalone_connection:
+        if self.mode == "standalone":
+            if self._standalone_connection:
+                return self._standalone_connection
+            self._standalone_connection = self._init_connection(client=redis.Redis)
             return self._standalone_connection
-        self._standalone_connection = self._init_connection(client=redis.Redis)
-        return self._standalone_connection
-
-    def get_cluster_connection(self) -> redis.cluster.RedisCluster:
-        """
-        return a cluster redis client based on class's init parameter
-        if there are cached connection then return directly
-
-        Returns
-        -------
-        Client:
-            redis.cluster.RedisCluster
-        """
-        if self._cluster_connection:
+        if self.mode == "cluster":
+            if self._cluster_connection:
+                return self._cluster_connection
+            self._cluster_connection = self._init_connection(client=redis.cluster.RedisCluster)
             return self._cluster_connection
-        self._cluster_connection = self._init_connection(client=redis.cluster.RedisCluster)
-        return self._cluster_connection
+        raise RedisConnectionError("Redis connection mode not supported yet:", self.mode)

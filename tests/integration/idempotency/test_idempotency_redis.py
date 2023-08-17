@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent_function,
 )
 
-redis_stdalone_config = {"host": "127.0.0.1", "port": 63005}
+redis_stdalone_config = {"host": "127.0.0.1", "port": 63005, "mode": "standalone"}
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def lambda_context():
 
 @pytest.fixture
 def persistence_store_standalone_redis():
-    return RedisCachePersistenceLayer(connection=RedisConnection(**redis_stdalone_config).get_standalone_connection())
+    return RedisCachePersistenceLayer(connection=RedisConnection(**redis_stdalone_config).get_connection())
 
 
 # test basic
