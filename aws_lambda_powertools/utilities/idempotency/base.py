@@ -21,6 +21,9 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseDictSerializer,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.no_op import (
+    NoOpSerializer,
+)
 
 MAX_RETRIES = 2
 logger = logging.getLogger(__name__)
@@ -68,6 +71,7 @@ class IdempotencyHandler:
         config: IdempotencyConfig
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
+            Instance of persistence layer to store idempotency records
         output_serializer: Optional[BaseDictSerializer]
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done
@@ -78,7 +82,7 @@ class IdempotencyHandler:
 
         """
         self.function = function
-        self.output_serializer = output_serializer
+        self.output_serializer = output_serializer or NoOpSerializer()
         self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
@@ -215,9 +219,7 @@ class IdempotencyHandler:
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
-        if response_dict and self.output_serializer:
-            return self.output_serializer.from_dict(response_dict)
-        return response_dict
+        return self.output_serializer.from_dict(response_dict)
 
     def _get_function_response(self):
         try:
@@ -236,8 +238,8 @@ class IdempotencyHandler:
 
         else:
             try:
-                saved_response: dict = self.output_serializer.to_dict(response) if self.output_serializer else response
-                self.persistence_store.save_success(data=self.data, result=saved_response)
+                serialized_response: dict = self.output_serializer.to_dict(response)
+                self.persistence_store.save_success(data=self.data, result=serialized_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store",

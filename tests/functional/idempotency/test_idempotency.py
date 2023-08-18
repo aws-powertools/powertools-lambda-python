@@ -15,10 +15,8 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from aws_lambda_powertools.utilities.idempotency import (
-    CustomDictSerializer,
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
-    PydanticSerializer,
     idempotent,
     idempotent_function,
 )
@@ -39,6 +37,8 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_stub,

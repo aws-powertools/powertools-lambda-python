@@ -1,9 +1,9 @@
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
-    PydanticSerializer,
     idempotent_function,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
 from aws_lambda_powertools.utilities.parser import BaseModel
 from aws_lambda_powertools.utilities.typing import LambdaContext
 

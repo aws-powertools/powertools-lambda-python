@@ -44,6 +44,7 @@ def idempotent(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
+
     Examples
     --------
     **Processes Lambda's event in an idempotent manner**
@@ -145,6 +146,7 @@ def idempotent_function(
             )
 
         payload = kwargs.get(data_keyword_argument)
+
         idempotency_handler = IdempotencyHandler(
             function=function,
             function_payload=payload,

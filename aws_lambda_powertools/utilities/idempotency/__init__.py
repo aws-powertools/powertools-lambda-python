@@ -8,8 +8,6 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 from aws_lambda_powertools.utilities.idempotency.persistence.dynamodb import (
     DynamoDBPersistenceLayer,
 )
-from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
-from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
 
 from .idempotency import IdempotencyConfig, idempotent, idempotent_function
 
@@ -19,6 +17,4 @@ __all__ = (
     "idempotent",
     "idempotent_function",
     "IdempotencyConfig",
-    "PydanticSerializer",
-    "CustomDictSerializer",
 )

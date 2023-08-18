@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
 from aws_lambda_powertools.utilities.idempotency import (
-    CustomDictSerializer,
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
     idempotent_function,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
