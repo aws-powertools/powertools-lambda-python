@@ -9,8 +9,8 @@ from aws_encryption_sdk import (
     StrictAwsKmsMasterKeyProvider,
 )
 
-from aws_lambda_powertools.utilities.data_masking.provider import Provider
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
+from aws_lambda_powertools.utilities.data_masking.provider import Provider
 
 
 class SingletonMeta(type):
@@ -55,6 +55,8 @@ class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
     def decrypt(self, data: str, **provider_options) -> bytes:
         ciphertext_decoded = base64.b64decode(data)
         ciphertext, _ = self.client.decrypt(
-            source=ciphertext_decoded, key_provider=self.key_provider, **provider_options
+            source=ciphertext_decoded,
+            key_provider=self.key_provider,
+            **provider_options,
         )
         return ciphertext
