@@ -238,7 +238,7 @@ class Route:
         cache_control: Optional[str]
             The cache control header value, example "max-age=3600"
         middlewares: Optional[List[Callable[..., Any]]]
-            The list of route middlewares to execute. These are executed in the order they are
+            The list of route middlewares. These are called in the order they are
             provided.
         """
         self.method = method.upper()
@@ -261,8 +261,8 @@ class Route:
         route_arguments: Dict[str, str],
     ) -> Union[Dict, Tuple, Response]:
         """Calling the Router class instance will trigger the following actions:
-            1. If Route Middleware execution stack has not been built, build it
-            2. Execute the Route Middleware execution stack wrapping the original function
+            1. If Route Middleware stack has not been built, build it
+            2. Call the Route Middleware stack wrapping the original function
                 handler with the app and route arguments.
 
         Parameters
@@ -270,7 +270,7 @@ class Route:
         router_middlewares: List[Callable]
             The list of Router Middlewares (assigned to ALL routes)
         app: Callable
-            The ApiGatewayResolver instance to pass into the middleware execution stack
+            The ApiGatewayResolver instance to pass into the middleware stack
         route_arguments: Dict[str, str]
             The route arguments to pass to the app function (extracted from the Api Gateway
             Lambda Message structure from AWS)
@@ -279,11 +279,11 @@ class Route:
         -------
         Union[Dict, Tuple, Response]
             Returns an API Response object in ALL cases, excepting when the original API route
-            handler is executed which may also return a Dict or Tuple response.
+            handler is called which may also return a Dict or Tuple response.
         """
 
         # Check self._middleware_stack_built to ensure the middleware stack is only built once.
-        # This will save CPU execution time when API route is executed multiple times.
+        # This will save CPU time when an API route is processed multiple times.
         #
         if not self._middleware_stack_built:
             self._build_middleware_stack(router_middlewares=router_middlewares)
@@ -293,20 +293,20 @@ class Route:
 
     def _build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
         """
-        Builds the middleware execution stack for the handler by wrapping each
+        Builds the middleware stack for the handler by wrapping each
         handler in an instance of MiddlewareWrapper which is used to contain the state
         of each middleware step.
 
         Middleware is represented by a standard Python Callable construct.  Any Middleware
-        handler wanting to short-circuit the middlware call chain should raise an execution
+        handler wanting to short-circuit the middlware call chain can raise an exception
         to force the Python call stack created by the handler call-chain to naturally un-wind.
 
-        This becomes a simple concept for Users to understand and reason with - no additional
+        This becomes a simple concept for developers to understand and reason with - no additional
         gymanstics other than plain old try ... except.
 
         Notes
         -----
-        The Route Middleware execution stack is executed in reverse order. This is so the stack of
+        The Route Middleware stack is processed in reverse order. This is so the stack of
         middleware handlers is applied in the order of being added to the handler.
         """
         all_middlewares = router_middlewares + self.middlewares
@@ -663,7 +663,7 @@ class BaseRouter(ABC):
 class MiddlewareFrame:
     """
     creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
-    middleware functions.  Each instance contains the current middleware to be executed and the next
+    middleware functions.  Each instance contains the current middleware and the next
     middleware function to be called in the stack.
 
     In this way the middleware stack is constructed in a recursive fashion, with each middleware
@@ -722,7 +722,7 @@ class MiddlewareFrame:
         Union[Dict, Tuple, Response]
             (tech-debt for backward compatibility).  The response type should be a
             Response object in all cases excepting when the original API route handler
-            is executed which will return one of 3 outputs.
+            is called which will return one of 3 outputs.
 
         """
         # Do debug printing and push processed stack frame AFTER calling middleware
