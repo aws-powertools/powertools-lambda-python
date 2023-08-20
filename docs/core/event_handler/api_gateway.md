@@ -367,7 +367,7 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 <!-- markdownlint-disable-next-line MD013 -->
 Often there is a need to handle cross-cutting concerns or to add custom processing in a reusable way, middleware allows you to customize the request/response cycle for your API event handlers.  Middleware enables you to add **before** and **after** processing for any API event, enabling you to pre-process the request and return early or to post-process the response to customize the API response.
 
-???+ info "How Middleware Works"
+??? info "How Middleware Works"
     Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
 
     ![Image showing how the middleware flow works](/media/how-middleware-works-1.png)
@@ -380,8 +380,9 @@ Often there is a need to handle cross-cutting concerns or to add custom processi
     6. After the next middleware (or API handler) returns After processing may be run to post-process the response.
     7. The response is returned by the Middleware function to the caller.
 
-???+ tip "What Middleware is Responsible for"
+??? tip "What Middleware is Responsible for"
     - They can be chained in a stack, so ensure it does only one thing to maximize re-usability and simplicity.
+    - Middleware must call the next middleware in the chain or your API handler will never be called.
     - Responsible for calling the next middleware function in the stack.
     - Can pre-process the Request data, change it or validate it before calling the next middleware function.
     - Returning early by throwing an exception or returning a valid response.
@@ -406,7 +407,14 @@ Middleware can be represented by any valid Python Callable structure so long as 
 
 The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
 
+Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route defintion.
+
 ???+ tip
+    **Router Middleware processing Order**
+
+    1. Global middlewares defined on the parent Router
+    2. Route specific Middlewares
+
     To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
 
 ???+ warning "Ensure your middleware calls the Next one in the chain"
@@ -426,6 +434,9 @@ The **app** parameter can also be a more specific type of Router such as ApiGate
     ```python hl_lines="12 14 18 21 23"
     --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
     ```
+
+???+ warning "Ensure your middleware returns the Next Response"
+    Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
 
 ### Fine grained responses
 
@@ -563,6 +574,15 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
 	```python hl_lines="11"
     --8<-- "examples/event_handler_rest/src/split_route.py"
 	```
+
+#### Split Router Middleware
+
+The application of middleware functions for split routers is the same as using the main Resolver classes.  When the split routes are combined in the API Rest resolver all Router based and route base middleware will be merged into the parent instance.
+
+???+ info "Split Router Middleware processing Order"
+    1. Global Middleware defined on the parent Router
+    2. Global Middleware for each split Router, in the order they are included
+    3. Route specific Middlewares
 
 #### Route prefix
 
