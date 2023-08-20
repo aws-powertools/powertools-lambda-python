@@ -182,7 +182,7 @@ class IdempotencyHandler:
 
         return data_record
 
-    def _handle_for_status(self, data_record: DataRecord) -> Optional[Dict[Any, Any]]:
+    def _handle_for_status(self, data_record: DataRecord) -> Optional[Any]:
         """
         Take appropriate action based on data_record's status
 
@@ -192,8 +192,9 @@ class IdempotencyHandler:
 
         Returns
         -------
-        Optional[Dict[Any, Any]
+        Optional[Any]
             Function's response previously used for this idempotency key, if it has successfully executed already.
+            In case an output serializer is configured, the response is deserialized.
 
         Raises
         ------
@@ -219,7 +220,7 @@ class IdempotencyHandler:
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
-        return self.output_serializer.from_dict(response_dict)
+        return self.output_serializer.from_dict(response_dict) if response_dict else None
 
     def _get_function_response(self):
         try:
@@ -238,7 +239,7 @@ class IdempotencyHandler:
 
         else:
             try:
-                serialized_response: dict = self.output_serializer.to_dict(response)
+                serialized_response: dict = self.output_serializer.to_dict(response) if response else None
                 self.persistence_store.save_success(data=self.data, result=serialized_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(

@@ -1237,6 +1237,47 @@ def test_idempotent_function_serialization_custom_dict():
     assert from_dict_called
 
 
+def test_idempotent_function_serialization_no_response():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_no_response.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    to_dict_called = False
+    from_dict_called = False
+
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return None
+
+    record_handler(record=mock_event)
+    assert to_dict_called is False, "in case response is None, to_dict should not be called"
+    response = record_handler(record=mock_event)
+    assert response is None
+    assert from_dict_called is False, "in case response is None, from_dict should not be called"
+
+
 def test_idempotent_function_serialization_pydantic():
     # GIVEN
     config = IdempotencyConfig(use_local_cache=True)
