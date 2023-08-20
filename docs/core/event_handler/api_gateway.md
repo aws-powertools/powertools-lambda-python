@@ -362,6 +362,71 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 | **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
 | **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
 
+### Middleware
+
+<!-- markdownlint-disable-next-line MD013 -->
+Often there is a need to handle cross-cutting concerns or to add custom processing in a reusable way, middleware allows you to customize the request/response cycle for your API event handlers.  Middleware enables you to add **before** and **after** processing for any API event, enabling you to pre-process the request and return early or to post-process the response to customize the API response.
+
+???+ info "How Middleware Works"
+    Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
+
+    ![Image showing how the middleware flow works](/media/how-middleware-works-1.png)
+
+    1. Powertools API Route handler executes API Route Handler (wrapped in composed middleware).
+    2. Middleware function is called
+    3. Before processing code
+    4. Calls Next Middleware function (or registered API route handler)
+    5. If the next function is middleware, it repeats these steps.  The API route code runs and returns if it is the route handler.
+    6. After the next middleware (or API handler) returns After processing may be run to post-process the response.
+    7. The response is returned by the Middleware function to the caller.
+
+???+ tip "What Middleware is Responsible for"
+    - They can be chained in a stack, so ensure it does only one thing to maximize re-usability and simplicity.
+    - Responsible for calling the next middleware function in the stack.
+    - Can pre-process the Request data, change it or validate it before calling the next middleware function.
+    - Returning early by throwing an exception or returning a valid response.
+    - Can process the Response and alter its content depending on the middleware's purpose.
+
+Middleware can be represented by any valid Python Callable structure so long as the call signature aligns with the following example and the function follows the processing cycle of **before**, **next (get_response)** and **after**.
+
+=== "middleware_func.py"
+    ```python hl_lines="2 5 7 11"
+        def middleware_func(app: BaseRouter, get_response: Callable[..., Any], **context_args) -> Response:
+            # Do Before processing here
+
+            # Get Next response
+            result = get_response(app, **context_args)
+
+            # Do After processing here
+
+
+            # return the response
+            return result
+    ```
+
+The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
+
+???+ tip
+    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
+
+???+ warning "Ensure your middleware calls the Next one in the chain"
+    The middleware stack processing relies on each middleware function calling the next and also returning the reponse or raising an exception.  If you do not pass control to the next middleware function in the chain, your API route handler will never be called.
+
+=== "route_middleware.py"
+    ```python hl_lines="9 16"
+    --8<-- "examples/event_handler_rest/src/route_middleware.py"
+    ```
+
+=== "all_routes_middleware.py"
+    ```python hl_lines="9 15"
+    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
+    ```
+
+=== "custom_middlewares.py"
+    ```python hl_lines="12 14 18 21 23"
+    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
+    ```
+
 ### Fine grained responses
 
 You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
