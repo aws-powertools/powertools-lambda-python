@@ -31,7 +31,7 @@ MAX_MESSAGES: int = 200
 # NOTE: You can also set max messages/bytes per data key
 
 
-class AwsEncryptionSdkProvider(Provider, metaclass=SingletonMeta):
+class AwsEncryptionSdkProvider(Provider):
     cache = LocalCryptoMaterialsCache(CACHE_CAPACITY)
     session = botocore.session.Session()
     register_feature_to_botocore_session(session, "data-masking")
