@@ -1,12 +1,12 @@
 import json
 import copy
 from itsdangerous.url_safe import URLSafeSerializer
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.provider import Provider
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 
-class MyEncryptionProvider(Provider):
+class MyEncryptionProvider(BaseProvider):
     """Custom encryption provider class"""
 
     def __init__(self, keys, salt=None):

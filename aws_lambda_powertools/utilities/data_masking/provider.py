@@ -1,10 +1,9 @@
 from abc import abstractmethod
 from collections.abc import Iterable
 
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
-
-class Provider:
+class BaseProvider():
     """
     When you try to create an instance of a subclass that does not implement the encrypt method,
     you will get a NotImplementedError with a message that says the method is not implemented:

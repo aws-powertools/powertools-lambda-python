@@ -1,15 +1,16 @@
 import json
 from typing import Union
 
-from aws_lambda_powertools.utilities.data_masking.provider import Provider
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 
 class DataMasking:
     def __init__(self, provider=None):
-        if provider is None:
-            self.provider = Provider()
-        else:
-            self.provider = provider
+        # if provider is None:
+        #     self.provider = Provider()
+        # else:
+        #     self.provider = provider
+        self.provider = provider or BaseProvider()
 
     def encrypt(self, data, fields=None, **provider_options):
         return self._apply_action(data, fields, self.provider.encrypt, **provider_options)

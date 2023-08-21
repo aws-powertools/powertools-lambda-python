@@ -5,7 +5,6 @@ import pytest
 from tests.e2e.utils import data_fetcher
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import AwsEncryptionSdkProvider
-from aws_lambda_powertools.shared.constants import DATA_MASKING_STRING
 
 
 @pytest.fixture
