@@ -31,7 +31,7 @@ def test_authorizer_response_invalid_verb(builder: APIGatewayAuthorizerResponse)
 
 
 def test_authorizer_response_invalid_resource(builder: APIGatewayAuthorizerResponse):
-    with pytest.raises(ValueError, match="Invalid resource path: \$."):  # noqa: W605
+    with pytest.raises(ValueError, match=r"Invalid resource path: \$."):
         # GIVEN an invalid resource path "$"
         # WHEN calling deny_method
         builder.deny_route(http_method=HttpVerb.GET.value, resource="$")
