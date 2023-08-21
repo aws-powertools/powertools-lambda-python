@@ -103,7 +103,7 @@ def idempotent_function(
         Configuration
     output_serializer: Optional[BaseDictSerializer]
             Serializer to transform the data to and from a dictionary.
-            If not supplied, no serialization is done
+            If not supplied, no serialization is done via the NoOpSerializer
     Examples
     --------
     **Processes an order in an idempotent manner**

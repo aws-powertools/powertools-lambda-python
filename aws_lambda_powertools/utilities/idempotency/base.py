@@ -74,7 +74,7 @@ class IdempotencyHandler:
             Instance of persistence layer to store idempotency records
         output_serializer: Optional[BaseDictSerializer]
             Serializer to transform the data to and from a dictionary.
-            If not supplied, no serialization is done
+            If not supplied, no serialization is done via the NoOpSerializer
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]
