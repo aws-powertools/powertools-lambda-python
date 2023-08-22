@@ -4,9 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **event_handler:** make invalid chars a raw str to fix DeprecationWarning ([#2982](https://github.com/aws-powertools/powertools-lambda-python/issues/2982))
+
 ## Maintenance
 
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#2978](https://github.com/aws-powertools/powertools-lambda-python/issues/2978))
+* **deps-dev:** bump ruff from 0.0.284 to 0.0.285 ([#2977](https://github.com/aws-powertools/powertools-lambda-python/issues/2977))
 
 
 <a name="v2.23.0"></a>
