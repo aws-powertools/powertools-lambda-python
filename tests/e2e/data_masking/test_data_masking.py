@@ -91,13 +91,14 @@ def test_encryption_no_context_fail(data_masker):
 
 # TODO: metaclass?
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_key_fail(kms_key2_arn, data_masker):
+def test_encryption_key_fail(data_masker, kms_key2_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider with a certain key
 
     # WHEN encrypting and then decrypting the encrypted data
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
     encrypted_data = data_masker.encrypt(value)
 
+    # THEN when decrypting with a different key it should fail
     data_masker_key2 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
 
     with pytest.raises(DecryptKeyError):
@@ -105,13 +106,13 @@ def test_encryption_key_fail(kms_key2_arn, data_masker):
 
 
 @pytest.mark.xdist_group(name="data_masking")
-def test_masked_in_logs(basic_handler_fn, basic_handler_fn_arn):
+def test_encrypted_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
-    data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key1_arn]))
 
-    # WHEN masking a value and logging it
-    masked_data = data_masker.mask([1, 2, "string", 4.5])
-    message = masked_data
+    # WHEN encrypting a value and logging it
+    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    encrypted_data = data_masker.encrypt(value)
+    message = encrypted_data
     custom_key = "order_id"
     additional_keys = {custom_key: f"{uuid4()}"}
     payload = json.dumps({"message": message, "append_keys": additional_keys})
@@ -119,7 +120,10 @@ def test_masked_in_logs(basic_handler_fn, basic_handler_fn_arn):
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
     data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
 
-    # THEN the logs should show only the obfuscated data
     logs = data_fetcher.get_logs(function_name=basic_handler_fn, start_time=execution_time, minimum_log_entries=2)
 
-    assert logs.have_keys("message") is True
+    # THEN decrypting it from the logs should show the original value
+    for log in logs.get_log(key=custom_key):
+        encrypted_data = log.message
+        decrypted_data = data_masker.decrypt(encrypted_data)
+        assert decrypted_data == value
