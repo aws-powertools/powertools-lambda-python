@@ -6,10 +6,6 @@ from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 class DataMasking:
     def __init__(self, provider=None):
-        # if provider is None:
-        #     self.provider = Provider()
-        # else:
-        #     self.provider = provider
         self.provider = provider or BaseProvider()
 
     def encrypt(self, data, fields=None, **provider_options):
@@ -18,7 +14,7 @@ class DataMasking:
     def decrypt(self, data, fields=None, **provider_options):
         return self._apply_action(data, fields, self.provider.decrypt, **provider_options)
 
-    def mask(self, data, fields=None, **provider_options):
+    def mask(self, data, fields=None, **provider_options) -> str:
         return self._apply_action(data, fields, self.provider.mask, **provider_options)
 
     def _apply_action(self, data, fields, action, **provider_options):
@@ -27,7 +23,7 @@ class DataMasking:
         else:
             return action(data, **provider_options)
 
-    def _apply_action_to_fields(self, data: Union[dict, str], fields, action, **provider_options) -> str:
+    def _apply_action_to_fields(self, data: Union[dict, str], fields, action, **provider_options) -> Union[dict, str]:
         """
         Apply the specified action to the specified fields in the input data.
 

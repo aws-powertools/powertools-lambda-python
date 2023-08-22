@@ -47,19 +47,47 @@ def test_encryption(data_masker):
     assert decrypted_data == value
 
 
-# TODO: Waiting on EncryptionSDK team to answer tt.amazon.com/V1005246120
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_context(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
 
-    # WHEN encrypting and then decrypting the encrypted data
+    # WHEN encrypting and then decrypting the encrypted data with an encryption_context
     encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    decrypted_data = data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
 
     # THEN the result is the original input data
     assert decrypted_data == value
+
+
+@pytest.mark.xdist_group(name="data_masking")
+def test_encryption_context_fail(data_masker):
+    # GIVEN an instantiation of DataMasking with the AWS encryption provider
+
+    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+
+    # WHEN encrypting with a encryption_context
+    encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
+
+    # THEN decrypting with a different encryption_context should raise a ValueError
+    with pytest.raises(ValueError):
+        data_masker.decrypt(encrypted_data, encryption_context={"not": "same_context"})
+
+
+# TODO: this should fail
+@pytest.mark.xdist_group(name="data_masking")
+def test_encryption_no_context_fail(data_masker):
+    # GIVEN an instantiation of DataMasking with the AWS encryption provider
+
+    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+
+    # WHEN encrypting with an encryption_context
+    encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
+
+    # THEN decrypting with no encryption_context should raise a ValueError
+    with pytest.raises(ValueError):
+        data_masker.decrypt(encrypted_data)
 
 
 # TODO: metaclass?

@@ -67,13 +67,3 @@ def test_encrypt_decrypt_with_fields(value, fields, data_masker):
         assert decrypted_data == aws_encrypted_json_blob
     else:
         assert decrypted_data == aws_encrypted_with_fields
-
-
-@patch("aws_encryption_sdk.EncryptionSDKClient")
-def test_mock(get_encryption_sdk_client_mock):
-    get_encryption_sdk_client_mock.return_value = "mock_value"
-
-    d_m = DataMasking(provider=AwsEncryptionSdkProvider(keys=["mock_value"]))
-    encrypted_data = d_m.encrypt(b"secret_data")
-    decrypted_data = d_m.decrypt(encrypted_data)
-    assert decrypted_data == b"secret_data"

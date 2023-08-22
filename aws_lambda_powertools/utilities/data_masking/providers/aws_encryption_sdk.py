@@ -36,7 +36,7 @@ class AwsEncryptionSdkProvider(BaseProvider):
     session = botocore.session.Session()
     register_feature_to_botocore_session(session, "data-masking")
 
-    def __init__(self, keys: List[str], client: Optional[EncryptionSDKClient] = None) -> None:
+    def __init__(self, keys: List[str], client: Optional[EncryptionSDKClient] = None):
         self.client = client or EncryptionSDKClient()
         self.keys = keys
         self.key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=self.session)
@@ -47,14 +47,22 @@ class AwsEncryptionSdkProvider(BaseProvider):
             max_messages_encrypted=MAX_MESSAGES,
         )
 
-    def encrypt(self, data: Union[bytes, str], **provider_options) -> Union[bytes, str]:
+    def encrypt(self, data: Union[bytes, str], **provider_options) -> str:
         ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, **provider_options)
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
-    def decrypt(self, data: str, **provider_options) -> Union[bytes, str]:
+    def decrypt(self, data: str, **provider_options) -> bytes:
         ciphertext_decoded = base64.b64decode(data)
-        ciphertext, _ = self.client.decrypt(
+
+        expected_context = provider_options.pop("encryption_context", {})
+
+        ciphertext, decryptor_header = self.client.decrypt(
             source=ciphertext_decoded, key_provider=self.key_provider, **provider_options
         )
+
+        for key, value in expected_context.items():
+            if decryptor_header.encryption_context.get(key) != value:
+                raise ValueError(f"Encryption Context does not match expected value for key: {key}")
+
         return ciphertext
