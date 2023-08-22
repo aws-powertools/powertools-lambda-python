@@ -1,12 +1,11 @@
 import requests
+from custom_middlewares import sanitise_exceptions, validate_correlation_id
 from requests import Response
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
-
-from .custom_middlewares import sanitise_exceptions, validate_correlation_id
 
 tracer = Tracer()
 logger = Logger()
