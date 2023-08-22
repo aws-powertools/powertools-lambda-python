@@ -1062,7 +1062,12 @@ class ApiGatewayResolver(BaseRouter):
         try:
             # Reset Processed stack for Middleware (for debugging purposes)
             self._reset_processed_stack()
-
+            
+            # Add matched Route reference into the Resolver context
+            self.append_context({
+                route: route,
+            })
+            
             return ResponseBuilder(
                 self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
