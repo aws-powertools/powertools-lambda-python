@@ -62,7 +62,7 @@ def test_encryption_context(data_masker):
 
 
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_context_fail(data_masker):
+def test_encryption_diff_context_fail(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
@@ -75,19 +75,18 @@ def test_encryption_context_fail(data_masker):
         data_masker.decrypt(encrypted_data, encryption_context={"not": "same_context"})
 
 
-# TODO: this should fail
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_no_context_fail(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
 
-    # WHEN encrypting with an encryption_context
-    encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
+    # WHEN encrypting with no encryption_context
+    encrypted_data = data_masker.encrypt(value)
 
-    # THEN decrypting with no encryption_context should raise a ValueError
+    # THEN decrypting with an encryption_context should raise a ValueError
     with pytest.raises(ValueError):
-        data_masker.decrypt(encrypted_data)
+        data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
 
 
 # TODO: metaclass?
