@@ -11,7 +11,9 @@
 ## Maintenance
 
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#2978](https://github.com/aws-powertools/powertools-lambda-python/issues/2978))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#2983](https://github.com/aws-powertools/powertools-lambda-python/issues/2983))
 * **deps-dev:** bump ruff from 0.0.284 to 0.0.285 ([#2977](https://github.com/aws-powertools/powertools-lambda-python/issues/2977))
+* **deps-dev:** bump mkdocs-material from 9.1.21 to 9.2.0 ([#2984](https://github.com/aws-powertools/powertools-lambda-python/issues/2984))
 
 
 <a name="v2.23.0"></a>
