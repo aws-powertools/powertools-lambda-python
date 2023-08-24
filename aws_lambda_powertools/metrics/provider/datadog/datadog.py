@@ -328,7 +328,7 @@ class DatadogProvider(BaseProvider):
             ['environment:production', 'service:web']
         """
 
-        # This code creates a new dictionary by combining default_tags first,
+        # We need to create a new dictionary by combining default_tags first,
         # and then metric_tags on top of it. This ensures that the keys from metric_tags take precedence
         # and replace corresponding keys in default_tags.
         tags = {**default_tags, **metric_tags}
