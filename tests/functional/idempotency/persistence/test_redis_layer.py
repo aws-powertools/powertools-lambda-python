@@ -32,7 +32,7 @@ def lambda_context():
 
 
 class MockRedis:
-    def __init__(self, decode_responses, cache, **kwargs):
+    def __init__(self, decode_responses, cache: dict = None, **kwargs):
         self.cache = cache or {}
         self.expire_dict = {}
         self.decode_responses = decode_responses
@@ -42,6 +42,9 @@ class MockRedis:
     def hset(self, name, mapping):
         self.expire_dict.pop(name, {})
         self.cache[name] = mapping
+
+    def from_url(self, url: str):
+        pass
 
     # not covered by test yet.
     def expire(self, name, time):
