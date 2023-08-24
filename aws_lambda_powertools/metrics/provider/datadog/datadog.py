@@ -327,7 +327,11 @@ class DatadogProvider(BaseProvider):
             >>> serialize_datadog_tags(metric_tags, None)
             ['environment:production', 'service:web']
         """
-        tags = metric_tags or default_tags
+
+        # We need to create a new dictionary by combining default_tags first,
+        # and then metric_tags on top of it. This ensures that the keys from metric_tags take precedence
+        # and replace corresponding keys in default_tags.
+        tags = {**default_tags, **metric_tags}
 
         return [f"{tag_key}:{tag_value}" for tag_key, tag_value in tags.items()]
 
