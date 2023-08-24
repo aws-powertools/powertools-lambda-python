@@ -76,94 +76,94 @@ publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
-name = "aws-cdk-asset-node-proxy-agent-v5"
-version = "2.0.166"
-description = "@aws-cdk/asset-node-proxy-agent-v5"
+name = "aws-cdk-asset-node-proxy-agent-v6"
+version = "2.0.1"
+description = "@aws-cdk/asset-node-proxy-agent-v6"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.asset-node-proxy-agent-v5-2.0.166.tar.gz", hash = "sha256:73d4a4f4bdeb3019779137e4b18d7c5efc8353dff673508bd8c584569ea18db6"},
-    {file = "aws_cdk.asset_node_proxy_agent_v5-2.0.166-py3-none-any.whl", hash = "sha256:d71d80710734c47f7114e3e51843c4a8ebae3bbe5032a5af40ca56ca611c0cfe"},
+    {file = "aws-cdk.asset-node-proxy-agent-v6-2.0.1.tar.gz", hash = "sha256:42cdbc1de2ed3f845e3eb883a72f58fc7e5554c2e0b6fcdb366c159778dce74d"},
+    {file = "aws_cdk.asset_node_proxy_agent_v6-2.0.1-py3-none-any.whl", hash = "sha256:e442673d4f93137ab165b75386761b1d46eea25fc5015e5145ae3afa9da06b6e"},
 ]
 
 [package.dependencies]
-jsii = ">=1.85.0,<2.0.0"
+jsii = ">=1.86.1,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-alpha"
-version = "2.91.0a0"
+version = "2.93.0a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.91.0a0.tar.gz", hash = "sha256:a7b0e78862f3dd81cf13740df2ecda1c877545500872dc476f2dbf3807632a32"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:e3d606055c2fe268d80f96052b583060a25fadcdee79d89a75f2eac4354f2e69"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.93.0a0.tar.gz", hash = "sha256:67b5c1cb5a3405f321a25da185ef949460793d9b33313f13544106bed2ce2180"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.93.0a0-py3-none-any.whl", hash = "sha256:962d52fdfbc922f104381943d2edb0d535f1d793fd73f4518fb25fb7d63041f4"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = "2.91.0"
+aws-cdk-lib = "2.93.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.85.0,<2.0.0"
+jsii = ">=1.87.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
-version = "2.91.0a0"
+version = "2.93.0a0"
 description = "Authorizers for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.91.0a0.tar.gz", hash = "sha256:cafd747af66f92755f188172f0e892503bc73c26f0d6d95e5f733c67b0307fa8"},
-    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:972393ad1c220708616322946ba3f8936cbe143a69e543762295c1ea02d69849"},
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.93.0a0.tar.gz", hash = "sha256:495969d05ca85942bc3da6fac7d0a6df5893265b644921d9e891441ee845fdfd"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.93.0a0-py3-none-any.whl", hash = "sha256:6b22e4d94afa481c94fcafdc62c2cf22ea08ea0d985e738569b39da4ba4ffbb0"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
-aws-cdk-lib = "2.91.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.93.0.a0"
+aws-cdk-lib = "2.93.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.85.0,<2.0.0"
+jsii = ">=1.87.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
-version = "2.91.0a0"
+version = "2.93.0a0"
 description = "Integrations for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.91.0a0.tar.gz", hash = "sha256:db607df2563f0b839795a41218a59e3ebc29e906dd08aed7b0b59aceba0bde02"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.91.0a0-py3-none-any.whl", hash = "sha256:34d0f103846613a72cfae8419be2e4302863a1e8f6e81951b0a51c2f62ab80b3"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.93.0a0.tar.gz", hash = "sha256:4c581f67634fab19b11025751e3ee825f055ee9d1bc77d9cbc5009f261456e62"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.93.0a0-py3-none-any.whl", hash = "sha256:48479656dca9e446ae625e5936ddd940863bd478eb86cdd62889c6b5fee9f751"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.91.0.a0"
-aws-cdk-lib = "2.91.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.93.0.a0"
+aws-cdk-lib = "2.93.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.85.0,<2.0.0"
+jsii = ">=1.87.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.91.0"
+version = "2.93.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.91.0.tar.gz", hash = "sha256:1163926527a8b7da931cddea77a4824b929b3f775447c3b7427ecdef7701ce74"},
-    {file = "aws_cdk_lib-2.91.0-py3-none-any.whl", hash = "sha256:ec2cadeb5727ea8259ad8a54ac9ff40502032cd2572c81f4594df93365da39da"},
+    {file = "aws-cdk-lib-2.93.0.tar.gz", hash = "sha256:54252c8df547d2bd83584278529f47506fa2c27adcbfa623f00322b685f24c18"},
+    {file = "aws_cdk_lib-2.93.0-py3-none-any.whl", hash = "sha256:063e7c1f2588a254766229130347fb60e0bd7dd2a6d222d3ae2aa145a6059554"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = ">=2.2.200,<3.0.0"
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
-"aws-cdk.asset-node-proxy-agent-v5" = ">=2.0.166,<3.0.0"
+"aws-cdk.asset-node-proxy-agent-v6" = ">=2.0.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.85.0,<2.0.0"
+jsii = ">=1.87.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -323,17 +323,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.24"
+version = "1.28.33"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.24-py3-none-any.whl", hash = "sha256:0300ca6ec8bc136eb316b32cc1e30c66b85bc497f5a5fe42e095ae4280569708"},
-    {file = "boto3-1.28.24.tar.gz", hash = "sha256:9d1b4713c888e53a218648ad71522bee9bec9d83f2999fff2494675af810b632"},
+    {file = "boto3-1.28.33-py3-none-any.whl", hash = "sha256:07997e299e7b87afbbb25dc9de677017eafbd96b4f1b81e931d5127716dc6dd1"},
+    {file = "boto3-1.28.33.tar.gz", hash = "sha256:fafc0eda7ebe7878be2ab934558ea1776cbd1bd624ce9e9b827e304d301ccd00"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.24,<1.32.0"
+botocore = ">=1.31.33,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.6.0,<0.7.0"
 
@@ -342,13 +342,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.24"
+version = "1.31.33"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.24-py3-none-any.whl", hash = "sha256:8c7ba9b09e9104e2d473214e1ffcf84b77e04cf6f5f2344942c1eed9e299f947"},
-    {file = "botocore-1.31.24.tar.gz", hash = "sha256:2d8f412c67f9285219f52d5dbbb6ef0dfa9f606da29cbdd41b6d6474bcc4bbd4"},
+    {file = "botocore-1.31.33-py3-none-any.whl", hash = "sha256:1b76549c45f712ca9734888e60a2ab9c857e6e6025b156b36c344162a7e9d0dc"},
+    {file = "botocore-1.31.33.tar.gz", hash = "sha256:3fd7cb89cf834b28bc7e8427cb29bb861b10652a3bebe9d0d18d9a2c1e4f3f67"},
 ]
 
 [package.dependencies]
@@ -540,13 +540,13 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.1.6"
+version = "8.1.7"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "click-8.1.6-py3-none-any.whl", hash = "sha256:fa244bb30b3b5ee2cae3da8f55c9e5e0c0e86093306301fb418eb9dc40fbded5"},
-    {file = "click-8.1.6.tar.gz", hash = "sha256:48ee849951919527a045bfe3bf7baa8a959c423134e1a5b98c05c20ba75a1cbd"},
+    {file = "click-8.1.7-py3-none-any.whl", hash = "sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28"},
+    {file = "click-8.1.7.tar.gz", hash = "sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de"},
 ]
 
 [package.dependencies]
@@ -858,13 +858,13 @@ mypy = ["mypy"]
 
 [[package]]
 name = "exceptiongroup"
-version = "1.1.2"
+version = "1.1.3"
 description = "Backport of PEP 654 (exception groups)"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "exceptiongroup-1.1.2-py3-none-any.whl", hash = "sha256:e346e69d186172ca7cf029c8c1d16235aa0e04035e5750b4b95039e65204328f"},
-    {file = "exceptiongroup-1.1.2.tar.gz", hash = "sha256:12c3e887d6485d16943a309616de20ae5582633e0a2eda17f4e10fd61c1e8af5"},
+    {file = "exceptiongroup-1.1.3-py3-none-any.whl", hash = "sha256:343280667a4585d195ca1cf9cef84a4e178c4b6cf2274caef9859782b567d5e3"},
+    {file = "exceptiongroup-1.1.3.tar.gz", hash = "sha256:097acd85d473d75af5bb98e41b61ff7fe35efe6675e4f9370ec6ec5126d160e9"},
 ]
 
 [package.extras]
@@ -1242,13 +1242,13 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.86.1"
+version = "1.87.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "jsii-1.86.1-py3-none-any.whl", hash = "sha256:32eb46ed4c9a35bc92b892ef049ed1996f13be38ffef964d607e8fe930471b3e"},
-    {file = "jsii-1.86.1.tar.gz", hash = "sha256:44f9a820eea92c9508693f72d3129b5a080421c949c32303f4f7b2cc98a81f59"},
+    {file = "jsii-1.87.0-py3-none-any.whl", hash = "sha256:4b7c1331e950af10ba7b71d1c9d2e634b17716b3d1b2bf61e0382ff524d8aafb"},
+    {file = "jsii-1.87.0.tar.gz", hash = "sha256:ba6860c827551901a8c43c7b09a9bb901d5f1231fc4693f2f4bf87b3db200064"},
 ]
 
 [package.dependencies]
@@ -1276,13 +1276,13 @@ jsonpointer = ">=1.9"
 
 [[package]]
 name = "jsonpickle"
-version = "3.0.1"
+version = "3.0.2"
 description = "Python library for serializing any arbitrary object graph into JSON"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "jsonpickle-3.0.1-py2.py3-none-any.whl", hash = "sha256:130d8b293ea0add3845de311aaba55e6d706d0bb17bc123bd2c8baf8a39ac77c"},
-    {file = "jsonpickle-3.0.1.tar.gz", hash = "sha256:032538804795e73b94ead410800ac387fdb6de98f8882ac957fcd247e3a85200"},
+    {file = "jsonpickle-3.0.2-py3-none-any.whl", hash = "sha256:4a8442d97ca3f77978afa58068768dba7bff2dbabe79a9647bc3cdafd4ef019f"},
+    {file = "jsonpickle-3.0.2.tar.gz", hash = "sha256:e37abba4bfb3ca4a4647d28bb9f4706436f7b46c8a8333b4a718abafa8e46b37"},
 ]
 
 [package.dependencies]
@@ -1470,13 +1470,13 @@ testing = ["pytest"]
 
 [[package]]
 name = "mando"
-version = "0.6.4"
+version = "0.7.1"
 description = "Create Python CLI apps with little to no effort at all!"
 optional = false
 python-versions = "*"
 files = [
-    {file = "mando-0.6.4-py2.py3-none-any.whl", hash = "sha256:4ce09faec7e5192ffc3c57830e26acba0fd6cd11e1ee81af0d4df0657463bd1c"},
-    {file = "mando-0.6.4.tar.gz", hash = "sha256:79feb19dc0f097daa64a1243db578e7674909b75f88ac2220f1c065c10a0d960"},
+    {file = "mando-0.7.1-py2.py3-none-any.whl", hash = "sha256:26ef1d70928b6057ee3ca12583d73c63e05c49de8972d620c278a7b206581a8a"},
+    {file = "mando-0.7.1.tar.gz", hash = "sha256:18baa999b4b613faefb00eac4efadcf14f510b59b924b66e08289aa1de8c3500"},
 ]
 
 [package.dependencies]
@@ -2099,24 +2099,24 @@ testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
 name = "protobuf"
-version = "4.24.0"
+version = "4.24.1"
 description = ""
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "protobuf-4.24.0-cp310-abi3-win32.whl", hash = "sha256:81cb9c4621d2abfe181154354f63af1c41b00a4882fb230b4425cbaed65e8f52"},
-    {file = "protobuf-4.24.0-cp310-abi3-win_amd64.whl", hash = "sha256:6c817cf4a26334625a1904b38523d1b343ff8b637d75d2c8790189a4064e51c3"},
-    {file = "protobuf-4.24.0-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:ae97b5de10f25b7a443b40427033e545a32b0e9dda17bcd8330d70033379b3e5"},
-    {file = "protobuf-4.24.0-cp37-abi3-manylinux2014_aarch64.whl", hash = "sha256:567fe6b0647494845d0849e3d5b260bfdd75692bf452cdc9cb660d12457c055d"},
-    {file = "protobuf-4.24.0-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:a6b1ca92ccabfd9903c0c7dde8876221dc7d8d87ad5c42e095cc11b15d3569c7"},
-    {file = "protobuf-4.24.0-cp37-cp37m-win32.whl", hash = "sha256:a38400a692fd0c6944c3c58837d112f135eb1ed6cdad5ca6c5763336e74f1a04"},
-    {file = "protobuf-4.24.0-cp37-cp37m-win_amd64.whl", hash = "sha256:5ab19ee50037d4b663c02218a811a5e1e7bb30940c79aac385b96e7a4f9daa61"},
-    {file = "protobuf-4.24.0-cp38-cp38-win32.whl", hash = "sha256:e8834ef0b4c88666ebb7c7ec18045aa0f4325481d724daa624a4cf9f28134653"},
-    {file = "protobuf-4.24.0-cp38-cp38-win_amd64.whl", hash = "sha256:8bb52a2be32db82ddc623aefcedfe1e0eb51da60e18fcc908fb8885c81d72109"},
-    {file = "protobuf-4.24.0-cp39-cp39-win32.whl", hash = "sha256:ae7a1835721086013de193311df858bc12cd247abe4ef9710b715d930b95b33e"},
-    {file = "protobuf-4.24.0-cp39-cp39-win_amd64.whl", hash = "sha256:44825e963008f8ea0d26c51911c30d3e82e122997c3c4568fd0385dd7bacaedf"},
-    {file = "protobuf-4.24.0-py3-none-any.whl", hash = "sha256:82e6e9ebdd15b8200e8423676eab38b774624d6a1ad696a60d86a2ac93f18201"},
-    {file = "protobuf-4.24.0.tar.gz", hash = "sha256:5d0ceb9de6e08311832169e601d1fc71bd8e8c779f3ee38a97a78554945ecb85"},
+    {file = "protobuf-4.24.1-cp310-abi3-win32.whl", hash = "sha256:d414199ca605eeb498adc4d2ba82aedc0379dca4a7c364ff9bc9a179aa28e71b"},
+    {file = "protobuf-4.24.1-cp310-abi3-win_amd64.whl", hash = "sha256:5906c5e79ff50fe38b2d49d37db5874e3c8010826f2362f79996d83128a8ed9b"},
+    {file = "protobuf-4.24.1-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:970c701ee16788d74f3de20938520d7a0aebc7e4fff37096a48804c80d2908cf"},
+    {file = "protobuf-4.24.1-cp37-abi3-manylinux2014_aarch64.whl", hash = "sha256:fc361148e902949dcb953bbcb148c99fe8f8854291ad01107e4120361849fd0e"},
+    {file = "protobuf-4.24.1-cp37-abi3-manylinux2014_x86_64.whl", hash = "sha256:5d32363d14aca6e5c9e9d5918ad8fb65b091b6df66740ae9de50ac3916055e43"},
+    {file = "protobuf-4.24.1-cp37-cp37m-win32.whl", hash = "sha256:df015c47d6855b8efa0b9be706c70bf7f050a4d5ac6d37fb043fbd95157a0e25"},
+    {file = "protobuf-4.24.1-cp37-cp37m-win_amd64.whl", hash = "sha256:d4af4fd9e9418e819be30f8df2a16e72fbad546a7576ac7f3653be92a6966d30"},
+    {file = "protobuf-4.24.1-cp38-cp38-win32.whl", hash = "sha256:302e8752c760549ed4c7a508abc86b25d46553c81989343782809e1a062a2ef9"},
+    {file = "protobuf-4.24.1-cp38-cp38-win_amd64.whl", hash = "sha256:06437f0d4bb0d5f29e3d392aba69600188d4be5ad1e0a3370e581a9bf75a3081"},
+    {file = "protobuf-4.24.1-cp39-cp39-win32.whl", hash = "sha256:0b2b224e9541fe9f046dd7317d05f08769c332b7e4c54d93c7f0f372dedb0b1a"},
+    {file = "protobuf-4.24.1-cp39-cp39-win_amd64.whl", hash = "sha256:bd39b9094a4cc003a1f911b847ab379f89059f478c0b611ba1215053e295132e"},
+    {file = "protobuf-4.24.1-py3-none-any.whl", hash = "sha256:55dd644adc27d2a624339332755fe077c7f26971045b469ebb9732a69ce1f2ca"},
+    {file = "protobuf-4.24.1.tar.gz", hash = "sha256:44837a5ed9c9418ad5d502f89f28ba102e9cd172b6668bc813f21716f9273348"},
 ]
 
 [[package]]
@@ -2702,13 +2702,13 @@ files = [
 
 [[package]]
 name = "s3transfer"
-version = "0.6.1"
+version = "0.6.2"
 description = "An Amazon S3 Transfer Manager"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "s3transfer-0.6.1-py3-none-any.whl", hash = "sha256:3c0da2d074bf35d6870ef157158641178a4204a6e689e82546083e31e0311346"},
-    {file = "s3transfer-0.6.1.tar.gz", hash = "sha256:640bb492711f4c0c0905e1f62b6aaeb771881935ad27884852411f8e9cacbca9"},
+    {file = "s3transfer-0.6.2-py3-none-any.whl", hash = "sha256:b014be3a8a2aab98cfe1abc7229cc5a9a0cf05eb9c1f2b86b230fd8df3f78084"},
+    {file = "s3transfer-0.6.2.tar.gz", hash = "sha256:cab66d3380cca3e70939ef2255d01cd8aece6a4907a9528740f668c4b0611861"},
 ]
 
 [package.dependencies]
@@ -3168,7 +3168,7 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 [extras]
 all = ["aws-xray-sdk", "fastjsonschema", "pydantic"]
 aws-sdk = ["boto3"]
-datadog = []
+datadog = ["datadog-lambda"]
 parser = ["pydantic"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]
@@ -3176,4 +3176,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "7470a88fe955ad30f1a470ab5e2885d94d6f3cda6ff111b656a47b33b169178f"
+content-hash = "f4b85d4beb37f7647661530831c804ecb373a73ca5318d7cef7d0dd8ecfead9d"
