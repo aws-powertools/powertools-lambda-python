@@ -71,3 +71,9 @@ class IdempotencyKeyError(BaseError):
     """
     Payload does not contain an idempotent key
     """
+
+
+class IdempotencyRedisClientConfigError(BaseError):
+    """
+    Redis Client passed into persistant layer is not valid
+    """
