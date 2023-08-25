@@ -34,6 +34,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.6.2"
+datadog-lambda = { version = "^4.77.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
@@ -68,7 +69,7 @@ mypy-boto3-s3 = "^1.28.27"
 mypy-boto3-xray = "^1.28.16"
 types-requests = "^2.31.0"
 typing-extensions = "^4.6.2"
-mkdocs-material = "^9.1.21"
+mkdocs-material = "^9.2.3"
 filelock = "^3.12.2"
 checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.28.16"
@@ -93,7 +94,7 @@ mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 httpx = ">=0.23.3,<0.25.0"
 sentry-sdk = "^1.22.2"
-ruff = ">=0.0.272,<0.0.285"
+ruff = ">=0.0.272,<0.0.286"
 retry2 = "^0.9.5"
 
 [tool.coverage.run]

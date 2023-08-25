@@ -44,7 +44,7 @@ jobs:
       id-token: write  # trade JWT token for AWS credentials in AWS Docs account
       pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+      - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744  # v3.6.0
         with:
           fetch-depth: 0
           ref: ${{ inputs.git_ref }}
@@ -79,7 +79,7 @@ jobs:
           poetry run mike set-default --push latest
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
+        uses: aws-actions/configure-aws-credentials@ef93a73b1313f148011965ef7361f667f371f58b
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
