@@ -14,7 +14,7 @@ from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
 )
-from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseIdempotencySerializer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ def idempotent_function(
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
-    output_serializer: Optional[BaseDictSerializer] = None,
+    output_serializer: Optional[BaseIdempotencySerializer] = None,
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -101,7 +101,7 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
-    output_serializer: Optional[BaseDictSerializer]
+    output_serializer: Optional[BaseIdempotencySerializer]
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done via the NoOpSerializer
     Examples

@@ -1,14 +1,14 @@
 from typing import Dict
 
-from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseIdempotencySerializer
 
 
-class NoOpSerializer(BaseDictSerializer):
+class NoOpSerializer(BaseIdempotencySerializer):
     def __init__(self):
         """
         Parameters
         ----------
-        default serializer, does not transform data
+        Default serializer, does not transform data
         """
 
     def to_dict(self, data: Dict) -> Dict:

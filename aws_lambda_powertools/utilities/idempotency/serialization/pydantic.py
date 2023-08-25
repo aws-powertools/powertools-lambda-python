@@ -2,18 +2,18 @@ from typing import Dict, Type
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseIdempotencySerializer
 
 Model = BaseModel
 
 
-class PydanticSerializer(BaseDictSerializer):
+class PydanticSerializer(BaseIdempotencySerializer):
     def __init__(self, model: Type[Model]):
         """
         Parameters
         ----------
         model: Model
-            A model of the type to transform
+            A Pydantic model of the type to transform
         """
         self.__model: Type[Model] = model
 

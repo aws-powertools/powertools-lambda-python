@@ -1,17 +1,13 @@
 """
 Serialization for supporting idempotency
 """
-import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-logger = logging.getLogger(__name__)
 
-
-class BaseDictSerializer(ABC):
+class BaseIdempotencySerializer(ABC):
     """
     Abstract Base Class for Idempotency serialization layer, supporting dict operations.
-    This interface not be inherited by end user implementation.
     """
 
     @abstractmethod

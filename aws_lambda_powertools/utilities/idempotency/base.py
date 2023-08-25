@@ -19,7 +19,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     DataRecord,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
-    BaseDictSerializer,
+    BaseIdempotencySerializer,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.no_op import (
     NoOpSerializer,
@@ -57,7 +57,7 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
-        output_serializer: Optional[BaseDictSerializer] = None,
+        output_serializer: Optional[BaseIdempotencySerializer] = None,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
     ):
@@ -72,7 +72,7 @@ class IdempotencyHandler:
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
-        output_serializer: Optional[BaseDictSerializer]
+        output_serializer: Optional[BaseIdempotencySerializer]
             Serializer to transform the data to and from a dictionary.
             If not supplied, no serialization is done via the NoOpSerializer
         function_args: Optional[Tuple]
