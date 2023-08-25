@@ -1,0 +1,18 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+participant Client
+participant Lambda
+participant "Persistence layer"
+
+
+Client->Lambda:Invoke (event)
+Lambda->"Persistence layer":Get or set (id=event.search(payload))
+activate "Persistence layer"
+note right of "Persistence layer":Locked during this time. Prevents \nmultiple Lambda invocations with the \nsame payload running concurrently.
+Lambda-->x Lambda:Run Lambda handler (event). Raises Exception.
+Lambda->"Persistence layer":Delete record (id=event.search(payload))
+deactivate "Persistence layer"
+Client<--Lambda:Return error response
+
+@enduml
