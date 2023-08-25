@@ -4,22 +4,12 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Bug Fixes
 
-* **event_handler:** make invalid chars a raw str to fix DeprecationWarning ([#2982](https://github.com/aws-powertools/powertools-lambda-python/issues/2982))
-* **metrics:** preserve default_tags when metric-specific tag is set in Datadog provider ([#2997](https://github.com/aws-powertools/powertools-lambda-python/issues/2997))
-
+<a name="v2.23.1"></a>
+## [v2.23.1] - 2023-08-25
 ## Maintenance
 
-* **deps:** bump slsa-framework/slsa-github-generator from 1.8.0 to 1.9.0 ([#2992](https://github.com/aws-powertools/powertools-lambda-python/issues/2992))
-* **deps:** bump squidfunk/mkdocs-material from `cd3a522` to `97da15b` in /docs ([#2987](https://github.com/aws-powertools/powertools-lambda-python/issues/2987))
-* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#2978](https://github.com/aws-powertools/powertools-lambda-python/issues/2978))
-* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#2983](https://github.com/aws-powertools/powertools-lambda-python/issues/2983))
-* **deps:** bump actions/checkout from 3.5.3 to 3.6.0 ([#2999](https://github.com/aws-powertools/powertools-lambda-python/issues/2999))
-* **deps-dev:** bump ruff from 0.0.284 to 0.0.285 ([#2977](https://github.com/aws-powertools/powertools-lambda-python/issues/2977))
-* **deps-dev:** bump mkdocs-material from 9.1.21 to 9.2.0 ([#2984](https://github.com/aws-powertools/powertools-lambda-python/issues/2984))
-* **deps-dev:** bump mkdocs-material from 9.2.0 to 9.2.3 ([#2988](https://github.com/aws-powertools/powertools-lambda-python/issues/2988))
-* **deps-dev:** bump aws-cdk from 2.92.0 to 2.93.0 ([#2993](https://github.com/aws-powertools/powertools-lambda-python/issues/2993))
+* version bump
 
 
 <a name="v2.23.0"></a>
@@ -3714,7 +3704,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.1...HEAD
+[v2.23.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.0...v2.23.1
 [v2.23.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.22.0...v2.23.0
 [v2.22.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.21.0...v2.22.0
 [v2.21.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.20.0...v2.21.0
