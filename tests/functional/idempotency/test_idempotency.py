@@ -1278,7 +1278,8 @@ def test_idempotent_function_serialization_no_response():
     assert from_dict_called is False, "in case response is None, from_dict should not be called"
 
 
-def test_idempotent_function_serialization_pydantic():
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_pydantic(output_serializer_type: str):
     # GIVEN
     config = IdempotencyConfig(use_local_cache=True)
     mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
@@ -1293,13 +1294,18 @@ def test_idempotent_function_serialization_pydantic():
         customer_id: str
         transaction_id: str
 
+    if output_serializer_type == "explicit":
+        output_serializer = PydanticSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = PydanticSerializer
+
     @idempotent_function(
         data_keyword_argument="payment",
         persistence_store=persistence_layer,
         config=config,
-        output_serializer=PydanticSerializer(
-            model=PaymentOutput,
-        ),
+        output_serializer=output_serializer,
     )
     def collect_payment(payment: PaymentInput) -> PaymentOutput:
         return PaymentOutput(**payment.dict())
