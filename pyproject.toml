@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.23.0"
+version = "2.23.1"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -94,7 +94,7 @@ mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 httpx = ">=0.23.3,<0.25.0"
 sentry-sdk = "^1.22.2"
-ruff = ">=0.0.272,<0.0.286"
+ruff = ">=0.0.272,<0.0.287"
 retry2 = "^0.9.5"
 
 [tool.coverage.run]
