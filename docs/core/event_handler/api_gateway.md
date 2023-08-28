@@ -353,19 +353,43 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ tip "Multiple origins?"
     If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
 
-| Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
-| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
-| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
+| Key                                                                                                                                                         | Value                                                                        | Note                                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                                            |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                                     |
+| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                                             |
 | **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank" rel="nofollow"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank" rel="nofollow"}. |
-| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
-| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
+| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                                     |
+| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                                        |
 
 ### Middleware
 
-<!-- markdownlint-disable-next-line MD013 -->
-Often there is a need to handle cross-cutting concerns or to add custom processing in a reusable way, middleware allows you to customize the request/response cycle for your API event handlers.  Middleware enables you to add **before** and **after** processing for any API event, enabling you to pre-process the request and return early or to post-process the response to customize the API response.
+```mermaid
+stateDiagram
+    direction LR
+
+    EventHandler: GET /todo
+    Before: Before response
+    Next: get_response()
+    MiddlewareLoop: Middleware loop
+    AfterResponse: After response
+    MiddlewareFinished: Aggregated response
+    Response: Final response
+
+    EventHandler --> Middleware: Has middleware?
+    state MiddlewareLoop {
+        direction LR
+        Middleware --> Before
+        Before --> Next
+        Next --> Middleware: More middlewares?
+        Next --> AfterResponse
+    }
+    AfterResponse --> MiddlewareFinished
+    MiddlewareFinished --> Response
+    EventHandler --> Response: No middleware
+```
+
+A middleware is a function you register per route to **intercept** or **enrich** a **request before** or **after** any response.
 
 ??? info "How Middleware Works"
     Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
@@ -390,20 +414,13 @@ Often there is a need to handle cross-cutting concerns or to add custom processi
 
 Middleware can be represented by any valid Python Callable structure so long as the call signature aligns with the following example and the function follows the processing cycle of **before**, **next (get_response)** and **after**.
 
-=== "middleware_func.py"
-    ```python hl_lines="2 5 7 11"
-        def middleware_func(app: BaseRouter, get_response: Callable[..., Any], **context_args) -> Response:
-            # Do Before processing here
+```python hl_lines="13 26" title="Your first middleware to log incoming events"
+--8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
+```
 
-            # Get Next response
-            result = get_response(app, **context_args)
-
-            # Do After processing here
-
-
-            # return the response
-            return result
-    ```
+1. Testing test
+2. Testing 2
+3. Testing 3
 
 The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
 
@@ -437,6 +454,12 @@ Middleware functions used in the Router instance will apply to all API routes an
 
 ???+ warning "Ensure your middleware returns the Next Response"
     Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
+
+#### Combining middlewares
+
+#### Returning early
+
+#### Common practices
 
 ### Fine grained responses
 
