@@ -397,7 +397,7 @@ Each middleware function receives the following arguments:
 2. **get_response**. A function to get the next middleware or route's response.
 3. **`**context`**. A Middleware context that is propagated with dynamic route arguments and any previously injected metadata.
 
-Here's a sample middleware that extracts and injects correlation ID, using `APIGatewayRestResolver`:
+Here's a sample middleware that extracts and injects correlation ID, using `APIGatewayRestResolver` (works for any [Resolver](#event-resolvers)):
 
 === "middleware_getting_started.py"
 
@@ -416,8 +416,6 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
     ```json hl_lines="9-10"
     --8<-- "examples/event_handler_rest/src/middleware_getting_started_output.json"
     ```
-
-The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
 
 Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route defintion.
 
