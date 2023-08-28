@@ -397,15 +397,25 @@ Each middleware function receives the following arguments:
 2. **get_response**. A function to get the next middleware or route's response.
 3. **`**context`**. A Middleware context that is propagated with dynamic route arguments and any previously injected metadata.
 
-```python hl_lines="12 23 30" title="Your first middleware to extract and inject correlation ID"
---8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
-```
+Here's a sample middleware that extract and inject correlation ID, using `APIGatewayRestResolver`:
 
-1. You can access current request like you normally would.
-2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br/><br/> Alternatively, you can use `**context` kwargs which will only be available for middlewares.
-3. Get response from the next middleware (if any) or from `/todos` route.
-4. You can manipulate headers, body, or status code before returning it
-5. Register one or more middlewares in order of execution
+=== "middleware_getting_started.py"
+
+    ```python hl_lines="12 23 30" title="Your first middleware to extract and inject correlation ID"
+    --8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
+    ```
+
+    1. You can access current request like you normally would.
+    2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br/ ><br/> Alternatively, you can use `**context` kwargs which will only be available for middlewares.
+    3. Get response from the next middleware (if any) or from `/todos` route.
+    4. You can manipulate headers, body, or status code before returning it
+    5. Register one or more middlewares in order of execution
+
+=== "middleware_getting_started_output.json"
+
+    ```json hl_lines="9-10"
+    --8<-- "examples/event_handler_rest/src/middleware_getting_started_output.json"
+    ```
 
 The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
 
