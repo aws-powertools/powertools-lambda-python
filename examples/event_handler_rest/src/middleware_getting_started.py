@@ -1,32 +1,41 @@
-from typing import Any, Callable
+from typing import Callable
 
 import requests
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.event_handler.api_gateway import BaseRouter
 
 app = APIGatewayRestResolver()
 logger = Logger()
 
 
-def log_incoming_request(app: BaseRouter, get_response: Callable[..., Any], **context_args) -> Response:
-    # Do Before processing here
-    logger.info("Received request...", path=app.current_event.path)  # (1)!
+def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+    request_id = app.current_event.request_context.request_id  # (1)!
 
-    # Get Next response
-    result = get_response(app, **context_args)  # (2)
+    # Use API Gateway REST API request ID if caller didn't include a correlation ID
+    correlation_id = app.current_event.headers.get("x-correlation-id", request_id)
 
-    # Do After processing here
+    # Inject correlation ID in shared context and Logger
+    app.append_context(correlation_id=correlation_id)  # (2)!
+    logger.set_correlation_id(request_id)
 
-    # return the response
-    return result  # (3)
+    # Get response from next middleware OR /todos route
+    result = get_response(app, **context)  # (3)!
+
+    # Include Correlation ID in the response back to caller
+    result.headers["x-correlation-id"] = correlation_id  # (4)!
+    return result
 
 
-@app.get("/todos", middlewares=[log_incoming_request])
+@app.get("/todos", middlewares=[inject_correlation_id])  # (5)!
 def get_todos():
     todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
     todos.raise_for_status()
 
     # for brevity, we'll limit to the first 10 only
     return {"todos": todos.json()[:10]}
+
+
+@logger.inject_lambda_context
+def lambda_handler(event, context):
+    return app.resolve(event, context)

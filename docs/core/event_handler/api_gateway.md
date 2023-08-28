@@ -373,7 +373,7 @@ stateDiagram
     Next: get_response()
     MiddlewareLoop: Middleware loop
     AfterResponse: After response
-    MiddlewareFinished: Aggregated response
+    MiddlewareFinished: Modified response
     Response: Final response
 
     EventHandler --> Middleware: Has middleware?
@@ -391,36 +391,21 @@ stateDiagram
 
 A middleware is a function you register per route to **intercept** or **enrich** a **request before** or **after** any response.
 
-??? info "How Middleware Works"
-    Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
+Each middleware function receives the following arguments:
 
-    ![Image showing how the middleware flow works](/media/how-middleware-works-1.png)
+1. **app**. An Event Handler instance so you can access incoming request information, Lambda context, etc.
+2. **get_response**. A function to get the next middleware or route's response.
+3. **`**context`**. A Middleware context that is propagated with dynamic route arguments and any previously injected metadata.
 
-    1. Powertools API Route handler executes API Route Handler (wrapped in composed middleware).
-    2. Middleware function is called
-    3. Before processing code
-    4. Calls Next Middleware function (or registered API route handler)
-    5. If the next function is middleware, it repeats these steps.  The API route code runs and returns if it is the route handler.
-    6. After the next middleware (or API handler) returns After processing may be run to post-process the response.
-    7. The response is returned by the Middleware function to the caller.
-
-??? tip "What Middleware is Responsible for"
-    - They can be chained in a stack, so ensure it does only one thing to maximize re-usability and simplicity.
-    - Middleware must call the next middleware in the chain or your API handler will never be called.
-    - Responsible for calling the next middleware function in the stack.
-    - Can pre-process the Request data, change it or validate it before calling the next middleware function.
-    - Returning early by throwing an exception or returning a valid response.
-    - Can process the Response and alter its content depending on the middleware's purpose.
-
-Middleware can be represented by any valid Python Callable structure so long as the call signature aligns with the following example and the function follows the processing cycle of **before**, **next (get_response)** and **after**.
-
-```python hl_lines="13 26" title="Your first middleware to log incoming events"
+```python hl_lines="12 23 30" title="Your first middleware to extract and inject correlation ID"
 --8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
 ```
 
-1. Testing test
-2. Testing 2
-3. Testing 3
+1. You can access current request like you normally would.
+2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br/><br/> Alternatively, you can use `**context` kwargs which will only be available for middlewares.
+3. Get response from the next middleware (if any) or from `/todos` route.
+4. You can manipulate headers, body, or status code before returning it
+5. Register one or more middlewares in order of execution
 
 The **app** parameter can also be a more specific type of Router such as ApiGatewayResolver, APIGatewayHttpResolver, ALBResolver, LambdaFunctionUrlResolver, or VPCLatticeResolver depending on your specific middleware requirements.
 
@@ -460,6 +445,29 @@ Middleware functions used in the Router instance will apply to all API routes an
 #### Returning early
 
 #### Common practices
+
+#### Staging area
+
+??? info "How Middleware Works"
+    Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
+
+    ![Image showing how the middleware flow works](/media/how-middleware-works-1.png)
+
+    1. Powertools API Route handler executes API Route Handler (wrapped in composed middleware).
+    2. Middleware function is called
+    3. Before processing code
+    4. Calls Next Middleware function (or registered API route handler)
+    5. If the next function is middleware, it repeats these steps.  The API route code runs and returns if it is the route handler.
+    6. After the next middleware (or API handler) returns After processing may be run to post-process the response.
+    7. The response is returned by the Middleware function to the caller.
+
+??? tip "What Middleware is Responsible for"
+    - They can be chained in a stack, so ensure it does only one thing to maximize re-usability and simplicity.
+    - Middleware must call the next middleware in the chain or your API handler will never be called.
+    - Responsible for calling the next middleware function in the stack.
+    - Can pre-process the Request data, change it or validate it before calling the next middleware function.
+    - Returning early by throwing an exception or returning a valid response.
+    - Can process the Response and alter its content depending on the middleware's purpose.
 
 ### Fine grained responses
 
