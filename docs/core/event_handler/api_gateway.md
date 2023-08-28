@@ -417,38 +417,32 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
     --8<-- "examples/event_handler_rest/src/middleware_getting_started_output.json"
     ```
 
-Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route defintion.
+#### Global middlewares
 
-???+ tip
-    **Router Middleware processing Order**
+<center>
+![Combining middlewares](../../media/middlewares_normal_processing.svg)
+_Request flowing through multiple registered middlewares_
+</center>
 
-    1. Global middlewares defined on the parent Router
-    2. Route specific Middlewares
+You can use `app.use` to register middlewares that should run for all routes. These so called **global middlewares are called before those defined at the route level.**
 
-    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
+Here's an example where we want to log request and response for debugging purposes.
 
-???+ warning "Ensure your middleware calls the Next one in the chain"
-    The middleware stack processing relies on each middleware function calling the next and also returning the reponse or raising an exception.  If you do not pass control to the next middleware function in the chain, your API route handler will never be called.
+!!! note "Use [debug mode](#debug-mode) if you have this exact need instead."
 
-=== "route_middleware.py"
-    ```python hl_lines="9 16"
-    --8<-- "examples/event_handler_rest/src/route_middleware.py"
+=== "middleware_global_middlewares.py"
+
+    ```python hl_lines="10" title="Registering global and route middlewares"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares.py"
     ```
 
-=== "all_routes_middleware.py"
-    ```python hl_lines="9 15"
-    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
+    1. A separate file where our middlewares are to keep this example focused.
+
+=== "middleware_global_middlewares_module.py"
+
+    ```python hl_lines="9"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
     ```
-
-=== "custom_middlewares.py"
-    ```python hl_lines="12 14 18 21 23"
-    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
-    ```
-
-???+ warning "Ensure your middleware returns the Next Response"
-    Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
-
-#### Combining middlewares
 
 #### Returning early
 
@@ -476,6 +470,39 @@ Middleware functions used in the Router instance will apply to all API routes an
     - Can pre-process the Request data, change it or validate it before calling the next middleware function.
     - Returning early by throwing an exception or returning a valid response.
     - Can process the Response and alter its content depending on the middleware's purpose.
+
+???+ warning "Ensure your middleware returns the Next Response"
+    Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
+
+**This should go under the Router area since we haven't introduced it yet**
+
+Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route defintion.
+
+???+ tip
+    **Router Middleware processing Order**
+
+    1. Global middlewares defined on the parent Router
+    2. Route specific Middlewares
+
+    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
+
+???+ warning "Ensure your middleware calls the Next one in the chain"
+    The middleware stack processing relies on each middleware function calling the next and also returning the reponse or raising an exception.  If you do not pass control to the next middleware function in the chain, your API route handler will never be called.
+
+=== "route_middleware.py"
+    ```python hl_lines="9 16"
+    --8<-- "examples/event_handler_rest/src/route_middleware.py"
+    ```
+
+=== "all_routes_middleware.py"
+    ```python hl_lines="9 15"
+    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
+    ```
+
+=== "custom_middlewares.py"
+    ```python hl_lines="12 14 18 21 23"
+    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
+    ```
 
 ### Fine grained responses
 
