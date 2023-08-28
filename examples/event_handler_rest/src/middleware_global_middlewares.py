@@ -7,7 +7,7 @@ from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 app = APIGatewayRestResolver()
 logger = Logger()
 
-app.use(middlewares=[middleware_global_middlewares_module.log_request_response])
+app.use(middlewares=[middleware_global_middlewares_module.log_request_response])  # (2)!
 
 
 @app.get("/todos", middlewares=[middleware_global_middlewares_module.inject_correlation_id])

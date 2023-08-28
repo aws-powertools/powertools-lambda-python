@@ -424,19 +424,31 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 _Request flowing through multiple registered middlewares_
 </center>
 
-You can use `app.use` to register middlewares that should run for all routes. These so called **global middlewares are called before those defined at the route level.**
+You can use `app.use` to register middlewares that should always run regardless of the route, also known as global middlewares.
 
-Here's an example where we want to log request and response for debugging purposes.
-
-!!! note "Use [debug mode](#debug-mode) if you have this exact need instead."
+Event Handler **calls global middlewares first**, then middlewares defined at the route level. Here's an example with both middlewares:
 
 === "middleware_global_middlewares.py"
 
-    ```python hl_lines="10" title="Registering global and route middlewares"
+    > Use [debug mode](#debug-mode) if you need to log request/response.
+
+    ```python hl_lines="10"
     --8<-- "examples/event_handler_rest/src/middleware_global_middlewares.py"
     ```
 
     1. A separate file where our middlewares are to keep this example focused.
+    2. We register `log_request_response` as a global middleware to run before middleware.
+       ```mermaid
+       stateDiagram
+           direction LR
+
+           GlobalMiddleware: Log request response
+           RouteMiddleware: Inject correlation ID
+           EventHandler: Event Handler
+
+           EventHandler --> GlobalMiddleware
+           GlobalMiddleware --> RouteMiddleware
+       ```
 
 === "middleware_global_middlewares_module.py"
 
