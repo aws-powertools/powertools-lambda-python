@@ -2,6 +2,7 @@ from typing import Callable
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+from aws_lambda_powertools.event_handler.exceptions import BadRequestError
 
 logger = Logger()
 
@@ -31,3 +32,12 @@ def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..
     # Include Correlation ID in the response back to caller
     result.headers["x-correlation-id"] = correlation_id
     return result
+
+
+def enforce_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+    # If missing mandatory header raise an error
+    if not app.current_event.get_header_value("x-correlation-id", case_sensitive=False):
+        raise BadRequestError("Correlation ID header is now mandatory.")  # (1)!
+
+    # Get the response from the next middleware and return it
+    return get_response(app, **context)

@@ -1,0 +1,10 @@
+{
+    "statusCode": 400,
+    "body": "{'statusCode':400,'message':'Correlation ID header is now mandatory.'}",
+    "isBase64Encoded": false,
+    "multiValueHeaders": {
+        "Content-Type": [
+            "application/json"
+        ]
+    }
+}

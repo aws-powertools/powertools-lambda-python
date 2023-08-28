@@ -452,11 +452,45 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 
 === "middleware_global_middlewares_module.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="10"
     --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
     ```
 
 #### Returning early
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_early_return.svg)
+_Interrupting request flow by returning early_
+</center>
+
+Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.
+
+In these scenarios, you short-circuit the middleware processing logic by raising a [HTTP Error](#raising-http-errors), or returning a [Response object](#fine-grained-responses). Event Handler will understand it now needs to run each “After” logic left in the chain.
+
+Here's an example where we now prevent any request that doesn't include a correlation ID header:
+
+=== "middleware_early_return.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/event_handler_rest/src/middleware_early_return.py"
+    ```
+
+    1. This middleware will raise an exception if correlation ID header is missing.
+    2. This code section will not run if `enforce_correlation_id` returns early.
+
+=== "middleware_global_middlewares_module.py"
+
+    ```python hl_lines="37 40"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
+    ```
+
+    1. Raising an exception OR returning a Response object early will short-circuit the middleware chain.
+
+=== "middleware_early_return_output.json"
+
+    ```python hl_lines="2-3"
+    --8<-- "examples/event_handler_rest/src/middleware_early_return_output.json"
+    ```
 
 #### Common practices
 
