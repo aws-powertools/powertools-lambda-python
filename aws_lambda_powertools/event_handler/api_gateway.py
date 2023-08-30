@@ -291,7 +291,9 @@ class Route:
 
         # If debug is turned on then output the middleware stack to the console
         if app._debug:
-            all_middlewares = router_middlewares + self.middlewares + [_registered_api_adapter, self.func]
+            print(f"\nProcessing Route:::{self.func.__name__} ({app.context['_path']})")
+            # Collect ALL middleware for debug printing - include internal _registered_api_adapter
+            all_middlewares = router_middlewares + self.middlewares + [_registered_api_adapter]
             print("\nMiddleware Stack:")
             print("=================")
             print("\n".join(getattr(item, "__name__", "Unknown") for item in all_middlewares))
@@ -1012,6 +1014,10 @@ class ApiGatewayResolver(BaseRouter):
             match_results: Optional[Match] = route.rule.match(path)
             if match_results:
                 logger.debug("Found a registered route. Calling function")
+                # Add matched Route reference into the Resolver context
+                self.append_context(_route=route)
+                self.append_context(_path=path)
+
                 return self._call_route(route, match_results.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
@@ -1079,9 +1085,6 @@ class ApiGatewayResolver(BaseRouter):
         try:
             # Reset Processed stack for Middleware (for debugging purposes)
             self._reset_processed_stack()
-
-            # Add matched Route reference into the Resolver context
-            self.append_context(_route=route)
 
             return ResponseBuilder(
                 self._to_response(
