@@ -1064,7 +1064,7 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             # Add matched Route reference into the Resolver context
-            self.append_context(powertools_route=route)
+            self.append_context(_route=route)
 
             return ResponseBuilder(
                 self._to_response(
