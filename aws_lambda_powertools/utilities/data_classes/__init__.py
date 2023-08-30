@@ -16,9 +16,6 @@ from .event_source import event_source
 from .kafka_event import KafkaEvent
 from .kinesis_firehose_event import KinesisFirehoseEvent
 from .kinesis_firehose_response import (
-    FirehoseStateDropped,
-    FirehoseStateFailed,
-    FirehoseStateOk,
     KinesisFirehoseResponce,
     KinesisFirehoseResponceFactory,
     KinesisFirehoseResponceRecord,

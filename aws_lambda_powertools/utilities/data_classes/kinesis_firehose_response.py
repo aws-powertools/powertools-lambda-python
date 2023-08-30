@@ -1,13 +1,7 @@
-from __future__ import annotations
-
 import base64
-from typing import Callable, Iterator, List, Optional, Union
+from typing import Any, Callable, Dict, Iterator, List, Literal, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-
-FirehoseStateOk = "Ok"
-FirehoseStateDropped = "Dropped"
-FirehoseStateFailed = "ProcessingFailed"
 
 
 class KinesisFirehoseResponseRecordMetadata(DictWrapper):
@@ -18,18 +12,18 @@ class KinesisFirehoseResponseRecordMetadata(DictWrapper):
     """
 
     @property
-    def _metadata(self) -> Optional[dict]:
+    def _metadata(self) -> Dict:
         """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
         return self["metadata"]  # could raise KeyError
 
     @property
-    def partition_keys(self) -> Optional[dict[str, str]]:
+    def partition_keys(self) -> Dict[str, str]:
         """Kinesis stream partition key; present only when Kinesis Stream is source"""
         return self._metadata["partitionKeys"]
 
 
 def KinesisFirehoseResponseRecordMetadataFactory(
-    partition_keys: dict[str, str],
+    partition_keys: Dict[str, str],
     json_deserializer: Optional[Callable] = None,
 ) -> KinesisFirehoseResponseRecordMetadata:
     data = {
@@ -54,7 +48,7 @@ class KinesisFirehoseResponceRecord(DictWrapper):
         return self["recordId"]
 
     @property
-    def result(self) -> Union[FirehoseStateOk, FirehoseStateDropped, FirehoseStateFailed]:
+    def result(self) -> Literal["Ok", "Dropped", "ProcessingFailed"]:
         """processing result, supported value: Ok, Dropped, ProcessingFailed"""
         return self["result"]
 
@@ -79,7 +73,7 @@ class KinesisFirehoseResponceRecord(DictWrapper):
         return self.data_as_bytes.decode("utf-8")
 
     @property
-    def data_as_json(self) -> dict:
+    def data_as_json(self) -> Dict:
         """Decoded base64-encoded data loaded to json"""
         if self._json_data is None:
             self._json_data = self._json_deserializer(self.data_as_text)
@@ -88,18 +82,18 @@ class KinesisFirehoseResponceRecord(DictWrapper):
 
 def KinesisFirehoseResponceRecordFactory(
     record_id: str,
-    result: Union[FirehoseStateOk, FirehoseStateDropped, FirehoseStateFailed],
+    result: Literal["Ok", "Dropped", "ProcessingFailed"],
     data: str,
     metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None,
     json_deserializer: Optional[Callable] = None,
 ) -> KinesisFirehoseResponceRecord:
-    pass_data = {
+    pass_data: Dict[str, Any] = {
         "recordId": record_id,
         "result": result,
         "data": base64.b64encode(data.encode("utf-8")).decode("utf-8"),
     }
     if metadata:
-        data["metadata"] = metadata
+        pass_data["metadata"] = metadata
     return KinesisFirehoseResponceRecord(data=pass_data, json_deserializer=json_deserializer)
 
 
