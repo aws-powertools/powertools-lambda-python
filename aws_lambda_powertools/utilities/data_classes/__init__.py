@@ -15,6 +15,17 @@ from .event_bridge_event import EventBridgeEvent
 from .event_source import event_source
 from .kafka_event import KafkaEvent
 from .kinesis_firehose_event import KinesisFirehoseEvent
+from .kinesis_firehose_response import (
+    FirehoseStateDropped,
+    FirehoseStateFailed,
+    FirehoseStateOk,
+    KinesisFirehoseResponce,
+    KinesisFirehoseResponceFactory,
+    KinesisFirehoseResponceRecord,
+    KinesisFirehoseResponceRecordFactory,
+    KinesisFirehoseResponseRecordMetadata,
+    KinesisFirehoseResponseRecordMetadataFactory,
+)
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
 from .s3_event import S3Event, S3EventBridgeNotificationEvent
@@ -37,6 +48,15 @@ __all__ = [
     "KafkaEvent",
     "KinesisFirehoseEvent",
     "KinesisStreamEvent",
+    "KinesisFirehoseResponce",
+    "KinesisFirehoseResponceRecord",
+    "KinesisFirehoseResponseRecordMetadata",
+    "FirehoseStateOk",
+    "FirehoseStateDropped",
+    "FirehoseStateFailed",
+    "KinesisFirehoseResponceFactory",
+    "KinesisFirehoseResponceRecordFactory",
+    "KinesisFirehoseResponseRecordMetadataFactory",
     "LambdaFunctionUrlEvent",
     "S3Event",
     "S3EventBridgeNotificationEvent",
