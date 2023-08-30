@@ -1,5 +1,11 @@
 import base64
-from typing import Any, Callable, Dict, Iterator, List, Literal, Optional
+import sys
+from typing import Any, Callable, Dict, Iterator, List, Optional
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
