@@ -56,16 +56,28 @@ def test_route_with_middleware(app, event):
 
 
 @pytest.mark.parametrize(
-    "app, event",
+    "app, event, other_event",
     [
-        (ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent), API_REST_EVENT),
-        (APIGatewayRestResolver(), API_REST_EVENT),
-        (APIGatewayHttpResolver(), API_RESTV2_EVENT),
+        (
+            ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent),
+            API_REST_EVENT,
+            load_event("apiGatewayProxyOtherEvent.json"),
+        ),
+        (
+            APIGatewayRestResolver(),
+            API_REST_EVENT,
+            load_event("apiGatewayProxyOtherEvent.json"),
+        ),
+        (
+            APIGatewayHttpResolver(),
+            API_RESTV2_EVENT,
+            load_event("apiGatewayProxyV2OtherGetEvent.json"),
+        ),
     ],
 )
-def test_with_router_middleware(app, event):
+def test_with_router_middleware(app, event, other_event):
     # define custom middleware to inject new argument - "custom"
-    def middleware_1(app, get_response, **kwargs):
+    def global_middleware(app, get_response, **kwargs):
         # inject a variable into the kwargs
         response = get_response(app, custom="custom", **kwargs)
 
@@ -78,7 +90,7 @@ def test_with_router_middleware(app, event):
 
         return response
 
-    app.use([middleware_1])
+    app.use([global_middleware])
 
     @app.get("/my/path", middlewares=[middleware_2])
     def get_lambda(another_one: int, custom: str) -> Response:
@@ -93,6 +105,19 @@ def test_with_router_middleware(app, event):
     # AND set the current_event type as APIGatewayProxyEvent
     assert result["statusCode"] == 200
     assert result["body"] == "foo"
+
+    @app.get("/other/path")
+    def get_other_lambda(custom: str) -> Response:
+        assert custom == "custom"
+        return Response(200, content_types.TEXT_HTML, "other_foo")
+
+    # WHEN calling the event handler
+    result = app(other_event, {})
+
+    # THEN process event correctly
+    # AND set the current_event type as APIGatewayProxyEvent
+    assert result["statusCode"] == 200
+    assert result["body"] == "other_foo"
 
 
 @pytest.mark.parametrize(

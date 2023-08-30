@@ -244,6 +244,7 @@ class Route:
         self.method = method.upper()
         self.rule = rule
         self.func = func
+        self._call_stack = func
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
@@ -288,8 +289,16 @@ class Route:
         if not self._middleware_stack_built:
             self._build_middleware_stack(router_middlewares=router_middlewares)
 
-        # Call the Middleware Wrapped route function handler with the app and route arguments
-        return self.func(app, **route_arguments)
+        # If debug is turned on then output the middleware stack to the console
+        if app._debug:
+            all_middlewares = router_middlewares + self.middlewares + [_registered_api_adapter, self.func]
+            print("\nMiddleware Stack:")
+            print("=================")
+            print("\n".join(getattr(item, "__name__", "Unknown") for item in all_middlewares))
+            print("=================")
+
+        # Call the Middleware Wrapped _call_stack function handler with the app and route arguments
+        return self._call_stack(app, **route_arguments)
 
     def _build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
         """
@@ -329,7 +338,7 @@ class Route:
         #
         # Start with the route function and wrap from last to the first Middleware handler.
         for handler in reversed(all_middlewares):
-            self.func = MiddlewareFrame(current_middleware=handler, next_middleware=self.func)
+            self._call_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._call_stack)
 
         self._middleware_stack_built = True
 
@@ -430,7 +439,7 @@ class BaseRouter(ABC):
     lambda_context: LambdaContext
     context: dict
     _router_middlewares: List[Callable] = []
-    _processed_stack_frames: List[str] = []
+    processed_stack_frames: List[str] = []
 
     @abstractmethod
     def route(
@@ -645,11 +654,11 @@ class BaseRouter(ABC):
         The stack frames will be used when excpetions are thrown and Powertools
         debug is enabled by developers.
         """
-        self._processed_stack_frames.append(frame)
+        self.processed_stack_frames.append(frame)
 
     def _reset_processed_stack(self):
         """Reset the Processed Stack Frames"""
-        self._processed_stack_frames = []
+        self.processed_stack_frames = []
 
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""
@@ -704,7 +713,7 @@ class MiddlewareFrame:
     def __str__(self) -> str:
         """Identify current middleware identity and call chain for debugging purposes."""
         middleware_name = self.__name__
-        return f"Middleware '{middleware_name}'. Next call chain is: {middleware_name} -> {self._next_middleware_name}"
+        return f"[{middleware_name}] next call chain is {middleware_name} -> {self._next_middleware_name}"
 
     def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
         """
@@ -919,6 +928,14 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.lambda_context = context
 
         response = self._resolve().build(self.current_event, self._cors)
+
+        # Debug print Processed Middlewares
+        if self._debug:
+            print("\nProcessed Middlewares:")
+            print("======================")
+            print("\n".join(self.processed_stack_frames))
+            print("======================")
+
         self.clear_context()
 
         return response
