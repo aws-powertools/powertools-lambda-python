@@ -1,13 +1,20 @@
-from typing import Dict, Type
+from typing import Any, Dict, Type
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.idempotency.serialization.base import BaseIdempotencySerializer
+from aws_lambda_powertools.utilities.idempotency.exceptions import (
+    IdempotencyModelTypeError,
+    IdempotencyNoSerializationModelError,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.base import (
+    BaseIdempotencyModelSerializer,
+    BaseIdempotencySerializer,
+)
 
 Model = BaseModel
 
 
-class PydanticSerializer(BaseIdempotencySerializer):
+class PydanticSerializer(BaseIdempotencyModelSerializer):
     def __init__(self, model: Type[Model]):
         """
         Parameters
@@ -28,3 +35,13 @@ class PydanticSerializer(BaseIdempotencySerializer):
             # Support for pydantic V2
             return self.__model.model_validate(data)  # type: ignore[unused-ignore,attr-defined]
         return self.__model.parse_obj(data)
+
+    @classmethod
+    def instantiate(cls, model_type: Any) -> BaseIdempotencySerializer:
+        if model_type is None:
+            raise IdempotencyNoSerializationModelError("No serialization model was supplied")
+
+        if not issubclass(model_type, BaseModel):
+            raise IdempotencyModelTypeError("Model type is not inherited from pydantic BaseModel")
+
+        return cls(model=model_type)
