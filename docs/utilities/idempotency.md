@@ -158,7 +158,7 @@ By supplying an output serializer, you can control the return type of the functi
 
 === "Using A Custom Type (Dataclasses)"
 
-    ```python hl_lines="3-8 26-28 32-35 42 48"
+    ```python hl_lines="3-8 26-28 32-44 51"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 
