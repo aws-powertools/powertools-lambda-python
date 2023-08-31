@@ -12,11 +12,11 @@ class BaseIdempotencySerializer(ABC):
 
     @abstractmethod
     def to_dict(self, data: Any) -> Dict:
-        pass
+        raise NotImplementedError("Implementation of to_dict is required")
 
     @abstractmethod
     def from_dict(self, data: Dict) -> Any:
-        pass
+        raise NotImplementedError("Implementation of from_dict is required")
 
 
 class BaseIdempotencyModelSerializer(BaseIdempotencySerializer):

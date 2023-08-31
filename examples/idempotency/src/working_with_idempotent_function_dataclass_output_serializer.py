@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
+from typing import Any, Dict
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -29,9 +30,17 @@ class OrderOutput:
     order_id: int
 
 
+def custom_to_dict(x: Any) -> Dict:
+    return asdict(x)
+
+
+def custom_from_dict(x: Dict) -> Any:
+    return OrderOutput(**x)
+
+
 order_output_serializer: CustomDictSerializer = CustomDictSerializer(
-    to_dict=lambda x: x.asdict(),
-    from_dict=lambda x: OrderOutput(**x),
+    to_dict=custom_to_dict,
+    from_dict=custom_from_dict,
 )
 
 
