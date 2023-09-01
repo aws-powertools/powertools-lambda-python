@@ -1,7 +1,120 @@
 import base64
-from typing import Iterator, Optional
+import json
+import sys
+from dataclasses import dataclass
+from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+if sys.version_info >= (3, 8):
+    from typing import Literal
+else:
+    from typing_extensions import Literal
+
+
+@dataclass
+class KinesisFirehoseResponseRecordMetadata:
+    """
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
+    """
+
+    partition_keys: Optional[Dict[str, str]]
+
+    @property
+    def asdict(self) -> Optional[Dict]:
+        if self.partition_keys is not None:
+            return {"partitionKeys": self.partition_keys}
+        return None
+
+
+@dataclass
+class KinesisFirehoseResponseRecord:
+    """Record in Kinesis Data Firehose event
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
+    """
+
+    """Record ID; uniquely identifies this record within the current batch"""
+    record_id: str
+    """processing result, supported value: Ok, Dropped, ProcessingFailed"""
+    result: Literal["Ok", "Dropped", "ProcessingFailed"]
+    """The data blob, base64-encoded, optional at init"""
+    data: Optional[str] = None
+    """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
+    metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
+    """Json data for caching json.dump result"""
+    _json_data: Optional[Any] = None
+    json_serializer: Optional[Callable] = json.dumps
+    json_deserializer: Optional[Callable] = json.loads
+
+    def data_from_byte(self, data: bytes):
+        """Populate data field using a byte like data"""
+        self.data = base64.b64encode(data).decode("utf-8")
+
+    def data_from_text(self, data: str):
+        """Populate data field using a string like data"""
+        self.data_from_byte(data.encode("utf-8"))
+
+    def data_from_json(
+        self,
+        data: Any,
+    ):
+        """Populate data field using any structure that could be converted to json"""
+        self.data_from_text(data=self.json_serializer(data))
+
+    @property
+    def asdict(self) -> Dict:
+        r = {
+            "recordId": self.record_id,
+            "result": self.result,
+            "data": self.data,
+        }
+        if self.metadata:
+            r["metadata"] = self.metadata.asdict
+        return r
+
+    @property
+    def data_as_bytes(self) -> bytes:
+        """Decoded base64-encoded data as bytes"""
+        return base64.b64decode(self.data)
+
+    @property
+    def data_as_text(self) -> str:
+        """Decoded base64-encoded data as text"""
+        return self.data_as_bytes.decode("utf-8")
+
+    @property
+    def data_as_json(self) -> Dict:
+        """Decoded base64-encoded data loaded to json"""
+        if self._json_data is None:
+            self._json_data = self.json_deserializer(self.data_as_text)
+        return self._json_data
+
+
+@dataclass
+class KinesisFirehoseResponse:
+    """Kinesis Data Firehose event
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
+    """
+
+    records: Optional[List[KinesisFirehoseResponseRecord]] = None
+
+    def add_record(self, record: KinesisFirehoseResponseRecord):
+        if self.records:
+            self.records.append(record)
+        else:
+            self.records = [record]
+
+    @property
+    def asdict(self) -> Dict:
+        return {"records": [r.asdict for r in self.records]}
 
 
 class KinesisFirehoseRecordMetadata(DictWrapper):
@@ -76,6 +189,13 @@ class KinesisFirehoseRecord(DictWrapper):
         if self._json_data is None:
             self._json_data = self._json_deserializer(self.data_as_text)
         return self._json_data
+
+    def create_firehose_response_record(
+        self,
+        result: Literal["Ok", "Dropped", "ProcessingFailed"],
+        data: str = None,
+    ) -> KinesisFirehoseResponseRecord:
+        return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data)
 
 
 class KinesisFirehoseEvent(DictWrapper):

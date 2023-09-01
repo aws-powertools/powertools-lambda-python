@@ -14,14 +14,11 @@ from .dynamo_db_stream_event import DynamoDBStreamEvent
 from .event_bridge_event import EventBridgeEvent
 from .event_source import event_source
 from .kafka_event import KafkaEvent
-from .kinesis_firehose_event import KinesisFirehoseEvent
-from .kinesis_firehose_response import (
-    KinesisFirehoseResponce,
-    KinesisFirehoseResponceFactory,
-    KinesisFirehoseResponceRecord,
-    KinesisFirehoseResponceRecordFactory,
+from .kinesis_firehose_event import (
+    KinesisFirehoseEvent,
+    KinesisFirehoseResponse,
+    KinesisFirehoseResponseRecord,
     KinesisFirehoseResponseRecordMetadata,
-    KinesisFirehoseResponseRecordMetadataFactory,
 )
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
@@ -45,12 +42,9 @@ __all__ = [
     "KafkaEvent",
     "KinesisFirehoseEvent",
     "KinesisStreamEvent",
-    "KinesisFirehoseResponce",
-    "KinesisFirehoseResponceRecord",
+    "KinesisFirehoseResponse",
+    "KinesisFirehoseResponseRecord",
     "KinesisFirehoseResponseRecordMetadata",
-    "KinesisFirehoseResponceFactory",
-    "KinesisFirehoseResponceRecordFactory",
-    "KinesisFirehoseResponseRecordMetadataFactory",
     "LambdaFunctionUrlEvent",
     "S3Event",
     "S3EventBridgeNotificationEvent",
