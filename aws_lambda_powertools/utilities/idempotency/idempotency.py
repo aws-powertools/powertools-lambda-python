@@ -110,6 +110,7 @@ def idempotent_function(
             If not supplied, no serialization is done via the NoOpSerializer.
             In case a serializer of type inheriting BaseIdempotencyModelSerializer is given,
             the serializer is derived from the function return type.
+
     Examples
     --------
     **Processes an order in an idempotent manner**
