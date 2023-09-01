@@ -4,6 +4,7 @@ Primary interface for idempotent Lambda functions utility
 import functools
 import logging
 import os
+from inspect import isclass
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
@@ -137,7 +138,7 @@ def idempotent_function(
             ),
         )
 
-    if issubclass(output_serializer, BaseIdempotencyModelSerializer):
+    if isclass(output_serializer) and issubclass(output_serializer, BaseIdempotencyModelSerializer):
         # instantiate an instance of the serializer class
         output_serializer = output_serializer.instantiate(function.__annotations__.get("return", None))
 
