@@ -1,5 +1,3 @@
-import json
-
 from aws_lambda_powertools.utilities.data_classes import (
     KinesisFirehoseEvent,
     KinesisFirehoseResponse,
@@ -16,12 +14,10 @@ def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
         # if data was delivered as json; caches loaded value
         data = record.data_as_json
 
-        json_data = json.loads(data)
-
         ## do all kind of stuff with data
 
         processed_record = record.create_firehose_response_record(result="Ok")
-        processed_record.data_from_json(data=json_data)
+        processed_record.data_from_json(data=data)
 
         result.add_record(processed_record)
 

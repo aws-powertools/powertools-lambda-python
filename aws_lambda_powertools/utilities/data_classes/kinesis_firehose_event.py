@@ -48,8 +48,8 @@ class KinesisFirehoseResponseRecord:
     metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
     """Json data for caching json.dump result"""
     _json_data: Optional[Any] = None
-    json_serializer: Optional[Callable] = json.dumps
-    json_deserializer: Optional[Callable] = json.loads
+    json_serializer: Callable = json.dumps
+    json_deserializer: Callable = json.loads
 
     def data_from_byte(self, data: bytes):
         """Populate data field using a byte like data"""
@@ -59,16 +59,13 @@ class KinesisFirehoseResponseRecord:
         """Populate data field using a string like data"""
         self.data_from_byte(data.encode("utf-8"))
 
-    def data_from_json(
-        self,
-        data: Any,
-    ):
+    def data_from_json(self, data: Any):
         """Populate data field using any structure that could be converted to json"""
         self.data_from_text(data=self.json_serializer(data))
 
     @property
     def asdict(self) -> Dict:
-        r = {
+        r: Dict[str, Any] = {
             "recordId": self.record_id,
             "result": self.result,
             "data": self.data,
@@ -78,18 +75,24 @@ class KinesisFirehoseResponseRecord:
         return r
 
     @property
-    def data_as_bytes(self) -> bytes:
+    def data_as_bytes(self) -> Optional[bytes]:
         """Decoded base64-encoded data as bytes"""
+        if not self.data:
+            return None
         return base64.b64decode(self.data)
 
     @property
-    def data_as_text(self) -> str:
+    def data_as_text(self) -> Optional[str]:
         """Decoded base64-encoded data as text"""
+        if not self.data_as_bytes:
+            return None
         return self.data_as_bytes.decode("utf-8")
 
     @property
-    def data_as_json(self) -> Dict:
+    def data_as_json(self) -> Optional[Dict]:
         """Decoded base64-encoded data loaded to json"""
+        if not self.data_as_text:
+            return None
         if self._json_data is None:
             self._json_data = self.json_deserializer(self.data_as_text)
         return self._json_data
@@ -114,6 +117,8 @@ class KinesisFirehoseResponse:
 
     @property
     def asdict(self) -> Dict:
+        if not self.records:
+            return {}
         return {"records": [r.asdict for r in self.records]}
 
 
@@ -193,7 +198,7 @@ class KinesisFirehoseRecord(DictWrapper):
     def create_firehose_response_record(
         self,
         result: Literal["Ok", "Dropped", "ProcessingFailed"],
-        data: str = None,
+        data: Optional[str] = None,
     ) -> KinesisFirehoseResponseRecord:
         return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data)
 
