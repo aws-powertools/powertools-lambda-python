@@ -38,7 +38,7 @@ def custom_from_dict(x: Dict) -> Any:
     return OrderOutput(**x)
 
 
-order_output_serializer: CustomDictSerializer = CustomDictSerializer(
+order_output_serializer = CustomDictSerializer(
     to_dict=custom_to_dict,
     from_dict=custom_from_dict,
 )
