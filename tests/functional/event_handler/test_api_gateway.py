@@ -989,7 +989,7 @@ def test_similar_dynamic_routes_with_whitespaces():
     [
         pytest.param(123456789, id="num"),
         pytest.param("user@example.com", id="email"),
-        pytest.param("-._~'!*:@,;()=", id="safe-rfc3986"),
+        pytest.param("-._~'!*:@,;()=+&$", id="safe-rfc3986"),
         pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
     ],
 )
