@@ -11,26 +11,26 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencySerializer,
 )
 
-Model = BaseModel
-
 
 class PydanticSerializer(BaseIdempotencyModelSerializer):
-    def __init__(self, model: Type[Model]):
+    """Pydantic serializer for idempotency models"""
+
+    def __init__(self, model: Type[BaseModel]):
         """
         Parameters
         ----------
         model: Model
-            A Pydantic model of the type to transform
+            Pydantic model to be used for serialization
         """
-        self.__model: Type[Model] = model
+        self.__model: Type[BaseModel] = model
 
-    def to_dict(self, data: Model) -> Dict:
+    def to_dict(self, data: BaseModel) -> Dict:
         if callable(getattr(data, "model_dump", None)):
             # Support for pydantic V2
             return data.model_dump()  # type: ignore[unused-ignore,attr-defined]
         return data.dict()
 
-    def from_dict(self, data: Dict) -> Model:
+    def from_dict(self, data: Dict) -> BaseModel:
         if callable(getattr(self.__model, "model_validate", None)):
             # Support for pydantic V2
             return self.__model.model_validate(data)  # type: ignore[unused-ignore,attr-defined]

@@ -28,10 +28,10 @@ class BaseIdempotencyModelSerializer(BaseIdempotencySerializer):
     @abstractmethod
     def instantiate(cls, model_type: Any) -> BaseIdempotencySerializer:
         """
-        Instantiate the serializer from the given model type.
-        In case there is the model_type is unknown, None will be sent to the method.
+        Creates an instance of a serializer based on a provided model type.
+        In case the model_type is unknown, None will be sent as `model_type`.
         It's on the implementer to verify that:
-        - None is handled
+        - None is handled correctly
         - A model type not matching the expected types is handled
 
         Parameters

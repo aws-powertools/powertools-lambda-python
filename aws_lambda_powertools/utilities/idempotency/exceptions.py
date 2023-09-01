@@ -75,7 +75,7 @@ class IdempotencyKeyError(BaseError):
 
 class IdempotencyModelTypeError(BaseError):
     """
-    Model type does not match expected type
+    Model type does not match expected payload output
     """
 
 

@@ -14,12 +14,16 @@ DataClass = Any
 
 
 class DataclassSerializer(BaseIdempotencyModelSerializer):
+    """
+    A serializer class for transforming data between dataclass objects and dictionaries.
+    """
+
     def __init__(self, model: Type[DataClass]):
         """
         Parameters
         ----------
-        model: Model
-            A Pydantic model of the type to transform
+        model: Type[DataClass]
+            A dataclass type to be used for serialization and deserialization
         """
         self.__model: Type[DataClass] = model
 
