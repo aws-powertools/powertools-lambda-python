@@ -1,27 +1,31 @@
+from dataclasses import dataclass
+
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
     idempotent_function,
 )
-from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
-from aws_lambda_powertools.utilities.parser import BaseModel
+from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import DataclassSerializer
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(event_key_jmespath="order_id")  # see Choosing a payload subset section
 
 
-class OrderItem(BaseModel):
+@dataclass
+class OrderItem:
     sku: str
     description: str
 
 
-class Order(BaseModel):
+@dataclass
+class Order:
     item: OrderItem
     order_id: int
 
 
-class OrderOutput(BaseModel):
+@dataclass
+class OrderOutput:
     order_id: int
 
 
@@ -29,7 +33,7 @@ class OrderOutput(BaseModel):
     data_keyword_argument="order",
     config=config,
     persistence_store=dynamodb,
-    output_serializer=PydanticSerializer(model=OrderOutput),
+    output_serializer=DataclassSerializer(model=OrderOutput),
 )
 def explicit_order_output_serializer(order: Order):
     return OrderOutput(order_id=order.order_id)
@@ -39,7 +43,7 @@ def explicit_order_output_serializer(order: Order):
     data_keyword_argument="order",
     config=config,
     persistence_store=dynamodb,
-    output_serializer=PydanticSerializer,
+    output_serializer=DataclassSerializer,
 )
 # order output is deduced from return type
 def deduced_order_output_serializer(order: Order) -> OrderOutput:

@@ -156,16 +156,30 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 By supplying an output serializer, you can control the return type of the function, allowing cleaner integration with the rest of your code base.
 
+=== "Using Pydantic"
+Explicitly passing the model type
+    ```python hl_lines="3-8 24-25 32-35 55"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
+    ```
+Deducing the model type from the return type annotation
+    ```python hl_lines="3-8 24-25 42-46 55"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
+    ```
+
+=== "Using Dataclasses"
+Explicitly passing the model type
+    ```python hl_lines="1 5-8 27-29 36-39 59"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass_output_serializer.py"
+    ```
+Deducing the model type from the return type annotation
+    ```python hl_lines="1 5-8 27-29 46-50 60"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass_output_serializer.py"
+    ```
+
 === "Using A Custom Type (Dataclasses)"
 
     ```python hl_lines="3-8 26-28 32-44 51"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
-    ```
-
-=== "Using Pydantic"
-
-    ```python hl_lines="3-8 23-24 32 35"
-    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
     ```
 
 #### Batch integration
