@@ -2,6 +2,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     KinesisFirehoseEvent,
     KinesisFirehoseResponse,
     KinesisFirehoseResponseRecord,
+    KinesisFirehoseResponseRecordMetadata,
 )
 from tests.functional.utils import load_event
 
@@ -15,13 +16,15 @@ def test_kinesis_firehose_response():
         # if data was delivered as json; caches loaded value
         data = record.data_as_text
 
+        metadata_partition = KinesisFirehoseResponseRecordMetadata(partition_keys={"year": 2023})
         processed_record = KinesisFirehoseResponseRecord(
             record_id=record.record_id,
             result="Ok",
+            metadata=metadata_partition,
         )
         processed_record.data_from_text(data=data)
         response.add_record(record=processed_record)
-    response_dict = response.asdict
+    response_dict = response.asdict()
 
     res_records = list(response_dict["records"])
     assert len(res_records) == 2
@@ -30,6 +33,7 @@ def test_kinesis_firehose_response():
     assert record_01["result"] == "Ok"
     assert record_01["recordId"] == record01_raw["recordId"]
     assert record_01["data"] == record01_raw["data"]
+    assert record_01["metadata"]["partitionKeys"]["year"] == 2023
 
     assert response.records[0].data_as_bytes == b"Hello World"
     assert response.records[0].data_as_text == "Hello World"
@@ -49,7 +53,7 @@ def test_kinesis_firehose_create_response():
         )
         processed_record.data_from_text(data=data)
         response.add_record(record=processed_record)
-    response_dict = response.asdict
+    response_dict = response.asdict()
 
     res_records = list(response_dict["records"])
     assert len(res_records) == 2

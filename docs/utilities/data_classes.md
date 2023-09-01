@@ -981,10 +981,21 @@ inline, and re-emit them back to the Delivery Stream.
 Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
 function to access the data either as json or plain text, depending on the original payload.
 
+When constructing response to Firehose, You can utilize the `KinesisFirehoseResponse` class shown
+in the example below.
+
 === "app.py"
 
     ```python
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
+    ```
+
+You can also construct response without using `event_source` wrapper. Shown in the example below.
+
+=== "app.py"
+
+    ```python
+    --8<-- "examples/event_sources/src/kinesis_firehose_response.py"
     ```
 
 ### Lambda Function URL

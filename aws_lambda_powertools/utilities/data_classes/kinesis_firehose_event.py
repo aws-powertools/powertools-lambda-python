@@ -1,15 +1,11 @@
 import base64
 import json
-import sys
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from typing_extensions import Literal
 
-if sys.version_info >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 @dataclass
@@ -22,7 +18,6 @@ class KinesisFirehoseResponseRecordMetadata:
 
     partition_keys: Optional[Dict[str, str]]
 
-    @property
     def asdict(self) -> Optional[Dict]:
         if self.partition_keys is not None:
             return {"partitionKeys": self.partition_keys}
@@ -42,7 +37,8 @@ class KinesisFirehoseResponseRecord:
     record_id: str
     """processing result, supported value: Ok, Dropped, ProcessingFailed"""
     result: Literal["Ok", "Dropped", "ProcessingFailed"]
-    """The data blob, base64-encoded, optional at init"""
+    """data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
+            use either function like `data_from_text`, `data_from_json` to populate data"""
     data: Optional[str] = None
     """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
     metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
@@ -63,7 +59,6 @@ class KinesisFirehoseResponseRecord:
         """Populate data field using any structure that could be converted to json"""
         self.data_from_text(data=self.json_serializer(data))
 
-    @property
     def asdict(self) -> Dict:
         r: Dict[str, Any] = {
             "recordId": self.record_id,
@@ -71,7 +66,7 @@ class KinesisFirehoseResponseRecord:
             "data": self.data,
         }
         if self.metadata:
-            r["metadata"] = self.metadata.asdict
+            r["metadata"] = self.metadata.asdict()
         return r
 
     @property
@@ -115,11 +110,12 @@ class KinesisFirehoseResponse:
         else:
             self.records = [record]
 
-    @property
     def asdict(self) -> Dict:
+        # make sure return size is less than 6MB
         if not self.records:
             return {}
-        return {"records": [r.asdict for r in self.records]}
+
+        return {"records": [r.asdict() for r in self.records]}
 
 
 class KinesisFirehoseRecordMetadata(DictWrapper):
@@ -200,6 +196,16 @@ class KinesisFirehoseRecord(DictWrapper):
         result: Literal["Ok", "Dropped", "ProcessingFailed"],
         data: Optional[str] = None,
     ) -> KinesisFirehoseResponseRecord:
+        """create a KinesisFirehoseResponseRecord directly using the record_id and given values
+        Parameters
+        ----------
+        result : Literal["Ok", "Dropped", "ProcessingFailed"]
+            processing result, supported value: Ok, Dropped, ProcessingFailed
+        data : str, optional
+            data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
+            use either function like `data_from_text`, `data_from_json` to populate data
+
+        """
         return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data)
 
 

@@ -15,7 +15,7 @@ class DictWrapper(Mapping):
 
     def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
         """
-        ParametersW
+        Parameters
         ----------
         data : Dict[str, Any]
             Lambda Event Source Event payload

@@ -15,11 +15,13 @@ def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
         data = record.data_as_json
 
         ## do all kind of stuff with data
+        ## generate data to return
+        new_data = {"tool_used": "powertools_dataclass", "original_payload": data}
 
         processed_record = record.create_firehose_response_record(result="Ok")
-        processed_record.data_from_json(data=data)
+        processed_record.data_from_json(data=new_data)
 
         result.add_record(processed_record)
 
     # return transformed records
-    return result.asdict
+    return result.asdict()
