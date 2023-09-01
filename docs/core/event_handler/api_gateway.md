@@ -420,7 +420,8 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 #### Global middlewares
 
 <center>
-![Combining middlewares](../../media/middlewares_normal_processing.svg)
+![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
+![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
 _Request flowing through multiple registered middlewares_
 </center>
 
@@ -459,7 +460,8 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 #### Returning early
 
 <center>
-![Short-circuiting middleware chain](../../media/middlewares_early_return.svg)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
 _Interrupting request flow by returning early_
 </center>
 
@@ -520,9 +522,35 @@ Here's an example where we now prevent any request that doesn't include a correl
 ???+ warning "Ensure your middleware returns the Next Response"
     Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
 
+#### More images (light and dark)
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_unhandled_exception-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_unhandled_exception-dark.svg#only-dark)
+_Interrupting request flow by raising an unhandled exception_
+</center>
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_catch_exception-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_catch_exception-dark.svg#only-dark)
+_Interrupting request flow by raising an exception captured by Middleware_
+</center>
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
+_Unhandled exception from route handler_
+</center>
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_catch_route_exception-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_catch_route_exception-dark.svg#only-dark)
+_Unhandled exception from route handler captured by Middleware_
+</center>
+
 **This should go under the Router area since we haven't introduced it yet**
 
-Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route defintion.
+Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route definition.
 
 ???+ tip
     **Router Middleware processing Order**
