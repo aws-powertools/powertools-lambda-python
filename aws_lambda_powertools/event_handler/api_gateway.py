@@ -456,7 +456,7 @@ class BaseRouter(ABC):
     ):
         raise NotImplementedError()
 
-    def use(self, middlewares: List[Callable[..., Any]]) -> None:
+    def use(self, middlewares: List[Callable[..., Response]]) -> None:
         """
         Add a list of middlewares to the global router middleware list
 
@@ -465,7 +465,7 @@ class BaseRouter(ABC):
 
         Example
         -------
-        Add middlewares to be used for every reuqest processed by the Router.
+        Add middlewares to be used for every request processed by the Router.
 
         ```
         my_custom_middleware = new CustomMiddleware()
