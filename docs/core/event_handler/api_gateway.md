@@ -395,13 +395,13 @@ Each middleware function receives the following arguments:
 
 1. **app**. An Event Handler instance so you can access incoming request information, Lambda context, etc.
 2. **get_response**. A function to get the next middleware or route's response.
-3. **`**context`**. A Middleware context that is propagated with dynamic route arguments and any previously injected metadata.
+3. **`**kwargs`**. Middleware keyword arguments that are propagated in the chain.
 
 Here's a sample middleware that extracts and injects correlation ID, using `APIGatewayRestResolver` (works for any [Resolver](#event-resolvers)):
 
 === "middleware_getting_started.py"
 
-    ```python hl_lines="12 23 30" title="Your first middleware to extract and inject correlation ID"
+    ```python hl_lines="11 22 29" title="Your first middleware to extract and inject correlation ID"
     --8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
     ```
 
@@ -422,6 +422,7 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 <center>
 ![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
 ![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
+
 _Request flowing through multiple registered middlewares_
 </center>
 
@@ -453,7 +454,7 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 
 === "middleware_global_middlewares_module.py"
 
-    ```python hl_lines="10"
+    ```python hl_lines="9"
     --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
     ```
 
@@ -462,14 +463,15 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 <center>
 ![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
 ![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
+
 _Interrupting request flow by returning early_
 </center>
 
 Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.
 
-In these scenarios, you short-circuit the middleware processing logic by raising a [HTTP Error](#raising-http-errors), or returning a [Response object](#fine-grained-responses). Event Handler will understand it now needs to run each “After” logic left in the chain.
+In these scenarios, you short-circuit the middleware processing logic by returning a [Response object](#fine-grained-responses), or raising a [HTTP Error](#raising-http-errors). This signals to Event Handler to stop and run each `After` logic left in the chain all the way back.
 
-Here's an example where we now prevent any request that doesn't include a correlation ID header:
+Here's an example where we prevent any request that doesn't include a correlation ID header:
 
 === "middleware_early_return.py"
 
@@ -482,7 +484,7 @@ Here's an example where we now prevent any request that doesn't include a correl
 
 === "middleware_global_middlewares_module.py"
 
-    ```python hl_lines="37 40"
+    ```python hl_lines="35 38"
     --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
     ```
 

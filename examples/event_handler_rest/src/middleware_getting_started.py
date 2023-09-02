@@ -1,15 +1,14 @@
-from typing import Callable
-
 import requests
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+from aws_lambda_powertools.event_handler.types import NextMiddlewareCallback
 
 app = APIGatewayRestResolver()
 logger = Logger()
 
 
-def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+def inject_correlation_id(app: APIGatewayRestResolver, get_response: NextMiddlewareCallback, **kwargs) -> Response:
     request_id = app.current_event.request_context.request_id  # (1)!
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID
@@ -20,7 +19,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..
     logger.set_correlation_id(request_id)
 
     # Get response from next middleware OR /todos route
-    result = get_response(app, **context)  # (3)!
+    result = get_response(app, **kwargs)  # (3)!
 
     # Include Correlation ID in the response back to caller
     result.headers["x-correlation-id"] = correlation_id  # (4)!
