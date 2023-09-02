@@ -24,7 +24,9 @@ def sanitise_exceptions(app: ApiGatewayResolver, get_response: Callable[..., Any
         logger.exception(err)
         # Raise a clean error for ALL unexpected exceptions (ServiceError based Exceptions are okay)
         if not isinstance(err, ServiceError):
-            raise InternalServerError("An error occurred during processing, please contact your administrator")
+            raise InternalServerError("An error occurred during processing, please contact your administrator") from err
+
+        raise err
 
     # return the result when there are no exceptions
     return result
