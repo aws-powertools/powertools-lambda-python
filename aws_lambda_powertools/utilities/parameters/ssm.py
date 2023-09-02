@@ -184,6 +184,27 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
+    def _set(self, name: str, parameter_type: str = "String", overwrite: bool = False, **sdk_options) -> str:
+        """
+        Sets a parameter value from AWS Systems Manager Parameter Store
+
+        Parameters
+        ----------
+        name: str
+            Parameter name
+        decrypt: bool, optional
+            If the parameter value should be decrypted
+        sdk_options: dict, optional
+            Dictionary of options that will be passed to the Parameter Store put_parameter API call
+        """
+
+        # Explicit arguments will take precedence over keyword arguments
+        sdk_options["Name"] = name
+        sdk_options["Type"] = parameter_type
+        sdk_options["Overwrite"] = overwrite
+
+        return self.client.put_parameter(**sdk_options)["Parameter"]["Value"]
+
     def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
