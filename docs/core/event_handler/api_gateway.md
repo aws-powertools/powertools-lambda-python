@@ -461,7 +461,7 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 #### Returning early
 
 <center>
-![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
+![Short-circuiting middleware chain](../../medi/middlewares_early_return-light.svg#only-light)
 ![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
 
 _Interrupting request flow by returning early_
@@ -495,6 +495,47 @@ Here's an example where we prevent any request that doesn't include a correlatio
     ```python hl_lines="2-3"
     --8<-- "examples/event_handler_rest/src/middleware_early_return_output.json"
     ```
+
+#### Handling exceptions
+
+!!! tip "For catching exceptions more broadly, we recommend you use the [exception_handler](#exception-handling) decorator."
+
+By default, any unhandled exception in the middleware chain is eventually propagated as a HTTP 500 back to the client.
+
+While there isn't anything special on how to use [`try/catch`](https://docs.python.org/3/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"} for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:
+
+=== "Unhandled exception from route handler"
+
+    An exception wasn't caught by any middleware during `get_response()` block, therefore it propagates all the way back to the client as HTTP 500.
+
+    <center>
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
+
+    _Unhandled route exceptions propagate back to the client_
+    </center>
+
+=== "Route handler exception caught by a middleware"
+
+    An exception was only caught by the third middleware, resuming the normal execution of each `After` logic for the second and first middleware.
+
+    <center>
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-light.svg#only-light)
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-dark.svg#only-dark)
+
+    _Unhandled route exceptions propagate back to the client_
+    </center>
+
+=== "Middleware short-circuit by raising exception"
+
+    The third middleware short-circuited the chain by raising an exception and completely skipping the fourth middleware. Because we only caught it in  the first middleware, it skipped the `After` logic in the second middleware.
+
+    <center>
+    ![Catching exceptions](../../media/middlewares_catch_exception-light.svg#only-light)
+    ![Catching exceptions](../../media/middlewares_catch_exception-dark.svg#only-dark)
+
+    _Middleware handling short-circuit exceptions_
+    </center>
 
 #### Common practices
 
