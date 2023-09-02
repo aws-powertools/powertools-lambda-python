@@ -79,7 +79,6 @@ class IdempotencyHandler:
             Function arguments
         function_kwargs: Optional[Dict]
             Function keyword arguments
-
         """
         self.function = function
         self.output_serializer = output_serializer or NoOpSerializer()
@@ -220,7 +219,9 @@ class IdempotencyHandler:
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
-        return self.output_serializer.from_dict(response_dict) if response_dict else None
+        if response_dict is not None:
+            return self.output_serializer.from_dict(response_dict)
+        return None
 
     def _get_function_response(self):
         try:
