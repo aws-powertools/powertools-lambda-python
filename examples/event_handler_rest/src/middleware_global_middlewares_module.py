@@ -1,13 +1,12 @@
-from typing import Callable
-
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError
+from aws_lambda_powertools.event_handler.types import NextMiddlewareCallback
 
 logger = Logger()
 
 
-def log_request_response(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+def log_request_response(app: APIGatewayRestResolver, get_response: NextMiddlewareCallback, **context) -> Response:
     logger.info("Incoming request", path=app.current_event.path, request=app.current_event.raw_event)
 
     result = get_response(app, **context)
@@ -16,7 +15,7 @@ def log_request_response(app: APIGatewayRestResolver, get_response: Callable[...
     return result
 
 
-def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+def inject_correlation_id(app: APIGatewayRestResolver, get_response: NextMiddlewareCallback, **context) -> Response:
     request_id = app.current_event.request_context.request_id
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID
@@ -34,7 +33,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..
     return result
 
 
-def enforce_correlation_id(app: APIGatewayRestResolver, get_response: Callable[..., Response], **context) -> Response:
+def enforce_correlation_id(app: APIGatewayRestResolver, get_response: NextMiddlewareCallback, **context) -> Response:
     # If missing mandatory header raise an error
     if not app.current_event.get_header_value("x-correlation-id", case_sensitive=False):
         raise BadRequestError("Correlation ID header is now mandatory.")  # (1)!

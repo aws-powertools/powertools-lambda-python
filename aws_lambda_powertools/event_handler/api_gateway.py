@@ -28,6 +28,7 @@ from aws_lambda_powertools.event_handler.exceptions import NotFoundError, Servic
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.shared.types import Protocol
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
@@ -1326,3 +1327,9 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
+
+
+class NextMiddlewareCallback(Protocol):
+    def __call__(self, app: ApiGatewayResolver, **kwds: Any) -> Response:
+        """Protocol for callback regardless of get_response(app, **kwargs), next(app, **kwargs)"""
+        ...
