@@ -461,7 +461,7 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 #### Returning early
 
 <center>
-![Short-circuiting middleware chain](../../medi/middlewares_early_return-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
 ![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
 
 _Interrupting request flow by returning early_
