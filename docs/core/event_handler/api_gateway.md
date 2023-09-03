@@ -537,7 +537,17 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     _Middleware handling short-circuit exceptions_
     </center>
 
-#### Common practices
+#### Being a good citizen
+
+Middlewares can add subtle improvements to request/response processing, but also add significant complexity if you're not careful.
+
+Keep the following in mind when authoring middlewares for Event Handler:
+
+1. **Use built-in features over middlewares**. We include built-in features like [CORS](#cors), [compression](#compress), [binary responses](#binary-responses), [global exception handling](#exception-handling), and [debug mode](#debug-mode) to reduce the need for middlewares.
+2. **Call the next middleware**. Return the result of `get_response(app, **kwargs)`, or a [Response object](#fine-grained-responses) when you want to [return early](#returning-early).
+3. **Keep a lean scope**. Focus on a single task per middleware to ease composability and maintenance. In [debug mode](#debug-mode), we also print out the order middlewares will be triggered to ease operations.
+4. **Catch your own exceptions**. Catch and handle known exceptions to your logic. Unless you want to raise [HTTP Errors](#raising-http-errors), or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the [exception_handler](#exception-handling) decorator.
+5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
 
 #### Staging area
 
@@ -564,32 +574,6 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
 
 ???+ warning "Ensure your middleware returns the Next Response"
     Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
-
-#### More images (light and dark)
-
-<center>
-![Short-circuiting middleware chain](../../media/middlewares_unhandled_exception-light.svg#only-light)
-![Short-circuiting middleware chain](../../media/middlewares_unhandled_exception-dark.svg#only-dark)
-_Interrupting request flow by raising an unhandled exception_
-</center>
-
-<center>
-![Short-circuiting middleware chain](../../media/middlewares_catch_exception-light.svg#only-light)
-![Short-circuiting middleware chain](../../media/middlewares_catch_exception-dark.svg#only-dark)
-_Interrupting request flow by raising an exception captured by Middleware_
-</center>
-
-<center>
-![Short-circuiting middleware chain](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
-![Short-circuiting middleware chain](../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
-_Unhandled exception from route handler_
-</center>
-
-<center>
-![Short-circuiting middleware chain](../../media/middlewares_catch_route_exception-light.svg#only-light)
-![Short-circuiting middleware chain](../../media/middlewares_catch_route_exception-dark.svg#only-dark)
-_Unhandled exception from route handler captured by Middleware_
-</center>
 
 **This should go under the Router area since we haven't introduced it yet**
 
