@@ -26,19 +26,17 @@ class MyEncryptionProvider(BaseProvider):
         return serialize.loads(data)
 
 
-# @pytest.fixture
-# def data_masker():
-#     return DataMasking()
+@pytest.fixture
+def data_masker() -> DataMasking:
+    return DataMasking()
 
 
-# @pytest.fixture
-# def custom_data_masker():
-#     return DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
+@pytest.fixture
+def custom_data_masker() -> DataMasking:
+    return DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
 
-def test_mask_int():
-    data_masker = DataMasking()
-
+def test_mask_int(data_masker):
     # GIVEN an int data type
 
     # WHEN mask is called with no fields argument
@@ -48,9 +46,7 @@ def test_mask_int():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_float():
-    data_masker = DataMasking()
-
+def test_mask_float(data_masker):
     # GIVEN a float data type
 
     # WHEN mask is called with no fields argument
@@ -60,9 +56,7 @@ def test_mask_float():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_bool():
-    data_masker = DataMasking()
-
+def test_mask_bool(data_masker):
     # GIVEN a bool data type
 
     # WHEN mask is called with no fields argument
@@ -72,9 +66,7 @@ def test_mask_bool():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_none():
-    data_masker = DataMasking()
-
+def test_mask_none(data_masker):
     # GIVEN a None data type
 
     # WHEN mask is called with no fields argument
@@ -84,9 +76,7 @@ def test_mask_none():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_str():
-    data_masker = DataMasking()
-
+def test_mask_str(data_masker):
     # GIVEN a str data type
 
     # WHEN mask is called with no fields argument
@@ -96,9 +86,7 @@ def test_mask_str():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_list():
-    data_masker = DataMasking()
-
+def test_mask_list(data_masker):
     # GIVEN a list data type
 
     # WHEN mask is called with no fields argument
@@ -108,9 +96,7 @@ def test_mask_list():
     assert masked_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
 
 
-def test_mask_dict():
-    data_masker = DataMasking()
-
+def test_mask_dict(data_masker):
     # GIVEN a dict data type
     data = {
         "a": {
@@ -126,9 +112,7 @@ def test_mask_dict():
     assert masked_string == DATA_MASKING_STRING
 
 
-def test_mask_dict_with_fields():
-    data_masker = DataMasking()
-
+def test_mask_dict_with_fields(data_masker):
     # GIVEN the data type is a dictionary
     data = {
         "a": {
@@ -146,9 +130,7 @@ def test_mask_dict_with_fields():
     }
 
 
-def test_mask_json_dict_with_fields():
-    data_masker = DataMasking()
-
+def test_mask_json_dict_with_fields(data_masker):
     # GIVEN the data type is a json representation of a dictionary
     data = json.dumps(
         {
@@ -168,81 +150,74 @@ def test_mask_json_dict_with_fields():
     }
 
 
-def test_encrypt_decrypt_int():
+def test_encrypt_decrypt_int(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting an int
-    encrypted_data = data_masker.encrypt(42)
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt(42)
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == 42
 
 
-def test_encrypt_decrypt_float():
+def test_encrypt_decrypt_float(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting a float
-    encrypted_data = data_masker.encrypt(4.2)
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt(4.2)
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == 4.2
 
 
-def test_encrypt_decrypt_bool():
+def test_encrypt_decrypt_bool(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting a bool
-    encrypted_data = data_masker.encrypt(True)
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt(True)
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == True
 
 
-def test_encrypt_decrypt_none():
+def test_encrypt_decrypt_none(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting a None type
-    encrypted_data = data_masker.encrypt(None)
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt(None)
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == None
 
 
-def test_encrypt_decrypt_str():
+def test_encrypt_decrypt_str(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting a string
-    encrypted_data = data_masker.encrypt("this is a string")
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt("this is a string")
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == "this is a string"
 
 
-def test_encrypt_decrypt_list():
+def test_encrypt_decrypt_list(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # WHEN encrypting and then decrypting a list
-    encrypted_data = data_masker.encrypt([1, 2, "string", 4])
-    decrypted_data = data_masker.decrypt(encrypted_data)
+    encrypted_data = custom_data_masker.encrypt([1, 2, "string", 4])
+    decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
     assert decrypted_data == [1, 2, "string", 4]
 
 
-def test_dict_encryption_with_fields():
+def test_dict_encryption_with_fields(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     data = {
         "a": {
@@ -252,16 +227,15 @@ def test_dict_encryption_with_fields():
     }
 
     # WHEN encrypting and decrypting the data with a list of fields
-    encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
+    encrypted_data = custom_data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
+    decrypted_data = custom_data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
 
     # THEN the result is the original input data
     assert decrypted_data == data
 
 
-def test_json_encryption_with_fields():
+def test_json_encryption_with_fields(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     data = json.dumps(
         {
@@ -273,16 +247,15 @@ def test_json_encryption_with_fields():
     )
 
     # WHEN encrypting and decrypting a json representation of a dictionary with a list of fields
-    encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
+    encrypted_data = custom_data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
+    decrypted_data = custom_data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
 
     # THEN the result is the original input data
     assert decrypted_data == json.loads(data)
 
 
-def test_big_data_encryption_with_fields():
+def test_big_data_encryption_with_fields(custom_data_masker):
     # GIVEN an instantiation of DataMasking with a Provider
-    data_masker = DataMasking(provider=MyEncryptionProvider(keys="secret-key"))
 
     # 10kb JSON blob for latency testing
     data = {
@@ -313,16 +286,15 @@ def test_big_data_encryption_with_fields():
     }
 
     # WHEN encrypting and decrypting the data with a list of fields
-    encrypted_data = data_masker.encrypt(data, fields=["address.street", "job_history.company"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["address.street", "job_history.company"])
+    encrypted_data = custom_data_masker.encrypt(data, fields=["address.street", "job_history.company"])
+    decrypted_data = custom_data_masker.decrypt(encrypted_data, fields=["address.street", "job_history.company"])
 
     # THEN the result is the original input data
     assert decrypted_data == data
 
 
-def test_encrypt_not_implemented():
+def test_encrypt_not_implemented(data_masker):
     # GIVEN DataMasking is not initialized with a Provider
-    data_masker = DataMasking()
 
     # WHEN attempting to call the encrypt method on the data
 
@@ -331,9 +303,8 @@ def test_encrypt_not_implemented():
         data_masker.encrypt("hello world")
 
 
-def test_decrypt_not_implemented():
+def test_decrypt_not_implemented(data_masker):
     # GIVEN DataMasking is not initialized with a Provider
-    data_masker = DataMasking()
 
     # WHEN attempting to call the decrypt method on the data
 
@@ -342,9 +313,8 @@ def test_decrypt_not_implemented():
         data_masker.decrypt("hello world")
 
 
-def test_parsing_unsupported_data_type():
+def test_parsing_unsupported_data_type(data_masker):
     # GIVEN an initialization of the DataMasking class
-    data_masker = DataMasking()
 
     # WHEN attempting to pass in a list of fields with input data that is not a dict
 
@@ -353,9 +323,9 @@ def test_parsing_unsupported_data_type():
         data_masker.mask(42, ["this.field"])
 
 
-def test_parsing_nonexistent_fields():
+def test_parsing_nonexistent_fields(data_masker):
     # GIVEN an initialization of the DataMasking class
-    data_masker = DataMasking()
+
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -370,9 +340,9 @@ def test_parsing_nonexistent_fields():
         data_masker.mask(data, ["3.1.True"])
 
 
-def test_parsing_nonstring_fields():
+def test_parsing_nonstring_fields(data_masker):
     # GIVEN an initialization of the DataMasking class
-    data_masker = DataMasking()
+
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -387,9 +357,8 @@ def test_parsing_nonstring_fields():
     assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
 
 
-def test_parsing_nonstring_keys_and_fields():
+def test_parsing_nonstring_keys_and_fields(data_masker):
     # GIVEN an initialization of the DataMasking class
-    data_masker = DataMasking()
 
     # WHEN the input data is a dictionary with integer keys
     data = {

@@ -4,7 +4,10 @@ from aws_encryption_sdk.exceptions import DecryptKeyError
 import pytest
 from tests.e2e.utils import data_fetcher
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import AwsEncryptionSdkProvider
+from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import (
+    AwsEncryptionSdkProvider,
+    ContextMismatchError,
+)
 
 
 @pytest.fixture
@@ -52,17 +55,18 @@ def test_encryption_context(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    context = {"this": "is_secure"}
 
     # WHEN encrypting and then decrypting the encrypted data with an encryption_context
-    encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
-    decrypted_data = data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
+    encrypted_data = data_masker.encrypt(value, encryption_context=context)
+    decrypted_data = data_masker.decrypt(encrypted_data, encryption_context=context)
 
     # THEN the result is the original input data
     assert decrypted_data == value
 
 
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_diff_context_fail(data_masker):
+def test_encryption_context_mismatch(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     value = bytes(str([1, 2, "string", 4.5]), "utf-8")
@@ -70,8 +74,8 @@ def test_encryption_diff_context_fail(data_masker):
     # WHEN encrypting with a encryption_context
     encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
 
-    # THEN decrypting with a different encryption_context should raise a ValueError
-    with pytest.raises(ValueError):
+    # THEN decrypting with a different encryption_context should raise a ContextMismatchError
+    with pytest.raises(ContextMismatchError):
         data_masker.decrypt(encrypted_data, encryption_context={"not": "same_context"})
 
 
@@ -84,14 +88,14 @@ def test_encryption_no_context_fail(data_masker):
     # WHEN encrypting with no encryption_context
     encrypted_data = data_masker.encrypt(value)
 
-    # THEN decrypting with an encryption_context should raise a ValueError
-    with pytest.raises(ValueError):
+    # THEN decrypting with an encryption_context should raise a ContextMismatchError
+    with pytest.raises(ContextMismatchError):
         data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
 
 
 # TODO: metaclass?
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_key_fail(data_masker, kms_key2_arn):
+def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider with a certain key
 
     # WHEN encrypting and then decrypting the encrypted data
@@ -106,7 +110,7 @@ def test_encryption_key_fail(data_masker, kms_key2_arn):
 
 
 @pytest.mark.xdist_group(name="data_masking")
-def test_encrypted_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn):
+def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     # WHEN encrypting a value and logging it
