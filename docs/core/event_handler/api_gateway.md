@@ -537,6 +537,10 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     _Middleware handling short-circuit exceptions_
     </center>
 
+#### Configurable middlewares
+
+!!! todo "Explain how to create a middleware that accepts configuration with `BaseMiddlewareHandler`"
+
 #### Being a good citizen
 
 Middlewares can add subtle improvements to request/response processing, but also add significant complexity if you're not careful.
@@ -550,30 +554,6 @@ Keep the following in mind when authoring middlewares for Event Handler:
 5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
 
 #### Staging area
-
-??? info "How Middleware Works"
-    Middleware functions are composed in a decorator style where each function controls the request/response flow and can make changes before or after the API handler is called.
-
-    ![Image showing how the middleware flow works](/media/how-middleware-works-1.png)
-
-    1. Powertools API Route handler executes API Route Handler (wrapped in composed middleware).
-    2. Middleware function is called
-    3. Before processing code
-    4. Calls Next Middleware function (or registered API route handler)
-    5. If the next function is middleware, it repeats these steps.  The API route code runs and returns if it is the route handler.
-    6. After the next middleware (or API handler) returns After processing may be run to post-process the response.
-    7. The response is returned by the Middleware function to the caller.
-
-??? tip "What Middleware is Responsible for"
-    - They can be chained in a stack, so ensure it does only one thing to maximize re-usability and simplicity.
-    - Middleware must call the next middleware in the chain or your API handler will never be called.
-    - Responsible for calling the next middleware function in the stack.
-    - Can pre-process the Request data, change it or validate it before calling the next middleware function.
-    - Returning early by throwing an exception or returning a valid response.
-    - Can process the Response and alter its content depending on the middleware's purpose.
-
-???+ warning "Ensure your middleware returns the Next Response"
-    Your middleware functions must return the response from calling **get_response** or a modified version of the Response.  If you do not return a value your API route will not work and return an API gateway error.
 
 **This should go under the Router area since we haven't introduced it yet**
 
