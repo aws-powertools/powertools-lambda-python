@@ -539,7 +539,21 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
 
 #### Extending middlewares
 
-!!! todo "Explain how to create a middleware that accepts configuration with `BaseMiddlewareHandler`"
+You can implement `BaseMiddlewareHandler` interface to create middlewares that accept configuration, or perform complex operations (_see [being a good citizen section](#being-a-good-citizen)_).
+
+As a practical example, let's refactor our correlation ID middleware so it accepts a custom HTTP Header to look for.
+
+```python hl_lines="5 11 23 36" title="Authoring class-based middlewares with BaseMiddlewareHandler"
+--8<-- "examples/event_handler_rest/src/middleware_extending_middlewares.py"
+```
+
+1. You can add any constructor argument like you normally would
+2. We implement `handler` just like we [did before](#middleware) with the only exception of the `self` argument, since it's a method.
+3. Get response from the next middleware (if any) or from `/todos` route.
+4. Register an instance of `CorrelationIdMiddleware`.
+
+!!! note "Class-based **vs** function-based middlewares"
+    When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
 
 #### Being a good citizen
 
