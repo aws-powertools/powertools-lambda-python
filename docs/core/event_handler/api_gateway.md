@@ -537,7 +537,7 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     _Middleware handling short-circuit exceptions_
     </center>
 
-#### Configurable middlewares
+#### Extending middlewares
 
 !!! todo "Explain how to create a middleware that accepts configuration with `BaseMiddlewareHandler`"
 
