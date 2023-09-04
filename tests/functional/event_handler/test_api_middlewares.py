@@ -5,12 +5,13 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     APIGatewayHttpResolver,
     ApiGatewayResolver,
     APIGatewayRestResolver,
+    NextMiddlewareCallback,
     ProxyEventType,
     Response,
     Router,
 )
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError
-from aws_lambda_powertools.event_handler.middlewares import SchemaValidationMiddleware
+from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, SchemaValidationMiddleware
 from tests.functional.utils import load_event
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -375,3 +376,36 @@ def test_api_gateway_app_router_with_middlewares(app, event):
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["body"] == to_inject
+
+
+def test_class_based_middleware():
+    # GIVEN a class-based middleware implementing BaseMiddlewareHandler correctly
+    class CorrelationIdMiddleware(BaseMiddlewareHandler):
+        def __init__(self, header: str):
+            super().__init__()
+            self.header = header
+
+        def handler(self, app: ApiGatewayResolver, get_response: NextMiddlewareCallback, **kwargs) -> Response:
+            request_id = app.current_event.request_context.request_id  # type: ignore[attr-defined] # using REST event in a base Resolver # noqa: E501
+            correlation_id = app.current_event.get_header_value(
+                name=self.header,
+                default_value=request_id,
+            )  # noqa: E501
+
+            response = get_response(app, **kwargs)
+            response.headers[self.header] = correlation_id
+
+            return response
+
+    resolver = ApiGatewayResolver()
+    event = load_event("apiGatewayProxyEvent.json")
+
+    # WHEN instantiated with extra configuration as part of a route handler
+    @resolver.get("/my/path", middlewares=[CorrelationIdMiddleware(header="X-Correlation-Id")])
+    def post_lambda():
+        return {"hello": "world"}
+
+    # THEN it should work as any other middleware when a request is processed
+    result = resolver(event, {})
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["X-Correlation-Id"][0] == resolver.current_event.request_context.request_id  # type: ignore[attr-defined] # noqa: E501
