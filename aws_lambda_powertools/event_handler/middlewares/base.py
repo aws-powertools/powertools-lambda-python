@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, Generic, TypeVar
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
 
+EventHandlerResolver = TypeVar("EventHandlerResolver", bound=ApiGatewayResolver)
 
-class BaseMiddlewareHandler(ABC):
+
+class BaseMiddlewareHandler(Generic[EventHandlerResolver], ABC):
     """
     Base class for Middleware Handlers
 
@@ -67,14 +69,14 @@ class BaseMiddlewareHandler(ABC):
     """
 
     @abstractmethod
-    def handler(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
+    def handler(self, app: EventHandlerResolver, next_middleware: Callable[..., Any]) -> Response:
         """
         The Middleware Handler
 
         Parameters
         ----------
-        app: ApiGatewayResolver
-            The ApiGatewayResolver object
+        app: EventHandlerResolver
+            An instance of an Event Handler that implements ApiGatewayResolver
         next_middleware: Callable[..., Any]
             The next middleware handler in the chain
 
@@ -90,14 +92,14 @@ class BaseMiddlewareHandler(ABC):
     def __name__(self) -> str:  # noqa A003
         return str(self.__class__.__name__)
 
-    def __call__(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
+    def __call__(self, app: EventHandlerResolver, next_middleware: Callable[..., Any]) -> Response:
         """
         The Middleware handler function.
 
         Parameters
         ----------
         app: ApiGatewayResolver
-            The ApiGatewayResolver object
+            An instance of an Event Handler that implements ApiGatewayResolver
         next_middleware: Callable[..., Any]
             The next middleware handler in the chain
 
