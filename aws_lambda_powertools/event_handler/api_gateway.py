@@ -1316,6 +1316,3 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
-
-
-# Specialized types defined here due to circular dependency in `.types`
