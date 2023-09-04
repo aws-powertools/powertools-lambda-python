@@ -370,7 +370,7 @@ stateDiagram
 
     EventHandler: GET /todo
     Before: Before response
-    Next: get_response()
+    Next: next_middleware()
     MiddlewareLoop: Middleware loop
     AfterResponse: After response
     MiddlewareFinished: Modified response
@@ -394,8 +394,7 @@ A middleware is a function you register per route to **intercept** or **enrich**
 Each middleware function receives the following arguments:
 
 1. **app**. An Event Handler instance so you can access incoming request information, Lambda context, etc.
-2. **get_response**. A function to get the next middleware or route's response.
-3. **`**kwargs`**. Middleware keyword arguments that are propagated in the chain.
+2. **next_middleware**. A function to get the next middleware or route's response.
 
 Here's a sample middleware that extracts and injects correlation ID, using `APIGatewayRestResolver` (works for any [Resolver](#event-resolvers)):
 
@@ -406,7 +405,7 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
     ```
 
     1. You can access current request like you normally would.
-    2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br/ ><br/> Alternatively, you can use `**context` kwargs which will only be available for middlewares.
+    2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances.
     3. Get response from the next middleware (if any) or from `/todos` route.
     4. You can manipulate headers, body, or status code before returning it.
     5. Register one or more middlewares in order of execution.
@@ -506,7 +505,7 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
 
 === "Unhandled exception from route handler"
 
-    An exception wasn't caught by any middleware during `get_response()` block, therefore it propagates all the way back to the client as HTTP 500.
+    An exception wasn't caught by any middleware during `next_middleware()` block, therefore it propagates all the way back to the client as HTTP 500.
 
     <center>
     ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
@@ -570,7 +569,7 @@ Middlewares can add subtle improvements to request/response processing, but also
 Keep the following in mind when authoring middlewares for Event Handler:
 
 1. **Use built-in features over middlewares**. We include built-in features like [CORS](#cors), [compression](#compress), [binary responses](#binary-responses), [global exception handling](#exception-handling), and [debug mode](#debug-mode) to reduce the need for middlewares.
-2. **Call the next middleware**. Return the result of `get_response(app, **kwargs)`, or a [Response object](#fine-grained-responses) when you want to [return early](#returning-early).
+2. **Call the next middleware**. Return the result of `next_middleware(app)`, or a [Response object](#fine-grained-responses) when you want to [return early](#returning-early).
 3. **Keep a lean scope**. Focus on a single task per middleware to ease composability and maintenance. In [debug mode](#debug-mode), we also print out the order middlewares will be triggered to ease operations.
 4. **Catch your own exceptions**. Catch and handle known exceptions to your logic. Unless you want to raise [HTTP Errors](#raising-http-errors), or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the [exception_handler](#exception-handling) decorator.
 5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
