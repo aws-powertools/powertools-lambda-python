@@ -11,7 +11,7 @@ class BaseMiddlewareHandler(ABC):
 
     This is the middleware handler function where middleware logic is implemented.
     Here you have the option to execute code before and after the next handler in the
-    middleware chain is called.  The next middleware handler is represented by `get_response`.
+    middleware chain is called.  The next middleware handler is represented by `next_middleware`.
 
 
     ```python
@@ -20,15 +20,15 @@ class BaseMiddlewareHandler(ABC):
     # or optionally raise an exception to short-circuit the middleware execution chain
 
     # Get the response from the NEXT middleware handler (optionally injecting custom
-    # arguments into the get_response call)
-    result: Response = get_response(app, my_custom_arg="handled", **kwargs)
+    # arguments into the next_middleware call)
+    result: Response = next_middleware(app, my_custom_arg="handled")
 
     # Place code here for actions AFTER the next middleware handler is called
 
     return result
     ```
 
-    To implement ERROR style middleware wrap the call to `get_response` in a `try..except`
+    To implement ERROR style middleware wrap the call to `next_middleware` in a `try..except`
     block - you can also catch specific types of errors this way so your middleware only handles
     specific types of exceptions.
 
@@ -37,7 +37,7 @@ class BaseMiddlewareHandler(ABC):
     ```python
 
     try:
-        result: Response = get_response(app, my_custom_arg="handled", **kwargs)
+        result: Response = next_middleware(app, my_custom_arg="handled")
     except MyCustomValidationException as e:
         # Make sure we send back a 400 response for any Custom Validation Exceptions.
         result.status_code = 400
@@ -48,7 +48,7 @@ class BaseMiddlewareHandler(ABC):
     ```
 
     To short-circuit the middleware execution chain you can either raise an exception to cause
-    the function call stack to unwind naturally OR you can simple not call the `get_response`
+    the function call stack to unwind naturally OR you can simple not call the `next_middleware`
     handler to get the response from the next middleware handler in the chain.
 
     for example:
@@ -63,12 +63,12 @@ class BaseMiddlewareHandler(ABC):
 
 
     # Call the next middleware in the chain (needed for when condition above is valid)
-    return get_response(app, **kwargs)
+    return next_middleware(app)
 
     """
 
     @abstractmethod
-    def handler(self, app: ApiGatewayResolver, get_response: NextMiddlewareCallback, **kwargs) -> Response:
+    def handler(self, app: ApiGatewayResolver, get_response: NextMiddlewareCallback) -> Response:
         """
         The Middleware Handler
 
@@ -78,8 +78,6 @@ class BaseMiddlewareHandler(ABC):
             The ApiGatewayResolver object
         get_response: NextMiddlewareCallback
             The next middleware handler in the chain
-        kwargs: Any
-            Any additional arguments to pass to the next middleware handler
 
         Returns
         -------
@@ -93,7 +91,7 @@ class BaseMiddlewareHandler(ABC):
     def __name__(self) -> str:  # noqa A003
         return str(self.__class__.__name__)
 
-    def __call__(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
+    def __call__(self, app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
         """
         The Middleware handler function.
 
@@ -101,14 +99,12 @@ class BaseMiddlewareHandler(ABC):
         ----------
         app: ApiGatewayResolver
             The ApiGatewayResolver object
-        get_response: Callable[...,Any]
+        next_middleware: NextMiddlewareCallback
             The next middleware handler in the chain
-        kwargs:
-            Any additional arguments to pass to the next middleware handler
 
         Returns
         -------
         Response
             The response from the next middleware handler in the chain
         """
-        return self.handler(app, get_response, **kwargs)
+        return self.handler(app, next_middleware)

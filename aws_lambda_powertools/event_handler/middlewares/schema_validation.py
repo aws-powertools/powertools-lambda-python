@@ -43,7 +43,7 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         logger.debug(f"Invalid Schema Format: {error}")
         raise InternalServerError("Internal Server Error")
 
-    def handler(self, app: ApiGatewayResolver, get_response: Callable[..., Any], **kwargs) -> Response:
+    def handler(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
         """
         Validate using Powertools validate() utility.
 
@@ -53,8 +53,7 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         Return the next middleware response if validation passes.
 
         :param app: The ApiGatewayResolver instance
-        :param get_response: The original response
-        :param kwargs: Additional arguments
+        :param next_middleware: The original response
         :return: The original response or HTTP 400 Response or HTTP 500 Response.
 
         """
@@ -66,7 +65,7 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
             return self.bad_config(error)
 
         # return next middleware response if validation passes.
-        result: Response = get_response(app, **kwargs)
+        result: Response = next_middleware(app)
 
         if self.outbound_formats is not None:
             try:

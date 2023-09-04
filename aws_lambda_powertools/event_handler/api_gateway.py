@@ -245,7 +245,7 @@ class Route:
         self.method = method.upper()
         self.rule = rule
         self.func = func
-        self._call_stack = func
+        self._middleware_stack = func
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
@@ -300,8 +300,11 @@ class Route:
             print("\n".join(getattr(item, "__name__", "Unknown") for item in all_middlewares))
             print("=================")
 
-        # Call the Middleware Wrapped _call_stack function handler with the app and route arguments
-        return self._call_stack(app, **route_arguments)
+        # Add Route Arguments to app context
+        app.append_context(_route_args=route_arguments)
+
+        # Call the Middleware Wrapped _call_stack function handler with the app
+        return self._middleware_stack(app)
 
     def _build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
         """
@@ -327,12 +330,10 @@ class Route:
         # this must be the last middleware in the stack (tech debt for backward
         # compatability purposes)
         #
-        # This adapter will call the registered API using **kwargs only and not the middleware
-        # param list of get_response(app: ApiGatewayResolver, **kwargs)
-        # to ensure the call signature of existing defined routes of Users do not
-        # need to change (avoid breaking changes)
+        # This adapter will call the registered API passing only the expected route arguments extracted from the path
+        # and not the middleware.
         # This adapter will adapt the response type of the route handler (Union[Dict, Tuple, Response])
-        # and normalise into a Resposne object so middleware will always have a constant signature
+        # and normalise into a Response object so middleware will always have a constant signature
         all_middlewares.append(_registered_api_adapter)
 
         # Wrap the original route handler function in the middleware handlers
@@ -341,7 +342,7 @@ class Route:
         #
         # Start with the route function and wrap from last to the first Middleware handler.
         for handler in reversed(all_middlewares):
-            self._call_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._call_stack)
+            self._middleware_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._middleware_stack)
 
         self._middleware_stack_built = True
 
@@ -718,7 +719,7 @@ class MiddlewareFrame:
         middleware_name = self.__name__
         return f"[{middleware_name}] next call chain is {middleware_name} -> {self._next_middleware_name}"
 
-    def __call__(self, app: BaseRouter, **kwargs) -> Union[Dict, Tuple, Response]:
+    def __call__(self, app: BaseRouter) -> Union[Dict, Tuple, Response]:
         """
         Call the middleware Frame to process the request.
 
@@ -726,8 +727,6 @@ class MiddlewareFrame:
         ----------
         app: BaseRouter
             The router instance
-        **kwargs
-            Any additional arguments to pass to the middleware Frame
 
         Returns
         -------
@@ -742,17 +741,17 @@ class MiddlewareFrame:
         logger.debug("MiddlewareFrame: %s", self)
         app._push_processed_stack_frame(str(self))
 
-        return self.current_middleware(app, self.next_middleware, **kwargs)
+        return self.current_middleware(app, self.next_middleware)
 
 
 def _registered_api_adapter(
     app: "ApiGatewayResolver",
-    get_response: Callable[..., Any],
-    **kwargs,
+    next_middleware: Callable[..., Any],
 ) -> Union[Dict, Tuple, Response]:
     """
-    Calls the registered API using ONLY the **kwargs provided to ensure the last call
-    in the chain will match the API route function signature.
+    Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
+    in the chain will match the API route function signature and ensure that Powertools passes the API
+    route handler the expected arguments.
 
     **IMPORTANT: This internal middleware ensures the actual API route is called with the correct call signature
     and it MUST be the final frame in the middleware stack.  This can only be removed when the API Route
@@ -762,10 +761,8 @@ def _registered_api_adapter(
     ----------
     app: ApiGatewayResolver
         The API Gateway resolver
-    get_response: Callable[..., Any]
+    next_middleware: Callable[..., Any]
         The function to handle the API
-    **kwargs:
-        The arguments to pass to the API
 
     Returns
     -------
@@ -773,9 +770,10 @@ def _registered_api_adapter(
         The API Response Object
 
     """
-    logger.debug(f"Calling API Route Handler: {kwargs}")
+    route_args: Dict = app.context.get("_route_args", {})
+    logger.debug(f"Calling API Route Handler: {route_args}")
 
-    return app._to_response(get_response(**kwargs))
+    return app.to_response(next_middleware(**route_args))
 
 
 class ApiGatewayResolver(BaseRouter):
@@ -1088,7 +1086,7 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             return ResponseBuilder(
-                self._to_response(
+                self.to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
                 route,
@@ -1159,7 +1157,7 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
+    def to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
         """Convert the route's result to a Response
 
          3 main result types are supported:
@@ -1330,6 +1328,6 @@ class ALBResolver(ApiGatewayResolver):
 
 
 class NextMiddlewareCallback(Protocol):
-    def __call__(self, app: ApiGatewayResolver, **kwds: Any) -> Response:
-        """Protocol for callback regardless of get_response(app, **kwargs), next(app, **kwargs)"""
+    def __call__(self, app: ApiGatewayResolver) -> Response:
+        """Protocol for callback regardless of next_middleware(app), next(app)"""
         ...

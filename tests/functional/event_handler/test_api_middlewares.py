@@ -5,6 +5,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     APIGatewayHttpResolver,
     ApiGatewayResolver,
     APIGatewayRestResolver,
+    BaseRouter,
     NextMiddlewareCallback,
     ProxyEventType,
     Response,
@@ -26,25 +27,30 @@ API_RESTV2_EVENT = load_event("apiGatewayProxyV2Event_GET.json")
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_route_with_middleware(app, event):
+def test_route_with_middleware(app: BaseRouter, event):
     # define custom middleware to inject new argument - "custom"
-    def middleware_1(app, get_response, **kwargs):
-        # inject a variable into the kwargs
-        response = get_response(app, custom="custom", **kwargs)
+    def middleware_1(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        # add additional data to Router Context
+        app.append_context(custom="custom")
+        response = next_middleware(app)
 
         return response
 
     # define custom middleware to inject new argument - "another_one"
-    def middleware_2(app, get_response, **kwargs):
-        # inject a variable into the kwargs
-        response = get_response(app, another_one=6, **kwargs)
+    def middleware_2(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        # add additional data to Router Context
+        app.append_context(another_one=6)
+        response = next_middleware(app)
 
         return response
 
     @app.get("/my/path", middlewares=[middleware_1, middleware_2])
-    def get_lambda(another_one: int, custom: str) -> Response:
+    def get_lambda() -> Response:
+        another_one = app.context.get("another_one")
+        custom = app.context.get("custom")
         assert another_one == 6
         assert custom == "custom"
+
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
@@ -76,27 +82,32 @@ def test_route_with_middleware(app, event):
         ),
     ],
 )
-def test_with_router_middleware(app, event, other_event):
+def test_with_router_middleware(app: BaseRouter, event, other_event):
     # define custom middleware to inject new argument - "custom"
-    def global_middleware(app, get_response, **kwargs):
-        # inject a variable into the kwargs
-        response = get_response(app, custom="custom", **kwargs)
+    def global_middleware(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        # add custom data to context
+        app.append_context(custom="custom")
+        response = next_middleware(app)
 
         return response
 
     # define custom middleware to inject new argument - "another_one"
-    def middleware_2(app, get_response, **kwargs):
-        # inject a variable into the kwargs
-        response = get_response(app, another_one=6, **kwargs)
+    def middleware_2(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        # add data to resolver context
+        app.append_context(another_one=6)
+        response = next_middleware(app)
 
         return response
 
     app.use([global_middleware])
 
     @app.get("/my/path", middlewares=[middleware_2])
-    def get_lambda(another_one: int, custom: str) -> Response:
+    def get_lambda() -> Response:
+        another_one: int = app.context.get("another_one")
+        custom: str = app.context.get("custom")
         assert another_one == 6
         assert custom == "custom"
+
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler
@@ -108,8 +119,10 @@ def test_with_router_middleware(app, event, other_event):
     assert result["body"] == "foo"
 
     @app.get("/other/path")
-    def get_other_lambda(custom: str) -> Response:
+    def get_other_lambda() -> Response:
+        custom: str = app.context.get("custom")
         assert custom == "custom"
+
         return Response(200, content_types.TEXT_HTML, "other_foo")
 
     # WHEN calling the event handler
@@ -129,15 +142,17 @@ def test_with_router_middleware(app, event, other_event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_dynamic_route_with_middleware(app, event):
-    def middleware_one(app, get_response, **kwargs):
-        # inject a variable into the kwargs
-        response = get_response(app, injected="injected_value", **kwargs)
+def test_dynamic_route_with_middleware(app: BaseRouter, event):
+    def middleware_one(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        # inject data into the resolver context
+        app.append_context(injected="injected_value")
+        response = next_middleware(app)
 
         return response
 
     @app.get("/<name>/<my_id>", middlewares=[middleware_one])
-    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+    def get_lambda(my_id: str, name: str) -> Response:
+        injected: str = app.context.get("injected")
         assert name == "my"
         assert injected == "injected_value"
 
@@ -159,26 +174,27 @@ def test_dynamic_route_with_middleware(app, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_middleware_early_return(app, event):
-    def middleware_one(app, get_response, **context):
-        # inject a variable into the kwargs
-        response = get_response(app, injected="injected_value", **context)
+def test_middleware_early_return(app: BaseRouter, event):
+    def middleware_one(app: BaseRouter, next_middleware):
+        # inject a variable into resolver context
+        app.append_context(injected="injected_value")
+        response = next_middleware(app)
 
         return response
 
-    def early_return_middleware(app, get_response, **context):
-        assert context.get("injected") == "injected_value"
+    def early_return_middleware(app: BaseRouter, next_middleware: NextMiddlewareCallback):
+        assert app.context.get("injected") == "injected_value"
 
         return Response(400, content_types.TEXT_HTML, "bad_response")
 
-    def not_executed_middleware(app, get_response, **context):
+    def not_executed_middleware(app: BaseRouter, next_middleware: NextMiddlewareCallback):
         # This should never be executed - if it is an excpetion will be raised
         raise NotImplementedError()
 
     @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware, not_executed_middleware])
-    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+    def get_lambda(my_id: str, name: str) -> Response:
         assert name == "my"
-        assert injected == "injected_value"
+        assert app.context.get("injected") == "injected_value"
 
         return Response(200, content_types.TEXT_HTML, my_id)
 
@@ -207,7 +223,7 @@ def test_middleware_early_return(app, event):
         ),
     ],
 )
-def test_pass_schema_validation(app, event, validation_schema):
+def test_pass_schema_validation(app: BaseRouter, event, validation_schema):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "path")
@@ -237,7 +253,7 @@ def test_pass_schema_validation(app, event, validation_schema):
         ),
     ],
 )
-def test_fail_schema_validation(app, event, validation_schema):
+def test_fail_schema_validation(app: BaseRouter, event, validation_schema):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
@@ -271,7 +287,7 @@ def test_fail_schema_validation(app, event, validation_schema):
         ),
     ],
 )
-def test_invalid_schema_validation(app, event):
+def test_invalid_schema_validation(app: BaseRouter, event):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(inbound_schema="schema.json")])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
@@ -293,26 +309,27 @@ def test_invalid_schema_validation(app, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_middleware_short_circuit_via_httperrors(app, event):
-    def middleware_one(app, get_response, **context):
+def test_middleware_short_circuit_via_httperrors(app: BaseRouter, event):
+    def middleware_one(app: BaseRouter, next_middleware: NextMiddlewareCallback):
         # inject a variable into the kwargs of the middleware chain
-        response = get_response(app, injected="injected_value", **context)
+        app.append_context(injected="injected_value")
+        response = next_middleware(app)
 
         return response
 
-    def early_return_middleware(app, get_response, **context):
+    def early_return_middleware(app: BaseRouter, next_middleware: NextMiddlewareCallback):
         # ensure "injected" context variable is passed in by middleware_one
-        assert context.get("injected") == "injected_value"
+        assert app.context.get("injected") == "injected_value"
         raise BadRequestError("bad_response")
 
-    def not_executed_middleware(app, get_response, **context):
+    def not_executed_middleware(app: BaseRouter, next_middleware: NextMiddlewareCallback):
         # This should never be executed - if it is an excpetion will be raised
         raise NotImplementedError()
 
     @app.get("/<name>/<my_id>", middlewares=[middleware_one, early_return_middleware, not_executed_middleware])
-    def get_lambda(my_id: str, name: str, injected: str) -> Response:
+    def get_lambda(my_id: str, name: str) -> Response:
         assert name == "my"
-        assert injected == "injected_value"
+        assert app.context.get("injected") == "injected_value"
 
         return Response(200, content_types.TEXT_HTML, my_id)
 
@@ -332,21 +349,23 @@ def test_middleware_short_circuit_via_httperrors(app, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_api_gateway_app_router_with_middlewares(app, event):
+def test_api_gateway_app_router_with_middlewares(app: BaseRouter, event):
     # GIVEN a Router with registered routes
     router = Router()
 
-    def app_middleware(app, get_response, **context):
-        # inject a variable into the kwargs of the middleware chain
-        response = get_response(app, app_injected="app_value", **context)
+    def app_middleware(app: BaseRouter, next_middleware):
+        # inject a variable into the resolver context
+        app.append_context(app_injected="app_value")
+        response = next_middleware(app)
 
         return response
 
     app.use(middlewares=[app_middleware])
 
-    def router_middleware(app, get_response, **context):
-        # inject a variable into the kwargs of the middleware chain
-        response = get_response(app, router_injected="router_value", **context)
+    def router_middleware(app: BaseRouter, next_middleware):
+        # inject a variable into the resolver context
+        app.append_context(router_injected="router_value")
+        response = next_middleware(app)
 
         return response
 
@@ -354,18 +373,20 @@ def test_api_gateway_app_router_with_middlewares(app, event):
 
     to_inject: str = "injected_value"
 
-    def middleware_one(app, get_response, **context):
+    def middleware_one(app: BaseRouter, next_middleware: NextMiddlewareCallback):
         # inject a variable into the kwargs of the middleware chain
-        response = get_response(app, injected=to_inject, **context)
+        app.append_context(injected=to_inject)
+        response = next_middleware(app)
 
         return response
 
     @router.get("/my/path", middlewares=[middleware_one])
-    def get_api_route(app_injected: str, router_injected: str, injected: str):
+    def get_api_route():
         # make sure value is injected by middleware_one
+        injected: str = app.context.get("injected")
         assert injected == to_inject
-        assert router_injected == "router_value"
-        assert app_injected == "app_value"
+        assert app.context.get("router_injected") == "router_value"
+        assert app.context.get("app_injected") == "app_value"
 
         return Response(200, content_types.TEXT_HTML, injected)
 

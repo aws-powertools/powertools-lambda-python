@@ -6,19 +6,19 @@ from aws_lambda_powertools.event_handler.exceptions import BadRequestError, Inte
 logger = Logger()
 
 
-def validate_correlation_id(app: ApiGatewayResolver, get_response: NextMiddlewareCallback, **context_args) -> Response:
+def validate_correlation_id(app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
     # If missing mandatory header raise an error
     if not app.current_event.headers.get("x-correlation-id", None):
         raise BadRequestError("No [x-correlation-id] header provided.  All requests must include this header.")
 
     # Get the response from the next middleware and return it
-    return get_response(app, **context_args)
+    return next_middleware(app)
 
 
-def sanitise_exceptions(app: ApiGatewayResolver, get_response: NextMiddlewareCallback, **context_args) -> Response:
+def sanitise_exceptions(app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
     try:
         # Get the Result from the next middleware
-        result = get_response(app, **context_args)
+        result = next_middleware(app)
     except Exception as err:
         logger.exception(err)
         # Raise a clean error for ALL unexpected exceptions (ServiceError based Exceptions are okay)

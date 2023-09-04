@@ -8,7 +8,7 @@ app = APIGatewayRestResolver()
 logger = Logger()
 
 
-def inject_correlation_id(app: APIGatewayRestResolver, get_response: NextMiddlewareCallback, **kwargs) -> Response:
+def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMiddlewareCallback) -> Response:
     request_id = app.current_event.request_context.request_id  # (1)!
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID
@@ -19,7 +19,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, get_response: NextMiddlew
     logger.set_correlation_id(request_id)
 
     # Get response from next middleware OR /todos route
-    result = get_response(app, **kwargs)  # (3)!
+    result = next_middleware(app)  # (3)!
 
     # Include Correlation ID in the response back to caller
     result.headers["x-correlation-id"] = correlation_id  # (4)!
