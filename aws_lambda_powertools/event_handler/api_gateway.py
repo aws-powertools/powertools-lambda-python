@@ -49,16 +49,6 @@ _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
 
 
-class NextMiddlewareCallback(Protocol):
-    def __call__(self, app: "ApiGatewayResolver") -> "Response":
-        """Protocol for callback regardless of next_middleware(app), next(app)"""
-        ...
-
-    def __name__(self) -> str:  # noqa A003
-        """Protocol for name of the Middleware"""
-        ...
-
-
 class ProxyEventType(Enum):
     """An enumerations of the supported proxy event types."""
 
@@ -1335,3 +1325,13 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
+
+
+class NextMiddlewareCallback(Protocol):
+    def __call__(self, app: ApiGatewayResolver) -> Response:
+        """Protocol for callback regardless of next_middleware(app), next(app)"""
+        ...
+
+    def __name__(self) -> str:  # noqa A003
+        """Protocol for name of the Middleware"""
+        ...

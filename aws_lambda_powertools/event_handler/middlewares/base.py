@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Any, Callable
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
-from aws_lambda_powertools.event_handler.types import NextMiddlewareCallback
 
 
 class BaseMiddlewareHandler(ABC):
@@ -67,7 +67,7 @@ class BaseMiddlewareHandler(ABC):
     """
 
     @abstractmethod
-    def handler(self, app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
+    def handler(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
         """
         The Middleware Handler
 
@@ -75,7 +75,7 @@ class BaseMiddlewareHandler(ABC):
         ----------
         app: ApiGatewayResolver
             The ApiGatewayResolver object
-        next_middleware: NextMiddlewareCallback
+        next_middleware: Callable[..., Any]
             The next middleware handler in the chain
 
         Returns
@@ -90,7 +90,7 @@ class BaseMiddlewareHandler(ABC):
     def __name__(self) -> str:  # noqa A003
         return str(self.__class__.__name__)
 
-    def __call__(self, app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
+    def __call__(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
         """
         The Middleware handler function.
 
@@ -98,7 +98,7 @@ class BaseMiddlewareHandler(ABC):
         ----------
         app: ApiGatewayResolver
             The ApiGatewayResolver object
-        next_middleware: NextMiddlewareCallback
+        next_middleware: Callable[..., Any]
             The next middleware handler in the chain
 
         Returns
