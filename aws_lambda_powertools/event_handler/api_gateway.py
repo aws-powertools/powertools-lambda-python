@@ -229,7 +229,7 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
-        middlewares: Optional[List[NextMiddlewareCallback]],
+        middlewares: Optional[List[Callable[..., Any]]],
     ):
         """
 
@@ -248,7 +248,7 @@ class Route:
             Whether or not to enable gzip compression for this route
         cache_control: Optional[str]
             The cache control header value, example "max-age=3600"
-        middlewares: Optional[List[NextMiddlewareCallback]]
+        middlewares: Optional[List[Callable[..., Any]]]
             The list of route middlewares. These are called in the order they are
             provided.
         """
@@ -316,7 +316,7 @@ class Route:
         # Call the Middleware Wrapped _call_stack function handler with the app
         return self._middleware_stack(app)
 
-    def _build_middleware_stack(self, router_middlewares: List[Callable]) -> None:
+    def _build_middleware_stack(self, router_middlewares: List[Callable[..., Any]]) -> None:
         """
         Builds the middleware stack for the handler by wrapping each
         handler in an instance of MiddlewareWrapper which is used to contain the state
@@ -463,7 +463,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
 
@@ -503,7 +503,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
 
@@ -535,7 +535,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
 
@@ -568,7 +568,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
 
@@ -601,7 +601,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -708,15 +708,15 @@ class MiddlewareFrame:
 
     def __init__(
         self,
-        current_middleware: NextMiddlewareCallback,
-        next_middleware: NextMiddlewareCallback,
+        current_middleware: Callable[..., Any],
+        next_middleware: Callable[..., Any],
     ) -> None:
-        self.current_middleware: NextMiddlewareCallback = current_middleware
-        self.next_middleware: NextMiddlewareCallback = next_middleware
+        self.current_middleware: Callable[..., Any] = current_middleware
+        self.next_middleware: Callable[..., Any] = next_middleware
         self._next_middleware_name = next_middleware.__name__
 
     @property
-    def __name__(self):  # noqa: A003
+    def __name__(self) -> str:  # noqa: A003
         """Current middleware name
 
         It ensures backward compatibility with view functions being callable. This
@@ -729,7 +729,7 @@ class MiddlewareFrame:
         middleware_name = self.__name__
         return f"[{middleware_name}] next call chain is {middleware_name} -> {self._next_middleware_name}"
 
-    def __call__(self, app: BaseRouter) -> Union[Dict, Tuple, Response]:
+    def __call__(self, app: "ApiGatewayResolver") -> Union[Dict, Tuple, Response]:
         """
         Call the middleware Frame to process the request.
 
@@ -756,7 +756,7 @@ class MiddlewareFrame:
 
 def _registered_api_adapter(
     app: "ApiGatewayResolver",
-    next_middleware: NextMiddlewareCallback,
+    next_middleware: Callable[..., Any],
 ) -> Union[Dict, Tuple, Response]:
     """
     Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
@@ -771,7 +771,7 @@ def _registered_api_adapter(
     ----------
     app: ApiGatewayResolver
         The API Gateway resolver
-    next_middleware: NextMiddlewareCallback
+    next_middleware: Callable[..., Any]
         The function to handle the API
 
     Returns
@@ -862,7 +862,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -1252,7 +1252,7 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
@@ -1298,7 +1298,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[NextMiddlewareCallback]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares)
