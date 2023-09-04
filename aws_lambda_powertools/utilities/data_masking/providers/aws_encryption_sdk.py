@@ -39,7 +39,9 @@ MAX_MESSAGES: int = 200
 class AwsEncryptionSdkProvider(BaseProvider):
     """
     The AwsEncryptionSdkProvider is to be used as a Provider for the Datamasking class.
-    Example:
+    
+    Example
+    -------
         >>> data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[keyARN1, keyARN2,...,]))
         >>> encrypted_data = data_masker.encrypt("a string")
         "encrptedBase64String"
@@ -73,14 +75,16 @@ class AwsEncryptionSdkProvider(BaseProvider):
         """
         Encrypt data using the AwsEncryptionSdkProvider.
 
-        Parameters:
-            - data (Union[bytes, str]):
+        Parameters
+        -------
+            data : Union[bytes, str]
                 The data to be encrypted.
-            - provider_options:
+            provider_options
                 Additional options for the aws_encryption_sdk.EncryptionSDKClient
 
-        Returns:
-            - ciphertext (str):
+        Returns
+        -------
+            ciphertext : str
                 The encrypted data, as a base64-encoded string.
         """
         ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, **provider_options)
@@ -91,14 +95,16 @@ class AwsEncryptionSdkProvider(BaseProvider):
         """
         Decrypt data using AwsEncryptionSdkProvider.
 
-        Parameters:
-            - data (Union[bytes, str]):
-                The encrypted data, as a base64-encoded string.
-            - provider_options:
+        Parameters
+        -------
+            data : Union[bytes, str]
+                The encrypted data, as a base64-encoded string
+            provider_options
                 Additional options for the aws_encryption_sdk.EncryptionSDKClient
 
-        Returns:
-            - ciphertext (bytes):
+        Returns
+        -------
+            ciphertext : bytes
                 The decrypted data in bytes
         """
         ciphertext_decoded = base64.b64decode(data)
