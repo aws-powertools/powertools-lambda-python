@@ -11,14 +11,14 @@ import os
 import sys
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union, overload
+from typing import Any, Callable, List, Optional, Tuple, Union, overload
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.batch.exceptions import (
     BatchProcessingError,
     ExceptionInfo,
 )
-from aws_lambda_powertools.utilities.batch.types import BatchTypeModels
+from aws_lambda_powertools.utilities.batch.types import BatchTypeModels, PartialItemFailureResponse, PartialItemFailures
 from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import (
     DynamoDBRecord,
 )
@@ -220,7 +220,7 @@ class BasePartialProcessor(ABC):
 
 
 class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
-    DEFAULT_RESPONSE: Dict[str, List[Optional[dict]]] = {"batchItemFailures": []}
+    DEFAULT_RESPONSE: PartialItemFailureResponse = {"batchItemFailures": []}
 
     def __init__(self, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         """Process batch and partially report failed items
@@ -239,7 +239,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         """
         self.event_type = event_type
         self.model = model
-        self.batch_response = copy.deepcopy(self.DEFAULT_RESPONSE)
+        self.batch_response: PartialItemFailureResponse = copy.deepcopy(self.DEFAULT_RESPONSE)
         self._COLLECTOR_MAPPING = {
             EventType.SQS: self._collect_sqs_failures,
             EventType.KinesisDataStreams: self._collect_kinesis_failures,
@@ -253,7 +253,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
 
         super().__init__()
 
-    def response(self):
+    def response(self) -> PartialItemFailureResponse:
         """Batch items that failed processing, if any"""
         return self.batch_response
 
@@ -294,7 +294,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _entire_batch_failed(self) -> bool:
         return len(self.exceptions) == len(self.records)
 
-    def _get_messages_to_report(self) -> List[Dict[str, str]]:
+    def _get_messages_to_report(self) -> List[PartialItemFailures]:
         """
         Format messages to use in batch deletion
         """
