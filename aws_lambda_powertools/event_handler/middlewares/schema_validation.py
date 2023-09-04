@@ -1,9 +1,10 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Dict, Optional
 
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import Response
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError, InternalServerError
-from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
+from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
+from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from aws_lambda_powertools.utilities.validation import validate
 from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
 
@@ -11,9 +12,38 @@ logger = logging.getLogger(__name__)
 
 
 class SchemaValidationMiddleware(BaseMiddlewareHandler):
-    """
-    Validates the API request body against the provided schema.
+    """Middleware to validate API request and response against JSON Schema using the [Validation utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/validation/).
 
+    Examples
+    --------
+    **Validating incoming event**
+
+    ```python
+    import requests
+
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+    from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
+    from aws_lambda_powertools.event_handler.middlewares.schema_validation import SchemaValidationMiddleware
+
+    app = APIGatewayRestResolver()
+    logger = Logger()
+    json_schema_validation = SchemaValidationMiddleware(inbound_schema=INCOMING_JSON_SCHEMA)
+
+
+    @app.get("/todos", middlewares=[json_schema_validation])
+    def get_todos():
+        todos: requests.Response = requests.get("https://jsonplaceholder.typicode.com/todos")
+        todos.raise_for_status()
+
+        # for brevity, we'll limit to the first 10 only
+        return {"todos": todos.json()[:10]}
+
+
+    @logger.inject_lambda_context
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+    ```
     """
 
     def __init__(
@@ -23,6 +53,18 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         outbound_schema: Optional[Dict] = None,
         outbound_formats: Optional[Dict] = None,
     ):
+        """See [Validation utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/validation/) docs for examples on all parameters.
+
+        Parameters
+        ----------
+        inbound_schema : Dict
+            JSON Schema to validate incoming event
+        inbound_formats : Optional[Dict], optional
+            Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool, by default None
+            JSON Schema to validate outbound event, by default None
+        outbound_formats : Optional[Dict], optional
+            Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool, by default None
+        """  # noqa: E501
         super().__init__()
         self.inbound_schema = inbound_schema
         self.inbound_formats = inbound_formats
@@ -43,19 +85,24 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         logger.debug(f"Invalid Schema Format: {error}")
         raise InternalServerError("Internal Server Error")
 
-    def handler(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
-        """
-        Validate using Powertools validate() utility.
+    def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
+        """Validates incoming JSON payload (body) against JSON Schema provided.
 
-        Return HTTP 400 Response if validation fails.
-        Return HTTP 500 Response if validation fails due to invalid schema format.
+        Parameters
+        ----------
+        app : EventHandlerInstance
+            An instance of an Event Handler
+        next_middleware : NextMiddleware
+            Callable to get response from the next middleware or route handler in the chain
 
-        Return the next middleware response if validation passes.
+        Returns
+        -------
+        Response
+            It can return three types of response objects
 
-        :param app: The ApiGatewayResolver instance
-        :param next_middleware: The original response
-        :return: The original response or HTTP 400 Response or HTTP 500 Response.
-
+            - Original response: Propagates HTTP response returned from the next middleware if validation succeeds
+            - HTTP 400: Payload or response failed JSON Schema validation
+            - HTTP 500: JSON Schema provided has incorrect format
         """
         try:
             validate(event=app.current_event.json_body, schema=self.inbound_schema, formats=self.inbound_formats)
@@ -64,8 +111,7 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         except InvalidSchemaFormatError as error:
             return self.bad_config(error)
 
-        # return next middleware response if validation passes.
-        result: Response = next_middleware(app)
+        result = next_middleware(app)
 
         if self.outbound_formats is not None:
             try:
