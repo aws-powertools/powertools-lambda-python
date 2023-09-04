@@ -5,7 +5,7 @@ from aws_lambda_powertools.event_handler.types import NextMiddlewareCallback
 logger = Logger()
 
 
-def log_request_response(app: APIGatewayRestResolver, next_middleware: NextMiddlewareCallback, **kwargs) -> Response:
+def log_request_response(app: APIGatewayRestResolver, next_middleware: NextMiddlewareCallback) -> Response:
     logger.info("Incoming request", path=app.current_event.path, request=app.current_event.raw_event)
 
     result = next_middleware(app)
@@ -14,7 +14,7 @@ def log_request_response(app: APIGatewayRestResolver, next_middleware: NextMiddl
     return result
 
 
-def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMiddlewareCallback, **kwargs) -> Response:
+def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMiddlewareCallback) -> Response:
     request_id = app.current_event.request_context.request_id
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID

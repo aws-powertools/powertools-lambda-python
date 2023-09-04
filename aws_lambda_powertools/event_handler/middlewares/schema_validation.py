@@ -1,7 +1,7 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Dict, Optional
 
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, NextMiddlewareCallback, Response
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError, InternalServerError
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler
 from aws_lambda_powertools.utilities.validation import validate
@@ -43,7 +43,7 @@ class SchemaValidationMiddleware(BaseMiddlewareHandler):
         logger.debug(f"Invalid Schema Format: {error}")
         raise InternalServerError("Internal Server Error")
 
-    def handler(self, app: ApiGatewayResolver, next_middleware: Callable[..., Any]) -> Response:
+    def handler(self, app: ApiGatewayResolver, next_middleware: NextMiddlewareCallback) -> Response:
         """
         Validate using Powertools validate() utility.
 

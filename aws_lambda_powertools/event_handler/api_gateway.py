@@ -49,6 +49,16 @@ _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
 
 
+class NextMiddlewareCallback(Protocol):
+    def __call__(self, app: "ApiGatewayResolver") -> "Response":
+        """Protocol for callback regardless of next_middleware(app), next(app)"""
+        ...
+
+    def __name__(self) -> str:  # noqa A003
+        """Protocol for name of the Middleware"""
+        ...
+
+
 class ProxyEventType(Enum):
     """An enumerations of the supported proxy event types."""
 
@@ -219,7 +229,7 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
-        middlewares: Optional[List[Callable[..., Any]]],
+        middlewares: Optional[List[NextMiddlewareCallback]],
     ):
         """
 
@@ -238,7 +248,7 @@ class Route:
             Whether or not to enable gzip compression for this route
         cache_control: Optional[str]
             The cache control header value, example "max-age=3600"
-        middlewares: Optional[List[Callable[..., Any]]]
+        middlewares: Optional[List[NextMiddlewareCallback]]
             The list of route middlewares. These are called in the order they are
             provided.
         """
@@ -453,7 +463,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         raise NotImplementedError()
 
@@ -493,7 +503,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         """Get route decorator with GET `method`
 
@@ -525,7 +535,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         """Post route decorator with POST `method`
 
@@ -558,7 +568,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         """Put route decorator with PUT `method`
 
@@ -591,7 +601,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -698,11 +708,11 @@ class MiddlewareFrame:
 
     def __init__(
         self,
-        current_middleware: Callable[..., Any],
-        next_middleware: Callable[..., Any],
+        current_middleware: NextMiddlewareCallback,
+        next_middleware: NextMiddlewareCallback,
     ) -> None:
-        self.current_middleware: Callable[..., Any] = current_middleware
-        self.next_middleware: Callable[..., Any] = next_middleware
+        self.current_middleware: NextMiddlewareCallback = current_middleware
+        self.next_middleware: NextMiddlewareCallback = next_middleware
         self._next_middleware_name = next_middleware.__name__
 
     @property
@@ -746,7 +756,7 @@ class MiddlewareFrame:
 
 def _registered_api_adapter(
     app: "ApiGatewayResolver",
-    next_middleware: Callable[..., Any],
+    next_middleware: NextMiddlewareCallback,
 ) -> Union[Dict, Tuple, Response]:
     """
     Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
@@ -761,7 +771,7 @@ def _registered_api_adapter(
     ----------
     app: ApiGatewayResolver
         The API Gateway resolver
-    next_middleware: Callable[..., Any]
+    next_middleware: NextMiddlewareCallback
         The function to handle the API
 
     Returns
@@ -852,7 +862,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -1242,7 +1252,7 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
@@ -1288,7 +1298,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        middlewares: Optional[List[NextMiddlewareCallback]] = None,
     ):
         # NOTE: see #1552 for more context.
         return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares)
@@ -1325,9 +1335,3 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
-
-
-class NextMiddlewareCallback(Protocol):
-    def __call__(self, app: ApiGatewayResolver) -> Response:
-        """Protocol for callback regardless of next_middleware(app), next(app)"""
-        ...
