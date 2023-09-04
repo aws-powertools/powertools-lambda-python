@@ -555,6 +555,14 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 !!! note "Class-based **vs** function-based middlewares"
     When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
 
+#### Native middlewares
+
+These are native middlewares that may become native features depending on customer demand.
+
+| Middleware                                                                                           | Purpose                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [SchemaValidationMiddleware](/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
+
 #### Being a good citizen
 
 Middlewares can add subtle improvements to request/response processing, but also add significant complexity if you're not careful.
