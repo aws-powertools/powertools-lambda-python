@@ -14,6 +14,8 @@ from aws_lambda_powertools.event_handler.exceptions import BadRequestError
 from aws_lambda_powertools.event_handler.middlewares import (
     BaseMiddlewareHandler,
     NextMiddleware,
+)
+from aws_lambda_powertools.event_handler.middlewares.schema_validation import (
     SchemaValidationMiddleware,
 )
 from tests.functional.utils import load_event
