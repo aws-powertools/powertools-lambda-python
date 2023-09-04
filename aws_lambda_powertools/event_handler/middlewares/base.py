@@ -1,12 +1,23 @@
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Generic, TypeVar
+from typing import Generic
 
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver, Response
+from typing_extensions import Protocol
 
-EventHandlerResolver = TypeVar("EventHandlerResolver", bound=ApiGatewayResolver)
+from aws_lambda_powertools.event_handler.api_gateway import Response
+from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
 
-class BaseMiddlewareHandler(Generic[EventHandlerResolver], ABC):
+class NextMiddleware(Protocol):
+    def __call__(self, app: EventHandlerInstance) -> Response:
+        """Protocol for callback regardless of next_middleware(app), get_response(app) etc"""
+        ...
+
+    def __name__(self) -> str:  # noqa A003
+        """Protocol for name of the Middleware"""
+        ...
+
+
+class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
     """
     Base class for Middleware Handlers
 
@@ -69,15 +80,15 @@ class BaseMiddlewareHandler(Generic[EventHandlerResolver], ABC):
     """
 
     @abstractmethod
-    def handler(self, app: EventHandlerResolver, next_middleware: Callable[..., Any]) -> Response:
+    def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         """
         The Middleware Handler
 
         Parameters
         ----------
-        app: EventHandlerResolver
+        app: EventHandlerInstance
             An instance of an Event Handler that implements ApiGatewayResolver
-        next_middleware: Callable[..., Any]
+        next_middleware: NextMiddleware
             The next middleware handler in the chain
 
         Returns
@@ -92,7 +103,7 @@ class BaseMiddlewareHandler(Generic[EventHandlerResolver], ABC):
     def __name__(self) -> str:  # noqa A003
         return str(self.__class__.__name__)
 
-    def __call__(self, app: EventHandlerResolver, next_middleware: Callable[..., Any]) -> Response:
+    def __call__(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         """
         The Middleware handler function.
 

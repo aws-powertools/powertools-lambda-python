@@ -9,26 +9,13 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Match,
-    Optional,
-    Pattern,
-    Set,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
-from aws_lambda_powertools.shared.types import Protocol
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
@@ -1331,11 +1318,4 @@ class ALBResolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
 
 
-class NextMiddlewareCallback(Protocol):
-    def __call__(self, app: ApiGatewayResolver) -> Response:
-        """Protocol for callback regardless of next_middleware(app), next(app)"""
-        ...
-
-    def __name__(self) -> str:  # noqa A003
-        """Protocol for name of the Middleware"""
-        ...
+# Specialized types defined here due to circular dependency in `.types`
