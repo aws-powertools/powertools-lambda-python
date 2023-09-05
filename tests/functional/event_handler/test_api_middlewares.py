@@ -1,3 +1,5 @@
+from typing import List
+
 import pytest
 
 from aws_lambda_powertools.event_handler import content_types
@@ -18,6 +20,7 @@ from aws_lambda_powertools.event_handler.middlewares import (
 from aws_lambda_powertools.event_handler.middlewares.schema_validation import (
     SchemaValidationMiddleware,
 )
+from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from tests.functional.utils import load_event
 
 API_REST_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -354,54 +357,95 @@ def test_middleware_short_circuit_via_httperrors(app: BaseRouter, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_api_gateway_app_router_with_middlewares(app: BaseRouter, event):
-    # GIVEN a Router with registered routes
+def test_api_gateway_middleware_order_with_include_router_last(app: EventHandlerInstance, event):
+    # GIVEN two global middlewares: one for App and one for Router
     router = Router()
 
-    def app_middleware(app: BaseRouter, next_middleware):
-        # inject a variable into the resolver context
-        app.append_context(app_injected="app_value")
-        response = next_middleware(app)
+    def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
+        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order.append("app")
 
-        return response
+        app.append_context(middleware_order=middleware_order)
+        return next_middleware(app)
 
-    app.use(middlewares=[app_middleware])
+    def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
+        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order.append("router")
 
-    def router_middleware(app: BaseRouter, next_middleware):
-        # inject a variable into the resolver context
-        app.append_context(router_injected="router_value")
-        response = next_middleware(app)
+        router.append_context(middleware_order=middleware_order)
+        return next_middleware(app)
 
-        return response
+    @router.get("/my/path")
+    def dummy_route():
+        middleware_order = app.context["middleware_order"]
 
-    router.use(middlewares=[router_middleware])
+        assert middleware_order[0] == "app"
+        assert middleware_order[1] == "router"
 
-    to_inject: str = "injected_value"
+        return Response(status_code=200, body="works!")
 
-    def middleware_one(app: BaseRouter, next_middleware: NextMiddleware):
-        # inject a variable into the kwargs of the middleware chain
-        app.append_context(injected=to_inject)
-        response = next_middleware(app)
+    # WHEN App global middlewares are registered first
+    # followed by include_router
 
-        return response
-
-    @router.get("/my/path", middlewares=[middleware_one])
-    def get_api_route():
-        # make sure value is injected by middleware_one
-        injected: str = app.context.get("injected")
-        assert injected == to_inject
-        assert app.context.get("router_injected") == "router_value"
-        assert app.context.get("app_injected") == "app_value"
-
-        return Response(200, content_types.TEXT_HTML, injected)
-
+    router.use([global_router_middleware])  # mimics App importing Router
     app.include_router(router)
-    # WHEN calling the event handler after applying routes from router object
+    app.use([global_app_middleware])
+
+    # THEN resolving a request should start processing global Router middlewares first
+    # due to insertion order
     result = app(event, {})
 
-    # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["body"] == to_inject
+
+
+@pytest.mark.parametrize(
+    "app, event",
+    [
+        (ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent), API_REST_EVENT),
+        (APIGatewayRestResolver(), API_REST_EVENT),
+        (APIGatewayHttpResolver(), API_RESTV2_EVENT),
+    ],
+)
+def test_api_gateway_middleware_order_with_include_router_first(app: EventHandlerInstance, event):
+    # GIVEN two global middlewares: one for App and one for Router
+    router = Router()
+
+    def global_app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
+        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order.append("app")
+
+        app.append_context(middleware_order=middleware_order)
+        return next_middleware(app)
+
+    def global_router_middleware(router: EventHandlerInstance, next_middleware: NextMiddleware):
+        middleware_order: List[str] = router.context.get("middleware_order", [])
+        middleware_order.append("router")
+
+        router.append_context(middleware_order=middleware_order)
+        return next_middleware(app)
+
+    @router.get("/my/path")
+    def dummy_route():
+        middleware_order = app.context["middleware_order"]
+
+        assert middleware_order[0] == "router"
+        assert middleware_order[1] == "app"
+
+        return Response(status_code=200, body="works!")
+
+    # WHEN App include router middlewares first
+    # followed by App global middlewares registration
+
+    router.use([global_router_middleware])  # mimics App importing Router
+    app.include_router(router)
+
+    app.use([global_app_middleware])
+
+    # THEN resolving a request should start processing global Router middlewares first
+    # due to insertion order
+    result = app(event, {})
+
+    assert result["statusCode"] == 200
 
 
 def test_class_based_middleware():
