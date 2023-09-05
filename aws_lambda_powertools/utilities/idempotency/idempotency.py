@@ -4,7 +4,8 @@ Primary interface for idempotent Lambda functions utility
 import functools
 import logging
 import os
-from typing import Any, Callable, Dict, Optional, cast
+from inspect import isclass
+from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
@@ -13,6 +14,10 @@ from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.base import (
+    BaseIdempotencyModelSerializer,
+    BaseIdempotencySerializer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -85,6 +90,7 @@ def idempotent_function(
     data_keyword_argument: str,
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
+    output_serializer: Optional[Union[BaseIdempotencySerializer, Type[BaseIdempotencyModelSerializer]]] = None,
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -99,6 +105,11 @@ def idempotent_function(
         Instance of BasePersistenceLayer to store data
     config: IdempotencyConfig
         Configuration
+    output_serializer: Optional[Union[BaseIdempotencySerializer, Type[BaseIdempotencyModelSerializer]]]
+            Serializer to transform the data to and from a dictionary.
+            If not supplied, no serialization is done via the NoOpSerializer.
+            In case a serializer of type inheriting BaseIdempotencyModelSerializer is given,
+            the serializer is derived from the function return type.
 
     Examples
     --------
@@ -124,8 +135,13 @@ def idempotent_function(
                 data_keyword_argument=data_keyword_argument,
                 persistence_store=persistence_store,
                 config=config,
+                output_serializer=output_serializer,
             ),
         )
+
+    if isclass(output_serializer) and issubclass(output_serializer, BaseIdempotencyModelSerializer):
+        # instantiate an instance of the serializer class
+        output_serializer = output_serializer.instantiate(function.__annotations__.get("return", None))
 
     config = config or IdempotencyConfig()
 
@@ -147,6 +163,7 @@ def idempotent_function(
             function_payload=payload,
             config=config,
             persistence_store=persistence_store,
+            output_serializer=output_serializer,
             function_args=args,
             function_kwargs=kwargs,
         )
