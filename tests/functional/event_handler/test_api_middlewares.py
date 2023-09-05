@@ -388,8 +388,8 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     # followed by include_router
 
     router.use([global_router_middleware])  # mimics App importing Router
-    app.include_router(router)
     app.use([global_app_middleware])
+    app.include_router(router)
 
     # THEN resolving a request should start processing global Router middlewares first
     # due to insertion order
