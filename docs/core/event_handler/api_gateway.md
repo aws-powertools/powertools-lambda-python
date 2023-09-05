@@ -574,38 +574,6 @@ Keep the following in mind when authoring middlewares for Event Handler:
 4. **Catch your own exceptions**. Catch and handle known exceptions to your logic. Unless you want to raise [HTTP Errors](#raising-http-errors), or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the [exception_handler](#exception-handling) decorator.
 5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
 
-#### Staging area
-
-**This should go under the Router area since we haven't introduced it yet**
-
-Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route definition.
-
-???+ tip
-    **Router Middleware processing Order**
-
-    1. Global middlewares defined on the parent Router
-    2. Route specific Middlewares
-
-    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
-
-???+ warning "Ensure your middleware calls the Next one in the chain"
-    The middleware stack processing relies on each middleware function calling the next and also returning the reponse or raising an exception.  If you do not pass control to the next middleware function in the chain, your API route handler will never be called.
-
-=== "route_middleware.py"
-    ```python hl_lines="9 16"
-    --8<-- "examples/event_handler_rest/src/route_middleware.py"
-    ```
-
-=== "all_routes_middleware.py"
-    ```python hl_lines="9 15"
-    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
-    ```
-
-=== "custom_middlewares.py"
-    ```python hl_lines="12 14 18 21 23"
-    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
-    ```
-
 ### Fine grained responses
 
 You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
@@ -743,15 +711,6 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
     --8<-- "examples/event_handler_rest/src/split_route.py"
 	```
 
-#### Split Router Middleware
-
-The application of middleware functions for split routers is the same as using the main Resolver classes.  When the split routes are combined in the API Rest resolver all Router based and route base middleware will be merged into the parent instance.
-
-???+ info "Split Router Middleware processing Order"
-    1. Global Middleware defined on the parent Router
-    2. Global Middleware for each split Router, in the order they are included
-    3. Route specific Middlewares
-
 #### Route prefix
 
 In the previous example, `split_route_module.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
@@ -837,6 +796,40 @@ This is a sample project layout for a monolithic function with routes split in d
         ├── conftest.py       # pytest fixtures for the functional tests
         └── test_main.py      # functional tests for the main lambda handler
 ```
+
+#### DRAFT Router Middlewares
+
+Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route definition.
+
+???+ tip
+    **Router Middleware processing Order**
+
+    1. Global middlewares defined on the parent Router
+    2. Route specific Middlewares
+
+    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
+
+=== "route_middleware.py"
+    ```python hl_lines="9 16"
+    --8<-- "examples/event_handler_rest/src/route_middleware.py"
+    ```
+
+=== "all_routes_middleware.py"
+    ```python hl_lines="9 15"
+    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
+    ```
+
+=== "custom_middlewares.py"
+    ```python hl_lines="12 14 18 21 23"
+    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
+    ```
+
+The application of middleware functions for split routers is the same as using the main Resolver classes.  When the split routes are combined in the API Rest resolver all Router based and route base middleware will be merged into the parent instance.
+
+???+ info "Split Router Middleware processing Order"
+    1. Global Middleware defined on the parent Router
+    2. Global Middleware for each split Router, in the order they are included
+    3. Route specific Middlewares
 
 ### Considerations
 
