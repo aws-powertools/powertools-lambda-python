@@ -33,16 +33,6 @@ class OrderOutput:
     data_keyword_argument="order",
     config=config,
     persistence_store=dynamodb,
-    output_serializer=DataclassSerializer(model=OrderOutput),
-)
-def explicit_order_output_serializer(order: Order):
-    return OrderOutput(order_id=order.order_id)
-
-
-@idempotent_function(
-    data_keyword_argument="order",
-    config=config,
-    persistence_store=dynamodb,
     output_serializer=DataclassSerializer,
 )
 # order output is deduced from return type
@@ -56,5 +46,4 @@ def lambda_handler(event: dict, context: LambdaContext):
     order = Order(item=order_item, order_id=1)
 
     # `order` parameter must be called as a keyword argument to work
-    explicit_order_output_serializer(order=order)
     deduced_order_output_serializer(order=order)

@@ -152,33 +152,42 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
-#### Output Serialization
+#### Output serialization
 
-By supplying an output serializer, you can control the return type of the function, allowing cleaner integration with the rest of your code base.
+The default return of the `idempotent_function` decorator is a JSON object, but you can customize the function's return type by utilizing the `output_serializer` parameter. The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
 
-=== "Using Pydantic"
-Explicitly passing the model type
-    ```python hl_lines="3-8 24-25 32-35 55"
-    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
+
+Working with Pydantic Models:
+
+=== "Explicitly passing the Pydantic model type"
+
+    ```python hl_lines="6 24 25 32 35 44"
+    --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
     ```
-Deducing the model type from the return type annotation
-    ```python hl_lines="3-8 24-25 42-46 55"
-    --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic_output_serializer.py"
+=== "Deducing the Pydantic model type from the return type annotation"
+
+    ```python hl_lines="6 24 25 32 36 45"
+    --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
     ```
 
-=== "Using Dataclasses"
-Explicitly passing the model type
-    ```python hl_lines="1 5-8 27-29 36-39 59"
-    --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass_output_serializer.py"
+Working with Python Dataclasses:
+
+=== "Explicitly passing the model type"
+
+    ```python hl_lines="8 27-29 36 39 48"
+    --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
     ```
-Deducing the model type from the return type annotation
-    ```python hl_lines="1 5-8 27-29 46-50 60"
-    --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass_output_serializer.py"
+
+=== "Deducing the model type from the return type annotation"
+
+    ```python hl_lines="8 27-29 36 40 49"
+    --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
     ```
 
 === "Using A Custom Type (Dataclasses)"
 
-    ```python hl_lines="3-8 26-28 32-44 51"
+    ```python hl_lines="9 33 37 41-44 51 54"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 

@@ -35,17 +35,6 @@ def explicit_order_output_serializer(order: Order):
     return OrderOutput(order_id=order.order_id)
 
 
-@idempotent_function(
-    data_keyword_argument="order",
-    config=config,
-    persistence_store=dynamodb,
-    output_serializer=PydanticSerializer,
-)
-# order output is deduced from return type
-def deduced_order_output_serializer(order: Order) -> OrderOutput:
-    return OrderOutput(order_id=order.order_id)
-
-
 def lambda_handler(event: dict, context: LambdaContext):
     config.register_lambda_context(context)  # see Lambda timeouts section
     order_item = OrderItem(sku="fake", description="sample")
@@ -53,4 +42,3 @@ def lambda_handler(event: dict, context: LambdaContext):
 
     # `order` parameter must be called as a keyword argument to work
     explicit_order_output_serializer(order=order)
-    deduced_order_output_serializer(order=order)
