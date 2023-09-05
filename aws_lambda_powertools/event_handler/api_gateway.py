@@ -1189,10 +1189,10 @@ class ApiGatewayResolver(BaseRouter):
         # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
         router.api_resolver = self
 
-        # Merge app and router context
+        logger.debug("Merging App context with Router context")
         self.context.update(**router.context)
 
-        # Add router middlewares to parent ApiGatewayResolver
+        logger.debug("Appending Router middlewares into App middlewares.")
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
@@ -1206,7 +1206,7 @@ class ApiGatewayResolver(BaseRouter):
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
                 new_route = (rule, *route[1:])
 
-            # Middlewares are stored by route seperately - must grab them to include
+            # Middlewares are stored by route separately - must grab them to include
             middlewares = router._routes_with_middleware.get(new_route)
 
             # Need to use "type: ignore" here since mypy does not like a named parameter after
