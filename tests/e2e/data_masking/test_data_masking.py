@@ -131,3 +131,18 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
         encrypted_data = log.message
         decrypted_data = data_masker.decrypt(encrypted_data)
         assert decrypted_data == value
+
+# NOTE: This test is failing currently, need to find a fix for building correct dependencies
+@pytest.mark.xdist_group(name="data_masking")
+def test_encryption_in_handler(basic_handler_fn_arn, kms_key1_arn):
+    payload = {"kms_key": kms_key1_arn, "append_keys": {"order_id": f"{uuid4()}"}}
+
+    # WHEN a lambda handler for encryption is invoked
+    handler_result, _ = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=json.dumps(payload))
+
+    response = json.loads(handler_result["Payload"].read())
+    encrypted_data = response["encrypted_data"]
+    decrypted_data = data_masker.decrypt(encrypted_data)
+
+    # THEN decrypting the encrypted data from the response should result in the original value
+    assert decrypted_data == bytes(str([1, 2, "string", 4.5]), "utf-8")

@@ -39,7 +39,7 @@ MAX_MESSAGES: int = 200
 class AwsEncryptionSdkProvider(BaseProvider):
     """
     The AwsEncryptionSdkProvider is to be used as a Provider for the Datamasking class.
-    
+
     Example
     -------
         >>> data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[keyARN1, keyARN2,...,]))
