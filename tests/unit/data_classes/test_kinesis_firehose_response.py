@@ -47,9 +47,10 @@ def test_kinesis_firehose_create_response():
     for record in parsed_event.records:
         # if data was delivered as json; caches loaded value
         data = record.data_as_text
-
+        metadata_partition = KinesisFirehoseResponseRecordMetadata(partition_keys={"year": 2023})
         processed_record = record.create_firehose_response_record(
             result="Ok",
+            metadata=metadata_partition,
         )
         processed_record.data_from_text(data=data)
         response.add_record(record=processed_record)
@@ -62,6 +63,7 @@ def test_kinesis_firehose_create_response():
     assert record_01["result"] == "Ok"
     assert record_01["recordId"] == record01_raw["recordId"]
     assert record_01["data"] == record01_raw["data"]
+    assert record_01["metadata"]["partitionKeys"]["year"] == 2023
 
     assert response.records[0].data_as_bytes == b"Hello World"
     assert response.records[0].data_as_text == "Hello World"

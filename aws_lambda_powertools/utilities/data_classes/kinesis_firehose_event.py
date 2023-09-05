@@ -26,7 +26,7 @@ class KinesisFirehoseResponseRecordMetadata:
 
 @dataclass
 class KinesisFirehoseResponseRecord:
-    """Record in Kinesis Data Firehose event
+    """Record in Kinesis Data Firehose response object
 
     Documentation:
     --------------
@@ -40,7 +40,10 @@ class KinesisFirehoseResponseRecord:
     """data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
             use either function like `data_from_text`, `data_from_json` to populate data"""
     data: Optional[str] = None
-    """Optional: metadata associated with this record; present only when Kinesis Stream is source"""
+    """
+    Optional: Metadata associated with this record; can contain partition keys
+    - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
+    """
     metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
     """Json data for caching json.dump result"""
     _json_data: Optional[Any] = None
@@ -95,11 +98,17 @@ class KinesisFirehoseResponseRecord:
 
 @dataclass
 class KinesisFirehoseResponse:
-    """Kinesis Data Firehose event
+    """Kinesis Data Firehose response object
 
     Documentation:
     --------------
     - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
+
+    Parameters
+    ----------
+    records : List[KinesisFirehoseResponseRecord]
+        records of Kinesis Data Firehose response object,
+        optional parameter at start. can be added later using `add_record` function.
     """
 
     records: Optional[List[KinesisFirehoseResponseRecord]] = None
@@ -113,7 +122,7 @@ class KinesisFirehoseResponse:
     def asdict(self) -> Dict:
         # make sure return size is less than 6MB
         if not self.records:
-            return {}
+            raise ValueError("Kinesis Firehose doesn't accept empyt response")
 
         return {"records": [r.asdict() for r in self.records]}
 
@@ -195,6 +204,7 @@ class KinesisFirehoseRecord(DictWrapper):
         self,
         result: Literal["Ok", "Dropped", "ProcessingFailed"],
         data: Optional[str] = None,
+        metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None,
     ) -> KinesisFirehoseResponseRecord:
         """create a KinesisFirehoseResponseRecord directly using the record_id and given values
         Parameters
@@ -204,9 +214,11 @@ class KinesisFirehoseRecord(DictWrapper):
         data : str, optional
             data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
             use either function like `data_from_text`, `data_from_json` to populate data
-
+        metadata: KinesisFirehoseResponseRecordMetadata, optional
+            Metadata associated with this record; can contain partition keys
+            - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
         """
-        return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data)
+        return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data, metadata=metadata)
 
 
 class KinesisFirehoseEvent(DictWrapper):
