@@ -71,3 +71,15 @@ class IdempotencyKeyError(BaseError):
     """
     Payload does not contain an idempotent key
     """
+
+
+class IdempotencyModelTypeError(BaseError):
+    """
+    Model type does not match expected payload output
+    """
+
+
+class IdempotencyNoSerializationModelError(BaseError):
+    """
+    No model was supplied to the serializer
+    """
