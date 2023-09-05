@@ -152,6 +152,45 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
+#### Output serialization
+
+The default return of the `idempotent_function` decorator is a JSON object, but you can customize the function's return type by utilizing the `output_serializer` parameter. The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
+
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
+
+Working with Pydantic Models:
+
+=== "Explicitly passing the Pydantic model type"
+
+    ```python hl_lines="6 24 25 32 35 44"
+    --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
+    ```
+=== "Deducing the Pydantic model type from the return type annotation"
+
+    ```python hl_lines="6 24 25 32 36 45"
+    --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
+    ```
+
+Working with Python Dataclasses:
+
+=== "Explicitly passing the model type"
+
+    ```python hl_lines="8 27-29 36 39 48"
+    --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
+    ```
+
+=== "Deducing the model type from the return type annotation"
+
+    ```python hl_lines="8 27-29 36 40 49"
+    --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
+    ```
+
+=== "Using A Custom Type (Dataclasses)"
+
+    ```python hl_lines="9 33 37 41-44 51 54"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
+    ```
+
 #### Batch integration
 
 You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
