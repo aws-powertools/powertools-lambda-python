@@ -120,9 +120,8 @@ class KinesisFirehoseResponse:
             self.records = [record]
 
     def asdict(self) -> Dict:
-        # make sure return size is less than 6MB
         if not self.records:
-            raise ValueError("Kinesis Firehose doesn't accept empyt response")
+            raise ValueError("Kinesis Firehose doesn't accept empty response")
 
         return {"records": [r.asdict() for r in self.records]}
 
