@@ -47,7 +47,7 @@ jobs:
     permissions:
       pull-requests: write  # comment on PR
     steps:
-      - uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9  # v3.5.3
+      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac  # v4.0.0
       # Maintenance: Persist state per PR as an artifact to avoid spam on label add
       - name: "Suggest split large Pull Request"
         uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1

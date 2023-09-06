@@ -51,6 +51,8 @@ class Metrics:
         service name to be used as metric dimension, by default "service_undefined"
     namespace : str, optional
         Namespace for metrics
+    provider: AmazonCloudWatchEMFProvider, optional
+        Pre-configured AmazonCloudWatchEMFProvider provider
 
     Raises
     ------

@@ -30,6 +30,11 @@ def metric() -> Dict[str, str]:
 
 
 @pytest.fixture
+def metric_datadog() -> Dict[str, str]:
+    return {"name": "single_metric", "value": 1, "timestamp": 1691678198, "powertools": "datadog"}
+
+
+@pytest.fixture
 def metrics() -> List[Dict[str, str]]:
     return [
         {"name": "metric_one", "unit": MetricUnit.Count, "value": 1},

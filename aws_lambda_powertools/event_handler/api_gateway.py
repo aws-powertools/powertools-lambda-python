@@ -41,9 +41,9 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 logger = logging.getLogger(__name__)
 
 _DYNAMIC_ROUTE_PATTERN = r"(<\w+>)"
-_SAFE_URI = "-._~()'!*:@,;="  # https://www.ietf.org/rfc/rfc3986.txt
+_SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
-_UNSAFE_URI = "%<> \[\]{}|^"  # noqa: W605
+_UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
 
@@ -520,7 +520,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """
         Parameters
@@ -534,9 +534,10 @@ class ApiGatewayResolver(BaseRouter):
             environment variable
         serializer : Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
-        strip_prefixes: List[str], optional
-            optional list of prefixes to be removed from the request path before doing the routing. This is often used
-            with api gateways with multiple custom mappings.
+        strip_prefixes: List[Union[str, Pattern]], optional
+            optional list of prefixes to be removed from the request path before doing the routing.
+            This is often used with api gateways with multiple custom mappings.
+            Each prefix can be a static string or a compiled regex pattern
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
@@ -713,10 +714,21 @@ class ApiGatewayResolver(BaseRouter):
             return path
 
         for prefix in self._strip_prefixes:
-            if path == prefix:
-                return "/"
-            if self._path_starts_with(path, prefix):
-                return path[len(prefix) :]
+            if isinstance(prefix, str):
+                if path == prefix:
+                    return "/"
+
+                if self._path_starts_with(path, prefix):
+                    return path[len(prefix) :]
+
+            if isinstance(prefix, Pattern):
+                path = re.sub(prefix, "", path)
+
+                # When using regexes, we might get into a point where everything is removed
+                # from the string, so we check if it's empty and return /, since there's nothing
+                # else to strip anymore.
+                if not path:
+                    return "/"
 
         return path
 
@@ -911,7 +923,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
@@ -942,7 +954,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
@@ -956,7 +968,7 @@ class ALBResolver(ApiGatewayResolver):
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
-        strip_prefixes: Optional[List[str]] = None,
+        strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)

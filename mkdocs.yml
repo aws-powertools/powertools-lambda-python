@@ -15,7 +15,10 @@ nav:
       - Features:
           - core/tracer.md
           - core/logger.md
-          - core/metrics.md
+          - Metrics:
+              - core/metrics/index.md
+              - Amazon CloudWatch EMF: core/metrics.md
+              - Datadog: core/metrics/datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md
@@ -57,7 +60,6 @@ theme:
   features:
     - header.autohide
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.instant
     - navigation.indexes
@@ -73,6 +75,7 @@ theme:
 
 markdown_extensions:
   - admonition
+  - abbr
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight:
@@ -82,6 +85,8 @@ markdown_extensions:
       base_path: "."
       check_paths: true
       restrict_base_path: false
+      auto_append:
+        - includes/abbreviations.md
   - meta
   - toc:
       permalink: true
