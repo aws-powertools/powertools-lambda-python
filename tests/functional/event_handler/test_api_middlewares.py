@@ -7,7 +7,6 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     APIGatewayHttpResolver,
     ApiGatewayResolver,
     APIGatewayRestResolver,
-    BaseRouter,
     ProxyEventType,
     Response,
     Router,
@@ -35,9 +34,9 @@ API_RESTV2_EVENT = load_event("apiGatewayProxyV2Event_GET.json")
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_route_with_middleware(app: BaseRouter, event):
+def test_route_with_middleware(app: ApiGatewayResolver, event):
     # define custom middleware to inject new argument - "custom"
-    def middleware_1(app: BaseRouter, next_middleware: NextMiddleware):
+    def middleware_1(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # add additional data to Router Context
         app.append_context(custom="custom")
         response = next_middleware(app)
@@ -45,7 +44,7 @@ def test_route_with_middleware(app: BaseRouter, event):
         return response
 
     # define custom middleware to inject new argument - "another_one"
-    def middleware_2(app: BaseRouter, next_middleware: NextMiddleware):
+    def middleware_2(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # add additional data to Router Context
         app.append_context(another_one=6)
         response = next_middleware(app)
@@ -90,9 +89,9 @@ def test_route_with_middleware(app: BaseRouter, event):
         ),
     ],
 )
-def test_with_router_middleware(app: BaseRouter, event, other_event):
+def test_with_router_middleware(app: ApiGatewayResolver, event, other_event):
     # define custom middleware to inject new argument - "custom"
-    def global_middleware(app: BaseRouter, next_middleware: NextMiddleware):
+    def global_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # add custom data to context
         app.append_context(custom="custom")
         response = next_middleware(app)
@@ -100,7 +99,7 @@ def test_with_router_middleware(app: BaseRouter, event, other_event):
         return response
 
     # define custom middleware to inject new argument - "another_one"
-    def middleware_2(app: BaseRouter, next_middleware: NextMiddleware):
+    def middleware_2(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # add data to resolver context
         app.append_context(another_one=6)
         response = next_middleware(app)
@@ -150,8 +149,8 @@ def test_with_router_middleware(app: BaseRouter, event, other_event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_dynamic_route_with_middleware(app: BaseRouter, event):
-    def middleware_one(app: BaseRouter, next_middleware: NextMiddleware):
+def test_dynamic_route_with_middleware(app: ApiGatewayResolver, event):
+    def middleware_one(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # inject data into the resolver context
         app.append_context(injected="injected_value")
         response = next_middleware(app)
@@ -182,20 +181,20 @@ def test_dynamic_route_with_middleware(app: BaseRouter, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_middleware_early_return(app: BaseRouter, event):
-    def middleware_one(app: BaseRouter, next_middleware):
+def test_middleware_early_return(app: ApiGatewayResolver, event):
+    def middleware_one(app: ApiGatewayResolver, next_middleware):
         # inject a variable into resolver context
         app.append_context(injected="injected_value")
         response = next_middleware(app)
 
         return response
 
-    def early_return_middleware(app: BaseRouter, next_middleware: NextMiddleware):
+    def early_return_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         assert app.context.get("injected") == "injected_value"
 
         return Response(400, content_types.TEXT_HTML, "bad_response")
 
-    def not_executed_middleware(app: BaseRouter, next_middleware: NextMiddleware):
+    def not_executed_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # This should never be executed - if it is an excpetion will be raised
         raise NotImplementedError()
 
@@ -231,7 +230,7 @@ def test_middleware_early_return(app: BaseRouter, event):
         ),
     ],
 )
-def test_pass_schema_validation(app: BaseRouter, event, validation_schema):
+def test_pass_schema_validation(app: ApiGatewayResolver, event, validation_schema):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "path")
@@ -261,7 +260,7 @@ def test_pass_schema_validation(app: BaseRouter, event, validation_schema):
         ),
     ],
 )
-def test_fail_schema_validation(app: BaseRouter, event, validation_schema):
+def test_fail_schema_validation(app: ApiGatewayResolver, event, validation_schema):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(validation_schema)])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
@@ -295,7 +294,7 @@ def test_fail_schema_validation(app: BaseRouter, event, validation_schema):
         ),
     ],
 )
-def test_invalid_schema_validation(app: BaseRouter, event):
+def test_invalid_schema_validation(app: ApiGatewayResolver, event):
     @app.post("/my/path", middlewares=[SchemaValidationMiddleware(inbound_schema="schema.json")])
     def post_lambda() -> Response:
         return Response(200, content_types.TEXT_HTML, "Should not be returned")
@@ -317,20 +316,20 @@ def test_invalid_schema_validation(app: BaseRouter, event):
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
-def test_middleware_short_circuit_via_httperrors(app: BaseRouter, event):
-    def middleware_one(app: BaseRouter, next_middleware: NextMiddleware):
+def test_middleware_short_circuit_via_httperrors(app: ApiGatewayResolver, event):
+    def middleware_one(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # inject a variable into the kwargs of the middleware chain
         app.append_context(injected="injected_value")
         response = next_middleware(app)
 
         return response
 
-    def early_return_middleware(app: BaseRouter, next_middleware: NextMiddleware):
+    def early_return_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # ensure "injected" context variable is passed in by middleware_one
         assert app.context.get("injected") == "injected_value"
         raise BadRequestError("bad_response")
 
-    def not_executed_middleware(app: BaseRouter, next_middleware: NextMiddleware):
+    def not_executed_middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
         # This should never be executed - if it is an excpetion will be raised
         raise NotImplementedError()
 
