@@ -764,7 +764,7 @@ def _registered_api_adapter(
     route_args: Dict = app.context.get("_route_args", {})
     logger.debug(f"Calling API Route Handler: {route_args}")
 
-    return app.to_response(next_middleware(**route_args))
+    return app._to_response(next_middleware(**route_args))
 
 
 class ApiGatewayResolver(BaseRouter):
@@ -1077,7 +1077,7 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             return ResponseBuilder(
-                self.to_response(
+                self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
                 route,
@@ -1148,7 +1148,7 @@ class ApiGatewayResolver(BaseRouter):
 
         return None
 
-    def to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
+    def _to_response(self, result: Union[Dict, Tuple, Response]) -> Response:
         """Convert the route's result to a Response
 
          3 main result types are supported:
