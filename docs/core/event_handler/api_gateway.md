@@ -655,7 +655,10 @@ Each endpoint will be it's own Lambda function that is configured as a [Lambda i
     --8<-- "examples/event_handler_rest/src/micro_function_user_by_id_route.py"
     ```
 
-=== "
+=== "Micro Function Example SAM Template"
+    ```yaml
+    --8<-- "examples/event_handler_rest/sam/micro_function_template.yaml"
+    ```
 
 ???+ note
     You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions.
