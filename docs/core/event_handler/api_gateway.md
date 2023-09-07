@@ -454,7 +454,7 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 
 === "middleware_global_middlewares_module.py"
 
-    ```python hl_lines="9"
+    ```python hl_lines="8"
     --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
     ```
 
