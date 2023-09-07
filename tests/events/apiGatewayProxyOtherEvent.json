@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "resource": "/my/path",
-  "path": "/my/path",
+  "resource": "/other/path",
+  "path": "/other/path",
   "httpMethod": "GET",
   "headers": {
     "Header1": "value1",
@@ -65,13 +65,13 @@
         }
       }
     },
-    "path": "/my/path",
+    "path": "/other/path",
     "protocol": "HTTP/1.1",
     "requestId": "id=",
     "requestTime": "04/Mar/2020:19:15:17 +0000",
     "requestTimeEpoch": 1583349317135,
     "resourceId": null,
-    "resourcePath": "/my/path",
+    "resourcePath": "/other/path",
     "stage": "$default"
   },
   "pathParameters": null,
