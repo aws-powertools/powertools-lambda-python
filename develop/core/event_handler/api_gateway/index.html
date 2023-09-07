@@ -992,6 +992,61 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#middleware" class="md-nav__link">
+    Middleware
+  </a>
+  
+    <nav class="md-nav" aria-label="Middleware">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-middlewares" class="md-nav__link">
+    Global middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#returning-early" class="md-nav__link">
+    Returning early
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-exceptions" class="md-nav__link">
+    Handling exceptions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extending-middlewares" class="md-nav__link">
+    Extending middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-middlewares" class="md-nav__link">
+    Native middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#being-a-good-citizen" class="md-nav__link">
+    Being a good citizen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fine-grained-responses" class="md-nav__link">
     Fine grained responses
   </a>
@@ -1772,6 +1827,61 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#middleware" class="md-nav__link">
+    Middleware
+  </a>
+  
+    <nav class="md-nav" aria-label="Middleware">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#global-middlewares" class="md-nav__link">
+    Global middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#returning-early" class="md-nav__link">
+    Returning early
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#handling-exceptions" class="md-nav__link">
+    Handling exceptions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#extending-middlewares" class="md-nav__link">
+    Extending middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#native-middlewares" class="md-nav__link">
+    Native middlewares
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#being-a-good-citizen" class="md-nav__link">
+    Being a good citizen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#fine-grained-responses" class="md-nav__link">
     Fine grained responses
   </a>
@@ -1919,6 +2029,7 @@
 <li>Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.</li>
 <li>Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer</li>
 <li>Built-in integration with <a href="../../../utilities/data_classes/" target="_blank">Event Source Data Classes utilities</a> for self-documented event schema</li>
+<li>Works with micro function (one or a few routes) and monolithic functions (all routes)</li>
 </ul>
 <h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
 <details class="tip" open="open">
@@ -3913,6 +4024,662 @@ matches one of the allowed values.</p>
 </tr>
 </tbody>
 </table>
+<h3 id="middleware">Middleware<a class="headerlink" href="#middleware" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>stateDiagram
+    direction LR
+
+    EventHandler: GET /todo
+    Before: Before response
+    Next: next_middleware()
+    MiddlewareLoop: Middleware loop
+    AfterResponse: After response
+    MiddlewareFinished: Modified response
+    Response: Final response
+
+    EventHandler --&gt; Middleware: Has middleware?
+    state MiddlewareLoop {
+        direction LR
+        Middleware --&gt; Before
+        Before --&gt; Next
+        Next --&gt; Middleware: More middlewares?
+        Next --&gt; AfterResponse
+    }
+    AfterResponse --&gt; MiddlewareFinished
+    MiddlewareFinished --&gt; Response
+    EventHandler --&gt; Response: No middleware</code></pre>
+<p>A middleware is a function you register per route to <strong>intercept</strong> or <strong>enrich</strong> a <strong>request before</strong> or <strong>after</strong> any response.</p>
+<p>Each middleware function receives the following arguments:</p>
+<ol>
+<li><strong>app</strong>. An Event Handler instance so you can access incoming request information, Lambda context, etc.</li>
+<li><strong>next_middleware</strong>. A function to get the next middleware or route's response.</li>
+</ol>
+<p>Here's a sample middleware that extracts and injects correlation ID, using <code>APIGatewayRestResolver</code> (works for any <a href="#event-resolvers">Resolver</a>):</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">middleware_getting_started.py</label><label for="__tabbed_11_2">middleware_getting_started_output.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Your first middleware to extract and inject correlation ID</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.middlewares</span> <span class="kn">import</span> <span class="n">NextMiddleware</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="hll"><span class="k">def</span> <span class="nf">inject_correlation_id</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+</span>    <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>  <span class="c1"># (1)!</span>
+
+    <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Inject correlation ID in shared context and Logger</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>  <span class="c1"># (2)!</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Get response from next middleware OR /todos route</span>
+<span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># (3)!</span>
+</span>
+    <span class="c1"># Include Correlation ID in the response back to caller</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>  <span class="c1"># (4)!</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span> <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">inject_correlation_id</span><span class="p">])</span>  <span class="c1"># (5)!</span>
+</span><span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+    <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
+    <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>You can access current request like you normally would.</li>
+<li><a href="#sharing-contextual-data">Shared context is available</a> to any middleware, Router and App instances.</li>
+<li>Get response from the next middleware (if any) or from <code>/todos</code> route.</li>
+<li>You can manipulate headers, body, or status code before returning it.</li>
+<li>Register one or more middlewares in order of execution.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;statusCode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">200</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;todos\&quot;:[{\&quot;userId\&quot;:1,\&quot;id\&quot;:1,\&quot;title\&quot;:\&quot;delectus aut autem\&quot;,\&quot;completed\&quot;:false}]}&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;isBase64Encoded&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;multiValueHeaders&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Content-Type&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s2">&quot;application/json&quot;</span>
+<span class="w">        </span><span class="p">],</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;x-correlation-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+</span><span class="hll"><span class="w">            </span><span class="s2">&quot;ccd87d70-7a3f-4aec-b1a8-a5a558c239b2&quot;</span>
+</span><span class="w">        </span><span class="p">]</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h4 id="global-middlewares">Global middlewares<a class="headerlink" href="#global-middlewares" title="Permanent link">&para;</a></h4>
+<p><center>
+<img alt="Combining middlewares" src="../../../media/middlewares_normal_processing-light.svg#only-light" />
+<img alt="Combining middlewares" src="../../../media/middlewares_normal_processing-dark.svg#only-dark" /></p>
+<p><em>Request flowing through multiple registered middlewares</em>
+</center></p>
+<p>You can use <code>app.use</code> to register middlewares that should always run regardless of the route, also known as global middlewares.</p>
+<p>Event Handler <strong>calls global middlewares first</strong>, then middlewares defined at the route level. Here's an example with both middlewares:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">middleware_global_middlewares.py</label><label for="__tabbed_12_2">middleware_global_middlewares_module.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Use <a href="#debug-mode">debug mode</a> if you need to log request/response.</p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">middleware_global_middlewares_module</span>  <span class="c1"># (1)!</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+<span class="hll"><span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">middleware_global_middlewares_module</span><span class="o">.</span><span class="n">log_request_response</span><span class="p">])</span>  <span class="c1"># (2)!</span>
+</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span> <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">middleware_global_middlewares_module</span><span class="o">.</span><span class="n">inject_correlation_id</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+    <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
+    <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>A separate file where our middlewares are to keep this example focused.</li>
+<li>We register <code>log_request_response</code> as a global middleware to run before middleware.
+   <pre class="mermaid"><code>stateDiagram
+    direction LR
+
+    GlobalMiddleware: Log request response
+    RouteMiddleware: Inject correlation ID
+    EventHandler: Event Handler
+
+    EventHandler --&gt; GlobalMiddleware
+    GlobalMiddleware --&gt; RouteMiddleware</code></pre></li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.middlewares</span> <span class="kn">import</span> <span class="n">NextMiddleware</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="hll"><span class="k">def</span> <span class="nf">log_request_response</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+</span>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incoming request&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">raw_event</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Response received&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">inject_correlation_id</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>
+
+    <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Inject correlation ID in shared context and Logger</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Get response from next middleware OR /todos route</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+    <span class="c1"># Include Correlation ID in the response back to caller</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">enforce_correlation_id</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="c1"># If missing mandatory header raise an error</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">&quot;Correlation ID header is now mandatory.&quot;</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+
+    <span class="c1"># Get the response from the next middleware and return it</span>
+    <span class="k">return</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h4 id="returning-early">Returning early<a class="headerlink" href="#returning-early" title="Permanent link">&para;</a></h4>
+<p><center>
+<img alt="Short-circuiting middleware chain" src="../../../media/middlewares_early_return-light.svg#only-light" />
+<img alt="Short-circuiting middleware chain" src="../../../media/middlewares_early_return-dark.svg#only-dark" /></p>
+<p><em>Interrupting request flow by returning early</em>
+</center></p>
+<p>Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.</p>
+<p>In these scenarios, you short-circuit the middleware processing logic by returning a <a href="#fine-grained-responses">Response object</a>, or raising a <a href="#raising-http-errors">HTTP Error</a>. This signals to Event Handler to stop and run each <code>After</code> logic left in the chain all the way back.</p>
+<p>Here's an example where we prevent any request that doesn't include a correlation ID header:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">middleware_early_return.py</label><label for="__tabbed_13_2">middleware_global_middlewares_module.py</label><label for="__tabbed_13_3">middleware_early_return_output.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">middleware_global_middlewares_module</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="n">app</span><span class="o">.</span><span class="n">use</span><span class="p">(</span>
+    <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span>
+        <span class="n">middleware_global_middlewares_module</span><span class="o">.</span><span class="n">log_request_response</span><span class="p">,</span>
+<span class="hll">        <span class="n">middleware_global_middlewares_module</span><span class="o">.</span><span class="n">enforce_correlation_id</span><span class="p">,</span>  <span class="c1"># (1)!</span>
+</span>    <span class="p">],</span>
+<span class="p">)</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+    <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>  <span class="c1"># (2)!</span>
+    <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>This middleware will raise an exception if correlation ID header is missing.</li>
+<li>This code section will not run if <code>enforce_correlation_id</code> returns early.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.middlewares</span> <span class="kn">import</span> <span class="n">NextMiddleware</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">log_request_response</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Incoming request&quot;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">request</span><span class="o">=</span><span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">raw_event</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Response received&quot;</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">result</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">inject_correlation_id</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+    <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>
+
+    <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Inject correlation ID in shared context and Logger</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+
+    <span class="c1"># Get response from next middleware OR /todos route</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+    <span class="c1"># Include Correlation ID in the response back to caller</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="hll"><span class="k">def</span> <span class="nf">enforce_correlation_id</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>
+</span>    <span class="c1"># If missing mandatory header raise an error</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="hll">        <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="n">status_code</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s2">&quot;Correlation ID header is now mandatory.&quot;</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+</span>
+    <span class="c1"># Get the response from the next middleware and return it</span>
+    <span class="k">return</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>Raising an exception OR returning a Response object early will short-circuit the middleware chain.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="hll">    <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+</span><span class="hll">    <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;Correlation ID header is now mandatory&quot;</span><span class="p">,</span>
+</span>    <span class="s2">&quot;isBase64Encoded&quot;</span><span class="p">:</span> <span class="n">false</span><span class="p">,</span>
+    <span class="s2">&quot;multiValueHeaders&quot;</span><span class="p">:</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h4 id="handling-exceptions">Handling exceptions<a class="headerlink" href="#handling-exceptions" title="Permanent link">&para;</a></h4>
+<div class="admonition tip">
+<p class="admonition-title">For catching exceptions more broadly, we recommend you use the <a href="#exception-handling">exception_handler</a> decorator.</p>
+</div>
+<p>By default, any unhandled exception in the middleware chain is eventually propagated as a HTTP 500 back to the client.</p>
+<p>While there isn't anything special on how to use <a href="https://docs.python.org/3/tutorial/errors.html#handling-exceptions" rel="nofollow" target="_blank"><code>try/catch</code></a> for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Unhandled exception from route handler</label><label for="__tabbed_14_2">Route handler exception caught by a middleware</label><label for="__tabbed_14_3">Middleware short-circuit by raising exception</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>An exception wasn't caught by any middleware during <code>next_middleware()</code> block, therefore it propagates all the way back to the client as HTTP 500.</p>
+<p><center>
+<img alt="Unhandled exceptions" src="../../../media/middlewares_unhandled_route_exception-light.svg#only-light" />
+<img alt="Unhandled exceptions" src="../../../media/middlewares_unhandled_route_exception-dark.svg#only-dark" /></p>
+<p><em>Unhandled route exceptions propagate back to the client</em>
+</center></p>
+</div>
+<div class="tabbed-block">
+<p>An exception was only caught by the third middleware, resuming the normal execution of each <code>After</code> logic for the second and first middleware.</p>
+<p><center>
+<img alt="Middleware handling exceptions" src="../../../media/middlewares_catch_route_exception-light.svg#only-light" />
+<img alt="Middleware handling exceptions" src="../../../media/middlewares_catch_route_exception-dark.svg#only-dark" /></p>
+<p><em>Unhandled route exceptions propagate back to the client</em>
+</center></p>
+</div>
+<div class="tabbed-block">
+<p>The third middleware short-circuited the chain by raising an exception and completely skipping the fourth middleware. Because we only caught it in  the first middleware, it skipped the <code>After</code> logic in the second middleware.</p>
+<p><center>
+<img alt="Catching exceptions" src="../../../media/middlewares_catch_exception-light.svg#only-light" />
+<img alt="Catching exceptions" src="../../../media/middlewares_catch_exception-dark.svg#only-dark" /></p>
+<p><em>Middleware handling short-circuit exceptions</em>
+</center></p>
+</div>
+</div>
+</div>
+<h4 id="extending-middlewares">Extending middlewares<a class="headerlink" href="#extending-middlewares" title="Permanent link">&para;</a></h4>
+<p>You can implement <code>BaseMiddlewareHandler</code> interface to create middlewares that accept configuration, or perform complex operations (<em>see <a href="#being-a-good-citizen">being a good citizen section</a></em>).</p>
+<p>As a practical example, let's refactor our correlation ID middleware so it accepts a custom HTTP Header to look for.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Authoring class-based middlewares with BaseMiddlewareHandler</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.middlewares</span> <span class="kn">import</span> <span class="n">BaseMiddlewareHandler</span><span class="p">,</span> <span class="n">NextMiddleware</span>
+</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="hll"><span class="k">class</span> <span class="nc">CorrelationIdMiddleware</span><span class="p">(</span><span class="n">BaseMiddlewareHandler</span><span class="p">):</span>
+</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># (1)!</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract and inject correlation ID in response</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        header : str</span>
+<span class="sd">            HTTP Header to extract correlation ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">header</span> <span class="o">=</span> <span class="n">header</span>
+
+<span class="hll">    <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">app</span><span class="p">:</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">next_middleware</span><span class="p">:</span> <span class="n">NextMiddleware</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Response</span><span class="p">:</span>  <span class="c1"># (2)!</span>
+</span>        <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>
+        <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>
+            <span class="n">default_value</span><span class="o">=</span><span class="n">request_id</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># (3)!</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>
+
+        <span class="k">return</span> <span class="n">response</span>
+
+
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span> <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">CorrelationIdMiddleware</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">)])</span>  <span class="c1"># (4)!</span>
+</span><span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
+    <span class="n">todos</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
+    <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="c1"># for brevity, we&#39;ll limit to the first 10 only</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>You can add any constructor argument like you normally would</li>
+<li>We implement <code>handler</code> just like we <a href="#middleware">did before</a> with the only exception of the <code>self</code> argument, since it's a method.</li>
+<li>Get response from the next middleware (if any) or from <code>/todos</code> route.</li>
+<li>Register an instance of <code>CorrelationIdMiddleware</code>.</li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Class-based <strong>vs</strong> function-based middlewares</p>
+<p>When registering a middleware, we expect a callable in both cases. For class-based middlewares, <code>BaseMiddlewareHandler</code> is doing the work of calling your <code>handler</code> method with the correct parameters, hence why we expect an instance of it.</p>
+</div>
+<h4 id="native-middlewares">Native middlewares<a class="headerlink" href="#native-middlewares" title="Permanent link">&para;</a></h4>
+<p>These are native middlewares that may become native features depending on customer demand.</p>
+<table>
+<thead>
+<tr>
+<th>Middleware</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="/api/event_handler/middlewares/schema_validation.html" target="_blank">SchemaValidationMiddleware</a></td>
+<td>Validates API request body and response against JSON Schema, using <a href="../../../utilities/validation/" target="_blank">Validation utility</a></td>
+</tr>
+</tbody>
+</table>
+<h4 id="being-a-good-citizen">Being a good citizen<a class="headerlink" href="#being-a-good-citizen" title="Permanent link">&para;</a></h4>
+<p>Middlewares can add subtle improvements to request/response processing, but also add significant complexity if you're not careful.</p>
+<p>Keep the following in mind when authoring middlewares for Event Handler:</p>
+<ol>
+<li><strong>Use built-in features over middlewares</strong>. We include built-in features like <a href="#cors">CORS</a>, <a href="#compress">compression</a>, <a href="#binary-responses">binary responses</a>, <a href="#exception-handling">global exception handling</a>, and <a href="#debug-mode">debug mode</a> to reduce the need for middlewares.</li>
+<li><strong>Call the next middleware</strong>. Return the result of <code>next_middleware(app)</code>, or a <a href="#fine-grained-responses">Response object</a> when you want to <a href="#returning-early">return early</a>.</li>
+<li><strong>Keep a lean scope</strong>. Focus on a single task per middleware to ease composability and maintenance. In <a href="#debug-mode">debug mode</a>, we also print out the order middlewares will be triggered to ease operations.</li>
+<li><strong>Catch your own exceptions</strong>. Catch and handle known exceptions to your logic. Unless you want to raise <a href="#raising-http-errors">HTTP Errors</a>, or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the <a href="#exception-handling">exception_handler</a> decorator.</li>
+<li><strong>Use context to share data</strong>. Use <code>app.append_context</code> to <a href="#sharing-contextual-data">share contextual data</a> between middlewares and route handlers, and <code>app.context.get(key)</code> to fetch them. We clear all contextual data at the end of every request.</li>
+</ol>
 <h3 id="fine-grained-responses">Fine grained responses<a class="headerlink" href="#fine-grained-responses" title="Permanent link">&para;</a></h3>
 <p>You can use the <code>Response</code> class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.</p>
 <details class="info" open="open">
@@ -3924,7 +4691,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Using multiple values for HTTP headers in ALB?</summary>
 <p>Make sure you <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers" target="_blank">enable the multi value headers feature</a> to serialize response headers correctly.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">fine_grained_responses.py</label><label for="__tabbed_11_2">fine_grained_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">fine_grained_responses.py</label><label for="__tabbed_15_2">fine_grained_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4046,7 +4813,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Warning</summary>
 <p>The client must send the <code>Accept-Encoding</code> header, otherwise a normal response will be sent.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">compressing_responses_using_route.py</label><label for="__tabbed_12_2">compressing_responses_using_response.py</label><label for="__tabbed_12_3">compressing_responses.json</label><label for="__tabbed_12_4">compressing_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:4"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">compressing_responses_using_route.py</label><label for="__tabbed_16_2">compressing_responses_using_response.py</label><label for="__tabbed_16_3">compressing_responses.json</label><label for="__tabbed_16_4">compressing_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4245,7 +5012,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Note</summary>
 <p>Lambda Function URLs handle binary media types automatically.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:4"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><input id="__tabbed_13_4" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">binary_responses.py</label><label for="__tabbed_13_2">binary_responses_logo.svg</label><label for="__tabbed_13_3">binary_responses.json</label><label for="__tabbed_13_4">binary_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">binary_responses.py</label><label for="__tabbed_17_2">binary_responses_logo.svg</label><label for="__tabbed_17_3">binary_responses.json</label><label for="__tabbed_17_4">binary_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4560,12 +5327,18 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="split-routes-with-router">Split routes with Router<a class="headerlink" href="#split-routes-with-router" title="Permanent link">&para;</a></h3>
-<p>As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the <code>Router</code> feature is useful.</p>
+<p>As you grow the number of routes a given Lambda function should handle, it is natural to either break into smaller Lambda functions, or split routes into separate files to ease maintenance - that's where the <code>Router</code> feature is useful.</p>
 <p>Let's assume you have <code>split_route.py</code> as your Lambda function entrypoint and routes in <code>split_route_module.py</code>. This is how you'd use the <code>Router</code> feature.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">split_route_module.py</label><label for="__tabbed_14_2">split_route.py</label></div>
+<!-- markdownlint-disable MD013 -->
+
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">split_route_module.py</label><label for="__tabbed_18_2">split_route.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>We import <strong>Router</strong> instead of <strong>APIGatewayRestResolver</strong>; syntax wise is exactly the same.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>This means all methods, including <a href="#middleware">middleware</a> will work as usual.</p>
+</div>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -4598,7 +5371,11 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="normal">30</span>
 <span class="normal">31</span>
 <span class="normal">32</span>
-<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Tracer</span>
@@ -4625,8 +5402,12 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="hll"><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos/&lt;todo_id&gt;&quot;</span><span class="p">)</span>
 </span><span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
 <span class="k">def</span> <span class="nf">get_todo_by_id</span><span class="p">(</span><span class="n">todo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># value come as str</span>
-<span class="hll">    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment] # sentinel typing # noqa: E501</span>
-</span>
+<span class="hll">    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span>
+</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">,</span>
+        <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># noqa: E501</span>
+
     <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">todo_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">})</span>
     <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
 
@@ -4635,6 +5416,10 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </div>
 <div class="tabbed-block">
 <p>We use <code>include_router</code> method and include all user routers registered in the <code>router</code> global object.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This method merges routes, <a href="#sharing-contextual-data">context</a> and <a href="#middleware">middleware</a> from <code>Router</code> into the main resolver instance (<code>APIGatewayRestResolver()</code>).</p>
+</div>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -4662,7 +5447,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 <span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
-<span class="hll"><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">split_route_module</span><span class="o">.</span><span class="n">router</span><span class="p">)</span>
+<span class="hll"><span class="n">app</span><span class="o">.</span><span class="n">include_router</span><span class="p">(</span><span class="n">split_route_module</span><span class="o">.</span><span class="n">router</span><span class="p">)</span>  <span class="c1"># (1)!</span>
 </span>
 
 <span class="c1"># You can continue to use other utilities just as before</span>
@@ -4671,13 +5456,17 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
+<ol>
+<li>When using <a href="#middleware">middleware</a> in both <code>Router</code> and main resolver, you can make <code>Router</code> middlewares to take precedence by using <code>include_router</code> before <code>app.use()</code>.</li>
+</ol>
 </div>
 </div>
 </div>
+<!-- markdownlint-enable MD013 -->
 <h4 id="route-prefix">Route prefix<a class="headerlink" href="#route-prefix" title="Permanent link">&para;</a></h4>
 <p>In the previous example, <code>split_route_module.py</code> routes had a <code>/todos</code> prefix. This might grow over time and become repetitive.</p>
 <p>When necessary, you can set a prefix when including a router object. This means you could remove <code>/todos</code> prefix altogether.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">split_route_prefix.py</label><label for="__tabbed_15_2">split_route_prefix_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">split_route_prefix.py</label><label for="__tabbed_19_2">split_route_prefix_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4755,7 +5544,11 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
-<span class="normal">36</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Tracer</span>
@@ -4782,7 +5575,11 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <span class="hll"><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/&lt;todo_id&gt;&quot;</span><span class="p">)</span>
 </span><span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
 <span class="k">def</span> <span class="nf">get_todo_by_id</span><span class="p">(</span><span class="n">todo_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>  <span class="c1"># value come as str</span>
-    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">,</span> <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment] # sentinel typing # noqa: E501</span>
+    <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">router</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_header_value</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">,</span>
+        <span class="n">case_sensitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># sentinel typing # noqa: E501</span>
 
     <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">todo_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;X-Api-Key&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">})</span>
     <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
@@ -4871,14 +5668,10 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <h4 id="sharing-contextual-data">Sharing contextual data<a class="headerlink" href="#sharing-contextual-data" title="Permanent link">&para;</a></h4>
 <p>You can use <code>append_context</code> when you want to share data between your App and Router instances. Any data you share will be available via the <code>context</code> dictionary available in your App or Router context.</p>
 <details class="info" open="open">
-<summary>Info</summary>
-<p>For safety, we always clear any data available in the <code>context</code> dictionary after each invocation.</p>
+<summary>We always clear data available in <code>context</code> after each invocation.</summary>
+<p>This can be useful for middlewares injecting contextual information before a request is processed.</p>
 </details>
-<details class="tip" open="open">
-<summary>Tip</summary>
-<p>This can also be useful for middlewares injecting contextual information before a request is processed.</p>
-</details>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">split_route_append_context.py</label><label for="__tabbed_16_2">split_route_append_context_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">split_route_append_context.py</label><label for="__tabbed_20_2">split_route_append_context_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5074,10 +5867,10 @@ your development, building, deployment tooling need to accommodate the distinct 
 </ul>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>You can test your routes by passing a proxy event request with required params.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">API Gateway REST API</label><label for="__tabbed_17_2">API Gateway HTTP API</label><label for="__tabbed_17_3">Application Load Balancer</label><label for="__tabbed_17_4">Lambda Function URL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">API Gateway REST API</label><label for="__tabbed_21_2">API Gateway HTTP API</label><label for="__tabbed_21_3">Application Load Balancer</label><label for="__tabbed_21_4">Lambda Function URL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_18_2">assert_rest_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_22_2">assert_rest_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5199,7 +5992,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">assert_http_api_resolver_response.py</label><label for="__tabbed_19_2">assert_http_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">assert_http_api_resolver_response.py</label><label for="__tabbed_23_2">assert_http_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5333,7 +6126,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_20_2">assert_alb_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_24_2">assert_alb_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5457,7 +6250,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_21_2">assert_function_url_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_25_2">assert_function_url_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5608,7 +6401,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-08-14
+      2023-09-08
     
   </small>
 </div>
