@@ -1,8 +1,8 @@
 from aws_lambda_powertools.utilities.data_classes import (
+    KinesisFirehoseDataTransformationRecord,
+    KinesisFirehoseDataTransformationRecordMetadata,
+    KinesisFirehoseDataTransformationResponse,
     KinesisFirehoseEvent,
-    KinesisFirehoseResponse,
-    KinesisFirehoseResponseRecord,
-    KinesisFirehoseResponseRecordMetadata,
 )
 from tests.functional.utils import load_event
 
@@ -11,13 +11,13 @@ def test_kinesis_firehose_response():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     parsed_event = KinesisFirehoseEvent(data=raw_event)
 
-    response = KinesisFirehoseResponse()
+    response = KinesisFirehoseDataTransformationResponse()
     for record in parsed_event.records:
         # if data was delivered as json; caches loaded value
         data = record.data_as_text
 
-        metadata_partition = KinesisFirehoseResponseRecordMetadata(partition_keys={"year": 2023})
-        processed_record = KinesisFirehoseResponseRecord(
+        metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": 2023})
+        processed_record = KinesisFirehoseDataTransformationRecord(
             record_id=record.record_id,
             result="Ok",
             metadata=metadata_partition,
@@ -43,12 +43,12 @@ def test_kinesis_firehose_create_response():
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
     parsed_event = KinesisFirehoseEvent(data=raw_event)
 
-    response = KinesisFirehoseResponse()
+    response = KinesisFirehoseDataTransformationResponse()
     for record in parsed_event.records:
         # if data was delivered as json; caches loaded value
         data = record.data_as_text
-        metadata_partition = KinesisFirehoseResponseRecordMetadata(partition_keys={"year": 2023})
-        processed_record = record.create_firehose_response_record(
+        metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": 2023})
+        processed_record = record.build_data_transformation_response(
             result="Ok",
             metadata=metadata_partition,
         )

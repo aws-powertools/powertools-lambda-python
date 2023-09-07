@@ -1,6 +1,6 @@
 import base64
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
 from typing_extensions import Literal
@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
 @dataclass
-class KinesisFirehoseResponseRecordMetadata:
+class KinesisFirehoseDataTransformationRecordMetadata:
     """
     Documentation:
     --------------
@@ -18,14 +18,14 @@ class KinesisFirehoseResponseRecordMetadata:
 
     partition_keys: Optional[Dict[str, str]]
 
-    def asdict(self) -> Optional[Dict]:
+    def asdict(self) -> Dict:
         if self.partition_keys is not None:
             return {"partitionKeys": self.partition_keys}
-        return None
+        return {}
 
 
 @dataclass
-class KinesisFirehoseResponseRecord:
+class KinesisFirehoseDataTransformationRecord:
     """Record in Kinesis Data Firehose response object
 
     Documentation:
@@ -36,13 +36,13 @@ class KinesisFirehoseResponseRecord:
     # Record ID; uniquely identifies this record within the current batch"""
     record_id: str
     # Processing result, supported value: Ok, Dropped, ProcessingFailed"""
-    result: Literal["Ok", "Dropped", "ProcessingFailed"]
+    result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok"
     # data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
     # use either function like `data_from_text`, `data_from_json` to populate data"""
     data: Optional[str] = None
     # Optional: Metadata associated with this record; can contain partition keys
     # See - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
-    metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
+    metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None
     _json_data: Optional[Any] = None
     json_serializer: Callable = json.dumps
     json_deserializer: Callable = json.loads
@@ -70,31 +70,31 @@ class KinesisFirehoseResponseRecord:
         return r
 
     @property
-    def data_as_bytes(self) -> Optional[bytes]:
+    def data_as_bytes(self) -> bytes:
         """Decoded base64-encoded data as bytes"""
         if not self.data:
-            return None
+            return b""
         return base64.b64decode(self.data)
 
     @property
-    def data_as_text(self) -> Optional[str]:
+    def data_as_text(self) -> str:
         """Decoded base64-encoded data as text"""
-        if not self.data_as_bytes:
-            return None
+        if not self.data:
+            return ""
         return self.data_as_bytes.decode("utf-8")
 
     @property
-    def data_as_json(self) -> Optional[Dict]:
+    def data_as_json(self) -> Dict:
         """Decoded base64-encoded data loaded to json"""
-        if not self.data_as_text:
-            return None
+        if not self.data:
+            return {}
         if self._json_data is None:
             self._json_data = self.json_deserializer(self.data_as_text)
         return self._json_data
 
 
 @dataclass
-class KinesisFirehoseResponse:
+class KinesisFirehoseDataTransformationResponse:
     """Kinesis Data Firehose response object
 
     Documentation:
@@ -108,13 +108,10 @@ class KinesisFirehoseResponse:
         optional parameter at start. can be added later using `add_record` function.
     """
 
-    records: Optional[List[KinesisFirehoseResponseRecord]] = None
+    records: List[KinesisFirehoseDataTransformationRecord] = field(default_factory=list)
 
-    def add_record(self, record: KinesisFirehoseResponseRecord):
-        if self.records:
-            self.records.append(record)
-        else:
-            self.records = [record]
+    def add_record(self, record: KinesisFirehoseDataTransformationRecord):
+        self.records.append(record)
 
     def asdict(self) -> Dict:
         if not self.records:
@@ -196,12 +193,12 @@ class KinesisFirehoseRecord(DictWrapper):
             self._json_data = self._json_deserializer(self.data_as_text)
         return self._json_data
 
-    def create_firehose_response_record(
+    def build_data_transformation_response(
         self,
-        result: Literal["Ok", "Dropped", "ProcessingFailed"],
+        result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok",
         data: Optional[str] = None,
-        metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None,
-    ) -> KinesisFirehoseResponseRecord:
+        metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None,
+    ) -> KinesisFirehoseDataTransformationRecord:
         """create a KinesisFirehoseResponseRecord directly using the record_id and given values
         Parameters
         ----------
@@ -214,7 +211,12 @@ class KinesisFirehoseRecord(DictWrapper):
             Metadata associated with this record; can contain partition keys
             - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
         """
-        return KinesisFirehoseResponseRecord(record_id=self.record_id, result=result, data=data, metadata=metadata)
+        return KinesisFirehoseDataTransformationRecord(
+            record_id=self.record_id,
+            result=result,
+            data=data,
+            metadata=metadata,
+        )
 
 
 class KinesisFirehoseEvent(DictWrapper):
