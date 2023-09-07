@@ -18,64 +18,64 @@ class NextMiddleware(Protocol):
 
 
 class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
-    """
-    Base class for Middleware Handlers
+    """Base implementation for Middlewares to run code before and after in a chain.
+
 
     This is the middleware handler function where middleware logic is implemented.
-    Here you have the option to execute code before and after the next handler in the
-    middleware chain is called.  The next middleware handler is represented by `next_middleware`.
+    The next middleware handler is represented by `next_middleware`, returning a Response object.
 
+    Examples
+    --------
+
+    **Correlation ID Middleware**
 
     ```python
+    import requests
 
-    # Place code here for actions BEFORE the next middleware handler is called
-    # or optionally raise an exception to short-circuit the middleware execution chain
+    from aws_lambda_powertools import Logger
+    from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+    from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
 
-    # Get the response from the NEXT middleware handler (optionally injecting custom
-    # arguments into the next_middleware call)
-    result: Response = next_middleware(app, my_custom_arg="handled")
+    app = APIGatewayRestResolver()
+    logger = Logger()
 
-    # Place code here for actions AFTER the next middleware handler is called
 
-    return result
+    class CorrelationIdMiddleware(BaseMiddlewareHandler):
+        def __init__(self, header: str):
+            super().__init__()
+            self.header = header
+
+        def handler(self, app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:
+            # BEFORE logic
+            request_id = app.current_event.request_context.request_id
+            correlation_id = app.current_event.get_header_value(
+                name=self.header,
+                default_value=request_id,
+            )
+
+            # Call next middleware or route handler ('/todos')
+            response = next_middleware(app)
+
+            # AFTER logic
+            response.headers[self.header] = correlation_id
+
+            return response
+
+
+    @app.get("/todos", middlewares=[CorrelationIdMiddleware(header="x-correlation-id")])
+    def get_todos():
+        todos: requests.Response = requests.get("https://jsonplaceholder.typicode.com/todos")
+        todos.raise_for_status()
+
+        # for brevity, we'll limit to the first 10 only
+        return {"todos": todos.json()[:10]}
+
+
+    @logger.inject_lambda_context
+    def lambda_handler(event, context):
+        return app.resolve(event, context)
+
     ```
-
-    To implement ERROR style middleware wrap the call to `next_middleware` in a `try..except`
-    block - you can also catch specific types of errors this way so your middleware only handles
-    specific types of exceptions.
-
-    for example:
-
-    ```python
-
-    try:
-        result: Response = next_middleware(app, my_custom_arg="handled")
-    except MyCustomValidationException as e:
-        # Make sure we send back a 400 response for any Custom Validation Exceptions.
-        result.status_code = 400
-        result.body = {"message": "Failed validation"}
-        logger.exception(f"Failed validation when handling route: {app.current_event.path}")
-
-    return result
-    ```
-
-    To short-circuit the middleware execution chain you can either raise an exception to cause
-    the function call stack to unwind naturally OR you can simple not call the `next_middleware`
-    handler to get the response from the next middleware handler in the chain.
-
-    for example:
-    If you wanted to ensure API callers cannot call a DELETE verb on your API (regardless of defined routes)
-    you could do so with the following middleware implementation.
-
-    ```python
-    # If invalid http_method is used - return a 405 error
-    # and return early to short-circuit the middleware execution chain
-    if app.current_event.http_method == "DELETE":
-        return Response(status_code=405, body={"message": "DELETE verb not allowed"})
-
-
-    # Call the next middleware in the chain (needed for when condition above is valid)
-    return next_middleware(app)
 
     """
 
@@ -111,7 +111,7 @@ class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
         ----------
         app: ApiGatewayResolver
             An instance of an Event Handler that implements ApiGatewayResolver
-        next_middleware: Callable[..., Any]
+        next_middleware: NextMiddleware
             The next middleware handler in the chain
 
         Returns
