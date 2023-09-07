@@ -691,13 +691,18 @@ You can instruct event handler to use a custom serializer to best suit your need
 
 ### Split routes with Router
 
-As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
+As you grow the number of routes a given Lambda function should handle, it is natural to either break into smaller Lambda functions, or split routes into separate files to ease maintenance - that's where the `Router` feature is useful.
 
 Let's assume you have `split_route.py` as your Lambda function entrypoint and routes in `split_route_module.py`. This is how you'd use the `Router` feature.
+
+<!-- markdownlint-disable MD013 -->
 
 === "split_route_module.py"
 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
+
+    !!! info
+        This means all methods, including [middleware](#middleware) will work as usual.
 
     ```python hl_lines="5 13 16 25 28"
     --8<-- "examples/event_handler_rest/src/split_route_module.py"
@@ -707,10 +712,16 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
+    !!! note
+          This method merges routes, [context](#sharing-contextual-data) and [middleware](#middleware) from `Router` into the main resolver instance (`APIGatewayRestResolver()`).
+
 	```python hl_lines="11"
     --8<-- "examples/event_handler_rest/src/split_route.py"
 	```
 
+    1. When using [middleware](#middleware) in both `Router` and main resolver, you can make `Router` middlewares to take precedence by using `include_router` before `app.use()`.
+
+<!-- markdownlint-enable MD013 -->
 #### Route prefix
 
 In the previous example, `split_route_module.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
@@ -748,11 +759,8 @@ You can use specialized router classes according to the type of event that you a
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
 
-???+ info
-    For safety, we always clear any data available in the `context` dictionary after each invocation.
-
-???+ tip
-    This can also be useful for middlewares injecting contextual information before a request is processed.
+???+ info "We always clear data available in `context` after each invocation."
+    This can be useful for middlewares injecting contextual information before a request is processed.
 
 === "split_route_append_context.py"
 
@@ -796,40 +804,6 @@ This is a sample project layout for a monolithic function with routes split in d
         ├── conftest.py       # pytest fixtures for the functional tests
         └── test_main.py      # functional tests for the main lambda handler
 ```
-
-#### DRAFT Router Middlewares
-
-Middleware functions used in the Router instance will apply to all API routes and will always be processed first in the order they are added to the Router.  Route specific middleware added to each route will then be processed in the order they were added in the route definition.
-
-???+ tip
-    **Router Middleware processing Order**
-
-    1. Global middlewares defined on the parent Router
-    2. Route specific Middlewares
-
-    To maximize the re-usability of your middleware functions we recommend using the **BaseRouter** or **Router** classes providing the **current_event** object contains the required fields for your middleware.
-
-=== "route_middleware.py"
-    ```python hl_lines="9 16"
-    --8<-- "examples/event_handler_rest/src/route_middleware.py"
-    ```
-
-=== "all_routes_middleware.py"
-    ```python hl_lines="9 15"
-    --8<-- "examples/event_handler_rest/src/all_routes_middleware.py"
-    ```
-
-=== "custom_middlewares.py"
-    ```python hl_lines="12 14 18 21 23"
-    --8<-- "examples/event_handler_rest/src/custom_middlewares.py"
-    ```
-
-The application of middleware functions for split routers is the same as using the main Resolver classes.  When the split routes are combined in the API Rest resolver all Router based and route base middleware will be merged into the parent instance.
-
-???+ info "Split Router Middleware processing Order"
-    1. Global Middleware defined on the parent Router
-    2. Global Middleware for each split Router, in the order they are included
-    3. Route specific Middlewares
 
 ### Considerations
 
