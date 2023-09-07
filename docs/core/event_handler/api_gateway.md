@@ -10,6 +10,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
+* Works with micro function (one or a few routes) and monolithic functions (all routes)
 
 ## Getting started
 
