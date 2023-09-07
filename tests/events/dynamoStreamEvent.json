@@ -4,6 +4,7 @@
       "eventID": "1",
       "eventVersion": "1.0",
       "dynamodb": {
+        "ApproximateCreationDateTime": 1693997155.0,
         "Keys": {
           "Id": {
             "N": "101"

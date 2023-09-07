@@ -33,7 +33,7 @@ def test_dynamodb_stream_trigger_event():
     assert record.user_identity is None
     dynamodb = record.dynamodb
     assert dynamodb is not None
-    assert dynamodb.approximate_creation_date_time is None
+    assert dynamodb.approximate_creation_date_time == record_raw["dynamodb"]["ApproximateCreationDateTime"]
     keys = dynamodb.keys
     assert keys is not None
     assert keys["Id"] == decimal_context.create_decimal(101)
