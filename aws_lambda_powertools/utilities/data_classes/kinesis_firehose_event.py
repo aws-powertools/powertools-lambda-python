@@ -33,19 +33,16 @@ class KinesisFirehoseResponseRecord:
     - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
     """
 
-    """Record ID; uniquely identifies this record within the current batch"""
+    # Record ID; uniquely identifies this record within the current batch"""
     record_id: str
-    """processing result, supported value: Ok, Dropped, ProcessingFailed"""
+    # Processing result, supported value: Ok, Dropped, ProcessingFailed"""
     result: Literal["Ok", "Dropped", "ProcessingFailed"]
-    """data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
-            use either function like `data_from_text`, `data_from_json` to populate data"""
+    # data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
+    # use either function like `data_from_text`, `data_from_json` to populate data"""
     data: Optional[str] = None
-    """
-    Optional: Metadata associated with this record; can contain partition keys
-    - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
-    """
+    # Optional: Metadata associated with this record; can contain partition keys
+    # See - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
     metadata: Optional[KinesisFirehoseResponseRecordMetadata] = None
-    """Json data for caching json.dump result"""
     _json_data: Optional[Any] = None
     json_serializer: Callable = json.dumps
     json_deserializer: Callable = json.loads
