@@ -2,7 +2,7 @@
   "version": "1.0",
   "resource": "/my/path",
   "path": "/my/path",
-  "httpMethod": "GET",
+  "httpMethod": "POST",
   "headers": {
     "Header1": "value1",
     "Header2": "value2",
@@ -76,6 +76,6 @@
   },
   "pathParameters": null,
   "stageVariables": null,
-  "body": "Hello from Lambda!",
+  "body": "{\"message\": \"hello world\", \"username\": \"lessa\"}",
   "isBase64Encoded": false
 }
