@@ -8,7 +8,7 @@ from typing_extensions import Literal
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-@dataclass
+@dataclass(repr=False, order=False, slots=True, frozen=True)
 class KinesisFirehoseDataTransformationRecordMetadata:
     """
     Documentation:
@@ -24,7 +24,7 @@ class KinesisFirehoseDataTransformationRecordMetadata:
         return {}
 
 
-@dataclass
+@dataclass(repr=False, order=False, slots=True)
 class KinesisFirehoseDataTransformationRecord:
     """Record in Kinesis Data Firehose response object
 
@@ -93,7 +93,7 @@ class KinesisFirehoseDataTransformationRecord:
         return self._json_data
 
 
-@dataclass
+@dataclass(repr=False, order=False, slots=True)
 class KinesisFirehoseDataTransformationResponse:
     """Kinesis Data Firehose response object
 
