@@ -38,7 +38,7 @@ datadog-lambda = { version = "^4.77.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
-pytest = "^7.4.1"
+pytest = "^7.4.2"
 black = "^23.3"
 boto3 = "^1.18"
 isort = "^5.11.5"
