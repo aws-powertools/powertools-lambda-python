@@ -1161,6 +1161,26 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
     --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
     ```
 
+### Secrets Manager
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, SecretManagerEvent
+
+    @event_source(data_class=SecretManagerEvent)
+    def lambda_handler(event: SecretManagerEvent, context):
+        # Multiple records can be delivered in a single event
+        service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
+        create_secret(service_client, event.secret_id, event.client_request_token)
+        ...
+    ```
+=== "Secrets Manager Example Event"
+
+    ```json
+    --8<-- "tests/events/secretManagerEvent.json"
+    ```
+
 ## Advanced
 
 ### Debugging

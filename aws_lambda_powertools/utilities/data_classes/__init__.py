@@ -18,7 +18,7 @@ from .kinesis_firehose_event import KinesisFirehoseEvent
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
 from .s3_event import S3Event, S3EventBridgeNotificationEvent
-from .secrets_event import SecretManagerEvents
+from .secrets_event import SecretManagerEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
@@ -27,7 +27,7 @@ from .vpc_lattice import VPCLatticeEvent
 __all__ = [
     "APIGatewayProxyEvent",
     "APIGatewayProxyEventV2",
-    "SecretManagerEvents",
+    "SecretManagerEvent",
     "AppSyncResolverEvent",
     "ALBEvent",
     "CloudWatchDashboardCustomWidgetEvent",
