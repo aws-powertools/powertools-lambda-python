@@ -9,19 +9,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Match,
-    Optional,
-    Pattern,
-    Set,
-    Tuple,
-    Type,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
@@ -218,13 +206,129 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
+        middlewares: Optional[List[Callable[..., Response]]],
     ):
+        """
+
+        Parameters
+        ----------
+
+        method: str
+            The HTTP method, example "GET"
+        rule: Pattern
+            The route rule, example "/my/path"
+        func: Callable
+            The route handler function
+        cors: bool
+            Whether or not to enable CORS for this route
+        compress: bool
+            Whether or not to enable gzip compression for this route
+        cache_control: Optional[str]
+            The cache control header value, example "max-age=3600"
+        middlewares: Optional[List[Callable[..., Response]]]
+            The list of route middlewares to be called in order.
+        """
         self.method = method.upper()
         self.rule = rule
         self.func = func
+        self._middleware_stack = func
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
+        self.middlewares = middlewares or []
+
+        # _middleware_stack_built is used to ensure the middleware stack is only built once.
+        self._middleware_stack_built = False
+
+    def __call__(
+        self,
+        router_middlewares: List[Callable],
+        app: "ApiGatewayResolver",
+        route_arguments: Dict[str, str],
+    ) -> Union[Dict, Tuple, Response]:
+        """Calling the Router class instance will trigger the following actions:
+            1. If Route Middleware stack has not been built, build it
+            2. Call the Route Middleware stack wrapping the original function
+                handler with the app and route arguments.
+
+        Parameters
+        ----------
+        router_middlewares: List[Callable]
+            The list of Router Middlewares (assigned to ALL routes)
+        app: "ApiGatewayResolver"
+            The ApiGatewayResolver instance to pass into the middleware stack
+        route_arguments: Dict[str, str]
+            The route arguments to pass to the app function (extracted from the Api Gateway
+            Lambda Message structure from AWS)
+
+        Returns
+        -------
+        Union[Dict, Tuple, Response]
+            API Response object in ALL cases, except when the original API route
+            handler is called which may also return a Dict, Tuple, or Response.
+        """
+
+        # Save CPU cycles by building middleware stack once
+        if not self._middleware_stack_built:
+            self._build_middleware_stack(router_middlewares=router_middlewares)
+
+        # If debug is turned on then output the middleware stack to the console
+        if app._debug:
+            print(f"\nProcessing Route:::{self.func.__name__} ({app.context['_path']})")
+            # Collect ALL middleware for debug printing - include internal _registered_api_adapter
+            all_middlewares = router_middlewares + self.middlewares + [_registered_api_adapter]
+            print("\nMiddleware Stack:")
+            print("=================")
+            print("\n".join(getattr(item, "__name__", "Unknown") for item in all_middlewares))
+            print("=================")
+
+        # Add Route Arguments to app context
+        app.append_context(_route_args=route_arguments)
+
+        # Call the Middleware Wrapped _call_stack function handler with the app
+        return self._middleware_stack(app)
+
+    def _build_middleware_stack(self, router_middlewares: List[Callable[..., Any]]) -> None:
+        """
+        Builds the middleware stack for the handler by wrapping each
+        handler in an instance of MiddlewareWrapper which is used to contain the state
+        of each middleware step.
+
+        Middleware is represented by a standard Python Callable construct.  Any Middleware
+        handler wanting to short-circuit the middlware call chain can raise an exception
+        to force the Python call stack created by the handler call-chain to naturally un-wind.
+
+        This becomes a simple concept for developers to understand and reason with - no additional
+        gymanstics other than plain old try ... except.
+
+        Notes
+        -----
+        The Route Middleware stack is processed in reverse order. This is so the stack of
+        middleware handlers is applied in the order of being added to the handler.
+        """
+        all_middlewares = router_middlewares + self.middlewares
+        logger.debug(f"Building middleware stack: {all_middlewares}")
+
+        # IMPORTANT:
+        # this must be the last middleware in the stack (tech debt for backward
+        # compatibility purposes)
+        #
+        # This adapter will:
+        #   1. Call the registered API passing only the expected route arguments extracted from the path
+        # and not the middleware.
+        #   2. Adapt the response type of the route handler (Union[Dict, Tuple, Response])
+        # and normalise into a Response object so middleware will always have a constant signature
+        all_middlewares.append(_registered_api_adapter)
+
+        # Wrap the original route handler function in the middleware handlers
+        # using the MiddlewareWrapper class callable construct in reverse order to
+        # ensure middleware is applied in the order the user defined.
+        #
+        # Start with the route function and wrap from last to the first Middleware handler.
+        for handler in reversed(all_middlewares):
+            self._middleware_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._middleware_stack)
+
+        self._middleware_stack_built = True
 
 
 class ResponseBuilder:
@@ -268,7 +372,11 @@ class ResponseBuilder:
         bool
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
-        encoding: str = event.get_header_value(name="accept-encoding", default_value="", case_sensitive=False)  # type: ignore[assignment] # noqa: E501
+        encoding: str = event.get_header_value(
+            name="accept-encoding",
+            default_value="",
+            case_sensitive=False,
+        )  # noqa: E501
         if "gzip" in encoding:
             if response_compression is not None:
                 return response_compression  # e.g., Response(compress=False/True))
@@ -322,6 +430,8 @@ class BaseRouter(ABC):
     current_event: BaseProxyEvent
     lambda_context: LambdaContext
     context: dict
+    _router_middlewares: List[Callable] = []
+    processed_stack_frames: List[str] = []
 
     @abstractmethod
     def route(
@@ -331,10 +441,59 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
 
-    def get(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def use(self, middlewares: List[Callable[..., Response]]) -> None:
+        """
+        Add one or more global middlewares that run before/after route specific middleware.
+
+        NOTE: Middlewares are called in insertion order.
+
+        Parameters
+        ----------
+        middlewares: List[Callable[..., Response]]
+            List of global middlewares to be used
+
+        Examples
+        --------
+
+        Add middlewares to be used for every request processed by the Router.
+
+        ```python
+        from aws_lambda_powertools import Logger
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
+        from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
+
+        logger = Logger()
+        app = APIGatewayRestResolver()
+
+        def log_request_response(app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:
+            logger.info("Incoming request", path=app.current_event.path, request=app.current_event.raw_event)
+
+            result = next_middleware(app)
+            logger.info("Response received", response=result.__dict__)
+
+            return result
+
+        app.use(middlewares=[log_request_response])
+
+
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
+        self._router_middlewares = self._router_middlewares + middlewares
+
+    def get(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
         """Get route decorator with GET `method`
 
         Examples
@@ -357,9 +516,16 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "GET", cors, compress, cache_control)
+        return self.route(rule, "GET", cors, compress, cache_control, middlewares)
 
-    def post(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def post(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
         """Post route decorator with POST `method`
 
         Examples
@@ -383,9 +549,16 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "POST", cors, compress, cache_control)
+        return self.route(rule, "POST", cors, compress, cache_control, middlewares)
 
-    def put(self, rule: str, cors: Optional[bool] = None, compress: bool = False, cache_control: Optional[str] = None):
+    def put(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
         """Put route decorator with PUT `method`
 
         Examples
@@ -409,7 +582,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PUT", cors, compress, cache_control)
+        return self.route(rule, "PUT", cors, compress, cache_control, middlewares)
 
     def delete(
         self,
@@ -417,6 +590,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -440,7 +614,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "DELETE", cors, compress, cache_control)
+        return self.route(rule, "DELETE", cors, compress, cache_control, middlewares)
 
     def patch(
         self,
@@ -448,6 +622,7 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -474,7 +649,19 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PATCH", cors, compress, cache_control)
+        return self.route(rule, "PATCH", cors, compress, cache_control, middlewares)
+
+    def _push_processed_stack_frame(self, frame: str):
+        """
+        Add Current Middleware to the Middleware Stack Frames
+        The stack frames will be used when exceptions are thrown and Powertools
+        debug is enabled by developers.
+        """
+        self.processed_stack_frames.append(frame)
+
+    def _reset_processed_stack(self):
+        """Reset the Processed Stack Frames"""
+        self.processed_stack_frames.clear()
 
     def append_context(self, **additional_context):
         """Append key=value data as routing context"""
@@ -483,6 +670,109 @@ class BaseRouter(ABC):
     def clear_context(self):
         """Resets routing context"""
         self.context.clear()
+
+
+class MiddlewareFrame:
+    """
+    creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
+    middleware functions.  Each instance contains the current middleware and the next
+    middleware function to be called in the stack.
+
+    In this way the middleware stack is constructed in a recursive fashion, with each middleware
+    calling the next as a simple function call.  The actual Python call-stack will contain
+    each MiddlewareStackWrapper "Frame", meaning any Middleware function can cause the
+    entire Middleware call chain to be exited early (short-circuited) by raising an exception
+    or by simply returning early with a custom Response.  The decision to short-circuit the middleware
+    chain is at the user's discretion but instantly available due to the Wrapped nature of the
+    callable constructs in the Middleware stack and each Middleware function having complete control over
+    whether the "Next" handler in the stack is called or not.
+
+    Parameters
+    ----------
+    current_middleware : Callable
+        The current middleware function to be called as a request is processed.
+    next_middleware : Callable
+        The next middleware in the middleware stack.
+    """
+
+    def __init__(
+        self,
+        current_middleware: Callable[..., Any],
+        next_middleware: Callable[..., Any],
+    ) -> None:
+        self.current_middleware: Callable[..., Any] = current_middleware
+        self.next_middleware: Callable[..., Any] = next_middleware
+        self._next_middleware_name = next_middleware.__name__
+
+    @property
+    def __name__(self) -> str:  # noqa: A003
+        """Current middleware name
+
+        It ensures backward compatibility with view functions being callable. This
+        improves debugging since we need both current and next middlewares/callable names.
+        """
+        return self.current_middleware.__name__
+
+    def __str__(self) -> str:
+        """Identify current middleware identity and call chain for debugging purposes."""
+        middleware_name = self.__name__
+        return f"[{middleware_name}] next call chain is {middleware_name} -> {self._next_middleware_name}"
+
+    def __call__(self, app: "ApiGatewayResolver") -> Union[Dict, Tuple, Response]:
+        """
+        Call the middleware Frame to process the request.
+
+        Parameters
+        ----------
+        app: BaseRouter
+            The router instance
+
+        Returns
+        -------
+        Union[Dict, Tuple, Response]
+            (tech-debt for backward compatibility).  The response type should be a
+            Response object in all cases excepting when the original API route handler
+            is called which will return one of 3 outputs.
+
+        """
+        # Do debug printing and push processed stack frame AFTER calling middleware
+        # else the stack frame text of `current calling next` is confusing.
+        logger.debug("MiddlewareFrame: %s", self)
+        app._push_processed_stack_frame(str(self))
+
+        return self.current_middleware(app, self.next_middleware)
+
+
+def _registered_api_adapter(
+    app: "ApiGatewayResolver",
+    next_middleware: Callable[..., Any],
+) -> Union[Dict, Tuple, Response]:
+    """
+    Calls the registered API using the "_route_args" from the Resolver context to ensure the last call
+    in the chain will match the API route function signature and ensure that Powertools passes the API
+    route handler the expected arguments.
+
+    **IMPORTANT: This internal middleware ensures the actual API route is called with the correct call signature
+    and it MUST be the final frame in the middleware stack.  This can only be removed when the API Route
+    function accepts `app: BaseRouter` as the first argument - which is the breaking change.
+
+    Parameters
+    ----------
+    app: ApiGatewayResolver
+        The API Gateway resolver
+    next_middleware: Callable[..., Any]
+        The function to handle the API
+
+    Returns
+    -------
+    Response
+        The API Response Object
+
+    """
+    route_args: Dict = app.context.get("_route_args", {})
+    logger.debug(f"Calling API Route Handler: {route_args}")
+
+    return app._to_response(next_middleware(**route_args))
 
 
 class ApiGatewayResolver(BaseRouter):
@@ -550,6 +840,7 @@ class ApiGatewayResolver(BaseRouter):
         self._debug = self._has_debug(debug)
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
+        self.processed_stack_frames = []
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -561,6 +852,7 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -573,7 +865,15 @@ class ApiGatewayResolver(BaseRouter):
                 cors_enabled = cors
 
             for item in methods:
-                _route = Route(item, self._compile_regex(rule), func, cors_enabled, compress, cache_control)
+                _route = Route(
+                    item,
+                    self._compile_regex(rule),
+                    func,
+                    cors_enabled,
+                    compress,
+                    cache_control,
+                    middlewares,
+                )
 
                 # The more specific route wins.
                 # We store dynamic (/studies/{studyid}) and static routes (/studies/fetch) separately.
@@ -594,6 +894,7 @@ class ApiGatewayResolver(BaseRouter):
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
                     self._cors_methods.add(item.upper())
+
             return func
 
         return register_resolver
@@ -628,7 +929,16 @@ class ApiGatewayResolver(BaseRouter):
         BaseRouter.lambda_context = context
 
         response = self._resolve().build(self.current_event, self._cors)
+
+        # Debug print Processed Middlewares
+        if self._debug:
+            print("\nProcessed Middlewares:")
+            print("======================")
+            print("\n".join(self.processed_stack_frames))
+            print("======================")
+
         self.clear_context()
+
         return response
 
     def __call__(self, event, context) -> Any:
@@ -703,6 +1013,9 @@ class ApiGatewayResolver(BaseRouter):
             match_results: Optional[Match] = route.rule.match(path)
             if match_results:
                 logger.debug("Found a registered route. Calling function")
+                # Add matched Route reference into the Resolver context
+                self.append_context(_route=route, _path=path)
+
                 return self._call_route(route, match_results.groupdict())  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
@@ -765,15 +1078,25 @@ class ApiGatewayResolver(BaseRouter):
             ),
         )
 
-    def _call_route(self, route: Route, args: Dict[str, str]) -> ResponseBuilder:
+    def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
         try:
-            return ResponseBuilder(self._to_response(route.func(**args)), route)
+            # Reset Processed stack for Middleware (for debugging purposes)
+            self._reset_processed_stack()
+
+            return ResponseBuilder(
+                self._to_response(
+                    route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
+                ),
+                route,
+            )
         except Exception as exc:
+            # If exception is handled then return the response builder to reduce noise
             response_builder = self._call_exception_handler(exc, route)
             if response_builder:
                 return response_builder
 
+            logger.exception(exc)
             if self._debug:
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate so
@@ -874,8 +1197,12 @@ class ApiGatewayResolver(BaseRouter):
         # Add reference to parent ApiGatewayResolver to support use cases where people subclass it to add custom logic
         router.api_resolver = self
 
-        # Merge app and router context
+        logger.debug("Merging App context with Router context")
         self.context.update(**router.context)
+
+        logger.debug("Appending Router middlewares into App middlewares.")
+        self._router_middlewares = self._router_middlewares + router._router_middlewares
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
@@ -887,7 +1214,15 @@ class ApiGatewayResolver(BaseRouter):
                 rule = prefix if rule == "/" else f"{prefix}{rule}"
                 new_route = (rule, *route[1:])
 
-            self.route(*new_route)(func)
+            # Middlewares are stored by route separately - must grab them to include
+            middlewares = router._routes_with_middleware.get(new_route)
+
+            # Need to use "type: ignore" here since mypy does not like a named parameter after
+            # tuple expansion since may cause duplicate named parameters in the function signature.
+            # In this case this is not possible since the tuple expansion is from a hashable source
+            # and the `middlewares` List is a non-hashable structure so will never be included.
+            # Still need to ignore for mypy checks or will cause failures (false-positive)
+            self.route(*new_route, middlewares=middlewares)(func)  # type: ignore
 
 
 class Router(BaseRouter):
@@ -895,6 +1230,7 @@ class Router(BaseRouter):
 
     def __init__(self):
         self._routes: Dict[tuple, Callable] = {}
+        self._routes_with_middleware: Dict[tuple, List[Callable]] = {}
         self.api_resolver: Optional[BaseRouter] = None
         self.context = {}  # early init as customers might add context before event resolution
 
@@ -905,11 +1241,26 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
             methods = (method,) if isinstance(method, str) else tuple(method)
-            self._routes[(rule, methods, cors, compress, cache_control)] = func
+
+            route_key = (rule, methods, cors, compress, cache_control)
+
+            # Collate Middleware for routes
+            if middlewares is not None:
+                for handler in middlewares:
+                    if self._routes_with_middleware.get(route_key) is None:
+                        self._routes_with_middleware[route_key] = [handler]
+                    else:
+                        self._routes_with_middleware[route_key].append(handler)
+            else:
+                self._routes_with_middleware[route_key] = []
+
+            self._routes[route_key] = func
+
             return func
 
         return register_route
@@ -936,9 +1287,10 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
-        return super().route(rule.rstrip("/"), method, cors, compress, cache_control)
+        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares)
 
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod

@@ -1,0 +1,6 @@
+{
+    "statusCode": 400,
+    "body": "Correlation ID header is now mandatory",
+    "isBase64Encoded": false,
+    "multiValueHeaders": {}
+}
