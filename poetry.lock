@@ -404,17 +404,17 @@ files = [
 
 [[package]]
 name = "cfn-lint"
-version = "0.79.8"
+version = "0.79.9"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.79.8.tar.gz", hash = "sha256:d121fe4fac7690247e5124644509e5c8ca9eabb9d7508d28b66c6d3f8c45629e"},
-    {file = "cfn_lint-0.79.8-py3-none-any.whl", hash = "sha256:0e2d026ea11b3f1cbab64aaa9df0ec9f31bbf5c40ad84d8a19c17ba8212314b6"},
+    {file = "cfn-lint-0.79.9.tar.gz", hash = "sha256:fb8a5fc674ce39469a66d37de19130f4b31fbe4685a19b65ec51c8c8f35e8990"},
+    {file = "cfn_lint-0.79.9-py3-none-any.whl", hash = "sha256:e151194ca5b4994d68593f4b0fd3cda3bb28edea2023528ca34ecf82b914eec1"},
 ]
 
 [package.dependencies]
-aws-sam-translator = ">=1.71.0"
+aws-sam-translator = ">=1.73.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
 jsonschema = ">=3.0,<4.18"
@@ -990,13 +990,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "hvac"
-version = "1.1.1"
+version = "1.2.0"
 description = "HashiCorp Vault API client"
 optional = false
 python-versions = ">=3.6.2,<4.0.0"
 files = [
-    {file = "hvac-1.1.1-py3-none-any.whl", hash = "sha256:466e883665b4082933106b292649f9fba3bc0709a1ec1729e9e35b29477164b3"},
-    {file = "hvac-1.1.1.tar.gz", hash = "sha256:f9dbcc46b98b250c785eb1050aa11ee34a0c8b6616b75218cf1346a9817992f9"},
+    {file = "hvac-1.2.0-py3-none-any.whl", hash = "sha256:95716e0a6c081214d5f6dc74548d6e388aca895cd7be152cfaf177f7520b3d6e"},
+    {file = "hvac-1.2.0.tar.gz", hash = "sha256:6f5aa0d6b8138b585d4656d1fe01b5d87616310c80484b909cc84c2cb8f064fd"},
 ]
 
 [package.dependencies]
@@ -2992,4 +2992,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "05d0774e5d3f7bb40b876aed38d34a3b210233289381f965f26fbae8da2f02ad"
+content-hash = "e9fb58ffd42aabe0876084ba36f74c706452721e785c39194576ea5e17283b9c"

@@ -17,6 +17,8 @@ from aws_lambda_powertools.utilities.data_classes import (
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
+    idempotent,
+    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.base import (
     MAX_RETRIES,
@@ -28,17 +30,18 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInconsistentStateError,
     IdempotencyInvalidStatusError,
     IdempotencyKeyError,
+    IdempotencyModelTypeError,
+    IdempotencyNoSerializationModelError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
-)
-from aws_lambda_powertools.utilities.idempotency.idempotency import (
-    idempotent,
-    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import DataclassSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_stub,
@@ -1194,6 +1197,297 @@ def test_idempotent_function():
     result = record_handler(record=mock_event)
     # THEN we expect the function to execute successfully
     assert result == expected_result
+
+
+def test_idempotent_function_serialization_custom_dict():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_custom_dict.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    to_dict_called = False
+    from_dict_called = False
+
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    expected_result = {"message": "Foo"}
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return expected_result
+
+    record_handler(record=mock_event)
+    assert to_dict_called
+    record_handler(record=mock_event)
+    assert from_dict_called
+
+
+def test_idempotent_function_serialization_no_response():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_no_response.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    to_dict_called = False
+    from_dict_called = False
+
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return None
+
+    record_handler(record=mock_event)
+    assert to_dict_called is False, "in case response is None, to_dict should not be called"
+    response = record_handler(record=mock_event)
+    assert response is None
+    assert from_dict_called is False, "in case response is None, from_dict should not be called"
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_pydantic(output_serializer_type: str):
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = PydanticSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = PydanticSerializer
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput(**payment.dict())
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
+def test_idempotent_function_serialization_pydantic_failure_no_return_type():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyNoSerializationModelError, match="No serialization model was supplied"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput):
+            return PaymentOutput(**payment.dict())
+
+
+def test_idempotent_function_serialization_pydantic_failure_bad_type():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyModelTypeError, match="Model type is not inherited from pydantic BaseModel"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput) -> dict:
+            return PaymentOutput(**payment.dict())
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_dataclass(output_serializer_type: str):
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_dataclass.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = DataclassSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = DataclassSerializer
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput(**dataclasses.asdict(payment))
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
+def test_idempotent_function_serialization_dataclass_failure_no_return_type():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=DataclassSerializer,
+    )
+    with pytest.raises(IdempotencyNoSerializationModelError, match="No serialization model was supplied"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput):
+            return PaymentOutput(**payment.dict())
+
+
+def test_idempotent_function_serialization_dataclass_failure_bad_type():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyModelTypeError, match="Model type is not inherited from pydantic BaseModel"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput) -> dict:
+            return PaymentOutput(**payment.dict())
 
 
 def test_idempotent_function_arbitrary_args_kwargs():
