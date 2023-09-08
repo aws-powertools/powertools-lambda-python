@@ -1,15 +1,32 @@
+from __future__ import annotations
+
 import pytest
 
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import AwsEncryptionSdkProvider
-from tests.unit.data_masking.setup import *
-
-AWS_SDK_KEY = "arn:aws:kms:us-west-2:683517028648:key/269301eb-81eb-4067-ac72-98e8e49bf2b3"
+from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import (
+    AwsEncryptionSdkProvider,
+)
+from tests.functional.data_masking.conftest import FakeEncryptionClient
+from tests.unit.data_masking.setup import (
+    aws_encrypted_with_fields,
+    data_types,
+    data_types_and_masks,
+    dict_fields,
+    dictionaries,
+    fields_to_mask,
+    json_blob,
+    json_dict,
+    masked_with_fields,
+    python_dict,
+)
 
 
 @pytest.fixture
-def data_masker():
-    return DataMasking(provider=AwsEncryptionSdkProvider(keys=[AWS_SDK_KEY]))
+def data_masker() -> DataMasking:
+    """DataMasking using AWS Encryption SDK Provider with a fake client"""
+    fake_client = FakeEncryptionClient()
+    provider = AwsEncryptionSdkProvider(keys=["dummy"], client=fake_client)
+    return DataMasking(provider=provider)
 
 
 @pytest.mark.parametrize("value, value_masked", data_types_and_masks)
@@ -36,7 +53,7 @@ def test_mask_with_fields(data_masker):
 
 
 @pytest.mark.parametrize("value", data_types)
-def test_encrypt_decrypt(value, data_masker):
+def test_encrypt_decrypt(value, data_masker: DataMasking):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     # WHEN encrypting and then decrypting the encrypted data
@@ -62,7 +79,4 @@ def test_encrypt_decrypt_with_fields(value, fields, data_masker):
         print("json blob!!!!")
         assert decrypted_data == value
     else:
-        print("json_blob_fields!!!!")
-        assert decrypted_data == str(value)
-        print("decrypted_data:", decrypted_data)
-        print("aws_encrypted_with_fields:", aws_encrypted_with_fields)
+        assert decrypted_data == aws_encrypted_with_fields

@@ -4,9 +4,6 @@ from types import ModuleType
 import pytest
 
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.providers.itsdangerous import (
-    ItsDangerousProvider,
-)
 
 DATA_MASKING_PACKAGE = "aws_lambda_powertools.utilities.data_masking"
 DATA_MASKING_INIT_SLA: float = 0.002
@@ -58,16 +55,15 @@ def test_data_masking_init(benchmark):
         pytest.fail(f"High level imports should be below {DATA_MASKING_INIT_SLA}s: {stat}")
 
 
-def encrypt_json_blob():
-    data_masker = DataMasking(provider=ItsDangerousProvider("mykey"))
-    encrypted = data_masker.encrypt(json_blob, json_blob_fields)
-    data_masker.decrypt(encrypted, json_blob_fields)
+def mask_json_blob():
+    data_masker = DataMasking()
+    data_masker.mask(json_blob, json_blob_fields)
 
 
 @pytest.mark.perf
 @pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
 def test_data_masking_encrypt_with_json_blob(benchmark):
-    benchmark.pedantic(encrypt_json_blob)
+    benchmark.pedantic(mask_json_blob)
     stat = benchmark.stats.stats.max
     if stat > DATA_MASKING_NESTED_ENCRYPT_SLA:
         pytest.fail(f"High level imports should be below {DATA_MASKING_NESTED_ENCRYPT_SLA}s: {stat}")
