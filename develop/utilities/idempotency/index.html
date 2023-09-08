@@ -2544,103 +2544,17 @@ estimate the cost.</p>
 </div>
 </div>
 <h4 id="output-serialization">Output serialization<a class="headerlink" href="#output-serialization" title="Permanent link">&para;</a></h4>
-<p>The default return of the <code>idempotent_function</code> decorator is a JSON object, but you can customize the function's return type by utilizing the <code>output_serializer</code> parameter. The output serializer supports any JSON serializable data, <strong>Python Dataclasses</strong> and <strong>Pydantic Models</strong>.</p>
+<p>By default, <code>idempotent_function</code> serializes, stores, and returns your annotated function's result as a JSON object. You can change this behavior using <code>output_serializer</code> parameter.</p>
+<p>The output serializer supports any JSON serializable data, <strong>Python Dataclasses</strong> and <strong>Pydantic Models</strong>.</p>
 <div class="admonition info">
 <p class="admonition-title">When using the <code>output_serializer</code> parameter, the data will continue to be stored in DynamoDB as a JSON object.</p>
 </div>
-<p>Working with Pydantic Models:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Explicitly passing the Pydantic model type</label><label for="__tabbed_4_2">Deducing the Pydantic model type from the return type annotation</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Pydantic</label><label for="__tabbed_4_2">Dataclasses</label><label for="__tabbed_4_3">Any type</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
-    <span class="n">IdempotencyConfig</span><span class="p">,</span>
-    <span class="n">idempotent_function</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency.serialization.pydantic</span> <span class="kn">import</span> <span class="n">PydanticSerializer</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
-
-<span class="n">dynamodb</span> <span class="o">=</span> <span class="n">DynamoDBPersistenceLayer</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;IdempotencyTable&quot;</span><span class="p">)</span>
-<span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">event_key_jmespath</span><span class="o">=</span><span class="s2">&quot;order_id&quot;</span><span class="p">)</span>  <span class="c1"># see Choosing a payload subset section</span>
-
-
-<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-
-
-<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-    <span class="n">item</span><span class="p">:</span> <span class="n">OrderItem</span>
-    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
-
-
-<span class="hll"><span class="k">class</span> <span class="nc">OrderOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
-</span><span class="hll">    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
-</span>
-
-<span class="nd">@idempotent_function</span><span class="p">(</span>
-    <span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span>
-    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
-    <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">,</span>
-<span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">PydanticSerializer</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">OrderOutput</span><span class="p">),</span>
-</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">explicit_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
-</span>
-
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="n">config</span><span class="o">.</span><span class="n">register_lambda_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>  <span class="c1"># see Lambda timeouts section</span>
-    <span class="n">order_item</span> <span class="o">=</span> <span class="n">OrderItem</span><span class="p">(</span><span class="n">sku</span><span class="o">=</span><span class="s2">&quot;fake&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
-    <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">order_item</span><span class="p">,</span> <span class="n">order_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-
-    <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
-<span class="hll">    <span class="n">explicit_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
+<p>You can use <code>PydanticSerializer</code> to automatically serialize what's retrieved from the persistent storage based on the return type annotated.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Inferring via the return type</label><label for="__tabbed_5_2">Explicit model type</label></div>
+<div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -2719,8 +2633,8 @@ estimate the cost.</p>
     <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">,</span>
 <span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">PydanticSerializer</span><span class="p">,</span>
 </span><span class="p">)</span>
-<span class="c1"># order output is deduced from return type</span>
-<span class="k">def</span> <span class="nf">deduced_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>
+<span class="c1"># order output is inferred from return type</span>
+<span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>  <span class="c1"># (1)!</span>
 <span class="hll">    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
 </span>
 
@@ -2730,15 +2644,14 @@ estimate the cost.</p>
     <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">order_item</span><span class="p">,</span> <span class="n">order_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
-<span class="hll">    <span class="n">deduced_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+<span class="hll">    <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
+<ol>
+<li>We'll use <code>OrderOutput</code> to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when <code>@idempotent_function</code> is used.</li>
+</ol>
 </div>
-</div>
-</div>
-<p>Working with Python Dataclasses:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Explicitly passing the model type</label><label for="__tabbed_5_2">Deducing the model type from the return type annotation</label><label for="__tabbed_5_3">Using A Custom Type (Dataclasses)</label></div>
-<div class="tabbed-content">
 <div class="tabbed-block">
+<p>Alternatively, you can provide an explicit model as an input to <code>PydanticSerializer</code>.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -2782,38 +2695,30 @@ estimate the cost.</p>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
     <span class="n">IdempotencyConfig</span><span class="p">,</span>
     <span class="n">idempotent_function</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency.serialization.dataclass</span> <span class="kn">import</span> <span class="n">DataclassSerializer</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency.serialization.pydantic</span> <span class="kn">import</span> <span class="n">PydanticSerializer</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">BaseModel</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">dynamodb</span> <span class="o">=</span> <span class="n">DynamoDBPersistenceLayer</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;IdempotencyTable&quot;</span><span class="p">)</span>
 <span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">event_key_jmespath</span><span class="o">=</span><span class="s2">&quot;order_id&quot;</span><span class="p">)</span>  <span class="c1"># see Choosing a payload subset section</span>
 
 
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
 
 
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Order</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Order</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
     <span class="n">item</span><span class="p">:</span> <span class="n">OrderItem</span>
     <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
 
 
-<span class="hll"><span class="nd">@dataclass</span>
-</span><span class="hll"><span class="k">class</span> <span class="nc">OrderOutput</span><span class="p">:</span>
+<span class="hll"><span class="k">class</span> <span class="nc">OrderOutput</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 </span><span class="hll">    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
 </span>
 
@@ -2821,9 +2726,9 @@ estimate the cost.</p>
     <span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span>
     <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
     <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">,</span>
-<span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">DataclassSerializer</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">OrderOutput</span><span class="p">),</span>
+<span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">PydanticSerializer</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">OrderOutput</span><span class="p">),</span>
 </span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">explicit_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">):</span>
 <span class="hll">    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
 </span>
 
@@ -2833,9 +2738,16 @@ estimate the cost.</p>
     <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">order_item</span><span class="p">,</span> <span class="n">order_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
-<span class="hll">    <span class="n">explicit_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+<span class="hll">    <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
 </div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You can use <code>DataclassSerializer</code> to automatically serialize what's retrieved from the persistent storage based on the return type annotated.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Inferring via the return type</label><label for="__tabbed_6_2">Explicit model type</label></div>
+<div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -2922,8 +2834,8 @@ estimate the cost.</p>
     <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">,</span>
 <span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">DataclassSerializer</span><span class="p">,</span>
 </span><span class="p">)</span>
-<span class="c1"># order output is deduced from return type</span>
-<span class="k">def</span> <span class="nf">deduced_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>
+<span class="c1"># order output is inferred from return type</span>
+<span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>  <span class="c1"># (1)!</span>
 <span class="hll">    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
 </span>
 
@@ -2933,10 +2845,120 @@ estimate the cost.</p>
     <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">order_item</span><span class="p">,</span> <span class="n">order_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
-<span class="hll">    <span class="n">deduced_order_output_serializer</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+<span class="hll">    <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </span></code></pre></div></td></tr></table></div>
+<ol>
+<li>We'll use <code>OrderOutput</code> to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when <code>@idempotent_function</code> is used.</li>
+</ol>
 </div>
 <div class="tabbed-block">
+<p>Alternatively, you can provide an explicit model as an input to <code>DataclassSerializer</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
+    <span class="n">IdempotencyConfig</span><span class="p">,</span>
+    <span class="n">idempotent_function</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency.serialization.dataclass</span> <span class="kn">import</span> <span class="n">DataclassSerializer</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">dynamodb</span> <span class="o">=</span> <span class="n">DynamoDBPersistenceLayer</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;IdempotencyTable&quot;</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">event_key_jmespath</span><span class="o">=</span><span class="s2">&quot;order_id&quot;</span><span class="p">)</span>  <span class="c1"># see Choosing a payload subset section</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">OrderItem</span><span class="p">:</span>
+    <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Order</span><span class="p">:</span>
+    <span class="n">item</span><span class="p">:</span> <span class="n">OrderItem</span>
+    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+
+
+<span class="hll"><span class="nd">@dataclass</span>
+</span><span class="hll"><span class="k">class</span> <span class="nc">OrderOutput</span><span class="p">:</span>
+</span><span class="hll">    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+</span>
+
+<span class="nd">@idempotent_function</span><span class="p">(</span>
+    <span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span>
+    <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+    <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">,</span>
+<span class="hll">    <span class="n">output_serializer</span><span class="o">=</span><span class="n">DataclassSerializer</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">OrderOutput</span><span class="p">),</span>
+</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="n">Order</span><span class="p">):</span>
+<span class="hll">    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="n">order_id</span><span class="o">=</span><span class="n">order</span><span class="o">.</span><span class="n">order_id</span><span class="p">)</span>
+</span>
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">register_lambda_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>  <span class="c1"># see Lambda timeouts section</span>
+    <span class="n">order_item</span> <span class="o">=</span> <span class="n">OrderItem</span><span class="p">(</span><span class="n">sku</span><span class="o">=</span><span class="s2">&quot;fake&quot;</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s2">&quot;sample&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">Order</span><span class="p">(</span><span class="n">item</span><span class="o">=</span><span class="n">order_item</span><span class="p">,</span> <span class="n">order_id</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
+<span class="hll">    <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You can use <code>CustomDictSerializer</code> to have full control over the serialization process for any type. It expects two functions:</p>
+<ul>
+<li><strong>to_dict</strong>. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.</li>
+<li><strong>from_dict</strong>. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.</li>
+</ul>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -2998,9 +3020,7 @@ estimate the cost.</p>
 <span class="normal">59</span>
 <span class="normal">60</span>
 <span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="normal">62</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
@@ -3014,36 +3034,36 @@ estimate the cost.</p>
 <span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">event_key_jmespath</span><span class="o">=</span><span class="s2">&quot;order_id&quot;</span><span class="p">)</span>  <span class="c1"># see Choosing a payload subset section</span>
 
 
-<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">OrderItem</span><span class="p">:</span>
-    <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sku</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sku</span> <span class="o">=</span> <span class="n">sku</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
 
 
-<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Order</span><span class="p">:</span>
-    <span class="n">item</span><span class="p">:</span> <span class="n">OrderItem</span>
-    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">OrderItem</span><span class="p">,</span> <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">item</span> <span class="o">=</span> <span class="n">item</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order_id</span> <span class="o">=</span> <span class="n">order_id</span>
 
 
-<span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">OrderOutput</span><span class="p">:</span>
-    <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">order_id</span> <span class="o">=</span> <span class="n">order_id</span>
 
 
-<span class="hll"><span class="k">def</span> <span class="nf">custom_to_dict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-</span>    <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">order_to_dict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OrderOutput</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>  <span class="c1"># (1)!</span>
+</span>    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span>
 
 
-<span class="hll"><span class="k">def</span> <span class="nf">custom_from_dict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="hll"><span class="k">def</span> <span class="nf">dict_to_order</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>  <span class="c1"># (2)!</span>
 </span>    <span class="k">return</span> <span class="n">OrderOutput</span><span class="p">(</span><span class="o">**</span><span class="n">x</span><span class="p">)</span>
 
 
-<span class="hll"><span class="n">order_output_serializer</span> <span class="o">=</span> <span class="n">CustomDictSerializer</span><span class="p">(</span>
-</span><span class="hll">    <span class="n">to_dict</span><span class="o">=</span><span class="n">custom_to_dict</span><span class="p">,</span>
-</span><span class="hll">    <span class="n">from_dict</span><span class="o">=</span><span class="n">custom_from_dict</span><span class="p">,</span>
-</span><span class="hll"><span class="p">)</span>
-</span>
+<span class="hll"><span class="n">order_output_serializer</span> <span class="o">=</span> <span class="n">CustomDictSerializer</span><span class="p">(</span>  <span class="c1"># (3)!</span>
+</span>    <span class="n">to_dict</span><span class="o">=</span><span class="n">order_to_dict</span><span class="p">,</span>
+    <span class="n">from_dict</span><span class="o">=</span><span class="n">dict_to_order</span><span class="p">,</span>
+<span class="p">)</span>
+
 
 <span class="nd">@idempotent_function</span><span class="p">(</span>
     <span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span>
@@ -3063,6 +3083,11 @@ estimate the cost.</p>
     <span class="c1"># `order` parameter must be called as a keyword argument to work</span>
     <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
+<ol>
+<li>This function does the following <br><br><strong>1</strong>. Receives the return from <code>process_order</code><br> <strong>2</strong>. Converts to dictionary before it can be saved into the persistent storage.</li>
+<li>This function does the following <br><br><strong>1</strong>. Receives the dictionary saved into the persistent storage <br><strong>1</strong> Serializes to <code>OrderOutput</code> before <code>@idempotent</code> returns back to the caller.</li>
+<li>This serializer receives both functions so it knows who to call when to serialize to and from dictionary.</li>
+</ol>
 </div>
 </div>
 </div>
@@ -3073,7 +3098,7 @@ estimate the cost.</p>
 <p>In this example, we choose <code>messageId</code> as our idempotency key since we know it'll be unique.</p>
 <p>Depending on your use case, it might be more accurate <a href="#choosing-a-payload-subset-for-idempotency">to choose another field</a> your producer intentionally set to define uniqueness.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Integration with Batch Processor</label><label for="__tabbed_6_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Integration with Batch Processor</label><label for="__tabbed_7_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3226,7 +3251,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 This means there could be differences in whitespace even when the JSON payload itself is identical.</p>
 <p>To alter this behaviour, we can use the <a href="../jmespath_functions/#powertools_json-function" target="_blank">JMESPath built-in function</a> <code>powertools_json()</code> to treat the payload as a JSON object (dict) rather than a string.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Payment function</label><label for="__tabbed_7_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Payment function</label><label for="__tabbed_8_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3402,7 +3427,7 @@ Powertools for AWS Lambda (Python) calculates and includes the remaining invocat
 you must use <code>register_lambda_context</code> available in the <a href="#customizing-the-default-behavior">idempotency config object</a> to benefit from this protection.</p>
 </details>
 <p>Here is an example on how you register the Lambda context in your handler:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Registering the Lambda context</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Registering the Lambda context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3472,7 +3497,7 @@ This means that new invocations will execute your code again despite having the 
 </center></p>
 <p>If you are using <code>idempotent_function</code>, any unhandled exceptions that are raised <em>inside</em> the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.</p>
 <p>If an Exception is raised <em>outside</em> the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Handling exceptions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Handling exceptions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3730,7 +3755,7 @@ This means that new invocations will execute your code again despite having the 
 <h3 id="persistence-layers">Persistence layers<a class="headerlink" href="#persistence-layers" title="Permanent link">&para;</a></h3>
 <h4 id="dynamodbpersistencelayer">DynamoDBPersistenceLayer<a class="headerlink" href="#dynamodbpersistencelayer" title="Permanent link">&para;</a></h4>
 <p>This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Customizing DynamoDBPersistenceLayer to suit your table structure</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:1"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Customizing DynamoDBPersistenceLayer to suit your table structure</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3905,7 +3930,7 @@ This means that new invocations will execute your code again despite having the 
 <p>This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.</p>
 </details>
 <p>You can enable in-memory caching with the <strong><code>use_local_cache</code></strong> parameter:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Caching idempotent transactions in-memory to prevent multiple calls to storage</label><label for="__tabbed_11_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Caching idempotent transactions in-memory to prevent multiple calls to storage</label><label for="__tabbed_12_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3960,7 +3985,7 @@ This means that new invocations will execute your code again despite having the 
 </div>
 <p>In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.</p>
 <p>You can change this window with the <strong><code>expires_after_seconds</code></strong> parameter:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Adjusting idempotency record expiration</label><label for="__tabbed_12_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Adjusting idempotency record expiration</label><label for="__tabbed_13_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4024,7 +4049,7 @@ This means that new invocations will execute your code again despite having the 
 </details>
 <p>By default, we will return the same result as it returned before, however in this instance it may be misleading; we provide a fail fast payload validation to address this edge case.</p>
 <p>With <strong><code>payload_validation_jmespath</code></strong>, you can provide an additional JMESPath expression to specify which part of the event body should be validated against previous idempotent invocations</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:3"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><input id="__tabbed_13_3" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Payload validation</label><label for="__tabbed_13_2">Sample event 1</label><label for="__tabbed_13_3">Sample event 2</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Payload validation</label><label for="__tabbed_14_2">Sample event 1</label><label for="__tabbed_14_3">Sample event 2</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4156,7 +4181,7 @@ This means that new invocations will execute your code again despite having the 
 <summary>Warning</summary>
 <p>To prevent errors, transactions will not be treated as idempotent if <strong><code>raise_on_no_idempotency_key</code></strong> is set to <code>False</code> and the evaluation of <strong><code>event_key_jmespath</code></strong> is <code>None</code>. Therefore, no data will be fetched, stored, or deleted in the idempotency storage layer.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:3"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><input id="__tabbed_14_3" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Idempotency key required</label><label for="__tabbed_14_2">Success Event</label><label for="__tabbed_14_3">Failure Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Idempotency key required</label><label for="__tabbed_15_2">Success Event</label><label for="__tabbed_15_3">Failure Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4231,7 +4256,7 @@ This means that new invocations will execute your code again despite having the 
 <h3 id="customizing-boto-configuration">Customizing boto configuration<a class="headerlink" href="#customizing-boto-configuration" title="Permanent link">&para;</a></h3>
 <!-- markdownlint-disable-next-line MD013 -->
 <p>The <strong><code>boto_config</code></strong> and <strong><code>boto3_session</code></strong> parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a> or a custom <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a> when constructing the persistence store.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Custom session</label><label for="__tabbed_15_2">Custom config</label><label for="__tabbed_15_3">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Custom session</label><label for="__tabbed_16_2">Custom config</label><label for="__tabbed_16_3">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4331,7 +4356,7 @@ This means that new invocations will execute your code again despite having the 
 <p>When using a composite primary key table (hash+range key), use <code>sort_key_attr</code> parameter when initializing your persistence layer.</p>
 <p>With this setting, we will save the idempotency key in the sort key instead of the primary key. By default, the primary key will now be set to <code>idempotency#{LAMBDA_FUNCTION_NAME}</code>.</p>
 <p>You can optionally set a static value for the partition key using the <code>static_pk_value</code> parameter.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Reusing a DynamoDB table that uses a composite primary key</label><label for="__tabbed_16_2">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Reusing a DynamoDB table that uses a composite primary key</label><label for="__tabbed_17_2">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4415,7 +4440,7 @@ This means that new invocations will execute your code again despite having the 
 <li><strong><code>_update_record()</code></strong> – Updates an item in the persistence store.</li>
 <li><strong><code>_delete_record()</code></strong> – Removes an item from the persistence store.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Bring your own persistent store</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Bring your own persistent store</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
@@ -4693,7 +4718,7 @@ This means that new invocations will execute your code again despite having the 
 event - not the "raw" event Lambda was invoked with.</p>
 <p>Make sure to account for this behaviour, if you set the <code>event_key_jmespath</code>.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Using Idempotency with JSONSchema Validation utility</label><label for="__tabbed_18_2">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Using Idempotency with JSONSchema Validation utility</label><label for="__tabbed_19_2">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4880,7 +4905,7 @@ event - not the "raw" event Lambda was invoked with.</p>
 <h3 id="disabling-the-idempotency-utility">Disabling the idempotency utility<a class="headerlink" href="#disabling-the-idempotency-utility" title="Permanent link">&para;</a></h3>
 <p>When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable <code>POWERTOOLS_IDEMPOTENCY_DISABLED</code>
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use <a href="https://docs.pytest.org/en/latest/monkeypatch.html" rel="nofollow" target="_blank">monkeypatch</a> fixture:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">test_disabling_idempotency_utility.py</label><label for="__tabbed_19_2">app_test_disabling_idempotency_utility.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">test_disabling_idempotency_utility.py</label><label for="__tabbed_20_2">app_test_disabling_idempotency_utility.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4980,7 +5005,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 </div>
 <h3 id="testing-with-dynamodb-local">Testing with DynamoDB Local<a class="headerlink" href="#testing-with-dynamodb-local" title="Permanent link">&para;</a></h3>
 <p>To test with <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html" target="_blank">DynamoDB Local</a>, you can replace the <code>DynamoDB client</code> used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">test_with_dynamodb_local.py</label><label for="__tabbed_20_2">app_test_dynamodb_local.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">test_with_dynamodb_local.py</label><label for="__tabbed_21_2">app_test_dynamodb_local.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5089,7 +5114,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 <h3 id="how-do-i-mock-all-dynamodb-io-operations">How do I mock all DynamoDB I/O operations<a class="headerlink" href="#how-do-i-mock-all-dynamodb-io-operations" title="Permanent link">&para;</a></h3>
 <p>The idempotency utility lazily creates the dynamodb <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" target="_blank">Table</a> which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">test_with_io_operations.py</label><label for="__tabbed_21_2">app_test_io_operations.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">test_with_io_operations.py</label><label for="__tabbed_22_2">app_test_io_operations.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5196,7 +5221,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
   <small>
     
       Last update:
-      2023-09-05
+      2023-09-08
     
   </small>
 </div>
