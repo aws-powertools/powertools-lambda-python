@@ -16,7 +16,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMidd
 
     # Inject correlation ID in shared context and Logger
     app.append_context(correlation_id=correlation_id)  # (2)!
-    logger.set_correlation_id(request_id)
+    logger.set_correlation_id(correlation_id)
 
     # Get response from next middleware OR /todos route
     result = next_middleware(app)  # (3)!
