@@ -31,8 +31,8 @@ class OrderOutput(BaseModel):
     persistence_store=dynamodb,
     output_serializer=PydanticSerializer,
 )
-# order output is deduced from return type
-def deduced_order_output_serializer(order: Order) -> OrderOutput:
+# order output is inferred from return type
+def process_order(order: Order) -> OrderOutput:  # (1)!
     return OrderOutput(order_id=order.order_id)
 
 
@@ -42,4 +42,4 @@ def lambda_handler(event: dict, context: LambdaContext):
     order = Order(item=order_item, order_id=1)
 
     # `order` parameter must be called as a keyword argument to work
-    deduced_order_output_serializer(order=order)
+    process_order(order=order)
