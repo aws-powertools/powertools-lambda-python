@@ -17,6 +17,10 @@ module.exports = async ({github, context, core}) => {
         "deprecated": DEPRECATED_REGEX,
     }
 
+    // get PR labels from env
+    const prLabels = process.env.PR_LABELS.replaceAll("\"", "").split(",");
+    const labelKeys = Object.keys(labels);
+
     // Maintenance: We should keep track of modified PRs in case their titles change
     let miss = 0;
     try {
@@ -25,6 +29,18 @@ module.exports = async ({github, context, core}) => {
             const matches = matcher.exec(PR_TITLE)
             if (matches != null) {
                 core.info(`Auto-labeling PR ${PR_NUMBER} with ${label}`)
+
+                for (const prLabel of prLabels) {
+                    if (labelKeys.includes(prLabel) && prLabel !== label) {
+                        core.info(`PR previously tagged with: ${prLabel}, removing.`);
+                        await github.rest.issues.removeLabel({
+                            issue_number: PR_NUMBER,
+                            owner: context.repo.owner,
+                            repo: context.repo.repo,
+                            name: prLabel
+                        })
+                    }
+                }
 
                 await github.rest.issues.addLabels({
                     issue_number: PR_NUMBER,
