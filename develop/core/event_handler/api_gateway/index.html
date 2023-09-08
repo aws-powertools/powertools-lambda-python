@@ -4114,7 +4114,7 @@ matches one of the allowed values.</p>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
     <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>  <span class="c1"># (2)!</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">correlation_id</span><span class="p">)</span>
 
     <span class="c1"># Get response from next middleware OR /todos route</span>
 <span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># (3)!</span>
@@ -4316,7 +4316,7 @@ matches one of the allowed values.</p>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
     <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">correlation_id</span><span class="p">)</span>
 
     <span class="c1"># Get response from next middleware OR /todos route</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
@@ -4475,7 +4475,7 @@ matches one of the allowed values.</p>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
     <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">request_id</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">correlation_id</span><span class="p">)</span>
 
     <span class="c1"># Get response from next middleware OR /todos route</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
