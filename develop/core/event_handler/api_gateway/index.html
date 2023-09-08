@@ -4110,21 +4110,21 @@ matches one of the allowed values.</p>
 </span>    <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>  <span class="c1"># (1)!</span>
 
     <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
-    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">get_correlation_id</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request_id</span>  <span class="c1"># (2)!</span>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
-    <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>  <span class="c1"># (2)!</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>  <span class="c1"># (3)!</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">set_correlation_id</span><span class="p">(</span><span class="n">correlation_id</span><span class="p">)</span>
 
     <span class="c1"># Get response from next middleware OR /todos route</span>
-<span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># (3)!</span>
+<span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">next_middleware</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>  <span class="c1"># (4)!</span>
 </span>
     <span class="c1"># Include Correlation ID in the response back to caller</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>  <span class="c1"># (4)!</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correlation_id</span>  <span class="c1"># (5)!</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span> <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">inject_correlation_id</span><span class="p">])</span>  <span class="c1"># (5)!</span>
+<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span> <span class="n">middlewares</span><span class="o">=</span><span class="p">[</span><span class="n">inject_correlation_id</span><span class="p">])</span>  <span class="c1"># (6)!</span>
 </span><span class="k">def</span> <span class="nf">get_todos</span><span class="p">():</span>
     <span class="n">todos</span><span class="p">:</span> <span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span><span class="p">)</span>
     <span class="n">todos</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
@@ -4133,16 +4133,18 @@ matches one of the allowed values.</p>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;todos&quot;</span><span class="p">:</span> <span class="n">todos</span><span class="o">.</span><span class="n">json</span><span class="p">()[:</span><span class="mi">10</span><span class="p">]}</span>
 
 
-<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="s1">&#39;headers.&quot;x-correlation-id&quot;&#39;</span><span class="p">)</span>  <span class="c1"># (7)!</span>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <ol>
 <li>You can access current request like you normally would.</li>
-<li><a href="#sharing-contextual-data">Shared context is available</a> to any middleware, Router and App instances.</li>
+<li>Logger extracts it first in the request path, so we can use it. <br><br> If this was available before, we'd use <code>app.context.get("correlation_id")</code>.</li>
+<li><a href="#sharing-contextual-data">Shared context is available</a> to any middleware, Router and App instances. <br><br> For example, another middleware can now use <code>app.context.get("correlation_id")</code> to retrieve it.</li>
 <li>Get response from the next middleware (if any) or from <code>/todos</code> route.</li>
 <li>You can manipulate headers, body, or status code before returning it.</li>
 <li>Register one or more middlewares in order of execution.</li>
+<li>Logger extracts correlation ID from header and makes it available under <code>correlation_id</code> key, and <code>get_correlation_id()</code> method.</li>
 </ol>
 </div>
 <div class="tabbed-block">
@@ -4312,7 +4314,7 @@ matches one of the allowed values.</p>
     <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>
 
     <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
-    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">get_correlation_id</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request_id</span>  <span class="c1"># elsewhere becomes app.context.get(&quot;correlation_id&quot;)</span>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
     <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
@@ -4471,7 +4473,7 @@ matches one of the allowed values.</p>
     <span class="n">request_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">request_context</span><span class="o">.</span><span class="n">request_id</span>
 
     <span class="c1"># Use API Gateway REST API request ID if caller didn&#39;t include a correlation ID</span>
-    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;x-correlation-id&quot;</span><span class="p">,</span> <span class="n">request_id</span><span class="p">)</span>
+    <span class="n">correlation_id</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">get_correlation_id</span><span class="p">()</span> <span class="ow">or</span> <span class="n">request_id</span>  <span class="c1"># elsewhere becomes app.context.get(&quot;correlation_id&quot;)</span>
 
     <span class="c1"># Inject correlation ID in shared context and Logger</span>
     <span class="n">app</span><span class="o">.</span><span class="n">append_context</span><span class="p">(</span><span class="n">correlation_id</span><span class="o">=</span><span class="n">correlation_id</span><span class="p">)</span>
