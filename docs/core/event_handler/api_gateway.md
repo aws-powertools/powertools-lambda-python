@@ -406,7 +406,7 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
     ```
 
     1. You can access current request like you normally would.
-    2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances.
+    2. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br><br> For example, another middleware can now use `app.context.get("correlation_id")` to retrieve it.
     3. Get response from the next middleware (if any) or from `/todos` route.
     4. You can manipulate headers, body, or status code before returning it.
     5. Register one or more middlewares in order of execution.
