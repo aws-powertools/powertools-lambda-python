@@ -12,7 +12,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMidd
     request_id = app.current_event.request_context.request_id  # (1)!
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID
-    correlation_id = app.current_event.headers.get("x-correlation-id", request_id)
+    correlation_id = logger.get_correlation_id() or request_id
 
     # Inject correlation ID in shared context and Logger
     app.append_context(correlation_id=correlation_id)  # (2)!
@@ -35,6 +35,6 @@ def get_todos():
     return {"todos": todos.json()[:10]}
 
 
-@logger.inject_lambda_context
+@logger.inject_lambda_context(correlation_id_path='headers."x-correlation-id"')
 def lambda_handler(event, context):
     return app.resolve(event, context)

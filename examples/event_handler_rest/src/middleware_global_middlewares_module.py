@@ -18,7 +18,7 @@ def inject_correlation_id(app: APIGatewayRestResolver, next_middleware: NextMidd
     request_id = app.current_event.request_context.request_id
 
     # Use API Gateway REST API request ID if caller didn't include a correlation ID
-    correlation_id = app.current_event.headers.get("x-correlation-id", request_id)
+    correlation_id = logger.get_correlation_id() or request_id
 
     # Inject correlation ID in shared context and Logger
     app.append_context(correlation_id=correlation_id)
