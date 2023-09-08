@@ -39,15 +39,12 @@ def test_mask_with_fields(data_masker):
 def test_encrypt_decrypt(value, data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
-    # AWS Encryption SDK encrypt method only takes in bytes or strings
-    value = bytes(str(value), "utf-8")
-
     # WHEN encrypting and then decrypting the encrypted data
     encrypted_data = data_masker.encrypt(value)
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == value
+    assert decrypted_data == str(value)
 
 
 @pytest.mark.parametrize("value, fields", zip(dictionaries, fields_to_mask))
@@ -60,7 +57,12 @@ def test_encrypt_decrypt_with_fields(value, fields, data_masker):
 
     # THEN the result is the original input data
     # AWS Encryption SDK decrypt method only returns bytes
+    print("value:", value)
     if value == json_blob:
-        assert decrypted_data == aws_encrypted_json_blob
+        print("json blob!!!!")
+        assert decrypted_data == value
     else:
-        assert decrypted_data == aws_encrypted_with_fields
+        print("json_blob_fields!!!!")
+        assert decrypted_data == str(value)
+        print("decrypted_data:", decrypted_data)
+        print("aws_encrypted_with_fields:", aws_encrypted_with_fields)

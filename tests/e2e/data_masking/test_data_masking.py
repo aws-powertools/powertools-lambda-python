@@ -42,21 +42,21 @@ def test_encryption(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     # AWS Encryption SDK encrypt method only takes in bytes or strings
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
 
     # WHEN encrypting and then decrypting the encrypted data
     encrypted_data = data_masker.encrypt(value)
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == value
+    assert decrypted_data == str(value)
 
 
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_context(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
     context = {"this": "is_secure"}
 
     # WHEN encrypting and then decrypting the encrypted data with an encryption_context
@@ -64,14 +64,14 @@ def test_encryption_context(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data, encryption_context=context)
 
     # THEN the result is the original input data
-    assert decrypted_data == value
+    assert decrypted_data == str(value)
 
 
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_context_mismatch(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
 
     # WHEN encrypting with a encryption_context
     encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
@@ -85,7 +85,7 @@ def test_encryption_context_mismatch(data_masker):
 def test_encryption_no_context_fail(data_masker):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
 
     # WHEN encrypting with no encryption_context
     encrypted_data = data_masker.encrypt(value)
@@ -100,7 +100,7 @@ def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider with a certain key
 
     # WHEN encrypting and then decrypting the encrypted data
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
     encrypted_data = data_masker.encrypt(value)
 
     # THEN when decrypting with a different key it should fail
@@ -114,12 +114,14 @@ def test_encryption_provider_singleton(data_masker, kms_key1_arn, kms_key2_arn):
     data_masker_2 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key1_arn]))
     assert data_masker.provider is data_masker_2.provider
 
+    value = [1, 2, "string", 4.5]
+
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt("string")
+    encrypted_data = data_masker.encrypt(value)
     decrypted_data = data_masker_2.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == bytes("string", "utf-8")
+    assert decrypted_data == str(value)
 
     data_masker_3 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
     assert data_masker_2.provider is not data_masker_3.provider
@@ -130,7 +132,7 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     # WHEN encrypting a value and logging it
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
     encrypted_data = data_masker.encrypt(value)
     message = encrypted_data
     custom_key = "order_id"
@@ -146,7 +148,7 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
     for log in logs.get_log(key=custom_key):
         encrypted_data = log.message
         decrypted_data = data_masker.decrypt(encrypted_data)
-        assert decrypted_data == value
+        assert decrypted_data == str(value)
 
 
 # NOTE: This test is failing currently, need to find a fix for building correct dependencies
@@ -162,4 +164,4 @@ def test_encryption_in_handler(basic_handler_fn_arn, kms_key1_arn):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN decrypting the encrypted data from the response should result in the original value
-    assert decrypted_data == bytes(str([1, 2, "string", 4.5]), "utf-8")
+    assert decrypted_data == str([1, 2, "string", 4.5])

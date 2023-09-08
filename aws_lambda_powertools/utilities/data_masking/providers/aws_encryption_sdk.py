@@ -75,6 +75,12 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             max_messages_encrypted=max_messages_encrypted,
         )
 
+    def _serialize(self, data: Any):
+        return bytes(str(data), "utf-8")
+
+    def _deserialize(self, data: bytes):
+        return data.decode("utf-8")
+
     def encrypt(self, data: Union[bytes, str], **provider_options) -> str:
         """
         Encrypt data using the AwsEncryptionSdkProvider.
@@ -91,6 +97,7 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             ciphertext : str
                 The encrypted data, as a base64-encoded string.
         """
+        data = self._serialize(data)
         ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, **provider_options)
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
@@ -125,4 +132,5 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             if decryptor_header.encryption_context.get(key) != value:
                 raise ContextMismatchError(key)
 
+        ciphertext = self._deserialize(ciphertext)
         return ciphertext

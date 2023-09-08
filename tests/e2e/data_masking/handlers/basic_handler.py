@@ -14,7 +14,7 @@ def lambda_handler(event, context):
 
     kms_key = event.get("kms_key")
     data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key]))
-    value = bytes(str([1, 2, "string", 4.5]), "utf-8")
+    value = [1, 2, "string", 4.5]
     encrypted_data = data_masker.encrypt(value)
     response = {}
     response["encrypted_data"] = encrypted_data
