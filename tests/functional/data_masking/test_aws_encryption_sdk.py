@@ -1,11 +1,8 @@
-from unittest.mock import patch
-
 import pytest
 
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import AwsEncryptionSdkProvider
 from tests.unit.data_masking.setup import *
-
 
 AWS_SDK_KEY = "arn:aws:kms:us-west-2:683517028648:key/269301eb-81eb-4067-ac72-98e8e49bf2b3"
 

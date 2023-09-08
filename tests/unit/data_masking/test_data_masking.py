@@ -1,8 +1,10 @@
 import json
+
 import pytest
 from itsdangerous.url_safe import URLSafeSerializer
-from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 
@@ -102,7 +104,7 @@ def test_mask_dict(data_masker):
         "a": {
             "1": {"None": "hello", "four": "world"},
             "b": {"3": {"4": "goodbye", "e": "world"}},
-        }
+        },
     }
 
     # WHEN mask is called with no fields argument
@@ -118,7 +120,7 @@ def test_mask_dict_with_fields(data_masker):
         "a": {
             "1": {"None": "hello", "four": "world"},
             "b": {"3": {"4": "goodbye", "e": "world"}},
-        }
+        },
     }
 
     # WHEN mask is called with a list of fields specified
@@ -126,7 +128,10 @@ def test_mask_dict_with_fields(data_masker):
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {
-        "a": {"1": {"None": DATA_MASKING_STRING, "four": "world"}, "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}}}
+        "a": {
+            "1": {"None": DATA_MASKING_STRING, "four": "world"},
+            "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}},
+        },
     }
 
 
@@ -137,8 +142,8 @@ def test_mask_json_dict_with_fields(data_masker):
             "a": {
                 "1": {"None": "hello", "four": "world"},
                 "b": {"3": {"4": "goodbye", "e": "world"}},
-            }
-        }
+            },
+        },
     )
 
     # WHEN mask is called with a list of fields specified
@@ -146,7 +151,10 @@ def test_mask_json_dict_with_fields(data_masker):
 
     # THEN the result is only the specified fields are masked
     assert masked_json_string == {
-        "a": {"1": {"None": DATA_MASKING_STRING, "four": "world"}, "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}}}
+        "a": {
+            "1": {"None": DATA_MASKING_STRING, "four": "world"},
+            "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}},
+        },
     }
 
 
@@ -180,7 +188,7 @@ def test_encrypt_decrypt_bool(custom_data_masker):
     decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == True
+    assert decrypted_data is True
 
 
 def test_encrypt_decrypt_none(custom_data_masker):
@@ -191,7 +199,7 @@ def test_encrypt_decrypt_none(custom_data_masker):
     decrypted_data = custom_data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == None
+    assert decrypted_data is None
 
 
 def test_encrypt_decrypt_str(custom_data_masker):
@@ -223,7 +231,7 @@ def test_dict_encryption_with_fields(custom_data_masker):
         "a": {
             "1": {"None": "hello", "four": "world"},
             "b": {"3": {"4": "goodbye", "e": "world"}},
-        }
+        },
     }
 
     # WHEN encrypting and decrypting the data with a list of fields
@@ -242,8 +250,8 @@ def test_json_encryption_with_fields(custom_data_masker):
             "a": {
                 "1": {"None": "hello", "four": "world"},
                 "b": {"3": {"4": "goodbye", "e": "world"}},
-            }
-        }
+            },
+        },
     )
 
     # WHEN encrypting and decrypting a json representation of a dictionary with a list of fields
@@ -330,7 +338,7 @@ def test_parsing_nonexistent_fields(data_masker):
         "3": {
             "1": {"None": "hello", "four": "world"},
             "4": {"33": {"5": "goodbye", "e": "world"}},
-        }
+        },
     }
 
     # WHEN attempting to pass in fields that do not exist in the input data
@@ -347,7 +355,7 @@ def test_parsing_nonstring_fields(data_masker):
         "3": {
             "1": {"None": "hello", "four": "world"},
             "4": {"33": {"5": "goodbye", "e": "world"}},
-        }
+        },
     }
 
     # WHEN attempting to pass in a list of fields that are not strings
@@ -365,7 +373,7 @@ def test_parsing_nonstring_keys_and_fields(data_masker):
         3: {
             "1": {"None": "hello", "four": "world"},
             4: {"33": {"5": "goodbye", "e": "world"}},
-        }
+        },
     }
     masked = data_masker.mask(data, fields=[3.4])
 

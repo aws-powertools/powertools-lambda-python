@@ -1,5 +1,6 @@
 import aws_cdk.aws_kms as kms
 from aws_cdk import CfnOutput, Duration
+
 from tests.e2e.utils.infrastructure import BaseInfrastructure
 
 

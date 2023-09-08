@@ -1,13 +1,15 @@
 import json
 from uuid import uuid4
-from aws_encryption_sdk.exceptions import DecryptKeyError
+
 import pytest
-from tests.e2e.utils import data_fetcher
+from aws_encryption_sdk.exceptions import DecryptKeyError
+
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import (
     AwsEncryptionSdkProvider,
     ContextMismatchError,
 )
+from tests.e2e.utils import data_fetcher
 
 
 @pytest.fixture
@@ -93,7 +95,6 @@ def test_encryption_no_context_fail(data_masker):
         data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
 
 
-# TODO: metaclass?
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider with a certain key
@@ -107,6 +108,21 @@ def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
 
     with pytest.raises(DecryptKeyError):
         data_masker_key2.decrypt(encrypted_data)
+
+
+def test_encryption_provider_singleton(data_masker, kms_key1_arn, kms_key2_arn):
+    data_masker_2 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key1_arn]))
+    assert data_masker.provider is data_masker_2.provider
+
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt("string")
+    decrypted_data = data_masker_2.decrypt(encrypted_data)
+
+    # THEN the result is the original input data
+    assert decrypted_data == bytes("string", "utf-8")
+
+    data_masker_3 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
+    assert data_masker_2.provider is not data_masker_3.provider
 
 
 @pytest.mark.xdist_group(name="data_masking")
@@ -131,6 +147,7 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
         encrypted_data = log.message
         decrypted_data = data_masker.decrypt(encrypted_data)
         assert decrypted_data == value
+
 
 # NOTE: This test is failing currently, need to find a fix for building correct dependencies
 @pytest.mark.xdist_group(name="data_masking")

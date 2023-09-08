@@ -1,4 +1,5 @@
 import pytest
+
 from tests.e2e.data_masking.infrastructure import DataMaskingStack
 
 

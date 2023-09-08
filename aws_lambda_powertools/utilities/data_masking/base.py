@@ -1,5 +1,5 @@
 import json
-from typing import Union, Optional
+from typing import Optional, Union
 
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
@@ -94,7 +94,7 @@ class DataMasking:
         else:
             raise TypeError(
                 "Unsupported data type. The 'data' parameter must be a dictionary or a JSON string "
-                "representation of a dictionary."
+                "representation of a dictionary.",
             )
 
         for field in fields:
