@@ -1,42 +1,17 @@
-import json
 import copy
-from itsdangerous.url_safe import URLSafeSerializer
-from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+import json
+
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
-
-class MyEncryptionProvider(BaseProvider):
-    """Custom encryption provider class"""
-
-    def __init__(self, keys, salt=None):
-        self.keys = keys
-        self.salt = salt
-
-    def encrypt(self, data: str) -> str:
-        if data is None:
-            return data
-        serialize = URLSafeSerializer(self.keys)
-        return serialize.dumps(data)
-
-    def decrypt(self, data: str) -> str:
-        if data is None:
-            return data
-        serialize = URLSafeSerializer(self.keys)
-        return serialize.loads(data)
-
-
-data_maskers = [
-    DataMasking(),
-    DataMasking(provider=MyEncryptionProvider(keys="secret-key")),
-]
+data_maskers = [DataMasking()]
 
 
 python_dict = {
     "a": {
         "1": {"None": "hello", "four": "world"},  # None type key doesn't work
         "b": {"3": {"4": "goodbye", "e": "world"}},  # key "4.5" doesn't work
-    }
+    },
 }
 
 
@@ -47,14 +22,14 @@ dict_fields = ["a.1.None", "a.b.3.4"]
 
 
 masked_with_fields = {
-    "a": {"1": {"None": DATA_MASKING_STRING, "four": "world"}, "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}}}
+    "a": {"1": {"None": DATA_MASKING_STRING, "four": "world"}, "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}}},
 }
 
 aws_encrypted_with_fields = {
     "a": {
         "1": {"None": bytes("hello", "utf-8"), "four": "world"},
         "b": {"3": {"4": bytes("goodbye", "utf-8"), "e": "world"}},
-    }
+    },
 }
 
 # 10kb JSON blob for latency testing
