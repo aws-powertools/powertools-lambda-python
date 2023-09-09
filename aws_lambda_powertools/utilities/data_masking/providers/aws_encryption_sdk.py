@@ -1,4 +1,5 @@
 import base64
+from collections.abc import Iterable
 from typing import Any, Dict, List, Optional, Union
 
 import botocore
@@ -23,14 +24,19 @@ class Singleton:
     _instances: Dict[Any, "AwsEncryptionSdkProvider"] = {}
 
     def __new__(cls, *args, **kwargs):
-        # Generate a unique key based on the configuration
+        # Generate a unique key based on the configuration.
         # Create a tuple by iterating through the values in kwargs, sorting them,
         # and then adding them to the tuple.
-        config_key = tuple(v for value in kwargs.values() for v in sorted(value))
+        config_key = tuple()
+        for value in kwargs.values():
+            if isinstance(value, Iterable):
+                for val in sorted(value):
+                    config_key += (val,)
+            else:
+                config_key += (value,)
 
         if config_key not in cls._instances:
             cls._instances[config_key] = super(Singleton, cls).__new__(cls, *args)
-            print("in if class instances:", cls._instances)
         return cls._instances[config_key]
 
 
@@ -75,10 +81,10 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             max_messages_encrypted=max_messages_encrypted,
         )
 
-    def _serialize(self, data: Any):
+    def _serialize(self, data: Any) -> bytes:
         return bytes(str(data), "utf-8")
 
-    def _deserialize(self, data: bytes):
+    def _deserialize(self, data: bytes) -> str:
         return data.decode("utf-8")
 
     def encrypt(self, data: Union[bytes, str], **provider_options) -> str:
@@ -102,7 +108,7 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
-    def decrypt(self, data: str, **provider_options) -> bytes:
+    def decrypt(self, data: str, **provider_options) -> str:
         """
         Decrypt data using AwsEncryptionSdkProvider.
 
