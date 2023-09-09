@@ -4,37 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Bug Fixes
 
-* **event_handler:** expanding safe URI characters to include +$& ([#3026](https://github.com/aws-powertools/powertools-lambda-python/issues/3026))
-* **parser:** change ApproximateCreationDateTime field to datetime in DynamoDBStreamChangedRecordModel ([#3049](https://github.com/aws-powertools/powertools-lambda-python/issues/3049))
+<a name="v2.24.0"></a>
+## [v2.24.0] - 2023-09-08
+## Documentation
 
-## Code Refactoring
-
-* **batch:** type response() method ([#3023](https://github.com/aws-powertools/powertools-lambda-python/issues/3023))
-
-## Features
-
-* **idempotency:** add support to custom serialization/deserialization on idempotency decorator ([#2951](https://github.com/aws-powertools/powertools-lambda-python/issues/2951))
+* **idempotency:** use tab navigation, improves custom serializer example, and additional explanations ([#3067](https://github.com/aws-powertools/powertools-lambda-python/issues/3067))
 
 ## Maintenance
 
-* **deps:** bump squidfunk/mkdocs-material from `b1f7f94` to `f4764d1` in /docs ([#3031](https://github.com/aws-powertools/powertools-lambda-python/issues/3031))
-* **deps:** bump actions/checkout from 3.6.0 to 4.0.0 ([#3041](https://github.com/aws-powertools/powertools-lambda-python/issues/3041))
-* **deps:** bump squidfunk/mkdocs-material from `97da15b` to `b1f7f94` in /docs ([#3021](https://github.com/aws-powertools/powertools-lambda-python/issues/3021))
-* **deps:** bump squidfunk/mkdocs-material from `f4764d1` to `dd1770c` in /docs ([#3044](https://github.com/aws-powertools/powertools-lambda-python/issues/3044))
-* **deps:** bump docker/setup-buildx-action from 2.9.1 to 2.10.0 ([#3022](https://github.com/aws-powertools/powertools-lambda-python/issues/3022))
-* **deps-dev:** bump mkdocs-material from 9.2.6 to 9.2.7 ([#3043](https://github.com/aws-powertools/powertools-lambda-python/issues/3043))
-* **deps-dev:** bump sentry-sdk from 1.29.2 to 1.30.0 ([#3028](https://github.com/aws-powertools/powertools-lambda-python/issues/3028))
-* **deps-dev:** bump the boto-typing group with 11 updates ([#3027](https://github.com/aws-powertools/powertools-lambda-python/issues/3027))
-* **deps-dev:** bump pytest from 7.4.0 to 7.4.1 ([#3042](https://github.com/aws-powertools/powertools-lambda-python/issues/3042))
-* **deps-dev:** bump mkdocs-material from 9.2.5 to 9.2.6 ([#3032](https://github.com/aws-powertools/powertools-lambda-python/issues/3032))
-* **deps-dev:** bump cfn-lint from 0.79.7 to 0.79.8 ([#3033](https://github.com/aws-powertools/powertools-lambda-python/issues/3033))
-* **deps-dev:** bump the boto-typing group with 1 update ([#3013](https://github.com/aws-powertools/powertools-lambda-python/issues/3013))
-* **deps-dev:** bump aws-cdk from 2.93.0 to 2.94.0 ([#3036](https://github.com/aws-powertools/powertools-lambda-python/issues/3036))
-* **deps-dev:** bump ruff from 0.0.285 to 0.0.286 ([#3014](https://github.com/aws-powertools/powertools-lambda-python/issues/3014))
-* **deps-dev:** bump cfn-lint from 0.79.8 to 0.79.9 ([#3046](https://github.com/aws-powertools/powertools-lambda-python/issues/3046))
-* **deps-dev:** bump ruff from 0.0.286 to 0.0.287 ([#3035](https://github.com/aws-powertools/powertools-lambda-python/issues/3035))
+* version bump
 
 
 <a name="v2.23.1"></a>
@@ -3753,7 +3732,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.24.0...HEAD
+[v2.24.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.1...v2.24.0
 [v2.23.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.0...v2.23.1
 [v2.23.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.22.0...v2.23.0
 [v2.22.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.21.0...v2.22.0
