@@ -31,7 +31,7 @@ class CustomFormatter(BasePowertoolsFormatter):
                 "timestamp": self.formatTime(record),
                 "my_default_key": "test",
                 **self.log_format,
-            }
+            },
         )
 
 

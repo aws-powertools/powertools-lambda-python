@@ -1,7 +1,7 @@
 from typing import Dict, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import (
-    DictWrapper,
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
 )
 
@@ -74,7 +74,10 @@ class S3ObjectUserRequest(DictWrapper):
         return self["headers"]
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 

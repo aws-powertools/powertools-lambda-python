@@ -145,7 +145,11 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
@@ -165,7 +169,11 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -590,7 +598,7 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
                     "timestamp": self.formatTime(record),
                     "my_default_key": "test",
                     **self.custom_format,
-                }
+                },
             )
 
     custom_formatter = CustomFormatter()
@@ -842,7 +850,8 @@ def test_use_datetime(stdout, service_name, utc):
 
     expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
     assert re.fullmatch(
-        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}",
+        log["timestamp"],
     )
 
 
@@ -936,3 +945,17 @@ def test_logger_log_uncaught_exceptions(service_name, stdout):
     # THEN it should contain our custom exception hook with a copy of our logger
     assert isinstance(exception_hook, functools.partial)
     assert exception_hook.keywords.get("logger") == logger
+
+
+def test_stream_defaults_to_stdout(service_name, capsys):
+    # GIVEN Logger is initialized without any explicit stream
+    logger = Logger(service=service_name)
+    msg = "testing stdout"
+
+    # WHEN logging statements are issued
+    logger.info(msg)
+
+    # THEN we should default to standard output, not standard error.
+    # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
+    log = json.loads(capsys.readouterr().out.strip())
+    assert log["message"] == msg

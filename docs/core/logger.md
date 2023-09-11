@@ -15,7 +15,7 @@ Logger provides an opinionated logger with output structured as JSON.
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Logger requires two settings:
 
@@ -23,6 +23,8 @@ Logger requires two settings:
 | ----------------- | ------------------------------------------------------------------- | ------------------------- | --------------------- |
 | **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `LOG_LEVEL`               | `level`               |
 | **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`             |
+
+There are some [other environment variables](#environment-variables) which can be set to modify Logger's settings at a global scope.
 
 ```yaml hl_lines="12-13" title="AWS Serverless Application Model (SAM) example"
 --8<-- "examples/logger/sam/template.yaml"
@@ -83,7 +85,7 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 ### Setting a Correlation ID
 
-You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
 
 ???+ tip
 	You can retrieve correlation IDs via `get_correlation_id` method
@@ -163,7 +165,7 @@ You can append additional keys using either mechanism:
 #### append_keys method
 
 ???+ warning
-	`append_keys` is not thread-safe, please see [RFC](https://github.com/awslabs/aws-lambda-powertools-python/issues/991){target="_blank"}.
+	`append_keys` is not thread-safe, please see [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/991){target="_blank"}.
 
 You can append your own keys to your existing Logger via `append_keys(**additional_key_values)` method.
 
@@ -301,7 +303,7 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 ??? question "What are uncaught exceptions?"
 
-    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank"}, leading a Python program to a non-successful exit.
+    It's any raised exception that wasn't handled by the [`except` statement](https://docs.python.org/3.9/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"}, leading a Python program to a non-successful exit.
 
     They are typically raised intentionally to signal a problem (`raise ValueError`), or a propagated exception from elsewhere in your code that you didn't handle it willingly or not (`KeyError`, `jsonDecoderError`, etc.).
 
@@ -323,10 +325,10 @@ Logger uses Python's standard logging date format with the addition of timezone:
 
 You can easily change the date format using one of the following parameters:
 
-* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank"}. Use `%F` if you need milliseconds.
+* **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank" rel="nofollow"}. Use `%F` if you need milliseconds.
 * **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
 
-???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank"}?"
+???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank" rel="nofollow"}?"
 	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
 
 === "date_formatting.py"
@@ -340,6 +342,18 @@ You can easily change the date format using one of the following parameters:
     ```json hl_lines="6 13"
     --8<-- "examples/logger/src/date_formatting_output.json"
     ```
+
+### Environment variables
+
+The following environment variables are available to configure Logger at a global scope:
+
+| Setting                   | Description                                                                  | Environment variable                    | Default |
+|---------------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
+| **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
+| **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+
+[`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value.
 
 ## Advanced
 
@@ -407,7 +421,7 @@ You can use values ranging from `0.0` to `1` (100%) when setting `POWERTOOLS_LOG
 Sampling decision happens at the Logger initialization. This means sampling may happen significantly more or less than depending on your traffic patterns, for example a steady low number of invocations and thus few cold starts.
 
 ???+ note
-	Open a [feature request](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
+	Open a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you want Logger to calculate sampling for every invocation
 
 === "sampling_debug_logs.py"
 
@@ -447,7 +461,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 
 ### Observability providers
 
-!!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank"} offering a platform for logging, metrics, traces, etc."
+!!! note "In this context, an observability provider is an [AWS Lambda Partner](https://go.aws/3HtU6CZ){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc."
 
 You can send logs to the observability provider of your choice via [Lambda Extensions](https://aws.amazon.com/blogs/compute/using-aws-lambda-extensions-to-send-logs-to-custom-destinations/){target="_blank"}. In most cases, you shouldn't need any custom Logger configuration, and logs will be shipped async without any performance impact.
 
@@ -604,7 +618,7 @@ For these, you can override the `serialize` method from [LambdaPowertoolsFormatt
 
 === "bring_your_own_formatter.py"
 
-    ```python hl_lines="2 5-6 12"
+    ```python hl_lines="2-3 6 11-12 15"
     --8<-- "examples/logger/src/bring_your_own_formatter.py"
     ```
 
@@ -634,7 +648,7 @@ For exceptional cases where you want to completely replace our formatter logic, 
 
 #### Bring your own JSON serializer
 
-By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank"}.
+By default, Logger uses `json.dumps` and `json.loads` as serializer and deserializer respectively. There could be scenarios where you are making use of alternative JSON libraries like [orjson](https://github.com/ijl/orjson){target="_blank" rel="nofollow"}.
 
 As parameters don't always translate well between them, you can pass any callable that receives a `dict` and return a `str`:
 
@@ -664,7 +678,7 @@ This is a Pytest sample that provides the minimum information necessary for Logg
     ```
 
 ???+ tip
-	Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank"} to assert plain log messages
+	Check out the built-in [Pytest caplog fixture](https://docs.pytest.org/en/latest/how-to/logging.html){target="_blank" rel="nofollow"} to assert plain log messages
 
 ### Pytest live log feature
 
@@ -703,7 +717,7 @@ By default all registered loggers will be modified. You can change this behavior
 
 ### How can I add standard library logging attributes to a log record?
 
-The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
+The Python standard library log records contains a [large set of attributes](https://docs.python.org/3/library/logging.html#logrecord-attributes){target="_blank" rel="nofollow"}, however only a few are included in Powertools for AWS Lambda (Python) Logger log record by default.
 
 You can include any of these logging attributes as key value arguments (`kwargs`) when instantiating `Logger` or `LambdaPowertoolsFormatter`.
 
@@ -744,4 +758,4 @@ Here's an example where we persist `payment_id` not `request_id`. Note that `pay
 <!-- markdownlint-disable MD013 -->
 ### How do I aggregate and search Powertools for AWS Lambda (Python) logs across accounts?
 
-As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/awslabs/aws-lambda-powertools-python/issues/460){target="_blank"}
+As of now, ElasticSearch (ELK) or 3rd party solutions are best suited to this task. Please refer to this [discussion for more details](https://github.com/aws-powertools/powertools-lambda-python/issues/460){target="_blank"}

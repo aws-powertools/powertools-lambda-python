@@ -194,7 +194,7 @@ class TraceFetcher:
         trace_ids = [trace["Id"] for trace in summaries[0]]  # type: ignore[index] # TypedDict not being recognized
         if len(trace_ids) < self.minimum_traces:
             raise ValueError(
-                f"Number of traces found doesn't meet minimum required ({self.minimum_traces}). Repeating..."
+                f"Number of traces found doesn't meet minimum required ({self.minimum_traces}). Repeating...",
             )
 
         return trace_ids

@@ -17,11 +17,10 @@ dev-gitpod:
 	pre-commit install
 
 format:
-	poetry run isort aws_lambda_powertools tests examples
 	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run flake8 aws_lambda_powertools tests examples
+	poetry run ruff aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
@@ -111,4 +110,4 @@ mypy:
 
 
 dev-version-plugin:
-	poetry self add git+https://github.com/monim67/poetry-bumpversion@ef49c63acef7fe8680789ddb31f376cc898f0012
+	poetry self add git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4

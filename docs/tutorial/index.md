@@ -20,11 +20,11 @@ Let's clone our sample project before we add one feature at a time.
     Bootstrap directly via SAM CLI:
 
     ```shell
-    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.10 --no-tracing`
+    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.11 --no-tracing
     ```
 
 ```bash title="Use SAM CLI to initialize the sample project"
-sam init --runtime python3.10 --dependency-manager pip --app-template hello-world --name powertools-quickstart
+sam init --runtime python3.11 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
 
 ### Project structure
@@ -103,7 +103,7 @@ AWS SAM allows you to execute a serverless application locally by running `sam b
 2021-11-26 17:43:08  * Running on http://127.0.0.1:3000/ (Press CTRL+C to quit)
 ```
 
-As a result, a local API endpoint will be exposed and you can invoke it using your browser, or your preferred HTTP API client e.g., [Postman](https://www.postman.com/downloads/){target="_blank"}, [httpie](https://httpie.io/){target="_blank"}, etc.
+As a result, a local API endpoint will be exposed and you can invoke it using your browser, or your preferred HTTP API client e.g., [Postman](https://www.postman.com/downloads/){target="_blank" rel="nofollow"}, [httpie](https://httpie.io/){target="_blank" rel="nofollow"}, etc.
 
 ```bash title="Invoking our function locally via curl"
 > curl http://127.0.0.1:3000/hello
@@ -226,7 +226,7 @@ For this to work, we could create a new Lambda function to handle incoming reque
 We could group similar routes and intents, separate read and write operations resulting in fewer functions. It doesn't address the boilerplate routing code, but maybe it will be easier to add additional URLs.
 
 ???+ info "Info: You might be already asking yourself about mono vs micro-functions"
-    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway/#considerations){target="_blank"} later.
+    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway.md#considerations){target="_blank"} later.
 
 A first attempt at the routing logic might look similar to the following code snippet.
 
@@ -355,7 +355,7 @@ Let's include Powertools for AWS Lambda (Python) as a dependency in `requirement
 Use `sam build && sam local start-api` and try run it locally again.
 
 ???+ note
-    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank"}, you will be familiar with this experience already. [Event Handler for API Gateway](../core/event_handler/api_gateway.md){target="_blank"} uses `APIGatewayRestResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
+    If you're coming from [Flask](https://flask.palletsprojects.com/en/2.0.x/){target="_blank" rel="nofollow"}, you will be familiar with this experience already. [Event Handler for API Gateway](../core/event_handler/api_gateway.md){target="_blank"} uses `APIGatewayRestResolver` to give a Flask-like experience while staying true to our tenet `Keep it lean`.
 
 We have added the route annotation as the decorator for our methods. It enables us to use the parameters passed in the request directly, and our responses are simply dictionaries.
 
@@ -364,7 +364,7 @@ Lastly, we used `return app.resolve(event, context)` so Event Handler can resolv
 From here, we could handle [404 routes](../core/event_handler/api_gateway.md#handling-not-found-routes){target="_blank"}, [error handling](../core/event_handler/api_gateway.md#exception-handling){target="_blank"}, [access query strings, payload](../core/event_handler/api_gateway.md#accessing-request-details){target="_blank"}, etc.
 
 ???+ tip
-    If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/){target="_blank"}'s article.
+    If you'd like to learn how python decorators work under the hood, you can follow [Real Python](https://realpython.com/primer-on-python-decorators/){target="_blank" rel="nofollow"}'s article.
 
 ## Structured Logging
 
@@ -509,7 +509,7 @@ This is how the logs would look like now:
 ```
 
 We can now search our logs by the request ID to find a specific operation. Additionally, we can also search our logs for function name, Lambda request ID, Lambda function ARN, find out whether an operation was a cold start, etc.
-
+<!-- markdownlint-disable-next-line MD013 -->
 From here, we could [set specific keys](../core/logger.md#append_keys-method){target="_blank"} to add additional contextual information about a given operation, [log exceptions](../core/logger.md#logging-exceptions){target="_blank"} to easily enumerate them later, [sample debug logs](../core/logger.md#sampling-debug-logs){target="_blank"}, etc.
 
 By having structured logs like this, we can easily search and analyse them in [CloudWatch Logs Insight](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html){target="_blank"}.
@@ -649,7 +649,7 @@ Within AWS X-Ray, we can answer these questions by using two features: tracing *
 
 Let's put them into action.
 
-```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-42 45"
+```python title="Enriching traces with annotations and metadata" hl_lines="10 17-18 26-27 35 37-41 44"
 from aws_xray_sdk.core import patch_all, xray_recorder
 
 from aws_lambda_powertools import Logger
@@ -687,11 +687,10 @@ def lambda_handler(event, context):
     global cold_start
 
     subsegment = xray_recorder.current_subsegment()
+    subsegment.put_annotation(key="ColdStart", value=cold_start)
+
     if cold_start:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
         cold_start = False
-    else:
-        subsegment.put_annotation(key="ColdStart", value=cold_start)
 
     result = app.resolve(event, context)
     subsegment.put_metadata("response", result)
@@ -705,8 +704,8 @@ Let's break it down:
 * **L17-18**: We use AWS X-Ray SDK to add `User` annotation on `hello_name` subsegment. This will allow us to filter traces using the `User` value.
 * **L26-27**: We repeat what we did in L17-18 except we use the value `unknown` since we don't have that information.
 * **L35**: We use `global` to modify our global variable defined in the outer scope.
-* **37-42**: We add `ColdStart` annotation and flip the value of `cold_start` variable, so that subsequent requests annotates the value `false` when the sandbox is reused.
-* **L45**: We include the final response under `response` key as part of the `handler` subsegment.
+* **37-41**: We add `ColdStart` annotation and set `cold_start` variable to `false`, so that subsequent requests annotates the value `false` when the sandbox is reused.
+* **L44**: We include the final response under `response` key as part of the `handler` subsegment.
 
 ???+ info
     If you want to understand how the Lambda execution environment (sandbox) works and why cold starts can occur, see this [blog series on Lambda performance](https://aws.amazon.com/blogs/compute/operating-lambda-performance-optimization-part-1/){target="_blank"}.
@@ -774,7 +773,7 @@ Another subtle difference is that you can now run your Lambda functions and unit
 Powertools for AWS Lambda (Python) optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
 
 ???+ tip
-    You can [opt-out some of these behaviours](../core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
+    You can [opt-out some of these behaviours](../core/tracer.md#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 
@@ -795,7 +794,7 @@ From here, you can browse to specific logs in CloudWatch Logs Insight, Metrics D
 ### Creating metrics
 
 Let's add custom metrics to better understand our application and business behavior (e.g. number of reservations, etc.).
-
+<!-- markdownlint-disable-next-line MD013 -->
 By default, AWS Lambda adds [invocation and performance metrics](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-metrics.html#monitoring-metrics-types){target="_blank"}, and Amazon API Gateway adds [latency and some HTTP metrics](https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metrics){target="_blank"}.
 
 ???+ tip
@@ -994,7 +993,7 @@ That's a lot less boilerplate code! Let's break this down:
 * **L33**: We use `@metrics.log_metrics` decorator to ensure that our metrics are aligned with the EMF output and validated before-hand, like in case we forget to set namespace, or accidentally use a metric unit as a string that doesn't exist in CloudWatch.
 * **L33**: We also use `capture_cold_start_metric=True` so we don't have to handle that logic either. Note that [Metrics](../core/metrics.md){target="_blank"} does not publish a warm invocation metric (ColdStart=0) for cost reasons. As such, treat the absence (sparse metric) as a non-cold start invocation.
 
-Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank"} and [K6.io](https://k6.io/open-source){target="_blank"} are quick ways to generate some load.
+Repeat the process of building, deploying, and invoking your application via the API endpoint a few times to generate metrics - [Artillery](https://www.artillery.io/){target="_blank" rel="nofollow"} and [K6.io](https://k6.io/open-source){target="_blank" rel="nofollow"} are quick ways to generate some load.
 
 Within [CloudWatch Metrics view](https://console.aws.amazon.com/cloudwatch/home#metricsV2:graph=~()){target="_blank}, you should see `MyApp` custom namespace with your custom metrics there and `SuccessfulGreetings` available to graph.
 
@@ -1035,7 +1034,7 @@ If you're curious about how the EMF portion of your function logs look like, you
 ## Final considerations
 
 We covered a lot of ground here and we only scratched the surface of the feature set available within Powertools for AWS Lambda (Python).
-
+<!-- markdownlint-disable-next-line MD013 -->
 When it comes to the observability features ([Tracer](../core/tracer.md){target="_blank"}, [Metrics](../core/metrics.md){target="_blank"}, [Logging](../core/logger.md){target="_blank"}), don't stop there! The goal here is to ensure you can ask arbitrary questions to assess your system's health; these features are only part of the wider story!
 
 This requires a change in mindset to ensure operational excellence is part of the software development lifecycle.
@@ -1046,4 +1045,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Powertools for AWS Lambda (Python) is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a [documentation issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).

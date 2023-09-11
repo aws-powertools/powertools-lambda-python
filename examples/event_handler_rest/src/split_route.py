@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 tracer = Tracer()
 logger = Logger()
 app = APIGatewayRestResolver()
-app.include_router(split_route_module.router)
+app.include_router(split_route_module.router)  # (1)!
 
 
 # You can continue to use other utilities just as before

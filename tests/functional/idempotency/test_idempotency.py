@@ -2,7 +2,6 @@ import copy
 import datetime
 import sys
 import warnings
-from hashlib import md5
 from unittest.mock import MagicMock
 
 import jmespath
@@ -18,6 +17,8 @@ from aws_lambda_powertools.utilities.data_classes import (
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
+    idempotent,
+    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.base import (
     MAX_RETRIES,
@@ -29,17 +30,18 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyInconsistentStateError,
     IdempotencyInvalidStatusError,
     IdempotencyKeyError,
+    IdempotencyModelTypeError,
+    IdempotencyNoSerializationModelError,
     IdempotencyPersistenceLayerError,
     IdempotencyValidationError,
-)
-from aws_lambda_powertools.utilities.idempotency.idempotency import (
-    idempotent,
-    idempotent_function,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
     DataRecord,
 )
+from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import DataclassSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_stub,
@@ -83,7 +85,7 @@ def test_idempotent_lambda_already_completed(
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
 
     expected_params = {
@@ -132,7 +134,7 @@ def test_idempotent_lambda_in_progress(
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -184,7 +186,7 @@ def test_idempotent_lambda_in_progress_with_cache(
             "id": {"S": hashed_idempotency_key},
             "expiration": {"N": timestamp_future},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
 
     stubber.add_client_error("put_item", "ConditionalCheckFailedException")
@@ -435,7 +437,7 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
             "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "COMPLETED"},
             "validation": {"S": hashed_validation_key},
-        }
+        },
     }
 
     expected_params = {"TableName": TABLE_NAME, "Key": {"id": {"S": hashed_idempotency_key}}, "ConsistentRead": True}
@@ -479,7 +481,7 @@ def test_idempotent_lambda_expired_during_request(
             "expiration": {"N": timestamp_expired},
             "data": {"S": '{"message": "test", "statusCode": 200}'},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
     ddb_response_get_item_missing = {}
     expected_params_get_item = {
@@ -643,7 +645,9 @@ def test_idempotent_lambda_first_execution_with_validation(
 
 
 @pytest.mark.parametrize(
-    "config_without_jmespath", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True
+    "config_without_jmespath",
+    [{"use_local_cache": False}, {"use_local_cache": True}],
+    indirect=True,
 )
 def test_idempotent_lambda_with_validator_util(
     config_without_jmespath: IdempotencyConfig,
@@ -668,7 +672,7 @@ def test_idempotent_lambda_with_validator_util(
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
 
     expected_params = {
@@ -724,7 +728,7 @@ def test_idempotent_lambda_expires_in_progress_before_expire(
             "in_progress_expiration": {"N": str(timestamp_expires_in_progress)},
             "data": {"S": '{"message": "test", "statusCode": 200'},
             "status": {"S": "INPROGRESS"},
-        }
+        },
     }
     stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
 
@@ -769,7 +773,7 @@ def test_idempotent_lambda_expires_in_progress_after_expire(
                 "in_progress_expiration": {"N": str(int(one_second_ago.timestamp() * 1000))},
                 "data": {"S": '{"message": "test", "statusCode": 200'},
                 "status": {"S": "INPROGRESS"},
-            }
+            },
         }
         stubber.add_response("get_item", ddb_response_get_item, expected_params_get_item)
 
@@ -817,7 +821,9 @@ def test_data_record_invalid_status_value():
 def test_data_record_json_to_dict_mapping():
     # GIVEN a data record with status "INPROGRESS" and provided response data
     data_record = DataRecord(
-        "key", status="INPROGRESS", response_data='{"body": "execution finished","statusCode": "200"}'
+        "key",
+        status="INPROGRESS",
+        response_data='{"body": "execution finished","statusCode": "200"}',
     )
 
     # WHEN translating response data to dictionary
@@ -839,7 +845,8 @@ def test_data_record_json_to_dict_mapping_when_response_data_none():
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_handler_for_status_expired_data_record(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     idempotency_handler = IdempotencyHandler(
         function=lambda a: a,
@@ -855,7 +862,8 @@ def test_handler_for_status_expired_data_record(
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_handler_for_status_inprogress_data_record_inconsistent(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     idempotency_handler = IdempotencyHandler(
         function=lambda a: a,
@@ -875,7 +883,8 @@ def test_handler_for_status_inprogress_data_record_inconsistent(
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_handler_for_status_inprogress_data_record_consistent(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     idempotency_handler = IdempotencyHandler(
         function=lambda a: a,
@@ -895,7 +904,8 @@ def test_handler_for_status_inprogress_data_record_consistent(
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_in_progress_never_saved_to_cache(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a data record with status "INPROGRESS"
     # and persistence_store has use_local_cache = True
@@ -931,7 +941,8 @@ def test_user_local_disabled(idempotency_config: IdempotencyConfig, persistence_
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_delete_from_cache_when_empty(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN use_local_cache is True AND the local cache is empty
     persistence_store.configure(idempotency_config)
@@ -953,11 +964,6 @@ def test_is_missing_idempotency_key():
     assert BasePersistenceLayer.is_missing_idempotency_key({})
     # GIVEN an empty str THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key("")
-    # GIVEN False THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(False)
-    # GIVEN number 0 THEN is_missing_idempotency_key is True
-    assert BasePersistenceLayer.is_missing_idempotency_key(0)
-
     # GIVEN None THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key(None)
     # GIVEN a list of Nones THEN is_missing_idempotency_key is True
@@ -967,23 +973,34 @@ def test_is_missing_idempotency_key():
     # GIVEN a dict of Nones THEN is_missing_idempotency_key is True
     assert BasePersistenceLayer.is_missing_idempotency_key({None: None})
 
+    # GIVEN True THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(True) is False
+    # GIVEN False THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(False) is False
+    # GIVEN number 0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0) is False
+    # GIVEN number 0.0 THEN is_missing_idempotency_key is False
+    assert BasePersistenceLayer.is_missing_idempotency_key(0.0) is False
     # GIVEN a str THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("Value") is False
     # GIVEN str "False" THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key("False") is False
-    # GIVEN an number THEN is_missing_idempotency_key is False
+    # GIVEN a number THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(1000) is False
     # GIVEN a float THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key(10.01) is False
-    # GIVEN a list of all not None THEN is_missing_idempotency_key is False
+    # GIVEN a list with some items THEN is_missing_idempotency_key is False
     assert BasePersistenceLayer.is_missing_idempotency_key([None, "Value"]) is False
 
 
 @pytest.mark.parametrize(
-    "idempotency_config", [{"use_local_cache": False, "event_key_jmespath": "body"}], indirect=True
+    "idempotency_config",
+    [{"use_local_cache": False, "event_key_jmespath": "body"}],
+    indirect=True,
 )
 def test_default_no_raise_on_missing_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence_store with use_local_cache = False and event_key_jmespath = "body"
     function_name = "foo"
@@ -995,8 +1012,7 @@ def test_default_no_raise_on_missing_idempotency_key(
     hashed_key = persistence_store._get_hashed_idempotency_key({})
 
     # THEN return the hash of None
-    expected_value = f"test-func.{function_name}#" + md5(json_serialize(None).encode()).hexdigest()
-    assert expected_value == hashed_key
+    assert hashed_key is None
 
 
 @pytest.mark.parametrize(
@@ -1007,7 +1023,8 @@ def test_default_no_raise_on_missing_idempotency_key(
     indirect=True,
 )
 def test_raise_on_no_idempotency_key(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence_store with raise_on_no_idempotency_key and no idempotency key in the request
     persistence_store.configure(idempotency_config)
@@ -1034,7 +1051,8 @@ def test_raise_on_no_idempotency_key(
     indirect=True,
 )
 def test_jmespath_with_powertools_json(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN an event_key_jmespath with powertools_json custom function
     persistence_store.configure(idempotency_config, "handler")
@@ -1055,7 +1073,8 @@ def test_jmespath_with_powertools_json(
 
 @pytest.mark.parametrize("config_with_jmespath_options", ["powertools_json(data).payload"], indirect=True)
 def test_custom_jmespath_function_overrides_builtin_functions(
-    config_with_jmespath_options: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    config_with_jmespath_options: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN a persistence store with a custom jmespath_options
     # AND use a builtin Powertools for AWS Lambda (Python) custom function
@@ -1093,7 +1112,7 @@ def test_idempotent_lambda_save_inprogress_error(persistence_store: DynamoDBPers
     # WHEN handling the idempotent call
     # AND save_inprogress raises a ClientError
     with pytest.raises(IdempotencyPersistenceLayerError) as e:
-        lambda_handler({}, lambda_context)
+        lambda_handler({"data": "some"}, lambda_context)
 
     # THEN idempotent should raise an IdempotencyPersistenceLayerError
     # AND append downstream exception details
@@ -1178,6 +1197,297 @@ def test_idempotent_function():
     result = record_handler(record=mock_event)
     # THEN we expect the function to execute successfully
     assert result == expected_result
+
+
+def test_idempotent_function_serialization_custom_dict():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_custom_dict.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    to_dict_called = False
+    from_dict_called = False
+
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    expected_result = {"message": "Foo"}
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return expected_result
+
+    record_handler(record=mock_event)
+    assert to_dict_called
+    record_handler(record=mock_event)
+    assert from_dict_called
+
+
+def test_idempotent_function_serialization_no_response():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_no_response.<locals>.record_handler#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    to_dict_called = False
+    from_dict_called = False
+
+    def to_dict(data):
+        nonlocal to_dict_called
+        to_dict_called = True
+        return data
+
+    def from_dict(data):
+        nonlocal from_dict_called
+        from_dict_called = True
+        return data
+
+    output_serializer = CustomDictSerializer(
+        to_dict=to_dict,
+        from_dict=from_dict,
+    )
+
+    @idempotent_function(
+        persistence_store=persistence_layer,
+        data_keyword_argument="record",
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def record_handler(record):
+        return None
+
+    record_handler(record=mock_event)
+    assert to_dict_called is False, "in case response is None, to_dict should not be called"
+    response = record_handler(record=mock_event)
+    assert response is None
+    assert from_dict_called is False, "in case response is None, from_dict should not be called"
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_pydantic(output_serializer_type: str):
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = PydanticSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = PydanticSerializer
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput(**payment.dict())
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
+def test_idempotent_function_serialization_pydantic_failure_no_return_type():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyNoSerializationModelError, match="No serialization model was supplied"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput):
+            return PaymentOutput(**payment.dict())
+
+
+def test_idempotent_function_serialization_pydantic_failure_bad_type():
+    # GIVEN
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    class PaymentInput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    class PaymentOutput(BaseModel):
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyModelTypeError, match="Model type is not inherited from pydantic BaseModel"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput) -> dict:
+            return PaymentOutput(**payment.dict())
+
+
+@pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
+def test_idempotent_function_serialization_dataclass(output_serializer_type: str):
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_dataclass.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    if output_serializer_type == "explicit":
+        output_serializer = DataclassSerializer(
+            model=PaymentOutput,
+        )
+    else:
+        output_serializer = DataclassSerializer
+
+    @idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=output_serializer,
+    )
+    def collect_payment(payment: PaymentInput) -> PaymentOutput:
+        return PaymentOutput(**dataclasses.asdict(payment))
+
+    # WHEN
+    payment = PaymentInput(**mock_event)
+    first_call: PaymentOutput = collect_payment(payment=payment)
+    assert first_call.customer_id == payment.customer_id
+    assert first_call.transaction_id == payment.transaction_id
+    assert isinstance(first_call, PaymentOutput)
+    second_call: PaymentOutput = collect_payment(payment=payment)
+    assert isinstance(second_call, PaymentOutput)
+    assert second_call.customer_id == payment.customer_id
+    assert second_call.transaction_id == payment.transaction_id
+
+
+def test_idempotent_function_serialization_dataclass_failure_no_return_type():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=DataclassSerializer,
+    )
+    with pytest.raises(IdempotencyNoSerializationModelError, match="No serialization model was supplied"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput):
+            return PaymentOutput(**payment.dict())
+
+
+def test_idempotent_function_serialization_dataclass_failure_bad_type():
+    # GIVEN
+    dataclasses = get_dataclasses_lib()
+    config = IdempotencyConfig(use_local_cache=True)
+    mock_event = {"customer_id": "fake", "transaction_id": "fake-id"}
+    idempotency_key = f"{TESTS_MODULE_PREFIX}.test_idempotent_function_serialization_pydantic_failure_no_return_type.<locals>.collect_payment#{hash_idempotency_key(mock_event)}"  # noqa E501
+    persistence_layer = MockPersistenceLayer(expected_idempotency_key=idempotency_key)
+
+    @dataclasses.dataclass
+    class PaymentInput:
+        customer_id: str
+        transaction_id: str
+
+    @dataclasses.dataclass
+    class PaymentOutput:
+        customer_id: str
+        transaction_id: str
+
+    idempotent_function_decorator = idempotent_function(
+        data_keyword_argument="payment",
+        persistence_store=persistence_layer,
+        config=config,
+        output_serializer=PydanticSerializer,
+    )
+    with pytest.raises(IdempotencyModelTypeError, match="Model type is not inherited from pydantic BaseModel"):
+
+        @idempotent_function_decorator
+        def collect_payment(payment: PaymentInput) -> dict:
+            return PaymentOutput(**payment.dict())
 
 
 def test_idempotent_function_arbitrary_args_kwargs():
@@ -1287,7 +1597,8 @@ def test_idempotent_function_falsy_values(data):
 
 @pytest.mark.parametrize("data", [None, 0, False])
 def test_idempotent_function_falsy_values_with_raise_on_no_idempotency_key(
-    data, persistence_store: DynamoDBPersistenceLayer
+    data,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # GIVEN raise_on_no_idempotency_key is True
     idempotency_config = IdempotencyConfig(event_key_jmespath="idemKey", raise_on_no_idempotency_key=True)
@@ -1347,7 +1658,8 @@ def test_idempotency_disabled_envvar(monkeypatch, lambda_context, persistence_st
 
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_function_duplicates(
-    idempotency_config: IdempotencyConfig, persistence_store: DynamoDBPersistenceLayer
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
 ):
     # Scenario to validate the both methods are called
     mock_event = {"data": "value"}
@@ -1363,14 +1675,17 @@ def test_idempotent_function_duplicates(
 
     assert one(data=mock_event) == "one"
     assert two(data=mock_event) == "two"
-    assert len(persistence_store.client.method_calls) == 4
+    assert len(persistence_store.client.method_calls) == 0
 
 
 def test_invalid_dynamodb_persistence_layer():
     # Scenario constructing a DynamoDBPersistenceLayer with a key_attr matching sort_key_attr should fail
     with pytest.raises(ValueError) as ve:
         DynamoDBPersistenceLayer(
-            table_name="Foo", key_attr="id", sort_key_attr="id", boto_config=Config(region_name="eu-west-1")
+            table_name="Foo",
+            key_attr="id",
+            sort_key_attr="id",
+            boto_config=Config(region_name="eu-west-1"),
         )
     # and raise a ValueError
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
@@ -1484,7 +1799,7 @@ def test_idempotent_lambda_compound_already_completed(
             "expiration": {"N": timestamp_future},
             "data": {"S": serialized_lambda_response},
             "status": {"S": "COMPLETED"},
-        }
+        },
     }
     expected_params = {
         "TableName": TABLE_NAME,

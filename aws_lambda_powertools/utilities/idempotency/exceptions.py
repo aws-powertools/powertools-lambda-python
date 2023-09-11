@@ -9,7 +9,7 @@ from typing import Optional, Union
 class BaseError(Exception):
     """
     Base error class that overwrites the way exception and extra information is printed.
-    See https://github.com/awslabs/aws-lambda-powertools-python/issues/1772
+    See https://github.com/aws-powertools/powertools-lambda-python/issues/1772
     """
 
     def __init__(self, *args: Optional[Union[str, Exception]]):
@@ -70,4 +70,16 @@ class IdempotencyPersistenceLayerError(BaseError):
 class IdempotencyKeyError(BaseError):
     """
     Payload does not contain an idempotent key
+    """
+
+
+class IdempotencyModelTypeError(BaseError):
+    """
+    Model type does not match expected payload output
+    """
+
+
+class IdempotencyNoSerializationModelError(BaseError):
+    """
+    No model was supplied to the serializer
     """

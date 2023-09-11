@@ -1,4 +1,3 @@
-import json
 import tempfile
 import zipfile
 from typing import Any, Dict, List, Optional
@@ -22,7 +21,7 @@ class CodePipelineConfiguration(DictWrapper):
     def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
         """Json Decoded user parameters"""
         if self._json_data is None and self.user_parameters is not None:
-            self._json_data = json.loads(self.user_parameters)
+            self._json_data = self._json_deserializer(self.user_parameters)
         return self._json_data
 
 

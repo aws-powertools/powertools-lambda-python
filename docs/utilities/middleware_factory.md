@@ -15,7 +15,7 @@ Middleware factory provides a decorator factory to create your own middleware to
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You might need a custom middleware to abstract non-functional code. These are often custom authorization or any reusable logic you might need to run before/after a Lambda function invocation.
 
@@ -68,6 +68,16 @@ You can also have your own keyword arguments after the mandatory arguments.
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_payload.json"
     ```
 
+### Environment variables
+
+The following environment variable is available to configure the middleware factory at a global scope:
+
+| Setting              | Description                                                                  | Environment variable                    | Default |
+|----------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
+| **Middleware Trace** | Creates sub-segment for each custom middleware.                              | `POWERTOOLS_TRACE_MIDDLEWARES`          | `false` |
+
+You can also use [`POWERTOOLS_TRACE_MIDDLEWARES`](#tracing-middleware-execution) on a per-method basis, which will consequently override the environment variable value.
+
 ## Advanced
 
 For advanced use cases, you can instantiate [Tracer](../core/tracer.md){target="_blank"} inside your middleware, and add annotations as well as metadata for additional operational insights.
@@ -92,7 +102,7 @@ If you are making use of [Tracer](../core/tracer.md){target="_blank"}, you can t
 This makes use of an existing Tracer instance that you may have initialized anywhere in your code.
 
 ???+ warning
-    You must [enable Active Tracing](../core/tracer/#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
+    You must [enable Active Tracing](../core/tracer.md#permissions){target="_blank"} in your Lambda function when using this feature, otherwise Lambda cannot send traces to XRay.
 
 === "getting_started_middleware_tracer_function.py"
     ```python hl_lines="8 14 15 36"
@@ -147,5 +157,5 @@ In the example below, we create a Middleware with the following features:
 
 * Use `trace_execution` to quickly understand the performance impact of your middlewares, and reduce or merge tasks when necessary
 * When nesting multiple middlewares, always return the handler with event and context, or response
-* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators){target="_blank"}. Lambda handler is actually called once (top-down)
+* Keep in mind [Python decorators execution order](https://realpython.com/primer-on-python-decorators/#nesting-decorators){target="_blank" rel="nofollow"}. Lambda handler is actually called once (top-down)
 * Async middlewares are not supported

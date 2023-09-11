@@ -35,40 +35,43 @@ env:
 
 concurrency: e2e
 
+permissions:
+  contents: read
+
 jobs:
   run:
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read  # checkout code
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
-        version: ["3.7", "3.8", "3.9", "3.10"]
-    if: ${{ github.actor != 'dependabot[bot]' }}
+        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+    if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac  # v4.0.0
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
-        uses: actions/setup-python@bd6b4b6205c4dbad673328db7b31b7fab9e241c0 # v4.6.1
+        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
           cache: "poetry"
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
         with:
           node-version: "16.12"
       - name: Install CDK CLI
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5727f247b64f324ec403ac56ae05e220fd02b65f # v2.1.0
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
           role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}

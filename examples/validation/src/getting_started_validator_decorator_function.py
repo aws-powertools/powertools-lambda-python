@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
 
 # we can get list of allowed IPs from AWS Parameter Store using Parameters Utility
-# See: https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/parameters/
+# See: https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/
 ALLOWED_IPS = parameters.get_parameter("/lambda-powertools/allowed_ips")
 
 
@@ -27,7 +27,6 @@ class User:
 # using a decorator to validate input and output data
 @validator(inbound_schema=schemas.INPUT, outbound_schema=schemas.OUTPUT)
 def lambda_handler(event, context: LambdaContext) -> dict:
-
     try:
         user_details: dict = {}
 

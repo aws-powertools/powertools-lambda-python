@@ -10,8 +10,12 @@ env:
   PULL_REQUEST_TITLE: "chore(ci): changelog rebuild"
   FILES_TO_COMMIT: "CHANGELOG.md"
 
+permissions:
+  contents: read
+
 jobs:
   publish_changelog:
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     # Force Github action to run only a single job at a time (based on the group name)
     # This is to prevent race-condition and inconsistencies with changelog push
     concurrency:
@@ -22,7 +26,7 @@ jobs:
       pull-requests: write  # create PR
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac  # v4.0.0
         with:
           fetch-depth: 0
       - name: "Generate latest changelog"
