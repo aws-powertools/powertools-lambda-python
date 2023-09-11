@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.23.1"
+version = "2.24.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -38,7 +38,7 @@ datadog-lambda = { version = "^4.77.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
-pytest = "^7.4.1"
+pytest = "^7.4.2"
 black = "^23.3"
 boto3 = "^1.18"
 isort = "^5.11.5"
