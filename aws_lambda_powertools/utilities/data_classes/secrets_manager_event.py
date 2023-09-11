@@ -3,7 +3,7 @@ from typing_extensions import Literal
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-class SecretManagerEvent(DictWrapper):
+class SecretsManagerEvent(DictWrapper):
     @property
     def secret_id(self) -> str:
         """SecretId: The secret ARN or identifier"""

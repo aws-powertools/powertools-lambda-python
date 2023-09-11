@@ -1166,19 +1166,27 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
 === "app.py"
 
     ```python
-    from aws_lambda_powertools.utilities.data_classes import event_source, SecretManagerEvent
+    import boto3
 
-    @event_source(data_class=SecretManagerEvent)
-    def lambda_handler(event: SecretManagerEvent, context):
-        # Multiple records can be delivered in a single event
+    from aws_lambda_powertools.utilities.data_classes import event_source, SecretsManagerEvent
+
+    @event_source(data_class=SecretsManagerEvent)
+    def lambda_handler(event: SecretsManagerEvent, context):
         service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
-        create_secret(service_client, event.secret_id, event.client_request_token)
+        secret = service_client.get_secret_value(
+            SecretId=event.secret_id,
+            VersionId=event.client_request_token,
+            VersionStage="AWSCURRENT"
+            )
+        # {'Name': 'MyTestDatabaseSecret','SecretString': '{\n  "username":"david",\n  "password":"EXAMPLE-PASSWORD"\n}\n',}
+        # work with secrets afterwards
+        # see - https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
         ...
     ```
 === "Secrets Manager Example Event"
 
     ```json
-    --8<-- "tests/events/secretManagerEvent.json"
+    --8<-- "tests/events/secretsManagerEvent.json"
     ```
 
 ## Advanced
