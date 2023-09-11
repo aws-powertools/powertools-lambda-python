@@ -60,14 +60,14 @@ class KinesisFirehoseDataTransformationRecord:
         self.data_from_text(data=self.json_serializer(data))
 
     def asdict(self) -> Dict:
-        r: Dict[str, Any] = {
+        record: Dict[str, Any] = {
             "recordId": self.record_id,
             "result": self.result,
             "data": self.data,
         }
         if self.metadata:
-            r["metadata"] = self.metadata.asdict()
-        return r
+            record["metadata"] = self.metadata.asdict()
+        return record
 
     @property
     def data_as_bytes(self) -> bytes:
@@ -117,7 +117,7 @@ class KinesisFirehoseDataTransformationResponse:
         if not self.records:
             raise ValueError("Kinesis Firehose doesn't accept empty response")
 
-        return {"records": [r.asdict() for r in self.records]}
+        return {"records": [record.asdict() for record in self.records]}
 
 
 class KinesisFirehoseRecordMetadata(DictWrapper):
