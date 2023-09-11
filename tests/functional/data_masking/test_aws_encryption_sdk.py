@@ -148,7 +148,7 @@ def test_encrypt_int(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(-1)
+    assert decrypted_data == -1
 
 
 def test_encrypt_float(data_masker):
@@ -159,7 +159,7 @@ def test_encrypt_float(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(-1.11)
+    assert decrypted_data == -1.11
 
 
 def test_encrypt_bool(data_masker):
@@ -170,7 +170,7 @@ def test_encrypt_bool(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(True)
+    assert decrypted_data is True
 
 
 def test_encrypt_none(data_masker):
@@ -181,7 +181,7 @@ def test_encrypt_none(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(None)
+    assert decrypted_data is None
 
 
 def test_encrypt_str(data_masker):
@@ -192,7 +192,7 @@ def test_encrypt_str(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str("this is a string")
+    assert decrypted_data == "this is a string"
 
 
 def test_encrypt_list(data_masker):
@@ -203,7 +203,7 @@ def test_encrypt_list(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str([1, 2, "a string", 3.4])
+    assert decrypted_data == [1, 2, "a string", 3.4]
 
 
 def test_encrypt_dict(data_masker):
@@ -221,7 +221,7 @@ def test_encrypt_dict(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(data)
+    assert decrypted_data == data
 
 
 def test_encrypt_dict_with_fields(data_masker):

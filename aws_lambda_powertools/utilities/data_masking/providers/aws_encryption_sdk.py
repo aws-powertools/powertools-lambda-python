@@ -1,6 +1,7 @@
 import base64
+import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import botocore
 from aws_encryption_sdk import (
@@ -21,13 +22,13 @@ class ContextMismatchError(Exception):
 
 
 class Singleton:
-    _instances: Dict[Any, "AwsEncryptionSdkProvider"] = {}
+    _instances: Dict[Tuple, "AwsEncryptionSdkProvider"] = {}
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, force_new_instance=False, **kwargs):
         # Generate a unique key based on the configuration.
         # Create a tuple by iterating through the values in kwargs, sorting them,
         # and then adding them to the tuple.
-        config_key = tuple()
+        config_key = ()
         for value in kwargs.values():
             if isinstance(value, Iterable):
                 for val in sorted(value):
@@ -35,7 +36,7 @@ class Singleton:
             else:
                 config_key += (value,)
 
-        if config_key not in cls._instances:
+        if force_new_instance or config_key not in cls._instances:
             cls._instances[config_key] = super(Singleton, cls).__new__(cls, *args)
         return cls._instances[config_key]
 
@@ -82,12 +83,14 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
         )
 
     def _serialize(self, data: Any) -> bytes:
-        return bytes(str(data), "utf-8")
+        json_data = json.dumps(data)
+        return json_data.encode("utf-8")
 
-    def _deserialize(self, data: bytes) -> str:
-        return data.decode("utf-8")
+    def _deserialize(self, data: bytes) -> Any:
+        json_data = data.decode("utf-8")
+        return json.loads(json_data)
 
-    def encrypt(self, data: Union[bytes, str], **provider_options) -> str:
+    def encrypt(self, data: Union[bytes, str], **provider_options) -> bytes:
         """
         Encrypt data using the AwsEncryptionSdkProvider.
 
@@ -108,7 +111,7 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
-    def decrypt(self, data: str, **provider_options) -> str:
+    def decrypt(self, data: str, **provider_options) -> Any:
         """
         Decrypt data using AwsEncryptionSdkProvider.
 
