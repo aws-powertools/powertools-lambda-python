@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -90,6 +90,24 @@ class VPCLatticeEvent(BaseProxyEvent):
             name=name,
             default_value=default_value,
         )
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: Optional[bool] = False,
+    ) -> str:
+        ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
+    ) -> Optional[str]:
+        ...
 
     def get_header_value(
         self,
