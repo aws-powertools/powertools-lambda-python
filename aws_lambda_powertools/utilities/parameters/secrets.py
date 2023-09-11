@@ -273,13 +273,13 @@ def set_secret(
 
         >>> from aws_lambda_powertools.utilities.parameters import set_secret
         >>>
-        >>> set_secret(name="llamas-are-awesome", secret="supers3cr3tllam@passw0rd")
+        >>> set_secret(name="llamas-are-awesome", secret={"password": "supers3cr3tllam@passw0rd"})
 
     **Sets a secret and includes an idempotency_id**
 
         >>> from aws_lambda_powertools.utilities.parameters import set_secret
         >>>
-        >>> set_secret("my-secret", secret="supers3cr3tllam@passw0rd", idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> set_secret("my-secret", secret='{"password": "supers3cr3tllam@passw0rd"}', idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
