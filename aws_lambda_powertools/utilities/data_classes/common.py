@@ -1,7 +1,7 @@
 import base64
 import json
 from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -156,7 +156,24 @@ class BaseProxyEvent(DictWrapper):
             default_value=default_value,
         )
 
-    # Maintenance: missing @overload to ensure return type is a str when default_value is set
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: Optional[bool] = False,
+    ) -> str:
+        ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
+    ) -> Optional[str]:
+        ...
+
     def get_header_value(
         self,
         name: str,

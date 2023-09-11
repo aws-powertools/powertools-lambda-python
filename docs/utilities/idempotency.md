@@ -154,42 +154,66 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
 
 #### Output serialization
 
-The default return of the `idempotent_function` decorator is a JSON object, but you can customize the function's return type by utilizing the `output_serializer` parameter. The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
+By default, `idempotent_function` serializes, stores, and returns your annotated function's result as a JSON object. You can change this behavior using `output_serializer` parameter.
+
+The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
 
 !!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
 
-Working with Pydantic Models:
+=== "Pydantic"
 
-=== "Explicitly passing the Pydantic model type"
+    You can use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
-    ```python hl_lines="6 24 25 32 35 44"
-    --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
-    ```
-=== "Deducing the Pydantic model type from the return type annotation"
+    === "Inferring via the return type"
 
-    ```python hl_lines="6 24 25 32 36 45"
-    --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
-    ```
+        ```python hl_lines="6 24 25 32 36 45"
+        --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
+        ```
 
-Working with Python Dataclasses:
+        1. We'll use `OrderOutput` to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when `@idempotent_function` is used.
 
-=== "Explicitly passing the model type"
+    === "Explicit model type"
 
-    ```python hl_lines="8 27-29 36 39 48"
-    --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
-    ```
+        Alternatively, you can provide an explicit model as an input to `PydanticSerializer`.
 
-=== "Deducing the model type from the return type annotation"
+        ```python hl_lines="6 24 25 32 35 44"
+        --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
+        ```
 
-    ```python hl_lines="8 27-29 36 40 49"
-    --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
-    ```
+=== "Dataclasses"
 
-=== "Using A Custom Type (Dataclasses)"
+     You can use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
-    ```python hl_lines="9 33 37 41-44 51 54"
+    === "Inferring via the return type"
+
+        ```python hl_lines="8 27-29 36 40 49"
+        --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
+        ```
+
+        1. We'll use `OrderOutput` to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when `@idempotent_function` is used.
+
+    === "Explicit model type"
+
+        Alternatively, you can provide an explicit model as an input to `DataclassSerializer`.
+
+        ```python hl_lines="8 27-29 36 39 48"
+        --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
+        ```
+
+=== "Any type"
+
+    You can use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
+
+    * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
+    * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
+
+    ```python hl_lines="8 32 36 40 50 53"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
+
+    1. This function does the following <br><br>**1**. Receives the return from `process_order`<br> **2**. Converts to dictionary before it can be saved into the persistent storage.
+    2. This function does the following <br><br>**1**. Receives the dictionary saved into the persistent storage <br>**1** Serializes to `OrderOutput` before `@idempotent` returns back to the caller.
+    3. This serializer receives both functions so it knows who to call when to serialize to and from dictionary.
 
 #### Batch integration
 
