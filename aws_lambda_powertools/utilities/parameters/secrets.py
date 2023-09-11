@@ -237,7 +237,6 @@ def set_secret(
     idempotency_id: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
     max_age: Optional[int] = None,
-    transform: Optional[str] = None,
     **sdk_options
 ) -> Union[str, dict, bytes]:
     """
@@ -247,22 +246,26 @@ def set_secret(
     ----------
     name: str
         Name of the parameter
-    max_age: int, optional
-        Maximum age of the cached value
+    secret: str, optional
+        Secret value to set
+    secret_binary: bytes, optional
+        Secret binary value to set
     idempotency_token: str, optional
         Idempotency token to use for the request to prevent the accidental
         creation of duplicate versions if there are failures and retries
         during the Lambda rotation function processing.
+    version_stages: list[str], optional
+        A list of staging labels that are attached to this version of the secret.
+    max_age: int, optional
+        Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
     Raises
     ------
     SetParameterError
-        When the parameter provider fails to retrieve a parameter value for
+        When the secrets provider fails to set a secret value or secret binary for
         a given name.
-    TransformParameterError
-        When the parameter provider fails to transform a parameter value.
 
     Example
     -------
@@ -272,17 +275,11 @@ def set_secret(
         >>>
         >>> set_secret(name="llamas-are-awesome", secret="supers3cr3tllam@passw0rd")
 
-    **Set a secret and transforms using a JSON deserializer***
-
-        >>> from aws_lambda_powertools.utilities.parameters import get_secret
-        >>>
-        >>> get_secret("my-secret", transform="json")
-
-    **Retrieves a secret and set an idempotency_id**
+    **Sets a secret and includes an idempotency_id**
 
         >>> from aws_lambda_powertools.utilities.parameters import set_secret
         >>>
-        >>> set_secret("my-secret", idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> set_secret("my-secret", secret="supers3cr3tllam@passw0rd", idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
     # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
