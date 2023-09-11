@@ -728,6 +728,7 @@ def get_parameters(
 
 def set_parameter(
     name: str,
+    value: str,
     transform: Optional[str] = None,
     max_age: Optional[int] = None,
     parameter_type: str = "String",
@@ -781,6 +782,7 @@ def set_parameter(
 
     # Add to `decrypt` sdk_options to we can have an explicit option for this
     sdk_options["Name"] = name
+    sdk_options["Value"] = value
     sdk_options["Type"] = parameter_type
     sdk_options["Overwrite"] = overwrite
 
