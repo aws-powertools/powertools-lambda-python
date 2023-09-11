@@ -12,6 +12,3 @@ class TransformParameterError(Exception):
 
 class SetParameterError(Exception):
     """When a provider raises an exception on parameter retrieval"""
-
-class UpdateSecretError(Exception):
-    """When a provider fails an exception on updating a secret"""

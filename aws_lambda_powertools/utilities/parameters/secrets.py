@@ -4,6 +4,7 @@ AWS Secrets Manager parameter retrieval and caching utility
 
 
 import os
+import json
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
@@ -113,20 +114,34 @@ class SecretsProvider(BaseProvider):
         """
         raise NotImplementedError()
 
-    def _update(self, name: str, secret: Optional[str], secret_binary: Optional[str],**sdk_options) -> str:
+    def set_secret(
+            self,
+            name: str,
+            secret: Optional[str],
+            secret_binary: Optional[str],
+            idempotency_id: Optional[str],
+            version_stages: Optional[list[str]],
+            **sdk_options
+        ) -> str:
         """
         Modifies the details of a secret, including metadata and the secret value.
 
         Parameters
         ----------
         name: str
-            Name of the parameter
+            The ARN or name of the secret to add a new version to.
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
         URLs:
-        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/update_secret.html
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
         """
+
+        if isinstance(secret, dict):
+            secret = json.dumps(secret)
+
+        if not isinstance(secret_binary, bytes):
+            secret_binary = secret_binary.encode("utf-8")
 
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["SecretId"] = name
@@ -134,11 +149,14 @@ class SecretsProvider(BaseProvider):
             sdk_options["SecretString"] = secret
         if secret_binary:
             sdk_options["SecretBinary"] = secret_binary
+        if version_stages:
+            sdk_options["VersionStages"] = version_stages
+        if idempotency_id:
+            sdk_options["ClientRequestToken"] = idempotency_id
 
-        update_secret = self.client.update_secret(**sdk_options)
+        put_secret = self.client.put_secret_value(**sdk_options)
 
-        return update_secret["VersionId"]
-
+        return put_secret["VersionId"]
 
 
 def get_secret(
@@ -201,8 +219,15 @@ def get_secret(
     )
 
 
-def update_secret(
-    name: str, transform: Optional[str] = None, max_age: Optional[int] = None, **sdk_options
+def set_secret(
+    name: str,
+    secret: Optional[Union[str, dict]] = None,
+    secret_binary: Optional[bytes] = None,
+    idempotency_id: Optional[str] = None,
+    version_stages: Optional[list[str]] = None,
+    max_age: Optional[int] = None,
+    transform: Optional[str] = None,
+    **sdk_options
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -211,18 +236,18 @@ def update_secret(
     ----------
     name: str
         Name of the parameter
-    transform: str, optional
-        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
-    force_fetch: bool, optional
-        Force update even before a cached item has expired, defaults to False
     max_age: int, optional
         Maximum age of the cached value
+    idempotency_token: str, optional
+        Idempotency token to use for the request to prevent the accidental
+        creation of duplicate versions if there are failures and retries
+        during the Lambda rotation function processing.
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
     Raises
     ------
-    GetParameterError
+    SetParameterError
         When the parameter provider fails to retrieve a parameter value for
         a given name.
     TransformParameterError
@@ -230,29 +255,39 @@ def update_secret(
 
     Example
     -------
-    **Retrieves a secret***
+    **Sets a secret***
 
-        >>> from aws_lambda_powertools.utilities.parameters import get_secret
+        >>> from aws_lambda_powertools.utilities.parameters import set_secret
         >>>
-        >>> get_secret("my-secret")
+        >>> set_secret(name="llamas-are-awesome", secret="supers3cr3tllam@passw0rd")
 
-    **Retrieves a secret and transforms using a JSON deserializer***
+    **Set a secret and transforms using a JSON deserializer***
 
         >>> from aws_lambda_powertools.utilities.parameters import get_secret
         >>>
         >>> get_secret("my-secret", transform="json")
 
-    **Retrieves a secret and passes custom arguments to the SDK**
+    **Retrieves a secret and set an idempotency_id**
 
-        >>> from aws_lambda_powertools.utilities.parameters import get_secret
+        >>> from aws_lambda_powertools.utilities.parameters import set_secret
         >>>
-        >>> get_secret("my-secret", VersionId="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> set_secret("my-secret", idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
+
+    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    return DEFAULT_PROVIDERS["secrets"].update(
-        name, max_age=max_age, transform=transform, **sdk_options
-    )
+    if secret and secret_binary:
+        raise ValueError("secret and secret_binary are mutually exclusive")
+    elif secret:
+        return DEFAULT_PROVIDERS["secrets"].set_secret(
+            name, secret=secret, idempotency_id=idempotency_id, version_stages=version_stages, max_age=max_age, **sdk_options
+        )
+    elif secret_binary:
+        return DEFAULT_PROVIDERS["secrets"].set_secret(
+            name, secret_binary=secret_binary, idempotency_id=idempotency_id, version_stages=version_stages, max_age=max_age, **sdk_options
+        )

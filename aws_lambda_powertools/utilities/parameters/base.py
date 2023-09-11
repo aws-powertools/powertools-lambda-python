@@ -29,7 +29,7 @@ from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
-from .exceptions import GetParameterError, SetParameterError, TransformParameterError, UpdateSecretError
+from .exceptions import GetParameterError, SetParameterError, TransformParameterError
 
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata import AppConfigDataClient
@@ -66,16 +66,16 @@ class BaseProvider(ABC):
     Abstract Base Class for Parameter providers
     """
 
-    store: Dict[Tuple[str, TransformOptions], ExpirableValue]
+    store: Dict[Tuple, ExpirableValue]
 
     def __init__(self):
         """
         Initialize the base provider
         """
 
-        self.store: Dict[Tuple[str, TransformOptions], ExpirableValue] = {}
+        self.store: Dict[Tuple, ExpirableValue] = {}
 
-    def has_not_expired_in_cache(self, key: Tuple[str, TransformOptions]) -> bool:
+    def has_not_expired_in_cache(self, key: Tuple) -> bool:
         return key in self.store and self.store[key].ttl >= datetime.now()
 
     def get(
@@ -123,25 +123,26 @@ class BaseProvider(ABC):
         # parameter will always be used in a specific transform, this should be
         # an acceptable tradeoff.
         value: Optional[Union[str, bytes, dict]] = None
-        key = (name, transform)
+        key = self._build_cache_key(name=name, transform=transform)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value
+            return self.fetch_from_cache(key)
 
         try:
             value = self._get(name, **sdk_options)
+        # Encapsulate all errors into a generic GetParameterError
         except Exception as exc:
-            raise GetParameterError(str(exc)) from exc
+            raise GetParameterError(str(exc))
 
         if transform:
             value = transform_value(key=name, value=value, transform=transform, raise_on_transform_error=True)
 
         # NOTE: don't cache None, as they might've been failed transforms and may be corrected
         if value is not None:
-            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
+            self.add_to_cache(key=key, value=value, max_age=max_age)
 
         return value
 
@@ -153,9 +154,9 @@ class BaseProvider(ABC):
         raise NotImplementedError()
 
     @abstractmethod
-    def set(self, name: str, **sdk_options) -> Union[str, bytes]:
+    def _set(self, name: str, **sdk_options) -> Union[str, bytes]:
         """
-        Retrieve parameter value from the underlying parameter store
+        Sets a parameter value from the underlying parameter store
         """
         raise NotImplementedError()
 
@@ -197,13 +198,13 @@ class BaseProvider(ABC):
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
         """
-        key = (path, transform)
+        key = self._build_cache_key(name=path, transform=transform, is_nested=True)
 
         # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
         max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
 
         if not force_fetch and self.has_not_expired_in_cache(key):
-            return self.store[key].value  # type: ignore # need to revisit entire typing here
+            return self.fetch_from_cache(key)
 
         try:
             values = self._get_multiple(path, **sdk_options)
@@ -214,7 +215,7 @@ class BaseProvider(ABC):
         if transform:
             values.update(transform_value(values, transform, raise_on_transform_error))
 
-        self.store[key] = ExpirableValue(values, datetime.now() + timedelta(seconds=max_age))
+        self.add_to_cache(key=key, value=values, max_age=max_age)
 
         return values
 
@@ -228,71 +229,38 @@ class BaseProvider(ABC):
     def clear_cache(self):
         self.store.clear()
 
-    def add_to_cache(self, key: Tuple[str, TransformOptions], value: Any, max_age: int):
+    def fetch_from_cache(self, key: Tuple):
+        return self.store[key].value if key in self.store else {}
+
+    def add_to_cache(self, key: Tuple, value: Any, max_age: int):
         if max_age <= 0:
             return
 
         self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
 
-    def update(
+    def _build_cache_key(
         self,
         name: str,
         transform: TransformOptions = None,
-        **sdk_options,
-    ) -> Optional[Union[str, dict, bytes]]:
-        """
-        Modifies the details of a secret, including metadata and the secret value.
+        is_nested: bool = False,
+    ):
+        """Creates cache key for parameters
 
         Parameters
         ----------
-        name: str
-            Parameter name
-        transform: str
-            Optional transformation of the parameter value. Supported values
-            are "json" for JSON strings and "binary" for base 64 encoded
-            values.
-        force_fetch: bool, optional
-            Force update even before a cached item has expired, defaults to False
-        sdk_options: dict, optional
-            Arguments that will be passed directly to the underlying API call
+        name : str
+            Name of parameter, secret or config
+        transform : TransformOptions, optional
+            Transform method used, by default None
+        is_nested : bool, optional
+            Whether it's a single parameter or multiple nested parameters, by default False
 
-        Raises
-        ------
-        GetParameterError
-            When the parameter provider fails to retrieve a parameter value for
-            a given name.
-        TransformParameterError
-            When the parameter provider fails to transform a parameter value.
+        Returns
+        -------
+        Tuple[str, TransformOptions, bool]
+            Cache key
         """
-
-        # If there are multiple calls to the same parameter but in a different
-        # transform, they will be stored multiple times. This allows us to
-        # optimize by transforming the data only once per retrieval, thus there
-        # is no need to transform cached values multiple times. However, this
-        # means that we need to make multiple calls to the underlying parameter
-        # store if we need to return it in different transforms. Since the number
-        # of supported transform is small and the probability that a given
-        # parameter will always be used in a specific transform, this should be
-        # an acceptable tradeoff.
-        value: Optional[Union[str, bytes, dict]] = None
-        key = (name, transform)
-
-        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
-
-        try:
-            value = self._get(name, **sdk_options)
-        except Exception as exc:
-            raise UpdateSecretError(str(exc)) from exc
-
-        if transform:
-            value = transform_value(key=name, value=value, transform=transform, raise_on_transform_error=True)
-
-        # NOTE: don't cache None, as they might've been failed transforms and may be corrected
-        if value is not None:
-            self.store[key] = ExpirableValue(value, datetime.now() + timedelta(seconds=max_age))
-
-        return value
+        return (name, transform, is_nested)
 
     @staticmethod
     def _build_boto3_client(
@@ -365,9 +333,6 @@ class BaseProvider(ABC):
         client = session.resource(service_name=service_name, config=config, endpoint_url=endpoint_url)
         user_agent.register_feature_to_resource(resource=client, feature="parameters")
         return client
-
-
-
 
 
 def get_transform_method(value: str, transform: TransformOptions = None) -> Callable[..., Any]:
