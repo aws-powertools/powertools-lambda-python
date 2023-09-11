@@ -1095,6 +1095,22 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         file_key = event.detail.object.key
     ```
 
+### Secrets Manager
+
+AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [Click here](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html){target="_blank"} for more information about rotating AWS Secrets Manager secrets.
+
+=== "app.py"
+
+    ```python hl_lines="2 7 11"
+    --8<-- "examples/event_sources/src/secrets_manager.py"
+    ```
+
+=== "Secrets Manager Example Event"
+
+    ```json
+    --8<-- "tests/events/secretsManagerEvent.json"
+    ```
+
 ### SES
 
 === "app.py"
@@ -1159,34 +1175,6 @@ You can register your Lambda functions as targets within an Amazon VPC Lattice s
 
     ```json
     --8<-- "examples/event_sources/src/vpc_lattice_payload.json"
-    ```
-
-### Secrets Manager
-
-=== "app.py"
-
-    ```python
-    import boto3
-
-    from aws_lambda_powertools.utilities.data_classes import event_source, SecretsManagerEvent
-
-    @event_source(data_class=SecretsManagerEvent)
-    def lambda_handler(event: SecretsManagerEvent, context):
-        service_client = boto3.client('secretsmanager', endpoint_url=os.environ['SECRETS_MANAGER_ENDPOINT'])
-        secret = service_client.get_secret_value(
-            SecretId=event.secret_id,
-            VersionId=event.client_request_token,
-            VersionStage="AWSCURRENT"
-            )
-        # {'Name': 'MyTestDatabaseSecret','SecretString': '{\n  "username":"david",\n  "password":"EXAMPLE-PASSWORD"\n}\n',}
-        # work with secrets afterwards
-        # see - https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
-        ...
-    ```
-=== "Secrets Manager Example Event"
-
-    ```json
-    --8<-- "tests/events/secretsManagerEvent.json"
     ```
 
 ## Advanced
