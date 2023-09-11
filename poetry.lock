@@ -990,13 +990,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "hvac"
-version = "1.2.0"
+version = "1.2.1"
 description = "HashiCorp Vault API client"
 optional = false
 python-versions = ">=3.6.2,<4.0.0"
 files = [
-    {file = "hvac-1.2.0-py3-none-any.whl", hash = "sha256:95716e0a6c081214d5f6dc74548d6e388aca895cd7be152cfaf177f7520b3d6e"},
-    {file = "hvac-1.2.0.tar.gz", hash = "sha256:6f5aa0d6b8138b585d4656d1fe01b5d87616310c80484b909cc84c2cb8f064fd"},
+    {file = "hvac-1.2.1-py3-none-any.whl", hash = "sha256:cb87f5724be8fd5f57507f5d5a94e6c42d2675128b460bf3186f966e07d4db78"},
+    {file = "hvac-1.2.1.tar.gz", hash = "sha256:c786e3dfa1f35239810e5317cccadbe358f49b8c9001a1f2f68b79a250b9f8a1"},
 ]
 
 [package.dependencies]
@@ -3002,4 +3002,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "317a8a69ad952c4d81c7c795c0f181c93afeb4e5e4406407048ebba592495343"
+content-hash = "e3b6f523ab6cd4e141e97272cc82fd9ca626e1adb02fcab04baff3038079f928"
