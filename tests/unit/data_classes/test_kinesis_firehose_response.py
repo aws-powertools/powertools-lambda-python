@@ -8,6 +8,20 @@ from aws_lambda_powertools.utilities.serialization import base64_encode, base64_
 from tests.functional.utils import load_event
 
 
+def test_kinesis_firehose_response_metadata():
+    # When we create metadata with partition keys and attach to a firehose response record
+    metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": "2023"})
+
+    processed_record = KinesisFirehoseDataTransformationRecord(
+        record_id="test_id",
+        metadata=metadata_partition,
+        data="",
+    )
+    # Then we should have partition keys available in metadata field with same value
+    assert processed_record.metadata.partition_keys["year"] == "2023"
+    assert metadata_partition.asdict() == {"partitionKeys": {"year": "2023"}}
+
+
 def test_kinesis_firehose_response():
     # GIVEN a Kinesis Firehose Event with two records
     raw_event = load_event("kinesisFirehoseKinesisEvent.json")
@@ -16,10 +30,8 @@ def test_kinesis_firehose_response():
     # WHEN we create a Data Transformation Response without changing the data
     response = KinesisFirehoseDataTransformationResponse()
     for record in parsed_event.records:
-        metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": 2023})
         processed_record = KinesisFirehoseDataTransformationRecord(
             record_id=record.record_id,
-            metadata=metadata_partition,
             data=record.data,
         )
         response.add_record(record=processed_record)
@@ -39,7 +51,28 @@ def test_kinesis_firehose_response():
     assert record_01.data == raw_record_01["data"]
     assert record_02.data == raw_record_02["data"]
 
-    assert record_01.metadata.partition_keys["year"] == 2023
+
+def test_kinesis_firehose_response_asdict():
+    # Given the following example response provided by Firehose
+    sample_response = {
+        "records": [
+            {"recordId": "sample_record", "data": "", "result": "Ok", "metadata": {"partitionKeys": {"year": "2023"}}},
+        ],
+    }
+
+    # Then asdict function should be able to return the same value
+    response = KinesisFirehoseDataTransformationResponse()
+    metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(
+        partition_keys=sample_response["records"][0]["metadata"]["partitionKeys"],
+    )
+    processed_record = KinesisFirehoseDataTransformationRecord(
+        record_id=sample_response["records"][0]["recordId"],
+        data=sample_response["records"][0]["data"],
+        result=sample_response["records"][0]["result"],
+        metadata=metadata_partition,
+    )
+    response.add_record(record=processed_record)
+    assert response.asdict() == sample_response
 
 
 def test_kinesis_firehose_create_response():
@@ -54,7 +87,7 @@ def test_kinesis_firehose_create_response():
 
     response = KinesisFirehoseDataTransformationResponse()
     for record in parsed_event.records:
-        metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": 2023})
+        metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": "2023"})
         processed_record = record.build_data_transformation_response(
             result="Ok",
             metadata=metadata_partition,
@@ -77,4 +110,4 @@ def test_kinesis_firehose_create_response():
     assert record_01.data == base64_encode(arbitrary_data)
     assert record_02.data == base64_encode(arbitrary_data)
 
-    assert record_01.metadata.partition_keys["year"] == 2023
+    assert record_01.metadata.partition_keys["year"] == "2023"

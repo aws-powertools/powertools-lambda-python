@@ -1,5 +1,6 @@
 import base64
 import json
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, Iterator, List, Optional
 
@@ -11,12 +12,24 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 @dataclass(repr=False, order=False, frozen=True)
 class KinesisFirehoseDataTransformationRecordMetadata:
     """
+    Metadata in Firehose Data Transform Record.
+
+    Parameters
+    ----------
+    partition_keys: Dict[str, str]
+        A dict of partition keys/value in string format, e.g. `{"year":"2023","month":"09"}`
+
     Documentation:
     --------------
     - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
     """
 
-    partition_keys: Dict[str, Any] = field(default_factory=lambda: {})
+    partition_keys: Dict[str, str] = field(default_factory=lambda: {})
+
+    def asdict(self) -> Dict:
+        if self.partition_keys is not None:
+            return {"partitionKeys": self.partition_keys}
+        return {}
 
 
 @dataclass(repr=False, order=False)
@@ -58,13 +71,19 @@ class KinesisFirehoseDataTransformationRecord:
     _json_data: Optional[Any] = None
 
     def asdict(self) -> Dict:
+        if self.result not in ["Ok", "Dropped", "ProcessingFailed"]:
+            warnings.warn(
+                stacklevel=1,
+                message=f'The result "{self.result}" is not valid, Choose from "Ok", "Dropped", "ProcessingFailed"',
+            )
+
         record: Dict[str, Any] = {
             "recordId": self.record_id,
             "result": self.result,
             "data": self.data,
         }
         if self.metadata:
-            record["metadata"] = self.metadata.__dict__
+            record["metadata"] = self.metadata.asdict()
         return record
 
     @property
