@@ -8,4 +8,5 @@ def test_secrets_manager_event():
 
     assert parsed_event.secret_id == raw_event["SecretId"]
     assert parsed_event.client_request_token == raw_event["ClientRequestToken"]
+    assert parsed_event.version_id == raw_event["ClientRequestToken"]
     assert parsed_event.step == raw_event["Step"]

@@ -11,7 +11,12 @@ class SecretsManagerEvent(DictWrapper):
 
     @property
     def client_request_token(self) -> str:
-        """ClientRequestToken: The ClientRequestToken of the secret version"""
+        """ClientRequestToken: The ClientRequestToken associated with the secret version"""
+        return self["ClientRequestToken"]
+
+    @property
+    def version_id(self) -> str:
+        """Alias to ClientRequestToken to get token associated to version"""
         return self["ClientRequestToken"]
 
     @property

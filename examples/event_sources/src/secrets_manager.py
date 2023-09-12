@@ -8,7 +8,7 @@ secrets_provider = parameters.SecretsProvider()
 def lambda_handler(event: SecretsManagerEvent, context):
     # Getting secret value using Parameter utility
     # See https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/
-    secret = secrets_provider.get(event.secret_id, VersionId=event.client_request_token, VersionStage="AWSCURRENT")
+    secret = secrets_provider.get(event.secret_id, VersionId=event.version_id, VersionStage="AWSCURRENT")
 
     # You need to work with secrets afterwards
     # Check more examples: https://github.com/aws-samples/aws-secrets-manager-rotation-lambdas
