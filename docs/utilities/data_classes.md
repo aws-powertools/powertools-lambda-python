@@ -1106,6 +1106,22 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         file_key = event.detail.object.key
     ```
 
+### Secrets Manager
+
+AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [Click here](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html){target="_blank"} for more information about rotating AWS Secrets Manager secrets.
+
+=== "app.py"
+
+    ```python hl_lines="2 7 11"
+    --8<-- "examples/event_sources/src/secrets_manager.py"
+    ```
+
+=== "Secrets Manager Example Event"
+
+    ```json
+    --8<-- "tests/events/secretsManagerEvent.json"
+    ```
+
 ### SES
 
 === "app.py"
