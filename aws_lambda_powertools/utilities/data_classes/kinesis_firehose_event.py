@@ -16,48 +16,46 @@ class KinesisFirehoseDataTransformationRecordMetadata:
     - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
     """
 
-    partition_keys: Optional[Dict[str, str]]
-
-    def asdict(self) -> Dict:
-        if self.partition_keys is not None:
-            return {"partitionKeys": self.partition_keys}
-        return {}
+    partition_keys: Dict[str, Any] = field(default_factory=lambda: {})
 
 
 @dataclass(repr=False, order=False)
 class KinesisFirehoseDataTransformationRecord:
-    """Record in Kinesis Data Firehose response object
+    """Record in Kinesis Data Firehose response object.
+
+    Parameters
+    ----------
+    record_id: str
+        uniquely identifies this record within the current batch
+    result: Literal["Ok", "Dropped", "ProcessingFailed"]
+        record data transformation status, whether it succeeded, should be dropped, or failed.
+    data: str
+        base64-encoded payload, by default empty string.
+
+        Use `data_from_text` or `data_from_json` methods to convert data if needed.
+
+    metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata]
+        Metadata associated with this record; can contain partition keys.
+
+        See: https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
+    json_serializer: Callable
+        function to serialize `obj` to a JSON formatted `str`, by default json.dumps
+    json_deserializer: Callable
+        function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+        by default json.loads
 
     Documentation:
     --------------
     - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
     """
 
-    # Record ID; uniquely identifies this record within the current batch"""
     record_id: str
-    # Processing result, supported value: Ok, Dropped, ProcessingFailed"""
     result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok"
-    # data blob, base64-encoded, optional at init. Allows pass in base64-encoded data directly or
-    # use either function like `data_from_text`, `data_from_json` to populate data"""
-    data: Optional[str] = None
-    # Optional: Metadata associated with this record; can contain partition keys
-    # See - https://docs.aws.amazon.com/firehose/latest/dev/dynamic-partitioning.html
+    data: str = ""
     metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None
-    _json_data: Optional[Any] = None
     json_serializer: Callable = json.dumps
     json_deserializer: Callable = json.loads
-
-    def data_from_byte(self, data: bytes):
-        """Populate data field using a byte like data"""
-        self.data = base64.b64encode(data).decode("utf-8")
-
-    def data_from_text(self, data: str):
-        """Populate data field using a string like data"""
-        self.data_from_byte(data.encode("utf-8"))
-
-    def data_from_json(self, data: Any):
-        """Populate data field using any structure that could be converted to json"""
-        self.data_from_text(data=self.json_serializer(data))
+    _json_data: Optional[Any] = None
 
     def asdict(self) -> Dict:
         record: Dict[str, Any] = {
@@ -66,7 +64,7 @@ class KinesisFirehoseDataTransformationRecord:
             "data": self.data,
         }
         if self.metadata:
-            record["metadata"] = self.metadata.asdict()
+            record["metadata"] = self.metadata.__dict__
         return record
 
     @property
@@ -196,7 +194,7 @@ class KinesisFirehoseRecord(DictWrapper):
     def build_data_transformation_response(
         self,
         result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok",
-        data: Optional[str] = None,
+        data: str = "",
         metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None,
     ) -> KinesisFirehoseDataTransformationRecord:
         """create a KinesisFirehoseResponseRecord directly using the record_id and given values
