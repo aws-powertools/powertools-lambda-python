@@ -66,7 +66,7 @@ def all_active_users(user_id: str):
         )
 
     else:
-        return Response(status_code=HTTPStatus.NO_CONTENT)
+        return Response(status_code=HTTPStatus.NOT_FOUND)
 
 
 @logger.inject_lambda_context()
