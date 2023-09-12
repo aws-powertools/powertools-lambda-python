@@ -88,7 +88,7 @@ def test_mask_dict(data_masker):
 
 
 def test_mask_dict_with_fields(data_masker):
-    # GIVEN the data type is a dictionary
+    # GIVEN a dict data type
     data = {
         "a": {
             "1": {"None": "hello", "four": "world"},
@@ -135,9 +135,8 @@ def test_encrypt_not_implemented(data_masker):
     # GIVEN DataMasking is not initialized with a Provider
 
     # WHEN attempting to call the encrypt method on the data
-
-    # THEN the result is a NotImplementedError
     with pytest.raises(NotImplementedError):
+        # THEN the result is a NotImplementedError
         data_masker.encrypt("hello world")
 
 
@@ -145,9 +144,8 @@ def test_decrypt_not_implemented(data_masker):
     # GIVEN DataMasking is not initialized with a Provider
 
     # WHEN attempting to call the decrypt method on the data
-
-    # THEN the result is a NotImplementedError
     with pytest.raises(NotImplementedError):
+        # THEN the result is a NotImplementedError
         data_masker.decrypt("hello world")
 
 
@@ -155,15 +153,13 @@ def test_parsing_unsupported_data_type(data_masker):
     # GIVEN an initialization of the DataMasking class
 
     # WHEN attempting to pass in a list of fields with input data that is not a dict
-
-    # THEN the result is a TypeError
     with pytest.raises(TypeError):
+        # THEN the result is a TypeError
         data_masker.mask(42, ["this.field"])
 
 
 def test_parsing_nonexistent_fields(data_masker):
-    # GIVEN an initialization of the DataMasking class
-
+    # GIVEN a dict data type
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -172,15 +168,13 @@ def test_parsing_nonexistent_fields(data_masker):
     }
 
     # WHEN attempting to pass in fields that do not exist in the input data
-
-    # THEN the result is a KeyError
     with pytest.raises(KeyError):
+        # THEN the result is a KeyError
         data_masker.mask(data, ["3.1.True"])
 
 
 def test_parsing_nonstring_fields(data_masker):
-    # GIVEN an initialization of the DataMasking class
-
+    # GIVEN a dict data type
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -196,16 +190,16 @@ def test_parsing_nonstring_fields(data_masker):
 
 
 def test_parsing_nonstring_keys_and_fields(data_masker):
-    # GIVEN an initialization of the DataMasking class
-
-    # WHEN the input data is a dictionary with integer keys
+    # GIVEN a dict data type with integer keys
     data = {
         3: {
             "1": {"None": "hello", "four": "world"},
             4: {"33": {"5": "goodbye", "e": "world"}},
         },
     }
+
+    # WHEN masked with a list of fields that are integer keys
     masked = data_masker.mask(data, fields=[3.4])
 
-    # THEN the result is the value of the nested field should be masked as normal
+    # THEN the result is the value of the nested field should be masked
     assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}

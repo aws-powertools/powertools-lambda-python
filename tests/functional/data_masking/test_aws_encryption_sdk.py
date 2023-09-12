@@ -97,7 +97,7 @@ def test_mask_dict(data_masker):
 
 
 def test_mask_dict_with_fields(data_masker):
-    # GIVEN the data type is a dictionary
+    # GIVEN a dict data type
     data = {
         "a": {
             "1": {"None": "hello", "four": "world"},
@@ -208,7 +208,6 @@ def test_encrypt_list(data_masker):
 
 def test_encrypt_dict(data_masker):
     # GIVEN an dict data type
-
     data = {
         "a": {
             "1": {"None": "hello", "four": "world"},
@@ -242,25 +241,6 @@ def test_encrypt_dict_with_fields(data_masker):
 
 
 def test_encrypt_json_dict_with_fields(data_masker):
-    # GIVEN the data type is a json representation of a dictionary
-    data = json.dumps(
-        {
-            "a": {
-                "1": {"None": "hello", "four": "world"},
-                "b": {"3": {"4": "goodbye", "e": "world"}},
-            },
-        },
-    )
-
-    # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
-
-    # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
-
-
-def test_encrypt_json_blob_with_fields(data_masker):
     # GIVEN the data type is a json representation of a dictionary
     data = json.dumps(
         {

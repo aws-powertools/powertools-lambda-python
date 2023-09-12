@@ -1,7 +1,6 @@
 import base64
-import json
 from collections.abc import Iterable
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import botocore
 from aws_encryption_sdk import (
@@ -12,6 +11,11 @@ from aws_encryption_sdk import (
 )
 
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
+from aws_lambda_powertools.utilities.data_masking.constants import (
+    CACHE_CAPACITY,
+    MAX_CACHE_AGE_SECONDS,
+    MAX_MESSAGES_ENCRYPTED,
+)
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 
@@ -41,12 +45,6 @@ class Singleton:
         return cls._instances[config_key]
 
 
-CACHE_CAPACITY: int = 100
-MAX_CACHE_AGE_SECONDS: float = 300.0
-MAX_MESSAGES_ENCRYPTED: int = 200
-# NOTE: You can also set max messages/bytes per data key
-
-
 class AwsEncryptionSdkProvider(BaseProvider, Singleton):
     """
     The AwsEncryptionSdkProvider is to be used as a Provider for the Datamasking class.
@@ -67,10 +65,13 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
         self,
         keys: List[str],
         client: Optional[EncryptionSDKClient] = None,
-        local_cache_capacity: Optional[int] = CACHE_CAPACITY,
-        max_cache_age_seconds: Optional[float] = MAX_CACHE_AGE_SECONDS,
-        max_messages_encrypted: Optional[int] = MAX_MESSAGES_ENCRYPTED,
+        local_cache_capacity: int = CACHE_CAPACITY,
+        max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
+        max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
+        json_serializer: Optional[Callable[[Dict], str]] = None,
+        json_deserializer: Optional[Callable[[Union[Dict, str, bool, int, float]], str]] = None,
     ):
+        super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
         self.client = client or EncryptionSDKClient()
         self.keys = keys
         self.cache = LocalCryptoMaterialsCache(local_cache_capacity)
@@ -81,14 +82,6 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             max_age=max_cache_age_seconds,
             max_messages_encrypted=max_messages_encrypted,
         )
-
-    def _serialize(self, data: Any) -> bytes:
-        json_data = json.dumps(data)
-        return json_data.encode("utf-8")
-
-    def _deserialize(self, data: bytes) -> Any:
-        json_data = data.decode("utf-8")
-        return json.loads(json_data)
 
     def encrypt(self, data: Union[bytes, str], **provider_options) -> bytes:
         """
@@ -106,7 +99,7 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             ciphertext : str
                 The encrypted data, as a base64-encoded string.
         """
-        data = self._serialize(data)
+        data = self.json_serializer(data)
         ciphertext, _ = self.client.encrypt(source=data, materials_manager=self.cache_cmm, **provider_options)
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
@@ -141,5 +134,5 @@ class AwsEncryptionSdkProvider(BaseProvider, Singleton):
             if decryptor_header.encryption_context.get(key) != value:
                 raise ContextMismatchError(key)
 
-        ciphertext = self._deserialize(ciphertext)
+        ciphertext = self.json_deserializer(ciphertext)
         return ciphertext
