@@ -4,6 +4,22 @@ import json
 from typing import Any, Callable
 
 
+def base64_encode(data: str) -> str:
+    """Encode a string and returns Base64-encoded encoded value.
+
+    Parameters
+    ----------
+    data: str
+        The string to encode.
+
+    Returns
+    -------
+    str
+        The Base64-encoded encoded value.
+    """
+    return base64.b64encode(data.encode()).decode("utf-8")
+
+
 def base64_decode(data: str) -> str:
     """Decodes a Base64-encoded string and returns the decoded value.
 
