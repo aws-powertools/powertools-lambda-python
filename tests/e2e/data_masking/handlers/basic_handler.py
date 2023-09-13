@@ -12,7 +12,8 @@ def lambda_handler(event, context):
     logger.append_keys(**append_keys)
     logger.info(message)
 
-    kms_key = event.get("kms_key")
+    # Encrypting data for test_encryption_in_handler test
+    kms_key = event.get("kms_key", "")
     data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key]))
     value = [1, 2, "string", 4.5]
     encrypted_data = data_masker.encrypt(value)

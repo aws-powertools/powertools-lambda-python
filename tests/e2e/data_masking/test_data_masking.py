@@ -49,7 +49,7 @@ def test_encryption(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(value)
+    assert decrypted_data == value
 
 
 @pytest.mark.xdist_group(name="data_masking")
@@ -64,7 +64,7 @@ def test_encryption_context(data_masker):
     decrypted_data = data_masker.decrypt(encrypted_data, encryption_context=context)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(value)
+    assert decrypted_data == value
 
 
 @pytest.mark.xdist_group(name="data_masking")
@@ -121,14 +121,14 @@ def test_encryption_provider_singleton(data_masker, kms_key1_arn, kms_key2_arn):
     decrypted_data = data_masker_2.decrypt(encrypted_data)
 
     # THEN the result is the original input data
-    assert decrypted_data == str(value)
+    assert decrypted_data == value
 
     data_masker_3 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
     assert data_masker_2.provider is not data_masker_3.provider
 
 
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn):
+def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn, kms_key1_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
 
     # WHEN encrypting a value and logging it
@@ -137,7 +137,7 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
     message = encrypted_data
     custom_key = "order_id"
     additional_keys = {custom_key: f"{uuid4()}"}
-    payload = json.dumps({"message": message, "append_keys": additional_keys})
+    payload = json.dumps({"message": message, "kms_key": kms_key1_arn, "append_keys": additional_keys})
 
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
     data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=payload)
@@ -148,15 +148,16 @@ def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn)
     for log in logs.get_log(key=custom_key):
         encrypted_data = log.message
         decrypted_data = data_masker.decrypt(encrypted_data)
-        assert decrypted_data == str(value)
+        assert decrypted_data == value
 
 
-# NOTE: This test is failing currently, need to find a fix for building correct dependencies
 @pytest.mark.xdist_group(name="data_masking")
-def test_encryption_in_handler(basic_handler_fn_arn, kms_key1_arn):
-    payload = {"kms_key": kms_key1_arn, "append_keys": {"order_id": f"{uuid4()}"}}
+def test_encryption_in_handler(data_masker, basic_handler_fn_arn, kms_key1_arn):
+    # GIVEN a lambda_handler with an instantiation the AWS encryption provider data masker
 
-    # WHEN a lambda handler for encryption is invoked
+    payload = {"kms_key": kms_key1_arn}
+
+    # WHEN the handler is invoked to encrypt data
     handler_result, _ = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=json.dumps(payload))
 
     response = json.loads(handler_result["Payload"].read())
@@ -164,4 +165,4 @@ def test_encryption_in_handler(basic_handler_fn_arn, kms_key1_arn):
     decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN decrypting the encrypted data from the response should result in the original value
-    assert decrypted_data == str([1, 2, "string", 4.5])
+    assert decrypted_data == [1, 2, "string", 4.5]
