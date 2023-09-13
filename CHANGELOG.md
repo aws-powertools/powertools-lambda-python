@@ -4,16 +4,21 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Features
+
+* **event_sources:** add Secrets Manager secret rotation event ([#3061](https://github.com/aws-powertools/powertools-lambda-python/issues/3061))
+
 ## Maintenance
 
 * **automation:** remove previous labels when PR is updated ([#3066](https://github.com/aws-powertools/powertools-lambda-python/issues/3066))
-* **deps:** bump actions/dependency-review-action from 3.0.8 to 3.1.0 ([#3071](https://github.com/aws-powertools/powertools-lambda-python/issues/3071))
 * **deps:** bump squidfunk/mkdocs-material from `dd1770c` to `c4890ab` in /docs ([#3078](https://github.com/aws-powertools/powertools-lambda-python/issues/3078))
-* **deps-dev:** bump cfn-lint from 0.79.9 to 0.79.10 ([#3077](https://github.com/aws-powertools/powertools-lambda-python/issues/3077))
-* **deps-dev:** bump hvac from 1.2.0 to 1.2.1 ([#3075](https://github.com/aws-powertools/powertools-lambda-python/issues/3075))
-* **deps-dev:** bump aws-cdk from 2.94.0 to 2.95.0 ([#3070](https://github.com/aws-powertools/powertools-lambda-python/issues/3070))
-* **deps-dev:** bump ruff from 0.0.287 to 0.0.288 ([#3076](https://github.com/aws-powertools/powertools-lambda-python/issues/3076))
+* **deps:** bump actions/dependency-review-action from 3.0.8 to 3.1.0 ([#3071](https://github.com/aws-powertools/powertools-lambda-python/issues/3071))
 * **deps-dev:** bump aws-cdk from 2.95.0 to 2.95.1 ([#3074](https://github.com/aws-powertools/powertools-lambda-python/issues/3074))
+* **deps-dev:** bump ruff from 0.0.287 to 0.0.288 ([#3076](https://github.com/aws-powertools/powertools-lambda-python/issues/3076))
+* **deps-dev:** bump aws-cdk from 2.94.0 to 2.95.0 ([#3070](https://github.com/aws-powertools/powertools-lambda-python/issues/3070))
+* **deps-dev:** bump hvac from 1.2.0 to 1.2.1 ([#3075](https://github.com/aws-powertools/powertools-lambda-python/issues/3075))
+* **deps-dev:** bump cfn-lint from 0.79.9 to 0.79.10 ([#3077](https://github.com/aws-powertools/powertools-lambda-python/issues/3077))
+* **deps-dev:** bump ruff from 0.0.288 to 0.0.289 ([#3080](https://github.com/aws-powertools/powertools-lambda-python/issues/3080))
 
 
 <a name="v2.24.0"></a>
