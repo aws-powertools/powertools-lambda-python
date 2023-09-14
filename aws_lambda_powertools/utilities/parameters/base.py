@@ -147,7 +147,7 @@ class BaseProvider(ABC):
         return value
 
     @abstractmethod
-    def _get(self, name: str, **sdk_options) -> Union[str, bytes]:
+    def _get(self, name: str, **sdk_options) -> Union[str, bytes, Dict[str, Any]]:
         """
         Retrieve parameter value from the underlying parameter store
         """
