@@ -1,23 +1,8 @@
 from __future__ import annotations
 
-import sys
-
-if sys.version_info >= (3, 11):
-    from typing import NotRequired
-else:
-    from typing_extensions import NotRequired
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
-
-if sys.version_info >= (3, 10):
-    from typing import TypeAlias
-else:
-    from typing_extensions import TypeAlias
-
 from typing import Any, Dict, List, Union
+
+from aws_lambda_powertools.shared.types import NotRequired, TypeAlias, TypedDict
 
 LogRecord: TypeAlias = Union[Dict[str, Any], "PowertoolsLogRecord"]
 

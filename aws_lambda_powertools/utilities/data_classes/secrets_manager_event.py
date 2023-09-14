@@ -1,5 +1,4 @@
-from typing_extensions import Literal
-
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
