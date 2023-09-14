@@ -1,9 +1,21 @@
 from __future__ import annotations
 
 import io
-from typing import IO, TYPE_CHECKING, Any, Optional, TypeVar, Union, cast, overload
+from typing import (
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    Sequence,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
-from aws_lambda_powertools.shared.types import Iterable, List, Literal, Sequence
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
