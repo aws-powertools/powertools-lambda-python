@@ -975,35 +975,30 @@ or plain text, depending on the original payload.
 
 ### Kinesis Firehose delivery stream
 
-Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
-inline, and re-emit them back to the Delivery Stream.
+When using Kinesis Firehose, you can use a Lambda function to [perform data transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html){target="_blank"}. For each transformed record, you can choose to either:
 
-Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
-function to access the data either as json or plain text, depending on the original payload.
+* **A)** Put them back to the delivery stream (default)
+* **B)** Drop them so consumers don't receive them (e.g., data validation)
+* **C)** Indicate a record failed data transformation and should be retried
 
-When constructing response to Firehose, You can utilize the `KinesisFirehoseDataTransformationResponse` class shown
-in the example below.
+To do that, you can use `KinesisFirehoseDataTransformationResponse` class along with helper functions to make it easier to decode and encode base64 data in the stream.
 
-=== "app.py"
+=== "Transforming streaming records"
 
     ```python
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
 
-You can also construct response without using `event_source` wrapper. Shown in the example below.
-
-=== "app.py"
+=== "Dropping invalid records"
 
     ```python
-    --8<-- "examples/event_sources/src/kinesis_firehose_response.py"
-    ```
-=== "with Failure"
-    ```python hl_lines="30"
-    --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
-    ```
-=== "with Dropped"
-    ```python hl_lines="30"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
+    ```
+
+=== "Indicating a processing failure"
+
+    ```python
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
     ```
 
 ### Lambda Function URL
