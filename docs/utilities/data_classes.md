@@ -985,9 +985,12 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Transforming streaming records"
 
-    ```python
+    ```python hl_lines="2-3 12 28"
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
+
+    1. **Ingesting JSON payloads?** <br><br> Use `record.data_as_json` to easily deserialize them.
+    2. For your convenience, `base64_from_json` serializes a dict to JSON, then encode as base64 data.
 
 === "Dropping invalid records"
 
