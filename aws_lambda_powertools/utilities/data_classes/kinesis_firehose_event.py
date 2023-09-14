@@ -62,7 +62,7 @@ class KinesisFirehoseDataTransformationRecord:
     - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
     """
 
-    _valid_result_types: ClassVar[Tuple[str]] = ("Ok", "Dropped", "ProcessingFailed")
+    _valid_result_types: ClassVar[Tuple[str, str, str]] = ("Ok", "Dropped", "ProcessingFailed")
 
     record_id: str
     result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok"
