@@ -132,7 +132,7 @@ class KinesisFirehoseDataTransformationResponse:
 
     def asdict(self) -> Dict:
         if not self.records:
-            raise ValueError("Kinesis Firehose doesn't accept empty response")
+            raise ValueError("Amazon Kinesis Data Firehose doesn't accept empty response")
 
         return {"records": [record.asdict() for record in self.records]}
 
@@ -216,7 +216,8 @@ class KinesisFirehoseRecord(DictWrapper):
         data: str = "",
         metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None,
     ) -> KinesisFirehoseDataTransformationRecord:
-        """create a KinesisFirehoseResponseRecord directly using the record_id and given values
+        """Create a KinesisFirehoseResponseRecord directly using the record_id and given values
+
         Parameters
         ----------
         result : Literal["Ok", "Dropped", "ProcessingFailed"]
