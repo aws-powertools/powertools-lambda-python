@@ -13,8 +13,13 @@ else:
     from typing_extensions import NotRequired
 
 
+if sys.version_info >= (3, 10):
+    from typing import TypeAlias
+else:
+    from typing_extensions import TypeAlias
+
 AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
 # JSON primitives only, mypy doesn't support recursive tho
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
-__all__ = ["Protocol", "TypedDict", "Literal", "NotRequired"]
+__all__ = ["Protocol", "TypedDict", "Literal", "NotRequired", "TypeAlias"]
