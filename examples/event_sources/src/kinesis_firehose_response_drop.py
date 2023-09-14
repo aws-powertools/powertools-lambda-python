@@ -23,11 +23,11 @@ def lambda_handler(event: dict, context: LambdaContext):
                 data=base64_from_json(transformed_data),
             )
         except Exception:
-            # add Failed result to processing results, send back to kinesis for retry
+            # encountered failure that couldn't be fixed by retry
             processed_record = KinesisFirehoseDataTransformationRecord(
                 record_id=record.record_id,
                 data=record.data,
-                result="ProcessingFailed",
+                result="Dropped",
             )
 
         result.add_record(processed_record)
