@@ -53,24 +53,27 @@ def test_kinesis_firehose_response():
 
 
 def test_kinesis_firehose_response_asdict():
-    # Given the following example response provided by Firehose
+    # GIVEN the following example response provided by Firehose
     sample_response = {
         "records": [
             {"recordId": "sample_record", "data": "", "result": "Ok", "metadata": {"partitionKeys": {"year": "2023"}}},
         ],
     }
 
-    # Then asdict function should be able to return the same value
     response = KinesisFirehoseDataTransformationResponse()
     metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(
         partition_keys=sample_response["records"][0]["metadata"]["partitionKeys"],
     )
+
+    # WHEN we create a transformation record with the exact same data
     processed_record = KinesisFirehoseDataTransformationRecord(
         record_id=sample_response["records"][0]["recordId"],
         data=sample_response["records"][0]["data"],
         result=sample_response["records"][0]["result"],
         metadata=metadata_partition,
     )
+
+    # THEN serialized response should return the same value
     response.add_record(record=processed_record)
     assert response.asdict() == sample_response
 
