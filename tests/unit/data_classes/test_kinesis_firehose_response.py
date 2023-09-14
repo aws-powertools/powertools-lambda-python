@@ -92,7 +92,6 @@ def test_kinesis_firehose_create_response():
     for record in parsed_event.records:
         metadata_partition = KinesisFirehoseDataTransformationRecordMetadata(partition_keys={"year": "2023"})
         processed_record = record.build_data_transformation_response(
-            result="Ok",
             metadata=metadata_partition,
             data=base64_from_str(arbitrary_data),
         )
