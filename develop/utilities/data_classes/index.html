@@ -3645,11 +3645,14 @@ or plain text, depending on the original payload.</p>
 </div>
 </div>
 <h3 id="kinesis-firehose-delivery-stream">Kinesis Firehose delivery stream<a class="headerlink" href="#kinesis-firehose-delivery-stream" title="Permanent link">&para;</a></h3>
-<p>Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
-inline, and re-emit them back to the Delivery Stream.</p>
-<p>Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
-function to access the data either as json or plain text, depending on the original payload.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">app.py</label></div>
+<p>When using Kinesis Firehose, you can use a Lambda function to <a href="https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html" target="_blank">perform data transformation</a>. For each transformed record, you can choose to either:</p>
+<ul>
+<li><strong>A)</strong> Put them back to the delivery stream (default)</li>
+<li><strong>B)</strong> Drop them so consumers don't receive them (e.g., data validation)</li>
+<li><strong>C)</strong> Indicate a record failed data transformation and should be retried</li>
+</ul>
+<p>To do that, you can use <code>KinesisFirehoseDataTransformationResponse</code> class along with helper functions to make it easier to decode and encode base64 data in the stream.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:3"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><input id="__tabbed_27_3" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">Transforming streaming records</label><label for="__tabbed_27_2">Dropping invalid records</label><label for="__tabbed_27_3">Indicating a processing failure</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3679,35 +3682,207 @@ function to access the data either as json or plain text, depending on the origi
 <span class="normal">25</span>
 <span class="normal">26</span>
 <span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
-<span class="kn">import</span> <span class="nn">json</span>
-
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">KinesisFirehoseEvent</span><span class="p">,</span>
-    <span class="n">event_source</span><span class="p">,</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="hll">    <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">KinesisFirehoseEvent</span><span class="p">,</span>
+</span>    <span class="n">event_source</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.serialization</span> <span class="kn">import</span> <span class="n">base64_from_json</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 
 <span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">KinesisFirehoseEvent</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">KinesisFirehoseEvent</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
-
+<span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">()</span>
+</span>
     <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
-        <span class="c1"># if data was delivered as json; caches loaded value</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">data_as_json</span>
+        <span class="c1"># get original data using data_as_text property</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">data_as_text</span>  <span class="c1"># (1)!</span>
 
-        <span class="n">processed_record</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s2">&quot;recordId&quot;</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">record_id</span><span class="p">,</span>
-            <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)),</span>
-            <span class="s2">&quot;result&quot;</span><span class="p">:</span> <span class="s2">&quot;Ok&quot;</span><span class="p">,</span>
-        <span class="p">}</span>
+        <span class="c1">## generate data to return</span>
+        <span class="n">transformed_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;new_data&quot;</span><span class="p">:</span> <span class="s2">&quot;transformed data using Powertools&quot;</span><span class="p">,</span> <span class="s2">&quot;original_payload&quot;</span><span class="p">:</span> <span class="n">data</span><span class="p">}</span>
 
-        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">processed_record</span><span class="p">)</span>
+        <span class="n">processed_record</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">build_data_transformation_response</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">base64_from_json</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">),</span>  <span class="c1"># (2)!</span>
+        <span class="p">)</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">add_record</span><span class="p">(</span><span class="n">processed_record</span><span class="p">)</span>
 
     <span class="c1"># return transformed records</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;records&quot;</span><span class="p">:</span> <span class="n">result</span><span class="p">}</span>
+<span class="hll">    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+</span></code></pre></div></td></tr></table></div>
+<ol>
+<li><strong>Ingesting JSON payloads?</strong> <br><br> Use <code>record.data_as_json</code> to easily deserialize them.</li>
+<li>For your convenience, <code>base64_from_json</code> serializes a dict to JSON, then encode as base64 data.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="hll">    <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">,</span>
+</span>    <span class="n">KinesisFirehoseEvent</span><span class="p">,</span>
+    <span class="n">event_source</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.serialization</span> <span class="kn">import</span> <span class="n">base64_from_json</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+<span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">KinesisFirehoseEvent</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">KinesisFirehoseEvent</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+<span class="hll">    <span class="n">result</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">()</span>
+</span>
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">payload</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">data_as_json</span>  <span class="c1"># decodes and deserialize base64 JSON string</span>
+
+            <span class="c1">## generate data to return</span>
+            <span class="n">transformed_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;tool_used&quot;</span><span class="p">:</span> <span class="s2">&quot;powertools_dataclass&quot;</span><span class="p">,</span> <span class="s2">&quot;original_payload&quot;</span><span class="p">:</span> <span class="n">payload</span><span class="p">}</span>
+
+            <span class="n">processed_record</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">(</span>
+                <span class="n">record_id</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">record_id</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">base64_from_json</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>  <span class="c1"># (1)!</span>
+            <span class="c1"># our producers ingest JSON payloads only; drop malformed records from the stream</span>
+            <span class="n">processed_record</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">(</span>
+                <span class="n">record_id</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">record_id</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="hll">                <span class="n">result</span><span class="o">=</span><span class="s2">&quot;Dropped&quot;</span><span class="p">,</span>
+</span>            <span class="p">)</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">add_record</span><span class="p">(</span><span class="n">processed_record</span><span class="p">)</span>
+
+    <span class="c1"># return transformed records</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
+<ol>
+<li>This exception would be generated from <code>record.data_as_json</code> if invalid payload.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="hll">    <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">,</span>
+</span>    <span class="n">KinesisFirehoseEvent</span><span class="p">,</span>
+    <span class="n">event_source</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.serialization</span> <span class="kn">import</span> <span class="n">base64_from_json</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+<span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">KinesisFirehoseEvent</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">firehose_event</span> <span class="o">=</span> <span class="n">KinesisFirehoseEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationResponse</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">firehose_event</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">data_as_text</span>  <span class="c1"># base64 decoded data as str</span>
+
+            <span class="c1"># generate data to return</span>
+            <span class="n">transformed_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;tool_used&quot;</span><span class="p">:</span> <span class="s2">&quot;powertools_dataclass&quot;</span><span class="p">,</span> <span class="s2">&quot;original_payload&quot;</span><span class="p">:</span> <span class="n">payload</span><span class="p">}</span>
+
+            <span class="c1"># Default result is Ok</span>
+            <span class="n">processed_record</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">(</span>
+                <span class="n">record_id</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">record_id</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">base64_from_json</span><span class="p">(</span><span class="n">transformed_data</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="c1"># add Failed result to processing results, send back to kinesis for retry</span>
+            <span class="n">processed_record</span> <span class="o">=</span> <span class="n">KinesisFirehoseDataTransformationRecord</span><span class="p">(</span>
+                <span class="n">record_id</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">record_id</span><span class="p">,</span>
+                <span class="n">data</span><span class="o">=</span><span class="n">record</span><span class="o">.</span><span class="n">data</span><span class="p">,</span>
+<span class="hll">                <span class="n">result</span><span class="o">=</span><span class="s2">&quot;ProcessingFailed&quot;</span><span class="p">,</span>  <span class="c1"># (1)!</span>
+</span>            <span class="p">)</span>
+
+        <span class="n">result</span><span class="o">.</span><span class="n">add_record</span><span class="p">(</span><span class="n">processed_record</span><span class="p">)</span>
+
+    <span class="c1"># return transformed records</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>This record will now be sent to your <a href="https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling" target="_blank">S3 bucket in the <code>processing-failed</code> folder</a>.</li>
+</ol>
 </div>
 </div>
 </div>
@@ -4300,7 +4475,7 @@ for more details.</p>
   <small>
     
       Last update:
-      2023-09-12
+      2023-09-14
     
   </small>
 </div>
