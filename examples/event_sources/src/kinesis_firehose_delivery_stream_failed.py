@@ -19,8 +19,10 @@ def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
         ## generate data to return
         transformed_data = {"new_data": "transformed data using Powertools", "original_payload": data}
 
+        # some process failed, send back to kinesis
         processed_record = record.build_data_transformation_response(
             data=base64_from_json(transformed_data),
+            result="ProcessingFailed",
         )
 
         result.add_record(processed_record)

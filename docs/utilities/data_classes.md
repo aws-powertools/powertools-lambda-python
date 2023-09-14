@@ -989,6 +989,10 @@ in the example below.
     ```python
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
+=== "with Failure"
+    ```python hl_lines="25"
+    --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream_failed.py"
+    ```
 
 You can also construct response without using `event_source` wrapper. Shown in the example below.
 
@@ -996,6 +1000,10 @@ You can also construct response without using `event_source` wrapper. Shown in t
 
     ```python
     --8<-- "examples/event_sources/src/kinesis_firehose_response.py"
+    ```
+=== "with Exception"
+    ```python hl_lines="26"
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
     ```
 
 ### Lambda Function URL
