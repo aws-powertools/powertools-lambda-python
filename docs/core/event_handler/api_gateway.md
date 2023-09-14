@@ -866,7 +866,7 @@ Consider a simplified micro function structured REST API that has two routes:
 * `/users` - an endpoint that will return all users of the application on `GET` requests
 * `/users/<id>` - an endpoint that looks up a single users details by ID on `GET` requests
 
-Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.)
+Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.).
 
 === "`/users` Endpoint"
     ```python
