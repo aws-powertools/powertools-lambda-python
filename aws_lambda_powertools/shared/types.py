@@ -1,6 +1,9 @@
 import sys
 from typing import Any, Callable, Dict, List, TypeVar, Union
 
+if sys.version_info == (3, 7):
+    from typing_extensions import Literal, NotRequired, Protocol, TypeAlias, TypedDict
+
 if sys.version_info >= (3, 8):
     from typing import Literal, Protocol, TypedDict
 else:
