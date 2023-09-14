@@ -85,7 +85,7 @@ class KinesisFirehoseDataTransformationRecord:
             "data": self.data,
         }
         if self.metadata:
-            record["metadata"] = self.metadata.__dict__
+            record["metadata"] = self.metadata.asdict()
         return record
 
     @property
