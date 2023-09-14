@@ -1002,9 +1002,11 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Indicating a processing failure"
 
-    ```python
+    ```python hl_lines="2-3 33"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
     ```
+
+    1. This record will now be sent to your [S3 bucket in the `processing-failed` folder](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling){target="_blank"}.
 
 ### Lambda Function URL
 
