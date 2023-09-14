@@ -14,10 +14,9 @@ vault_provider = VaultProvider(vault_url="http://192.168.68.105:8200/", vault_to
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-
     try:
         # Retrieve a single parameter
-        endpoint_comments: Any = vault_provider.get("comments_endpoint", transform="json")
+        endpoint_comments: Any = vault_provider.get("comments_endpoint")
 
         # you can get all parameters using get_multiple and specifying vault mount point
         # # for testing purposes we will not use it

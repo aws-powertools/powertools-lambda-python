@@ -404,13 +404,13 @@ files = [
 
 [[package]]
 name = "cfn-lint"
-version = "0.79.10"
+version = "0.79.11"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.79.10.tar.gz", hash = "sha256:01eccb77c3e0bb52a91719a468e3713a376395e9444b639bca4dbe1867ebf225"},
-    {file = "cfn_lint-0.79.10-py3-none-any.whl", hash = "sha256:cfaadcd601c513a8ec2af1f19da31e8e2f3e36d71b85a38614b08b03bbab466c"},
+    {file = "cfn-lint-0.79.11.tar.gz", hash = "sha256:aef38604fce280aacc1bb02f673ebab101503a7660a0d18e08e1df58f3bca885"},
+    {file = "cfn_lint-0.79.11-py3-none-any.whl", hash = "sha256:f97f7a6ba9ed3b4715ea4064b437f522235be087a6661d813dbd089757c3a714"},
 ]
 
 [package.dependencies]
@@ -1792,13 +1792,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-xray"
-version = "1.28.36"
-description = "Type annotations for boto3.XRay 1.28.36 service generated with mypy-boto3-builder 7.18.0"
+version = "1.28.47"
+description = "Type annotations for boto3.XRay 1.28.47 service generated with mypy-boto3-builder 7.19.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-xray-1.28.36.tar.gz", hash = "sha256:fc7dfbd85d78c14bc45a823165c61dd084a36d7700b4935f88ff3a7b8e8dac48"},
-    {file = "mypy_boto3_xray-1.28.36-py3-none-any.whl", hash = "sha256:57a4a32fcc0368e5ec6c58d67f7abdc7332bedb7236ef072c157ae21fb44a332"},
+    {file = "mypy-boto3-xray-1.28.47.tar.gz", hash = "sha256:d4e893a5b6819b668096ce00ed969904d00cf034d1b9073034a243ab794e28c6"},
+    {file = "mypy_boto3_xray-1.28.47-py3-none-any.whl", hash = "sha256:3af3f00c48fd379fe264ab4050f5fcb1dba8a404a8cd8b0b08aa3ec70860b2d0"},
 ]
 
 [package.dependencies]
@@ -2570,13 +2570,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.30.0"
+version = "1.31.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.30.0.tar.gz", hash = "sha256:7dc873b87e1faf4d00614afd1058bfa1522942f33daef8a59f90de8ed75cd10c"},
-    {file = "sentry_sdk-1.30.0-py2.py3-none-any.whl", hash = "sha256:2e53ad63f96bb9da6570ba2e755c267e529edcf58580a2c0d2a11ef26e1e678b"},
+    {file = "sentry-sdk-1.31.0.tar.gz", hash = "sha256:6de2e88304873484207fed836388e422aeff000609b104c802749fd89d56ba5b"},
+    {file = "sentry_sdk-1.31.0-py2.py3-none-any.whl", hash = "sha256:64a7141005fb775b9db298a30de93e3b83e0ddd1232dc6f36eb38aebc1553291"},
 ]
 
 [package.dependencies]
@@ -2586,10 +2586,12 @@ urllib3 = {version = ">=1.26.11", markers = "python_version >= \"3.6\""}
 [package.extras]
 aiohttp = ["aiohttp (>=3.5)"]
 arq = ["arq (>=0.23)"]
+asyncpg = ["asyncpg (>=0.23)"]
 beam = ["apache-beam (>=2.12)"]
 bottle = ["bottle (>=0.12.13)"]
 celery = ["celery (>=3)"]
 chalice = ["chalice (>=1.16.0)"]
+clickhouse-driver = ["clickhouse-driver (>=0.2.0)"]
 django = ["django (>=1.8)"]
 falcon = ["falcon (>=1.4)"]
 fastapi = ["fastapi (>=0.79.0)"]
@@ -3002,4 +3004,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "412d962e54e113463ff8727f917df9dbfe5fae84705bf658909277f76d7af4f1"
+content-hash = "47678477156d6633904ebc1a5b35ea018da5f6095d9a7162fc552cda8130f1c3"
