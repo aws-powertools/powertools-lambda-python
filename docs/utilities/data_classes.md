@@ -994,9 +994,11 @@ To do that, you can use `KinesisFirehoseDataTransformationResponse` class along 
 
 === "Dropping invalid records"
 
-    ```python
+    ```python hl_lines="5-6 16 34"
     --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
     ```
+
+    1. This exception would be generated from `record.data_as_json` if invalid payload.
 
 === "Indicating a processing failure"
 
