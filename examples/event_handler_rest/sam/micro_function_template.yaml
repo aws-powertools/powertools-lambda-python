@@ -34,7 +34,7 @@ Resources:
                     Properties:
                         Path: /users
                         Method: GET
-            MemorySize: 512 # This Lambda Function can have a higher memory size set
+            MemorySize: 128 # This Lambda Function can have a higher memory size set
             Environment:
                 Variables:
                     LOG_LEVEL: INFO

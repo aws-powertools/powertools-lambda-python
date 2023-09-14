@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.utilities.parser import BaseModel
+from dataclasses import dataclass
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
@@ -25,20 +25,11 @@ users = [
         "email": "alex.wilson@example.com",
         "active": True,
     },
-    {
-        "user_id": "67a6c17d-b7f0-4f79-aae0-79f4a53c113b",
-        "email": "lisa.johnson@example.com",
-        "active": True,
-    },
-    {
-        "user_id": "6e85cf66-47af-4dbf-8aa2-2db3c24f29c1",
-        "email": "michael.brown@example.com",
-        "active": False,
-    },
 ]
 
 
-class User(BaseModel):
+@dataclass
+class User():
     user_id: str
     email: str
     active: bool
@@ -70,5 +61,5 @@ def all_active_users(user_id: str):
 
 
 @logger.inject_lambda_context()
-def handler(event: dict, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     return app.resolve(event, context)
