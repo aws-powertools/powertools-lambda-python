@@ -2,7 +2,7 @@ import base64
 import json
 import warnings
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 from typing_extensions import Literal
 
@@ -62,6 +62,8 @@ class KinesisFirehoseDataTransformationRecord:
     - https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html
     """
 
+    _valid_result_types: ClassVar[Tuple[str]] = ("Ok", "Dropped", "ProcessingFailed")
+
     record_id: str
     result: Literal["Ok", "Dropped", "ProcessingFailed"] = "Ok"
     data: str = ""
@@ -71,7 +73,7 @@ class KinesisFirehoseDataTransformationRecord:
     _json_data: Optional[Any] = None
 
     def asdict(self) -> Dict:
-        if self.result not in ["Ok", "Dropped", "ProcessingFailed"]:
+        if self.result not in self._valid_result_types:
             warnings.warn(
                 stacklevel=1,
                 message=f'The result "{self.result}" is not valid, Choose from "Ok", "Dropped", "ProcessingFailed"',
