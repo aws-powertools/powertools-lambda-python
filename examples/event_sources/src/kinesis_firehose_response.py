@@ -16,7 +16,6 @@ def lambda_handler(event: dict, context: LambdaContext):
 
         ## generate data to return
         transformed_data = {"tool_used": "powertools_dataclass", "original_payload": payload}
-
         processed_record = KinesisFirehoseDataTransformationRecord(
             record_id=record.record_id,
             data=base64_from_json(transformed_data),
