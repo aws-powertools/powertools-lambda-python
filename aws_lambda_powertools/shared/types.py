@@ -1,14 +1,20 @@
 import sys
 from typing import Any, Callable, Dict, List, TypeVar, Union
 
+if sys.version_info >= (3, 8):
+    from typing import Literal, Protocol, TypedDict
+else:
+    from typing_extensions import Literal, Protocol
+
+
+if sys.version_info >= (3, 11):
+    from typing import NotRequired
+else:
+    from typing_extensions import NotRequired
+
+
 AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
 # JSON primitives only, mypy doesn't support recursive tho
 JSONType = Union[str, int, float, bool, None, Dict[str, Any], List[Any]]
 
-
-if sys.version_info >= (3, 8):
-    from typing import Protocol
-else:
-    from typing_extensions import Protocol
-
-__all__ = ["Protocol"]
+__all__ = ["Protocol", "TypedDict", "Literal", "NotRequired"]

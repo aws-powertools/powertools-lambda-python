@@ -5,7 +5,9 @@ from __future__ import annotations
 
 import traceback
 from types import TracebackType
-from typing import List, Optional, Tuple, Type
+from typing import Optional, Type
+
+from aws_lambda_powertools.shared.types import List, Tuple
 
 ExceptionInfo = Tuple[Optional[Type[BaseException]], Optional[BaseException], Optional[TracebackType]]
 

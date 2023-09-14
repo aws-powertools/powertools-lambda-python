@@ -1,5 +1,6 @@
-from typing import List, Optional, Tuple
+from typing import Optional
 
+from aws_lambda_powertools.shared.types import List, Tuple
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
 
