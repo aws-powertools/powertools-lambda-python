@@ -188,7 +188,64 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def set(self, name: str, value: str, parameter_type: str = "String", overwrite: bool = False, **sdk_options) -> str:
+    def set(
+        self,
+        name: str,
+        value: str,
+        type: Optional[str] = "String",
+        overwrite: bool = False,
+        max_age: Optional[int] = None,
+        transform: TransformOptions = None,
+        **sdk_options,
+    ) -> Optional[Union[str, dict, bytes]]:
+        """
+        Retrieve a parameter value or return the cached value
+
+        Parameters
+        ----------
+        name: str
+            Parameter name
+        value: str
+            Parameter value
+        type: str, optional
+            Parameter type (Allowed: 'String','StringList','SecureString')
+            Items in a StringList must be separated by a comma (,).
+        max_age: int, optional
+            Maximum age of the cached value
+        transform: str
+            Optional transformation of the parameter value. Supported values
+            are "json" for JSON strings and "binary" for base 64 encoded
+            values.
+        sdk_options: dict, optional
+            Arguments that will be passed directly to the underlying API call
+
+        Raises
+        ------
+        GetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+        TransformParameterError
+            When the parameter provider fails to transform a parameter value.
+        """
+
+        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
+        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
+
+        sdk_options["Name"] = name
+        sdk_options["Value"] = value
+        sdk_options["Type"] = type
+        sdk_options["Overwrite"] = overwrite
+
+        return super().set(name, max_age, transform, **sdk_options)
+
+    def _set(
+        self,
+        name: str,
+        value: str,
+        type: str = "String",
+        overwrite: bool = False,
+        **sdk_options
+    ) -> str:
         """
         Sets a parameter value from AWS Systems Manager Parameter Store
 
@@ -198,8 +255,6 @@ class SSMProvider(BaseProvider):
             Parameter name
         value: str
             Parameter value
-        decrypt: bool, optional
-            If the parameter value should be decrypted
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store put_parameter API call
         """
@@ -207,7 +262,7 @@ class SSMProvider(BaseProvider):
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Name"] = name
         sdk_options["Value"] = value
-        sdk_options["Type"] = parameter_type
+        sdk_options["Type"] = type
         sdk_options["Overwrite"] = overwrite
 
         return self.client.put_parameter(**sdk_options)["Version"]
@@ -731,7 +786,7 @@ def set_parameter(
     value: str,
     transform: Optional[str] = None,
     max_age: Optional[int] = None,
-    parameter_type: str = "String",
+    type: str = "String",
     overwrite: bool = False,
     **sdk_options,
 ) -> Union[str, dict, bytes]:
@@ -783,7 +838,7 @@ def set_parameter(
     # Add to `decrypt` sdk_options to we can have an explicit option for this
     sdk_options["Name"] = name
     sdk_options["Value"] = value
-    sdk_options["Type"] = parameter_type
+    sdk_options["Type"] = type
     sdk_options["Overwrite"] = overwrite
 
     return DEFAULT_PROVIDERS["ssm"].set(
