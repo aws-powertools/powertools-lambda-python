@@ -1,9 +1,9 @@
 import json
+from dataclasses import dataclass
 from http import HTTPStatus
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from dataclasses import dataclass
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
@@ -18,7 +18,7 @@ users = [
     {
         "user_id": "3a9df6b1-938c-4e80-bd4a-0c966f4b1c1e",
         "email": "jane.smith@example.com",
-        "active": True,
+        "active": False,
     },
     {
         "user_id": "aa0d3d09-9cb9-42b9-9e63-1fb17ea52981",
@@ -29,7 +29,7 @@ users = [
 
 
 @dataclass
-class User():
+class User:
     user_id: str
     email: str
     active: bool
@@ -53,7 +53,7 @@ def all_active_users(user_id: str):
         return Response(
             status_code=HTTPStatus.OK.value,
             content_type="application/json",
-            body=json.dumps(user.dict()),
+            body=json.dumps(user.__dict__),
         )
 
     else:

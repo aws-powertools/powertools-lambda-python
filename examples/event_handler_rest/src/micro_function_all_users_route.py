@@ -1,9 +1,9 @@
 import json
+from dataclasses import dataclass
 from http import HTTPStatus
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from dataclasses import dataclass
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
@@ -24,11 +24,12 @@ users = [
         "user_id": "aa0d3d09-9cb9-42b9-9e63-1fb17ea52981",
         "email": "alex.wilson@example.com",
         "active": True,
+    },
 ]
 
 
 @dataclass
-class User():
+class User:
     user_id: str
     email: str
     active: bool

@@ -34,7 +34,7 @@ Resources:
                     Properties:
                         Path: /users
                         Method: GET
-            MemorySize: 128 # This Lambda Function can have a higher memory size set
+            MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
                     LOG_LEVEL: INFO
@@ -57,7 +57,7 @@ Resources:
                     Properties:
                         Path: /users/{id+}
                         Method: GET
-            MemorySize: 128
+            MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
                     LOG_LEVEL: INFO

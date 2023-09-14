@@ -884,7 +884,7 @@ Each endpoint will be it's own Lambda function that is configured as a [Lambda i
     ```
 
 ???+ note
-    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions.
+    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a Lambda Layer.
 
 ## Testing your code
 
