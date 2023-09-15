@@ -195,7 +195,6 @@ class SSMProvider(BaseProvider):
         type: Optional[str] = "String",
         overwrite: bool = False,
         max_age: Optional[int] = None,
-        transform: TransformOptions = None,
         **sdk_options,
     ) -> Optional[Union[str, dict, bytes]]:
         """
@@ -236,7 +235,7 @@ class SSMProvider(BaseProvider):
         sdk_options["Type"] = type
         sdk_options["Overwrite"] = overwrite
 
-        return super().set(name, max_age, transform, **sdk_options)
+        return super().set(name, max_age, **sdk_options)
 
     def _set(
         self,
@@ -784,7 +783,6 @@ def get_parameters(
 def set_parameter(
     name: str,
     value: str,
-    transform: Optional[str] = None,
     max_age: Optional[int] = None,
     type: str = "String",
     overwrite: bool = False,
@@ -797,8 +795,6 @@ def set_parameter(
     ----------
     name: str
         Name of the parameter
-    transform: str, optional
-        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     max_age: int, optional
         Maximum age of the cached value
     parameter_type: str, optional
@@ -842,7 +838,7 @@ def set_parameter(
     sdk_options["Overwrite"] = overwrite
 
     return DEFAULT_PROVIDERS["ssm"].set(
-        name, max_age=max_age, transform=transform, **sdk_options
+        name, max_age=max_age, **sdk_options
     )
 
 
