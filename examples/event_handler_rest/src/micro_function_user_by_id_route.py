@@ -35,10 +35,16 @@ class User:
     active: bool
 
 
-def get_user_by_id(user_id: str):
-    for user in users:
-        if user["user_id"] == user_id:
-            return User(**user)
+def get_user_by_id(user_id: str) -> Union[User, None]:
+    for user_data in users:
+        if user_data["user_id"] == user_id:
+            return User(
+                user_id=str(user_data["user_id"]),
+                email=str(user_data["email"]),
+                active=bool(user_data["active"]),
+            )
+            
+    return None
 
 
 app = APIGatewayRestResolver()
