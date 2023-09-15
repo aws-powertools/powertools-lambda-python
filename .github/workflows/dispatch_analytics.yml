@@ -13,15 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     environment: layer-beta
     steps:
-      - name: Setup uptrem session
-        uses: lhotari/action-upterm@v1
-        with:
-          limit-access-to-actor: true
+      # - name: Setup uptrem session
+      #   uses: lhotari/action-upterm@v1
+      #   with:
+      #     limit-access-to-actor: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-region: us-gov-east-1
+          aws-region: us-gov-west-1
           role-to-assume: ${{ secrets.AWS_TEST }}
 
       - name: Print identity
