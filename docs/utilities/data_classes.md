@@ -197,7 +197,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
         if user.get("isAdmin", False):
             policy.allow_all_routes()
         else:
-            policy.allow_route(HttpVerb.GET, "/user-profile")
+            policy.allow_route(HttpVerb.GET.value, "/user-profile")
 
         return policy.asdict()
     ```
