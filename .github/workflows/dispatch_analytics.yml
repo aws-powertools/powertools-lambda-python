@@ -1,57 +1,22 @@
 name: Dispatch analytics
 
-# PROCESS
-#
-# 1. Trade GitHub JWT token with AWS credentials for the analytics account
-# 2. Invoke a Lambda function dispatcher synchronously with the read-only scoped JWT token
-# 3. The dispatcher function will call GitHub APIs to read data from the last hour and aggregate for operational analytics
-
-# USAGE
-#
-# NOTE: meant to use as a scheduled task only (or manually for debugging purposes).
-
 on:
   workflow_dispatch:
-
-  schedule:
-    - cron: "0 * * * *"
 
 permissions:
   contents: read
 
-
 jobs:
   dispatch_token:
     if: github.repository == 'aws-powertools/powertools-lambda-python'
-    concurrency:
-      group: analytics
     runs-on: ubuntu-latest
-    environment: analytics
-    permissions:
-      id-token: write
-      actions: read
-      checks: read
-      contents: read    # previously we needed `write` to use GH_TOKEN in our dispatcher (Lambda)
-      deployments: read
-      issues: read
-      discussions: read
-      packages: read
-      pages: read
-      pull-requests: read
-      repository-projects: read
-      security-events: read
-      statuses: read
+    environment: layer-beta
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
-          aws-region: eu-central-1
-          role-to-assume: ${{ secrets.AWS_ANALYTICS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_TEST }}
 
-      - name: Invoke Lambda function
+      - name: Print identity
         run: |
-          payload=$(echo -n '{"githubToken": "${{ secrets.GITHUB_TOKEN }}"}' | base64)
-          aws lambda invoke \
-            --function-name ${{ secrets.AWS_ANALYTICS_DISPATCHER_ARN }} \
-            --payload "$payload" response.json
-          cat response.json
+          aws sts get-caller-identity
