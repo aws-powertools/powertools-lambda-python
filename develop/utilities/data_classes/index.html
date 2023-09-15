@@ -2259,7 +2259,7 @@ for more details.</p>
     <span class="k">if</span> <span class="n">user</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;isAdmin&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
 <span class="hll">        <span class="n">policy</span><span class="o">.</span><span class="n">allow_all_routes</span><span class="p">()</span>
 </span>    <span class="k">else</span><span class="p">:</span>
-<span class="hll">        <span class="n">policy</span><span class="o">.</span><span class="n">allow_route</span><span class="p">(</span><span class="n">HttpVerb</span><span class="o">.</span><span class="n">GET</span><span class="p">,</span> <span class="s2">&quot;/user-profile&quot;</span><span class="p">)</span>
+<span class="hll">        <span class="n">policy</span><span class="o">.</span><span class="n">allow_route</span><span class="p">(</span><span class="n">HttpVerb</span><span class="o">.</span><span class="n">GET</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;/user-profile&quot;</span><span class="p">)</span>
 </span>
     <span class="k">return</span> <span class="n">policy</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
@@ -4475,7 +4475,7 @@ for more details.</p>
   <small>
     
       Last update:
-      2023-09-14
+      2023-09-15
     
   </small>
 </div>
