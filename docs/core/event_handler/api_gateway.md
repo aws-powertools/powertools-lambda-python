@@ -883,8 +883,10 @@ Each endpoint will be it's own Lambda function that is configured as a [Lambda i
     --8<-- "examples/event_handler_rest/sam/micro_function_template.yaml"
     ```
 
+<!-- markdownlint-disable MD013 -->
 ???+ note
-    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a Lambda Layer.
+    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} or [Pants](https://www.pantsbuild.org/docs/awslambda-python){target="_blank" rel="nofollow"}.
+<!-- markdownlint-enable MD013 -->
 
 ## Testing your code
 

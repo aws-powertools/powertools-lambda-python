@@ -1,6 +1,7 @@
 import json
 from dataclasses import dataclass
 from http import HTTPStatus
+from typing import Union
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
@@ -43,7 +44,7 @@ def get_user_by_id(user_id: str) -> Union[User, None]:
                 email=str(user_data["email"]),
                 active=bool(user_data["active"]),
             )
-            
+
     return None
 
 
