@@ -15,6 +15,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
+          aws-region: aws-us-gov
           role-to-assume: ${{ secrets.AWS_TEST }}
 
       - name: Print identity
