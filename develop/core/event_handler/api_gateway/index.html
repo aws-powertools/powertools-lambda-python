@@ -6061,9 +6061,11 @@ your development, building, deployment tooling need to accommodate the distinct 
 <span class="normal">68</span>
 <span class="normal">69</span>
 <span class="normal">70</span>
-<span class="normal">71</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="normal">71</span>
+<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">http</span> <span class="kn">import</span> <span class="n">HTTPStatus</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span><span class="p">,</span> <span class="n">Response</span>
@@ -6264,10 +6266,13 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 </div>
+<!-- markdownlint-disable MD013 -->
 <details class="note" open="open">
 <summary>Note</summary>
-<p>You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the <code>User</code> class could be shared across functions. This could be accomplished by packaging shared code as a Lambda Layer.</p>
+<p>You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the <code>User</code> class could be shared across functions. This could be accomplished by packaging shared code as a <a href="https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html" target="_blank">Lambda Layer</a> or <a href="https://www.pantsbuild.org/docs/awslambda-python" rel="nofollow" target="_blank">Pants</a>.</p>
 </details>
+<!-- markdownlint-enable MD013 -->
+
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>You can test your routes by passing a proxy event request with required params.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">API Gateway REST API</label><label for="__tabbed_22_2">API Gateway HTTP API</label><label for="__tabbed_22_3">Application Load Balancer</label><label for="__tabbed_22_4">Lambda Function URL</label></div>
