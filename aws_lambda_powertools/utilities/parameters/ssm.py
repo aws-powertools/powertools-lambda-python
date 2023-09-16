@@ -18,7 +18,7 @@ from aws_lambda_powertools.shared.functions import (
 )
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
-from .exceptions import GetParameterError
+from .exceptions import GetParameterError, SetParameterError
 from .types import TransformOptions
 
 if TYPE_CHECKING:
@@ -192,11 +192,15 @@ class SSMProvider(BaseProvider):
         self,
         name: str,
         value: str,
+        *, # force keyword arguments
         type: Optional[str] = "String",
         overwrite: bool = False,
-        max_age: Optional[int] = None,
+        tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
+        description: Optional[str] = None,
+        kms_key_id: Optional[str] = None,
+        transform: Optional[str] = None,
         **sdk_options,
-    ) -> Optional[Union[str, dict, bytes]]:
+    ) -> str:
         """
         Retrieve a parameter value or return the cached value
 
@@ -227,44 +231,26 @@ class SSMProvider(BaseProvider):
             When the parameter provider fails to transform a parameter value.
         """
 
-        # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-        max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
-
         sdk_options["Name"] = name
         sdk_options["Value"] = value
         sdk_options["Type"] = type
         sdk_options["Overwrite"] = overwrite
+        sdk_options["Tier"] = tier
 
-        return super().set(name, max_age, **sdk_options)
+        if description:
+            sdk_options["Description"] = description
+        if kms_key_id:
+            sdk_options["KeyId"] = kms_key_id
 
-    def _set(
-        self,
-        name: str,
-        value: str,
-        type: str = "String",
-        overwrite: bool = False,
-        **sdk_options
-    ) -> str:
-        """
-        Sets a parameter value from AWS Systems Manager Parameter Store
+        try:
+            value = self.client.put_parameter(**sdk_options)["Version"]
+        except Exception as exc:
+            raise SetParameterError(str(exc)) from exc
 
-        Parameters
-        ----------
-        name: str
-            Parameter name
-        value: str
-            Parameter value
-        sdk_options: dict, optional
-            Dictionary of options that will be passed to the Parameter Store put_parameter API call
-        """
+        if transform:
+            value = transform_value(key=name, value=value, transform=transform, raise_on_transform_error=True)
 
-        # Explicit arguments will take precedence over keyword arguments
-        sdk_options["Name"] = name
-        sdk_options["Value"] = value
-        sdk_options["Type"] = type
-        sdk_options["Overwrite"] = overwrite
-
-        return self.client.put_parameter(**sdk_options)["Version"]
+        return value
 
     def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
         """
@@ -783,11 +769,15 @@ def get_parameters(
 def set_parameter(
     name: str,
     value: str,
-    max_age: Optional[int] = None,
-    type: str = "String",
+    *, # force keyword arguments
+    type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
     overwrite: bool = False,
+    tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
+    description: Optional[str] = None,
+    kms_key_id: Optional[str] = None,
+    transform: Optional[str] = None,
     **sdk_options,
-) -> Union[str, dict, bytes]:
+) -> str:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -806,7 +796,7 @@ def set_parameter(
 
     Raises
     ------
-    GetParameterError
+    SetParameterError
         When the parameter provider fails to retrieve a parameter value for
         a given name.
     TransformParameterError
@@ -828,17 +818,16 @@ def set_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
-
-    # Add to `decrypt` sdk_options to we can have an explicit option for this
-    sdk_options["Name"] = name
-    sdk_options["Value"] = value
-    sdk_options["Type"] = type
-    sdk_options["Overwrite"] = overwrite
-
     return DEFAULT_PROVIDERS["ssm"].set(
-        name, max_age=max_age, **sdk_options
+        name,
+        value,
+        type=type,
+        overwrite=overwrite,
+        tier=tier,
+        description=description,
+        kms_key_id=kms_key_id,
+        transform=transform,
+        **sdk_options
     )
 
 
