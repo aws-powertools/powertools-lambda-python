@@ -207,25 +207,26 @@ class SSMProvider(BaseProvider):
         Parameters
         ----------
         name: str
-            Parameter name
-        value: str
-            Parameter value
+            Name of the parameter
         type: str, optional
-            Parameter type (Allowed: 'String','StringList','SecureString')
-            Items in a StringList must be separated by a comma (,).
-        max_age: int, optional
-            Maximum age of the cached value
-        transform: str
-            Optional transformation of the parameter value. Supported values
-            are "json" for JSON strings and "binary" for base 64 encoded
-            values.
+            Type of the parameter.  Allowed values are String, StringList, and SecureString
+        overwrite: bool, optional
+            If the parameter value should be overwritten, False by default
+        tier: str, optional
+            The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
+        description: str, optional
+            The description of the parameter
+        kms_key_id: str, optional
+            The KMS key id to use to encrypt the parameter
+        transform: str, optional
+            Transforms the content from a JSON object ('json') or base64 binary string ('binary')
         sdk_options: dict, optional
-            Arguments that will be passed directly to the underlying API call
+            Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
         Raises
         ------
-        GetParameterError
-            When the parameter provider fails to retrieve a parameter value for
+        SetParameterError
+            When the parameter provider fails to set a parameter value for
             a given name.
         TransformParameterError
             When the parameter provider fails to transform a parameter value.
@@ -785,12 +786,18 @@ def set_parameter(
     ----------
     name: str
         Name of the parameter
-    max_age: int, optional
-        Maximum age of the cached value
-    parameter_type: str, optional
+    type: str, optional
         Type of the parameter.  Allowed values are String, StringList, and SecureString
     overwrite: bool, optional
-        If the parameter value should be overwritten
+        If the parameter value should be overwritten, False by default
+    tier: str, optional
+        The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
+    description: str, optional
+        The description of the parameter
+    kms_key_id: str, optional
+        The KMS key id to use to encrypt the parameter
+    transform: str, optional
+        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -808,7 +815,7 @@ def set_parameter(
 
         >>> from aws_lambda_powertools.utilities.parameters import set_parameter
         >>>
-        >>> value = set_parameter("/my/parameter")
+        >>> value = set_parameter("/my/parameter", "My parameter value", description="My parameter description")
         >>>
         >>> print(value)
         My parameter value

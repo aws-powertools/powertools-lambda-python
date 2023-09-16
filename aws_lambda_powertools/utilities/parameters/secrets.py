@@ -17,6 +17,7 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from .exceptions import SetParameterError
 
 
 class SecretsProvider(BaseProvider):
@@ -119,6 +120,7 @@ class SecretsProvider(BaseProvider):
 
     def set_secret(
             self,
+            *, # force keyword arguments
             name: str,
             secret: Optional[str],
             secret_binary: Optional[str],
@@ -133,6 +135,16 @@ class SecretsProvider(BaseProvider):
         ----------
         name: str
             The ARN or name of the secret to add a new version to.
+        secret: str, optional
+            Specifies text data that you want to encrypt and store in this new version of the secret.
+        secret_binary: bytes, optional
+            Specifies binary data that you want to encrypt and store in this new version of the secret.
+        idempotency_id: str, optional
+            Idempotency token to use for the request to prevent the accidental
+            creation of duplicate versions if there are failures and retries
+            during the Lambda rotation function processing.
+        version_stages: list[str], optional
+            Specifies a list of staging labels that are attached to this version of the secret.
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -157,7 +169,10 @@ class SecretsProvider(BaseProvider):
         if idempotency_id:
             sdk_options["ClientRequestToken"] = idempotency_id
 
-        put_secret = self.client.put_secret_value(**sdk_options)
+        try:
+            put_secret = self.client.put_secret_value(**sdk_options)["VersionId"]
+        except Exception as exc:
+            raise SetParameterError(str(exc)) from exc
 
         return put_secret["VersionId"]
 
@@ -231,14 +246,14 @@ def get_secret(
 
 
 def set_secret(
+    *, # force keyword arguments
     name: str,
     secret: Optional[Union[str, dict]] = None,
     secret_binary: Optional[bytes] = None,
     idempotency_id: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
-    max_age: Optional[int] = None,
     **sdk_options
-) -> Union[str, dict, bytes]:
+) -> str:
     """
     Retrieve a parameter value from AWS Secrets Manager
 
@@ -256,8 +271,6 @@ def set_secret(
         during the Lambda rotation function processing.
     version_stages: list[str], optional
         A list of staging labels that are attached to this version of the secret.
-    max_age: int, optional
-        Maximum age of the cached value
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
@@ -282,20 +295,10 @@ def set_secret(
         >>> set_secret("my-secret", secret='{"password": "supers3cr3tllam@passw0rd"}', idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
-    # If max_age is not set, resolve it from the environment variable, defaulting to DEFAULT_MAX_AGE_SECS
-    max_age = resolve_max_age(env=os.getenv(constants.PARAMETERS_MAX_AGE_ENV, DEFAULT_MAX_AGE_SECS), choice=max_age)
-
     # Only create the provider if this function is called at least once
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    if secret and secret_binary:
-        raise ValueError("secret and secret_binary are mutually exclusive")
-    elif secret:
-        return DEFAULT_PROVIDERS["secrets"].set_secret(
-            name, secret=secret, idempotency_id=idempotency_id, version_stages=version_stages, max_age=max_age, **sdk_options
-        )
-    elif secret_binary:
-        return DEFAULT_PROVIDERS["secrets"].set_secret(
-            name, secret_binary=secret_binary, idempotency_id=idempotency_id, version_stages=version_stages, max_age=max_age, **sdk_options
-        )
+    return DEFAULT_PROVIDERS["secrets"].set_secret(
+        name=name, secret=secret, secret_binary=secret_binary, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
+    )
