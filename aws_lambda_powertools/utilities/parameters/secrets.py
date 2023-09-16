@@ -170,11 +170,11 @@ class SecretsProvider(BaseProvider):
             sdk_options["ClientRequestToken"] = idempotency_id
 
         try:
-            put_secret = self.client.put_secret_value(**sdk_options)["VersionId"]
+            value = self.client.put_secret_value(**sdk_options)["VersionId"]
         except Exception as exc:
             raise SetParameterError(str(exc)) from exc
 
-        return put_secret["VersionId"]
+        return value
 
 
 def get_secret(
