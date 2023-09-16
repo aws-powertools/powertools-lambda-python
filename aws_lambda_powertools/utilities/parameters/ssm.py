@@ -190,7 +190,7 @@ class SSMProvider(BaseProvider):
 
     def set(
         self,
-        name: str,
+        path: str,
         value: str,
         *, # force keyword arguments
         type: Optional[str] = "String",
@@ -206,8 +206,8 @@ class SSMProvider(BaseProvider):
 
         Parameters
         ----------
-        name: str
-            Name of the parameter
+        path: str
+            The fully qualified name includes the complete hierarchy of the parameter path and name.
         type: str, optional
             Type of the parameter.  Allowed values are String, StringList, and SecureString
         overwrite: bool, optional
@@ -232,7 +232,7 @@ class SSMProvider(BaseProvider):
             When the parameter provider fails to transform a parameter value.
         """
 
-        sdk_options["Name"] = name
+        sdk_options["Name"] = path
         sdk_options["Value"] = value
         sdk_options["Type"] = type
         sdk_options["Overwrite"] = overwrite
@@ -249,7 +249,7 @@ class SSMProvider(BaseProvider):
             raise SetParameterError(str(exc)) from exc
 
         if transform:
-            value = transform_value(key=name, value=value, transform=transform, raise_on_transform_error=True)
+            value = transform_value(key=path, value=value, transform=transform, raise_on_transform_error=True)
 
         return value
 
@@ -768,7 +768,7 @@ def get_parameters(
 
 
 def set_parameter(
-    name: str,
+    path: str,
     value: str,
     *, # force keyword arguments
     type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
@@ -784,8 +784,8 @@ def set_parameter(
 
     Parameters
     ----------
-    name: str
-        Name of the parameter
+    path: str
+        The fully qualified name includes the complete hierarchy of the parameter path and name.
     type: str, optional
         Type of the parameter.  Allowed values are String, StringList, and SecureString
     overwrite: bool, optional
@@ -801,6 +801,10 @@ def set_parameter(
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
+    Returns:
+    --------
+        The version of the parameter that was set
+
     Raises
     ------
     SetParameterError
@@ -809,16 +813,20 @@ def set_parameter(
     TransformParameterError
         When the parameter provider fails to transform a parameter value.
 
+    URLs:
+    -------
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm/client/put_parameter.html
+
     Example
     -------
     **Sets a parameter value from Systems Manager Parameter Store**
 
-        >>> from aws_lambda_powertools.utilities.parameters import set_parameter
+        >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> value = set_parameter("/my/parameter", "My parameter value", description="My parameter description")
+        >>> value = parameters.set_parameter(path="/my/example/parameter", value="More Powertools", description="My parameter description")
         >>>
         >>> print(value)
-        My parameter value
+        123
     """
 
     # Only create the provider if this function is called at least once
@@ -826,7 +834,7 @@ def set_parameter(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     return DEFAULT_PROVIDERS["ssm"].set(
-        name,
+        path,
         value,
         type=type,
         overwrite=overwrite,

@@ -148,8 +148,13 @@ class SecretsProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
+        Returns:
+        -------
+            Version ID of the newly created version of the secret.
+
         URLs:
-        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
+        -------
+            https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
         """
 
         if isinstance(secret, dict):
@@ -280,19 +285,27 @@ def set_secret(
         When the secrets provider fails to set a secret value or secret binary for
         a given name.
 
+    Returns:
+    -------
+        Version ID of the newly created version of the secret.
+
+    URLs:
+    -------
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
+
     Example
     -------
     **Sets a secret***
 
-        >>> from aws_lambda_powertools.utilities.parameters import set_secret
+        >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> set_secret(name="llamas-are-awesome", secret={"password": "supers3cr3tllam@passw0rd"})
+        >>> parameters.set_secret(name="llamas-are-awesome", secret={"password": "supers3cr3tllam@passw0rd"})
 
     **Sets a secret and includes an idempotency_id**
 
-        >>> from aws_lambda_powertools.utilities.parameters import set_secret
+        >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> set_secret("my-secret", secret='{"password": "supers3cr3tllam@passw0rd"}', idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> parameters.set_secret("my-secret", secret='{"password": "supers3cr3tllam@passw0rd"}', idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
     """
 
     # Only create the provider if this function is called at least once
