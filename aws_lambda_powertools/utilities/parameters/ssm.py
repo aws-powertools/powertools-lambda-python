@@ -200,7 +200,7 @@ class SSMProvider(BaseProvider):
         kms_key_id: Optional[str] = None,
         transform: Optional[str] = None,
         **sdk_options,
-    ) -> str:
+    ) -> int:
         """
         Retrieve a parameter value or return the cached value
 
@@ -778,7 +778,7 @@ def set_parameter(
     kms_key_id: Optional[str] = None,
     transform: Optional[str] = None,
     **sdk_options,
-) -> str:
+) -> int:
     """
     Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
 
@@ -803,7 +803,7 @@ def set_parameter(
 
     Returns:
     --------
-        The version of the parameter that was set
+        The version (integer) of the parameter that was set
 
     Raises
     ------
@@ -823,9 +823,9 @@ def set_parameter(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> value = parameters.set_parameter(path="/my/example/parameter", value="More Powertools", description="My parameter description")
+        >>> response = parameters.set_parameter(path="/my/example/parameter", value="More Powertools", description="My parameter description")
         >>>
-        >>> print(value)
+        >>> print(response)
         123
     """
 
