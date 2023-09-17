@@ -4,16 +4,47 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
 
 <a name="v2.25.0"></a>
 ## [v2.25.0] - 2023-09-15
+## Code Refactoring
+
+* **parameters:** BaseProvider._get to also support Dict ([#3090](https://github.com/aws-powertools/powertools-lambda-python/issues/3090))
+
 ## Documentation
 
 * **event_handler:** fix typing in micro function example ([#3098](https://github.com/aws-powertools/powertools-lambda-python/issues/3098))
+* **event_handler:** add micro function examples ([#3056](https://github.com/aws-powertools/powertools-lambda-python/issues/3056))
+* **we-made-this:** fix broken Twitch video embeds ([#3096](https://github.com/aws-powertools/powertools-lambda-python/issues/3096))
+
+## Features
+
+* **event_source:** add Kinesis Firehose Data Transformation data class ([#3029](https://github.com/aws-powertools/powertools-lambda-python/issues/3029))
+* **event_sources:** add Secrets Manager secret rotation event ([#3061](https://github.com/aws-powertools/powertools-lambda-python/issues/3061))
 
 ## Maintenance
 
 * version bump
+* **automation:** remove previous labels when PR is updated ([#3066](https://github.com/aws-powertools/powertools-lambda-python/issues/3066))
+* **deps:** bump actions/dependency-review-action from 3.0.8 to 3.1.0 ([#3071](https://github.com/aws-powertools/powertools-lambda-python/issues/3071))
+* **deps:** bump docker/setup-qemu-action from 2.2.0 to 3.0.0 ([#3081](https://github.com/aws-powertools/powertools-lambda-python/issues/3081))
+* **deps:** bump docker/setup-buildx-action from 2.10.0 to 3.0.0 ([#3083](https://github.com/aws-powertools/powertools-lambda-python/issues/3083))
+* **deps:** bump squidfunk/mkdocs-material from `dd1770c` to `c4890ab` in /docs ([#3078](https://github.com/aws-powertools/powertools-lambda-python/issues/3078))
+* **deps-dev:** bump cfn-lint from 0.79.9 to 0.79.10 ([#3077](https://github.com/aws-powertools/powertools-lambda-python/issues/3077))
+* **deps-dev:** bump hvac from 1.2.0 to 1.2.1 ([#3075](https://github.com/aws-powertools/powertools-lambda-python/issues/3075))
+* **deps-dev:** bump ruff from 0.0.288 to 0.0.289 ([#3080](https://github.com/aws-powertools/powertools-lambda-python/issues/3080))
+* **deps-dev:** bump ruff from 0.0.287 to 0.0.288 ([#3076](https://github.com/aws-powertools/powertools-lambda-python/issues/3076))
+* **deps-dev:** bump aws-cdk from 2.95.0 to 2.95.1 ([#3074](https://github.com/aws-powertools/powertools-lambda-python/issues/3074))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3085](https://github.com/aws-powertools/powertools-lambda-python/issues/3085))
+* **deps-dev:** bump aws-cdk from 2.95.1 to 2.96.0 ([#3087](https://github.com/aws-powertools/powertools-lambda-python/issues/3087))
+* **deps-dev:** bump sentry-sdk from 1.30.0 to 1.31.0 ([#3086](https://github.com/aws-powertools/powertools-lambda-python/issues/3086))
+* **deps-dev:** bump aws-cdk from 2.94.0 to 2.95.0 ([#3070](https://github.com/aws-powertools/powertools-lambda-python/issues/3070))
+* **deps-dev:** bump cfn-lint from 0.79.10 to 0.79.11 ([#3088](https://github.com/aws-powertools/powertools-lambda-python/issues/3088))
+* **deps-dev:** bump aws-cdk from 2.96.0 to 2.96.1 ([#3093](https://github.com/aws-powertools/powertools-lambda-python/issues/3093))
+* **typing:** move backwards compat types to shared types ([#3092](https://github.com/aws-powertools/powertools-lambda-python/issues/3092))
 
 
 <a name="v2.24.0"></a>
