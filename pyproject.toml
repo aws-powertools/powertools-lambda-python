@@ -94,7 +94,7 @@ mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 httpx = ">=0.23.3,<0.25.0"
 sentry-sdk = "^1.22.2"
-ruff = ">=0.0.272,<0.0.290"
+ruff = ">=0.0.272,<0.0.291"
 retry2 = "^0.9.5"
 
 [tool.coverage.run]
