@@ -1,6 +1,4 @@
-from typing import List
-
-from typing_extensions import NotRequired, TypedDict
+from aws_lambda_powertools.shared.types import List, NotRequired, TypedDict
 
 
 class CloudWatchEMFMetric(TypedDict):

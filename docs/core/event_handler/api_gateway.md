@@ -847,7 +847,7 @@ A micro function means that your final code artifact will be different to each f
 **Benefits**
 
 * **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
-* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
+* **Discoverability**. Micro functions are easier to visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
 * **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
 **Downsides**
@@ -858,6 +858,35 @@ A micro function means that your final code artifact will be different to each f
 your development, building, deployment tooling need to accommodate the distinct layout.
 * **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
     * Automated testing, operational and security reviews are essential to stability in either approaches.
+
+**Example**
+
+Consider a simplified micro function structured REST API that has two routes:
+
+* `/users` - an endpoint that will return all users of the application on `GET` requests
+* `/users/<id>` - an endpoint that looks up a single users details by ID on `GET` requests
+
+Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.).
+
+=== "`/users` Endpoint"
+    ```python
+    --8<-- "examples/event_handler_rest/src/micro_function_all_users_route.py"
+    ```
+
+=== "`/users/<id>` Endpoint"
+    ```python
+    --8<-- "examples/event_handler_rest/src/micro_function_user_by_id_route.py"
+    ```
+
+=== "Micro Function Example SAM Template"
+    ```yaml
+    --8<-- "examples/event_handler_rest/sam/micro_function_template.yaml"
+    ```
+
+<!-- markdownlint-disable MD013 -->
+???+ note
+    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} or [Pants](https://www.pantsbuild.org/docs/awslambda-python){target="_blank" rel="nofollow"}.
+<!-- markdownlint-enable MD013 -->
 
 ## Testing your code
 

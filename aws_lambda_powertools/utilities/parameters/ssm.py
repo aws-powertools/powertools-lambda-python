@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overl
 
 import boto3
 from botocore.config import Config
-from typing_extensions import Literal
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -16,6 +15,7 @@ from aws_lambda_powertools.shared.functions import (
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
+from aws_lambda_powertools.shared.types import Literal
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
 from .exceptions import GetParameterError, SetParameterError
