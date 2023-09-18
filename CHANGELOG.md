@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **deps-dev:** bump ruff from 0.0.289 to 0.0.290 ([#3105](https://github.com/aws-powertools/powertools-lambda-python/issues/3105))
+* **deps-dev:** bump aws-cdk from 2.96.1 to 2.96.2 ([#3102](https://github.com/aws-powertools/powertools-lambda-python/issues/3102))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3101](https://github.com/aws-powertools/powertools-lambda-python/issues/3101))
 
 
 <a name="v2.25.0"></a>
