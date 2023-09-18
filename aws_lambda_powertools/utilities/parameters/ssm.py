@@ -193,7 +193,7 @@ class SSMProvider(BaseProvider):
         path: str,
         value: str,
         *, # force keyword arguments
-        type: Optional[str] = "String",
+        type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
         overwrite: bool = False,
         tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
         description: Optional[str] = None,
