@@ -193,7 +193,7 @@ class SSMProvider(BaseProvider):
         path: str,
         value: str,
         *, # force keyword arguments
-        type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
+        parameter_type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
         overwrite: bool = False,
         tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
         description: Optional[str] = None,
@@ -208,7 +208,7 @@ class SSMProvider(BaseProvider):
         ----------
         path: str
             The fully qualified name includes the complete hierarchy of the parameter path and name.
-        type: str, optional
+        parameter_type: str, optional
             Type of the parameter.  Allowed values are String, StringList, and SecureString
         overwrite: bool, optional
             If the parameter value should be overwritten, False by default
@@ -234,7 +234,7 @@ class SSMProvider(BaseProvider):
 
         sdk_options["Name"] = path
         sdk_options["Value"] = value
-        sdk_options["Type"] = type
+        sdk_options["Type"] = parameter_type
         sdk_options["Overwrite"] = overwrite
         sdk_options["Tier"] = tier
 
@@ -771,7 +771,7 @@ def set_parameter(
     path: str,
     value: str,
     *, # force keyword arguments
-    type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
+    parameter_type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
     overwrite: bool = False,
     tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
     description: Optional[str] = None,
@@ -786,7 +786,7 @@ def set_parameter(
     ----------
     path: str
         The fully qualified name includes the complete hierarchy of the parameter path and name.
-    type: str, optional
+    parameter_type: str, optional
         Type of the parameter.  Allowed values are String, StringList, and SecureString
     overwrite: bool, optional
         If the parameter value should be overwritten, False by default
@@ -823,7 +823,7 @@ def set_parameter(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> response = parameters.set_parameter(path="/my/example/parameter", value="More Powertools", description="My parameter description")
+        >>> response = parameters.set_parameter(path="/my/example/parameter", value="More Powertools")
         >>>
         >>> print(response)
         123
@@ -836,7 +836,7 @@ def set_parameter(
     return DEFAULT_PROVIDERS["ssm"].set(
         path,
         value,
-        type=type,
+        parameter_type=parameter_type,
         overwrite=overwrite,
         tier=tier,
         description=description,

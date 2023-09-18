@@ -1,7 +1,7 @@
 """
 AWS Secrets Manager parameter retrieval and caching utility
 """
-
+from __future__ import annotations
 
 import os
 import json
