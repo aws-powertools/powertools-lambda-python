@@ -120,10 +120,9 @@ class SecretsProvider(BaseProvider):
 
     def set_secret(
             self,
-            *, # force keyword arguments
             name: str,
-            secret: Optional[str],
-            secret_binary: Optional[str],
+            value: Union[str, bytes],
+            *, # force keyword arguments
             idempotency_id: Optional[str],
             version_stages: Optional[list[str]],
             **sdk_options
@@ -135,10 +134,8 @@ class SecretsProvider(BaseProvider):
         ----------
         name: str
             The ARN or name of the secret to add a new version to.
-        secret: str, optional
+        value: str or bytes
             Specifies text data that you want to encrypt and store in this new version of the secret.
-        secret_binary: bytes, optional
-            Specifies binary data that you want to encrypt and store in this new version of the secret.
         idempotency_id: str, optional
             Idempotency token to use for the request to prevent the accidental
             creation of duplicate versions if there are failures and retries
@@ -157,18 +154,16 @@ class SecretsProvider(BaseProvider):
             https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
         """
 
-        if isinstance(secret, dict):
-            secret = json.dumps(secret)
-
-        if not isinstance(secret_binary, bytes):
-            secret_binary = secret_binary.encode("utf-8")
-
-        # Explicit arguments will take precedence over keyword arguments
         sdk_options["SecretId"] = name
-        if secret:
-            sdk_options["SecretString"] = secret
-        if secret_binary:
-            sdk_options["SecretBinary"] = secret_binary
+
+        if isinstance(value, dict):
+            value = json.dumps(value)
+
+        if isinstance(value, bytes):
+            sdk_options["SecretBinary"] = value
+        else:
+            sdk_options["SecretString"] = value
+
         if version_stages:
             sdk_options["VersionStages"] = version_stages
         if idempotency_id:
@@ -251,10 +246,9 @@ def get_secret(
 
 
 def set_secret(
-    *, # force keyword arguments
     name: str,
-    secret: Optional[Union[str, dict]] = None,
-    secret_binary: Optional[bytes] = None,
+    value: Union[str, bytes],
+    *, # force keyword arguments
     idempotency_id: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
     **sdk_options
@@ -266,10 +260,8 @@ def set_secret(
     ----------
     name: str
         Name of the parameter
-    secret: str, optional
+    value: str or bytes
         Secret value to set
-    secret_binary: bytes, optional
-        Secret binary value to set
     idempotency_token: str, optional
         Idempotency token to use for the request to prevent the accidental
         creation of duplicate versions if there are failures and retries
@@ -313,5 +305,5 @@ def set_secret(
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
     return DEFAULT_PROVIDERS["secrets"].set_secret(
-        name=name, secret=secret, secret_binary=secret_binary, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
+        name=name, secret=value, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
     )
