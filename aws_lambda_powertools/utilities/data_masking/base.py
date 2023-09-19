@@ -43,8 +43,13 @@ class DataMasking:
         else:
             return action(data, **provider_options)
 
-    def _apply_action_to_fields(self, data: Union[dict, str], fields: list,
-                                action, **provider_options) -> Union[dict, str]:
+    def _apply_action_to_fields(
+        self,
+        data: Union[dict, str],
+        fields: list,
+        action,
+        **provider_options,
+    ) -> Union[dict, str]:
         """
         This method takes the input data, which can be either a dictionary or a JSON string,
         and applies a mask, an encryption, or a decryption to the specified fields.
@@ -75,16 +80,17 @@ class DataMasking:
             ValueError
                 If 'fields' parameter is None.
             TypeError
-                If the 'data' parameter is not a dictionary or a JSON string.
+                If the 'data' parameter is not a traversable type
 
-        # TODO: document for field in fields logic (more in code)
         Example
         -------
+        ```python
         >>> data = {'a': {'b': {'c': 1}}, 'x': {'y': 2}}
         >>> fields = ['a.b.c', 'a.x.y']
-        The function will transform the value at 'a.b.c' (1) and 'a.x.y' (2)
-        and store the result as:
+        # The function will transform the value at 'a.b.c' (1) and 'a.x.y' (2)
+        # and store the result as:
         new_dict = {'a': {'b': {'c': 'transformed_value'}}, 'x': {'y': 'transformed_value'}}
+        ```
         """
 
         if fields is None:
@@ -94,32 +100,20 @@ class DataMasking:
             # Parse JSON string as dictionary
             my_dict_parsed = json.loads(data)
         elif isinstance(data, dict):
-            #TODO:  Revisit Turn into json string so everything has quotes around it.
-            # Think this is only so integer keys work on str and vice versa?
-            # so if we don't care abt that then can remove this
-
-            # Turn into json string so everything has quotes around it
+            # In case their data has keys that are not strings (i.e. ints), convert it all into a JSON string
             my_dict_parsed = json.dumps(data)
             # Turn back into dict so can parse it
             my_dict_parsed = json.loads(my_dict_parsed)
         else:
-            #TODO:  Revisit error handling in _apply_action_to_fields for string data that isn't a JSON string.
-            # This is an internal method and can't be called by anything but just in case?
-            # this method is only called if there's a list of fields, and if the list of
-            # fields doesn't match the input data
-            # then they get a key error, would that be enough?
             raise TypeError(
-                "Unsupported data type. The 'data' parameter must be a dictionary or a JSON string "
-                "representation of a dictionary.",
+                f"Unsupported data type for 'data' parameter. Expected a traversable type, but got {type(data)}.",
             )
 
-        #TODO:  Revisit variable names in for field in fields to reduce cognitive load
-        # is nested_key ok? field_path?
+        # ['a.b.c'] in ['a.b.c', 'a.x.y']
         for nested_key in fields:
             # Prevent overriding loop variable
             curr_nested_key = nested_key
 
-            # this is also not necessary if we can ensure the list of fields will be a string
             # If the nested_key is not a string, convert it to a string representation
             if not isinstance(curr_nested_key, str):
                 curr_nested_key = json.dumps(curr_nested_key)
