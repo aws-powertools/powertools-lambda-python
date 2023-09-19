@@ -6,6 +6,7 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
+	poetry config --local virtualenvs.in-project true
 	@$(MAKE) dev-version-plugin
 	poetry install --extras "all"
 	pre-commit install
