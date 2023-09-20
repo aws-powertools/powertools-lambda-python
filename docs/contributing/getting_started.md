@@ -48,6 +48,8 @@ Whether you're new contributor or a pro, we compiled a list of the common contri
 !!! question "Still couldn't find anything that match your skill set?"
         Please reach out on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}, specially if you'd like to get mentoring for a task you'd like to take but you don't feel ready yet :)
 
+        Contributions are meant to be bi-directional. There's always something we can learn from each other.
+
 ## Sending a pull request
 
 !!! note "First time creating a Pull Request? Keep [this document handy.](https://help.github.com/articles/creating-a-pull-request/){target='blank' rel='nofollow'}"
@@ -78,7 +80,7 @@ For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of
 
 ## Security issue notifications
 
-If you discover a potential security issue in this project we ask that you notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
+If you discover a potential security issue in this project, we kindly ask you to notify AWS/Amazon Security via our [vulnerability reporting page](http://aws.amazon.com/security/vulnerability-reporting/). Please do **not** create a public github issue.
 
 ## Troubleshooting
 
