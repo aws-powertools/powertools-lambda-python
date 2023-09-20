@@ -7,13 +7,7 @@ description: All you need to know for your first contribution to Powertools for 
 
 Thank you for your interest in contributing to our project - we couldn't be more excited!
 
-Please read through this document before submitting any issues or pull requests to ensure we have all the necessary information to effectively respond to your  contribution.
-
-**TODO**
-
-* [x] Types of contributions (slide as example); make a table
-* [ ] How contributions are licensed etc - confirm whether we can remove CLAs mention
-* [ ] Refer to licensing within sending a PR section
+!!! note "This is a living document that we will keep iterating based on everyone's feedback."
 
 ## Types of contributions
 
@@ -52,7 +46,7 @@ Whether you're new contributor or a pro, we compiled a list of the common contri
 | Build a sample application                                                                                                                                                                                      | Using Powertools for AWS Lambda in different contexts will give you insights on what could be made easier, which documentation could be enriched, and more.                                        |
 
 !!! question "Still couldn't find anything that match your skill set?"
-        Please reach out on Discord, specially if you'd like to get mentoring for a task you'd like to take but feel you aren't ready yet :)
+        Please reach out on [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}, specially if you'd like to get mentoring for a task you'd like to take but you don't feel ready yet :)
 
 ## Sending a pull request
 
