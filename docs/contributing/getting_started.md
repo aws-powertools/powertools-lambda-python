@@ -7,7 +7,13 @@ description: All you need to know for your first contribution to Powertools for 
 
 Thank you for your interest in contributing to our project - we couldn't be more excited!
 
-!!! note "This is a living document that we will keep iterating based on everyone's feedback."
+<center>
+```mermaid
+graph LR
+    Learn["Learn about contributions"] --> Find["Find areas to work / get mentoring"] --> Work["Prepare pull request"] --> Closing["Take learnings with you"]
+```
+<i>End-to-end process</i>
+</center>
 
 ## Types of contributions
 
