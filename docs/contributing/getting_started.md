@@ -39,7 +39,41 @@ Whether you're new contributor or a pro, we compiled a list of the common contri
 
 ## Finding contributions to work on
 
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), [looking at any 'help wanted' issues is a great place to start](https://github.com/orgs/aws-powertools/projects/3/views/5?query=is%3Aopen+sort%3Aupdated-desc).
+[Besides suggesting ideas](#types-of-contributions) you think it'll improve everyone's experience, these are the most common places to find work:
+
+| Area                                                                                                                                                                                                            | Description                                                                                                                                                                                        |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Help wanted issues](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3A%22help+wanted%22+){target="_blank" rel="nofollow"}                   | These are triaged areas that we'd appreciate any level of contribution - from opinions to actual implementation.                                                                                   |
+| [Missing customer feedback issues](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Aneed-customer-feedback){target="_blank" rel="nofollow"} | These are items we'd like to hear from more customers before making any decision. Sharing your thoughts, use case, or asking additional questions are great help.                                  |
+| [Pending design proposals](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3ARFC){target="_blank" rel="nofollow"}                            | These are feature requests that initially look good but need a RFC to enrich the discussion by validating user-experience, tradeoffs, and highlight use cases.                                     |
+| [Backlog items](https://github.com/orgs/aws-powertools/projects/3/views/3?query=is%3Aopen+sort%3Aupdated-desc){target="_blank" rel="nofollow"}                                                                  | We use GitHub projects to surface what we're working on, needs triage, etc. This view shows items we already triaged but don't have the bandwidth to tackle them just yet.                         |
+| [Documentation](https://docs.powertools.aws.dev/lambda/python/latest/){target="_blank"}                                                                                                                         | Documentation can always be improved. Look for areas that a better example, or a diagram, or more context helps everyone - keep in mind a diverse audience and English as a second language folks. |
+| [Participate in discussions](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}                                                                                                                     | There's always a discussion that could benefit others in the form of documentation, blog post, etc.                                                                                                |
+| Build a sample application                                                                                                                                                                                      | Using Powertools for AWS Lambda in different contexts will give you insights on what could be made easier, which documentation could be enriched, and more.                                        |
+
+!!! question "Still couldn't find anything that match your skill set?"
+        Please reach out on Discord, specially if you'd like to get mentoring for a task you'd like to take but feel you aren't ready yet :)
+
+## Sending a pull request
+
+!!! note "First time creating a Pull Request? Keep [this document handy.](https://help.github.com/articles/creating-a-pull-request/){target='blank' rel='nofollow'}"
+
+Before sending us a pull request, please ensure that:
+
+* [ ] You are working against the latest source on the **develop** branch.
+* [ ] You check existing [open, and recently merged](https://github.com/aws-powertools/powertools-lambda-python/pulls?q=is%3Apr+is%3Aopen%2Cmerged+sort%3Aupdated-desc){target="_blank" rel="nofollow"} pull requests to make sure someone else hasn't addressed the problem already.
+* [ ] You open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose){target="_blank" rel="nofollow"} before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+* [ ] Create a new branch named after the change you are contributing _e.g._ `feat/logger-debug-sampling`
+
+**Ready?**
+
+These are the steps to send a pull request:
+
+1. Run all formatting, linting, tests, documentation and baseline checks: `make pr`
+2. Commit to your fork using clear commit messages. Don't worry about typos or format, we squash all commits during merge.
+3. Send us a pull request with a [conventional semantic title](https://github.com/aws-powertools/powertools-lambda-python/pull/67).
+4. Fill in the areas pre-defined in the pull request body to help expedite reviewing your work.
+5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 ## Code of Conduct
 
