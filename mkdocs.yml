@@ -44,6 +44,7 @@ nav:
           - contributing/index.md
           - Development environment: contributing/setup.md
           - Your first contribution: contributing/getting_started.md
+          - Conventions: contributing/conventions.md
           - Testing:
               - Unit tests: contributing/testing/unit_tests.md
               - Functional tests: contributing/testing/functional_tests.md

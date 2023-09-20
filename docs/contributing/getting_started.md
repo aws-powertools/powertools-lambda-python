@@ -37,35 +37,6 @@ Whether you're new contributor or a pro, we compiled a list of the common contri
 | [Technical debt](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=tech-debt%2Ctriage&projects=&template=tech_debt.yml&title=Tech+debt%3A+TITLE){target="_blank" rel="nofollow"}                                                                              | Suggest areas to address technical debt that could make maintenance easier or provide customer value faster. Generally used by maintainers and contributors.                                           |
 | [Governance](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=internal%2Ctriage&projects=&template=maintenance.yml&title=Maintenance%3A+TITLE){target="_blank" rel="nofollow"}                                                                               | Ideas to improve to our governance processes, automation, and anything internal. Typically used by maintainers and regular contributors.                                                               |
 
-## Conventions
-
-### General terminology and practices
-
-| Category              | Convention                                                                                                                                                                                                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Docstring**         | We use a slight variation of Numpy convention with markdown to help generate more readable API references.                                                                                                                                                                  |
-| **Style guide**       | We use black as well as [Ruff](https://beta.ruff.rs/docs/) to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                               |
-| **Core utilities**    | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.                                                                                                            |
-| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://docs.powertools.aws.dev/lambda/python/#tenets).                                                                                        |
-| **Exceptions**        | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.                                                                                                                                                                         |
-| **Git commits**       | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly. |
-| **API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.                                          |
-| **Documentation**     | We treat it like a product. We sub-divide content aimed at getting started (80% of customers) vs advanced usage (20%). We also ensure customers know how to unit test their code when using our features.                                                                   |
-
-### Testing definition
-
-We group tests in different categories
-
-| Test              | When to write                                                                                         | Notes                                                                                                                           | Speed                                             |
-| ----------------- | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| Unit tests        | Verify the smallest possible unit works.                                                              | Networking access is prohibited. Prefer Functional tests given our complexity.                                                  | Lightning fast (nsec to ms)                       |
-| Functional tests  | Guarantee functionality works as expected. It's a subset of integration test covering multiple units. | No external dependency. Prefer Fake implementations (in-memory) over Mocks and Stubs.                                           | Fast (ms to few seconds at worst)                 |
-| Integration tests | Gain confidence that code works with one or more external dependencies.                               | No need for a Lambda function. Use our code base against an external dependency _e.g., fetch an existing SSM parameter_.        | Moderate to slow (a few minutes)                  |
-| End-to-end tests  | Gain confidence that a Lambda function with our code operates as expected.                            | It simulates how customers configure, deploy, and run their Lambda function - Event Source configuration, IAM permissions, etc. | Slow (minutes)                                    |
-| Performance tests | Ensure critical operations won't increase latency and costs to customers.                             | CI arbitrary hardware can make it flaky. We'll resume writing perf test after our new Integ/End have significant coverage.      | Fast to moderate (a few seconds to a few minutes) |
-
-**NOTE**: Functional tests are mandatory. We have plans to create a guide on how to create these different tests. Maintainers will help indicate whether additional tests are necessary and provide assistance as required.
-
 ## Finding contributions to work on
 
 Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), [looking at any 'help wanted' issues is a great place to start](https://github.com/orgs/aws-powertools/projects/3/views/5?query=is%3Aopen+sort%3Aupdated-desc).
