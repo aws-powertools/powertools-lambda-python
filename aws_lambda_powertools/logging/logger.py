@@ -301,7 +301,7 @@ class Logger:
         self.structure_logs(formatter_options=formatter_options, **kwargs)
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        self._logger.findCaller = compat.findCaller
+        self._logger.findCaller = compat.findCaller  # type: ignore[method-assign]
 
         # Pytest Live Log feature duplicates log records for colored output
         # but we explicitly add a filter for log deduplication.
@@ -318,7 +318,7 @@ class Logger:
         # therefore we set a custom attribute in the Logger that will be returned
         # std logging will return the same Logger with our attribute if name is reused
         logger.debug(f"Marking logger {self.service} as preconfigured")
-        self._logger.init = True
+        self._logger.init = True  # type: ignore[attr-defined]
 
     def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
