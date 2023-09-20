@@ -221,7 +221,7 @@ class Logger:
         utc: bool = False,
         use_rfc3339: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         self.service = resolve_env_var_choice(
             choice=service,
             env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
@@ -270,7 +270,7 @@ class Logger:
             # https://github.com/aws-powertools/powertools-lambda-python/issues/97
             return getattr(self._logger, name)
 
-    def _get_logger(self):
+    def _get_logger(self) -> logging.Logger:
         """Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
         logger_name = self.service
         if self.child:
@@ -278,7 +278,12 @@ class Logger:
 
         return logging.getLogger(logger_name)
 
-    def _init_logger(self, formatter_options: Optional[Dict] = None, log_level: Union[str, int, None] = None, **kwargs):
+    def _init_logger(
+        self,
+        formatter_options: Optional[Dict] = None,
+        log_level: Union[str, int, None] = None,
+        **kwargs,
+    ) -> None:
         """Configures new logger"""
 
         # Skip configuration if it's a child logger or a pre-configured logger
@@ -315,7 +320,7 @@ class Logger:
         logger.debug(f"Marking logger {self.service} as preconfigured")
         self._logger.init = True
 
-    def _configure_sampling(self):
+    def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
 
         Raises
@@ -329,8 +334,10 @@ class Logger:
                 self._logger.setLevel(logging.DEBUG)
         except ValueError:
             raise InvalidLoggerSamplingRateError(
-                f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
-                f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable.",
+                (
+                    f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
+                    "Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+                ),
             )
 
     @overload
@@ -452,7 +459,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -477,7 +484,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -502,7 +509,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -527,7 +534,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -552,7 +559,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -577,7 +584,7 @@ class Logger:
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -593,13 +600,13 @@ class Logger:
             extra=extra,
         )
 
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
 
-    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys):
+    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys) -> None:
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
@@ -645,7 +652,7 @@ class Logger:
         self.registered_formatter.clear_state()
         self.registered_formatter.append_keys(**log_keys)
 
-    def set_correlation_id(self, value: Optional[str]):
+    def set_correlation_id(self, value: Optional[str]) -> None:
         """Sets the correlation_id in the logging json
 
         Parameters
@@ -720,7 +727,7 @@ def set_package_logger(
     level: Union[str, int] = logging.DEBUG,
     stream: Optional[IO[str]] = None,
     formatter: Optional[logging.Formatter] = None,
-):
+) -> None:
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
     **Package log by default is suppressed (NullHandler), this should only used for debugging.
@@ -755,12 +762,12 @@ def set_package_logger(
     logger.addHandler(handler)
 
 
-def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger):
+def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger) -> None:
     """Callback function for sys.excepthook to use Logger to log uncaught exceptions"""
     logger.exception(exc_value, exc_info=(exc_type, exc_value, exc_traceback))  # pragma: no cover
 
 
-def _get_caller_filename():
+def _get_caller_filename() -> str:
     """Return caller filename by finding the caller frame"""
     # Current frame         => _get_logger()
     # Previous frame        => logger.py
