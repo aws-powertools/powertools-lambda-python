@@ -3,110 +3,39 @@ title: Your first contribution
 description: All you need to know for your first contribution to Powertools for AWS Lambda (Python)
 ---
 
-## Contributing Guidelines
+<!-- markdownlint-disable MD043 -->
 
-<!-- markdownlint-disable MD013 -->
-Thank you for your interest in contributing to our project. Whether it's a [bug report](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug_report.yml&title=Bug%3A+TITLE), [new feature](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE), [correction](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), or [additional documentation](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE), we greatly value feedback and contributions from our community.
-<!-- markdownlint-enable MD013 -->
+Thank you for your interest in contributing to our project - we couldn't be more excited!
 
-Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
-information to effectively respond to your bug report or contribution.
+Please read through this document before submitting any issues or pull requests to ensure we have all the necessary information to effectively respond to your  contribution.
 
-## Reporting Bugs/Feature Requests
+**TODO**
 
-We welcome you to use the GitHub issue tracker to report bugs, suggest features, or documentation improvements.
+* [x] Types of contributions (slide as example); make a table
+* [ ] How contributions are licensed etc - confirm whether we can remove CLAs mention
+* [ ] Refer to licensing within sending a PR section
 
-<!-- markdownlint-disable MD013 -->
-[When filing an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), please check [existing open](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc), or [recently closed](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aclosed), issues to make sure somebody else hasn't already reported the issue. Please try to include as much information as you can.
-<!-- markdownlint-enable MD013 -->
+## Types of contributions
 
-## Contributing via Pull Requests
+We consider any contribution that help this project improve everyone's experience to be valid, as long as you agree with our [tenets](../index.md#tenets){target="_blank"}, [licensing](../../LICENSE){target="_blank"}, and [Code of Conduct](#code-of-conduct).
 
-Contributions via pull requests are much appreciated. Before sending us a pull request, please ensure that:
+Whether you're new contributor or a pro, we compiled a list of the common contributions to help you choose your first:
 
-1. You are working against the latest source on the **develop** branch.
-2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+!!! info "Please check [existing open](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc){target='_blank'}, or [recently closed](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aclosed){target='_blank'} issues before creating a new one."
+        Each type link goes to their respective template, or Discord invite.
 
-At a high level, these are the steps to get code merged in the repository - don't worry, nearly all of them are automated.
-
-```mermaid
-timeline
-    title Code integration journey (CI)
-    Project setup <br> (make dev)   : Code checkout
-                                    : Virtual environment
-                                    : Dependencies
-                                    : Git pre-commit hooks
-                                    : Local branch
-                                    : Local changes
-                                    : Local tests
-
-    Pre-commit checks <br> (git commit)     : Merge conflict check
-                                            : Trailing whitespaces
-                                            : TOML checks
-                                            : Code linting (standards)
-                                            : Markdown linting
-                                            : CloudFormation linting
-                                            : GitHub Actions linting
-                                            : Terraform linting
-                                            : Secrets linting
-
-    Pre-Pull Request <br> (make pr)     : Code linting
-                                        : Docs linting
-                                        : Static typing analysis
-                                        : Tests (unit|functional|perf)
-                                        : Security baseline
-                                        : Complexity baseline
-                                        : +pre-commit checks
-
-    Pull Request <br> (CI checks)   : Semantic PR title check
-                                    : Related issue check
-                                    : Acknowledgment check
-                                    : Code coverage diff
-                                    : Contribution size check
-                                    : Contribution category check
-                                    : Dependency vulnerability check
-                                    : GitHub Actions security check
-                                    : +pre-pull request checks
-
-    After merge <br> (CI checks)    : End-to-end tests
-                                    : Longer SAST check
-                                    : Security posture check (scorecard)
-                                    : GitHub Actions security check
-                                    : Rebuild Changelog
-                                    : Deploy staging docs
-                                    : Update draft release
-```
-
-### Dev setup
-
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
-
-Firstly, [fork the repository](https://github.com/aws-powertools/powertools-lambda-python/fork).
-
-To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
-
-Alternatively, you can use `make dev` within your local virtual environment.
-
-To send us a pull request, please follow these steps:
-
-1. Create a new branch to focus on the specific change you are contributing e.g. `improv/logger-debug-sampling`
-2. Run all tests, and code baseline checks: `make pr`
-    - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
-3. Commit to your fork using clear commit messages.
-4. Send us a pull request with a [conventional semantic title](https://github.com/aws-powertools/powertools-lambda-python/pull/67), and answering any default questions in the pull request interface.
-5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
-
-GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
-[creating a pull request](https://help.github.com/articles/creating-a-pull-request/).
-
-### Local documentation
-
-You might find useful to run both the documentation website and the API reference locally while contributing:
-
-- **API reference**: `make docs-api-local`
-- **Docs website**: `make docs-local`
-    - If you prefer using Docker: `make docs-local-docker`
+| Type                                                                                                                                                                                                                                                                                                | Description                                                                                                                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [Documentation](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE){target="_blank" rel="nofollow"}                                                               | Ideas to make user guide or API guide clearer. It generally go from typos, diagrams, tutorials, the lack of documentation, etc.                                                                        |
+| [Feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank" rel="nofollow"}                                                           | New functionalities or enhancements that could help you, your team, existing and future customers. Check out our [process to understand how we prioritize it](../roadmap.md#process){target="_blank"}. |
+| [Design proposals](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=RFC%2Ctriage&projects=&template=rfc.yml&title=RFC%3A+TITLE){target="_blank" rel="nofollow"}                                                                                              | Request for Comments (RFC) including user experience (UX) based on a feature request to gather the community feedback, and demonstrate the art of the possible.                                        |
+| [Bug report](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug_report.yml&title=Bug%3A+TITLE){target="_blank" rel="nofollow"}                                                                                             | A runtime error that is reproducible whether you have an idea how to solve it or not.                                                                                                                  |
+| [Advocacy](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&projects=&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank" rel="nofollow"}                                                                 | Share what you did with Powertools for AWS Lambda. Blog posts, workshops, presentation, sample applications, podcasts, etc.                                                                            |
+| [Public reference](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&projects=&template=support_powertools.yml&title=%5BSupport+Powertools+for+AWS+Lambda+%28Python%29%5D%3A+%3Cyour+organization+name%3E){target="_blank" rel="nofollow"} | Become a public reference to share how you're using Powertools for AWS Lambda at your organization.                                                                                                    |
+| [Discussions](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}                                                                                                                                                                                                                        | Kick off a discussion on Discord, introduce yourself, and help respond to existing questions from the community.                                                                                       |
+| [Static typing](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=typing%2Ctriage&projects=&template=static_typing.yml&title=Static+typing%3A+TITLE){target="_blank" rel="nofollow"}                                                                          | Improvements to increase or correct static typing coverage to ease maintenance, autocompletion, etc.                                                                                                   |
+| [Technical debt](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=tech-debt%2Ctriage&projects=&template=tech_debt.yml&title=Tech+debt%3A+TITLE){target="_blank" rel="nofollow"}                                                                              | Suggest areas to address technical debt that could make maintenance easier or provide customer value faster. Generally used by maintainers and contributors.                                           |
+| [Governance](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=internal%2Ctriage&projects=&template=maintenance.yml&title=Maintenance%3A+TITLE){target="_blank" rel="nofollow"}                                                                               | Ideas to improve to our governance processes, automation, and anything internal. Typically used by maintainers and regular contributors.                                                               |
 
 ## Conventions
 
@@ -143,7 +72,8 @@ Looking at the existing issues is a great way to find something to contribute on
 
 ## Code of Conduct
 
-This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
+!!! info "This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct){target='_blank'}"
+
 For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
 <opensource-codeofconduct@amazon.com> with any additional questions or comments.
 
@@ -159,14 +89,8 @@ When you are working on the codebase and you use the local API reference documen
 
 This happens when:
 
-- You did not install the local dev environment yet
-    - You can install dev deps with `make dev` command
-- The code in the repository is raising an exception while the `pdoc` is scanning the codebase
-    - Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
-    - Once resolved the documentation should load correctly again
-
-## Licensing
-
-See the [LICENSE](LICENSE) file for our project's licensing. We will ask you to confirm the licensing of your contribution.
-
-We may ask you to sign a [Contributor License Agreement (CLA)](http://en.wikipedia.org/wiki/Contributor_License_Agreement) for larger changes.
+* You did not install the local dev environment yet
+    * You can install dev deps with `make dev` command
+* The code in the repository is raising an exception while the `pdoc` is scanning the codebase
+    * Unfortunately, this exception is not shown to you, but if you run, `poetry run pdoc --pdf aws_lambda_powertools`, the exception is shown and you can prevent the exception from being raised
+    * Once resolved the documentation should load correctly again
