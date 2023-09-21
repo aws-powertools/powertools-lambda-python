@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
     from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef
 
+SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
+SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
+
 
 class SSMProvider(BaseProvider):
     """
@@ -193,9 +196,9 @@ class SSMProvider(BaseProvider):
         path: str,
         value: str,
         *, # force keyword arguments
-        parameter_type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
+        parameter_type: SSM_PARAMETER_TYPES = "String",
         overwrite: bool = False,
-        tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
+        tier: SSM_PARAMETER_TIER = "Standard",
         description: Optional[str] = None,
         kms_key_id: Optional[str] = None,
         transform: Optional[str] = None,
@@ -244,14 +247,15 @@ class SSMProvider(BaseProvider):
             sdk_options["KeyId"] = kms_key_id
 
         try:
-            value = self.client.put_parameter(**sdk_options)["Version"]
+            value = self.client.put_parameter(**sdk_options)
+            version = value["Version"]
         except Exception as exc:
             raise SetParameterError(str(exc)) from exc
 
         if transform:
-            value = transform_value(key=path, value=value, transform=transform, raise_on_transform_error=True)
+            version = transform_value(key=path, value=value, transform=transform, raise_on_transform_error=True)
 
-        return value
+        return version
 
     def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
         """
