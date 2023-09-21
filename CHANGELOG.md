@@ -6,9 +6,12 @@
 
 ## Maintenance
 
+* **deps:** bump squidfunk/mkdocs-material from `c4890ab` to `4ff781e` in /docs ([#3110](https://github.com/aws-powertools/powertools-lambda-python/issues/3110))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3108](https://github.com/aws-powertools/powertools-lambda-python/issues/3108))
 * **deps-dev:** bump ruff from 0.0.289 to 0.0.290 ([#3105](https://github.com/aws-powertools/powertools-lambda-python/issues/3105))
 * **deps-dev:** bump aws-cdk from 2.96.1 to 2.96.2 ([#3102](https://github.com/aws-powertools/powertools-lambda-python/issues/3102))
 * **deps-dev:** bump the boto-typing group with 1 update ([#3101](https://github.com/aws-powertools/powertools-lambda-python/issues/3101))
+* **deps-dev:** bump cfn-lint from 0.79.11 to 0.80.2 ([#3107](https://github.com/aws-powertools/powertools-lambda-python/issues/3107))
 
 
 <a name="v2.25.0"></a>
