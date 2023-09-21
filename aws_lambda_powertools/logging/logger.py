@@ -684,7 +684,7 @@ class Logger:
     def registered_handler(self) -> logging.Handler:
         """Convenience property to access the first logger handler"""
         # We ignore mypy here because self.child encodes whether or not self._logger.parent is
-        # None or not, mypy can't see this from context
+        # None, mypy can't see this from context but we can
         handlers = self._logger.parent.handlers if self.child else self._logger.handlers  # type: ignore[union-attr]
         return handlers[0]
 
