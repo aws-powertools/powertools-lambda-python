@@ -119,14 +119,14 @@ class SecretsProvider(BaseProvider):
         raise NotImplementedError()
 
     def set_secret(
-            self,
-            name: str,
-            value: Union[str, bytes],
-            *, # force keyword arguments
-            idempotency_id: Optional[str],
-            version_stages: Optional[list[str]],
-            **sdk_options
-        ) -> str:
+        self,
+        name: str,
+        value: Union[str, bytes],
+        *, # force keyword arguments
+        idempotency_id: Optional[str] = None,
+        version_stages: Optional[list[str]] = None,
+        **sdk_options
+    ) -> str:
         """
         Modifies the details of a secret, including metadata and the secret value.
 
