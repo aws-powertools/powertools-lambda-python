@@ -683,7 +683,9 @@ class Logger:
     @property
     def registered_handler(self) -> logging.Handler:
         """Convenience property to access the first logger handler"""
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
+        # We ignore mypy here because self.child encodes whether or not self._logger.parent is
+        # None or not, mypy can't see this from context
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers  # type: ignore[union-attr]
         return handlers[0]
 
     @property
@@ -772,6 +774,8 @@ def _get_caller_filename() -> str:
     # Current frame         => _get_logger()
     # Previous frame        => logger.py
     # Before previous frame => Caller
+    # We ignore mypy here because *we* know that there will always be at least
+    # 3 frames (above) so repeatedly calling f_back is safe here
     frame = inspect.currentframe()
-    caller_frame = frame.f_back.f_back.f_back
-    return caller_frame.f_globals["__name__"]
+    caller_frame = frame.f_back.f_back.f_back  # type: ignore[union-attr]
+    return caller_frame.f_globals["__name__"]  # type: ignore[union-attr]
