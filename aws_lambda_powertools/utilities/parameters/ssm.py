@@ -775,9 +775,9 @@ def set_parameter(
     path: str,
     value: str,
     *, # force keyword arguments
-    parameter_type: Optional[Literal["String", "StringList", "SecureString"]] = "String",
+    parameter_type: SSM_PARAMETER_TYPES = "String",
     overwrite: bool = False,
-    tier: Optional[Literal["Standard", "Advanced", "Intelligent-Tiering"]] = "Standard",
+    tier: SSM_PARAMETER_TIER = "Standard",
     description: Optional[str] = None,
     kms_key_id: Optional[str] = None,
     transform: Optional[str] = None,
