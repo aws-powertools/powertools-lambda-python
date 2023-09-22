@@ -121,7 +121,7 @@ class SecretsProvider(BaseProvider):
     def set_secret(
         self,
         name: str,
-        value: Union[str, bytes],
+        value: Union[str, dict, bytes],
         *, # force keyword arguments
         idempotency_id: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
@@ -296,7 +296,7 @@ def set_secret(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> parameters.set_secret(name="my-secret", secret='{"password": "supers3cr3tllam@passw0rd"}', idempotency_id="f658cac0-98a5-41d9-b993-8a76a7799194")
+        >>> parameters.set_secret(name="my-secret", secret='{"password": "supers3cr3tl"}', idempotency_id="f658ca...99194")
     """
 
     # Only create the provider if this function is called at least once

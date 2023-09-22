@@ -29,7 +29,7 @@ from aws_lambda_powertools.shared import constants, user_agent
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
-from .exceptions import GetParameterError, SetParameterError, TransformParameterError
+from .exceptions import GetParameterError, TransformParameterError
 
 if TYPE_CHECKING:
     from mypy_boto3_appconfigdata import AppConfigDataClient
