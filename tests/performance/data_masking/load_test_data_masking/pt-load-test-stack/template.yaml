@@ -1,0 +1,191 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  pt-load-test-stack
+
+  Powertools for AWS Lambda (Python) example
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+  Function:
+    Timeout: 5
+    Runtime: python3.10
+
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Resources:
+  MyKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Enabled: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: "*"
+          Principal:
+            AWS: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":root" ] ]
+  Function128Singleton:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: singleton_128
+      Description: function 128 MB Singleton
+      MemorySize: 128
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /singleton128
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+
+  Function1769Singleton:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: singleton_1769
+      Description: function 1769 MB Singleton
+      MemorySize: 1769
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /singleton1769
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+  
+  Function128NonSingleton:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: nonsingleton_128
+      Description: function 128 MB Non Singleton
+      MemorySize: 128
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /nonsingleton128
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+
+  Function1769NonSingleton:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: nonsingleton_1769
+      Description: function 1769 MB Non Singleton
+      MemorySize: 1769
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /nonsingleton1769
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+
+Outputs:
+  KMSKeyArn:
+    Description: ARN of the KMS Key
+    Value: !GetAtt MyKMSKey.Arn
+
+
+  128SingletonApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 128 MB Singleton
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/singleton128"
+
+  1769SingletonApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 1769 MB Singleton
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/singleton1769"
+
+  Function128Singleton:
+    Description: Lambda Function 128 MB Singleton ARN
+    Value: !GetAtt Function128Singleton.Arn
+
+  Function1769Singleton:
+    Description: Lambda Function 1769 MB Singleton ARN
+    Value: !GetAtt Function1769Singleton.Arn
+
+
+  128NonSingletonApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 128 MB Non Singleton
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/nonsingleton128"
+
+  1769NonSingletonApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 1769 MB Non Singleton
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/nonsingleton1769"
+
+  Function128NonSingleton:
+    Description: Lambda Function 128 MB Non Singleton ARN
+    Value: !GetAtt Function128NonSingleton.Arn
+
+  Function1769NonSingleton:
+    Description: Lambda Function 1769 MB Non Singleton ARN
+    Value: !GetAtt Function1769NonSingleton.Arn
+
