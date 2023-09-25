@@ -191,7 +191,7 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def set(
+    def _set(
         self,
         path: str,
         value: str,
@@ -201,7 +201,6 @@ class SSMProvider(BaseProvider):
         tier: SSM_PARAMETER_TIER = "Standard",
         description: Optional[str] = None,
         kms_key_id: Optional[str] = None,
-        transform: Optional[str] = None,
         **sdk_options,
     ) -> int:
         """
@@ -221,8 +220,6 @@ class SSMProvider(BaseProvider):
             The description of the parameter
         kms_key_id: str, optional
             The KMS key id to use to encrypt the parameter
-        transform: str, optional
-            Transforms the content from a JSON object ('json') or base64 binary string ('binary')
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -251,9 +248,6 @@ class SSMProvider(BaseProvider):
             version = value["Version"]
         except Exception as exc:
             raise SetParameterError(str(exc)) from exc
-
-        if transform:
-            version = transform_value(key=path, value=value, transform=transform, raise_on_transform_error=True)
 
         return version
 
@@ -837,7 +831,7 @@ def set_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"].set(
+    return DEFAULT_PROVIDERS["ssm"]._set(
         path,
         value,
         parameter_type=parameter_type,
