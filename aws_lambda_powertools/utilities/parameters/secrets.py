@@ -118,7 +118,7 @@ class SecretsProvider(BaseProvider):
         """
         raise NotImplementedError()
 
-    def set_secret(
+    def _set(
         self,
         name: str,
         value: Union[str, dict, bytes],
@@ -303,6 +303,6 @@ def set_secret(
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    return DEFAULT_PROVIDERS["secrets"].set_secret(
-        name=name, secret=value, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
+    return DEFAULT_PROVIDERS["secrets"]._set(
+        name=name, value=value, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
     )
