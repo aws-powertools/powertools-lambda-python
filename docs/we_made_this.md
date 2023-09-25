@@ -106,7 +106,7 @@ When building applications with AWS Lambda it is critical to verify the data str
 
 In this session you will learn how to increase code quality, extensibility and testability, boost you productivity and ship rock solid apps to production.
 
-<iframe src="https://player.twitch.tv/?video=1034744364&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://player.twitch.tv/?video=1034744364&parent=docs.powertools.aws.dev&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 #### Talk DEV to me | Feature Flags with AWS Lambda Powertools
 
@@ -114,7 +114,7 @@ In this session you will learn how to increase code quality, extensibility and t
 
 A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank" rel="nofollow"} feature along with tips and tricks.
 
-<iframe src="https://player.twitch.tv/?video=1174133534&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://player.twitch.tv/?video=1174133534&parent=docs.powertools.aws.dev&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 #### Level Up Your CI/CD With Smart AWS Feature Flags
 

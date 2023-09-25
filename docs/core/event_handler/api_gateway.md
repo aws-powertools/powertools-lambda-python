@@ -10,6 +10,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
+* Works with micro function (one or a few routes) and monolithic functions (all routes)
 
 ## Getting started
 
@@ -353,14 +354,228 @@ For convenience, these are the default values when using `CORSConfig` to enable 
 ???+ tip "Multiple origins?"
     If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
 
-| Key                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                      |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                             |
-| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                      |
-| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                              |
+| Key                                                                                                                                                         | Value                                                                        | Note                                                                                                                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                                            |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                                     |
+| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                                             |
 | **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank" rel="nofollow"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank" rel="nofollow"}. |
-| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                      |
-| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                         |
+| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                                     |
+| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                                        |
+
+### Middleware
+
+```mermaid
+stateDiagram
+    direction LR
+
+    EventHandler: GET /todo
+    Before: Before response
+    Next: next_middleware()
+    MiddlewareLoop: Middleware loop
+    AfterResponse: After response
+    MiddlewareFinished: Modified response
+    Response: Final response
+
+    EventHandler --> Middleware: Has middleware?
+    state MiddlewareLoop {
+        direction LR
+        Middleware --> Before
+        Before --> Next
+        Next --> Middleware: More middlewares?
+        Next --> AfterResponse
+    }
+    AfterResponse --> MiddlewareFinished
+    MiddlewareFinished --> Response
+    EventHandler --> Response: No middleware
+```
+
+A middleware is a function you register per route to **intercept** or **enrich** a **request before** or **after** any response.
+
+Each middleware function receives the following arguments:
+
+1. **app**. An Event Handler instance so you can access incoming request information, Lambda context, etc.
+2. **next_middleware**. A function to get the next middleware or route's response.
+
+Here's a sample middleware that extracts and injects correlation ID, using `APIGatewayRestResolver` (works for any [Resolver](#event-resolvers)):
+
+=== "middleware_getting_started.py"
+
+    ```python hl_lines="11 22 29" title="Your first middleware to extract and inject correlation ID"
+    --8<-- "examples/event_handler_rest/src/middleware_getting_started.py"
+    ```
+
+    1. You can access current request like you normally would.
+    2. Logger extracts it first in the request path, so we can use it. <br><br> If this was available before, we'd use `app.context.get("correlation_id")`.
+    3. [Shared context is available](#sharing-contextual-data) to any middleware, Router and App instances. <br><br> For example, another middleware can now use `app.context.get("correlation_id")` to retrieve it.
+    4. Get response from the next middleware (if any) or from `/todos` route.
+    5. You can manipulate headers, body, or status code before returning it.
+    6. Register one or more middlewares in order of execution.
+    7. Logger extracts correlation ID from header and makes it available under `correlation_id` key, and `get_correlation_id()` method.
+
+=== "middleware_getting_started_output.json"
+
+    ```json hl_lines="9-10"
+    --8<-- "examples/event_handler_rest/src/middleware_getting_started_output.json"
+    ```
+
+#### Global middlewares
+
+<center>
+![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
+![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
+
+_Request flowing through multiple registered middlewares_
+</center>
+
+You can use `app.use` to register middlewares that should always run regardless of the route, also known as global middlewares.
+
+Event Handler **calls global middlewares first**, then middlewares defined at the route level. Here's an example with both middlewares:
+
+=== "middleware_global_middlewares.py"
+
+    > Use [debug mode](#debug-mode) if you need to log request/response.
+
+    ```python hl_lines="10"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares.py"
+    ```
+
+    1. A separate file where our middlewares are to keep this example focused.
+    2. We register `log_request_response` as a global middleware to run before middleware.
+       ```mermaid
+       stateDiagram
+           direction LR
+
+           GlobalMiddleware: Log request response
+           RouteMiddleware: Inject correlation ID
+           EventHandler: Event Handler
+
+           EventHandler --> GlobalMiddleware
+           GlobalMiddleware --> RouteMiddleware
+       ```
+
+=== "middleware_global_middlewares_module.py"
+
+    ```python hl_lines="8"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
+    ```
+
+#### Returning early
+
+<center>
+![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
+
+_Interrupting request flow by returning early_
+</center>
+
+Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.
+
+In these scenarios, you short-circuit the middleware processing logic by returning a [Response object](#fine-grained-responses), or raising a [HTTP Error](#raising-http-errors). This signals to Event Handler to stop and run each `After` logic left in the chain all the way back.
+
+Here's an example where we prevent any request that doesn't include a correlation ID header:
+
+=== "middleware_early_return.py"
+
+    ```python hl_lines="12"
+    --8<-- "examples/event_handler_rest/src/middleware_early_return.py"
+    ```
+
+    1. This middleware will raise an exception if correlation ID header is missing.
+    2. This code section will not run if `enforce_correlation_id` returns early.
+
+=== "middleware_global_middlewares_module.py"
+
+    ```python hl_lines="35 38"
+    --8<-- "examples/event_handler_rest/src/middleware_global_middlewares_module.py"
+    ```
+
+    1. Raising an exception OR returning a Response object early will short-circuit the middleware chain.
+
+=== "middleware_early_return_output.json"
+
+    ```python hl_lines="2-3"
+    --8<-- "examples/event_handler_rest/src/middleware_early_return_output.json"
+    ```
+
+#### Handling exceptions
+
+!!! tip "For catching exceptions more broadly, we recommend you use the [exception_handler](#exception-handling) decorator."
+
+By default, any unhandled exception in the middleware chain is eventually propagated as a HTTP 500 back to the client.
+
+While there isn't anything special on how to use [`try/catch`](https://docs.python.org/3/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"} for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:
+
+=== "Unhandled exception from route handler"
+
+    An exception wasn't caught by any middleware during `next_middleware()` block, therefore it propagates all the way back to the client as HTTP 500.
+
+    <center>
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
+
+    _Unhandled route exceptions propagate back to the client_
+    </center>
+
+=== "Route handler exception caught by a middleware"
+
+    An exception was only caught by the third middleware, resuming the normal execution of each `After` logic for the second and first middleware.
+
+    <center>
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-light.svg#only-light)
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-dark.svg#only-dark)
+
+    _Unhandled route exceptions propagate back to the client_
+    </center>
+
+=== "Middleware short-circuit by raising exception"
+
+    The third middleware short-circuited the chain by raising an exception and completely skipping the fourth middleware. Because we only caught it in  the first middleware, it skipped the `After` logic in the second middleware.
+
+    <center>
+    ![Catching exceptions](../../media/middlewares_catch_exception-light.svg#only-light)
+    ![Catching exceptions](../../media/middlewares_catch_exception-dark.svg#only-dark)
+
+    _Middleware handling short-circuit exceptions_
+    </center>
+
+#### Extending middlewares
+
+You can implement `BaseMiddlewareHandler` interface to create middlewares that accept configuration, or perform complex operations (_see [being a good citizen section](#being-a-good-citizen)_).
+
+As a practical example, let's refactor our correlation ID middleware so it accepts a custom HTTP Header to look for.
+
+```python hl_lines="5 11 23 36" title="Authoring class-based middlewares with BaseMiddlewareHandler"
+--8<-- "examples/event_handler_rest/src/middleware_extending_middlewares.py"
+```
+
+1. You can add any constructor argument like you normally would
+2. We implement `handler` just like we [did before](#middleware) with the only exception of the `self` argument, since it's a method.
+3. Get response from the next middleware (if any) or from `/todos` route.
+4. Register an instance of `CorrelationIdMiddleware`.
+
+!!! note "Class-based **vs** function-based middlewares"
+    When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
+
+#### Native middlewares
+
+These are native middlewares that may become native features depending on customer demand.
+
+| Middleware                                                                                           | Purpose                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| [SchemaValidationMiddleware](/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
+
+#### Being a good citizen
+
+Middlewares can add subtle improvements to request/response processing, but also add significant complexity if you're not careful.
+
+Keep the following in mind when authoring middlewares for Event Handler:
+
+1. **Use built-in features over middlewares**. We include built-in features like [CORS](#cors), [compression](#compress), [binary responses](#binary-responses), [global exception handling](#exception-handling), and [debug mode](#debug-mode) to reduce the need for middlewares.
+2. **Call the next middleware**. Return the result of `next_middleware(app)`, or a [Response object](#fine-grained-responses) when you want to [return early](#returning-early).
+3. **Keep a lean scope**. Focus on a single task per middleware to ease composability and maintenance. In [debug mode](#debug-mode), we also print out the order middlewares will be triggered to ease operations.
+4. **Catch your own exceptions**. Catch and handle known exceptions to your logic. Unless you want to raise [HTTP Errors](#raising-http-errors), or propagate specific exceptions to the client. To catch all and any exceptions, we recommend you use the [exception_handler](#exception-handling) decorator.
+5. **Use context to share data**. Use `app.append_context` to [share contextual data](#sharing-contextual-data) between middlewares and route handlers, and `app.context.get(key)` to fetch them. We clear all contextual data at the end of every request.
 
 ### Fine grained responses
 
@@ -479,13 +694,18 @@ You can instruct event handler to use a custom serializer to best suit your need
 
 ### Split routes with Router
 
-As you grow the number of routes a given Lambda function should handle, it is natural to split routes into separate files to ease maintenance - That's where the `Router` feature is useful.
+As you grow the number of routes a given Lambda function should handle, it is natural to either break into smaller Lambda functions, or split routes into separate files to ease maintenance - that's where the `Router` feature is useful.
 
 Let's assume you have `split_route.py` as your Lambda function entrypoint and routes in `split_route_module.py`. This is how you'd use the `Router` feature.
+
+<!-- markdownlint-disable MD013 -->
 
 === "split_route_module.py"
 
 	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
+
+    !!! info
+        This means all methods, including [middleware](#middleware) will work as usual.
 
     ```python hl_lines="5 13 16 25 28"
     --8<-- "examples/event_handler_rest/src/split_route_module.py"
@@ -495,10 +715,16 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
 
 	We use `include_router` method and include all user routers registered in the `router` global object.
 
+    !!! note
+          This method merges routes, [context](#sharing-contextual-data) and [middleware](#middleware) from `Router` into the main resolver instance (`APIGatewayRestResolver()`).
+
 	```python hl_lines="11"
     --8<-- "examples/event_handler_rest/src/split_route.py"
 	```
 
+    1. When using [middleware](#middleware) in both `Router` and main resolver, you can make `Router` middlewares to take precedence by using `include_router` before `app.use()`.
+
+<!-- markdownlint-enable MD013 -->
 #### Route prefix
 
 In the previous example, `split_route_module.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
@@ -536,11 +762,8 @@ You can use specialized router classes according to the type of event that you a
 
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
 
-???+ info
-    For safety, we always clear any data available in the `context` dictionary after each invocation.
-
-???+ tip
-    This can also be useful for middlewares injecting contextual information before a request is processed.
+???+ info "We always clear data available in `context` after each invocation."
+    This can be useful for middlewares injecting contextual information before a request is processed.
 
 === "split_route_append_context.py"
 
@@ -624,7 +847,7 @@ A micro function means that your final code artifact will be different to each f
 **Benefits**
 
 * **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
-* **Discoverability**. Micro functions are easier do visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
+* **Discoverability**. Micro functions are easier to visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
 * **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
 
 **Downsides**
@@ -635,6 +858,35 @@ A micro function means that your final code artifact will be different to each f
 your development, building, deployment tooling need to accommodate the distinct layout.
 * **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
     * Automated testing, operational and security reviews are essential to stability in either approaches.
+
+**Example**
+
+Consider a simplified micro function structured REST API that has two routes:
+
+* `/users` - an endpoint that will return all users of the application on `GET` requests
+* `/users/<id>` - an endpoint that looks up a single users details by ID on `GET` requests
+
+Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.).
+
+=== "`/users` Endpoint"
+    ```python
+    --8<-- "examples/event_handler_rest/src/micro_function_all_users_route.py"
+    ```
+
+=== "`/users/<id>` Endpoint"
+    ```python
+    --8<-- "examples/event_handler_rest/src/micro_function_user_by_id_route.py"
+    ```
+
+=== "Micro Function Example SAM Template"
+    ```yaml
+    --8<-- "examples/event_handler_rest/sam/micro_function_template.yaml"
+    ```
+
+<!-- markdownlint-disable MD013 -->
+???+ note
+    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} or [Pants](https://www.pantsbuild.org/docs/awslambda-python){target="_blank" rel="nofollow"}.
+<!-- markdownlint-enable MD013 -->
 
 ## Testing your code
 

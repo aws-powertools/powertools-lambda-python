@@ -36,14 +36,14 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.before_build()
 
         if self._has_source_changed():
-            subprocess.run(self.build_command, shell=True)
+            subprocess.run(self.build_command, shell=True, check=True)
 
         self.after_build()
 
         return str(self.output_dir)
 
     def after_build(self):
-        subprocess.run(self.cleanup_command, shell=True)
+        subprocess.run(self.cleanup_command, shell=True, check=True)
 
     def _has_source_changed(self) -> bool:
         """Hashes source code and

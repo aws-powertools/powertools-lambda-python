@@ -136,6 +136,22 @@ def test_metrics_decorator_with_metrics_warning():
         )
 
 
+def test_datadog_log_metrics_decorator_with_additional_handler_args():
+    # GIVEN DatadogMetrics is initialized
+    my_metrics = DatadogMetrics(flush_to_log=True)
+
+    # WHEN log_metrics is used to serialize metrics
+    # AND the wrapped function uses additional parameters
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context, additional_arg, additional_kw_arg="default_value"):
+        return additional_arg, additional_kw_arg
+
+    # THEN the decorator should not raise any errors when
+    # the wrapped function is passed additional arguments
+    assert lambda_handler({}, {}, "arg_value", additional_kw_arg="kw_arg_value") == ("arg_value", "kw_arg_value")
+    assert lambda_handler({}, {}, "arg_value") == ("arg_value", "default_value")
+
+
 def test_metrics_with_default_namespace(capsys, namespace):
     # GIVEN DatadogMetrics is initialized with default namespace
     metrics = DatadogMetrics(flush_to_log=True)
@@ -238,6 +254,46 @@ def test_log_metrics_with_default_tags(capsys):
     # THEN we should have default tags in both outputs
     assert "environment" in first_invocation
     assert "environment" in second_invocation
+
+
+def test_log_metrics_precedence_metrics_tags_over_default_tags(capsys):
+    # GIVEN DatadogMetrics is initialized and we persist a set of default tags
+    my_metrics = DatadogMetrics(flush_to_log=True)
+    default_tags = {"environment": "test", "log_group": "/lambda/test"}
+
+    # WHEN we use log_metrics with default_tags to serialize
+    # and create metrics with a tag that has the same name as one of the default_tags
+    @my_metrics.log_metrics(default_tags=default_tags)
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(name="item_sold", value=1, environment="metric_precedence")
+
+    lambda_handler({}, {})
+    output = json.loads(capsys.readouterr().out.strip())
+
+    # THEN tag defined in add_metric must have preference over default_tags
+    assert "environment:metric_precedence" in output["t"]
+    assert "environment:test" not in output["t"]
+
+
+def test_log_metrics_merge_metrics_tags_and_default_tags(capsys):
+    # GIVEN DatadogMetrics is initialized and we persist a set of default tags
+    my_metrics = DatadogMetrics(flush_to_log=True)
+    default_tags = {"environment": "test", "log_group": "/lambda/test"}
+
+    # WHEN we use log_metrics with default_tags to serialize
+    # and create metrics with a tag that has the same name as one of the default_tags
+    @my_metrics.log_metrics(default_tags=default_tags)
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(name="item_sold", value=1, product="powertools")
+
+    lambda_handler({}, {})
+    output = json.loads(capsys.readouterr().out.strip())
+
+    # THEN there should be serialized default_tags and metric tags
+    output["e"] = ""
+    assert output == json.loads(
+        '{"m":"item_sold","v":1,"e":"","t":["environment:test","log_group:/lambda/test", "product:powertools"]}',
+    )
 
 
 def test_clear_default_tags():

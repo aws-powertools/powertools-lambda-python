@@ -25,7 +25,7 @@ class RequestContextV2AuthorizerIam(BaseModel):
 
 class RequestContextV2AuthorizerJwt(BaseModel):
     claims: Dict[str, Any]
-    scopes: List[str]
+    scopes: Optional[List[str]] = None
 
 
 class RequestContextV2Authorizer(BaseModel):

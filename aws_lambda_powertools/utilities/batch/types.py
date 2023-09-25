@@ -1,10 +1,7 @@
-#
-# type specifics
-#
 import sys
-from typing import List, Optional, Type, Union
+from typing import Optional, Type, Union
 
-from typing_extensions import TypedDict
+from aws_lambda_powertools.shared.types import List, TypedDict
 
 has_pydantic = "pydantic" in sys.modules
 

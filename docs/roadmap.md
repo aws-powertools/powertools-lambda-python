@@ -95,7 +95,7 @@ Since JWT is a close second, this new utility would cover higher level functions
 
 We want to make this easier by extending certain utilities to accept a `metrics` instance and metrics configuration (what metrics to create). It would be opt-in due to costs associated with creating metrics.
 
-!!! question "Got ideas for custom metrics? Open up a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE)"{target="_blank"}
+!!! question "Got ideas for custom metrics? Open up a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE)"
 
 **Major updates**
 
@@ -103,6 +103,19 @@ We want to make this easier by extending certain utilities to accept a `metrics`
 - [ ] RFC to outline metrics for Feature flags (_e.g., matched rules_)
 - [ ] RFC to outline metrics for Event Handler (_e.g., validation errors_ )
 - [ ] RFC to outline metrics for Idempotency (_e.g., cache hit_)
+
+### Lambda Layer in GovCloud and China region
+
+We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
+
+!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-lambda-powertools-feedback@amazon.com)."
+
+**Major updates**
+
+- [ ] Gather agencies and customers name to prioritize it
+- [ ] Investigate security requirements for special regions
+- [ ] Update CDK Layer construct to include regions
+- [ ] Create additional infrastructure for special regions
 
 ### V3
 

@@ -3,9 +3,11 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List, Type, Union
+from typing import Type, Union
 
 from pydantic import BaseModel, Field, validator
+
+from aws_lambda_powertools.shared.types import List
 
 logger = logging.getLogger(__name__)
 

@@ -73,7 +73,13 @@ class IdempotencyKeyError(BaseError):
     """
 
 
-class IdempotencyRedisClientConfigError(BaseError):
+class IdempotencyModelTypeError(BaseError):
     """
-    Redis Client passed into persistant layer is not valid
+    Model type does not match expected payload output
+    """
+
+
+class IdempotencyNoSerializationModelError(BaseError):
+    """
+    No model was supplied to the serializer
     """

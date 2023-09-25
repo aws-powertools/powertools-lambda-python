@@ -164,6 +164,69 @@ When using `idempotent_function`, you must tell us which keyword parameter in yo
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
+#### Output serialization
+
+By default, `idempotent_function` serializes, stores, and returns your annotated function's result as a JSON object. You can change this behavior using `output_serializer` parameter.
+
+The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
+
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
+
+=== "Pydantic"
+
+    You can use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+
+    === "Inferring via the return type"
+
+        ```python hl_lines="6 24 25 32 36 45"
+        --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
+        ```
+
+        1. We'll use `OrderOutput` to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when `@idempotent_function` is used.
+
+    === "Explicit model type"
+
+        Alternatively, you can provide an explicit model as an input to `PydanticSerializer`.
+
+        ```python hl_lines="6 24 25 32 35 44"
+        --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
+        ```
+
+=== "Dataclasses"
+
+     You can use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+
+    === "Inferring via the return type"
+
+        ```python hl_lines="8 27-29 36 40 49"
+        --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
+        ```
+
+        1. We'll use `OrderOutput` to instantiate a new object using the data retrieved from persistent storage as input. <br><br> This ensures the return of the function is not impacted when `@idempotent_function` is used.
+
+    === "Explicit model type"
+
+        Alternatively, you can provide an explicit model as an input to `DataclassSerializer`.
+
+        ```python hl_lines="8 27-29 36 39 48"
+        --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
+        ```
+
+=== "Any type"
+
+    You can use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
+
+    * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
+    * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
+
+    ```python hl_lines="8 32 36 40 50 53"
+    --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
+    ```
+
+    1. This function does the following <br><br>**1**. Receives the return from `process_order`<br> **2**. Converts to dictionary before it can be saved into the persistent storage.
+    2. This function does the following <br><br>**1**. Receives the dictionary saved into the persistent storage <br>**1** Serializes to `OrderOutput` before `@idempotent` returns back to the caller.
+    3. This serializer receives both functions so it knows who to call when to serialize to and from dictionary.
+
 #### Batch integration
 
 You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
