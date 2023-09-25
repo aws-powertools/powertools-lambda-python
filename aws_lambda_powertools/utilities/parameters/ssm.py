@@ -839,7 +839,6 @@ def set_parameter(
         tier=tier,
         description=description,
         kms_key_id=kms_key_id,
-        transform=transform,
         **sdk_options
     )
 
