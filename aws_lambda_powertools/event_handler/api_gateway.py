@@ -687,7 +687,7 @@ class ApiGatewayResolver(BaseRouter):
 
         for route in all_routes:
             dependant = get_dependant(
-                path=route.func.__name__,
+                path=route.path,
                 call=route.func,
             )
 

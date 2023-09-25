@@ -9,8 +9,16 @@ from pydantic.schema import get_annotation_from_field_info
 
 from aws_lambda_powertools.event_handler.openapi import Example
 
+"""
+This turns the low-level function signature into typed, validated Pydantic models for consumption.
+"""
+
 
 class Dependant:
+    """
+    A class used internally to represent a dependency between path operation decorators and the path operation function.
+    """
+
     def __init__(
         self,
         *,
@@ -57,9 +65,6 @@ class ParamTypes(Enum):
     cookie = "cookie"
 
 
-_Unset: Any = Undefined
-
-
 class Param(FieldInfo):
     in_: ParamTypes
 
@@ -67,10 +72,10 @@ class Param(FieldInfo):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
+        default_factory: Union[Callable[[], Any], None] = Undefined,
         annotation: Optional[Any] = None,
         alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias_priority: Union[int, None] = Undefined,
         # TODO: update when deprecating Pydantic v1, import these types
         # validation_alias: str | AliasPath | AliasChoices | None
         validation_alias: Union[str, None] = None,
@@ -85,11 +90,11 @@ class Param(FieldInfo):
         max_length: Optional[int] = None,
         pattern: Optional[str] = None,
         discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
+        strict: Union[bool, None] = Undefined,
+        multiple_of: Union[float, None] = Undefined,
+        allow_inf_nan: Union[bool, None] = Undefined,
+        max_digits: Union[int, None] = Undefined,
+        decimal_places: Union[int, None] = Undefined,
         examples: Optional[List[Any]] = None,
         openapi_examples: Optional[Dict[str, Example]] = None,
         deprecated: Optional[bool] = None,
@@ -125,7 +130,7 @@ class Param(FieldInfo):
         current_json_schema_extra = json_schema_extra or extra
         kwargs["regex"] = pattern
         kwargs.update(**current_json_schema_extra)
-        use_kwargs = {k: v for k, v in kwargs.items() if v is not _Unset}
+        use_kwargs = {k: v for k, v in kwargs.items() if v is not Undefined}
 
         super().__init__(**use_kwargs)
 
@@ -140,10 +145,10 @@ class Path(Param):
         self,
         default: Any = ...,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
+        default_factory: Union[Callable[[], Any], None] = Undefined,
         annotation: Optional[Any] = None,
         alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias_priority: Union[int, None] = Undefined,
         # TODO: update when deprecating Pydantic v1, import these types
         # validation_alias: str | AliasPath | AliasChoices | None
         validation_alias: Union[str, None] = None,
@@ -158,11 +163,11 @@ class Path(Param):
         max_length: Optional[int] = None,
         pattern: Optional[str] = None,
         discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
+        strict: Union[bool, None] = Undefined,
+        multiple_of: Union[float, None] = Undefined,
+        allow_inf_nan: Union[bool, None] = Undefined,
+        max_digits: Union[int, None] = Undefined,
+        decimal_places: Union[int, None] = Undefined,
         examples: Optional[List[Any]] = None,
         openapi_examples: Optional[Dict[str, Example]] = None,
         deprecated: Optional[bool] = None,
@@ -211,10 +216,10 @@ class Query(Param):
         self,
         default: Any = Undefined,
         *,
-        default_factory: Union[Callable[[], Any], None] = _Unset,
+        default_factory: Union[Callable[[], Any], None] = Undefined,
         annotation: Optional[Any] = None,
         alias: Optional[str] = None,
-        alias_priority: Union[int, None] = _Unset,
+        alias_priority: Union[int, None] = Undefined,
         validation_alias: Union[str, None] = None,
         serialization_alias: Union[str, None] = None,
         title: Optional[str] = None,
@@ -227,11 +232,11 @@ class Query(Param):
         max_length: Optional[int] = None,
         pattern: Optional[str] = None,
         discriminator: Union[str, None] = None,
-        strict: Union[bool, None] = _Unset,
-        multiple_of: Union[float, None] = _Unset,
-        allow_inf_nan: Union[bool, None] = _Unset,
-        max_digits: Union[int, None] = _Unset,
-        decimal_places: Union[int, None] = _Unset,
+        strict: Union[bool, None] = Undefined,
+        multiple_of: Union[float, None] = Undefined,
+        allow_inf_nan: Union[bool, None] = Undefined,
+        max_digits: Union[int, None] = Undefined,
+        decimal_places: Union[int, None] = Undefined,
         examples: Optional[List[Any]] = None,
         openapi_examples: Optional[Dict[str, Example]] = None,
         deprecated: Optional[bool] = None,
@@ -278,9 +283,29 @@ def analyze_param(
     value: Any,
     is_path_param: bool,
 ) -> Tuple[Any, Optional[ModelField]]:
+    """
+    Analyze a parameter annotation and value to determine the type and default value of the parameter.
+
+    Parameters
+    ----------
+    param_name: str
+        The name of the parameter
+    annotation
+        The annotation of the parameter
+    value
+        The value of the parameter
+    is_path_param
+        Whether the parameter is a path parameter
+
+    Returns
+    -------
+    Tuple[Any, Optional[ModelField]]
+        The type annotation and the Pydantic field representing the parameter
+    """
     field_info: Optional[FieldInfo] = None
     type_annotation: Any = Any
 
+    # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
     if annotation is not inspect.Signature.empty and get_origin(annotation) is Annotated:
         annotated_args = get_args(annotation)
         type_annotation = annotated_args[0]
@@ -293,41 +318,50 @@ def analyze_param(
             # Copy `field_info` because we mutate `field_info.default` later
             field_info = copy(powertools_annotation)
             assert field_info.default is Undefined or field_info.default is Required
+
             if value is not inspect.Signature.empty:
                 assert not is_path_param
                 field_info.default = value
             else:
                 field_info.default = Required
+
+    # If the annotation is not an Annotated type, we use it as the type annotation
     elif annotation is not inspect.Signature.empty:
         type_annotation = annotation
 
+    # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
     if isinstance(value, FieldInfo):
         assert field_info is None
         field_info = value
 
+    # If we didn't determine the FieldInfo yet, we create a default one
     if field_info is None:
         default_value = value if value is not inspect.Signature.empty else Required
+
         if is_path_param:
             field_info = Path(annotation=type_annotation, default=default_value)
         else:
             field_info = Query(annotation=type_annotation, default=default_value)
 
+    # Now that we have the FieldInfo, we can determine the type annotation
     field = None
     if field_info is not None:
         if is_path_param:
-            assert isinstance(field_info, Path)
+            assert isinstance(field_info, Path), "Path parameters must be of type Path"
         elif isinstance(field_info, Param) and getattr(field_info, "in_", None) is None:
             field_info.in_ = ParamTypes.query
 
+        # If the field_info is a Param, we use the `in_` attribute to determine the type annotation
         use_annotation = get_annotation_from_field_info(type_annotation, field_info, param_name)
 
+        # If the field doesn't have a defined alias, we use the param name
         if not field_info.alias and getattr(field_info, "convert_underscores", None):
             alias = param_name.replace("_", "-")
         else:
             alias = field_info.alias or param_name
-
         field_info.alias = alias
 
+        # Create the Pydantic field
         field = ModelField(
             name=param_name,
             field_info=field_info,

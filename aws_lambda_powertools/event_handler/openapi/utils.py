@@ -1,11 +1,14 @@
-from typing import Any, Callable, List, Optional, Tuple, Type, Union
+from typing import Any, Callable, List, Optional, Tuple
 
-from pydantic import BaseConfig
-from pydantic.fields import FieldInfo, ModelField, Undefined, UndefinedType
+from pydantic.fields import ModelField
 
 from aws_lambda_powertools.event_handler.openapi.params import Dependant
 
 CacheKey = Tuple[Optional[Callable[..., Any]], Tuple[str, ...]]
+
+"""
+This file defines utility functions for working with OpenAPI/JSON Schema models.
+"""
 
 
 def get_flat_dependant(
@@ -14,6 +17,27 @@ def get_flat_dependant(
     skip_repeats: bool = False,
     visited: Optional[List[CacheKey]] = None,
 ) -> Dependant:
+    """
+    Flatten a recursive Dependant model structure.
+
+    This function recursively concatenates the parameter fields of a Dependant model and its dependencies into a flat
+    Dependant structure. This is useful for scenarios like parameter validation where the nested structure is not
+    relevant.
+
+    Parameters
+    ----------
+    dependant: Dependant
+        The dependant model to flatten
+    skip_repeats: bool
+        If True, child Dependents already visited will be skipped to avoid duplicates
+    visited: List[CacheKey], optional
+        Keeps track of visited Dependents to avoid infinite recursion. Defaults to empty list.
+
+    Returns
+    -------
+    Dependant
+        The flattened Dependant model
+    """
     if visited is None:
         visited = []
     visited.append(dependant.cache_key)
@@ -42,6 +66,20 @@ def get_flat_dependant(
 
 
 def get_flat_params(dependant: Dependant) -> List[ModelField]:
+    """
+    Get a list of all the parameters from a Dependant object.
+
+    Parameters
+    ----------
+    dependant : Dependant
+        The Dependant object containing the parameters.
+
+    Returns
+    -------
+    List[ModelField]
+        A list of ModelField objects containing the flat parameters from the Dependant object.
+
+    """
     flat_dependant = get_flat_dependant(dependant, skip_repeats=True)
     return (
         flat_dependant.path_params
@@ -49,29 +87,3 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
         + flat_dependant.header_params
         + flat_dependant.cookie_params
     )
-
-
-def create_response_field(
-    name: str,
-    type_: Type[Any],
-    default: Optional[Any] = Undefined,
-    required: Union[bool, UndefinedType] = Undefined,
-    model_config: Type[BaseConfig] = BaseConfig,
-    alias: Optional[str] = None,
-) -> ModelField:
-    """
-    Create a new response field.
-    """
-    field_info = FieldInfo()
-
-    kwargs = {
-        "name": name,
-        "field_info": field_info,
-        "type_": type_,
-        "default": default,
-        "required": required,
-        "model_config": model_config,
-        "alias": alias,
-        "class_validators": {},
-    }
-    return ModelField(**kwargs)
