@@ -2,10 +2,10 @@ import logging
 
 
 class SuppressFilter(logging.Filter):
-    def __init__(self, logger):
+    def __init__(self, logger: str):
         self.logger = logger
 
-    def filter(self, record):  # noqa: A003
+    def filter(self, record: logging.LogRecord) -> bool:  # noqa: A003
         """Suppress Log Records from registered logger
 
         It rejects log records from registered logger e.g. a child logger

@@ -44,14 +44,14 @@ RESERVED_LOG_ATTRS = (
 
 class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     @abstractmethod
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def clear_state(self):
+    def clear_state(self) -> None:
         """Removes any previously added logging keys"""
         raise NotImplementedError()
 
@@ -78,7 +78,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         utc: bool = False,
         use_rfc3339: bool = False,
         **kwargs,
-    ):
+    ) -> None:
         """Return a LambdaPowertoolsFormatter instance.
 
         The `log_record_order` kwarg is used to specify the order of the keys used in
@@ -217,26 +217,26 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
         return time.strftime(custom_fmt, record_ts)
 
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         for key in keys:
             self.log_format.pop(key, None)
 
-    def clear_state(self):
+    def clear_state(self) -> None:
         self.log_format = dict.fromkeys(self.log_record_order)
         self.log_format.update(**self.keys_combined)
 
     @staticmethod
-    def _build_default_keys():
+    def _build_default_keys() -> Dict[str, str]:
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
             "timestamp": "%(asctime)s",
         }
 
-    def _get_latest_trace_id(self):
+    def _get_latest_trace_id(self) -> Optional[str]:
         xray_trace_id_key = self.log_format.get("xray_trace_id", "")
         if xray_trace_id_key is None:
             # key is explicitly disabled; ignore it. e.g., Logger(xray_trace_id=None)
