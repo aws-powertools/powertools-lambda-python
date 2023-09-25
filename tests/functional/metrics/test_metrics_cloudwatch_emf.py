@@ -355,6 +355,22 @@ def test_log_metrics_decorator_call_decorated_function(metric, namespace, servic
     assert lambda_handler({}, {}) is True
 
 
+def test_log_metrics_decorator_with_additional_handler_args(namespace, service):
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics(service=service, namespace=namespace)
+
+    # WHEN log_metrics is used to serialize metrics
+    # AND the wrapped function uses additional parameters
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context, additional_arg, additional_kw_arg="default_value"):
+        return additional_arg, additional_kw_arg
+
+    # THEN the decorator should not raise any errors when
+    # the wrapped function is passed additional arguments
+    assert lambda_handler({}, {}, "arg_value", additional_kw_arg="kw_arg_value") == ("arg_value", "kw_arg_value")
+    assert lambda_handler({}, {}, "arg_value") == ("arg_value", "default_value")
+
+
 def test_schema_validation_incorrect_metric_resolution(metric, dimension):
     # GIVEN we pass a metric resolution that is not supported by CloudWatch
     metric["resolution"] = 10  # metric resolution must be 1 (High) or 60 (Standard)

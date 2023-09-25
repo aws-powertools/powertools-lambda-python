@@ -199,9 +199,9 @@ class BaseProvider(ABC):
             )
 
         @functools.wraps(lambda_handler)
-        def decorate(event, context):
+        def decorate(event, context, *args, **kwargs):
             try:
-                response = lambda_handler(event, context)
+                response = lambda_handler(event, context, *args, **kwargs)
                 if capture_cold_start_metric:
                     self._add_cold_start_metric(context=context)
             finally:

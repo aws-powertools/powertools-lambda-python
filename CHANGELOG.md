@@ -6,9 +6,28 @@
 
 ## Maintenance
 
+
+
+<a name="v2.25.1"></a>
+## [v2.25.1] - 2023-09-22
+## Bug Fixes
+
+* **logger:** add explicit None return type annotations ([#3113](https://github.com/aws-powertools/powertools-lambda-python/issues/3113))
+* **metrics:** support additional arguments in functions wrapped with log_metrics decorator ([#3120](https://github.com/aws-powertools/powertools-lambda-python/issues/3120))
+
+## Maintenance
+
+* version bump
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3108](https://github.com/aws-powertools/powertools-lambda-python/issues/3108))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3115](https://github.com/aws-powertools/powertools-lambda-python/issues/3115))
+* **deps:** bump squidfunk/mkdocs-material from `4ff781e` to `b41ba6d` in /docs ([#3117](https://github.com/aws-powertools/powertools-lambda-python/issues/3117))
+* **deps:** bump squidfunk/mkdocs-material from `c4890ab` to `4ff781e` in /docs ([#3110](https://github.com/aws-powertools/powertools-lambda-python/issues/3110))
 * **deps-dev:** bump ruff from 0.0.289 to 0.0.290 ([#3105](https://github.com/aws-powertools/powertools-lambda-python/issues/3105))
 * **deps-dev:** bump aws-cdk from 2.96.1 to 2.96.2 ([#3102](https://github.com/aws-powertools/powertools-lambda-python/issues/3102))
+* **deps-dev:** bump the boto-typing group with 3 updates ([#3118](https://github.com/aws-powertools/powertools-lambda-python/issues/3118))
 * **deps-dev:** bump the boto-typing group with 1 update ([#3101](https://github.com/aws-powertools/powertools-lambda-python/issues/3101))
+* **deps-dev:** bump cfn-lint from 0.79.11 to 0.80.2 ([#3107](https://github.com/aws-powertools/powertools-lambda-python/issues/3107))
+* **deps-dev:** bump types-requests from 2.31.0.2 to 2.31.0.3 ([#3114](https://github.com/aws-powertools/powertools-lambda-python/issues/3114))
 
 
 <a name="v2.25.0"></a>
@@ -3815,7 +3834,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.1...HEAD
+[v2.25.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.0...v2.25.1
 [v2.25.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.24.0...v2.25.0
 [v2.24.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.1...v2.24.0
 [v2.23.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.0...v2.23.1
