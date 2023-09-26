@@ -1029,16 +1029,16 @@ class ApiGatewayResolver(BaseRouter):
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
-        if summary:
-            info["summary"] = summary
-        if description:
-            info["description"] = description
-        if terms_of_service:
-            info["termsOfService"] = terms_of_service
-        if contact:
-            info["contact"] = contact
-        if license_info:
-            info["license"] = license_info
+
+        optional_fields = {
+            "summary": summary,
+            "description": description,
+            "termsOfService": terms_of_service,
+            "contact": contact,
+            "license": license_info,
+        }
+
+        info.update({field: value for field, value in optional_fields.items() if value})
 
         output: Dict[str, Any] = {"openapi": openapi_version, "info": info}
         if servers:
@@ -1173,10 +1173,8 @@ class ApiGatewayResolver(BaseRouter):
         def register_resolver(func: Callable):
             methods = (method,) if isinstance(method, str) else method
             logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
-            if cors is None:
-                cors_enabled = self._cors_enabled
-            else:
-                cors_enabled = cors
+
+            cors_enabled = self._cors_enabled if cors is None else cors
 
             for item in methods:
                 _route = Route(
@@ -1201,13 +1199,8 @@ class ApiGatewayResolver(BaseRouter):
                 else:
                     self._static_routes.append(_route)
 
-                route_key = item + rule
-                if route_key in self._route_keys:
-                    warnings.warn(
-                        f"A route like this was already registered. method: '{item}' rule: '{rule}'",
-                        stacklevel=2,
-                    )
-                self._route_keys.append(route_key)
+                self._create_route_key(item, rule)
+
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
                     self._cors_methods.add(item.upper())
@@ -1260,6 +1253,15 @@ class ApiGatewayResolver(BaseRouter):
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
+
+    def _create_route_key(self, item: str, rule: str):
+        route_key = item + rule
+        if route_key in self._route_keys:
+            warnings.warn(
+                f"A route like this was already registered. method: '{item}' rule: '{rule}'",
+                stacklevel=2,
+            )
+        self._route_keys.append(route_key)
 
     @staticmethod
     def _has_debug(debug: Optional[bool] = None) -> bool:

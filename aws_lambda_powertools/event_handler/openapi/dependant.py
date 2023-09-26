@@ -159,8 +159,8 @@ def get_dependant(
         # If the parameter is a path parameter, we need to set the in_ field to "path".
         is_path_param = param_name in path_param_names
 
-        # Analyze the parameter to get the type annotation and the Pydantic field.
-        type_annotation, param_field = analyze_param(
+        # Analyze the parameter to get the Pydantic field.
+        _, param_field = analyze_param(
             param_name=param_name,
             annotation=param.annotation,
             value=param.default,
@@ -173,7 +173,7 @@ def get_dependant(
     # If the return annotation is not empty, add it to the dependant model.
     return_annotation = endpoint_signature.return_annotation
     if return_annotation is not inspect.Signature.empty:
-        type_annotation, param_field = analyze_param(
+        _, param_field = analyze_param(
             param_name="Return",
             annotation=return_annotation,
             value=None,
