@@ -1778,13 +1778,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.28.36"
-description = "Type annotations for boto3.SSM 1.28.36 service generated with mypy-boto3-builder 7.18.0"
+version = "1.28.54"
+description = "Type annotations for boto3.SSM 1.28.54 service generated with mypy-boto3-builder 7.19.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-ssm-1.28.36.tar.gz", hash = "sha256:06de6f9ba9fcdda7af12a4f90d3fff965642d9a514731b77a5d1a9308e546643"},
-    {file = "mypy_boto3_ssm-1.28.36-py3-none-any.whl", hash = "sha256:b578f07ba6c86916e7be759eff344e0549557e22a3207d548d579c7df58d3fd4"},
+    {file = "mypy-boto3-ssm-1.28.54.tar.gz", hash = "sha256:71fdb8e90cbb7e1560bd4eccf70dfc264aac7564266b8188f9898d369209b49f"},
+    {file = "mypy_boto3_ssm-1.28.54-py3-none-any.whl", hash = "sha256:9fc591e88461f5b9ae27c7e94b413634e9fa9d67e436e563a76563b2c849cb39"},
 ]
 
 [package.dependencies]
@@ -2764,13 +2764,13 @@ files = [
 
 [[package]]
 name = "types-requests"
-version = "2.31.0.3"
+version = "2.31.0.5"
 description = "Typing stubs for requests"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-requests-2.31.0.3.tar.gz", hash = "sha256:d5d7a08965fca12bedf716eaf5430c6e3d0da9f3164a1dba2a7f3885f9ebe3c0"},
-    {file = "types_requests-2.31.0.3-py3-none-any.whl", hash = "sha256:938f51653c757716aeca5d72c405c5e2befad8b0d330e3b385ce7f148e1b10dc"},
+    {file = "types-requests-2.31.0.5.tar.gz", hash = "sha256:e4153c2a4e48dcc661600fa5f199b483cdcbd21965de0b5e2df26e93343c0f57"},
+    {file = "types_requests-2.31.0.5-py3-none-any.whl", hash = "sha256:e2523825754b2832e04cdc1e731423390e731457890113a201ebca8ad9b40427"},
 ]
 
 [package.dependencies]
@@ -3004,4 +3004,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "07f7e3364f2353eaa9305805d1182d46924314b53e19b49c0e713f461d5ee8cb"
+content-hash = "4e756acb30cdd11d63e3116d54cf19027f0fd3f1dd39e85f32efdec908c95660"
