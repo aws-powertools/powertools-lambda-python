@@ -1,0 +1,13 @@
+{
+    "statusCode": 200,
+    "body": "{\"todos\":[{\"userId\":1,\"id\":1,\"title\":\"delectus aut autem\",\"completed\":false}]}",
+    "isBase64Encoded": false,
+    "multiValueHeaders": {
+        "Content-Type": [
+            "application/json"
+        ],
+        "x-correlation-id": [
+            "ccd87d70-7a3f-4aec-b1a8-a5a558c239b2"
+        ]
+    }
+}

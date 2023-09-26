@@ -60,3 +60,19 @@ def test_metrics_provider_class_decorate():
     # THEN log_metrics should invoke the function it decorates
     # and return no error if we have a namespace and dimension
     assert lambda_handler({}, {}) is True
+
+
+def test_metrics_provider_class_decorator_with_additional_handler_args():
+    # GIVEN Metrics is initialized
+    my_metrics = Metrics()
+
+    # WHEN log_metrics is used to serialize metrics
+    # AND the wrapped function uses additional parameters
+    @my_metrics.log_metrics
+    def lambda_handler(evt, context, additional_arg, additional_kw_arg="default_value"):
+        return additional_arg, additional_kw_arg
+
+    # THEN the decorator should not raise any errors when
+    # the wrapped function is passed additional arguments
+    assert lambda_handler({}, {}, "arg_value", additional_kw_arg="kw_arg_value") == ("arg_value", "kw_arg_value")
+    assert lambda_handler({}, {}, "arg_value") == ("arg_value", "default_value")
