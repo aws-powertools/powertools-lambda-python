@@ -109,7 +109,7 @@ class DataMasking:
                 f"Unsupported data type for 'data' parameter. Expected a traversable type, but got {type(data)}.",
             )
 
-        # ['a.b.c'] in ['a.b.c', 'a.x.y']
+        # For example: ['a.b.c'] in ['a.b.c', 'a.x.y']
         for nested_key in fields:
             # Prevent overriding loop variable
             curr_nested_key = nested_key

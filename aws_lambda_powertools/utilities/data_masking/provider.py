@@ -1,12 +1,11 @@
 import json
-from abc import ABCMeta
 from collections.abc import Iterable
 from typing import Union
 
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
 
-class BaseProvider(metaclass=ABCMeta):
+class BaseProvider:
     """
     When you try to create an instance of a subclass that does not implement the encrypt method,
     you will get a NotImplementedError with a message that says the method is not implemented:
