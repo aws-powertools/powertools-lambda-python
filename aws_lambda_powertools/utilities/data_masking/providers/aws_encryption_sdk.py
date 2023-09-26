@@ -1,6 +1,7 @@
 import base64
 from typing import Any, Callable, Dict, List, Optional, Union
 
+import botocore
 from aws_encryption_sdk import (
     CachingCryptoMaterialsManager,
     EncryptionSDKClient,
@@ -8,6 +9,7 @@ from aws_encryption_sdk import (
     StrictAwsKmsMasterKeyProvider,
 )
 
+from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities.data_masking.constants import (
     CACHE_CAPACITY,
     MAX_CACHE_AGE_SECONDS,
@@ -35,6 +37,9 @@ class AwsEncryptionSdkProvider(BaseProvider):
         "a string"
     """
 
+    session = botocore.session.Session()
+    register_feature_to_botocore_session(session, "data-masking")
+
     def __init__(
         self,
         keys: List[str],
@@ -49,7 +54,7 @@ class AwsEncryptionSdkProvider(BaseProvider):
         self.client = client or EncryptionSDKClient()
         self.keys = keys
         self.cache = LocalCryptoMaterialsCache(local_cache_capacity)
-        self.key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys)
+        self.key_provider = StrictAwsKmsMasterKeyProvider(key_ids=self.keys, botocore_session=self.session)
         self.cache_cmm = CachingCryptoMaterialsManager(
             master_key_provider=self.key_provider,
             cache=self.cache,
