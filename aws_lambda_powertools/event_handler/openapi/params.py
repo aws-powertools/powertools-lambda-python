@@ -317,6 +317,28 @@ def analyze_param(
     Tuple[Any, Optional[ModelField]]
         The type annotation and the Pydantic field representing the parameter
     """
+    field_info, type_annotation = _get_field_info_and_type_annotation(annotation, value, is_path_param)
+
+    # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
+    if isinstance(value, FieldInfo):
+        assert field_info is None
+        field_info = value
+
+    # If we didn't determine the FieldInfo yet, we create a default one
+    if field_info is None:
+        default_value = value if value is not inspect.Signature.empty else Required
+
+        # Check if the parameter is part of the path. Otherwise, defaults to query.
+        if is_path_param:
+            field_info = Path(annotation=type_annotation, default=default_value)
+        else:
+            field_info = Query(annotation=type_annotation, default=default_value)
+
+    field = _create_model_field(field_info, type_annotation, param_name, is_path_param)
+    return type_annotation, field
+
+
+def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
     field_info: Optional[FieldInfo] = None
     type_annotation: Any = Any
 
@@ -344,48 +366,41 @@ def analyze_param(
     elif annotation is not inspect.Signature.empty:
         type_annotation = annotation
 
-    # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
-    if isinstance(value, FieldInfo):
-        assert field_info is None
-        field_info = value
+    return field_info, type_annotation
 
-    # If we didn't determine the FieldInfo yet, we create a default one
+
+def _create_model_field(
+    field_info: Optional[FieldInfo],
+    type_annotation: Any,
+    param_name: str,
+    is_path_param: bool,
+) -> Optional[ModelField]:
     if field_info is None:
-        default_value = value if value is not inspect.Signature.empty else Required
+        return None
 
-        if is_path_param:
-            field_info = Path(annotation=type_annotation, default=default_value)
-        else:
-            field_info = Query(annotation=type_annotation, default=default_value)
+    if is_path_param:
+        assert isinstance(field_info, Path), "Path parameters must be of type Path"
+    elif isinstance(field_info, Param) and getattr(field_info, "in_", None) is None:
+        field_info.in_ = ParamTypes.query
 
-    # Now that we have the FieldInfo, we can determine the type annotation
-    field = None
-    if field_info is not None:
-        if is_path_param:
-            assert isinstance(field_info, Path), "Path parameters must be of type Path"
-        elif isinstance(field_info, Param) and getattr(field_info, "in_", None) is None:
-            field_info.in_ = ParamTypes.query
+    # If the field_info is a Param, we use the `in_` attribute to determine the type annotation
+    use_annotation = get_annotation_from_field_info(type_annotation, field_info, param_name)
 
-        # If the field_info is a Param, we use the `in_` attribute to determine the type annotation
-        use_annotation = get_annotation_from_field_info(type_annotation, field_info, param_name)
+    # If the field doesn't have a defined alias, we use the param name
+    if not field_info.alias and getattr(field_info, "convert_underscores", None):
+        alias = param_name.replace("_", "-")
+    else:
+        alias = field_info.alias or param_name
+    field_info.alias = alias
 
-        # If the field doesn't have a defined alias, we use the param name
-        if not field_info.alias and getattr(field_info, "convert_underscores", None):
-            alias = param_name.replace("_", "-")
-        else:
-            alias = field_info.alias or param_name
-        field_info.alias = alias
-
-        # Create the Pydantic field
-        field = ModelField(
-            name=param_name,
-            field_info=field_info,
-            type_=use_annotation,
-            class_validators={},
-            default=field_info.default,
-            required=field_info.default in (Required, Undefined),
-            model_config=BaseConfig,
-            alias=alias,
-        )
-
-    return type_annotation, field
+    # Create the Pydantic field
+    return ModelField(
+        name=param_name,
+        field_info=field_info,
+        type_=use_annotation,
+        class_validators={},
+        default=field_info.default,
+        required=field_info.default in (Required, Undefined),
+        model_config=BaseConfig,
+        alias=alias,
+    )
