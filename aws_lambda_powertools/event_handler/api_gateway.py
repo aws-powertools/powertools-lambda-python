@@ -62,6 +62,7 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
+_COMPONENT_REF_PREFIX = "#/components/schemas/"
 
 
 class ProxyEventType(Enum):
@@ -416,7 +417,7 @@ class Route:
             if not field_info.include_in_schema:
                 continue
 
-            param_schema = field_schema(param, model_name_map=model_name_map, ref_prefix="#/components/schemas/")[0]
+            param_schema = field_schema(param, model_name_map=model_name_map, ref_prefix=_COMPONENT_REF_PREFIX)[0]
 
             parameter = {
                 "name": param.alias,
@@ -448,7 +449,7 @@ class Route:
         return_schema = field_schema(
             param,
             model_name_map=model_name_map,
-            ref_prefix="#/components/schemas/",
+            ref_prefix=_COMPONENT_REF_PREFIX,
         )[0]
 
         return {"name": f"Return {operation_id}", "schema": return_schema}
@@ -1062,7 +1063,7 @@ class ApiGatewayResolver(BaseRouter):
             m_schema, m_definitions, _ = model_process_schema(
                 model,
                 model_name_map=model_name_map,
-                ref_prefix="#/components/schemas/",
+                ref_prefix=_COMPONENT_REF_PREFIX,
             )
             definitions.update(m_definitions)
             model_name = model_name_map[model]
