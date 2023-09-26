@@ -1,10 +1,10 @@
-from typing import Any, Callable, List, Optional, Tuple
+from typing import Any, Callable, List, Optional
 
 from pydantic.fields import ModelField
 
 from aws_lambda_powertools.event_handler.openapi.params import Dependant
 
-CacheKey = Tuple[Optional[Callable[..., Any]], Tuple[str, ...]]
+CacheKey = Optional[Callable[..., Any]]
 
 """
 This file defines utility functions for working with OpenAPI/JSON Schema models.

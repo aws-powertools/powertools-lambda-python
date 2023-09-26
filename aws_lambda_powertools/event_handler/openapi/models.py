@@ -49,7 +49,7 @@ class Info(BaseModel):
     description: Optional[str] = None
     termsOfService: Optional[str] = None
     contact: Optional[Contact] = None
-    license: Optional[License] = None
+    license: Optional[License] = None  # noqa: A003
     version: str
 
     if PYDANTIC_V2:
@@ -139,7 +139,7 @@ class Schema(BaseModel):
     # Core Vocabulary
     schema_: Optional[str] = Field(default=None, alias="$schema")
     vocabulary: Optional[str] = Field(default=None, alias="$vocabulary")
-    id: Optional[str] = Field(default=None, alias="$id")
+    id: Optional[str] = Field(default=None, alias="$id")  # noqa: A003
     anchor: Optional[str] = Field(default=None, alias="$anchor")
     dynamicAnchor: Optional[str] = Field(default=None, alias="$dynamicAnchor")
     ref: Optional[str] = Field(default=None, alias="$ref")
@@ -157,9 +157,9 @@ class Schema(BaseModel):
     else_: Optional["SchemaOrBool"] = Field(default=None, alias="else")
     dependentSchemas: Optional[Dict[str, "SchemaOrBool"]] = None
     prefixItems: Optional[List["SchemaOrBool"]] = None
-    # TODO: uncomment and remove below when deprecating Pydantic v1
-    # It generales a list of schemas for tuples, before prefixItems was available
-    # items: Optional["SchemaOrBool"] = None
+    # MAINTENANCE: uncomment and remove below when deprecating Pydantic v1
+    # MAINTENANCE: It generates a list of schemas for tuples, before prefixItems was available
+    # MAINTENANCE: items: Optional["SchemaOrBool"] = None
     items: Optional[Union["SchemaOrBool", List["SchemaOrBool"]]] = None
     contains: Optional["SchemaOrBool"] = None
     properties: Optional[Dict[str, "SchemaOrBool"]] = None
@@ -170,7 +170,7 @@ class Schema(BaseModel):
     unevaluatedProperties: Optional["SchemaOrBool"] = None
     # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-a-vocabulary-for-structural
     # A Vocabulary for Structural Validation
-    type: Optional[str] = None
+    type: Optional[str] = None  # noqa: A003
     enum: Optional[List[Any]] = None
     const: Optional[Any] = None
     multipleOf: Optional[float] = Field(default=None, gt=0)
@@ -192,7 +192,7 @@ class Schema(BaseModel):
     dependentRequired: Optional[Dict[str, Set[str]]] = None
     # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-vocabularies-for-semantic-c
     # Vocabularies for Semantic Content With "format"
-    format: Optional[str] = None
+    format: Optional[str] = None  # noqa: A003
     # Ref: JSON Schema Validation 2020-12: https://json-schema.org/draft/2020-12/json-schema-validation.html#name-a-vocabulary-for-the-conten
     # A Vocabulary for the Contents of String-Encoded Data
     contentEncoding: Optional[str] = None
