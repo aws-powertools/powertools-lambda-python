@@ -13,10 +13,13 @@ from tests.functional.data_masking.conftest import FakeEncryptionClient
 
 
 @pytest.fixture
-def data_masker() -> DataMasking:
+def data_masker(monkeypatch) -> DataMasking:
+    # Setting a default region
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
+
     """DataMasking using AWS Encryption SDK Provider with a fake client"""
     fake_client = FakeEncryptionClient()
-    provider = AwsEncryptionSdkProvider(keys=["arn:aws:kms:us-east-1:0123456789012:key/dummy"], client=fake_client)
+    provider = AwsEncryptionSdkProvider(keys=["dummy"], client=fake_client)
     return DataMasking(provider=provider)
 
 
