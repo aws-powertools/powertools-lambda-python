@@ -16,7 +16,7 @@ from tests.functional.data_masking.conftest import FakeEncryptionClient
 def data_masker() -> DataMasking:
     """DataMasking using AWS Encryption SDK Provider with a fake client"""
     fake_client = FakeEncryptionClient()
-    provider = AwsEncryptionSdkProvider(keys=["dummy"], client=fake_client)
+    provider = AwsEncryptionSdkProvider(keys=["arn:aws:kms:us-east-1:0123456789012:key/dummy"], client=fake_client)
     return DataMasking(provider=provider)
 
 
