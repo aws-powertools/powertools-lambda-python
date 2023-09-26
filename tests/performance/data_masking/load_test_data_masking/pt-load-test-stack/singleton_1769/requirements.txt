@@ -1,3 +1,0 @@
-requests
-aws-lambda-powertools[tracer]
-aws-encryption-sdk

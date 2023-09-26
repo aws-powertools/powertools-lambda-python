@@ -1,6 +1,5 @@
 import base64
-from collections.abc import Iterable
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 import botocore
 from aws_encryption_sdk import (
@@ -25,27 +24,7 @@ class ContextMismatchError(Exception):
         self.key = key
 
 
-class Singleton:
-    _instances: Dict[Tuple, "AwsEncryptionSdkProvider"] = {}
-
-    def __new__(cls, *args, force_new_instance=False, **kwargs):
-        # Generate a unique key based on the configuration.
-        # Create a tuple by iterating through the values in kwargs, sorting them,
-        # and then adding them to the tuple.
-        config_key = ()
-        for value in kwargs.values():
-            if isinstance(value, Iterable):
-                for val in sorted(value):
-                    config_key += (val,)
-            else:
-                config_key += (value,)
-
-        if force_new_instance or config_key not in cls._instances:
-            cls._instances[config_key] = super(Singleton, cls).__new__(cls, *args)
-        return cls._instances[config_key]
-
-
-class AwsEncryptionSdkProvider(BaseProvider, Singleton):
+class AwsEncryptionSdkProvider(BaseProvider):
     """
     The AwsEncryptionSdkProvider is to be used as a Provider for the Datamasking class.
 

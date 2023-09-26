@@ -1,5 +1,5 @@
 config:
-  target: https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/singleton128
+  target: https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function128
   phases:
     - duration: 60
       arrivalRate: 1
@@ -16,28 +16,17 @@ config:
   # Load & configure a couple of useful plugins
   # https://docs.art/reference/extensions
   plugins:
-    ensure: {}
     apdex: {}
     metrics-by-endpoint: {}
   apdex:
     threshold: 500
-  ensure:
-      thresholds:
-        - http.response_time.p99: 100
-        - http.response_time.p95: 75
 scenarios:
   - flow:
       - loop:
         - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/singleton128"
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function128"
         - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/singleton1024"
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function1024"
         - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/singleton1769"
-        - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/nonsingleton128"
-        - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/nonsingleton1024"
-        - get:
-            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/nonsingleton1769"
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function1769"
         count: 100

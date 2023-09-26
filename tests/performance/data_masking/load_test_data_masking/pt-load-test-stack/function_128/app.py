@@ -1,13 +1,13 @@
 import os
+
+from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools import Logger
-from aws_lambda_powertools import Tracer
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import AwsEncryptionSdkProvider
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
-KMS_KEY_ARN = os.environ['KMS_KEY_ARN']
+KMS_KEY_ARN = os.environ["KMS_KEY_ARN"]
 
 json_blob = {
     "id": 1,
@@ -43,14 +43,16 @@ app = APIGatewayRestResolver()
 tracer = Tracer()
 logger = Logger()
 
-@app.get("/singleton1024")
+
+@app.get("/function128")
 @tracer.capture_method
-def singleton1024():
-    logger.info("Hello world singleton1024 - HTTP 200")
+def function128():
+    logger.info("Hello world function128 - HTTP 200")
     data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[KMS_KEY_ARN]))
     encrypted = data_masker.encrypt(json_blob, fields=["address.street", "job_history.company.company_name"])
     decrypted = data_masker.decrypt(encrypted, fields=["address.street", "job_history.company.company_name"])
-    return {"Decrypted_json_blob_singleton_1024": decrypted}
+    return {"Decrypted_json_blob_function_128": decrypted}
+
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
 @tracer.capture_lambda_handler

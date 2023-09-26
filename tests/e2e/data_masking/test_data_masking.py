@@ -110,23 +110,6 @@ def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
         data_masker_key2.decrypt(encrypted_data)
 
 
-def test_encryption_provider_singleton(data_masker, kms_key1_arn, kms_key2_arn):
-    data_masker_2 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key1_arn]))
-    assert data_masker.provider is data_masker_2.provider
-
-    value = [1, 2, "string", 4.5]
-
-    # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(value)
-    decrypted_data = data_masker_2.decrypt(encrypted_data)
-
-    # THEN the result is the original input data
-    assert decrypted_data == value
-
-    data_masker_3 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
-    assert data_masker_2.provider is not data_masker_3.provider
-
-
 @pytest.mark.xdist_group(name="data_masking")
 def test_encryption_in_logs(data_masker, basic_handler_fn, basic_handler_fn_arn, kms_key1_arn):
     # GIVEN an instantiation of DataMasking with the AWS encryption provider
