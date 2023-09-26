@@ -1,12 +1,13 @@
 import inspect
 from copy import copy
 from enum import Enum
-from typing import Annotated, Any, Callable, Dict, List, Optional, Tuple, Union, get_args, get_origin
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union, get_args, get_origin
 
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo, ModelField, Required, Undefined
 from pydantic.schema import get_annotation_from_field_info
 from pydantic.version import VERSION as PYDANTIC_VERSION
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.openapi.utils import CacheKey
 
