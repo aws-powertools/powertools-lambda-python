@@ -87,8 +87,6 @@ Resources:
           KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
       Tags:
         LambdaPowertools: python
-    
-
   Function1769Singleton:
     Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
     Properties:

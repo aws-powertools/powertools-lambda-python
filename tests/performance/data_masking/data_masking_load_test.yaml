@@ -1,7 +1,4 @@
 config:
-  # This is a test server run by team Artillery
-  # It's designed to be highly scalable
-
   target: https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/singleton128
   phases:
     - duration: 60
@@ -23,7 +20,7 @@ config:
     apdex: {}
     metrics-by-endpoint: {}
   apdex:
-    threshold: 100
+    threshold: 500
   ensure:
       thresholds:
         - http.response_time.p99: 100

@@ -50,7 +50,6 @@ def singleton1024():
     data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[KMS_KEY_ARN]))
     encrypted = data_masker.encrypt(json_blob, fields=["address.street", "job_history.company.company_name"])
     decrypted = data_masker.decrypt(encrypted, fields=["address.street", "job_history.company.company_name"])
-    #TODO: decrypt in another function
     return {"Decrypted_json_blob_singleton_1024": decrypted}
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_REST)
