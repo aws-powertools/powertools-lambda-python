@@ -1,6 +1,5 @@
 import json
-from collections.abc import Iterable
-from typing import Union
+from typing import Any, Union
 
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
@@ -24,12 +23,12 @@ class BaseProvider:
     def encrypt(self, data) -> Union[bytes, str]:
         raise NotImplementedError("Subclasses must implement encrypt()")
 
-    def decrypt(self, data) -> any:
+    def decrypt(self, data) -> Any:
         raise NotImplementedError("Subclasses must implement decrypt()")
 
-    def mask(self, data) -> str:
+    def mask(self, data) -> Any:
         if isinstance(data, (str, dict, bytes)):
             return DATA_MASKING_STRING
-        elif isinstance(data, Iterable):
+        elif isinstance(data, (list, tuple, set)):
             return type(data)([DATA_MASKING_STRING] * len(data))
         return DATA_MASKING_STRING
