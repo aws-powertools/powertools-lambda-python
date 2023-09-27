@@ -195,7 +195,9 @@ class Path(Param):
         json_schema_extra: Union[Dict[str, Any], None] = None,
         **extra: Any,
     ):
-        assert default is ..., "Path parameters cannot have a default value"
+        if default is not ...:
+            raise AssertionError("Path parameters cannot have a default value")
+
         super(Path, self).__init__(
             default=default,
             default_factory=default_factory,
@@ -322,7 +324,8 @@ def analyze_param(
 
     # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
     if isinstance(value, FieldInfo):
-        assert field_info is None
+        if field_info is not None:
+            raise AssertionError("Cannot use a FieldInfo as a parameter annotation and pass a FieldInfo as a value")
         field_info = value
 
     # If we didn't determine the FieldInfo yet, we create a default one
@@ -343,29 +346,40 @@ def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) 
     field_info: Optional[FieldInfo] = None
     type_annotation: Any = Any
 
-    # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
-    if annotation is not inspect.Signature.empty and get_origin(annotation) is Annotated:
-        annotated_args = get_args(annotation)
-        type_annotation = annotated_args[0]
-        powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
-        assert len(powertools_annotations) <= 1
+    if annotation is not inspect.Signature.empty:
+        # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
+        if get_origin(annotation) is Annotated:
+            type_annotation = _get_field_info_annotated_type(annotation, value, is_path_param)
+        # If the annotation is not an Annotated type, we use it as the type annotation
+        else:
+            type_annotation = annotation
 
-        powertools_annotation = next(iter(powertools_annotations), None)
+    return field_info, type_annotation
 
-        if isinstance(powertools_annotation, FieldInfo):
-            # Copy `field_info` because we mutate `field_info.default` later
-            field_info = copy(powertools_annotation)
-            assert field_info.default is Undefined or field_info.default is Required
 
-            if value is not inspect.Signature.empty:
-                assert not is_path_param
-                field_info.default = value
-            else:
-                field_info.default = Required
+def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+    field_info: Optional[FieldInfo] = None
+    annotated_args = get_args(annotation)
+    type_annotation = annotated_args[0]
+    powertools_annotations = [arg for arg in annotated_args[1:] if isinstance(arg, FieldInfo)]
 
-    # If the annotation is not an Annotated type, we use it as the type annotation
-    elif annotation is not inspect.Signature.empty:
-        type_annotation = annotation
+    if len(powertools_annotations) > 1:
+        raise AssertionError("Only one FieldInfo can be used per parameter")
+
+    powertools_annotation = next(iter(powertools_annotations), None)
+
+    if isinstance(powertools_annotation, FieldInfo):
+        # Copy `field_info` because we mutate `field_info.default` later
+        field_info = copy(powertools_annotation)
+        if field_info.default not in [Undefined, Required]:
+            raise AssertionError("FieldInfo needs to have a default value of Undefined or Required")
+
+        if value is not inspect.Signature.empty:
+            if is_path_param:
+                raise AssertionError("Cannot use a FieldInfo as a path parameter and pass a value")
+            field_info.default = value
+        else:
+            field_info.default = Required
 
     return field_info, type_annotation
 
@@ -380,7 +394,8 @@ def _create_model_field(
         return None
 
     if is_path_param:
-        assert isinstance(field_info, Path), "Path parameters must be of type Path"
+        if not isinstance(field_info, Path):
+            raise AssertionError("Path parameters must be of type Path")
     elif isinstance(field_info, Param) and getattr(field_info, "in_", None) is None:
         field_info.in_ = ParamTypes.query
 

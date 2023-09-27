@@ -48,7 +48,8 @@ def add_param_to_fields(
     elif field_info.in_ == ParamTypes.header:
         dependant.header_params.append(field)
     else:
-        assert field_info.in_ == ParamTypes.cookie
+        if field_info.in_ != ParamTypes.cookie:
+            raise AssertionError(f"Unsupported param type: {field_info.in_}")
         dependant.cookie_params.append(field)
 
 
@@ -167,7 +168,8 @@ def get_dependant(
             value=param.default,
             is_path_param=is_path_param,
         )
-        assert param_field is not None
+        if param_field is None:
+            raise AssertionError(f"Param field is None for param: {param_name}")
 
         add_param_to_fields(field=param_field, dependant=dependant)
 
@@ -180,7 +182,8 @@ def get_dependant(
             value=None,
             is_path_param=False,
         )
-        assert param_field is not None
+        if param_field is None:
+            raise AssertionError("Param field is None for return annotation")
 
         dependant.return_param = param_field
 
