@@ -56,7 +56,7 @@ def persistence_store_standalone_redis():
     # and avoid AuthenticationError at redis queries
     redis_client = redis.Redis(
         host="localhost",
-        port="63005",
+        port=63005,
         decode_responses=True,
     )
     return RedisCachePersistenceLayer(client=redis_client)
@@ -67,8 +67,26 @@ def redis_config():
     return RedisConfig(host="localhost", port=63005, mode="standalone", ssl=False)
 
 
-def test_idempotent_create_redis_client_with_config(redis_config):
-    RedisCachePersistenceLayer(config=redis_config)
+def test_idempotent_create_redis_client_with_config(redis_config, lambda_context):
+    persistence_layer = RedisCachePersistenceLayer(config=redis_config)
+    mock_event = {"data": "value"}
+    expected_result = {"message": "Foo"}
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return expected_result
+
+    @idempotent(persistence_store=persistence_layer)
+    def lambda_handler(event, context):
+        return expected_result
+
+    # WHEN calling the function
+    fn_result = record_handler(record=mock_event)
+    # WHEN calling lambda handler
+    handler_result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the function and lambda handler to execute successfully
+    assert fn_result == expected_result
+    assert handler_result == expected_result
 
 
 # test basic
@@ -191,16 +209,22 @@ def test_idempotent_lambda_redis_delete(
     result = {"message": "Foo"}
 
     @idempotent(persistence_store=persistence_layer)
-    def lambda_handler(event, _):
+    def lambda_handler(event, context):
         return result
 
+    # first run is just to populate function infos for deletion.
+    # delete_record won't work if the function was not run yet. bug maybe?
+    handler_result = lambda_handler(mock_event, lambda_context)
+    # delete what's might be dirty data
+    persistence_layer.delete_record(mock_event, IdempotencyItemNotFoundError)
+    # run second time to ensure clean result
     handler_result = lambda_handler(mock_event, lambda_context)
     assert handler_result == result
-
-    # delete the idem and handler should output new result
     persistence_layer.delete_record(mock_event, IdempotencyItemNotFoundError)
+    # delete the idem and handler should output new result
     result = {"message": "Foo2"}
     handler_result2 = lambda_handler(mock_event, lambda_context)
+
     assert handler_result2 == result
 
 
