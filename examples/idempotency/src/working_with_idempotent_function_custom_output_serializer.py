@@ -1,5 +1,4 @@
-from dataclasses import asdict, dataclass
-from typing import Any, Dict
+from typing import Dict, Type
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -13,34 +12,34 @@ dynamodb = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 config = IdempotencyConfig(event_key_jmespath="order_id")  # see Choosing a payload subset section
 
 
-@dataclass
 class OrderItem:
-    sku: str
-    description: str
+    def __init__(self, sku: str, description: str):
+        self.sku = sku
+        self.description = description
 
 
-@dataclass
 class Order:
-    item: OrderItem
-    order_id: int
+    def __init__(self, item: OrderItem, order_id: int):
+        self.item = item
+        self.order_id = order_id
 
 
-@dataclass
 class OrderOutput:
-    order_id: int
+    def __init__(self, order_id: int):
+        self.order_id = order_id
 
 
-def custom_to_dict(x: Any) -> Dict:
-    return asdict(x)
+def order_to_dict(x: Type[OrderOutput]) -> Dict:  # (1)!
+    return x.__dict__
 
 
-def custom_from_dict(x: Dict) -> Any:
+def dict_to_order(x: Dict) -> OrderOutput:  # (2)!
     return OrderOutput(**x)
 
 
-order_output_serializer = CustomDictSerializer(
-    to_dict=custom_to_dict,
-    from_dict=custom_from_dict,
+order_output_serializer = CustomDictSerializer(  # (3)!
+    to_dict=order_to_dict,
+    from_dict=dict_to_order,
 )
 
 

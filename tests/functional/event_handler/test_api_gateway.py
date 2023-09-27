@@ -909,7 +909,8 @@ def test_debug_print_event(capsys):
     # THEN print the event
     out, err = capsys.readouterr()
     assert "\n" in out
-    assert json.loads(out) == event
+    output: str = out.split("\n")[0]
+    assert json.loads(output) == event
 
 
 def test_similar_dynamic_routes():

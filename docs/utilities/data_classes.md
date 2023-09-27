@@ -197,7 +197,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
         if user.get("isAdmin", False):
             policy.allow_all_routes()
         else:
-            policy.allow_route(HttpVerb.GET, "/user-profile")
+            policy.allow_route(HttpVerb.GET.value, "/user-profile")
 
         return policy.asdict()
     ```
@@ -975,17 +975,38 @@ or plain text, depending on the original payload.
 
 ### Kinesis Firehose delivery stream
 
-Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
-inline, and re-emit them back to the Delivery Stream.
+When using Kinesis Firehose, you can use a Lambda function to [perform data transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html){target="_blank"}. For each transformed record, you can choose to either:
 
-Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
-function to access the data either as json or plain text, depending on the original payload.
+* **A)** Put them back to the delivery stream (default)
+* **B)** Drop them so consumers don't receive them (e.g., data validation)
+* **C)** Indicate a record failed data transformation and should be retried
 
-=== "app.py"
+To do that, you can use `KinesisFirehoseDataTransformationResponse` class along with helper functions to make it easier to decode and encode base64 data in the stream.
 
-    ```python
+=== "Transforming streaming records"
+
+    ```python hl_lines="2-3 12 28"
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
+
+    1. **Ingesting JSON payloads?** <br><br> Use `record.data_as_json` to easily deserialize them.
+    2. For your convenience, `base64_from_json` serializes a dict to JSON, then encode as base64 data.
+
+=== "Dropping invalid records"
+
+    ```python hl_lines="5-6 16 34"
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
+    ```
+
+    1. This exception would be generated from `record.data_as_json` if invalid payload.
+
+=== "Indicating a processing failure"
+
+    ```python hl_lines="2-3 33"
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
+    ```
+
+    1. This record will now be sent to your [S3 bucket in the `processing-failed` folder](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling){target="_blank"}.
 
 ### Lambda Function URL
 
@@ -1093,6 +1114,22 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
     def lambda_handler(event: S3EventBridgeNotificationEvent, context):
         bucket_name = event.detail.bucket.name
         file_key = event.detail.object.key
+    ```
+
+### Secrets Manager
+
+AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [Click here](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html){target="_blank"} for more information about rotating AWS Secrets Manager secrets.
+
+=== "app.py"
+
+    ```python hl_lines="2 7 11"
+    --8<-- "examples/event_sources/src/secrets_manager.py"
+    ```
+
+=== "Secrets Manager Example Event"
+
+    ```json
+    --8<-- "tests/events/secretsManagerEvent.json"
     ```
 
 ### SES

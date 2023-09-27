@@ -7,13 +7,13 @@ target:
 dev:
 	pip install --upgrade pip pre-commit poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all"
+	poetry install --extras "all datamasking-aws-sdk"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all"
+	poetry install --extras "all datamasking-aws-sdk"
 	pre-commit install
 
 format:

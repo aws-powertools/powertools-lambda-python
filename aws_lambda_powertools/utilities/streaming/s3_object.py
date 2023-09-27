@@ -15,8 +15,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Literal
-
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,

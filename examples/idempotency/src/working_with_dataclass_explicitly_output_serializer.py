@@ -35,7 +35,7 @@ class OrderOutput:
     persistence_store=dynamodb,
     output_serializer=DataclassSerializer(model=OrderOutput),
 )
-def explicit_order_output_serializer(order: Order):
+def process_order(order: Order):
     return OrderOutput(order_id=order.order_id)
 
 
@@ -45,4 +45,4 @@ def lambda_handler(event: dict, context: LambdaContext):
     order = Order(item=order_item, order_id=1)
 
     # `order` parameter must be called as a keyword argument to work
-    explicit_order_output_serializer(order=order)
+    process_order(order=order)

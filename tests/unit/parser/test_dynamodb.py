@@ -55,7 +55,8 @@ def test_dynamo_db_stream_trigger_event_no_envelope():
     dynamodb = record.dynamodb
     raw_dynamodb = raw_record["dynamodb"]
     assert dynamodb is not None
-    assert dynamodb.ApproximateCreationDateTime is None
+    assert dynamodb.ApproximateCreationDateTime is not None
+    assert dynamodb.ApproximateCreationDateTime.timestamp() == raw_dynamodb["ApproximateCreationDateTime"]
     assert dynamodb.OldImage is None
     assert dynamodb.SequenceNumber == raw_dynamodb["SequenceNumber"]
     assert dynamodb.SizeBytes == raw_dynamodb["SizeBytes"]
