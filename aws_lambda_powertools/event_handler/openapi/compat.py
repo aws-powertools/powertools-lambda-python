@@ -1,3 +1,6 @@
+# mypy: ignore-errors
+# flake8: noqa
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Set, Tuple, Type, Union
@@ -111,7 +114,7 @@ if PYDANTIC_V2:
         inputs = [(field, field.mode, field._type_adapter.core_schema) for field in fields]
         field_mapping, definitions = schema_generator.generate_definitions(inputs=inputs)
 
-        return field_mapping, definitions  # type: ignore[return-value]
+        return field_mapping, definitions
 
     def get_compat_model_name_map(fields: List[ModelField]) -> ModelNameMap:
         return {}
@@ -121,33 +124,20 @@ if PYDANTIC_V2:
 
 else:
     from pydantic import BaseModel
-    from pydantic.fields import (  # type: ignore
-        ModelField as ModelField,  # noqa: F401, PLC0414
-    )
-    from pydantic.fields import (  # type: ignore
-        Required as Required,  # noqa: F401, PLC0414
-    )
-    from pydantic.fields import (  # type: ignore
-        Undefined as Undefined,  # noqa: PLC0414
-    )
-    from pydantic.schema import (  # type: ignore[no-redef]
+    from pydantic.fields import ModelField, Required, Undefined
+    from pydantic.schema import (
         field_schema,
         get_annotation_from_field_info,
         get_flat_models_from_fields,
         get_model_name_map,
         model_process_schema,
     )
+    from pydantic.typing import evaluate_forwardref
 
-    # re-export for compatibility
-    vars()["get_annotation_from_field_info"] = get_annotation_from_field_info
-
-    # type ignore[no-redef]
-    from pydantic.typing import evaluate_forwardref  # type: ignore[no-redef] # noqa: F401
-
-    JsonSchemaValue = Dict[str, Any]  # type: ignore[misc]
+    JsonSchemaValue = Dict[str, Any]
 
     @dataclass
-    class GenerateJsonSchema:  # type: ignore[no-redef]
+    class GenerateJsonSchema:
         ref_template: str
 
     def get_schema_from_model_field(
