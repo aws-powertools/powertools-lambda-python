@@ -25,20 +25,25 @@ from typing import (
     cast,
 )
 
-from pydantic.fields import ModelField
-from pydantic.schema import (
-    TypeModelOrEnum,
-    field_schema,
-    get_flat_models_from_fields,
-    get_model_name_map,
-    model_process_schema,
-)
+from typing_extensions import Literal
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.compat import (
+    GenerateJsonSchema,
+    JsonSchemaValue,
+    ModelField,
+    get_compat_model_name_map,
+    get_definitions,
+    get_schema_from_model_field,
+)
 from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant, get_flat_params
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, OpenAPI, Server, Tag
 from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param
+from aws_lambda_powertools.event_handler.openapi.types import (
+    COMPONENT_REF_TEMPLATE,
+    TypeModelOrEnum,
+)
 from aws_lambda_powertools.event_handler.response import Response
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -61,7 +66,6 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
-_COMPONENT_REF_PREFIX = "#/components/schemas/"
 
 
 class ProxyEventType(Enum):
@@ -340,6 +344,7 @@ class Route:
         dependant: Dependant,
         operation_ids: Set[str],
         model_name_map: Dict[TypeModelOrEnum, str],
+        field_mapping: Dict[Tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
         path = {}
         definitions: Dict[str, Any] = {}
@@ -350,6 +355,7 @@ class Route:
         operation_params = self._openapi_operation_parameters(
             all_route_params=all_route_params,
             model_name_map=model_name_map,
+            field_mapping=field_mapping,
         )
 
         parameters.extend(operation_params)
@@ -369,6 +375,7 @@ class Route:
             operation_id=self.operation_id,
             param=dependant.return_param,
             model_name_map=model_name_map,
+            field_mapping=field_mapping,
         )
 
         path[self.method.lower()] = operation
@@ -408,6 +415,10 @@ class Route:
         *,
         all_route_params: Sequence[ModelField],
         model_name_map: Dict[TypeModelOrEnum, str],
+        field_mapping: Dict[
+            Tuple[ModelField, Literal["validation", "serialization"]],
+            JsonSchemaValue,
+        ],
     ) -> List[Dict[str, Any]]:
         parameters = []
         for param in all_route_params:
@@ -416,7 +427,11 @@ class Route:
             if not field_info.include_in_schema:
                 continue
 
-            param_schema = field_schema(param, model_name_map=model_name_map, ref_prefix=_COMPONENT_REF_PREFIX)[0]
+            param_schema = get_schema_from_model_field(
+                field=param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            )
 
             parameter = {
                 "name": param.alias,
@@ -441,15 +456,19 @@ class Route:
         operation_id: str,
         param: Optional[ModelField],
         model_name_map: Dict[TypeModelOrEnum, str],
+        field_mapping: Dict[
+            Tuple[ModelField, Literal["validation", "serialization"]],
+            JsonSchemaValue,
+        ],
     ) -> Dict[str, Any]:
         if param is None:
             return {}
 
-        return_schema = field_schema(
-            param,
+        return_schema = get_schema_from_model_field(
+            field=param,
             model_name_map=model_name_map,
-            ref_prefix=_COMPONENT_REF_PREFIX,
-        )[0]
+            field_mapping=field_mapping,
+        )
 
         return {"name": f"Return {operation_id}", "schema": return_schema}
 
@@ -1053,20 +1072,15 @@ class ApiGatewayResolver(BaseRouter):
 
         all_routes = self._dynamic_routes + self._static_routes
         all_fields = self._get_fields_from_routes(all_routes)
-        models = get_flat_models_from_fields(all_fields, known_models=set())
-        model_name_map = get_model_name_map(models)
+        model_name_map = get_compat_model_name_map(all_fields)
 
         # Collect all models and definitions
-        definitions: Dict[str, Dict[str, Any]] = {}
-        for model in models:
-            m_schema, m_definitions, _ = model_process_schema(
-                model,
-                model_name_map=model_name_map,
-                ref_prefix=_COMPONENT_REF_PREFIX,
-            )
-            definitions.update(m_definitions)
-            model_name = model_name_map[model]
-            definitions[model_name] = m_schema
+        schema_generator = GenerateJsonSchema(ref_template=COMPONENT_REF_TEMPLATE)
+        field_mapping, definitions = get_definitions(
+            fields=all_fields,
+            schema_generator=schema_generator,
+            model_name_map=model_name_map,
+        )
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
@@ -1079,6 +1093,7 @@ class ApiGatewayResolver(BaseRouter):
                 dependant=dependant,
                 operation_ids=operation_ids,
                 model_name_map=model_name_map,
+                field_mapping=field_mapping,
             )
             if result:
                 path, path_definitions = result

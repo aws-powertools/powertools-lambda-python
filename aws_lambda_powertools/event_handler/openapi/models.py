@@ -2,10 +2,9 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Union
 
 from pydantic import AnyUrl, BaseModel, Field
-from pydantic.version import VERSION as PYDANTIC_VERSION
 from typing_extensions import Annotated, Literal
 
-PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
+from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2
 
 """
 The code defines Pydantic models for the various OpenAPI objects like OpenAPI, PathItem, Operation, Parameter etc.

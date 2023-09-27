@@ -4,18 +4,20 @@ from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pydantic import BaseConfig
-from pydantic.fields import FieldInfo, ModelField, Required, Undefined
-from pydantic.schema import get_annotation_from_field_info
-from pydantic.version import VERSION as PYDANTIC_VERSION
+from pydantic.fields import FieldInfo
 from typing_extensions import Annotated, get_args, get_origin
 
-from aws_lambda_powertools.event_handler.openapi.types import CacheKey
+from aws_lambda_powertools.event_handler.openapi.compat import (
+    ModelField,
+    Required,
+    Undefined,
+    get_annotation_from_field_info,
+)
+from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2, CacheKey
 
 """
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
 """
-
-PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
 
 
 class Dependant:
@@ -410,13 +412,20 @@ def _create_model_field(
     field_info.alias = alias
 
     # Create the Pydantic field
-    return ModelField(
-        name=param_name,
-        field_info=field_info,
-        type_=use_annotation,
-        class_validators={},
-        default=field_info.default,
-        required=field_info.default in (Required, Undefined),
-        model_config=BaseConfig,
-        alias=alias,
-    )
+    kwargs = {"name": param_name, "field_info": field_info}
+
+    if PYDANTIC_V2:
+        kwargs.update({"mode": "validation"})
+    else:
+        kwargs.update(
+            {
+                "type_": use_annotation,
+                "class_validators": {},
+                "default": field_info.default,
+                "required": field_info.default in (Required, Undefined),
+                "model_config": BaseConfig,
+                "alias": alias,
+            },
+        )
+
+    return ModelField(**kwargs)  # type: ignore[arg-type]

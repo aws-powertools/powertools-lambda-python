@@ -2,9 +2,7 @@ import inspect
 import re
 from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, cast
 
-from pydantic.fields import ModelField
-from pydantic.typing import evaluate_forwardref
-
+from aws_lambda_powertools.event_handler.openapi.compat import ModelField, evaluate_forwardref
 from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param, ParamTypes, analyze_param
 from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
