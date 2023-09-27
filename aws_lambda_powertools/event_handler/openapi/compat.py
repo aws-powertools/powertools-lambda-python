@@ -1,6 +1,9 @@
 # mypy: ignore-errors
 # flake8: noqa
 
+# MAINTENANCE: remove when deprecating Pydantic v1. Mypy doesn't handle two different code paths that import different
+# versions of a module, so we need to ignore errors here.
+
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Set, Tuple, Type, Union
