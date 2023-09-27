@@ -1,0 +1,13 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Runtime: python3.11
+      Handler: app.py
+      VpcConfig: # (1)!
+        SecurityGroupIds:
+          - sg-{your_sg_id}
+        SubnetIds:
+          - subnet-{your_subnet_id_1}
+          - subnet-{your_subnet_id_2}

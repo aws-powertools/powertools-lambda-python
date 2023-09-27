@@ -54,7 +54,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         if not connection.get_connection_kwargs().get("decode_responses", False):
             # Requires decode_responses to be true
             raise IdempotencyRedisClientConfigError
-        self._connection = connection
+        self.connection = connection
 
         self.in_progress_expiry_attr = in_progress_expiry_attr
         self.status_attr = status_attr
@@ -76,7 +76,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
     def _get_record(self, idempotency_key) -> DataRecord:
         # See: https://redis.io/commands/hgetall/
-        response = self._connection.hgetall(idempotency_key)
+        response = self.connection.hgetall(idempotency_key)
 
         try:
             item = response
@@ -115,7 +115,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             # The idempotency key does not exist:
             #    - first time that this invocation key is used
             #    - previous invocation with the same key was deleted due to TTL
-            idempotency_record = self._connection.hgetall(data_record.idempotency_key)
+            idempotency_record = self.connection.hgetall(data_record.idempotency_key)
             print(idempotency_record)
             if len(idempotency_record) > 0:
                 # record already exists.
@@ -132,11 +132,11 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                     raise IdempotencyItemAlreadyExistsError
 
             logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
-            self._connection.hset(**item)
+            self.connection.hset(**item)
             # hset type must set expiration after adding the record
             # Need to review this to get ttl in seconds
             # Q: should we replace self.expires_after_seconds with _get_expiry_timestamp? more consistent
-            self._connection.expire(name=data_record.idempotency_key, time=self.expires_after_seconds)
+            self.connection.expire(name=data_record.idempotency_key, time=self.expires_after_seconds)
         except redis.exceptions.RedisError:
             raise redis.exceptions.RedisError
         except redis.exceptions.RedisClusterException:
@@ -156,9 +156,9 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             },
         }
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
-        self._connection.hset(**item)
+        self.connection.hset(**item)
 
     def _delete_record(self, data_record: DataRecord) -> None:
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
         # See: https://redis.io/commands/del/
-        self._connection.delete(data_record.idempotency_key)
+        self.connection.delete(data_record.idempotency_key)

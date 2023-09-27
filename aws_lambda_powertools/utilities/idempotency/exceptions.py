@@ -83,3 +83,9 @@ class IdempotencyNoSerializationModelError(BaseError):
     """
     No model was supplied to the serializer
     """
+
+
+class IdempotencyRedisClientConfigError(BaseError):
+    """
+    The Redis connection passed in has unsupported config
+    """

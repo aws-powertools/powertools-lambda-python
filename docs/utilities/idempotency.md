@@ -51,9 +51,10 @@ classDiagram
 
 ## Getting started
 
-### IAM Permissions
+???+ note
+    This section uses DynamoDB as default idempotent persistence storage layer. If you are interested in using Redis as persistence storage layer, Check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
 
-#### DynamoDB
+### IAM Permissions
 
 Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
 
@@ -62,15 +63,9 @@ Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, 
 
 ### Required resources
 
-_**DynamoDB**_
-
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
 As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
-
-_**Redis**_
-
-Before getting started you need to setup your [EC2 Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html) and [ElastiCache for Redis cluster](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/GettingStarted.html).
 
 **Default table configuration**
 
@@ -114,8 +109,6 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
 ### Idempotent decorator
 
-_**DynamoDB**_
-
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
 
 ???+ note
@@ -135,15 +128,13 @@ You can quickly start by initializing the `DynamoDBPersistenceLayer` class and u
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
     ```
 
-_**Redis**_
-
 After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
 
 !!! question "New to idempotency concept? Please review our [Terminology](#terminology) section if you haven't yet."
 
-You can initialize `RedisCachePersistenceLayer` class and use it with `idempotent` decorator on your lambda handler.
+### Idempotent_function decorator
 
-=== "app.py"
+Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
@@ -539,6 +530,59 @@ sequenceDiagram
 <i>Optional idempotency key</i>
 </center>
 
+## Redis as persistent storage layer provider
+
+### Redis resources
+
+You need an existing Redis service before setting up Redis as persistent storage layer provider. You can also use Redis compatible services like [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/) or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/) as persistent storage layer provider.
+???+ tip "No existing Redis service?"
+    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as persistent storage layer provider.
+
+### VPC Access
+
+Your Lambda Function must be able to reach the Redis endpoint before using it for idempotency persistent storage layer. In most cases you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html) for your Lambda Fucntion. Using a public accessable Redis is not recommended.
+
+???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
+    If you intend to use Amazon ElastiCache for Redis for idempotency persistent storage layer, you can also reference [This AWS Tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html).
+    If you are using Amazon MemoryDB for Redis, reference [This AWS Tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/) for only VPC setup part.
+
+After VPC setup, you can follow the templates down below to setup Lambda fucntions with VPC internal subnet access.
+
+=== "AWS Serverless Application Model (SAM) example"
+
+    ```yaml hl_lines="8-13"
+    --8<-- "examples/idempotency/templates/sam_redis_vpc.yaml"
+    ```
+
+    1. Replace the Security Group ID and Subnet ID to match your Redis' VPC setting.
+
+### Idempotent decorator for Redis
+
+You can quickly start by initializing the `RedisCachePersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler. Check out detailed example of `RedisCachePersistenceLayer` in [Persistence layers section](#redispersistencelayer)
+
+???+ warning "Passing in Redis Client"
+    We support passing in established Redis clients when initilizing `RedisPersistenceLayer`. However, this rely on Redis parameter `decode_responses=True` to decode all Redis response. Please make sure this parameter is set when establishing Redis client or `RedisPersistenceLayer` will raise a `IdempotencyRedisClientConfigError`. See example below
+
+=== "Use established Redis Client"
+    TODO
+    ```python hl_lines="4-7 10 24"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
+    ```
+
+=== "Use Redis Config Class"
+    TODO
+    ```python hl_lines="4-7 10 24"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
+
+For other use cases like `Idempotent function decorator` please reference the [DynamoDB section](#idempotent_function-decorator). You only need to substitute the `persistence_store` from `DynamoDBPersistenceLayer` to `RedisPersistenceLayer` and no other code changes are required.
+
 ## Advanced
 
 ### Persistence layers
@@ -567,56 +611,9 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 | **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
 | **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
 
-#### RedisCachePersistenceLayer
+#### RedisPersistenceLayer
 
-This persistence layer is built-in and you can use ElastiCache to store and see the keys.
-
-```python
-from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
-persistence_layer = RedisCachePersistenceLayer(
-    static_pk_value: Optional[str] = None,
-    expiry_attr: str = "expiration",
-    in_progress_expiry_attr: str = "in_progress_expiration",
-    status_attr: str = "status",
-    data_attr: str = "data",
-    validation_key_attr: str = "validation",
-)
-```
-
-When using ElastiCache for Redis as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
-
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
-| **expiry_attr**             |                    | `expiration`                         | Unix timestamp of when record expires                                                                    |
-| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
-| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
-| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
-| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
-
-#### RedisStandalone/RedisCluster
-
-```python
-from aws_lambda_powertools.utilities.connections import RedisConnection
-
-redis_connection = RedisConnection(
-	host="192.168.68.112",
-	port=6379,
-	username = "abc",
-	password="pass",
-	db_index=0,
-	url = None
-).get_standalone_connection()
-```
-
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **host**                    |                    | `localhost`                          | Name of the host to connect to Redis instance/cluster     |
-| **port**                    |                    | 6379                                 | Number of the port to connect to Redis instance/cluster   |
-| **username**                |                    | `None`                               | Name of the username to connect to Redis instance/cluster in case of using ACL |
-| **password**                |                    | `None`                               | Passwod to connect to Redis instance/cluster              |
-| **db_index**                |                    | 0.                                   | Index of Redis database                                   |
-| **url**                     |                    | `None`                               | Redis client object configured from the given URL.        |
+TODO, check github
 
 ### Customizing the default behavior
 
@@ -916,6 +913,34 @@ This means it is possible to pass a mocked Table resource, or stub various metho
     ```python hl_lines="10"
     --8<-- "examples/idempotency/tests/app_test_io_operations.py"
     ```
+
+### Testing with Redis
+
+To test locally, You can either utilize [fakeredis-py](https://github.com/cunla/fakeredis-py) or check out the [MockRedis](https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66) Class we used in our test.
+
+=== "test_with_mock_redis.py"
+
+    ```python hl_lines="4 5 24 25 27"
+    --8<-- "examples/idempotency/tests/test_with_mock_redis.py"
+    ```
+
+If you want to actually setup a Real Redis client for integration test, reference the code below
+
+=== "test_with_real_redis.py"
+
+    ```python hl_lines="4 5 24 25 27"
+    --8<-- "examples/idempotency/tests/test_with_real_redis.py"
+    ```
+
+=== "Makefile"
+
+    ```bash
+    test-idempotency-redis: # (1)!
+    	docker run --name test-idempotency-redis -d -p 63005:6379 redis
+    	pytest test_with_real_redis.py;docker stop test-idempotency-redis;docker rm test-idempotency-redis
+    ```
+
+    1. Use this script to setup a temp Redis docker and auto remove it upon completion
 
 ## Extra resources
 
