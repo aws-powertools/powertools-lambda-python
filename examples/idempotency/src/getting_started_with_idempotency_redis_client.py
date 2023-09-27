@@ -1,13 +1,21 @@
 from dataclasses import dataclass, field
 from uuid import uuid4
 
+from redis import Redis
+
 from aws_lambda_powertools.utilities.idempotency import (
-    DynamoDBPersistenceLayer,
+    RedisCachePersistenceLayer,
     idempotent,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+client = Redis(
+    host="localhost",
+    port=6379,
+    decode_responses=True,  # (1)!
+)
+
+persistence_layer = RedisCachePersistenceLayer(client=client)
 
 
 @dataclass

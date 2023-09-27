@@ -27,18 +27,19 @@ def lambda_context():
 
 @pytest.fixture
 def persistence_store_standalone_redis():
-    # you will need to handle yourself the connection to pass again the password
-    # and avoid AuthenticationError at redis queries
+    # init a Real Redis client and connect to the Port set in the Makefile
     redis_client = redis.Redis(
         host="localhost",
         port="63005",
         decode_responses=True,
     )
-    return RedisCachePersistenceLayer(connection=redis_client)
+
+    # return a persistence layer with real Redis
+    return RedisCachePersistenceLayer(client=redis_client)
 
 
 def test_idempotent_lambda(lambda_context, persistence_store_standalone_redis):
-    # Establish persistence layer using the mock redis client
+    # Establish persistence layer using the real redis client
     persistence_layer = persistence_store_standalone_redis
 
     # setup idempotent with redis persistence layer

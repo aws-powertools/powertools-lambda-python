@@ -89,3 +89,9 @@ class IdempotencyRedisClientConfigError(BaseError):
     """
     The Redis connection passed in has unsupported config
     """
+
+
+class IdempotencyRedisConnectionError(BaseError):
+    """
+    Redis connection error
+    """

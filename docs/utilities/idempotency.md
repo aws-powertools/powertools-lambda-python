@@ -564,14 +564,14 @@ You can quickly start by initializing the `RedisCachePersistenceLayer` class and
     We support passing in established Redis clients when initilizing `RedisPersistenceLayer`. However, this rely on Redis parameter `decode_responses=True` to decode all Redis response. Please make sure this parameter is set when establishing Redis client or `RedisPersistenceLayer` will raise a `IdempotencyRedisClientConfigError`. See example below
 
 === "Use established Redis Client"
-    TODO
-    ```python hl_lines="4-7 10 24"
+    ```python hl_lines="4 7 12-16 18 32"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
+    1. Notice we rely on this field to be true
+
 === "Use Redis Config Class"
-    TODO
-    ```python hl_lines="4-7 10 24"
+    ```python hl_lines="4-8 11 13 27"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
@@ -613,7 +613,23 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 
 #### RedisPersistenceLayer
 
-TODO, check github
+This persistence layer is built-in, and you can use an existing Redis service. We don't recomend using Redis Persistence Layer if you don't have a exsiting Redis service. You can try [DynamoDBPersistenceLayer](#dynamodbpersistencelayer) instead.
+
+=== "Customizing RedisPersistenceLayer to suit your data structure"
+
+    ```python hl_lines="10-16"
+    --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+    ```
+
+When using Redis as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
+
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **config**         |                    | `None` | You can pass in the configs to establish the corresponding Redis client |
+| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
+| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
+| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
+| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation |
 
 ### Customizing the default behavior
 
@@ -920,15 +936,21 @@ To test locally, You can either utilize [fakeredis-py](https://github.com/cunla/
 
 === "test_with_mock_redis.py"
 
-    ```python hl_lines="4 5 24 25 27"
+    ```python hl_lines="2 3 29 31"
     --8<-- "examples/idempotency/tests/test_with_mock_redis.py"
+    ```
+
+=== "mock_redis.py"
+
+    ```python
+    --8<-- "examples/idempotency/tests/mock_redis.py"
     ```
 
 If you want to actually setup a Real Redis client for integration test, reference the code below
 
 === "test_with_real_redis.py"
 
-    ```python hl_lines="4 5 24 25 27"
+    ```python hl_lines="3 4 29 38"
     --8<-- "examples/idempotency/tests/test_with_real_redis.py"
     ```
 

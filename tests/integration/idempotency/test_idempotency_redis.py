@@ -3,7 +3,7 @@ import copy
 import pytest
 import redis
 
-from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
+from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer, RedisConfig
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
@@ -47,7 +47,7 @@ def persistence_store_sentinel_redis():
     )
     redis_client.expire()
 
-    return RedisCachePersistenceLayer(connection=redis_client)
+    return RedisCachePersistenceLayer(client=redis_client)
 
 
 @pytest.fixture
@@ -59,7 +59,16 @@ def persistence_store_standalone_redis():
         port="63005",
         decode_responses=True,
     )
-    return RedisCachePersistenceLayer(connection=redis_client)
+    return RedisCachePersistenceLayer(client=redis_client)
+
+
+@pytest.fixture
+def redis_config():
+    return RedisConfig(host="localhost", port=63005, mode="standalone", ssl=False)
+
+
+def test_idempotent_create_redis_client_with_config(redis_config):
+    RedisCachePersistenceLayer(config=redis_config)
 
 
 # test basic
@@ -97,7 +106,7 @@ def test_idempotent_lambda_redis_no_decode():
     )
     # decode_responses=False will not be accepted
     with pytest.raises(IdempotencyRedisClientConfigError):
-        RedisCachePersistenceLayer(connection=redis_client)
+        RedisCachePersistenceLayer(client=redis_client)
 
 
 def test_idempotent_function_and_lambda_handler_redis_cache(
@@ -206,7 +215,7 @@ def test_idempotent_lambda_redis_credential(lambda_context):
     redis_client.acl_setuser(username=usr, enabled=True, passwords="+" + pwd, keys="*", commands=["+hgetall", "-set"])
     redis_client.auth(password=pwd, username=usr)
 
-    @idempotent(persistence_store=RedisCachePersistenceLayer(connection=redis_client))
+    @idempotent(persistence_store=RedisCachePersistenceLayer(client=redis_client))
     def lambda_handler(event, _):
         return True
 
