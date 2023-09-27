@@ -9,7 +9,7 @@ from pydantic.schema import get_annotation_from_field_info
 from pydantic.version import VERSION as PYDANTIC_VERSION
 from typing_extensions import Annotated
 
-from aws_lambda_powertools.event_handler.openapi.utils import CacheKey
+from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 
 """
 This turns the low-level function signature into typed, validated Pydantic models for consumption.

@@ -36,10 +36,9 @@ from pydantic.schema import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
+from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant, get_flat_params
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, OpenAPI, Server, Tag
 from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param
-from aws_lambda_powertools.event_handler.openapi.utils import get_flat_params
 from aws_lambda_powertools.event_handler.response import Response
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -565,9 +564,9 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
         tags: Optional[List[Tag]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
 
@@ -644,7 +643,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "GET", cors, compress, cache_control, middlewares, description, tags)
+        return self.route(rule, "GET", cors, compress, cache_control, description, tags, middlewares)
 
     def post(
         self,
@@ -679,7 +678,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "POST", cors, compress, cache_control, middlewares, description, tags)
+        return self.route(rule, "POST", cors, compress, cache_control, description, tags, middlewares)
 
     def put(
         self,
@@ -714,7 +713,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PUT", cors, compress, cache_control, middlewares, description, tags)
+        return self.route(rule, "PUT", cors, compress, cache_control, description, tags, middlewares)
 
     def delete(
         self,
@@ -748,7 +747,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "DELETE", cors, compress, cache_control, middlewares, description, tags)
+        return self.route(rule, "DELETE", cors, compress, cache_control, description, tags, middlewares)
 
     def patch(
         self,
@@ -785,7 +784,7 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PATCH", cors, compress, cache_control, middlewares, description, tags)
+        return self.route(rule, "PATCH", cors, compress, cache_control, description, tags, middlewares)
 
     def _push_processed_stack_frame(self, frame: str):
         """
@@ -1164,9 +1163,9 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
         tags: Optional[List[Tag]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
 
@@ -1582,9 +1581,9 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
         tags: Optional[List[Tag]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
@@ -1630,12 +1629,12 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
         tags: Optional[List[Tag]] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
-        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares, description, tags)
+        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, description, tags, middlewares)
 
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
