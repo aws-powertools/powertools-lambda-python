@@ -92,14 +92,13 @@ datadog-lambda = "^4.77.0"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
-datamasking-aws-sdk= ["aws-encryption-sdk"]
-datamasking-all = ["aws-encryption-sdk"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
-all = ["pydantic", "aws-xray-sdk", "fastjsonschema", "aws-encryption-sdk"]
+all = ["pydantic", "aws-xray-sdk", "fastjsonschema"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
+datamasking-aws-sdk = ["aws-encryption-sdk"]
 
 [tool.poetry.group.dev.dependencies]
 cfn-lint = "0.80.3"

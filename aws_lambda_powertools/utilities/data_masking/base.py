@@ -5,6 +5,38 @@ from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 
 class DataMasking:
+    """
+    A utility class for masking sensitive data within various data types.
+
+    This class provides methods for masking sensitive information, such as personal
+    identifiers or confidential data, within different data types such as strings,
+    dictionaries, lists, and more. It helps protect sensitive information while
+    preserving the structure of the original data.
+
+    Usage:
+    Instantiate an object of this class and use its methods to mask sensitive data
+    based on the data type. Supported data types include strings, dictionaries,
+    and more.
+
+    Example:
+    ```
+    from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+
+    def lambda_handler(event, context):
+        masker = DataMasking()
+
+        data = {
+            "project": "powertools",
+            "sensitive": "xxxxxxxxxx"
+        }
+
+        masked = masker.mask(data,fields=["sensitive"])
+
+        return masked
+
+    ```
+    """
+
     def __init__(self, provider: Optional[BaseProvider] = None):
         self.provider = provider or BaseProvider()
 

@@ -1,25 +1,46 @@
 from __future__ import annotations
 
+import base64
 import json
+from typing import Any, Callable, Dict, Union
 
 import pytest
 
-from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking import DataMasking
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
-from aws_lambda_powertools.utilities.data_masking.providers.aws_encryption_sdk import (
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities.data_masking.provider.kms import (
     AwsEncryptionSdkProvider,
 )
-from tests.functional.data_masking.conftest import FakeEncryptionClient
+
+
+class FakeEncryptionKeyProvider(BaseProvider):
+    def __init__(
+        self,
+        json_serializer: Callable[[Dict], str] | None = None,
+        json_deserializer: Callable[[Union[Dict, str, bool, int, float]], str] | None = None,
+    ):
+        super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
+
+    def encrypt(self, data: bytes | str, **kwargs) -> str:
+        data = self.json_serializer(data)
+        ciphertext = base64.b64encode(data).decode()
+        return ciphertext
+
+    def decrypt(self, data: bytes, **kwargs) -> Any:
+        ciphertext_decoded = base64.b64decode(data)
+        ciphertext = self.json_deserializer(ciphertext_decoded)
+        return ciphertext
 
 
 @pytest.fixture
 def data_masker(monkeypatch) -> DataMasking:
-    # Setting a default region
-    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-1")
-
     """DataMasking using AWS Encryption SDK Provider with a fake client"""
-    fake_client = FakeEncryptionClient()
-    provider = AwsEncryptionSdkProvider(keys=["dummy"], client=fake_client)
+    fake_key_provider = FakeEncryptionKeyProvider()
+    provider = AwsEncryptionSdkProvider(
+        keys=["dummy"],
+        key_provider=fake_key_provider,
+    )
     return DataMasking(provider=provider)
 
 

@@ -1,5 +1,5 @@
 import json
-from typing import Any, Union
+from typing import Any
 
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
@@ -20,7 +20,7 @@ class BaseProvider:
     def default_json_deserializer(self, data):
         return json.loads(data.decode("utf-8"))
 
-    def encrypt(self, data) -> Union[bytes, str]:
+    def encrypt(self, data) -> str:
         raise NotImplementedError("Subclasses must implement encrypt()")
 
     def decrypt(self, data) -> Any:
