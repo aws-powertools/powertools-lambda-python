@@ -1,7 +1,9 @@
 import datetime
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, Literal, Optional, Union
+from typing import Any, Dict, Optional, Union
+
+from typing_extensions import Literal
 
 try:
     import redis
