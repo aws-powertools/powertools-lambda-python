@@ -177,11 +177,20 @@ class SecretsProvider(BaseProvider):
             value = self.client.put_secret_value(**sdk_options)
             return value["VersionId"]
         except ClientError as exc:
-            if exc.response['Error']['Code'] == 'ResourceNotFoundException' and create_not_exists:
-                sdk_options.pop("SecretId")
-                sdk_options["Name"] = name
-                value = self.client.create_secret(**sdk_options)
-                return value["VersionId"]
+            if exc.response['Error']['Code'] != 'ResourceNotFoundException' :
+                raise SetParameterError('Failed to set parameter') from exc
+            elif not raise SetParameterError(str(exc)) from exc:
+                raise SetParameterError('Parameter does not exist, create before setting') from exc
+
+            sdk_options.pop("SecretId")
+            sdk_options["Name"] = name
+            try:
+              value = self.client.create_secret(**sdk_options)
+              return value["VersionId"]
+
+            except Exception as exc:
+                raise SetParameterError('Failed to create parameter') from exc
+
         except Exception as exc:
             raise SetParameterError(str(exc)) from exc
 
