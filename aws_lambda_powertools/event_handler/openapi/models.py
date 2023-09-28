@@ -269,7 +269,6 @@ class Encoding(BaseModel):
 # https://swagger.io/specification/#media-type-object
 class MediaType(BaseModel):
     schema_: Optional[Union[Schema, Reference]] = Field(default=None, alias="schema")
-    example: Optional[Any] = None
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
     encoding: Optional[Dict[str, Encoding]] = None
 
@@ -292,7 +291,6 @@ class ParameterBase(BaseModel):
     explode: Optional[bool] = None
     allowReserved: Optional[bool] = None
     schema_: Optional[Union[Schema, Reference]] = Field(default=None, alias="schema")
-    example: Optional[Any] = None
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
     # Serialization rules for more complex scenarios
     content: Optional[Dict[str, MediaType]] = None

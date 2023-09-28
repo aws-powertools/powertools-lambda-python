@@ -376,11 +376,13 @@ class Route:
         success_response["content"] = {"application/json": {"schema": {}}}
         json_response = success_response["content"].setdefault("application/json", {})
 
-        json_response["schema"] = self._openapi_operation_return(
-            operation_id=self.operation_id,
-            param=dependant.return_param,
-            model_name_map=model_name_map,
-            field_mapping=field_mapping,
+        json_response.update(
+            self._openapi_operation_return(
+                operation_id=self.operation_id,
+                param=dependant.return_param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            ),
         )
 
         path[self.method.lower()] = operation
@@ -389,8 +391,7 @@ class Route:
         return path, definitions
 
     def _openapi_operation_summary(self) -> str:
-        # Generate a summary from the pattern
-        return self.rule.__str__().replace("_", " ").title()
+        return f"{self.method.upper()} {self.path}"
 
     def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
         operation: Dict[str, Any] = {}
