@@ -44,6 +44,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 redis = {version = "^4.4.0", optional = true}
+types-redis = {version = "^4.4.0", optional = true}
 typing-extensions = "^4.6.2"
 datadog-lambda = { version = "^4.77.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
@@ -95,8 +96,8 @@ datadog-lambda = "^4.77.0"
 parser = ["pydantic"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
-redis = ["redis"]
-all = ["pydantic", "aws-xray-sdk", "fastjsonschema","redis"]
+redis = ["redis","types-redis"]
+all = ["pydantic", "aws-xray-sdk", "fastjsonschema","redis","types-redis"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]

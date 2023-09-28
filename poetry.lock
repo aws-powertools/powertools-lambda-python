@@ -2933,6 +2933,20 @@ doc = ["sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
 test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
+name = "types-pyopenssl"
+version = "23.2.0.2"
+description = "Typing stubs for pyOpenSSL"
+optional = true
+python-versions = "*"
+files = [
+    {file = "types-pyOpenSSL-23.2.0.2.tar.gz", hash = "sha256:6a010dac9ecd42b582d7dd2cc3e9e40486b79b3b64bb2fffba1474ff96af906d"},
+    {file = "types_pyOpenSSL-23.2.0.2-py3-none-any.whl", hash = "sha256:19536aa3debfbe25a918cf0d898e9f5fbbe6f3594a429da7914bf331deb1b342"},
+]
+
+[package.dependencies]
+cryptography = ">=35.0.0"
+
+[[package]]
 name = "types-python-dateutil"
 version = "2.8.19.14"
 description = "Typing stubs for python-dateutil"
@@ -2942,6 +2956,21 @@ files = [
     {file = "types-python-dateutil-2.8.19.14.tar.gz", hash = "sha256:1f4f10ac98bb8b16ade9dbee3518d9ace017821d94b057a425b069f834737f4b"},
     {file = "types_python_dateutil-2.8.19.14-py3-none-any.whl", hash = "sha256:f977b8de27787639986b4e28963263fd0e5158942b3ecef91b9335c130cb1ce9"},
 ]
+
+[[package]]
+name = "types-redis"
+version = "4.6.0.7"
+description = "Typing stubs for redis"
+optional = true
+python-versions = "*"
+files = [
+    {file = "types-redis-4.6.0.7.tar.gz", hash = "sha256:28c4153ddb5c9d4f10def44a2454673c361d2d5fc3cd867cf3bb1520f3f59a38"},
+    {file = "types_redis-4.6.0.7-py3-none-any.whl", hash = "sha256:05b1bf92879b25df20433fa1af07784a0d7928c616dc2ebf9087618db77ccbd0"},
+]
+
+[package.dependencies]
+cryptography = ">=35.0.0"
+types-pyOpenSSL = "*"
 
 [[package]]
 name = "types-requests"
@@ -3175,16 +3204,16 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["aws-xray-sdk", "fastjsonschema", "pydantic", "redis"]
+all = ["aws-xray-sdk", "fastjsonschema", "pydantic", "redis", "types-redis"]
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
 datamasking-aws-sdk = ["aws-encryption-sdk"]
 parser = ["pydantic"]
-redis = ["redis"]
+redis = ["redis", "types-redis"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "a6bf1f13542f5ac50a1e96945172e1ea8fe898b59bc0dfbec8a2771f8169f434"
+content-hash = "948387121798b46e130e564e62596b1484d4cd409a055c0b80849b5cc92074c9"
