@@ -22,5 +22,5 @@ def test_openapi_schema_custom_server():
 
     assert schema.servers
     assert len(schema.servers) == 1
-    assert schema.servers[0].url == "https://example.org"
+    assert str(schema.servers[0].url) == "https://example.org"
     assert schema.servers[0].description == "Example website"
