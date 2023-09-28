@@ -126,6 +126,7 @@ class SecretsProvider(BaseProvider):
         *, # force keyword arguments
         idempotency_id: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
+        create_not_exists: bool = False,
         **sdk_options
     ) -> str:
         """
@@ -143,6 +144,8 @@ class SecretsProvider(BaseProvider):
             during the Lambda rotation function processing.
         version_stages: list[str], optional
             Specifies a list of staging labels that are attached to this version of the secret.
+        create_not_exists: bool, optional
+            Create the secret if it does not exist, defaults to False
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -174,7 +177,7 @@ class SecretsProvider(BaseProvider):
             value = self.client.put_secret_value(**sdk_options)
             return value["VersionId"]
         except ClientError as exc:
-            if exc.response['Error']['Code'] == 'ResourceNotFoundException':
+            if exc.response['Error']['Code'] == 'ResourceNotFoundException' and create_not_exists:
                 sdk_options.pop("SecretId")
                 sdk_options["Name"] = name
                 value = self.client.create_secret(**sdk_options)
