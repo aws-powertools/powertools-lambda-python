@@ -210,6 +210,8 @@ class SSMProvider(BaseProvider):
         ----------
         path: str
             The fully qualified name includes the complete hierarchy of the parameter path and name.
+        value: str
+            The parameter value
         parameter_type: str, optional
             Type of the parameter.  Allowed values are String, StringList, and SecureString
         overwrite: bool, optional
@@ -228,8 +230,6 @@ class SSMProvider(BaseProvider):
         SetParameterError
             When the parameter provider fails to set a parameter value for
             a given name.
-        TransformParameterError
-            When the parameter provider fails to transform a parameter value.
         """
 
         sdk_options["Name"] = path
@@ -774,7 +774,6 @@ def set_parameter(
     tier: SSM_PARAMETER_TIER = "Standard",
     description: Optional[str] = None,
     kms_key_id: Optional[str] = None,
-    transform: Optional[str] = None,
     **sdk_options,
 ) -> int:
     """
@@ -784,6 +783,8 @@ def set_parameter(
     ----------
     path: str
         The fully qualified name includes the complete hierarchy of the parameter path and name.
+    value: str
+        The parameter value
     parameter_type: str, optional
         Type of the parameter.  Allowed values are String, StringList, and SecureString
     overwrite: bool, optional
@@ -794,8 +795,6 @@ def set_parameter(
         The description of the parameter
     kms_key_id: str, optional
         The KMS key id to use to encrypt the parameter
-    transform: str, optional
-        Transforms the content from a JSON object ('json') or base64 binary string ('binary')
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
 
@@ -808,8 +807,6 @@ def set_parameter(
     SetParameterError
         When the parameter provider fails to retrieve a parameter value for
         a given name.
-    TransformParameterError
-        When the parameter provider fails to transform a parameter value.
 
     URLs:
     -------

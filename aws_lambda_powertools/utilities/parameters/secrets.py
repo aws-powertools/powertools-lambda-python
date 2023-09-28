@@ -319,7 +319,7 @@ def set_secret(
         >>>
         >>> parameters.set_secret(
                 name="my-secret",
-                secret='{"password": "supers3cr3tllam@passw0rd"}',
+                value='{"password": "supers3cr3tllam@passw0rd"}',
                 idempotency_id="61f2af5f-5f75-44b1-a29f-0cc37af55b11"
             )
     """
