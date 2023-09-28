@@ -10,6 +10,7 @@ from enum import Enum
 from functools import partial
 from http import HTTPStatus
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -29,21 +30,6 @@ from typing_extensions import Literal
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
-from aws_lambda_powertools.event_handler.openapi.compat import (
-    GenerateJsonSchema,
-    JsonSchemaValue,
-    ModelField,
-    get_compat_model_name_map,
-    get_definitions,
-    get_schema_from_model_field,
-)
-from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant, get_flat_params
-from aws_lambda_powertools.event_handler.openapi.models import Contact, License, OpenAPI, Server, Tag
-from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param
-from aws_lambda_powertools.event_handler.openapi.types import (
-    COMPONENT_REF_TEMPLATE,
-    TypeModelOrEnum,
-)
 from aws_lambda_powertools.event_handler.response import Response
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -66,6 +52,21 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _ROUTE_REGEX = "^{}$"
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.compat import (
+        JsonSchemaValue,
+        ModelField,
+    )
+    from aws_lambda_powertools.event_handler.openapi.models import (
+        Contact,
+        License,
+        OpenAPI,
+        Server,
+        Tag,
+    )
+    from aws_lambda_powertools.event_handler.openapi.params import Dependant
+    from aws_lambda_powertools.event_handler.openapi.types import TypeModelOrEnum
 
 
 class ProxyEventType(Enum):
@@ -204,7 +205,7 @@ class Route:
         cache_control: Optional[str],
         middlewares: Optional[List[Callable[..., Response]]],
         description: Optional[str],
-        tags: Optional[List[Tag]],
+        tags: Optional[List["Tag"]],
     ):
         """
 
@@ -341,11 +342,15 @@ class Route:
     def _get_openapi_path(
         self,
         *,
-        dependant: Dependant,
+        dependant: "Dependant",
         operation_ids: Set[str],
-        model_name_map: Dict[TypeModelOrEnum, str],
-        field_mapping: Dict[Tuple[ModelField, Literal["validation", "serialization"]], JsonSchemaValue],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        from aws_lambda_powertools.event_handler.openapi.dependant import (
+            get_flat_params,
+        )
+
         path = {}
         definitions: Dict[str, Any] = {}
 
@@ -413,13 +418,18 @@ class Route:
     @staticmethod
     def _openapi_operation_parameters(
         *,
-        all_route_params: Sequence[ModelField],
-        model_name_map: Dict[TypeModelOrEnum, str],
+        all_route_params: Sequence["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[
-            Tuple[ModelField, Literal["validation", "serialization"]],
-            JsonSchemaValue,
+            Tuple["ModelField", Literal["validation", "serialization"]],
+            "JsonSchemaValue",
         ],
     ) -> List[Dict[str, Any]]:
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            get_schema_from_model_field,
+        )
+        from aws_lambda_powertools.event_handler.openapi.params import Param
+
         parameters = []
         for param in all_route_params:
             field_info = param.field_info
@@ -454,15 +464,19 @@ class Route:
     def _openapi_operation_return(
         *,
         operation_id: str,
-        param: Optional[ModelField],
-        model_name_map: Dict[TypeModelOrEnum, str],
+        param: Optional["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[
-            Tuple[ModelField, Literal["validation", "serialization"]],
-            JsonSchemaValue,
+            Tuple["ModelField", Literal["validation", "serialization"]],
+            "JsonSchemaValue",
         ],
     ) -> Dict[str, Any]:
         if param is None:
             return {}
+
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            get_schema_from_model_field,
+        )
 
         return_schema = get_schema_from_model_field(
             field=param,
@@ -584,7 +598,7 @@ class BaseRouter(ABC):
         compress: bool = False,
         cache_control: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -638,7 +652,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
     ):
         """Get route decorator with GET `method`
 
@@ -672,7 +686,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
     ):
         """Post route decorator with POST `method`
 
@@ -707,7 +721,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
     ):
         """Put route decorator with PUT `method`
 
@@ -742,7 +756,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -776,7 +790,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         middlewares: Optional[List[Callable]] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -1007,12 +1021,12 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
-        servers: Optional[List[Server]] = None,
+        tags: Optional[List["Tag"]] = None,
+        servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
-        contact: Optional[Contact] = None,
-        license_info: Optional[License] = None,
-    ) -> OpenAPI:
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
+    ) -> "OpenAPI":
         """
         Returns the OpenAPI schema as a pydantic model.
 
@@ -1044,6 +1058,17 @@ class ApiGatewayResolver(BaseRouter):
         OpenAPI: pydantic model
             The OpenAPI schema as a pydantic model.
         """
+
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            GenerateJsonSchema,
+            get_compat_model_name_map,
+            get_definitions,
+        )
+        from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, Server
+        from aws_lambda_powertools.event_handler.openapi.types import (
+            COMPONENT_REF_TEMPLATE,
+        )
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
@@ -1121,11 +1146,11 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
-        servers: Optional[List[Server]] = None,
+        tags: Optional[List["Tag"]] = None,
+        servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
-        contact: Optional[Contact] = None,
-        license_info: Optional[License] = None,
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1179,7 +1204,7 @@ class ApiGatewayResolver(BaseRouter):
         compress: bool = False,
         cache_control: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1561,12 +1586,18 @@ class ApiGatewayResolver(BaseRouter):
             self.route(*new_route, middlewares=middlewares)(func)  # type: ignore
 
     @staticmethod
-    def _get_fields_from_routes(routes: Sequence[Route]) -> List[ModelField]:
+    def _get_fields_from_routes(routes: Sequence[Route]) -> List["ModelField"]:
         """
         Returns a list of fields from the routes
         """
-        responses_from_routes: List[ModelField] = []
-        request_fields_from_routes: List[ModelField] = []
+
+        from aws_lambda_powertools.event_handler.openapi.dependant import (
+            get_dependant,
+            get_flat_params,
+        )
+
+        responses_from_routes: List["ModelField"] = []
+        request_fields_from_routes: List["ModelField"] = []
 
         for route in routes:
             dependant = get_dependant(path=route.path, call=route.func)
@@ -1597,7 +1628,7 @@ class Router(BaseRouter):
         compress: bool = False,
         cache_control: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -1645,7 +1676,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         compress: bool = False,
         cache_control: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[Tag]] = None,
+        tags: Optional[List["Tag"]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
