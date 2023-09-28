@@ -126,7 +126,7 @@ class SecretsProvider(BaseProvider):
         *, # force keyword arguments
         idempotency_id: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
-        create_not_exists: bool = False,
+        create: bool = True,
         **sdk_options
     ) -> str:
         """
@@ -177,22 +177,19 @@ class SecretsProvider(BaseProvider):
             value = self.client.put_secret_value(**sdk_options)
             return value["VersionId"]
         except ClientError as exc:
-            if exc.response['Error']['Code'] != 'ResourceNotFoundException' :
-                raise SetParameterError('Failed to set parameter') from exc
-            elif not raise SetParameterError(str(exc)) from exc:
-                raise SetParameterError('Parameter does not exist, create before setting') from exc
+            if exc.response["Error"]["Code"] != "ResourceNotFoundException":
+                raise SetParameterError(str(exc)) from exc
+            elif not create:
+                raise SetParameterError("Parameter does not exist, create before setting or set 'create' to True.") from exc
+            else:
+                sdk_options.pop("SecretId")
+                sdk_options["Name"] = name
+                try:
+                    value = self.client.create_secret(**sdk_options)
+                    return value["VersionId"]
+                except Exception as exc:
+                    raise SetParameterError(str(exc)) from exc
 
-            sdk_options.pop("SecretId")
-            sdk_options["Name"] = name
-            try:
-              value = self.client.create_secret(**sdk_options)
-              return value["VersionId"]
-
-            except Exception as exc:
-                raise SetParameterError('Failed to create parameter') from exc
-
-        except Exception as exc:
-            raise SetParameterError(str(exc)) from exc
 
 
 def get_secret(
@@ -269,6 +266,7 @@ def set_secret(
     *, # force keyword arguments
     idempotency_id: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
+    create: bool = True,
     **sdk_options
 ) -> str:
     """
@@ -323,5 +321,5 @@ def set_secret(
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
     return DEFAULT_PROVIDERS["secrets"]._set(
-        name=name, value=value, idempotency_id=idempotency_id, version_stages=version_stages, **sdk_options
+        name=name, value=value, idempotency_id=idempotency_id, version_stages=version_stages, create=create, **sdk_options
     )
