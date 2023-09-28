@@ -175,6 +175,8 @@ class SecretsProvider(BaseProvider):
             return value["VersionId"]
         except ClientError as exc:
             if exc.response['Error']['Code'] == 'ResourceNotFoundException':
+                sdk_options.pop("SecretId")
+                sdk_options["Name"] = name
                 value = self.client.create_secret(**sdk_options)
                 return value["VersionId"]
         except Exception as exc:
