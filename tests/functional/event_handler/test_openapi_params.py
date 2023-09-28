@@ -9,15 +9,19 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     Schema,
 )
 
+JSON_CONTENT_TYPE = "application/json"
+
 
 def test_openapi_no_params():
     app = ApiGatewayResolver()
 
     @app.get("/")
     def handler():
-        pass
+        raise NotImplementedError()
 
-    schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
+    schema = app.get_openapi_schema()
+    assert schema.info.title == "Powertools API"
+    assert schema.info.version == "1.0.0"
 
     assert len(schema.paths.keys()) == 1
     assert "/" in schema.paths
@@ -33,8 +37,8 @@ def test_openapi_no_params():
     response = get.responses["200"]
     assert response.description == "Success"
 
-    assert "application/json" in response.content
-    json_response = response.content["application/json"]
+    assert JSON_CONTENT_TYPE in response.content
+    json_response = response.content[JSON_CONTENT_TYPE]
     assert json_response.schema_ == Schema()
     assert not json_response.examples
     assert not json_response.encoding
@@ -45,9 +49,11 @@ def test_openapi_with_scalar_params():
 
     @app.get("/users/<user_id>")
     def handler(user_id: str, include_extra: bool = False):
-        pass
+        raise NotImplementedError()
 
-    schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
+    schema = app.get_openapi_schema(title="My API", version="0.2.2")
+    assert schema.info.title == "My API"
+    assert schema.info.version == "0.2.2"
 
     assert len(schema.paths.keys()) == 1
     assert "/users/<user_id>" in schema.paths
@@ -86,13 +92,13 @@ def test_openapi_with_scalar_returns():
     def handler() -> str:
         return "Hello, world"
 
-    schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
+    schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
 
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content["application/json"]
+    response = get.responses["200"].content[JSON_CONTENT_TYPE]
     assert response.schema_.title == "Return"
     assert response.schema_.type == "string"
 
@@ -107,13 +113,13 @@ def test_openapi_with_pydantic_returns():
     def handler() -> User:
         return User(name="Ruben Fonseca")
 
-    schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
+    schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
 
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content["application/json"]
+    response = get.responses["200"].content[JSON_CONTENT_TYPE]
     reference = response.schema_
     assert reference.ref == "#/components/schemas/User"
 
@@ -135,13 +141,13 @@ def test_openapi_with_dataclasse_return():
     def handler() -> User:
         return User(name="Ruben Fonseca")
 
-    schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
+    schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
 
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content["application/json"]
+    response = get.responses["200"].content[JSON_CONTENT_TYPE]
     reference = response.schema_
     assert reference.ref == "#/components/schemas/User"
 

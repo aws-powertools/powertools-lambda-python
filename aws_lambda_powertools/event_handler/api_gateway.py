@@ -1017,8 +1017,8 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_schema(
         self,
         *,
-        title: str,
-        version: str,
+        title: str = "Powertools API",
+        version: str = "1.0.0",
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
@@ -1142,8 +1142,8 @@ class ApiGatewayResolver(BaseRouter):
     def get_openapi_json_schema(
         self,
         *,
-        title: str,
-        version: str,
+        title: str = "Powertools API",
+        version: str = "1.0.0",
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
