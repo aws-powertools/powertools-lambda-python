@@ -8,6 +8,7 @@ import json
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
+from botocore.exceptions import ClientError
 from botocore.config import Config
 
 if TYPE_CHECKING:
@@ -172,6 +173,10 @@ class SecretsProvider(BaseProvider):
         try:
             value = self.client.put_secret_value(**sdk_options)
             return value["VersionId"]
+        except ClientError as exc:
+            if exc.response['Error']['Code'] == 'ResourceNotFoundException':
+                value = self.client.create_secret(**sdk_options)
+                return value["VersionId"]
         except Exception as exc:
             raise SetParameterError(str(exc)) from exc
 
