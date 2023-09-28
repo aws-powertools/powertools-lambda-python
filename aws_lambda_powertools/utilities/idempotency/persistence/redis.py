@@ -338,6 +338,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.client.hset(**item)
 
     def _delete_record(self, data_record: DataRecord) -> None:
+        # This function only works when Lambda handler has already been invoked once
+        # maybe we should add some exception when this is called before Lambda handler
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
         # See: https://redis.io/commands/del/
         self.client.delete(data_record.idempotency_key)
