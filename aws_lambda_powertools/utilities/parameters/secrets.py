@@ -138,14 +138,15 @@ class SecretsProvider(BaseProvider):
             The ARN or name of the secret to add a new version to.
         value: str or bytes
             Specifies text data that you want to encrypt and store in this new version of the secret.
-        idempotency_id: str, optional
-            Idempotency token to use for the request to prevent the accidental
-            creation of duplicate versions if there are failures and retries
-            during the Lambda rotation function processing.
+        idempotency_token: str, optional
+            This value helps ensure idempotency. Recommended that you generate
+            a UUID-type value to ensure uniqueness within the specified secret.
+            This value becomes the VersionId of the new version. This field is
+            autopopulated if not provided.
         version_stages: list[str], optional
             Specifies a list of staging labels that are attached to this version of the secret.
-        create_not_exists: bool, optional
-            Create the secret if it does not exist, defaults to False
+        create: bool, optional
+            Create the secret by default unless this is set to False, defaults to True
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -180,7 +181,7 @@ class SecretsProvider(BaseProvider):
             if exc.response["Error"]["Code"] != "ResourceNotFoundException":
                 raise SetParameterError(str(exc)) from exc
             elif not create:
-                raise SetParameterError("Parameter does not exist, create before setting or set 'create' to True.") from exc
+                raise SetParameterError("Parameter does not exist, create before setting or set 'create' to True.")
             else:
                 sdk_options.pop("SecretId")
                 sdk_options["Name"] = name
@@ -279,11 +280,14 @@ def set_secret(
     value: str or bytes
         Secret value to set
     idempotency_token: str, optional
-        Idempotency token to use for the request to prevent the accidental
-        creation of duplicate versions if there are failures and retries
-        during the Lambda rotation function processing.
+        This value helps ensure idempotency. Recommended that you generate
+        a UUID-type value to ensure uniqueness within the specified secret.
+        This value becomes the VersionId of the new version. This field is
+        autopopulated if not provided.
     version_stages: list[str], optional
         A list of staging labels that are attached to this version of the secret.
+    create: bool, optional
+        Create the secret by default unless this is set to False, defaults to True
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
@@ -313,7 +317,11 @@ def set_secret(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> parameters.set_secret(name="my-secret", secret='{"password": "supers3cr3tl"}', idempotency_id="f658ca...99194")
+        >>> parameters.set_secret(
+                name="my-secret",
+                secret='{"password": "supers3cr3tl"}',
+                idempotency_id="61f2af5f-5f75-44b1-a29f-0cc37af55b11"
+            )
     """
 
     # Only create the provider if this function is called at least once
