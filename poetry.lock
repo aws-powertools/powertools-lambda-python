@@ -437,7 +437,7 @@ files = [
 name = "cffi"
 version = "1.15.1"
 description = "Foreign Function Interface for Python calling C code."
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "cffi-1.15.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:a66d3508133af6e8548451b25058d5812812ec3798c886bf38ed24a98216fab2"},
@@ -748,7 +748,7 @@ toml = ["tomli"]
 name = "cryptography"
 version = "41.0.4"
 description = "cryptography is a package which provides cryptographic recipes and primitives to Python developers."
-optional = true
+optional = false
 python-versions = ">=3.7"
 files = [
     {file = "cryptography-41.0.4-cp37-abi3-macosx_10_12_universal2.whl", hash = "sha256:80907d3faa55dc5434a16579952ac6da800935cd98d14dbd62f6f042c7f5e839"},
@@ -2146,7 +2146,7 @@ files = [
 name = "pycparser"
 version = "2.21"
 description = "C parser in Python"
-optional = true
+optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
     {file = "pycparser-2.21-py2.py3-none-any.whl", hash = "sha256:8ee45429555515e1f6b185e78100aea234072576aa43ab53aefcae078162fca9"},
@@ -2936,7 +2936,7 @@ test = ["mypy", "pytest", "typing-extensions"]
 name = "types-pyopenssl"
 version = "23.2.0.2"
 description = "Typing stubs for pyOpenSSL"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "types-pyOpenSSL-23.2.0.2.tar.gz", hash = "sha256:6a010dac9ecd42b582d7dd2cc3e9e40486b79b3b64bb2fffba1474ff96af906d"},
@@ -2961,7 +2961,7 @@ files = [
 name = "types-redis"
 version = "4.6.0.7"
 description = "Typing stubs for redis"
-optional = true
+optional = false
 python-versions = "*"
 files = [
     {file = "types-redis-4.6.0.7.tar.gz", hash = "sha256:28c4153ddb5c9d4f10def44a2454673c361d2d5fc3cd867cf3bb1520f3f59a38"},
@@ -3216,4 +3216,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "948387121798b46e130e564e62596b1484d4cd409a055c0b80849b5cc92074c9"
+content-hash = "54b337d0e75ea0b49c3ce3e9d9f16ba0a08fa7c2e1ad5fbfffdd9aaaca86ea6d"
