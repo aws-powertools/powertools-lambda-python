@@ -319,6 +319,22 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
     --8<-- "examples/logger/src/logging_uncaught_exceptions_output.json"
     ```
 
+#### Stack trace logging
+
+Logger can optionally log the full stack trace as JSON by setting `logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=True)` at initialization. Optionally, setting the `POWERTOOLS_LOGGER_ENHANCED_STACKTRACE` environment variable to `true` will include stacktrace information in the logs.
+
+=== "logging_stacktrace.py"
+
+    ```python hl_lines="8"
+    --8<-- "examples/logger/src/logging_stacktrace.py"
+    ```
+
+=== "logging_stacktrace_output.json"
+
+    ```json hl_lines="7-22"
+    --8<-- "examples/logger/src/logging_stacktrace_output.json"
+    ```
+
 ### Date formatting
 
 Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
@@ -352,6 +368,7 @@ The following environment variables are available to configure Logger at a globa
 | **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
 | **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
 | **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+| **Include Stack Trace**   | Includes JSON formatted stack trace in the log output.                       | `POWERTOOLS_LOGGER_ENHANCED_STACKTRACE` | `false` |
 
 [`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value.
 

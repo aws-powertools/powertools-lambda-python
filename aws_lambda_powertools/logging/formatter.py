@@ -81,7 +81,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         log_record_order: List[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
-        include_traceback: bool = None,
+        include_stacktrace: bool = None,
         **kwargs,
     ) -> None:
         """Return a LambdaPowertoolsFormatter instance.
@@ -153,8 +153,8 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**self.keys_combined)
 
-        self.include_traceback = resolve_truthy_env_var_choice(env=os.getenv(constants.POWERTOOLS_TRACEBACK_ENV, "false"),
-                                                               choice=include_traceback,
+        self.include_stacktrace = resolve_truthy_env_var_choice(env=os.getenv(constants.POWERTOOLS_STACKTRACE_ENV, "false"),
+                                                               choice=include_stacktrace,
                                                                )
 
         super().__init__(datefmt=self.datefmt)
@@ -164,11 +164,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         return self.json_serializer(log)
     
     def serialize_traceback(self, e: Exception) -> list:
-        return [{"File": fs.filename, 
-                    "Line": fs.lineno,
-                    "Column": fs.colno,
-                    "Function": fs.name,
-                    "Statement": fs.line
+        return [{"file": fs.filename, 
+                    "line": fs.lineno,
+                    "column": fs.colno,
+                    "function": fs.name,
+                    "statement": fs.line
                     } for fs in traceback.extract_tb(e.__traceback__)]
 
 
@@ -177,7 +177,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         formatted_log = self._extract_log_keys(log_record=record)
         formatted_log["message"] = self._extract_log_message(log_record=record)
 
-        if self.include_traceback:
+        if self.include_stacktrace:
             # Generate the traceback from the traceback library
             formatted_log["stack_trace"] = self.serialize_traceback(record.msg) #JSR
 

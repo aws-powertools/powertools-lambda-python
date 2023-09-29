@@ -959,3 +959,62 @@ def test_stream_defaults_to_stdout(service_name, capsys):
     # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
     log = json.loads(capsys.readouterr().out.strip())
     assert log["message"] == msg
+
+def test_logger_logs_no_stack_trace_without_parameter(stdout):
+    logger = Logger(stream=stdout)
+
+    try:
+        val = 1 + "someString"
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log
+
+def test_logger_logs_stack_trace_with_parameter(stdout):
+    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=True))
+
+    try:
+        val = 1 + "someString"
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" in log
+
+def test_logger_logs_stack_trace_with_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "true")
+    logger = Logger(stream=stdout)
+
+    try:
+        val = 1 + "someString"
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" in log
+
+
+def test_logger_logs_no_stack_trace_with_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "false")
+    logger = Logger(stream=stdout)
+
+    try:
+        val = 1 + "someString"
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log
+
+def test_logger_logs_no_stack_trace_with_parameter_override(stdout, monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "true")
+    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=False))
+
+    try:
+        val = 1 + "someString"
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log

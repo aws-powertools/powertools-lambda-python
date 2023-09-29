@@ -718,6 +718,7 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | **POWERTOOLS_PARAMETERS_SSM_DECRYPT**     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters.md#ssmprovider){target="_blank"}                     | `false`               |
 | **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#optimizing-for-non-production-environments) | `false`               |
 | **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `INFO`                |
+| **POWERTOOLS_LOGGER_ENHANCED_STACKTRACE** | Include JSON formatted stack trace in log message                                      | [Logging](./core/logger.md){target="_blank"}                                             | `false`               |
 
 ### Optimizing for non-production environments
 
