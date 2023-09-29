@@ -311,7 +311,7 @@ def set_secret(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> parameters.set_secret(name="llamas-are-awesome", secret="supers3cr3tllam@passw0rd")
+        >>> parameters.set_secret(name="llamas-are-awesome", value="supers3cr3tllam@passw0rd")
 
     **Sets a secret and includes an idempotency_id**
 

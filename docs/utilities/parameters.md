@@ -112,6 +112,16 @@ You can fetch secrets stored in Secrets Manager using `get_secret`.
     --8<-- "examples/parameters/src/getting_started_secret.py"
     ```
 
+### Setting secrets
+
+You can set secrets stored in Secrets Manager using `set_secret`.
+
+=== "getting_started_secret.py"
+    ```python hl_lines="5 15"
+    --8<-- "examples/parameters/src/getting_started_setting_secret.py"
+    ```
+
+
 ### Fetching app configurations
 
 You can fetch application configurations in AWS AppConfig using `get_app_config`.
