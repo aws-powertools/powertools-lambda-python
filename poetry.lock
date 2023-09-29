@@ -214,13 +214,13 @@ requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.75.0"
+version = "1.76.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.75.0.tar.gz", hash = "sha256:18c83abcae594de084947befb9c80f689f8b99ece2d38729d27a9cea634da15c"},
-    {file = "aws_sam_translator-1.75.0-py3-none-any.whl", hash = "sha256:02bad7636356438b439c8e0ef0195618e3b7b67b6dfbf675b1627d6fd84b2910"},
+    {file = "aws-sam-translator-1.76.0.tar.gz", hash = "sha256:6d0d68071071bd54c11ec69346a5a52db22cc316bfa2cb6f827a36a9348bbf00"},
+    {file = "aws_sam_translator-1.76.0-py3-none-any.whl", hash = "sha256:782ed1502d1a84a4912827da168edb133da9f8a5a7d5701cff7eede80ead1dca"},
 ]
 
 [package.dependencies]
@@ -336,17 +336,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.56"
+version = "1.28.57"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.56-py3-none-any.whl", hash = "sha256:f5fcb27cdbd08ca38d699f2d2e32d96d1d9fab3368c15c6bc326256612d2cfd7"},
-    {file = "boto3-1.28.56.tar.gz", hash = "sha256:b927a7ed335d543c33c15fa63f1076f3fa8422959771c2187da74bc4395ab6e3"},
+    {file = "boto3-1.28.57-py3-none-any.whl", hash = "sha256:5ddf24cf52c7fb6aaa332eaa08ae8c2afc8f2d1e8860680728533dd573904e32"},
+    {file = "boto3-1.28.57.tar.gz", hash = "sha256:e2d2824ba6459b330d097e94039a9c4f96ae3f4bcdc731d620589ad79dcd16d3"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.56,<1.32.0"
+botocore = ">=1.31.57,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.7.0,<0.8.0"
 
@@ -355,13 +355,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.56"
+version = "1.31.57"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.56-py3-none-any.whl", hash = "sha256:66c686e4eda7051ffcc9357d9075390c8ab2f95a2977669039618ee186fb533b"},
-    {file = "botocore-1.31.56.tar.gz", hash = "sha256:70252cd8abc2fe9b791328e187620f5a3911545e2520486b01ecfad31f41b9cb"},
+    {file = "botocore-1.31.57-py3-none-any.whl", hash = "sha256:af006248276ff8e19e3ec7214478f6257035eb40aed865e405486500471ae71b"},
+    {file = "botocore-1.31.57.tar.gz", hash = "sha256:301436174635bec739b225b840fc365ca00e5c1a63e5b2a19ee679d204e01b78"},
 ]
 
 [package.dependencies]
@@ -3204,16 +3204,16 @@ docs = ["furo", "jaraco.packaging (>=9)", "jaraco.tidelift (>=1.4)", "rst.linker
 testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more-itertools", "pytest (>=6)", "pytest-black (>=0.3.7)", "pytest-checkdocs (>=2.4)", "pytest-cov", "pytest-enabler (>=1.3)", "pytest-flake8", "pytest-mypy (>=0.9.1)"]
 
 [extras]
-all = ["aws-xray-sdk", "fastjsonschema", "pydantic", "redis", "types-redis"]
+all = ["aws-xray-sdk", "fastjsonschema", "pydantic", "redis"]
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
 datamasking-aws-sdk = ["aws-encryption-sdk"]
 parser = ["pydantic"]
-redis = ["redis", "types-redis"]
+redis = ["redis"]
 tracer = ["aws-xray-sdk"]
 validation = ["fastjsonschema"]
 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "54b337d0e75ea0b49c3ce3e9d9f16ba0a08fa7c2e1ad5fbfffdd9aaaca86ea6d"
+content-hash = "56b0ac2a1d61fe1b85c6ada47ca657477768bc9c393b3cf30ef20899b1e1febf"
