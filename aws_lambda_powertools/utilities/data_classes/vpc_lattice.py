@@ -160,7 +160,7 @@ class VPCLatticeEventV2(BaseProxyEvent):
 
     @property
     def headers(self) -> Dict[str, str]:
-        """The VPC Lattice v2 Event event headers."""
+        """The VPC Lattice v2 Event headers."""
         return self["headers"]
 
     @property
