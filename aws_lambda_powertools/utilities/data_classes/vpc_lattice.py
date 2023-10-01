@@ -179,7 +179,7 @@ class VPCLatticeEventV2(BaseProxyEvent):
         return self["is_base64_encoded"]
 
     @property
-    def request_context(self) -> dict:
+    def request_context(self) -> Dict[str, str]:
         """he VPC Lattice event request context."""
         return self["requestContext"]
 
