@@ -198,7 +198,6 @@ class VPCLatticeEventV2(BaseProxyEvent):
             return base64_decode(body)
         return body
 
-
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
 
