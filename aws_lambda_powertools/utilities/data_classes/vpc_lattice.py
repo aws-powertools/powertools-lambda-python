@@ -150,17 +150,17 @@ class VPCLatticeEventV2(BaseProxyEvent):
 
     @property
     def path(self) -> str:
-        """The VPC Lattice path"""
+        """The VPC Lattice v2 Event path"""
         return self["path"]
 
     @property
     def method(self) -> str:
-        """The VPC Lattice method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
+        """The VPC Lattice v2 Event method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["method"]
 
     @property
     def headers(self) -> Dict[str, str]:
-        """The VPC Lattice event headers."""
+        """The VPC Lattice v2 Event event headers."""
         return self["headers"]
 
     @property
@@ -170,7 +170,7 @@ class VPCLatticeEventV2(BaseProxyEvent):
 
     @property
     def body(self) -> str:
-        """The VPC Lattice body."""
+        """The VPC Lattice v2 Event body."""
         return self["body"]
 
     @property
@@ -180,7 +180,7 @@ class VPCLatticeEventV2(BaseProxyEvent):
 
     @property
     def request_context(self) -> Dict[str, str]:
-        """he VPC Lattice event request context."""
+        """he VPC Lattice v2 Event request context."""
         return self["requestContext"]
 
     @property
