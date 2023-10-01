@@ -22,6 +22,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     LambdaFunctionUrlEvent,
     VPCLatticeEvent,
+    VPCLatticeEventV2
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -43,6 +44,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
     VPCLatticeEvent = "VPCLatticeEvent"
+    VPCLatticeEventV2 = "VPCLatticeEventV2"
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
 
 
@@ -999,6 +1001,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.VPCLatticeEvent:
             logger.debug("Converting event to VPC Lattice contract")
             return VPCLatticeEvent(event)
+        if self._proxy_type == ProxyEventType.VPCLatticeEventV2:
+            logger.debug("Converting event to VPC Lattice contract")
+            return VPCLatticeEventV2(event)
         logger.debug("Converting event to ALB contract")
         return ALBEvent(event)
 
