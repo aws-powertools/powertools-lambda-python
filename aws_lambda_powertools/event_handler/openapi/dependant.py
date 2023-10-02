@@ -160,11 +160,12 @@ def get_dependant(
         is_path_param = param_name in path_param_names
 
         # Analyze the parameter to get the Pydantic field.
-        _, param_field = analyze_param(
+        param_field = analyze_param(
             param_name=param_name,
             annotation=param.annotation,
             value=param.default,
             is_path_param=is_path_param,
+            is_response_param=False,
         )
         if param_field is None:
             raise AssertionError(f"Param field is None for param: {param_name}")
@@ -174,11 +175,12 @@ def get_dependant(
     # If the return annotation is not empty, add it to the dependant model.
     return_annotation = endpoint_signature.return_annotation
     if return_annotation is not inspect.Signature.empty:
-        _, param_field = analyze_param(
-            param_name="Return",
+        param_field = analyze_param(
+            param_name="return",
             annotation=return_annotation,
             value=None,
             is_path_param=False,
+            is_response_param=True,
         )
         if param_field is None:
             raise AssertionError("Param field is None for return annotation")

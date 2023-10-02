@@ -98,7 +98,7 @@ def test_openapi_with_custom_params():
     def handler(
         count: Annotated[
             int,
-            Query(lt=100, gt=0, examples=[Example(summary="Example 1", value=10)]),
+            Query(gt=0, lt=100, examples=[Example(summary="Example 1", value=10)]),
         ] = 1,
     ):
         raise NotImplementedError()

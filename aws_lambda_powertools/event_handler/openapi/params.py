@@ -1,16 +1,17 @@
 import inspect
-from copy import copy
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
-from typing_extensions import Annotated, get_args, get_origin
+from typing_extensions import Annotated, Literal, get_args, get_origin
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     Required,
     Undefined,
+    UndefinedType,
+    copy_field_info,
     get_annotation_from_field_info,
 )
 from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2, CacheKey
@@ -302,7 +303,8 @@ def analyze_param(
     annotation: Any,
     value: Any,
     is_path_param: bool,
-) -> Tuple[Any, Optional[ModelField]]:
+    is_response_param: bool,
+) -> Optional[ModelField]:
     """
     Analyze a parameter annotation and value to determine the type and default value of the parameter.
 
@@ -316,10 +318,12 @@ def analyze_param(
         The value of the parameter
     is_path_param
         Whether the parameter is a path parameter
+    is_response_param
+        Whether the parameter is the return annotation
 
     Returns
     -------
-    Tuple[Any, Optional[ModelField]]
+    Optional[ModelField]
         The type annotation and the Pydantic field representing the parameter
     """
     field_info, type_annotation = _get_field_info_and_type_annotation(annotation, value, is_path_param)
@@ -336,12 +340,16 @@ def analyze_param(
 
         # Check if the parameter is part of the path. Otherwise, defaults to query.
         if is_path_param:
-            field_info = Path(annotation=type_annotation, default=default_value)
+            field_info = Path(annotation=type_annotation)
         else:
             field_info = Query(annotation=type_annotation, default=default_value)
 
+    # When we have a response field, we need to set the default value to Required
+    if is_response_param:
+        field_info.default = Required
+
     field = _create_model_field(field_info, type_annotation, param_name, is_path_param)
-    return type_annotation, field
+    return field
 
 
 def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
@@ -372,7 +380,10 @@ def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tu
 
     if isinstance(powertools_annotation, FieldInfo):
         # Copy `field_info` because we mutate `field_info.default` later
-        field_info = copy(powertools_annotation)
+        field_info = copy_field_info(
+            field_info=powertools_annotation,
+            annotation=annotation,
+        )
         if field_info.default not in [Undefined, Required]:
             raise AssertionError("FieldInfo needs to have a default value of Undefined or Required")
 
@@ -384,6 +395,44 @@ def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tu
             field_info.default = Required
 
     return field_info, type_annotation
+
+
+def _create_response_field(
+    name: str,
+    type_: Type[Any],
+    default: Optional[Any] = Undefined,
+    required: Union[bool, UndefinedType] = Undefined,
+    model_config: Type[BaseConfig] = BaseConfig,
+    field_info: Optional[FieldInfo] = None,
+    alias: Optional[str] = None,
+    mode: Literal["validation", "serialization"] = "validation",
+) -> ModelField:
+    """
+    Create a new response field. Raises if type_ is invalid.
+    """
+    if PYDANTIC_V2:
+        field_info = field_info or FieldInfo(
+            annotation=type_,
+            default=default,
+            alias=alias,
+        )
+    else:
+        field_info = field_info or FieldInfo()
+    kwargs = {"name": name, "field_info": field_info}
+    if PYDANTIC_V2:
+        kwargs.update({"mode": mode})
+    else:
+        kwargs.update(
+            {
+                "type_": type_,
+                "class_validators": {},
+                "default": default,
+                "required": required,
+                "model_config": model_config,
+                "alias": alias,
+            },
+        )
+    return ModelField(**kwargs)  # type: ignore[arg-type]
 
 
 def _create_model_field(
@@ -411,21 +460,11 @@ def _create_model_field(
         alias = field_info.alias or param_name
     field_info.alias = alias
 
-    # Create the Pydantic field
-    kwargs = {"name": param_name, "field_info": field_info}
-
-    if PYDANTIC_V2:
-        kwargs.update({"mode": "validation"})
-    else:
-        kwargs.update(
-            {
-                "type_": use_annotation,
-                "class_validators": {},
-                "default": field_info.default,
-                "required": field_info.default in (Required, Undefined),
-                "model_config": BaseConfig,
-                "alias": alias,
-            },
-        )
-
-    return ModelField(**kwargs)  # type: ignore[arg-type]
+    return _create_response_field(
+        name=param_name,
+        type_=use_annotation,
+        default=field_info.default,
+        alias=alias,
+        required=field_info.default in (Required, Undefined),
+        field_info=field_info,
+    )

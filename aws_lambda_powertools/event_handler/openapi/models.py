@@ -4,6 +4,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from pydantic import AnyUrl, BaseModel, Field
 from typing_extensions import Annotated, Literal
 
+from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
 from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2
 
 """
@@ -205,7 +206,7 @@ class Schema(BaseModel):
     deprecated: Optional[bool] = None
     readOnly: Optional[bool] = None
     writeOnly: Optional[bool] = None
-    examples: Optional[List[Any]] = None
+    examples: Optional[List["Example"]] = None
     # Ref: OpenAPI 3.1.0: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object
     # Schema Object
     discriminator: Optional[Discriminator] = None
@@ -577,6 +578,6 @@ class OpenAPI(BaseModel):
             extra = "allow"
 
 
-Schema.update_forward_refs()
-Operation.update_forward_refs()
-Encoding.update_forward_refs()
+model_rebuild(Schema)
+model_rebuild(Operation)
+model_rebuild(Encoding)

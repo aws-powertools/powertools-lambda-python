@@ -265,6 +265,9 @@ class Route:
         # _middleware_stack_built is used to ensure the middleware stack is only built once.
         self._middleware_stack_built = False
 
+        # _dependant is used to cache the dependant model for the handler function
+        self._dependant: Optional["Dependant"] = None
+
     def __call__(
         self,
         router_middlewares: List[Callable],
@@ -354,6 +357,15 @@ class Route:
             self._middleware_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._middleware_stack)
 
         self._middleware_stack_built = True
+
+    @property
+    def dependant(self) -> "Dependant":
+        if self._dependant is None:
+            from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
+
+            self._dependant = get_dependant(path=self.path, call=self.func)
+
+        return self._dependant
 
     def _get_openapi_path(
         self,
@@ -1170,8 +1182,7 @@ class ApiGatewayResolver(BaseRouter):
             get_compat_model_name_map,
             get_definitions,
         )
-        from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, Server
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1215,13 +1226,8 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
-            dependant = get_dependant(
-                path=route.path,
-                call=route.func,
-            )
-
             result = route._get_openapi_path(
-                dependant=dependant,
+                dependant=route.dependant,
                 operation_ids=operation_ids,
                 model_name_map=model_name_map,
                 field_mapping=field_mapping,
@@ -1240,7 +1246,7 @@ class ApiGatewayResolver(BaseRouter):
         if tags:
             output["tags"] = tags
 
-        output["paths"] = paths
+        output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
         return OpenAPI(**output)
 
@@ -1706,7 +1712,6 @@ class ApiGatewayResolver(BaseRouter):
         """
 
         from aws_lambda_powertools.event_handler.openapi.dependant import (
-            get_dependant,
             get_flat_params,
         )
 
@@ -1714,12 +1719,11 @@ class ApiGatewayResolver(BaseRouter):
         request_fields_from_routes: List["ModelField"] = []
 
         for route in routes:
-            dependant = get_dependant(path=route.path, call=route.func)
-            params = get_flat_params(dependant)
+            params = get_flat_params(route.dependant)
             request_fields_from_routes.extend(params)
 
-            if dependant.return_param:
-                responses_from_routes.append(dependant.return_param)
+            if route.dependant.return_param:
+                responses_from_routes.append(route.dependant.return_param)
 
         flat_models = list(responses_from_routes + request_fields_from_routes)
         return flat_models

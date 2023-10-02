@@ -1,5 +1,6 @@
 # mypy: ignore-errors
 # flake8: noqa
+from copy import copy
 
 # MAINTENANCE: remove when deprecating Pydantic v1. Mypy doesn't handle two different code paths that import different
 # versions of a module, so we need to ignore errors here.
@@ -10,19 +11,27 @@ from typing import Any, Dict, List, Set, Tuple, Type, Union
 
 from typing_extensions import Annotated, Literal
 
-from aws_lambda_powertools.event_handler.openapi.types import COMPONENT_REF_PREFIX, PYDANTIC_V2, ModelNameMap
+from pydantic import BaseModel
+from pydantic.fields import FieldInfo
+
+from aws_lambda_powertools.event_handler.openapi.types import (
+    COMPONENT_REF_PREFIX,
+    PYDANTIC_V2,
+    ModelNameMap,
+)
 
 if PYDANTIC_V2:
     from pydantic import TypeAdapter
     from pydantic._internal._typing_extra import eval_type_lenient
     from pydantic.fields import FieldInfo
     from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
-    from pydantic_core import PydanticUndefined
+    from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
     from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
     Undefined = PydanticUndefined
     Required = PydanticUndefined
+    UndefinedType = PydanticUndefinedType
 
     evaluate_forwardref = eval_type_lenient
 
@@ -49,7 +58,7 @@ if PYDANTIC_V2:
         def type_(self) -> Any:
             return self.field_info.annotation
 
-        def __post__init__(self) -> None:
+        def __post_init__(self) -> None:
             self._type_adapter: TypeAdapter[Any] = TypeAdapter(
                 Annotated[self.field_info.annotation, self.field_info],
             )
@@ -125,9 +134,15 @@ if PYDANTIC_V2:
     def get_annotation_from_field_info(annotation: Any, field_info: FieldInfo, field_name: str) -> Any:
         return annotation
 
+    def model_rebuild(model: Type[BaseModel]) -> None:
+        model.model_rebuild()
+
+    def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
+        return type(field_info).from_annotation(annotation)
+
 else:
     from pydantic import BaseModel
-    from pydantic.fields import ModelField, Required, Undefined
+    from pydantic.fields import ModelField, Required, Undefined, UndefinedType
     from pydantic.schema import (
         field_schema,
         get_annotation_from_field_info,
@@ -192,3 +207,9 @@ else:
     def get_compat_model_name_map(fields: List[ModelField]) -> ModelNameMap:
         models = get_flat_models_from_fields(fields, known_models=set())
         return get_model_name_map(models)
+
+    def model_rebuild(model: Type[BaseModel]) -> None:
+        model.update_forward_refs()
+
+    def copy_field_info(*, field_info: FieldInfo, annotation: Any) -> FieldInfo:
+        return copy(field_info)
