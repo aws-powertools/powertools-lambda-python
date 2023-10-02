@@ -64,6 +64,7 @@ var regions = []string{
 	"eu-west-1",
 	"eu-west-2",
 	"eu-west-3",
+	"il-central-1",
 	"me-central-1",
 	"me-south-1",
 	"sa-east-1",
@@ -73,14 +74,8 @@ var regions = []string{
 	"us-west-2",
 }
 
-var singleArchitectureRegions = []string{
-	"ap-south-2",
-	"ap-southeast-4",
-	"eu-central-2",
-	"eu-south-2",
-	"me-central-1",
-	"il-central-1",
-}
+// Add regions that only support x86_64
+var singleArchitectureRegions = []string{}
 
 // getLayerVersion returns the latest version of a layer in a region
 func getLayerVersion(ctx context.Context, layerName string, region string) (int64, error) {
@@ -100,7 +95,7 @@ func getLayerVersion(ctx context.Context, layerName string, region string) (int6
 	}
 
 	if len(layerVersionsResult.LayerVersions) == 0 {
-		return 0, fmt.Errorf("no layer meets the search criteria %s - %s", layerName, region)
+		return 0, nil
 	}
 	return layerVersionsResult.LayerVersions[0].Version, nil
 }
