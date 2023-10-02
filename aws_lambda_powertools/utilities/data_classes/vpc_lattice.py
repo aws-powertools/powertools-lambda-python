@@ -155,7 +155,10 @@ class VPCLatticeEventV2(BaseProxyEvent):
 
     @property
     def method(self) -> str:
-        """The VPC Lattice v2 Event method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
+        """
+        The VPC Lattice v2 Event method used.
+        Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT.
+        """
         return self["method"]
 
     @property
