@@ -197,9 +197,7 @@ class VPCLatticeEventV2(BaseProxyEvent):
     def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
-        if self.is_base64_encoded:
-            return base64_decode(body)
-        return body
+        return base64_decode(body) if self.is_base64_encoded else body
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
