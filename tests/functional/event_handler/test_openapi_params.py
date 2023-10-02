@@ -1,13 +1,18 @@
 from dataclasses import dataclass
+from datetime import datetime
+from typing import List
 
 from pydantic import BaseModel
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.openapi.models import (
+    Example,
     Parameter,
     ParameterInType,
     Schema,
 )
+from aws_lambda_powertools.event_handler.openapi.params import Query
 
 JSON_CONTENT_TYPE = "application/json"
 
@@ -33,9 +38,10 @@ def test_openapi_no_params():
     assert get.summary == "GET /"
     assert get.operationId == "GetHandler"
 
-    assert "200" in get.responses
+    assert get.responses is not None
+    assert "200" in get.responses.keys()
     response = get.responses["200"]
-    assert response.description == "Success"
+    assert response.description == "Successful Response"
 
     assert JSON_CONTENT_TYPE in response.content
     json_response = response.content[JSON_CONTENT_TYPE]
@@ -85,6 +91,41 @@ def test_openapi_with_scalar_params():
     assert parameter.schema_.title == "Include Extra"
 
 
+def test_openapi_with_custom_params():
+    app = ApiGatewayResolver()
+
+    @app.get("/users", summary="Get Users", operation_id="GetUsers", description="Get paginated users", tags=["Users"])
+    def handler(
+        count: Annotated[
+            int,
+            Query(lt=100, gt=0, examples=[Example(summary="Example 1", value=10)]),
+        ] = 1,
+    ):
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+
+    get = schema.paths["/users"].get
+    assert len(get.parameters) == 1
+    assert get.summary == "Get Users"
+    assert get.operationId == "GetUsers"
+    assert get.description == "Get paginated users"
+    assert get.tags == ["Users"]
+
+    parameter = get.parameters[0]
+    assert parameter.required is False
+    assert parameter.name == "count"
+    assert parameter.in_ == ParameterInType.query
+    assert parameter.schema_.type == "integer"
+    assert parameter.schema_.default == 1
+    assert parameter.schema_.title == "Count"
+    assert parameter.schema_.exclusiveMinimum == 0
+    assert parameter.schema_.exclusiveMaximum == 100
+    assert len(parameter.schema_.examples) == 1
+    assert parameter.schema_.examples[0].summary == "Example 1"
+    assert parameter.schema_.examples[0].value == 10
+
+
 def test_openapi_with_scalar_returns():
     app = ApiGatewayResolver()
 
@@ -130,7 +171,32 @@ def test_openapi_with_pydantic_returns():
     assert "name" in user_schema.properties
 
 
-def test_openapi_with_dataclasse_return():
+def test_openapi_with_pydantic_nested_returns():
+    app = ApiGatewayResolver()
+
+    class Order(BaseModel):
+        date: datetime
+
+    class User(BaseModel):
+        name: str
+        orders: List[Order]
+
+    @app.get("/")
+    def handler() -> User:
+        return User(name="Ruben Fonseca", orders=[Order(date=datetime.now())])
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    assert "User" in schema.components.schemas
+    assert "Order" in schema.components.schemas
+
+    user_schema = schema.components.schemas["User"]
+    assert "orders" in user_schema.properties
+    assert user_schema.properties["orders"].type == "array"
+
+
+def test_openapi_with_dataclass_return():
     app = ApiGatewayResolver()
 
     @dataclass

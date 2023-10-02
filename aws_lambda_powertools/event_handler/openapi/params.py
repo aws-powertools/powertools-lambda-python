@@ -351,7 +351,7 @@ def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) 
     if annotation is not inspect.Signature.empty:
         # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
         if get_origin(annotation) is Annotated:
-            type_annotation = _get_field_info_annotated_type(annotation, value, is_path_param)
+            field_info, type_annotation = _get_field_info_annotated_type(annotation, value, is_path_param)
         # If the annotation is not an Annotated type, we use it as the type annotation
         else:
             type_annotation = annotation

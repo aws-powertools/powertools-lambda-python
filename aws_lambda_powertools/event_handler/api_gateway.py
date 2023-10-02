@@ -51,6 +51,7 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 
 if TYPE_CHECKING:
@@ -203,9 +204,13 @@ class Route:
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
-        middlewares: Optional[List[Callable[..., Response]]],
+        summary: Optional[str],
         description: Optional[str],
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]],
+        response_description: Optional[str],
         tags: Optional[List["Tag"]],
+        operation_id: Optional[str],
+        middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
 
@@ -214,10 +219,10 @@ class Route:
 
         method: str
             The HTTP method, example "GET"
-        rule: Pattern
-            The route rule, example "/my/path"
         path: str
             The path of the route
+        rule: Pattern
+            The route rule, example "/my/path"
         func: Callable
             The route handler function
         cors: bool
@@ -226,12 +231,20 @@ class Route:
             Whether or not to enable gzip compression for this route
         cache_control: Optional[str]
             The cache control header value, example "max-age=3600"
-        middlewares: Optional[List[Callable[..., Response]]]
-            The list of route middlewares to be called in order.
+        summary: Optional[str]
+            The OpenAPI summary for this route
         description: Optional[str]
             The OpenAPI description for this route
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]]
+            The OpenAPI responses for this route
+        response_description: Optional[str]
+            The OpenAPI response description for this route
         tags: Optional[List[Tag]]
             The list of OpenAPI tags to be used for this route
+        operation_id: Optional[str]
+            The OpenAPI operationId for this route
+        middlewares: Optional[List[Callable[..., Response]]]
+            The list of route middlewares to be called in order.
         """
         self.method = method.upper()
         self.path = path
@@ -241,10 +254,13 @@ class Route:
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
-        self.middlewares = middlewares or []
+        self.summary = summary
         self.description = description
+        self.responses = responses
+        self.response_description = response_description
         self.tags = tags or []
-        self.operation_id = self.method.title() + self.func.__name__.title()
+        self.middlewares = middlewares or []
+        self.operation_id = operation_id or (self.method.title() + self.func.__name__.title())
 
         # _middleware_stack_built is used to ensure the middleware stack is only built once.
         self._middleware_stack_built = False
@@ -372,7 +388,7 @@ class Route:
 
         responses = operation.setdefault("responses", {})
         success_response = responses.setdefault("200", {})
-        success_response["description"] = "Success"
+        success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
         success_response["content"] = {"application/json": {"schema": {}}}
         json_response = success_response["content"].setdefault("application/json", {})
 
@@ -391,7 +407,7 @@ class Route:
         return path, definitions
 
     def _openapi_operation_summary(self) -> str:
-        return f"{self.method.upper()} {self.path}"
+        return self.summary or f"{self.method.upper()} {self.path}"
 
     def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
         operation: Dict[str, Any] = {}
@@ -598,8 +614,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -651,9 +671,13 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
 
@@ -677,7 +701,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "GET", cors, compress, cache_control, description, tags, middlewares)
+        return self.route(
+            rule,
+            "GET",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def post(
         self,
@@ -685,9 +722,13 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
 
@@ -712,7 +753,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "POST", cors, compress, cache_control, description, tags, middlewares)
+        return self.route(
+            rule,
+            "POST",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def put(
         self,
@@ -720,9 +774,13 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
 
@@ -747,7 +805,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PUT", cors, compress, cache_control, description, tags, middlewares)
+        return self.route(
+            rule,
+            "PUT",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def delete(
         self,
@@ -755,9 +826,13 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable[..., Any]]] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
 
@@ -781,7 +856,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "DELETE", cors, compress, cache_control, description, tags, middlewares)
+        return self.route(
+            rule,
+            "DELETE",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def patch(
         self,
@@ -789,9 +877,13 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
-        middlewares: Optional[List[Callable]] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
+        middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
 
@@ -818,7 +910,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PATCH", cors, compress, cache_control, description, tags, middlewares)
+        return self.route(
+            rule,
+            "PATCH",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def _push_processed_stack_frame(self, frame: str):
         """
@@ -1204,8 +1309,12 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1225,9 +1334,13 @@ class ApiGatewayResolver(BaseRouter):
                     cors_enabled,
                     compress,
                     cache_control,
-                    middlewares,
+                    summary,
                     description,
+                    responses,
+                    response_description,
                     tags,
+                    operation_id,
+                    middlewares,
                 )
 
                 # The more specific route wins.
@@ -1628,15 +1741,31 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
             methods = (method,) if isinstance(method, str) else tuple(method)
 
-            route_key = (rule, methods, cors, compress, cache_control, description, tags)
+            route_key = (
+                rule,
+                methods,
+                cors,
+                compress,
+                cache_control,
+                summary,
+                description,
+                responses,
+                response_description,
+                tags,
+                operation_id,
+            )
 
             # Collate Middleware for routes
             if middlewares is not None:
@@ -1676,12 +1805,29 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
         description: Optional[str] = None,
+        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
-        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, description, tags, middlewares)
+        return super().route(
+            rule.rstrip("/"),
+            method,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
