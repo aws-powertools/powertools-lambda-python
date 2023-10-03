@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Dict, Optional, Type, Union
 
-from ..models import VpcLatticeModel,VpcLatticeV2Model
+from ..models import VpcLatticeModel, VpcLatticeV2Model
 from ..types import Model
 from .base import BaseEnvelope
 

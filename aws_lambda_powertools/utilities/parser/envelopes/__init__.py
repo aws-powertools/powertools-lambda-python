@@ -27,5 +27,5 @@ __all__ = [
     "KafkaEnvelope",
     "BaseEnvelope",
     "VpcLatticeEnvelope",
-    "VpcLatticeV2Envelope"
+    "VpcLatticeV2Envelope",
 ]

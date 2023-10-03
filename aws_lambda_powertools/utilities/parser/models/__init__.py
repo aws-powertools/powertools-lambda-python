@@ -163,5 +163,5 @@ __all__ = [
     "CloudFormationCustomResourceCreateModel",
     "CloudFormationCustomResourceBaseModel",
     "VpcLatticeModel",
-    "VpcLatticeV2Model"
+    "VpcLatticeV2Model",
 ]

@@ -22,7 +22,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     LambdaFunctionUrlEvent,
     VPCLatticeEvent,
-    VPCLatticeEventV2
+    VPCLatticeEventV2,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
