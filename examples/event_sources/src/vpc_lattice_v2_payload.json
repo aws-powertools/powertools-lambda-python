@@ -9,9 +9,11 @@
       "accept": "*/*"
     },
     "query_string_parameters": {
-      "order-id": "1"
+      "order-id": "314159"
     },
-    "body": "{\"message\": \"Hello from Lambda!\"}",
+    "body": {
+      "message": "Hello from Powertools!"
+    },
     "isBase64Encoded": false,
     "requestContext": {
         "serviceNetworkArn": "arn:aws:vpc-lattice:us-east-2:123456789012:servicenetwork/sn-0bf3f2882e9cc805a",
