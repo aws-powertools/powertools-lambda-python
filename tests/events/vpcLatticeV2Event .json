@@ -12,7 +12,7 @@
       "order-id": "314159"
     },
     "body": {
-      "message": "Hello from Lambda!"
+      "message": "Hello from Powertools!"
     },
     "isBase64Encoded": false,
     "requestContext": {
