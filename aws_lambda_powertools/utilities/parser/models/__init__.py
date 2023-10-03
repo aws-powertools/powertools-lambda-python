@@ -88,7 +88,7 @@ from .ses import (
 )
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
-from .vpc_lattice import VpcLatticeModel
+from .vpc_lattice import VpcLatticeModel, VpcLatticeV2Model
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
@@ -163,4 +163,5 @@ __all__ = [
     "CloudFormationCustomResourceCreateModel",
     "CloudFormationCustomResourceBaseModel",
     "VpcLatticeModel",
+    "VpcLatticeV2Model"
 ]
