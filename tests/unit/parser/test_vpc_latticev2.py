@@ -29,7 +29,22 @@ def test_vpc_lattice_v2_event():
     assert model.is_base64_encoded == raw_event["isBase64Encoded"]
     assert model.headers == raw_event["headers"]
     assert model.query_string_parameters == raw_event["query_string_parameters"]
-    assert model.request_context == raw_event["requestContext"]
+    assert model.request_context.region == raw_event["requestContext"]["region"]
+    assert model.request_context.service_network_arn == raw_event["requestContext"]["serviceNetworkArn"]
+    assert model.request_context.service_arn == raw_event["requestContext"]["serviceArn"]
+    assert model.request_context.target_group_arn == raw_event["requestContext"]["targetGroupArn"]
+    convert_time = int((model.request_context.time_epoch.timestamp() * 1000000))
+    assert convert_time == int(raw_event["requestContext"]["timeEpoch"])
+    assert model.request_context.identity.source_vpc_arn == raw_event["requestContext"]["identity"]["sourceVpcArn"]
+    assert model.request_context.identity.get_type == raw_event["requestContext"]["identity"]["type"]
+    assert model.request_context.identity.principal == raw_event["requestContext"]["identity"]["principal"]
+    assert model.request_context.identity.session_name == raw_event["requestContext"]["identity"]["sessionName"]
+    assert model.request_context.identity.x509_san_dns == raw_event["requestContext"]["identity"]["x509SanDns"]
+    assert model.request_context.identity.x509_issuer_ou is None
+    assert model.request_context.identity.x509_san_name_cn is None
+    assert model.request_context.identity.x509_san_uri is None
+    assert model.request_context.identity.x509_subject_cn is None
+    assert model.request_context.identity.principal_org_id is None
 
 
 def test_vpc_lattice_v2_event_custom_model():

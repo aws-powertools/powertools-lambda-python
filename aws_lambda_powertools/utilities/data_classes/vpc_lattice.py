@@ -142,6 +142,58 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         return self["raw_path"]
 
 
+class vpcLatticeEventV2Identity(DictWrapper):
+    @property
+    def source_vpc_arn(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext Identity sourceVpcArn"""
+        return self.get("sourceVpcArn")
+
+    @property
+    def get_type(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext Identity type"""
+        return self.get("type")
+
+    @property
+    def principal(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext principal"""
+        return self.get("principal")
+
+    @property
+    def principal_org_id(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext principalOrgID"""
+        return self.get("principalOrgID")
+
+    @property
+    def session_name(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext sessionName"""
+        return self.get("sessionName")
+
+    @property
+    def x509_subject_cn(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext X509SubjectCn"""
+        return self.get("X509SubjectCn")
+
+    @property
+    def x509_issuer_ou(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext X509IssuerOu"""
+        return self.get("X509IssuerOu")
+
+    @property
+    def x509_san_dns(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext X509SanDns"""
+        return self.get("x509SanDns")
+
+    @property
+    def x509_san_uri(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext X509SanUri"""
+        return self.get("X509SanUri")
+
+    @property
+    def x509_san_name_cn(self) -> Optional[str]:
+        """The VPC Lattice v2 Event requestContext X509SanNameCn"""
+        return self.get("X509SanNameCn")
+
+
 class vpcLatticeEventV2RequestContext(DictWrapper):
     @property
     def service_network_arn(self) -> str:
@@ -159,9 +211,9 @@ class vpcLatticeEventV2RequestContext(DictWrapper):
         return self["targetGroupArn"]
 
     @property
-    def source_vpc_arn(self) -> str:
-        """The VPC Lattice v2 Event requestContext sourceVpcArn"""
-        return self["identity"].get("sourceVpcArn")
+    def identity(self) -> vpcLatticeEventV2Identity:
+        """The VPC Lattice v2 Event requestContext identity"""
+        return vpcLatticeEventV2Identity(self["identity"])
 
     @property
     def region(self) -> str:
@@ -181,9 +233,9 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
         return self["version"]
 
     @property
-    def is_base64_encoded(self) -> bool:
+    def is_base64_encoded(self) -> Optional[bool]:
         """A boolean flag to indicate if the applicable request payload is Base64-encode"""
-        return self["isBase64Encoded"]
+        return self.get("isBase64Encoded")
 
     @property
     def path(self) -> str:

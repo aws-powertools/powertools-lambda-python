@@ -18,9 +18,13 @@
         "serviceArn": "arn:aws:vpc-lattice:us-east-2:123456789012:service/svc-0a40eebed65f8d69c",
         "targetGroupArn": "arn:aws:vpc-lattice:us-east-2:123456789012:targetgroup/tg-6d0ecf831eec9f09",
         "identity": {
-            "sourceVpcArn": "arn:aws:ec2:us-east-2:123456789012:vpc/vpc-0b8276c84697e7339"
+          "sourceVpcArn": "arn:aws:ec2:region:123456789012:vpc/vpc-0b8276c84697e7339",
+          "type" : "AWS_IAM",
+          "principal": "arn:aws:sts::123456789012:assumed-role/example-role/057d00f8b51257ba3c853a0f248943cf",
+          "sessionName": "057d00f8b51257ba3c853a0f248943cf",
+          "x509SanDns": "example.com"
         },
         "region": "us-east-2",
-        "timeEpoch": "1690497599177430"
+        "timeEpoch": "1696331543569073"
     }
 }

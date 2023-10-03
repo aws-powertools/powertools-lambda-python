@@ -20,5 +20,16 @@ def test_vpc_lattice_event():
     assert parsed_event.request_context.service_network_arn == raw_event["requestContext"]["serviceNetworkArn"]
     assert parsed_event.request_context.service_arn == raw_event["requestContext"]["serviceArn"]
     assert parsed_event.request_context.target_group_arn == raw_event["requestContext"]["targetGroupArn"]
-    assert parsed_event.request_context.source_vpc_arn == raw_event["requestContext"]["identity"]["sourceVpcArn"]
     assert parsed_event.request_context.time_epoch == raw_event["requestContext"]["timeEpoch"]
+    assert (
+        parsed_event.request_context.identity.source_vpc_arn == raw_event["requestContext"]["identity"]["sourceVpcArn"]
+    )
+    assert parsed_event.request_context.identity.get_type == raw_event["requestContext"]["identity"]["type"]
+    assert parsed_event.request_context.identity.principal == raw_event["requestContext"]["identity"]["principal"]
+    assert parsed_event.request_context.identity.session_name == raw_event["requestContext"]["identity"]["sessionName"]
+    assert parsed_event.request_context.identity.x509_san_dns == raw_event["requestContext"]["identity"]["x509SanDns"]
+    assert parsed_event.request_context.identity.x509_issuer_ou is None
+    assert parsed_event.request_context.identity.x509_san_name_cn is None
+    assert parsed_event.request_context.identity.x509_san_uri is None
+    assert parsed_event.request_context.identity.x509_subject_cn is None
+    assert parsed_event.request_context.identity.principal_org_id is None
