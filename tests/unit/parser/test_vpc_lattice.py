@@ -72,4 +72,20 @@ def test_vpc_lattice_v2_event():
     assert model.is_base64_encoded == raw_event["is_base64_encoded"]
     assert model.headers == raw_event["headers"]
     assert model.query_string_parameters == raw_event["query_string_parameters"]
-    assert model.request_context == raw_event["requestContext"]
+    assert model.request_context == raw_event["request_context"]
+
+def test_vpc_lattice_v2_event_custom_model():
+    class MyCustomResource(VpcLatticeV2Model):
+        body: str
+
+    raw_event = load_event("vpcLatticeV2Event.json")
+    model = MyCustomResource(**raw_event)
+
+    assert model.body == raw_event["body"]
+
+def test_vpc_lattice_v2_event_invalid():
+    raw_event = load_event("vpcLatticeV2Event.json")
+    raw_event["body"] = ["some_more_data"]
+
+    with pytest.raises(ValidationError):
+        VpcLatticeV2Model(**raw_event)
