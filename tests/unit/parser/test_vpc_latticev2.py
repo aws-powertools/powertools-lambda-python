@@ -33,8 +33,9 @@ def test_vpc_lattice_v2_event():
     assert model.request_context.service_network_arn == raw_event["requestContext"]["serviceNetworkArn"]
     assert model.request_context.service_arn == raw_event["requestContext"]["serviceArn"]
     assert model.request_context.target_group_arn == raw_event["requestContext"]["targetGroupArn"]
-    convert_time = int((model.request_context.time_epoch.timestamp() * 1000000))
-    assert convert_time == int(raw_event["requestContext"]["timeEpoch"])
+    convert_time = int((model.request_context.time_epoch.timestamp() * 1000))
+    event_converted_time = round(int(raw_event["requestContext"]["timeEpoch"]) / 1000)
+    assert convert_time == event_converted_time
     assert model.request_context.identity.source_vpc_arn == raw_event["requestContext"]["identity"]["sourceVpcArn"]
     assert model.request_context.identity.get_type == raw_event["requestContext"]["identity"]["type"]
     assert model.request_context.identity.principal == raw_event["requestContext"]["identity"]["principal"]
