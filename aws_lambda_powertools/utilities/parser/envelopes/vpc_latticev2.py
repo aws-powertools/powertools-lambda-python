@@ -1,14 +1,14 @@
 import logging
 from typing import Any, Dict, Optional, Type, Union
 
-from ..models import VpcLatticeModel
+from ..models import VpcLatticeV2Model
 from ..types import Model
 from .base import BaseEnvelope
 
 logger = logging.getLogger(__name__)
 
 
-class VpcLatticeEnvelope(BaseEnvelope):
+class VpcLatticeV2Envelope(BaseEnvelope):
     """Amazon VPC Lattice envelope to extract data within body key"""
 
     def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Optional[Model]:
@@ -26,7 +26,7 @@ class VpcLatticeEnvelope(BaseEnvelope):
         Optional[Model]
             Parsed detail payload with model provided
         """
-        logger.debug(f"Parsing incoming data with VPC Lattice model {VpcLatticeModel}")
-        parsed_envelope: VpcLatticeModel = VpcLatticeModel.parse_obj(data)
+        logger.debug(f"Parsing incoming data with VPC Lattice V2 model {VpcLatticeV2Model}")
+        parsed_envelope: VpcLatticeV2Model = VpcLatticeV2Model.parse_obj(data)
         logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.body, model=model)

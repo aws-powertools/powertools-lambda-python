@@ -10,7 +10,8 @@ from .kinesis_firehose import KinesisFirehoseEnvelope
 from .lambda_function_url import LambdaFunctionUrlEnvelope
 from .sns import SnsEnvelope, SnsSqsEnvelope
 from .sqs import SqsEnvelope
-from .vpc_lattice import VpcLatticeEnvelope, VpcLatticeV2Envelope
+from .vpc_lattice import VpcLatticeEnvelope
+from .vpc_latticev2 import VpcLatticeV2Envelope
 
 __all__ = [
     "ApiGatewayEnvelope",
