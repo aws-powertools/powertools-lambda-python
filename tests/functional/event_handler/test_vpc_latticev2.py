@@ -1,6 +1,6 @@
 from aws_lambda_powertools.event_handler import (
     Response,
-    VPCLatticeResolver,
+    VPCLatticeV2Resolver,
     content_types,
 )
 from aws_lambda_powertools.event_handler.api_gateway import CORSConfig
@@ -8,9 +8,9 @@ from aws_lambda_powertools.utilities.data_classes import VPCLatticeEventV2
 from tests.functional.utils import load_event
 
 
-def test_vpclattice_event():
+def test_vpclatticev2_event():
     # GIVEN a VPC Lattice event
-    app = VPCLatticeResolver()
+    app = VPCLatticeV2Resolver()
 
     @app.get("/newpath")
     def foo():
@@ -28,9 +28,9 @@ def test_vpclattice_event():
     assert result["body"] == "foo"
 
 
-def test_vpclattice_event_path_trailing_slash(json_dump):
+def test_vpclatticev2_event_path_trailing_slash(json_dump):
     # GIVEN a VPC Lattice event
-    app = VPCLatticeResolver()
+    app = VPCLatticeV2Resolver()
 
     @app.get("/newpath")
     def foo():
@@ -50,7 +50,7 @@ def test_vpclattice_event_path_trailing_slash(json_dump):
 
 def test_cors_preflight_body_is_empty_not_null():
     # GIVEN CORS is configured
-    app = VPCLatticeResolver(cors=CORSConfig())
+    app = VPCLatticeV2Resolver(cors=CORSConfig())
 
     event = {"path": "/my/request", "method": "OPTIONS", "headers": {}}
 
@@ -61,9 +61,9 @@ def test_cors_preflight_body_is_empty_not_null():
     assert result["body"] == ""
 
 
-def test_vpclattice_url_no_matches():
+def test_vpclatticev2_url_no_matches():
     # GIVEN a VPC Lattice event
-    app = VPCLatticeResolver()
+    app = VPCLatticeV2Resolver()
 
     @app.post("/no_match")
     def foo():

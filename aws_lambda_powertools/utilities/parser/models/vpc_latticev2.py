@@ -35,7 +35,7 @@ class VpcLatticeV2Model(BaseModel):
     path: str
     method: str
     headers: Dict[str, str]
-    query_string_parameters: Optional[Dict[str, str]] = None
+    query_string_parameters: Optional[Dict[str, str]] = Field(None, alias="queryStringParameters")
     body: Optional[Union[str, Type[BaseModel]]] = None
     is_base64_encoded: Optional[bool] = Field(None, alias="isBase64Encoded")
     request_context: VpcLatticeV2RequestContext = Field(None, alias="requestContext")

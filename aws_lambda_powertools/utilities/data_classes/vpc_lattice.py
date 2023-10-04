@@ -48,11 +48,6 @@ class VPCLatticeEventBase(BaseProxyEvent):
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["method"]
 
-    @property
-    def query_string_parameters(self) -> Dict[str, str]:
-        """The request query string parameters."""
-        return self["query_string_parameters"]
-
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
 
@@ -140,6 +135,11 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     @property
     def path(self) -> str:
         return self["raw_path"]
+
+    @property
+    def query_string_parameters(self) -> Dict[str, str]:
+        """The request query string parameters."""
+        return self["query_string_parameters"]
 
 
 class vpcLatticeEventV2Identity(DictWrapper):
@@ -246,3 +246,8 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     def request_context(self) -> vpcLatticeEventV2RequestContext:
         """he VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
+
+    @property
+    def query_string_parameters(self) -> Dict[str, str]:
+        """The request query string parameters."""
+        return self["queryStringParameters"]

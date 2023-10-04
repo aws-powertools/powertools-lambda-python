@@ -8,7 +8,7 @@
       "host": "test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws",
       "accept": "*/*"
     },
-    "query_string_parameters": {
+    "queryStringParameters": {
       "order-id": "1"
     },
     "body": "{\"message\": \"Hello from Lambda!\"}",
