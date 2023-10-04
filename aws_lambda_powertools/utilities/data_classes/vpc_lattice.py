@@ -221,7 +221,7 @@ class vpcLatticeEventV2RequestContext(DictWrapper):
         return self["region"]
 
     @property
-    def time_epoch(self) -> str:
+    def time_epoch(self) -> float:
         """The VPC Lattice v2 Event requestContext timeEpoch"""
         return self["timeEpoch"]
 

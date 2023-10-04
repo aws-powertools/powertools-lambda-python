@@ -23,9 +23,10 @@ class VpcLatticeV2RequestContext(BaseModel):
     target_group_arn: str = Field(alias="targetGroupArn")
     identity: VpcLatticeV2RequestContextIdentity
     region: str
-    time_epoch: datetime = Field(alias="timeEpoch")
+    time_epoch: float = Field(alias="timeEpoch")
+    time_epoch_as_datetime: datetime = Field(alias="timeEpoch")
 
-    @validator("time_epoch", pre=True, allow_reuse=True)
+    @validator("time_epoch_as_datetime", pre=True, allow_reuse=True)
     def time_epoch_convert_to_miliseconds(cls, value: int):
         return round(int(value) / 1000)
 
