@@ -28,7 +28,7 @@ def test_vpc_lattice_v2_event():
     assert model.path == raw_event["path"]
     assert model.is_base64_encoded == raw_event["isBase64Encoded"]
     assert model.headers == raw_event["headers"]
-    assert model.query_string_parameters == raw_event["query_string_parameters"]
+    assert model.query_string_parameters == raw_event["queryStringParameters"]
     assert model.request_context.region == raw_event["requestContext"]["region"]
     assert model.request_context.service_network_arn == raw_event["requestContext"]["serviceNetworkArn"]
     assert model.request_context.service_arn == raw_event["requestContext"]["serviceArn"]

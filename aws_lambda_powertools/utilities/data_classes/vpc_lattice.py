@@ -250,4 +250,4 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     @property
     def query_string_parameters(self) -> Dict[str, str]:
         """The request query string parameters."""
-        return self["queryStringParameters"]
+        return self.get("queryStringParameters")

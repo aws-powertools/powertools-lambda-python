@@ -39,7 +39,7 @@ def test_vpclatticev2_event_path_trailing_slash(json_dump):
         return Response(200, content_types.TEXT_HTML, "foo")
 
     # WHEN calling the event handler using path with trailing "/"
-    result = app(load_event("vpcLatticeEventPathTrailingSlash.json"), {})
+    result = app(load_event("vpcLatticeEventV2PathTrailingSlash.json"), {})
 
     # THEN
     assert result["statusCode"] == 404
