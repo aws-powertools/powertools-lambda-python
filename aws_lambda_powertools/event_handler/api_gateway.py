@@ -1002,7 +1002,7 @@ class ApiGatewayResolver(BaseRouter):
             logger.debug("Converting event to VPC Lattice contract")
             return VPCLatticeEvent(event)
         if self._proxy_type == ProxyEventType.VPCLatticeEventV2:
-            logger.debug("Converting event to VPC Lattice contract")
+            logger.debug("Converting event to VPC LatticeV2 contract")
             return VPCLatticeEventV2(event)
         logger.debug("Converting event to ALB contract")
         return ALBEvent(event)
