@@ -52,7 +52,7 @@ def test_cors_preflight_body_is_empty_not_null():
     # GIVEN CORS is configured
     app = VPCLatticeResolver(cors=CORSConfig())
 
-    event = {"raw_path": "/my/request", "method": "OPTIONS", "headers": {}}
+    event = {"path": "/my/request", "method": "OPTIONS", "headers": {}}
 
     # WHEN calling the event handler
     result = app(event, {})
