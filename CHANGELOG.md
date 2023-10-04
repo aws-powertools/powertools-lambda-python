@@ -11,20 +11,29 @@
 
 ## Maintenance
 
-* **deps:** bump actions/checkout from 4.0.0 to 4.1.0 ([#3128](https://github.com/aws-powertools/powertools-lambda-python/issues/3128))
-* **deps:** bump squidfunk/mkdocs-material from `b41ba6d` to `06673a1` in /docs ([#3124](https://github.com/aws-powertools/powertools-lambda-python/issues/3124))
+* **deps:** bump squidfunk/mkdocs-material from `e5f28aa` to `cbfecae` in /docs ([#3157](https://github.com/aws-powertools/powertools-lambda-python/issues/3157))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3156](https://github.com/aws-powertools/powertools-lambda-python/issues/3156))
+* **deps:** bump actions/setup-python from 4.7.0 to 4.7.1 ([#3158](https://github.com/aws-powertools/powertools-lambda-python/issues/3158))
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3127](https://github.com/aws-powertools/powertools-lambda-python/issues/3127))
+* **deps:** bump fastjsonschema from 2.18.0 to 2.18.1 ([#3159](https://github.com/aws-powertools/powertools-lambda-python/issues/3159))
+* **deps:** bump actions/checkout from 4.0.0 to 4.1.0 ([#3128](https://github.com/aws-powertools/powertools-lambda-python/issues/3128))
 * **deps:** bump pydantic from 1.10.12 to 1.10.13 ([#3144](https://github.com/aws-powertools/powertools-lambda-python/issues/3144))
+* **deps:** bump squidfunk/mkdocs-material from `b41ba6d` to `06673a1` in /docs ([#3124](https://github.com/aws-powertools/powertools-lambda-python/issues/3124))
+* **deps:** bump urllib3 from 1.26.16 to 1.26.17 ([#3162](https://github.com/aws-powertools/powertools-lambda-python/issues/3162))
 * **deps:** bump squidfunk/mkdocs-material from `06673a1` to `e5f28aa` in /docs ([#3134](https://github.com/aws-powertools/powertools-lambda-python/issues/3134))
+* **deps-dev:** bump the boto-typing group with 2 updates ([#3143](https://github.com/aws-powertools/powertools-lambda-python/issues/3143))
+* **deps-dev:** bump types-requests from 2.31.0.3 to 2.31.0.5 ([#3136](https://github.com/aws-powertools/powertools-lambda-python/issues/3136))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3135](https://github.com/aws-powertools/powertools-lambda-python/issues/3135))
 * **deps-dev:** bump aws-cdk from 2.97.0 to 2.98.0 ([#3139](https://github.com/aws-powertools/powertools-lambda-python/issues/3139))
 * **deps-dev:** bump ruff from 0.0.290 to 0.0.291 ([#3126](https://github.com/aws-powertools/powertools-lambda-python/issues/3126))
-* **deps-dev:** bump aws-cdk from 2.96.2 to 2.97.0 ([#3129](https://github.com/aws-powertools/powertools-lambda-python/issues/3129))
-* **deps-dev:** bump types-requests from 2.31.0.3 to 2.31.0.5 ([#3136](https://github.com/aws-powertools/powertools-lambda-python/issues/3136))
 * **deps-dev:** bump types-requests from 2.31.0.5 to 2.31.0.6 ([#3145](https://github.com/aws-powertools/powertools-lambda-python/issues/3145))
-* **deps-dev:** bump cfn-lint from 0.80.2 to 0.80.3 ([#3125](https://github.com/aws-powertools/powertools-lambda-python/issues/3125))
-* **deps-dev:** bump the boto-typing group with 2 updates ([#3143](https://github.com/aws-powertools/powertools-lambda-python/issues/3143))
+* **deps-dev:** bump aws-cdk from 2.96.2 to 2.97.0 ([#3129](https://github.com/aws-powertools/powertools-lambda-python/issues/3129))
 * **deps-dev:** bump aws-cdk from 2.98.0 to 2.99.0 ([#3148](https://github.com/aws-powertools/powertools-lambda-python/issues/3148))
-* **deps-dev:** bump the boto-typing group with 1 update ([#3135](https://github.com/aws-powertools/powertools-lambda-python/issues/3135))
+* **deps-dev:** bump aws-cdk from 2.99.0 to 2.99.1 ([#3155](https://github.com/aws-powertools/powertools-lambda-python/issues/3155))
+* **deps-dev:** bump cfn-lint from 0.80.2 to 0.80.3 ([#3125](https://github.com/aws-powertools/powertools-lambda-python/issues/3125))
+* **deps-dev:** bump ruff from 0.0.291 to 0.0.292 ([#3161](https://github.com/aws-powertools/powertools-lambda-python/issues/3161))
+* **deps-dev:** bump urllib3 from 1.26.16 to 1.26.17 in /layer ([#3163](https://github.com/aws-powertools/powertools-lambda-python/issues/3163))
+* **deps-dev:** bump cfn-lint from 0.80.3 to 0.80.4 ([#3166](https://github.com/aws-powertools/powertools-lambda-python/issues/3166))
 
 
 <a name="v2.25.1"></a>
