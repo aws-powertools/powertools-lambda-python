@@ -1793,13 +1793,13 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-boto3-appconfig"
-version = "1.28.52"
-description = "Type annotations for boto3.AppConfig 1.28.52 service generated with mypy-boto3-builder 7.19.0"
+version = "1.28.60"
+description = "Type annotations for boto3.AppConfig 1.28.60 service generated with mypy-boto3-builder 7.19.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-appconfig-1.28.52.tar.gz", hash = "sha256:3a31c569394cb28edd6d40b235f3ad6c8829450626566ee7d0fa1466339a7f5f"},
-    {file = "mypy_boto3_appconfig-1.28.52-py3-none-any.whl", hash = "sha256:3335d41af596cac5b63fc3551b79531fea8f904fc91fa27a69a21fdd5c0275fe"},
+    {file = "mypy-boto3-appconfig-1.28.60.tar.gz", hash = "sha256:50ac377c8f6233a29f233d3c7af40094b0a7ffdf5e0fb56696a91328f21954d6"},
+    {file = "mypy_boto3_appconfig-1.28.60-py3-none-any.whl", hash = "sha256:49fd889cd3565b3d0c6bfe36c2bb68f76a50f2ee84e3e88507cf154d04834adf"},
 ]
 
 [package.dependencies]
@@ -3172,4 +3172,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "ef2d7ffd4231db12b97c471977d1ba4458935ff96ccdce2a84b963b877ebc4c5"
+content-hash = "1d547fb744ce9b7bb73cd4c52524e50c5cd7357923a7f9612a65245a30b173ed"
