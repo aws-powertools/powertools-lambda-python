@@ -1204,8 +1204,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#vpc-lattice" class="md-nav__link">
-    VPC Lattice
+  <a href="#vpc-lattice-v2" class="md-nav__link">
+    VPC Lattice V2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vpc-lattice-v1" class="md-nav__link">
+    VPC Lattice V1
   </a>
   
 </li>
@@ -1852,8 +1859,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#vpc-lattice" class="md-nav__link">
-    VPC Lattice
+  <a href="#vpc-lattice-v2" class="md-nav__link">
+    VPC Lattice V2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vpc-lattice-v1" class="md-nav__link">
+    VPC Lattice V1
   </a>
   
 </li>
@@ -2102,7 +2116,11 @@ by using the <code>event_source</code> decorator.</p>
 <td><code>SQSEvent</code></td>
 </tr>
 <tr>
-<td><a href="#vpc-lattice">VPC Lattice</a></td>
+<td><a href="#vpc-lattice-v2">VPC Lattice V2</a></td>
+<td><code>VPCLatticeV2Event</code></td>
+</tr>
+<tr>
+<td><a href="#vpc-lattice-v1">VPC Lattice V1</a></td>
 <td><code>VPCLatticeEvent</code></td>
 </tr>
 </tbody>
@@ -4186,10 +4204,119 @@ for more details.</p>
 </div>
 </div>
 </div>
-<h3 id="vpc-lattice">VPC Lattice<a class="headerlink" href="#vpc-lattice" title="Permanent link">&para;</a></h3>
-<p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.</p>
+<h3 id="vpc-lattice-v2">VPC Lattice V2<a class="headerlink" href="#vpc-lattice-v2" title="Permanent link">&para;</a></h3>
+<p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html#vpc-lattice-receiving-events" target="_blank">Payload V2</a>.</p>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="37:2"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><input id="__tabbed_37_2" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">app.py</label><label for="__tabbed_37_2">Lattice Example Event</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">VPCLatticeEventV2</span><span class="p">,</span> <span class="n">event_source</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="hll"><span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">VPCLatticeEventV2</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">VPCLatticeEventV2</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">body</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;isBase64Encoded&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+        <span class="s2">&quot;statusDescription&quot;</span><span class="p">:</span> <span class="s2">&quot;200 OK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/text&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="s2">&quot;VPC Lattice V2 Event ✨🎉✨&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">response</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/todos&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;method&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;headers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;user_agent&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;curl/7.64.1&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;x-forwarded-for&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;10.213.229.10&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;accept&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*/*&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;queryStringParameters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;order-id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1&quot;</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;message\&quot;: \&quot;Hello from Lambda!\&quot;}&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;requestContext&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;serviceNetworkArn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:vpc-lattice:us-east-2:123456789012:servicenetwork/sn-0bf3f2882e9cc805a&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;serviceArn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:vpc-lattice:us-east-2:123456789012:service/svc-0a40eebed65f8d69c&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;targetGroupArn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:vpc-lattice:us-east-2:123456789012:targetgroup/tg-6d0ecf831eec9f09&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;identity&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;sourceVpcArn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:ec2:region:123456789012:vpc/vpc-0b8276c84697e7339&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AWS_IAM&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;principal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;arn:aws:sts::123456789012:assumed-role/example-role/057d00f8b51257ba3c853a0f248943cf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;sessionName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;057d00f8b51257ba3c853a0f248943cf&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;x509SanDns&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;example.com&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="nt">&quot;region&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;us-east-2&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;timeEpoch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1696331543569073&quot;</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h3 id="vpc-lattice-v1">VPC Lattice V1<a class="headerlink" href="#vpc-lattice-v1" title="Permanent link">&para;</a></h3>
+<p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.</p>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:2"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">app.py</label><label for="__tabbed_38_2">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4272,7 +4399,7 @@ for more details.</p>
 <div class="admonition warning">
 <p class="admonition-title">If we fail to deserialize a field value (e.g., JSON), they will appear as <code>[Cannot be deserialized]</code></p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:3"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><input id="__tabbed_38_3" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">debugging.py</label><label for="__tabbed_38_2">debugging_event.json</label><label for="__tabbed_38_3">debugging_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:3"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><input id="__tabbed_39_3" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">debugging.py</label><label for="__tabbed_39_2">debugging_event.json</label><label for="__tabbed_39_3">debugging_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4475,7 +4602,7 @@ for more details.</p>
   <small>
     
       Last update:
-      2023-09-15
+      2023-10-05
     
   </small>
 </div>
