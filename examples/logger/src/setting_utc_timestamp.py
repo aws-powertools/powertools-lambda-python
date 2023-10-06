@@ -1,7 +1,13 @@
+import os
+import time
+
 from aws_lambda_powertools import Logger
 
-logger = Logger(service="payment")
-logger.info("Local time")
+logger = Logger(service="payment", utc=True)
+logger.info("utf time")
 
-logger_in_utc = Logger(service="order", utc=True)
-logger_in_utc.info("GMT time zone")
+os.environ["TZ"] = "US/Eastern"
+time.tzset()  # (1)!
+
+logger_in_utc = Logger(service="order")
+logger_in_utc.info("US eastern time")

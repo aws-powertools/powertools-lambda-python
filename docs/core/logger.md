@@ -39,7 +39,7 @@ Your Logger will include the following keys to your structured logging:
 | **level**: `str`           | `INFO`                                | Logging level                                                                                                                        |
 | **location**: `str`        | `collect.handler:1`                   | Source code location where statement was executed                                                                                    |
 | **message**: `Any`         | `Collecting payment`                  | Unserializable JSON values are casted as `str`                                                                                       |
-| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0200`        | Timestamp with milliseconds, by default uses local timezone                                                                          |
+| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0000`        | Timestamp with milliseconds, by default uses default lambda timezone (UTC)                                                                         |
 | **service**: `str`         | `payment`                             | Service name defined, by default `service_undefined`                                                                                 |
 | **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID |
 | **sampling_rate**: `float` | `0.1`                                 | When enabled, it shows sampling rate in percentage e.g. 10%                                                                          |
@@ -567,17 +567,21 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
     --8<-- "examples/logger/src/reordering_log_keys_output.json"
     ```
 
-#### Setting timestamp to UTC
+#### Setting timestamp to custom Timezone
 
-By default, this Logger and standard logging library emits records using local time timestamp. You can override this behavior via `utc` parameter:
+By default, this Logger and standard logging library emits records using default lambda time(UTC) timestamp. You can enforce this behavior via `utc` parameter.
 
-=== "setting_utc_timestamp.py"
+However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`, either set it as Lambda Environment Variable. Or setup this value directly in your Lambda Hander.
 
-    ```python hl_lines="6"
+=== "setting_custom_timezone.py"
+
+    ```python hl_lines="8 11"
     --8<-- "examples/logger/src/setting_utc_timestamp.py"
     ```
 
-=== "setting_utc_timestamp_output.json"
+    1.  if you set TZ in lambda runtime, time.tzset() need to be called. You don't need it when setting TZ in lambda environment variable
+
+=== "setting_custom_timezone_output.json"
 
     ```json hl_lines="6 13"
     --8<-- "examples/logger/src/setting_utc_timestamp_output.json"

@@ -294,6 +294,14 @@ def test_log_in_utc(service_name):
     assert logger._logger.handlers[0].formatter.converter == time.gmtime
 
 
+def test_log_wo_utc(service_name):
+    # GIVEN a logger where UTC is false
+    logger = Logger(service=service_name, utc=False)
+
+    # THEN logging formatter time converter should use localtime fn
+    assert logger._logger.handlers[0].formatter.converter == time.localtime
+
+
 @pytest.mark.parametrize("message", ["hello", 1.10, {}, [], True, object()])
 def test_logging_various_primitives(stdout, service_name, message):
     # GIVEN a logger with default settings
