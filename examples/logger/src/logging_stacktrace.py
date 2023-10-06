@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 
 ENDPOINT = "http://httpbin.org/status/500"
-logger = Logger(logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=True))
+logger = Logger(logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))
 
 
 def lambda_handler(event: dict, context: LambdaContext) -> str:

@@ -964,7 +964,7 @@ def test_logger_logs_no_stack_trace_without_parameter(stdout):
     logger = Logger(stream=stdout)
 
     try:
-        val = 1 + "someString"
+        raise ValueError("Something went wrong")
     except Exception as e:
         logger.exception(e)
 
@@ -972,10 +972,10 @@ def test_logger_logs_no_stack_trace_without_parameter(stdout):
     assert "stack_trace" not in log
 
 def test_logger_logs_stack_trace_with_parameter(stdout):
-    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=True))
+    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))
 
     try:
-        val = 1 + "someString"
+        raise ValueError("Something went wrong")
     except Exception as e:
         logger.exception(e)
 
@@ -987,20 +987,19 @@ def test_logger_logs_stack_trace_with_env_var(stdout, monkeypatch: pytest.Monkey
     logger = Logger(stream=stdout)
 
     try:
-        val = 1 + "someString"
+        raise ValueError("Something went wrong")
     except Exception as e:
         logger.exception(e)
 
     log = capture_logging_output(stdout)
     assert "stack_trace" in log
 
-
 def test_logger_logs_no_stack_trace_with_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "false")
     logger = Logger(stream=stdout)
 
     try:
-        val = 1 + "someString"
+        raise ValueError("Something went wrong")
     except Exception as e:
         logger.exception(e)
 
@@ -1009,12 +1008,23 @@ def test_logger_logs_no_stack_trace_with_env_var(stdout, monkeypatch: pytest.Mon
 
 def test_logger_logs_no_stack_trace_with_parameter_override(stdout, monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "true")
-    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(include_stacktrace=False))
+    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=False))
 
     try:
-        val = 1 + "someString"
+        raise ValueError("Something went wrong")
     except Exception as e:
         logger.exception(e)
 
     log = capture_logging_output(stdout)
     assert "stack_trace" not in log
+
+def test_logger_logs_stack_trace_with_logger_parameter(stdout):
+    logger = Logger(stream=stdout, serialize_stacktrace=True)
+
+    try:
+        raise ValueError("Something went wrong")
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" in log.keys()

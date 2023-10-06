@@ -220,6 +220,7 @@ class Logger:
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         use_rfc3339: bool = False,
+        serialize_stacktrace: bool = None,
         **kwargs,
     ) -> None:
         self.service = resolve_env_var_choice(
@@ -253,6 +254,7 @@ class Logger:
             "log_record_order": log_record_order,
             "utc": utc,
             "use_rfc3339": use_rfc3339,
+            "serialize_stacktrace": serialize_stacktrace
         }
 
         self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
