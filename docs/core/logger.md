@@ -571,11 +571,14 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 By default, this Logger and standard logging library emits records using default lambda time(UTC) timestamp. You can enforce this behavior via `utc` parameter.
 
-However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`, either set it as Lambda Environment Variable. Or setup this value directly in your Lambda Hander.
+However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`: Either set it as Lambda Environment Variable. Or setup this value directly in your Lambda Hander.
+
+???+ tip
+    `TZ` environment variable will be ingnored if `utc` is set to `True`
 
 === "setting_custom_timezone.py"
 
-    ```python hl_lines="8 11"
+    ```python hl_lines="9 12"
     --8<-- "examples/logger/src/setting_utc_timestamp.py"
     ```
 
