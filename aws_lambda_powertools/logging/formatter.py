@@ -164,14 +164,6 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         """Serialize structured log dict to JSON str"""
         return self.json_serializer(log)
     
-    # def serialize_traceback(self, e: Exception) -> list:
-    #     return [{"file": fs.filename, 
-    #                 "line": fs.lineno,
-    #                 "column": fs.colno,
-    #                 "function": fs.name,
-    #                 "statement": fs.line
-    #                 } for fs in traceback.extract_tb(e.__traceback__)]
-
     def serialize_traceback(self, log_record: logging.LogRecord) -> list:
         exception_info = {
             "type": log_record.exc_info[0].__name__,
