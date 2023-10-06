@@ -1231,6 +1231,8 @@
       
         
       
+        
+      
     
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
@@ -1486,6 +1488,118 @@
 
               
             
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        
+          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_5">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Your first contribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing/conventions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Conventions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -1677,8 +1791,9 @@
 <p><strong>Major updates</strong></p>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1858">RFC to agree on design and MVP</a></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197">POC with AWS KMS as the default provider</a></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Documentation to guide customers how to bring their own provider (e.g., <code>ItsDangerous</code>)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197">POC with AWS KMS as the default provider</a></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> User-guide documentation and include when not to use it (e.g., when to use SNS data policy, CloudWatch Logs data policy)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Decide whether to use Encryption SDK to bring their own provider or a simply a contract (e.g., <code>ItsDangerous</code>)</li>
 </ul>
 <h3 id="revamp-event-handler">Revamp Event Handler<a class="headerlink" href="#revamp-event-handler" title="Permanent link">&para;</a></h3>
 <p>Event Handler provides lightweight routing for both <a href="../core/event_handler/api_gateway/"><strong>REST</strong>: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL</a>, and <a href="../core/event_handler/appsync/"><strong>GraphQL</strong>: AWS AppSync</a>.</p>
@@ -1687,8 +1802,8 @@
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/953#issuecomment-1450223155">Agree on experience for middleware support</a></li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/2421">RFC to outline initial thoughts on OpenAPI integration</a></li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> MVP for REST middleware</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> MVP for OpenAPI and SwaggerUI</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="../core/event_handler/api_gateway/#middleware">MVP for REST middleware</a></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/3109">MVP for OpenAPI and SwaggerUI</a></li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/1998">MVP for AppSync Batch invoke and partial failure support</a></li>
 </ul>
 <h3 id="lambda-layer-in-release-notes">Lambda Layer in release notes<a class="headerlink" href="#lambda-layer-in-release-notes" title="Permanent link">&para;</a></h3>
@@ -1736,10 +1851,10 @@
 </div>
 <p><strong>Major updates</strong></p>
 <ul class="task-list">
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Gather agencies and customers name to prioritize it</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Investigate security requirements for special regions</li>
-<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update CDK Layer construct to include regions</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Gather agencies and customers name to prioritize it</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Investigate security requirements for special regions</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Create additional infrastructure for special regions</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update CDK Layer construct to include regions</li>
 </ul>
 <h3 id="v3">V3<a class="headerlink" href="#v3" title="Permanent link">&para;</a></h3>
 <p>With Python 3.7 reaching <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html">end-of-life in AWS Lambda by the end of the year</a>, we want to plan some breaking changes. As always, we plan on having ample notice, a detailed upgrade guide, and keep breaking changes to a minimum to ease transition (e.g., it took ~7 months from v2 to surpass v1 downloads).</p>
@@ -1821,7 +1936,7 @@
   <small>
     
       Last update:
-      2023-08-15
+      2023-10-06
     
   </small>
 </div>

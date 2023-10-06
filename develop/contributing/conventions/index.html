@@ -6,28 +6,30 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Powertools for AWS Lambda (Python)">
+        <meta name="description" content="General conventions and practices that are applicable throughout to Powertools for AWS Lambda (Python)">
       
       
         <meta name="author" content="Amazon Web Services">
       
       
       
+        <link rel="prev" href="../getting_started/">
       
       
-      <link rel="icon" href="/media/aws-logo-light.svg">
+      
+      <link rel="icon" href="../../media/aws-logo-light.svg">
       <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.2.7">
     
     
       
-        <title>Powertools for AWS Lambda (Python)</title>
+        <title>Conventions - Powertools for AWS Lambda (Python)</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.046329b4.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.046329b4.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.85d0ee34.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.85d0ee34.min.css">
       
       
 
@@ -46,9 +48,9 @@
       
     
     
-      <link rel="stylesheet" href="/stylesheets/extra.css">
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -76,6 +78,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#general-terminology-and-practices" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -87,7 +94,7 @@
             <div class="md-banner__inner md-grid md-typeset">
               
   You're not viewing the latest version.
-  <a href="..//">
+  <a href="../../..">
     <strong>Click here to go to latest.</strong>
   </a>
 
@@ -102,9 +109,9 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
       
-  <img src="/media/aws-logo-light.svg" alt="logo">
+  <img src="../../media/aws-logo-light.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -121,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Conventions
             
           </span>
         </div>
@@ -227,7 +234,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="/." class="md-tabs__link">
+        <a href="../.." class="md-tabs__link">
           
   
     
@@ -245,7 +252,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/tutorial/" class="md-tabs__link">
+      <a href="../../tutorial/" class="md-tabs__link">
         
   
     
@@ -260,11 +267,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="/security/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../../security/" class="md-tabs__link">
           
   
     
@@ -299,9 +308,9 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
       
-  <img src="/media/aws-logo-light.svg" alt="logo">
+  <img src="../../media/aws-logo-light.svg" alt="logo">
 
     </a>
     Powertools for AWS Lambda (Python)
@@ -358,7 +367,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="/." class="md-nav__link ">
+            <a href="../.." class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -389,7 +398,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/changelog/" class="md-nav__link">
+      <a href="../../changelog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -409,7 +418,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/api/" target="_blank" class="md-nav__link">
+      <a href="../../api/" target="_blank" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -429,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/upgrade/" class="md-nav__link">
+      <a href="../../upgrade/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -449,7 +458,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/we_made_this/" class="md-nav__link">
+      <a href="../../we_made_this/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -469,7 +478,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/roadmap/" class="md-nav__link">
+      <a href="../../roadmap/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -559,7 +568,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/tracer/" class="md-nav__link">
+      <a href="../../core/tracer/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -579,7 +588,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/logger/" class="md-nav__link">
+      <a href="../../core/logger/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -622,7 +631,7 @@
           
           
           <div class="md-nav__link md-nav__container">
-            <a href="/core/metrics/" class="md-nav__link ">
+            <a href="../../core/metrics/" class="md-nav__link ">
               
   
   <span class="md-ellipsis">
@@ -653,7 +662,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/metrics/" class="md-nav__link">
+      <a href="../../core/metrics/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -673,7 +682,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/metrics/datadog/" class="md-nav__link">
+      <a href="../../core/metrics/datadog/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -741,7 +750,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/event_handler/api_gateway/" class="md-nav__link">
+      <a href="../../core/event_handler/api_gateway/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -761,7 +770,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/core/event_handler/appsync/" class="md-nav__link">
+      <a href="../../core/event_handler/appsync/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -789,7 +798,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/parameters/" class="md-nav__link">
+      <a href="../../utilities/parameters/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -809,7 +818,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/batch/" class="md-nav__link">
+      <a href="../../utilities/batch/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -829,7 +838,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/typing/" class="md-nav__link">
+      <a href="../../utilities/typing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -849,7 +858,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/validation/" class="md-nav__link">
+      <a href="../../utilities/validation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -869,7 +878,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/data_classes/" class="md-nav__link">
+      <a href="../../utilities/data_classes/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -889,7 +898,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/parser/" class="md-nav__link">
+      <a href="../../utilities/parser/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -909,7 +918,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/idempotency/" class="md-nav__link">
+      <a href="../../utilities/idempotency/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -929,7 +938,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/feature_flags/" class="md-nav__link">
+      <a href="../../utilities/feature_flags/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -949,7 +958,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/streaming/" class="md-nav__link">
+      <a href="../../utilities/streaming/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -969,7 +978,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/middleware_factory/" class="md-nav__link">
+      <a href="../../utilities/middleware_factory/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -989,7 +998,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/utilities/jmespath_functions/" class="md-nav__link">
+      <a href="../../utilities/jmespath_functions/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1044,7 +1053,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/tutorial/" class="md-nav__link">
+      <a href="../../tutorial/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1061,6 +1070,8 @@
       
   
   
+    
+  
   
     
     
@@ -1077,13 +1088,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
@@ -1096,7 +1107,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Processes
@@ -1109,7 +1120,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/security/" class="md-nav__link">
+      <a href="../../security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1129,7 +1140,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/automation/" class="md-nav__link">
+      <a href="../../automation/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1149,7 +1160,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/roadmap/" class="md-nav__link">
+      <a href="../../roadmap/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1169,7 +1180,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/maintainers/" class="md-nav__link">
+      <a href="../../maintainers/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1187,6 +1198,8 @@
                 
   
   
+    
+  
   
     
     
@@ -1201,13 +1214,13 @@
     
       
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" checked>
         
           <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
             
@@ -1220,7 +1233,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_5">
             <span class="md-nav__icon md-icon"></span>
             Contributing
@@ -1233,7 +1246,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/contributing/setup/" class="md-nav__link">
+      <a href="../setup/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1253,7 +1266,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/contributing/getting_started/" class="md-nav__link">
+      <a href="../getting_started/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1271,9 +1284,27 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/contributing/conventions/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Conventions
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1282,6 +1313,38 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-terminology-and-practices" class="md-nav__link">
+    General terminology and practices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-definition" class="md-nav__link">
+    Testing definition
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1320,6 +1383,28 @@
   
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#general-terminology-and-practices" class="md-nav__link">
+    General terminology and practices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-definition" class="md-nav__link">
+    Testing definition
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1330,8 +1415,115 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+  
+  
+
+
+  <h1>Conventions</h1>
+
+<!-- markdownlint-disable MD043 -->
+
+<h2 id="general-terminology-and-practices">General terminology and practices<a class="headerlink" href="#general-terminology-and-practices" title="Permanent link">&para;</a></h2>
+<p>These are common conventions we keep on building as the project gains new contributors and grows in complexity.</p>
+<p>As we gather more concrete examples, this page will have one section for each category to demonstrate a before and after.</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Convention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docstring</strong></td>
+<td>We use <a href="https://numpydoc.readthedocs.io/en/latest/format.html" target="_blank">Numpy convention</a> with markdown to help generate more readable API references. For public APIs, we always include at least one <strong>Example</strong> to ease everyone's experience when using an IDE.</td>
+</tr>
+<tr>
+<td><strong>Style guide</strong></td>
+<td>We use black and <a href="https://beta.ruff.rs/docs/">Ruff</a> to enforce beyond good practices <a href="https://pep8.org/">PEP8</a>. We use type annotations and enforce static type checking at CI (mypy).</td>
+</tr>
+<tr>
+<td><strong>Core utilities</strong></td>
+<td>Core utilities always accept <code>service</code> as a constructor parameter, can work in isolation, and are also available in other languages implementation.</td>
+</tr>
+<tr>
+<td><strong>Utilities</strong></td>
+<td>Utilities are not as strict as core and focus on community needs: development productivity, industry leading practices, etc. Both core and general utilities follow our <a href="https://docs.powertools.aws.dev/lambda/python/#tenets">Tenets</a>.</td>
+</tr>
+<tr>
+<td><strong>Exceptions</strong></td>
+<td>Specific exceptions live within utilities themselves and use <code>Error</code> suffix e.g. <code>MetricUnitError</code>.</td>
+</tr>
+<tr>
+<td><strong>Git commits</strong></td>
+<td>We follow <a href="https://www.conventionalcommits.org/en/v1.0.0/">conventional commits</a>. We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly.</td>
+</tr>
+<tr>
+<td><strong>API documentation</strong></td>
+<td>API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.</td>
+</tr>
+<tr>
+<td><strong>Documentation</strong></td>
+<td>We treat it like a product. We sub-divide content aimed at getting started (80% of customers) vs advanced usage (20%). We also ensure customers know how to unit test their code when using our features.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="testing-definition">Testing definition<a class="headerlink" href="#testing-definition" title="Permanent link">&para;</a></h2>
+<p>We group tests in different categories</p>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>When to write</th>
+<th>Notes</th>
+<th>Speed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit tests</td>
+<td>Verify the smallest possible unit works.</td>
+<td>Networking access is prohibited. Prefer Functional tests given our complexity.</td>
+<td>Lightning fast (nsec to ms)</td>
+</tr>
+<tr>
+<td>Functional tests</td>
+<td>Guarantee functionality works as expected. It's a subset of integration test covering multiple units.</td>
+<td>No external dependency. Prefer Fake implementations (in-memory) over Mocks and Stubs.</td>
+<td>Fast (ms to few seconds at worst)</td>
+</tr>
+<tr>
+<td>End-to-end tests</td>
+<td>Gain confidence that a Lambda function with our code operates as expected.</td>
+<td>It simulates how customers configure, deploy, and run their Lambda function - Event Source configuration, IAM permissions, etc.</td>
+<td>Slow (minutes)</td>
+</tr>
+<tr>
+<td>Performance tests</td>
+<td>Ensure critical operations won't increase latency and costs to customers.</td>
+<td>CI arbitrary hardware can make it flaky. We'll resume writing perf test after we revamp our functional tests with internal utilities.</td>
+<td>Fast to moderate (a few seconds to a few minutes)</td>
+</tr>
+</tbody>
+</table>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      2023-10-06
+    
+  </small>
+</div>
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -1373,14 +1565,14 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "/assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.dfff1995.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.dff1b7c8.min.js"></script>
+      <script src="../../assets/javascripts/bundle.dff1b7c8.min.js"></script>
       
-        <script src="/javascript/aws-amplify.min.js"></script>
+        <script src="../../javascript/aws-amplify.min.js"></script>
       
-        <script src="/javascript/extra.js"></script>
+        <script src="../../javascript/extra.js"></script>
       
     
   </body>
