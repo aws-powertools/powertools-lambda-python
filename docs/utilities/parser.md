@@ -192,6 +192,7 @@ Parser comes with the following built-in models:
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
+| **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                         |
 
 #### Extending built-in models
 
