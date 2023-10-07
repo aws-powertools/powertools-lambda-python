@@ -90,7 +90,7 @@ def event_parser(
                 "or as the type hint of `event` in the handler that it wraps",
             )
 
-    parsed_event = parse(event=event, model=model, envelope=envelope) if envelope else parse(event=event, model=model)
+    parsed_event = parse(event=event, model=model, envelope=envelope)
     logger.debug(f"Calling handler {handler.__name__}")
     return handler(parsed_event, context)
 
