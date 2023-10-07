@@ -1,4 +1,5 @@
 import logging
+import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
 from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
@@ -17,7 +18,7 @@ def event_parser(
     handler: Callable[[Any, LambdaContext], EventParserReturnType],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: Type[Model],
+    model: Type[Model] = None,
     envelope: Optional[Type[Envelope]] = None,
 ) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
@@ -76,10 +77,19 @@ def event_parser(
     ValidationError
         When input event does not conform with model provided
     InvalidModelTypeError
-        When model given does not implement BaseModel
+        When model given does not implement BaseModel or is not provided
     InvalidEnvelopeError
         When envelope given does not implement BaseEnvelope
     """
+    if model is None:
+        type_hints = typing.get_type_hints(handler)
+        model = type_hints.get("event")
+        if model is None:
+            raise InvalidModelTypeError(
+                "The model must be provided either as the `model` argument to `event_parser`"
+                "or as the type hint of `event` in the handler that it wraps",
+            )
+
     parsed_event = parse(event=event, model=model, envelope=envelope) if envelope else parse(event=event, model=model)
     logger.debug(f"Calling handler {handler.__name__}")
     return handler(parsed_event, context)
