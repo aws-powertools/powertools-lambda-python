@@ -36,8 +36,9 @@ Data Masking will be a new utility to mask/unmask sensitive data using encryptio
 **Major updates**
 
 - [x] [RFC to agree on design and MVP](https://github.com/aws-powertools/powertools-lambda-python/issues/1858)
-- [ ] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
-- [ ] Documentation to guide customers how to bring their own provider (e.g., `ItsDangerous`)
+- [x] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
+- [ ] User-guide documentation and include when not to use it (e.g., when to use SNS data policy, CloudWatch Logs data policy)
+- [ ] Decide whether to use Encryption SDK to bring their own provider or a simply a contract (e.g., `ItsDangerous`)
 
 ### Revamp Event Handler
 
@@ -49,8 +50,8 @@ Based on customers feedback, we want to provide middleware authoring support for
 
 - [x] [Agree on experience for middleware support](https://github.com/aws-powertools/powertools-lambda-python/issues/953#issuecomment-1450223155)
 - [x] [RFC to outline initial thoughts on OpenAPI integration](https://github.com/aws-powertools/powertools-lambda-python/issues/2421)
-- [ ] MVP for REST middleware
-- [ ] MVP for OpenAPI and SwaggerUI
+- [x] [MVP for REST middleware](./core/event_handler/api_gateway.md#middleware)
+- [ ] [MVP for OpenAPI and SwaggerUI](https://github.com/aws-powertools/powertools-lambda-python/pull/3109)
 - [ ] [MVP for AppSync Batch invoke and partial failure support](https://github.com/aws-powertools/powertools-lambda-python/pull/1998)
 
 ### Lambda Layer in release notes
@@ -112,10 +113,10 @@ We want to investigate security and scaling requirements for these special regio
 
 **Major updates**
 
-- [ ] Gather agencies and customers name to prioritize it
-- [ ] Investigate security requirements for special regions
-- [ ] Update CDK Layer construct to include regions
+- [x] Gather agencies and customers name to prioritize it
+- [x] Investigate security requirements for special regions
 - [ ] Create additional infrastructure for special regions
+- [ ] Update CDK Layer construct to include regions
 
 ### V3
 
