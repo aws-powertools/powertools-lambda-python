@@ -227,7 +227,7 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 #### Headers
 
-Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
+Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`. If you'd like to perform a case-insensitive lookup of the header value, the `get_header_value` utility function will do it by default.
 
 ```python hl_lines="19" title="Accessing HTTP Headers"
 --8<-- "examples/event_handler_rest/src/accessing_request_details_headers.py"
