@@ -40,6 +40,24 @@ nav:
       - Automation: automation.md
       - Roadmap: roadmap.md
       - Maintainers: maintainers.md
+      - Contributing:
+          # - contributing/index.md
+          - Development environment: contributing/setup.md
+          - Your first contribution: contributing/getting_started.md
+          - Conventions: contributing/conventions.md
+          # - Testing:
+          #     - Unit tests: contributing/testing/unit_tests.md
+          #     - Functional tests: contributing/testing/functional_tests.md
+          #     - End-to-end tests: contributing/testing/e2e_tests.md
+          # - Documentation:
+          #     - User guide: contributing/documentation/user_guide.md
+          #     - API guide: contributing/documentation/api_guide.md
+          #     - Tutorials: contributing/documentation/tutorials.md
+          #     - Request For Comments (RFC): contributing/documentation/rfc.md
+          # - Tracks:
+          #     - Overview: contributing/tracks/overview.md
+          #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
+          #     - Customer to advocate: contributing/tracks/customer_advocate.md
 
 theme:
   name: material
