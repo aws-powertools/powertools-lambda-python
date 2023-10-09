@@ -166,7 +166,6 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         # exception and exception_name fields can be added as extra key
         # in any log level, we try to extract and use them first
         extracted_exception, extracted_exception_name = self._extract_log_exception(log_record=record)
-        formatted_log["record"] = record
         formatted_log["exception"] = formatted_log.get("exception", extracted_exception)
         formatted_log["exception_name"] = formatted_log.get("exception_name", extracted_exception_name)
         if self.serialize_stacktrace:
