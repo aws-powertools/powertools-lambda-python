@@ -8,7 +8,6 @@ from copy import copy
 
 from dataclasses import dataclass, is_dataclass
 from enum import Enum
-from types import UnionType
 from typing import Any, Dict, List, Set, Tuple, Type, Union, FrozenSet, Deque, Sequence, Mapping
 
 from typing_extensions import Annotated, Literal, get_origin, get_args
@@ -20,6 +19,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     PYDANTIC_V2,
     ModelNameMap,
+    UnionType,
 )
 
 sequence_annotation_to_type = {
