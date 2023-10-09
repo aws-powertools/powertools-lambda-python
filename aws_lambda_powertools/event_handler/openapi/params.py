@@ -584,7 +584,7 @@ def analyze_param(
         field_info = value
 
         if PYDANTIC_V2:
-            field_info.annotation = type_annotation  # type: ignore[attr-defined]
+            field_info.annotation = type_annotation  # type: ignore[attr-defined,unused-ignore]
 
     # If we didn't determine the FieldInfo yet, we create a default one
     if field_info is None:
