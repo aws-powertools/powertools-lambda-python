@@ -1,7 +1,7 @@
 import json
-from typing import Annotated
 
 from pydantic import BaseModel
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body

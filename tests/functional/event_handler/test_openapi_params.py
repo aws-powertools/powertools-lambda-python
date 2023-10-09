@@ -234,7 +234,6 @@ def test_openapi_with_body_param():
     @app.post("/users")
     def handler(user: User):
         print(user)
-        pass
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
@@ -257,7 +256,6 @@ def test_openapi_with_embed_body_param():
     @app.post("/users")
     def handler(user: Annotated[User, Body(embed=True)]):
         print(user)
-        pass
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
