@@ -1389,18 +1389,25 @@ class ApiGatewayResolver(BaseRouter):
         str
             The OpenAPI schema as a JSON serializable dict.
         """
-        return self.get_openapi_schema(
-            title=title,
-            version=version,
-            openapi_version=openapi_version,
-            summary=summary,
-            description=description,
-            tags=tags,
-            servers=servers,
-            terms_of_service=terms_of_service,
-            contact=contact,
-            license_info=license_info,
-        ).json(by_alias=True, exclude_none=True, indent=2)
+        from aws_lambda_powertools.event_handler.openapi.compat import model_json
+
+        return model_json(
+            self.get_openapi_schema(
+                title=title,
+                version=version,
+                openapi_version=openapi_version,
+                summary=summary,
+                description=description,
+                tags=tags,
+                servers=servers,
+                terms_of_service=terms_of_service,
+                contact=contact,
+                license_info=license_info,
+            ),
+            by_alias=True,
+            exclude_none=True,
+            indent=2,
+        )
 
     def route(
         self,

@@ -209,6 +209,12 @@ if PYDANTIC_V2:
         model: Type[BaseModel] = create_model(model_name, **field_params)
         return model
 
+    def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
+        return model.model_dump(mode=mode, **kwargs)
+
+    def model_json(model: BaseModel, **kwargs: Any) -> Any:
+        return model.model_dump_json(**kwargs)
+
 else:
     from pydantic import BaseModel, ValidationError
     from pydantic.fields import (
@@ -390,6 +396,12 @@ else:
     def serialize_sequence_value(*, field: ModelField, value: Any) -> Sequence[Any]:
         return sequence_shape_to_type[field.shape](value)
 
+    def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
+        return model.dict(**kwargs)
+
+    def model_json(model: BaseModel, **kwargs: Any) -> Any:
+        return model.json(**kwargs)
+
 
 # Common code for both versions
 
@@ -482,7 +494,3 @@ def _regenerate_error_with_loc(
     ]
 
     return updated_loc_errors
-
-
-def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
-    return model.dict(**kwargs)
