@@ -2,9 +2,22 @@ import inspect
 import re
 from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, cast
 
-from aws_lambda_powertools.event_handler.openapi.compat import ModelField, evaluate_forwardref
-from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param, ParamTypes, analyze_param
-from aws_lambda_powertools.event_handler.openapi.types import CacheKey
+from aws_lambda_powertools.event_handler.openapi.compat import (
+    ModelField,
+    evaluate_forwardref,
+    is_scalar_field,
+    is_scalar_sequence_field,
+)
+from aws_lambda_powertools.event_handler.openapi.params import (
+    Body,
+    Dependant,
+    Header,
+    Param,
+    ParamTypes,
+    Query,
+    analyze_param,
+)
+from aws_lambda_powertools.event_handler.openapi.utils import get_flat_dependant
 
 """
 This turns the opaque function signature into typed, validated models.
@@ -170,7 +183,10 @@ def get_dependant(
         if param_field is None:
             raise AssertionError(f"Param field is None for param: {param_name}")
 
-        add_param_to_fields(field=param_field, dependant=dependant)
+        if is_body_param(param_field=param_field, is_path_param=is_path_param):
+            dependant.body_params.append(param_field)
+        else:
+            add_param_to_fields(field=param_field, dependant=dependant)
 
     # If the return annotation is not empty, add it to the dependant model.
     return_annotation = endpoint_signature.return_annotation
@@ -190,58 +206,19 @@ def get_dependant(
     return dependant
 
 
-def get_flat_dependant(
-    dependant: Dependant,
-    *,
-    skip_repeats: bool = False,
-    visited: Optional[List[CacheKey]] = None,
-) -> Dependant:
-    """
-    Flatten a recursive Dependant model structure.
-
-    This function recursively concatenates the parameter fields of a Dependant model and its dependencies into a flat
-    Dependant structure. This is useful for scenarios like parameter validation where the nested structure is not
-    relevant.
-
-    Parameters
-    ----------
-    dependant: Dependant
-        The dependant model to flatten
-    skip_repeats: bool
-        If True, child Dependents already visited will be skipped to avoid duplicates
-    visited: List[CacheKey], optional
-        Keeps track of visited Dependents to avoid infinite recursion. Defaults to empty list.
-
-    Returns
-    -------
-    Dependant
-        The flattened Dependant model
-    """
-    if visited is None:
-        visited = []
-    visited.append(dependant.cache_key)
-
-    flat_dependant = Dependant(
-        path_params=dependant.path_params.copy(),
-        query_params=dependant.query_params.copy(),
-        header_params=dependant.header_params.copy(),
-        cookie_params=dependant.cookie_params.copy(),
-        body_params=dependant.body_params.copy(),
-        path=dependant.path,
-    )
-    for sub_dependant in dependant.dependencies:
-        if skip_repeats and sub_dependant.cache_key in visited:
-            continue
-
-        flat_sub = get_flat_dependant(sub_dependant, skip_repeats=skip_repeats, visited=visited)
-
-        flat_dependant.path_params.extend(flat_sub.path_params)
-        flat_dependant.query_params.extend(flat_sub.query_params)
-        flat_dependant.header_params.extend(flat_sub.header_params)
-        flat_dependant.cookie_params.extend(flat_sub.cookie_params)
-        flat_dependant.body_params.extend(flat_sub.body_params)
-
-    return flat_dependant
+def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
+    if is_path_param:
+        if not is_scalar_field(field=param_field):
+            raise AssertionError("Path params must be of one of the supported types")
+        return False
+    elif is_scalar_field(field=param_field):
+        return False
+    elif isinstance(param_field.field_info, (Query, Header)) and is_scalar_sequence_field(param_field):
+        return False
+    else:
+        if not isinstance(param_field.field_info, Body):
+            raise AssertionError(f"Param: {param_field.name} can only be a request body, using Body()")
+        return True
 
 
 def get_flat_params(dependant: Dependant) -> List[ModelField]:

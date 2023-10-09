@@ -30,6 +30,12 @@ from typing_extensions import Literal
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.types import (
+    COMPONENT_REF_PREFIX,
+    METHODS_WITH_BODY,
+    validation_error_definition,
+    validation_error_response_definition,
+)
 from aws_lambda_powertools.event_handler.response import Response
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -67,7 +73,9 @@ if TYPE_CHECKING:
         Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
-    from aws_lambda_powertools.event_handler.openapi.types import TypeModelOrEnum
+    from aws_lambda_powertools.event_handler.openapi.types import (
+        TypeModelOrEnum,
+    )
 
 
 class ProxyEventType(Enum):
@@ -268,6 +276,9 @@ class Route:
         # _dependant is used to cache the dependant model for the handler function
         self._dependant: Optional["Dependant"] = None
 
+        # _body_field is used to cache the dependant model for the body field
+        self._body_field: Optional["ModelField"] = None
+
     def __call__(
         self,
         router_middlewares: List[Callable],
@@ -367,6 +378,15 @@ class Route:
 
         return self._dependant
 
+    @property
+    def body_field(self) -> Optional["ModelField"]:
+        if self._body_field is None:
+            from aws_lambda_powertools.event_handler.openapi.params import _get_body_field
+
+            self._body_field = _get_body_field(dependant=self.dependant, name=self.operation_id)
+
+        return self._body_field
+
     def _get_openapi_path(
         self,
         *,
@@ -375,9 +395,7 @@ class Route:
         model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-        from aws_lambda_powertools.event_handler.openapi.dependant import (
-            get_flat_params,
-        )
+        from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params
 
         path = {}
         definitions: Dict[str, Any] = {}
@@ -398,6 +416,15 @@ class Route:
             all_parameters.update(required_parameters)
             operation["parameters"] = list(all_parameters.values())
 
+        if self.method.upper() in METHODS_WITH_BODY:
+            request_body_oai = self._openapi_operation_request_body(
+                body_field=self.body_field,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            )
+            if request_body_oai:
+                operation["requestBody"] = request_body_oai
+
         responses = operation.setdefault("responses", {})
         success_response = responses.setdefault("200", {})
         success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
@@ -412,6 +439,24 @@ class Route:
                 field_mapping=field_mapping,
             ),
         )
+
+        # Validation responses
+        operation["responses"]["422"] = {
+            "description": "Validation Error",
+            "content": {
+                "application/json": {
+                    "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                },
+            },
+        }
+
+        if "ValidationError" not in definitions:
+            definitions.update(
+                {
+                    "ValidationError": validation_error_definition,
+                    "HTTPValidationError": validation_error_response_definition,
+                },
+            )
 
         path[self.method.lower()] = operation
 
@@ -443,6 +488,38 @@ class Route:
         operation["operationId"] = self.operation_id
 
         return operation
+
+    @staticmethod
+    def _openapi_operation_request_body(
+        *,
+        body_field: Optional["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
+    ) -> Optional[Dict[str, Any]]:
+        from aws_lambda_powertools.event_handler.openapi.compat import ModelField, get_schema_from_model_field
+        from aws_lambda_powertools.event_handler.openapi.params import Body
+
+        if not body_field:
+            return None
+
+        if not isinstance(body_field, ModelField):
+            raise AssertionError(f"Expected ModelField, got {body_field}")
+
+        body_schema = get_schema_from_model_field(
+            field=body_field,
+            model_name_map=model_name_map,
+            field_mapping=field_mapping,
+        )
+
+        field_info = cast(Body, body_field.field_info)
+        request_media_type = field_info.media_type
+        required = body_field.required
+        request_body_oai: Dict[str, Any] = {}
+        if required:
+            request_body_oai["required"] = required
+        request_media_content: Dict[str, Any] = {"schema": body_schema}
+        request_body_oai["content"] = {request_media_type: request_media_content}
+        return request_body_oai
 
     @staticmethod
     def _openapi_operation_parameters(
@@ -1097,6 +1174,7 @@ class ApiGatewayResolver(BaseRouter):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: Optional[bool] = False,
     ):
         """
         Parameters
@@ -1114,6 +1192,8 @@ class ApiGatewayResolver(BaseRouter):
             optional list of prefixes to be removed from the request path before doing the routing.
             This is often used with api gateways with multiple custom mappings.
             Each prefix can be a static string or a compiled regex pattern
+        enable_validation: Optional[bool]
+            Enables validation of the request body against the route schema, by default False.
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
@@ -1124,12 +1204,26 @@ class ApiGatewayResolver(BaseRouter):
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
         self._debug = self._has_debug(debug)
+        self._enable_validation = enable_validation
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        if self._enable_validation:
+            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
+
+            self.use([OpenAPIValidationMiddleware()])
+
+            # When using validation, we need to skip the serializer, as the middleware is doing it automatically
+            # However, if the user is using a custom serializer, we need to abort
+            if serializer:
+                raise ValueError("Cannot use a custom serializer when using validation")
+
+            # Install a dummy serializer
+            self._serializer = lambda args: args  # type: ignore
 
     def get_openapi_schema(
         self,
@@ -1711,21 +1805,28 @@ class ApiGatewayResolver(BaseRouter):
         Returns a list of fields from the routes
         """
 
+        from aws_lambda_powertools.event_handler.openapi.compat import ModelField
         from aws_lambda_powertools.event_handler.openapi.dependant import (
             get_flat_params,
         )
 
+        body_fields_from_routes: List["ModelField"] = []
         responses_from_routes: List["ModelField"] = []
         request_fields_from_routes: List["ModelField"] = []
 
         for route in routes:
+            if route.body_field:
+                if not isinstance(route.body_field, ModelField):
+                    raise AssertionError("A request body myst be a Pydantic Field")
+                body_fields_from_routes.append(route.body_field)
+
             params = get_flat_params(route.dependant)
             request_fields_from_routes.extend(params)
 
             if route.dependant.return_param:
                 responses_from_routes.append(route.dependant.return_param)
 
-        flat_models = list(responses_from_routes + request_fields_from_routes)
+        flat_models = list(responses_from_routes + request_fields_from_routes + body_fields_from_routes)
         return flat_models
 
 
