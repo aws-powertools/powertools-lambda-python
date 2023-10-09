@@ -254,7 +254,7 @@ class Logger:
             "log_record_order": log_record_order,
             "utc": utc,
             "use_rfc3339": use_rfc3339,
-            "serialize_stacktrace": serialize_stacktrace
+            "serialize_stacktrace": serialize_stacktrace,
         }
 
         self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)

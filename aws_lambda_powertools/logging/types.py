@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 from aws_lambda_powertools.shared.types import NotRequired, TypeAlias, TypedDict
 
 LogRecord: TypeAlias = Union[Dict[str, Any], "PowertoolsLogRecord"]
+LogStackTrace: TypeAlias = Union[Dict[str, Any], "PowertoolsStackTrace"]
 
 
 class PowertoolsLogRecord(TypedDict):
@@ -33,3 +34,11 @@ class PowertoolsLogRecord(TypedDict):
     # Fields from logger.exception
     exception_name: NotRequired[str]
     exception: NotRequired[str]
+    stack_trace: NotRequired[Dict[str, Any]]
+
+
+class PowertoolsStackTrace(TypedDict):
+    type: str
+    value: str
+    module: str
+    frames: List[Dict[str, Any]]

@@ -1,8 +1,8 @@
 import requests
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 ENDPOINT = "http://httpbin.org/status/500"
 logger = Logger(logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))

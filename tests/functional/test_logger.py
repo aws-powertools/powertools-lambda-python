@@ -960,6 +960,7 @@ def test_stream_defaults_to_stdout(service_name, capsys):
     log = json.loads(capsys.readouterr().out.strip())
     assert log["message"] == msg
 
+
 def test_logger_logs_stack_trace_without_parameter(stdout):
     logger = Logger(stream=stdout)
 
@@ -970,6 +971,7 @@ def test_logger_logs_stack_trace_without_parameter(stdout):
 
     log = capture_logging_output(stdout)
     assert "stack_trace" in log
+
 
 def test_logger_logs_stack_trace_with_parameter(stdout):
     logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))
@@ -982,6 +984,7 @@ def test_logger_logs_stack_trace_with_parameter(stdout):
     log = capture_logging_output(stdout)
     assert "stack_trace" in log
 
+
 def test_logger_logs_no_stack_trace_with_parameter_false(stdout):
     logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=False))
 
@@ -993,6 +996,7 @@ def test_logger_logs_no_stack_trace_with_parameter_false(stdout):
     log = capture_logging_output(stdout)
     assert "stack_trace" not in log
 
+
 def test_logger_logs_stack_trace_with_logger_parameter(stdout):
     logger = Logger(stream=stdout, serialize_stacktrace=True)
 
@@ -1003,6 +1007,7 @@ def test_logger_logs_stack_trace_with_logger_parameter(stdout):
 
     log = capture_logging_output(stdout)
     assert "stack_trace" in log.keys()
+
 
 def test_logger_logs_no_stack_trace_with_logger_parameter_false(stdout):
     logger = Logger(stream=stdout, serialize_stacktrace=False)

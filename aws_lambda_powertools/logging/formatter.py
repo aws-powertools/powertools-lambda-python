@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-import sys
 import json
 import logging
 import os
@@ -11,11 +10,8 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
-from ..shared.functions import (
-    resolve_truthy_env_var_choice
-)
 
-from aws_lambda_powertools.logging.types import LogRecord
+from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
@@ -161,32 +157,11 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
     def serialize(self, log: LogRecord) -> str:
         """Serialize structured log dict to JSON str"""
         return self.json_serializer(log)
-    
-    def serialize_traceback(self, log_record: logging.LogRecord) -> list:
-        exception_info = {
-            "type": log_record.exc_info[0].__name__,
-            "value": log_record.exc_info[1],
-            "module": log_record.exc_info[1].__class__.__module__,
-            "frames": []
-        }
-
-        exception_info["frames"] = [{
-                "file": fs.filename,
-                "line": fs.lineno,
-                "function": fs.name,
-                "statement": fs.line
-            } for fs in traceback.extract_tb(log_record.exc_info[2])]
-
-        return exception_info
 
     def format(self, record: logging.LogRecord) -> str:  # noqa: A003
         """Format logging record as structured JSON str"""
         formatted_log = self._extract_log_keys(log_record=record)
         formatted_log["message"] = self._extract_log_message(log_record=record)
-
-        if self.serialize_stacktrace:
-            # Generate the traceback from the traceback library
-            formatted_log["stack_trace"] = self.serialize_traceback(log_record=record)
 
         # exception and exception_name fields can be added as extra key
         # in any log level, we try to extract and use them first
@@ -194,6 +169,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         formatted_log["record"] = record
         formatted_log["exception"] = formatted_log.get("exception", extracted_exception)
         formatted_log["exception_name"] = formatted_log.get("exception_name", extracted_exception_name)
+        if self.serialize_stacktrace:
+            # Generate the traceback from the traceback library
+            formatted_log["stack_trace"] = self._serialize_stacktrace(log_record=record)
         formatted_log["xray_trace_id"] = self._get_latest_trace_id()
         formatted_log = self._strip_none_records(records=formatted_log)
 
@@ -303,6 +281,24 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
                 pass
 
         return message
+
+    def _serialize_stacktrace(self, log_record: logging.LogRecord) -> LogStackTrace | None:
+        if log_record.exc_info:
+            exception_info: LogStackTrace = {
+                "type": log_record.exc_info[0].__name__,  # type: ignore
+                "value": log_record.exc_info[1],  # type: ignore
+                "module": log_record.exc_info[1].__class__.__module__,
+                "frames": [],
+            }
+
+            exception_info["frames"] = [
+                {"file": fs.filename, "line": fs.lineno, "function": fs.name, "statement": fs.line}
+                for fs in traceback.extract_tb(log_record.exc_info[2])
+            ]
+
+            return exception_info
+
+        return None
 
     def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
         """Format traceback information, if available
