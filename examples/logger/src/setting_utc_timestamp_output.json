@@ -1,16 +1,16 @@
 [
     {
         "level":"INFO",
-        "location":"<module>:6",
-        "message":"utf time",
-        "timestamp":"2023-10-06 02:46:54,097+0000",
+        "location":"<module>:7",
+        "message":"Logging with default AWS Lambda timezone: UTC time",
+        "timestamp":"2023-10-09 21:33:55,733+0000",
         "service":"payment"
     },
     {
         "level":"INFO",
-        "location":"<module>:12",
-        "message":"US eastern time",
-        "timestamp":"2023-10-05 22:46:54,097-0400",
+        "location":"<module>:13",
+        "message":"Logging with US Eastern timezone",
+        "timestamp":"2023-10-09 17:33:55,734-0400",
         "service":"order"
     }
 ]

@@ -3,7 +3,7 @@
         "level": "INFO",
         "location": "<module>:6",
         "message": "Collecting payment",
-        "timestamp": "2022-10-28T14:35:03.210+02:00",
+        "timestamp": "2022-10-28T14:35:03.210+00:00",
         "service": "payment"
     },
     {

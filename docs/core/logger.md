@@ -39,7 +39,7 @@ Your Logger will include the following keys to your structured logging:
 | **level**: `str`           | `INFO`                                | Logging level                                                                                                                        |
 | **location**: `str`        | `collect.handler:1`                   | Source code location where statement was executed                                                                                    |
 | **message**: `Any`         | `Collecting payment`                  | Unserializable JSON values are casted as `str`                                                                                       |
-| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0000`        | Timestamp with milliseconds, by default uses default lambda timezone (UTC)                                                                         |
+| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0000`        | Timestamp with milliseconds, by default uses default AWS Lambda timezone (UTC)                                                                         |
 | **service**: `str`         | `payment`                             | Service name defined, by default `service_undefined`                                                                                 |
 | **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID |
 | **sampling_rate**: `float` | `0.1`                                 | When enabled, it shows sampling rate in percentage e.g. 10%                                                                          |
@@ -321,12 +321,12 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 ### Date formatting
 
-Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
+Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0000`.
 
 You can easily change the date format using one of the following parameters:
 
 * **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank" rel="nofollow"}. Use `%F` if you need milliseconds.
-* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
+* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+00:00`
 
 ???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank" rel="nofollow"}?"
 	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
@@ -352,6 +352,7 @@ The following environment variables are available to configure Logger at a globa
 | **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
 | **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
 | **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+| **TZ** | Sets timezone when using Logger, e.g., `US/Eastern`. Timezone is defaulted to UTC when `TZ` is not set | `TZ` | `None` (UTC) |
 
 [`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value.
 
@@ -448,7 +449,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`json_default`**           | function to coerce unserializable values, when no custom serializer/deserializer is set                                  | `str`                                                         |
 | **`datefmt`**                | string directives (strftime) to format log timestamp                                                                     | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive |
 | **`use_datetime_directive`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`                                                       |
-| **`utc`**                    | set logging timestamp to UTC                                                                                             | `False`                                                       |
+| **`utc`**                    | enforce logging timestamp to UTC (ignore `TZ` environment variable)                                                                                             | `False`                                                       |
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
@@ -569,12 +570,12 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 #### Setting timestamp to custom Timezone
 
-By default, this Logger and standard logging library emits records using default lambda time(UTC) timestamp. You can enforce this behavior via `utc` parameter.
+By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in UTC.
 
-However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`: Either set it as Lambda Environment Variable. Or setup this value directly in your Lambda Hander.
+However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`: Either set it as AWS Lambda environment variable, or setup this value directly in your Lambda function.
 
 ???+ tip
-    `TZ` environment variable will be ingnored if `utc` is set to `True`
+    `TZ` environment variable will be ignored if `utc` is set to `True`
 
 === "setting_custom_timezone.py"
 
@@ -582,7 +583,7 @@ However, if you want to use your preferred timezone to format your log instead, 
     --8<-- "examples/logger/src/setting_utc_timestamp.py"
     ```
 
-    1.  if you set TZ in lambda runtime, time.tzset() need to be called. You don't need it when setting TZ in lambda environment variable
+    1.  if you set TZ in your Lambda function, `time.tzset()` need to be called. You don't need it when setting TZ in AWS Lambda environment variable
 
 === "setting_custom_timezone_output.json"
 
