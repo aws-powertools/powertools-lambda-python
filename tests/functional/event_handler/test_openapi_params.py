@@ -12,7 +12,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     ParameterInType,
     Schema,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Query
+from aws_lambda_powertools.event_handler.openapi.params import Body, Query
 
 JSON_CONTENT_TYPE = "application/json"
 
@@ -101,6 +101,7 @@ def test_openapi_with_custom_params():
             Query(gt=0, lt=100, examples=[Example(summary="Example 1", value=10)]),
         ] = 1,
     ):
+        print(count)
         raise NotImplementedError()
 
     schema = app.get_openapi_schema()
@@ -205,7 +206,7 @@ def test_openapi_with_dataclass_return():
 
     @app.get("/")
     def handler() -> User:
-        return User(name="Ruben Fonseca")
+        return User(surname="Fonseca")
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
@@ -222,3 +223,56 @@ def test_openapi_with_dataclass_return():
     assert isinstance(user_schema, Schema)
     assert user_schema.title == "User"
     assert "surname" in user_schema.properties
+
+
+def test_openapi_with_body_param():
+    app = ApiGatewayResolver()
+
+    class User(BaseModel):
+        name: str
+
+    @app.post("/users")
+    def handler(user: User):
+        print(user)
+        pass
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
+
+    request_body = post.requestBody
+    assert request_body.required is True
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.ref == "#/components/schemas/User"
+
+
+def test_openapi_with_embed_body_param():
+    app = ApiGatewayResolver()
+
+    class User(BaseModel):
+        name: str
+
+    @app.post("/users")
+    def handler(user: Annotated[User, Body(embed=True)]):
+        print(user)
+        pass
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
+
+    request_body = post.requestBody
+    assert request_body.required is True
+    # Notice here we craft a specific schema for the embedded user
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.ref == "#/components/schemas/Body_PostHandler"
+
+    # Ensure that the custom body schema actually points to the real user class
+    components = schema.components
+    assert "Body_PostHandler" in components.schemas
+    body_posthandler_schema = components.schemas["Body_PostHandler"]
+    assert body_posthandler_schema.properties["user"].ref == "#/components/schemas/User"
