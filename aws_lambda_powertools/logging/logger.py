@@ -220,7 +220,7 @@ class Logger:
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         use_rfc3339: bool = False,
-        serialize_stacktrace: bool = None,
+        serialize_stacktrace: bool = True,
         **kwargs,
     ) -> None:
         self.service = resolve_env_var_choice(

@@ -82,7 +82,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         log_record_order: List[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
-        serialize_stacktrace: bool = None,
+        serialize_stacktrace: bool = True,
         **kwargs,
     ) -> None:
         """Return a LambdaPowertoolsFormatter instance.
@@ -154,9 +154,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         self.keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**self.keys_combined)
 
-        self.serialize_stacktrace = resolve_truthy_env_var_choice(env=os.getenv(constants.POWERTOOLS_STACKTRACE_ENV, "false"),
-                                                               choice=serialize_stacktrace,
-                                                               )
+        self.serialize_stacktrace = serialize_stacktrace
 
         super().__init__(datefmt=self.datefmt)
 

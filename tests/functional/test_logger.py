@@ -960,7 +960,7 @@ def test_stream_defaults_to_stdout(service_name, capsys):
     log = json.loads(capsys.readouterr().out.strip())
     assert log["message"] == msg
 
-def test_logger_logs_no_stack_trace_without_parameter(stdout):
+def test_logger_logs_stack_trace_without_parameter(stdout):
     logger = Logger(stream=stdout)
 
     try:
@@ -969,7 +969,7 @@ def test_logger_logs_no_stack_trace_without_parameter(stdout):
         logger.exception(e)
 
     log = capture_logging_output(stdout)
-    assert "stack_trace" not in log
+    assert "stack_trace" in log
 
 def test_logger_logs_stack_trace_with_parameter(stdout):
     logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))
@@ -982,32 +982,7 @@ def test_logger_logs_stack_trace_with_parameter(stdout):
     log = capture_logging_output(stdout)
     assert "stack_trace" in log
 
-def test_logger_logs_stack_trace_with_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "true")
-    logger = Logger(stream=stdout)
-
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
-
-    log = capture_logging_output(stdout)
-    assert "stack_trace" in log
-
-def test_logger_logs_no_stack_trace_with_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "false")
-    logger = Logger(stream=stdout)
-
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
-
-    log = capture_logging_output(stdout)
-    assert "stack_trace" not in log
-
-def test_logger_logs_no_stack_trace_with_parameter_override(stdout, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setenv(constants.POWERTOOLS_STACKTRACE_ENV, "true")
+def test_logger_logs_no_stack_trace_with_parameter_false(stdout):
     logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=False))
 
     try:
@@ -1028,3 +1003,14 @@ def test_logger_logs_stack_trace_with_logger_parameter(stdout):
 
     log = capture_logging_output(stdout)
     assert "stack_trace" in log.keys()
+
+def test_logger_logs_no_stack_trace_with_logger_parameter_false(stdout):
+    logger = Logger(stream=stdout, serialize_stacktrace=False)
+
+    try:
+        raise ValueError("Something went wrong")
+    except Exception as e:
+        logger.exception(e)
+
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log.keys()
