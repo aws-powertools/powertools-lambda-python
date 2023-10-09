@@ -28,7 +28,7 @@ def test_validate_scalars():
 
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert "Input should be a valid integer, unable to parse string as an integer" in result["body"]
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_scalars_with_default():
@@ -49,7 +49,7 @@ def test_validate_scalars_with_default():
 
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert "Input should be a valid integer, unable to parse string as an integer" in result["body"]
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_scalars_with_default_and_optional():
@@ -70,7 +70,7 @@ def test_validate_scalars_with_default_and_optional():
 
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert "Input should be a valid integer, unable to parse string as an integer" in result["body"]
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_return_type():
@@ -120,7 +120,7 @@ def test_validate_invalid_return_model():
 
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert "Field required" in result["body"]
+    assert "missing" in result["body"]
 
 
 def test_validate_body_param():
@@ -160,7 +160,7 @@ def test_validate_embed_body_param():
 
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert "Field required" in result["body"]
+    assert "missing" in result["body"]
 
     LOAD_GW_EVENT["body"] = json.dumps({"user": {"name": "John", "age": 30}})
     result = app(LOAD_GW_EVENT, {})
