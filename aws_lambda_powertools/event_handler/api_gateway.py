@@ -4,6 +4,7 @@ import logging
 import re
 import traceback
 import warnings
+import zlib
 from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
@@ -23,7 +24,6 @@ from typing import (
     Union,
 )
 
-import zlib
 from pydantic.fields import ModelField
 from pydantic.schema import get_flat_models_from_fields, get_model_name_map, model_process_schema
 
