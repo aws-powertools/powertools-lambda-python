@@ -961,61 +961,35 @@ def test_stream_defaults_to_stdout(service_name, capsys):
     assert log["message"] == msg
 
 
-def test_logger_logs_stack_trace_without_parameter(stdout):
-    logger = Logger(stream=stdout)
+def test_logger_logs_stack_trace_with_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace default value = True
+    logger = Logger(service=service_name, stream=stdout)
 
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
 
+    # THEN we expect a "stack_trace" in log
+    handler({}, lambda_context)
     log = capture_logging_output(stdout)
     assert "stack_trace" in log
 
 
-def test_logger_logs_stack_trace_with_parameter(stdout):
-    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True))
+def test_logger_logs_stack_trace_with_non_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace = False
+    logger = Logger(service=service_name, stream=stdout, serialize_stacktrace=False)
 
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
 
-    log = capture_logging_output(stdout)
-    assert "stack_trace" in log
-
-
-def test_logger_logs_no_stack_trace_with_parameter_false(stdout):
-    logger = Logger(stream=stdout, logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=False))
-
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
-
+    # THEN we expect a "stack_trace" not in log
+    handler({}, lambda_context)
     log = capture_logging_output(stdout)
     assert "stack_trace" not in log
-
-
-def test_logger_logs_stack_trace_with_logger_parameter(stdout):
-    logger = Logger(stream=stdout, serialize_stacktrace=True)
-
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
-
-    log = capture_logging_output(stdout)
-    assert "stack_trace" in log.keys()
-
-
-def test_logger_logs_no_stack_trace_with_logger_parameter_false(stdout):
-    logger = Logger(stream=stdout, serialize_stacktrace=False)
-
-    try:
-        raise ValueError("Something went wrong")
-    except Exception as e:
-        logger.exception(e)
-
-    log = capture_logging_output(stdout)
-    assert "stack_trace" not in log.keys()
