@@ -32,6 +32,7 @@ from aws_lambda_powertools.event_handler.exceptions import NotFoundError, Servic
 from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
 from aws_lambda_powertools.event_handler.openapi.models import Contact, License, OpenAPI, Server, Tag
 from aws_lambda_powertools.event_handler.openapi.utils import get_flat_params
+from aws_lambda_powertools.event_handler.response import Response
 from aws_lambda_powertools.event_handler.route import Route
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set

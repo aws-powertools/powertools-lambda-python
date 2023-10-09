@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Generic
 
-from aws_lambda_powertools.event_handler.api_gateway import Response
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 from aws_lambda_powertools.shared.types import Protocol
 

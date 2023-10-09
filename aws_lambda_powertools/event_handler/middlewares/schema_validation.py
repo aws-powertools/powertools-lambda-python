@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, Optional
 
-from aws_lambda_powertools.event_handler.api_gateway import Response
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.exceptions import BadRequestError, InternalServerError
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
 from aws_lambda_powertools.event_handler.types import EventHandlerInstance

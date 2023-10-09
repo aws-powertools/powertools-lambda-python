@@ -1,3 +1,4 @@
+import logging
 import warnings
 from re import Pattern
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union, cast
@@ -5,10 +6,11 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Un
 from pydantic.fields import ModelField
 from pydantic.schema import TypeModelOrEnum, field_schema
 
-from aws_lambda_powertools.event_handler import Response
-from aws_lambda_powertools.event_handler.api_gateway import logger
 from aws_lambda_powertools.event_handler.openapi.params import Dependant, Param
 from aws_lambda_powertools.event_handler.openapi.utils import get_flat_params
+from aws_lambda_powertools.event_handler.response import Response
+
+logger = logging.getLogger(__name__)
 
 
 class MiddlewareFrame:

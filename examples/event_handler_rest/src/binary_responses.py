@@ -2,9 +2,9 @@ import os
 from pathlib import Path
 
 from aws_lambda_powertools import Logger, Tracer
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.api_gateway import (
     APIGatewayRestResolver,
-    Response,
 )
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
