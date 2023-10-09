@@ -321,17 +321,17 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 #### Stack trace logging
 
-Logger can optionally log the full stack trace as JSON by setting `logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=True)` at initialization.
+By default, the Logger will automatically log the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
 
 === "logging_stacktrace.py"
 
-    ```python hl_lines="8"
+    ```python hl_lines="7 15"
     --8<-- "examples/logger/src/logging_stacktrace.py"
     ```
 
 === "logging_stacktrace_output.json"
 
-    ```json hl_lines="7-22"
+    ```json hl_lines="9-27"
     --8<-- "examples/logger/src/logging_stacktrace_output.json"
     ```
 
