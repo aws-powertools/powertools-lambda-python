@@ -1,9 +1,10 @@
 import inspect
 import re
-from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, cast
+from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, Type, cast
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
+    create_body_model,
     evaluate_forwardref,
     is_scalar_field,
     is_scalar_sequence_field,
@@ -11,13 +12,16 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    File,
+    Form,
     Header,
     Param,
     ParamTypes,
     Query,
+    _create_response_field,
     analyze_param,
+    get_flat_dependant,
 )
-from aws_lambda_powertools.event_handler.openapi.utils import get_flat_dependant
 
 """
 This turns the opaque function signature into typed, validated models.
@@ -243,3 +247,52 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
         + flat_dependant.header_params
         + flat_dependant.cookie_params
     )
+
+
+def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
+    flat_dependant = get_flat_dependant(dependant)
+    if not flat_dependant.body_params:
+        return None
+
+    first_param = flat_dependant.body_params[0]
+    field_info = first_param.field_info
+    embed = getattr(field_info, "embed", None)
+    body_param_names_set = {param.name for param in flat_dependant.body_params}
+    if len(body_param_names_set) == 1 and not embed:
+        return first_param
+
+    # If one field requires to embed, all have to be embedded
+    for param in flat_dependant.body_params:
+        setattr(param.field_info, "embed", True)  # noqa: B010
+
+    model_name = "Body_" + name
+    body_model = create_body_model(fields=flat_dependant.body_params, model_name=model_name)
+
+    required = any(True for f in flat_dependant.body_params if f.required)
+
+    body_field_info_kwargs: Dict[str, Any] = {"annotation": body_model, "alias": "body"}
+
+    if not required:
+        body_field_info_kwargs["default"] = None
+
+    if any(isinstance(f.field_info, File) for f in flat_dependant.body_params):
+        body_field_info: Type[Body] = File
+    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
+        body_field_info = Form
+    else:
+        body_field_info = Body
+
+        body_param_media_types = [
+            f.field_info.media_type for f in flat_dependant.body_params if isinstance(f.field_info, Body)
+        ]
+        if len(set(body_param_media_types)) == 1:
+            body_field_info_kwargs["media_type"] = body_param_media_types[0]
+
+    final_field = _create_response_field(
+        name="body",
+        type_=body_model,
+        required=required,
+        alias="body",
+        field_info=body_field_info(**body_field_info_kwargs),
+    )
+    return final_field

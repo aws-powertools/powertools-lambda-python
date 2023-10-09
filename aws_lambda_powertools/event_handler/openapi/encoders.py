@@ -17,7 +17,10 @@ from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
 from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
 
-def isoformat(o: Union[datetime.date, datetime.time]) -> str:
+def iso_format(o: Union[datetime.date, datetime.time]) -> str:
+    """
+    ISO format for date and time
+    """
     return o.isoformat()
 
 
@@ -42,12 +45,13 @@ def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
         return float(dec_value)
 
 
+# Encoders for types that are not JSON serializable
 ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
     bytes: lambda o: o.decode(),
     Color: str,
-    datetime.date: isoformat,
-    datetime.datetime: isoformat,
-    datetime.time: isoformat,
+    datetime.date: iso_format,
+    datetime.datetime: iso_format,
+    datetime.time: iso_format,
     datetime.timedelta: lambda td: td.total_seconds(),
     Decimal: decimal_encoder,
     Enum: lambda o: o.value,
@@ -63,6 +67,7 @@ ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
 }
 
 
+# Generates a mapping of encoders to a tuple of classes that they can encode
 def generate_encoders_by_class_tuples(
     type_encoder_map: Dict[Any, Callable[[Any], Any]],
 ) -> Dict[Callable[[Any], Any], Tuple[Any, ...]]:
@@ -72,6 +77,7 @@ def generate_encoders_by_class_tuples(
     return encoders
 
 
+# Mapping of encoders to a tuple of classes that they can encode
 encoders_by_class_tuples = generate_encoders_by_class_tuples(ENCODERS_BY_TYPE)
 
 
@@ -84,6 +90,9 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
     exclude_defaults: bool = False,
     exclude_none: bool = False,
 ) -> Any:
+    """
+    JSON encodes an arbitrary Python object into JSON serializable data types.
+    """
     if include is not None and not isinstance(include, (set, dict)):
         include = set(include)
     if exclude is not None and not isinstance(exclude, (set, dict)):

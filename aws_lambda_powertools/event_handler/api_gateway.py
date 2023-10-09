@@ -381,7 +381,7 @@ class Route:
     @property
     def body_field(self) -> Optional["ModelField"]:
         if self._body_field is None:
-            from aws_lambda_powertools.event_handler.openapi.params import _get_body_field
+            from aws_lambda_powertools.event_handler.openapi.dependant import _get_body_field
 
             self._body_field = _get_body_field(dependant=self.dependant, name=self.operation_id)
 

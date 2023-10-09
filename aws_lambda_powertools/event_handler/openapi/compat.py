@@ -201,8 +201,8 @@ if PYDANTIC_V2:
         assert issubclass(origin_type, sequence_types)  # type: ignore[arg-type]
         return sequence_annotation_to_type[origin_type](value)  # type: ignore[no-any-return]
 
-    def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
-        return model.dict(**kwargs)
+    def _normalize_errors(errors: Sequence[Any]) -> List[Dict[str, Any]]:
+        return errors  # type: ignore[return-value]
 
     def create_body_model(*, fields: Sequence[ModelField], model_name: str) -> Type[BaseModel]:
         field_params = {f.name: (f.field_info.annotation, f.field_info) for f in fields}
@@ -390,9 +390,6 @@ else:
     def serialize_sequence_value(*, field: ModelField, value: Any) -> Sequence[Any]:
         return sequence_shape_to_type[field.shape](value)
 
-    def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
-        return model.dict(**kwargs)
-
 
 # Common code for both versions
 
@@ -485,3 +482,7 @@ def _regenerate_error_with_loc(
     ]
 
     return updated_loc_errors
+
+
+def _model_dump(model: BaseModel, mode: Literal["json", "python"] = "json", **kwargs: Any) -> Any:
+    return model.dict(**kwargs)

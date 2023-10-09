@@ -2,8 +2,6 @@ import types
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
 
-from pydantic.version import VERSION as PYDANTIC_VERSION
-
 if TYPE_CHECKING:
     from pydantic import BaseModel  # noqa: F401
 
@@ -13,10 +11,18 @@ ModelNameMap = Dict[Union[Type["BaseModel"], Type[Enum]], str]
 TypeModelOrEnum = Union[Type["BaseModel"], Type[Enum]]
 UnionType = getattr(types, "UnionType", Union)
 
-PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
+
 COMPONENT_REF_PREFIX = "#/components/schemas/"
 COMPONENT_REF_TEMPLATE = "#/components/schemas/{model}"
 METHODS_WITH_BODY = {"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"}
+
+try:
+    from pydantic.version import VERSION as PYDANTIC_VERSION
+
+    PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
+except ImportError:
+    PYDANTIC_V2 = False
+
 
 validation_error_definition = {
     "title": "ValidationError",

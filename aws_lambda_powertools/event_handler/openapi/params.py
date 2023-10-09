@@ -12,12 +12,10 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     Undefined,
     UndefinedType,
     copy_field_info,
-    create_body_model,
     field_annotation_is_scalar,
     get_annotation_from_field_info,
 )
 from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2, CacheKey
-from aws_lambda_powertools.event_handler.openapi.utils import get_flat_dependant
 
 """
 This turns the low-level function signature into typed, validated Pydantic models for consumption.
@@ -35,7 +33,55 @@ class ParamTypes(Enum):
 _Unset: Any = Undefined
 
 
+class Dependant:
+    """
+    A class used internally to represent a dependency between path operation decorators and the path operation function.
+    """
+
+    def __init__(
+        self,
+        *,
+        path_params: Optional[List[ModelField]] = None,
+        query_params: Optional[List[ModelField]] = None,
+        header_params: Optional[List[ModelField]] = None,
+        cookie_params: Optional[List[ModelField]] = None,
+        body_params: Optional[List[ModelField]] = None,
+        return_param: Optional[ModelField] = None,
+        dependencies: Optional[List["Dependant"]] = None,
+        name: Optional[str] = None,
+        call: Optional[Callable[..., Any]] = None,
+        request_param_name: Optional[str] = None,
+        websocket_param_name: Optional[str] = None,
+        http_connection_param_name: Optional[str] = None,
+        response_param_name: Optional[str] = None,
+        background_tasks_param_name: Optional[str] = None,
+        path: Optional[str] = None,
+    ) -> None:
+        self.path_params = path_params or []
+        self.query_params = query_params or []
+        self.header_params = header_params or []
+        self.cookie_params = cookie_params or []
+        self.body_params = body_params or []
+        self.return_param = return_param or None
+        self.dependencies = dependencies or []
+        self.request_param_name = request_param_name
+        self.websocket_param_name = websocket_param_name
+        self.http_connection_param_name = http_connection_param_name
+        self.response_param_name = response_param_name
+        self.background_tasks_param_name = background_tasks_param_name
+        self.name = name
+        self.call = call
+        # Store the path to be able to re-generate a dependable from it in overrides
+        self.path = path
+        # Save the cache key at creation to optimize performance
+        self.cache_key: CacheKey = self.call
+
+
 class Param(FieldInfo):
+    """
+    A class used internally to represent a parameter in a path operation.
+    """
+
     in_: ParamTypes
 
     def __init__(
@@ -122,6 +168,10 @@ class Param(FieldInfo):
 
 
 class Path(Param):
+    """
+    A class used internally to represent a path parameter in a path operation.
+    """
+
     in_ = ParamTypes.path
 
     def __init__(
@@ -192,6 +242,10 @@ class Path(Param):
 
 
 class Query(Param):
+    """
+    A class used internally to represent a query parameter in a path operation.
+    """
+
     in_ = ParamTypes.query
 
     def __init__(
@@ -257,6 +311,10 @@ class Query(Param):
 
 
 class Header(Param):
+    """
+    A class used internally to represent a header parameter in a path operation.
+    """
+
     in_ = ParamTypes.header
 
     def __init__(
@@ -326,6 +384,10 @@ class Header(Param):
 
 
 class Body(FieldInfo):
+    """
+    A class used internally to represent a body parameter in a path operation.
+    """
+
     def __init__(
         self,
         default: Any = Undefined,
@@ -412,6 +474,10 @@ class Body(FieldInfo):
 
 
 class Form(Body):
+    """
+    A class used internally to represent a form parameter in a path operation.
+    """
+
     def __init__(
         self,
         default: Any = Undefined,
@@ -480,6 +546,10 @@ class Form(Body):
 
 
 class File(Form):
+    """
+    A class used internally to represent a file parameter in a path operation.
+    """
+
     def __init__(
         self,
         default: Any = Undefined,
@@ -546,6 +616,60 @@ class File(Form):
         )
 
 
+def get_flat_dependant(
+    dependant: Dependant,
+    *,
+    skip_repeats: bool = False,
+    visited: Optional[List[CacheKey]] = None,
+) -> Dependant:
+    """
+    Flatten a recursive Dependant model structure.
+
+    This function recursively concatenates the parameter fields of a Dependant model and its dependencies into a flat
+    Dependant structure. This is useful for scenarios like parameter validation where the nested structure is not
+    relevant.
+
+    Parameters
+    ----------
+    dependant: Dependant
+        The dependant model to flatten
+    skip_repeats: bool
+        If True, child Dependents already visited will be skipped to avoid duplicates
+    visited: List[CacheKey], optional
+        Keeps track of visited Dependents to avoid infinite recursion. Defaults to empty list.
+
+    Returns
+    -------
+    Dependant
+        The flattened Dependant model
+    """
+    if visited is None:
+        visited = []
+    visited.append(dependant.cache_key)
+
+    flat_dependant = Dependant(
+        path_params=dependant.path_params.copy(),
+        query_params=dependant.query_params.copy(),
+        header_params=dependant.header_params.copy(),
+        cookie_params=dependant.cookie_params.copy(),
+        body_params=dependant.body_params.copy(),
+        path=dependant.path,
+    )
+    for sub_dependant in dependant.dependencies:
+        if skip_repeats and sub_dependant.cache_key in visited:
+            continue
+
+        flat_sub = get_flat_dependant(sub_dependant, skip_repeats=skip_repeats, visited=visited)
+
+        flat_dependant.path_params.extend(flat_sub.path_params)
+        flat_dependant.query_params.extend(flat_sub.query_params)
+        flat_dependant.header_params.extend(flat_sub.header_params)
+        flat_dependant.cookie_params.extend(flat_sub.cookie_params)
+        flat_dependant.body_params.extend(flat_sub.body_params)
+
+    return flat_dependant
+
+
 def analyze_param(
     *,
     param_name: str,
@@ -607,6 +731,9 @@ def analyze_param(
 
 
 def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+    """
+    Get the FieldInfo and type annotation from an annotation and value.
+    """
     field_info: Optional[FieldInfo] = None
     type_annotation: Any = Any
 
@@ -622,6 +749,9 @@ def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) 
 
 
 def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+    """
+    Get the FieldInfo and type annotation from an Annotated type.
+    """
     field_info: Optional[FieldInfo] = None
     annotated_args = get_args(annotation)
     type_annotation = annotated_args[0]
@@ -649,99 +779,6 @@ def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tu
             field_info.default = Required
 
     return field_info, type_annotation
-
-
-class Dependant:
-    """
-    A class used internally to represent a dependency between path operation decorators and the path operation function.
-    """
-
-    def __init__(
-        self,
-        *,
-        path_params: Optional[List[ModelField]] = None,
-        query_params: Optional[List[ModelField]] = None,
-        header_params: Optional[List[ModelField]] = None,
-        cookie_params: Optional[List[ModelField]] = None,
-        body_params: Optional[List[ModelField]] = None,
-        return_param: Optional[ModelField] = None,
-        dependencies: Optional[List["Dependant"]] = None,
-        name: Optional[str] = None,
-        call: Optional[Callable[..., Any]] = None,
-        request_param_name: Optional[str] = None,
-        websocket_param_name: Optional[str] = None,
-        http_connection_param_name: Optional[str] = None,
-        response_param_name: Optional[str] = None,
-        background_tasks_param_name: Optional[str] = None,
-        path: Optional[str] = None,
-    ) -> None:
-        self.path_params = path_params or []
-        self.query_params = query_params or []
-        self.header_params = header_params or []
-        self.cookie_params = cookie_params or []
-        self.body_params = body_params or []
-        self.return_param = return_param or None
-        self.dependencies = dependencies or []
-        self.request_param_name = request_param_name
-        self.websocket_param_name = websocket_param_name
-        self.http_connection_param_name = http_connection_param_name
-        self.response_param_name = response_param_name
-        self.background_tasks_param_name = background_tasks_param_name
-        self.name = name
-        self.call = call
-        # Store the path to be able to re-generate a dependable from it in overrides
-        self.path = path
-        # Save the cache key at creation to optimize performance
-        self.cache_key: CacheKey = self.call
-
-
-def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
-    flat_dependant = get_flat_dependant(dependant)
-    if not flat_dependant.body_params:
-        return None
-
-    first_param = flat_dependant.body_params[0]
-    field_info = first_param.field_info
-    embed = getattr(field_info, "embed", None)
-    body_param_names_set = {param.name for param in flat_dependant.body_params}
-    if len(body_param_names_set) == 1 and not embed:
-        return first_param
-
-    # If one field requires to embed, all have to be embedded
-    for param in flat_dependant.body_params:
-        setattr(param.field_info, "embed", True)  # noqa: B010
-
-    model_name = "Body_" + name
-    body_model = create_body_model(fields=flat_dependant.body_params, model_name=model_name)
-
-    required = any(True for f in flat_dependant.body_params if f.required)
-
-    body_field_info_kwargs: Dict[str, Any] = {"annotation": body_model, "alias": "body"}
-
-    if not required:
-        body_field_info_kwargs["default"] = None
-
-    if any(isinstance(f.field_info, File) for f in flat_dependant.body_params):
-        body_field_info: Type[Body] = File
-    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
-        body_field_info = Form
-    else:
-        body_field_info = Body
-
-        body_param_media_types = [
-            f.field_info.media_type for f in flat_dependant.body_params if isinstance(f.field_info, Body)
-        ]
-        if len(set(body_param_media_types)) == 1:
-            body_field_info_kwargs["media_type"] = body_param_media_types[0]
-
-    final_field = _create_response_field(
-        name="body",
-        type_=body_model,
-        required=required,
-        alias="body",
-        field_info=body_field_info(**body_field_info_kwargs),
-    )
-    return final_field
 
 
 def _create_response_field(
@@ -788,6 +825,9 @@ def _create_model_field(
     param_name: str,
     is_path_param: bool,
 ) -> Optional[ModelField]:
+    """
+    Create a new ModelField from a FieldInfo and type annotation.
+    """
     if field_info is None:
         return None
 
