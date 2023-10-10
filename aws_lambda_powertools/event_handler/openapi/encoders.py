@@ -21,70 +21,7 @@ This module contains the encoders used by jsonable_encoder to convert Python obj
 """
 
 
-def iso_format(o: Union[datetime.date, datetime.time]) -> str:
-    """
-    ISO format for date and time
-    """
-    return o.isoformat()
-
-
-def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
-    """
-    Encodes a Decimal as int of there's no exponent, otherwise float
-
-    This is useful when we use ConstrainedDecimal to represent Numeric(x,0)
-    where an integer (but not int typed) is used. Encoding this as a float
-    results in failed round-tripping between encode and parse.
-
-    >>> decimal_encoder(Decimal("1.0"))
-    1.0
-
-    >>> decimal_encoder(Decimal("1"))
-    1
-    """
-    if dec_value.as_tuple().exponent >= 0:  # type: ignore[operator]
-        return int(dec_value)
-    else:
-        return float(dec_value)
-
-
-# Encoders for types that are not JSON serializable
-ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
-    bytes: lambda o: o.decode(),
-    Color: str,
-    datetime.date: iso_format,
-    datetime.datetime: iso_format,
-    datetime.time: iso_format,
-    datetime.timedelta: lambda td: td.total_seconds(),
-    Decimal: decimal_encoder,
-    Enum: lambda o: o.value,
-    frozenset: list,
-    deque: list,
-    GeneratorType: list,
-    Path: str,
-    Pattern: lambda o: o.pattern,
-    SecretBytes: str,
-    SecretStr: str,
-    set: list,
-    UUID: str,
-}
-
-
-# Generates a mapping of encoders to a tuple of classes that they can encode
-def generate_encoders_by_class_tuples(
-    type_encoder_map: Dict[Any, Callable[[Any], Any]],
-) -> Dict[Callable[[Any], Any], Tuple[Any, ...]]:
-    encoders: Dict[Callable[[Any], Any], Tuple[Any, ...]] = defaultdict(tuple)
-    for type_, encoder in type_encoder_map.items():
-        encoders[encoder] += (type_,)
-    return encoders
-
-
-# Mapping of encoders to a tuple of classes that they can encode
-encoders_by_class_tuples = generate_encoders_by_class_tuples(ENCODERS_BY_TYPE)
-
-
-def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
+def jsonable_encoder(  # noqa: PLR0911
     obj: Any,
     include: Optional[IncEx] = None,
     exclude: Optional[IncEx] = None,
@@ -344,3 +281,66 @@ def _dump_other(
         exclude_defaults=exclude_defaults,
         exclude_none=exclude_none,
     )
+
+
+def iso_format(o: Union[datetime.date, datetime.time]) -> str:
+    """
+    ISO format for date and time
+    """
+    return o.isoformat()
+
+
+def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
+    """
+    Encodes a Decimal as int of there's no exponent, otherwise float
+
+    This is useful when we use ConstrainedDecimal to represent Numeric(x,0)
+    where an integer (but not int typed) is used. Encoding this as a float
+    results in failed round-tripping between encode and parse.
+
+    >>> decimal_encoder(Decimal("1.0"))
+    1.0
+
+    >>> decimal_encoder(Decimal("1"))
+    1
+    """
+    if dec_value.as_tuple().exponent >= 0:  # type: ignore[operator]
+        return int(dec_value)
+    else:
+        return float(dec_value)
+
+
+# Encoders for types that are not JSON serializable
+ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
+    bytes: lambda o: o.decode(),
+    Color: str,
+    datetime.date: iso_format,
+    datetime.datetime: iso_format,
+    datetime.time: iso_format,
+    datetime.timedelta: lambda td: td.total_seconds(),
+    Decimal: decimal_encoder,
+    Enum: lambda o: o.value,
+    frozenset: list,
+    deque: list,
+    GeneratorType: list,
+    Path: str,
+    Pattern: lambda o: o.pattern,
+    SecretBytes: str,
+    SecretStr: str,
+    set: list,
+    UUID: str,
+}
+
+
+# Generates a mapping of encoders to a tuple of classes that they can encode
+def generate_encoders_by_class_tuples(
+    type_encoder_map: Dict[Any, Callable[[Any], Any]],
+) -> Dict[Callable[[Any], Any], Tuple[Any, ...]]:
+    encoders: Dict[Callable[[Any], Any], Tuple[Any, ...]] = defaultdict(tuple)
+    for type_, encoder in type_encoder_map.items():
+        encoders[encoder] += (type_,)
+    return encoders
+
+
+# Mapping of encoders to a tuple of classes that they can encode
+encoders_by_class_tuples = generate_encoders_by_class_tuples(ENCODERS_BY_TYPE)
