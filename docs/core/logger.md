@@ -570,9 +570,11 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 #### Setting timestamp to custom Timezone
 
-By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in UTC.
+By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in **UTC**.
 
-However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`: Either set it as AWS Lambda environment variable, or setup this value directly in your Lambda function.
+<!-- markdownlint-disable MD013 -->
+If you prefer to log in a specific timezone, you can configure it by setting the `TZ` environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. [Click here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime){target="_blank"} for a comprehensive list of available Lambda environment variables.
+<!-- markdownlint-enable MD013 -->
 
 ???+ tip
     `TZ` environment variable will be ignored if `utc` is set to `True`
