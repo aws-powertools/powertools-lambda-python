@@ -124,7 +124,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         Serialize the response content according to the field type.
         """
         if field:
-            errors = []
+            errors: List[Dict[str, Any]] = []
             # MAINTENANCE: remove this when we drop pydantic v1
             if not hasattr(field, "serializable"):
                 response_content = self._prepare_response_content(
@@ -134,13 +134,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     exclude_none=exclude_none,
                 )
 
-            value, errors_ = field.validate(response_content, {}, loc=("response",))
-
-            if isinstance(errors_, list):
-                errors.extend(errors_)
-            elif errors_:
-                errors.append(errors_)
-
+            value = _validate_field(field=field, value=response_content, loc=("response",), existing_errors=errors)
             if errors:
                 raise RequestValidationError(errors=_normalize_errors(errors), body=response_content)
 
@@ -178,7 +172,6 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
         Prepares the response content for serialization.
         """
-
         if isinstance(res, BaseModel):
             return _model_dump(
                 res,
@@ -252,7 +245,7 @@ def _request_params_to_args(
                 values[field.name] = deepcopy(field.default)
             continue
 
-        _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
 
@@ -264,12 +257,8 @@ def _request_body_to_args(
     """
     Convert the request body to a dictionary of values using validation, and returns a list of errors.
     """
-
     values: Dict[str, Any] = {}
     errors: List[Dict[str, Any]] = []
-
-    if not required_params:
-        return values, errors
 
     received_body, field_alias_omitted = _get_embed_body(
         field=required_params[0],
@@ -301,7 +290,7 @@ def _request_body_to_args(
 
         # MAINTENANCE: Handle byte and file fields
 
-        _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+        values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
 
@@ -311,18 +300,17 @@ def _validate_field(
     field: ModelField,
     value: Any,
     loc: Tuple[str, ...],
-    existing_values: Dict[str, Any],
     existing_errors: List[Dict[str, Any]],
 ):
-    validated_value, errors = field.validate(value, existing_values, loc=loc)
+    validated_value, errors = field.validate(value, value, loc=loc)
 
     if isinstance(errors, list):
         processed_errors = _regenerate_error_with_loc(errors=errors, loc_prefix=())
         existing_errors.extend(processed_errors)
     elif errors:
         existing_errors.append(errors)
-    else:
-        existing_values[field.name] = validated_value
+
+    return validated_value
 
 
 def _get_embed_body(
