@@ -16,6 +16,10 @@ from pydantic.types import SecretBytes, SecretStr
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
 from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
+"""
+This module contains the encoders used by jsonable_encoder to convert Python objects to JSON serializable data types.
+"""
+
 
 def iso_format(o: Union[datetime.date, datetime.time]) -> str:
     """
@@ -91,12 +95,43 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
 ) -> Any:
     """
     JSON encodes an arbitrary Python object into JSON serializable data types.
+
+    This is a modified version of fastapi.encoders.jsonable_encoder that supports
+    encoding of pydantic.BaseModel objects.
+
+    This function is used to encode the response body of a FastAPI endpoint.
+
+    Parameters
+    ----------
+    obj : Any
+        The object to encode
+    include : Optional[IncEx], optional
+        A set or dictionary of strings that specifies which properties should be included, by default None,
+        meaning everything is included
+    exclude : Optional[IncEx], optional
+        A set or dictionary of strings that specifies which properties should be excluded, by default None,
+        meaning nothing is excluded
+    by_alias : bool, optional
+        Whether field aliases should be respected, by default True
+    exclude_unset : bool, optional
+        Whether fields that are not set should be excluded, by default False
+    exclude_defaults : bool, optional
+        Whether fields that are equal to their default value (as specified in the model) should be excluded,
+        by default False
+    exclude_none : bool, optional
+        Whether fields that are equal to None should be excluded, by default False
+
+    Returns
+    -------
+    Any
+        The JSON serializable data types
     """
     if include is not None and not isinstance(include, (set, dict)):
         include = set(include)
     if exclude is not None and not isinstance(exclude, (set, dict)):
         exclude = set(exclude)
 
+    # Pydantic models
     if isinstance(obj, BaseModel):
         return _dump_base_model(
             obj=obj,
@@ -108,6 +143,7 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
             exclude_defaults=exclude_defaults,
         )
 
+    # Dataclasses
     if dataclasses.is_dataclass(obj):
         obj_dict = dataclasses.asdict(obj)
         return jsonable_encoder(
@@ -120,12 +156,19 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
             exclude_none=exclude_none,
         )
 
+    # Enums
     if isinstance(obj, Enum):
         return obj.value
+
+    # Paths
     if isinstance(obj, PurePath):
         return str(obj)
+
+    # Scalars
     if isinstance(obj, (str, int, float, type(None))):
         return obj
+
+    # Dictionaries
     if isinstance(obj, dict):
         return _dump_dict(
             obj=obj,
@@ -135,6 +178,8 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
             exclude_none=exclude_none,
             exclude_unset=exclude_unset,
         )
+
+    # Sequences
     if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
         return _dump_sequence(
             obj=obj,
@@ -146,6 +191,7 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
             exclude_unset=exclude_unset,
         )
 
+    # Other types
     if type(obj) in ENCODERS_BY_TYPE:
         return ENCODERS_BY_TYPE[type(obj)](obj)
 
@@ -153,6 +199,7 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
         if isinstance(obj, classes_tuple):
             return encoder(obj)
 
+    # Default
     return _dump_other(
         obj=obj,
         include=include,
@@ -206,6 +253,9 @@ def _dump_dict(
     exclude_unset: bool = False,
     exclude_none: bool = False,
 ) -> Dict[str, Any]:
+    """
+    Dump a dict to a dict, using the same parameters as jsonable_encoder
+    """
     encoded_dict = {}
     allowed_keys = set(obj.keys())
     if include is not None:
@@ -244,6 +294,9 @@ def _dump_sequence(
     exclude_none: bool = False,
     exclude_defaults: bool = False,
 ) -> List[Any]:
+    """
+    Dump a sequence to a list, using the same parameters as jsonable_encoder
+    """
     encoded_list = []
     for item in obj:
         encoded_list.append(
@@ -270,6 +323,9 @@ def _dump_other(
     exclude_none: bool = False,
     exclude_defaults: bool = False,
 ) -> Any:
+    """
+    Dump an object to ah hashable object, using the same parameters as jsonable_encoder
+    """
     try:
         data = dict(obj)
     except Exception as e:
