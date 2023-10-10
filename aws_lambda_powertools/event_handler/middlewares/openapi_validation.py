@@ -26,8 +26,33 @@ logger = logging.getLogger(__name__)
 
 
 class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
-    def __init__(self):
-        super().__init__()
+    """
+    OpenAPIValidationMiddleware is a middleware that validates the request against the OpenAPI schema defined by the
+    Lambda handler. It also validates the response against the OpenAPI schema defined by the Lambda handler. It
+    should not be used directly, but rather through the `enable_validation` parameter of the `APIGatewayProxyHandler`.
+
+    Examples
+    --------
+
+    ```python
+    from typing import List
+
+    from pydantic import BaseModel
+
+    from aws_lambda_powertools.event_handler.api_gateway import (
+        APIGatewayProxyHandler,
+    )
+
+    class Todo(BaseModel):
+      name: str
+
+    app = APIGatewayProxyHandler(enable_validation=True)
+
+    @app.get("/todos")
+    def get_todos(): List[Todo]:
+      return [Todo(name="hello world")]
+    ```
+    """
 
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         logger.debug("OpenAPIValidationMiddleware handler")
@@ -38,35 +63,43 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         errors: List[Any] = []
 
         try:
-            path_values, path_errors = self._request_params_to_args(
+            # Process path values, which can be found on the route_args
+            path_values, path_errors = _request_params_to_args(
                 route.dependant.path_params,
                 app.context["_route_args"],
             )
-            query_values, query_errors = self._request_params_to_args(
+
+            # Process query values
+            query_values, query_errors = _request_params_to_args(
                 route.dependant.query_params,
                 app.current_event.query_string_parameters or {},
             )
 
             values.update(path_values)
             values.update(query_values)
-
             errors += path_errors + query_errors
 
+            # Process the request body, if it exists
             if route.dependant.body_params:
-                (body_values, body_errors) = self._request_body_to_args(
+                (body_values, body_errors) = _request_body_to_args(
                     required_params=route.dependant.body_params,
-                    received_body=self._get_body(app, route),
+                    received_body=self._get_body(app),
                 )
                 values.update(body_values)
                 errors.extend(body_errors)
 
             if errors:
+                # Raise the validation errors
                 raise RequestValidationError(_normalize_errors(errors))
             else:
+                # Re-write the route_args with the validated values, and call the next middleware
                 app.context["_route_args"] = values
                 response = next_middleware(app)
 
+                # Process the response body, if it exists
                 raw_response = jsonable_encoder(response.body)
+
+                # Validate and serialize the response
                 return self._serialize_response(field=route.dependant.return_param, response_content=raw_response)
         except RequestValidationError as e:
             return Response(
@@ -87,6 +120,9 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         exclude_defaults: bool = False,
         exclude_none: bool = False,
     ) -> Any:
+        """
+        Serialize the response content according to the field type.
+        """
         if field:
             errors = []
             # MAINTENANCE: remove this when we drop pydantic v1
@@ -139,6 +175,10 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         exclude_defaults: bool = False,
         exclude_none: bool = False,
     ) -> Any:
+        """
+        Prepares the response content for serialization.
+        """
+
         if isinstance(res, BaseModel):
             return _model_dump(
                 res,
@@ -161,7 +201,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             return dataclasses.asdict(res)
         return res
 
-    def _get_body(self, app: EventHandlerInstance, route: Route) -> Dict[str, Any]:
+    def _get_body(self, app: EventHandlerInstance) -> Dict[str, Any]:
+        """
+        Get the request body from the event, and parse it as JSON.
+        """
+
         content_type_value = app.current_event.get_header_value("content-type")
         if not content_type_value or content_type_value.startswith("application/json"):
             try:
@@ -182,77 +226,84 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         else:
             raise NotImplementedError("Only JSON body is supported")
 
-    @staticmethod
-    def _request_params_to_args(
-        required_params: Sequence[ModelField],
-        received_params: Mapping[str, Any],
-    ) -> Tuple[Dict[str, Any], List[Any]]:
-        values = {}
-        errors = []
 
-        for field in required_params:
-            value = received_params.get(field.alias)
+def _request_params_to_args(
+    required_params: Sequence[ModelField],
+    received_params: Mapping[str, Any],
+) -> Tuple[Dict[str, Any], List[Any]]:
+    """
+    Convert the request params to a dictionary of values using validation, and returns a list of errors.
+    """
+    values = {}
+    errors = []
 
-            field_info = field.field_info
-            if not isinstance(field_info, Param):
-                raise AssertionError(f"Expected Param field_info, got {field_info}")
+    for field in required_params:
+        value = received_params.get(field.alias)
 
-            loc = (field_info.in_.value, field.alias)
-            if value is None:
-                if field.required:
-                    errors.append(get_missing_field_error(loc=loc))
-                else:
-                    values[field.name] = deepcopy(field.default)
-                continue
+        field_info = field.field_info
+        if not isinstance(field_info, Param):
+            raise AssertionError(f"Expected Param field_info, got {field_info}")
 
-            _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+        loc = (field_info.in_.value, field.alias)
+        if value is None:
+            if field.required:
+                errors.append(get_missing_field_error(loc=loc))
+            else:
+                values[field.name] = deepcopy(field.default)
+            continue
 
+        _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+
+    return values, errors
+
+
+def _request_body_to_args(
+    required_params: List[ModelField],
+    received_body: Optional[Dict[str, Any]],
+) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
+    """
+    Convert the request body to a dictionary of values using validation, and returns a list of errors.
+    """
+
+    values: Dict[str, Any] = {}
+    errors: List[Dict[str, Any]] = []
+
+    if not required_params:
         return values, errors
 
-    @staticmethod
-    def _request_body_to_args(
-        required_params: List[ModelField],
-        received_body: Optional[Dict[str, Any]],
-    ) -> Tuple[Dict[str, Any], List[Dict[str, Any]]]:
-        values: Dict[str, Any] = {}
-        errors: List[Dict[str, Any]] = []
+    received_body, field_alias_omitted = _get_embed_body(
+        field=required_params[0],
+        required_params=required_params,
+        received_body=received_body,
+    )
 
-        if not required_params:
-            return values, errors
+    for field in required_params:
+        loc: Tuple[str, ...] = ("body", field.alias)
+        if field_alias_omitted:
+            loc = ("body",)
 
-        received_body, field_alias_omitted = _get_embed_body(
-            field=required_params[0],
-            required_params=required_params,
-            received_body=received_body,
-        )
+        value: Optional[Any] = None
 
-        for field in required_params:
-            loc: Tuple[str, ...] = ("body", field.alias)
-            if field_alias_omitted:
-                loc = ("body",)
-
-            value: Optional[Any] = None
-
-            if received_body is not None:
-                try:
-                    value = received_body.get(field.alias)
-                except AttributeError:
-                    errors.append(get_missing_field_error(loc))
-                    continue
-
-            # Determine if the field is required
-            if value is None:
-                if field.required:
-                    errors.append(get_missing_field_error(loc))
-                else:
-                    values[field.name] = deepcopy(field.default)
+        if received_body is not None:
+            try:
+                value = received_body.get(field.alias)
+            except AttributeError:
+                errors.append(get_missing_field_error(loc))
                 continue
 
-            # MAINTENANCE: Handle byte and file fields
+        # Determine if the field is required
+        if value is None:
+            if field.required:
+                errors.append(get_missing_field_error(loc))
+            else:
+                values[field.name] = deepcopy(field.default)
+            continue
 
-            _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+        # MAINTENANCE: Handle byte and file fields
 
-        return values, errors
+        _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
+
+    return values, errors
 
 
 def _validate_field(
