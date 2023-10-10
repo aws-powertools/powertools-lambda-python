@@ -781,7 +781,7 @@ def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tu
     return field_info, type_annotation
 
 
-def _create_response_field(
+def create_response_field(
     name: str,
     type_: Type[Any],
     default: Optional[Any] = Undefined,
@@ -847,7 +847,7 @@ def _create_model_field(
         alias = field_info.alias or param_name
     field_info.alias = alias
 
-    return _create_response_field(
+    return create_response_field(
         name=param_name,
         type_=use_annotation,
         default=field_info.default,

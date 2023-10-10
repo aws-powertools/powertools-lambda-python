@@ -20,8 +20,8 @@ from aws_lambda_powertools.event_handler.openapi.params import (
     Param,
     ParamTypes,
     Query,
-    _create_response_field,
     analyze_param,
+    create_response_field,
     get_flat_dependant,
 )
 
@@ -174,6 +174,7 @@ def get_dependant(
         path=path,
     )
 
+    # Add each parameter to the dependant model
     for param_name, param in signature_params.items():
         # If the parameter is a path parameter, we need to set the in_ field to "path".
         is_path_param = param_name in path_param_names
@@ -187,7 +188,7 @@ def get_dependant(
             is_response_param=False,
         )
         if param_field is None:
-            raise AssertionError(f"Param field is None for param: {param_name}")
+            raise AssertionError(f"Parameter field is None for param: {param_name}")
 
         if is_body_param(param_field=param_field, is_path_param=is_path_param):
             dependant.body_params.append(param_field)
@@ -213,6 +214,21 @@ def get_dependant(
 
 
 def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
+    """
+    Returns whether a parameter is a request body parameter, by checking if it is a scalar field or a body field.
+
+    Parameters
+    ----------
+    param_field: ModelField
+        The parameter field
+    is_path_param: bool
+        Whether the parameter is a path parameter
+
+    Returns
+    -------
+    bool
+        Whether the parameter is a request body parameter
+    """
     if is_path_param:
         if not is_scalar_field(field=param_field):
             raise AssertionError("Path params must be of one of the supported types")
@@ -251,7 +267,7 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
     )
 
 
-def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
+def get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
     """
     Get the Body field for a given Dependant object.
     """
@@ -262,6 +278,8 @@ def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
 
     first_param = flat_dependant.body_params[0]
     field_info = first_param.field_info
+
+    # Handle the case where there is only one body parameter and it is embedded
     embed = getattr(field_info, "embed", None)
     body_param_names_set = {param.name for param in flat_dependant.body_params}
     if len(body_param_names_set) == 1 and not embed:
@@ -271,18 +289,19 @@ def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
     for param in flat_dependant.body_params:
         setattr(param.field_info, "embed", True)  # noqa: B010
 
+    # Generate a custom body model for this endpoint
     model_name = "Body_" + name
     body_model = create_body_model(fields=flat_dependant.body_params, model_name=model_name)
 
     required = any(True for f in flat_dependant.body_params if f.required)
 
-    body_field_info, body_field_info_kwargs = _get_body_field_info(
+    body_field_info, body_field_info_kwargs = get_body_field_info(
         body_model=body_model,
         flat_dependant=flat_dependant,
         required=required,
     )
 
-    final_field = _create_response_field(
+    final_field = create_response_field(
         name="body",
         type_=body_model,
         required=required,
@@ -292,7 +311,7 @@ def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
     return final_field
 
 
-def _get_body_field_info(
+def get_body_field_info(
     *,
     body_model: Type[BaseModel],
     flat_dependant: Dependant,
