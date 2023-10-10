@@ -152,9 +152,9 @@ class Param(FieldInfo):
                     "serialization_alias": serialization_alias,
                     "strict": strict,
                     "json_schema_extra": current_json_schema_extra,
+                    "pattern": pattern,
                 },
             )
-            kwargs["pattern"] = pattern
         else:
             kwargs["regex"] = pattern
             kwargs.update(**current_json_schema_extra)
@@ -458,9 +458,9 @@ class Body(FieldInfo):
                     "serialization_alias": serialization_alias,
                     "strict": strict,
                     "json_schema_extra": current_json_schema_extra,
+                    "pattern": pattern,
                 },
             )
-            kwargs["pattern"] = pattern
         else:
             kwargs["regex"] = pattern
             kwargs.update(**current_json_schema_extra)
@@ -699,7 +699,7 @@ def analyze_param(
     Optional[ModelField]
         The type annotation and the Pydantic field representing the parameter
     """
-    field_info, type_annotation = _get_field_info_and_type_annotation(annotation, value, is_path_param)
+    field_info, type_annotation = get_field_info_and_type_annotation(annotation, value, is_path_param)
 
     # If the value is a FieldInfo, we use it as the FieldInfo for the parameter
     if isinstance(value, FieldInfo):
@@ -730,7 +730,7 @@ def analyze_param(
     return field
 
 
-def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
     """
     Get the FieldInfo and type annotation from an annotation and value.
     """
@@ -740,7 +740,7 @@ def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) 
     if annotation is not inspect.Signature.empty:
         # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
         if get_origin(annotation) is Annotated:
-            field_info, type_annotation = _get_field_info_annotated_type(annotation, value, is_path_param)
+            field_info, type_annotation = get_field_info_annotated_type(annotation, value, is_path_param)
         # If the annotation is not an Annotated type, we use it as the type annotation
         else:
             type_annotation = annotation
@@ -748,7 +748,7 @@ def _get_field_info_and_type_annotation(annotation, value, is_path_param: bool) 
     return field_info, type_annotation
 
 
-def _get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
+def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
     """
     Get the FieldInfo and type annotation from an Annotated type.
     """
@@ -803,6 +803,7 @@ def create_response_field(
     else:
         field_info = field_info or FieldInfo()
     kwargs = {"name": name, "field_info": field_info}
+
     if PYDANTIC_V2:
         kwargs.update({"mode": mode})
     else:
