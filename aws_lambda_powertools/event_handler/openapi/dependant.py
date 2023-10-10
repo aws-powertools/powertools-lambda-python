@@ -1,6 +1,8 @@
 import inspect
 import re
-from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, Type, cast
+from typing import Any, Callable, Dict, ForwardRef, List, Optional, Set, Tuple, Type, cast
+
+from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
@@ -250,6 +252,10 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
 
 
 def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
+    """
+    Get the Body field for a given Dependant object.
+    """
+
     flat_dependant = get_flat_dependant(dependant)
     if not flat_dependant.body_params:
         return None
@@ -270,6 +276,32 @@ def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
 
     required = any(True for f in flat_dependant.body_params if f.required)
 
+    body_field_info, body_field_info_kwargs = _get_body_field_info(
+        body_model=body_model,
+        flat_dependant=flat_dependant,
+        required=required,
+    )
+
+    final_field = _create_response_field(
+        name="body",
+        type_=body_model,
+        required=required,
+        alias="body",
+        field_info=body_field_info(**body_field_info_kwargs),
+    )
+    return final_field
+
+
+def _get_body_field_info(
+    *,
+    body_model: Type[BaseModel],
+    flat_dependant: Dependant,
+    required: bool,
+) -> Tuple[Type[Body], Dict[str, Any]]:
+    """
+    Get the Body field info and kwargs for a given body model.
+    """
+
     body_field_info_kwargs: Dict[str, Any] = {"annotation": body_model, "alias": "body"}
 
     if not required:
@@ -288,11 +320,4 @@ def _get_body_field(*, dependant: Dependant, name: str) -> Optional[ModelField]:
         if len(set(body_param_media_types)) == 1:
             body_field_info_kwargs["media_type"] = body_param_media_types[0]
 
-    final_field = _create_response_field(
-        name="body",
-        type_=body_model,
-        required=required,
-        alias="body",
-        field_info=body_field_info(**body_field_info_kwargs),
-    )
-    return final_field
+    return body_field_info, body_field_info_kwargs

@@ -97,22 +97,14 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
         include = set(include)
     if exclude is not None and not isinstance(exclude, (set, dict)):
         exclude = set(exclude)
+
     if isinstance(obj, BaseModel):
-        obj_dict = _model_dump(
-            obj,
-            mode="json",
+        return _dump_base_model(
+            obj=obj,
             include=include,
             exclude=exclude,
             by_alias=by_alias,
             exclude_unset=exclude_unset,
-            exclude_none=exclude_none,
-            exclude_defaults=exclude_defaults,
-        )
-        if "__root__" in obj_dict:
-            obj_dict = obj_dict["__root__"]
-
-        return jsonable_encoder(
-            obj_dict,
             exclude_none=exclude_none,
             exclude_defaults=exclude_defaults,
         )
@@ -128,6 +120,7 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
             exclude_defaults=exclude_defaults,
             exclude_none=exclude_none,
         )
+
     if isinstance(obj, Enum):
         return obj.value
     if isinstance(obj, PurePath):
@@ -135,54 +128,149 @@ def jsonable_encoder(  # noqa: C901, PLR0911, PLR0912
     if isinstance(obj, (str, int, float, type(None))):
         return obj
     if isinstance(obj, dict):
-        encoded_dict = {}
-        allowed_keys = set(obj.keys())
-        if include is not None:
-            allowed_keys &= set(include)
-        if exclude is not None:
-            allowed_keys -= set(exclude)
-        for key, value in obj.items():
-            if (
-                (not isinstance(key, str) or not key.startswith("_sa"))
-                and (value is not None or not exclude_none)
-                and key in allowed_keys
-            ):
-                encoded_key = jsonable_encoder(
-                    key,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_none=exclude_none,
-                )
-                encoded_value = jsonable_encoder(
-                    value,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_none=exclude_none,
-                )
-                encoded_dict[encoded_key] = encoded_value
-        return encoded_dict
+        return _dump_dict(
+            obj=obj,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_none=exclude_none,
+            exclude_unset=exclude_unset,
+        )
     if isinstance(obj, (list, set, frozenset, GeneratorType, tuple, deque)):
-        encoded_list = []
-        for item in obj:
-            encoded_list.append(
-                jsonable_encoder(
-                    item,
-                    include=include,
-                    exclude=exclude,
-                    by_alias=by_alias,
-                    exclude_unset=exclude_unset,
-                    exclude_defaults=exclude_defaults,
-                    exclude_none=exclude_none,
-                ),
-            )
-        return encoded_list
+        return _dump_sequence(
+            obj=obj,
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_none=exclude_none,
+            exclude_defaults=exclude_defaults,
+            exclude_unset=exclude_unset,
+        )
 
     if type(obj) in ENCODERS_BY_TYPE:
         return ENCODERS_BY_TYPE[type(obj)](obj)
+
     for encoder, classes_tuple in encoders_by_class_tuples.items():
         if isinstance(obj, classes_tuple):
             return encoder(obj)
 
+    return _dump_other(
+        obj=obj,
+        include=include,
+        exclude=exclude,
+        by_alias=by_alias,
+        exclude_none=exclude_none,
+        exclude_unset=exclude_unset,
+        exclude_defaults=exclude_defaults,
+    )
+
+
+def _dump_base_model(
+    *,
+    obj: Any,
+    include: Optional[IncEx] = None,
+    exclude: Optional[IncEx] = None,
+    by_alias: bool = True,
+    exclude_unset: bool = False,
+    exclude_none: bool = False,
+    exclude_defaults: bool = False,
+):
+    """
+    Dump a BaseModel object to a dict, using the same parameters as jsonable_encoder
+    """
+    obj_dict = _model_dump(
+        obj,
+        mode="json",
+        include=include,
+        exclude=exclude,
+        by_alias=by_alias,
+        exclude_unset=exclude_unset,
+        exclude_none=exclude_none,
+        exclude_defaults=exclude_defaults,
+    )
+    if "__root__" in obj_dict:
+        obj_dict = obj_dict["__root__"]
+
+    return jsonable_encoder(
+        obj_dict,
+        exclude_none=exclude_none,
+        exclude_defaults=exclude_defaults,
+    )
+
+
+def _dump_dict(
+    *,
+    obj: Any,
+    include: Optional[IncEx] = None,
+    exclude: Optional[IncEx] = None,
+    by_alias: bool = True,
+    exclude_unset: bool = False,
+    exclude_none: bool = False,
+) -> Dict[str, Any]:
+    encoded_dict = {}
+    allowed_keys = set(obj.keys())
+    if include is not None:
+        allowed_keys &= set(include)
+    if exclude is not None:
+        allowed_keys -= set(exclude)
+    for key, value in obj.items():
+        if (
+            (not isinstance(key, str) or not key.startswith("_sa"))
+            and (value is not None or not exclude_none)
+            and key in allowed_keys
+        ):
+            encoded_key = jsonable_encoder(
+                key,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+            )
+            encoded_value = jsonable_encoder(
+                value,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_none=exclude_none,
+            )
+            encoded_dict[encoded_key] = encoded_value
+    return encoded_dict
+
+
+def _dump_sequence(
+    *,
+    obj: Any,
+    include: Optional[IncEx] = None,
+    exclude: Optional[IncEx] = None,
+    by_alias: bool = True,
+    exclude_unset: bool = False,
+    exclude_none: bool = False,
+    exclude_defaults: bool = False,
+) -> List[Any]:
+    encoded_list = []
+    for item in obj:
+        encoded_list.append(
+            jsonable_encoder(
+                item,
+                include=include,
+                exclude=exclude,
+                by_alias=by_alias,
+                exclude_unset=exclude_unset,
+                exclude_defaults=exclude_defaults,
+                exclude_none=exclude_none,
+            ),
+        )
+    return encoded_list
+
+
+def _dump_other(
+    *,
+    obj: Any,
+    include: Optional[IncEx] = None,
+    exclude: Optional[IncEx] = None,
+    by_alias: bool = True,
+    exclude_unset: bool = False,
+    exclude_none: bool = False,
+    exclude_defaults: bool = False,
+) -> Any:
     try:
         data = dict(obj)
     except Exception as e:

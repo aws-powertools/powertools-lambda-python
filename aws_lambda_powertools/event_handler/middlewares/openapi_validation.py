@@ -10,7 +10,6 @@ from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.api_gateway import Route
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
 from aws_lambda_powertools.event_handler.openapi.compat import (
-    ErrorWrapper,
     ModelField,
     _model_dump,
     _normalize_errors,
@@ -206,14 +205,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                     values[field.name] = deepcopy(field.default)
                 continue
 
-            v_, errors_ = field.validate(value, values, loc=loc)
-            if isinstance(errors_, ErrorWrapper):
-                errors.append(errors_)
-            elif isinstance(errors_, list):
-                new_errors = _regenerate_error_with_loc(errors=errors_, loc_prefix=())
-                errors.extend(new_errors)
-            else:
-                values[field.name] = v_
+            _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
 
         return values, errors
 
@@ -228,19 +220,16 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         if not required_params:
             return values, errors
 
-        field = required_params[0]
-        field_info = field.field_info
-        embed = getattr(field_info, "embed", None)
-        field_alias_omitted = len(required_params) == 1 and not embed
-        if field_alias_omitted:
-            received_body = {field.alias: received_body}
+        received_body, field_alias_omitted = _get_embed_body(
+            field=required_params[0],
+            required_params=required_params,
+            received_body=received_body,
+        )
 
         for field in required_params:
-            loc: Tuple[str, ...]
+            loc: Tuple[str, ...] = ("body", field.alias)
             if field_alias_omitted:
                 loc = ("body",)
-            else:
-                loc = ("body", field.alias)
 
             value: Optional[Any] = None
 
@@ -261,13 +250,41 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
             # MAINTENANCE: Handle byte and file fields
 
-            v_, errors_ = field.validate(value, values, loc=loc)
-
-            if isinstance(errors_, list):
-                errors.extend(errors_)
-            elif errors_:
-                errors.append(errors_)
-            else:
-                values[field.name] = v_
+            _validate_field(field=field, value=value, loc=loc, existing_values=values, existing_errors=errors)
 
         return values, errors
+
+
+def _validate_field(
+    *,
+    field: ModelField,
+    value: Any,
+    loc: Tuple[str, ...],
+    existing_values: Dict[str, Any],
+    existing_errors: List[Dict[str, Any]],
+):
+    validated_value, errors = field.validate(value, existing_values, loc=loc)
+
+    if isinstance(errors, list):
+        processed_errors = _regenerate_error_with_loc(errors=errors, loc_prefix=())
+        existing_errors.extend(processed_errors)
+    elif errors:
+        existing_errors.append(errors)
+    else:
+        existing_values[field.name] = validated_value
+
+
+def _get_embed_body(
+    *,
+    field: ModelField,
+    required_params: List[ModelField],
+    received_body: Optional[Dict[str, Any]],
+) -> Tuple[Optional[Dict[str, Any]], bool]:
+    field_info = field.field_info
+    embed = getattr(field_info, "embed", None)
+
+    field_alias_omitted = len(required_params) == 1 and not embed
+    if field_alias_omitted:
+        received_body = {field.alias: received_body}
+
+    return received_body, field_alias_omitted
