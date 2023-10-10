@@ -1,0 +1,28 @@
+{
+    "level":"ERROR",
+    "location":"lambda_handler:16",
+    "message":"500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500",
+    "timestamp":"2023-10-09 17:47:50,191+0000",
+    "service":"service_undefined",
+    "exception":"Traceback (most recent call last):\n  File \"/var/task/app.py\", line 14, in lambda_handler\n    ret.raise_for_status()\n  File \"/var/task/requests/models.py\", line 1021, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500",
+    "exception_name":"HTTPError",
+    "stack_trace":{
+       "type":"HTTPError",
+       "value":"500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500",
+       "module":"requests.exceptions",
+       "frames":[
+          {
+             "file":"/var/task/app.py",
+             "line":14,
+             "function":"lambda_handler",
+             "statement":"ret.raise_for_status()"
+          },
+          {
+             "file":"/var/task/requests/models.py",
+             "line":1021,
+             "function":"raise_for_status",
+             "statement":"raise HTTPError(http_error_msg, response=self)"
+          }
+       ]
+    }
+ }

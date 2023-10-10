@@ -319,6 +319,22 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
     --8<-- "examples/logger/src/logging_uncaught_exceptions_output.json"
     ```
 
+#### Stack trace logging
+
+By default, the Logger will automatically include the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
+
+=== "logging_stacktrace.py"
+
+    ```python hl_lines="7 15"
+    --8<-- "examples/logger/src/logging_stacktrace.py"
+    ```
+
+=== "logging_stacktrace_output.json"
+
+    ```json hl_lines="9-27"
+    --8<-- "examples/logger/src/logging_stacktrace_output.json"
+    ```
+
 ### Date formatting
 
 Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0000`.

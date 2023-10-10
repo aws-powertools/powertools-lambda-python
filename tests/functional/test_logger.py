@@ -959,3 +959,37 @@ def test_stream_defaults_to_stdout(service_name, capsys):
     # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
     log = json.loads(capsys.readouterr().out.strip())
     assert log["message"] == msg
+
+
+def test_logger_logs_stack_trace_with_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace default value = True
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "stack_trace" in log
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "stack_trace" in log
+
+
+def test_logger_logs_stack_trace_with_non_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace = False
+    logger = Logger(service=service_name, stream=stdout, serialize_stacktrace=False)
+
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "stack_trace" not in log
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log
