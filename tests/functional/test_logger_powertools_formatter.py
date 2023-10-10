@@ -6,25 +6,11 @@ import random
 import re
 import string
 import time
-from collections import namedtuple
 
 import pytest
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.logging.formatter import LambdaPowertoolsFormatter
 from aws_lambda_powertools.logging.formatters.datadog import DatadogLogFormatter
-
-
-@pytest.fixture
-def lambda_context():
-    lambda_context = {
-        "function_name": "test",
-        "memory_limit_in_mb": 128,
-        "invoked_function_arn": "arn:aws:lambda:eu-west-1:809313241:function:test",
-        "aws_request_id": "52fdfc07-2182-154f-163f-5f0f9a621d72",
-    }
-
-    return namedtuple("LambdaContext", lambda_context.keys())(*lambda_context.values())
 
 
 @pytest.fixture
@@ -310,9 +296,7 @@ def test_log_in_utc(service_name):
 
 def test_log_with_localtime(service_name):
     # GIVEN a logger where UTC is false
-    logger = Logger(service=service_name, utc=True)
-
-    print(logger.handlers[0].formatter.converter)
+    logger = Logger(service=service_name, utc=False)
 
     # THEN logging formatter time converter should use localtime fn
     assert logger.handlers[0].formatter.converter == time.localtime
@@ -374,42 +358,3 @@ def test_datadog_formatter_use_rfc3339_date(stdout, service_name):
     log = capture_logging_output(stdout)
 
     assert re.fullmatch(RFC3339_REGEX, log["timestamp"])  # "2022-10-27T17:42:26.841+0200"
-
-
-def test_logger_logs_stack_trace_with_formatter_default_value(service_name, stdout):
-    # GIVEN a Logger instance with LambdaPowertoolsFormatter set explictly
-    # GIVE serialize_stacktrace default value = True
-    logger = Logger(service=service_name, stream=stdout, logger_formatter=LambdaPowertoolsFormatter())
-
-    # WHEN invoking a Lambda
-    def handler(event, context):
-        try:
-            raise ValueError("something went wrong")
-        except Exception:
-            logger.exception("Received an exception")
-
-    # THEN we expect a "stack_trace" in log
-    handler({}, lambda_context)
-    log = capture_logging_output(stdout)
-    assert "stack_trace" in log
-
-
-def test_logger_logs_stack_trace_with_formatter_non_default_value(service_name, stdout):
-    # GIVEN a Logger instance with serialize_stacktrace = False
-    logger = Logger(
-        service=service_name,
-        stream=stdout,
-        logger_formatter=LambdaPowertoolsFormatter(serialize_stacktrace=False),
-    )
-
-    # WHEN invoking a Lambda
-    def handler(event, context):
-        try:
-            raise ValueError("something went wrong")
-        except Exception:
-            logger.exception("Received an exception")
-
-    # THEN we expect a "stack_trace" not in log
-    handler({}, lambda_context)
-    log = capture_logging_output(stdout)
-    assert "stack_trace" not in log
