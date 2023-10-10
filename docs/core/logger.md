@@ -321,7 +321,7 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
 
 #### Stack trace logging
 
-By default, the Logger will automatically log the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
+By default, the Logger will automatically includes the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
 
 === "logging_stacktrace.py"
 
