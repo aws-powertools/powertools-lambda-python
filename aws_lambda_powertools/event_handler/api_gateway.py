@@ -438,6 +438,7 @@ class Route:
         path = {}
         definitions: Dict[str, Any] = {}
 
+        # Gather all the route parameters
         operation = self._openapi_operation_metadata(operation_ids=operation_ids)
         parameters: List[Dict[str, Any]] = []
         all_route_params = get_flat_params(dependant)
@@ -446,14 +447,16 @@ class Route:
             model_name_map=model_name_map,
             field_mapping=field_mapping,
         )
-
         parameters.extend(operation_params)
+
+        # Add the parameters to the OpenAPI operation
         if parameters:
             all_parameters = {(param["in"], param["name"]): param for param in parameters}
             required_parameters = {(param["in"], param["name"]): param for param in parameters if param.get("required")}
             all_parameters.update(required_parameters)
             operation["parameters"] = list(all_parameters.values())
 
+        # Add the request body to the OpenAPI operation, if applicable
         if self.method.upper() in METHODS_WITH_BODY:
             request_body_oai = self._openapi_operation_request_body(
                 body_field=self.body_field,
@@ -463,12 +466,14 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
+        # Add the response to the OpenAPI operation
         responses = operation.setdefault("responses", {})
         success_response = responses.setdefault("200", {})
         success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
         success_response["content"] = {"application/json": {"schema": {}}}
         json_response = success_response["content"].setdefault("application/json", {})
 
+        # Add the response schema to the OpenAPI response
         json_response.update(
             self._openapi_operation_return(
                 operation_id=self.operation_id,
@@ -478,7 +483,7 @@ class Route:
             ),
         )
 
-        # Validation responses
+        # Add validation responses
         operation["responses"]["422"] = {
             "description": "Validation Error",
             "content": {
@@ -488,6 +493,7 @@ class Route:
             },
         }
 
+        # We need to add the validation error schema to the definitions once
         if "ValidationError" not in definitions:
             definitions.update(
                 {
@@ -502,16 +508,27 @@ class Route:
         return path, definitions
 
     def _openapi_operation_summary(self) -> str:
+        """
+        Returns the OpenAPI operation summary. If the user has not provided a summary, we
+        generate one based on the route path and method.
+        """
         return self.summary or f"{self.method.upper()} {self.path}"
 
     def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
+        """
+        Returns the OpenAPI operation metadata. If the user has not provided a description, we
+        generate one based on the route path and method.
+        """
         operation: Dict[str, Any] = {}
 
+        # Ensure tags is added to the operation
         if self.tags:
             operation["tags"] = self.tags
 
+        # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
 
+        # Ensure description is added to the operation
         if self.description:
             operation["description"] = self.description
 
@@ -522,6 +539,8 @@ class Route:
             if file_name:
                 message += f" in {file_name}"
             warnings.warn(message, stacklevel=1)
+
+        # Adds the operation
         operation_ids.add(self.operation_id)
         operation["operationId"] = self.operation_id
 
@@ -534,15 +553,20 @@ class Route:
         model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
     ) -> Optional[Dict[str, Any]]:
+        """
+        Returns the OpenAPI operation request body.
+        """
         from aws_lambda_powertools.event_handler.openapi.compat import ModelField, get_schema_from_model_field
         from aws_lambda_powertools.event_handler.openapi.params import Body
 
+        # Check tat there is a body field and it's a Pydantic's model field
         if not body_field:
             return None
 
         if not isinstance(body_field, ModelField):
             raise AssertionError(f"Expected ModelField, got {body_field}")
 
+        # Generate the request body schema
         body_schema = get_schema_from_model_field(
             field=body_field,
             model_name_map=model_name_map,
@@ -555,6 +579,8 @@ class Route:
         request_body_oai: Dict[str, Any] = {}
         if required:
             request_body_oai["required"] = required
+
+        # Generate the request body media type
         request_media_content: Dict[str, Any] = {"schema": body_schema}
         request_body_oai["content"] = {request_media_type: request_media_content}
         return request_body_oai
@@ -569,6 +595,9 @@ class Route:
             "JsonSchemaValue",
         ],
     ) -> List[Dict[str, Any]]:
+        """
+        Returns the OpenAPI operation parameters.
+        """
         from aws_lambda_powertools.event_handler.openapi.compat import (
             get_schema_from_model_field,
         )
@@ -615,6 +644,9 @@ class Route:
             "JsonSchemaValue",
         ],
     ) -> Dict[str, Any]:
+        """
+        Returns the OpenAPI operation return.
+        """
         if param is None:
             return {}
 
