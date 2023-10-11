@@ -50,20 +50,20 @@ def test_basic_lambda_logs_visible(basic_handler_fn, basic_handler_fn_arn):
     assert logs.have_keys(*LOGGER_LAMBDA_CONTEXT_KEYS) is True
 
 
-# test on combination of utc,tz,datefmt params
+# test on combination of tz,datefmt params
 @pytest.mark.xdist_group(name="logger")
-@pytest.mark.parametrize("utc", [False, True])
 @pytest.mark.parametrize("tz", ["US/Eastern", "UTC", "Asia/Shanghai"])
 @pytest.mark.parametrize("datefmt", ["%z", None])
-def test_lambda_tz(tz_handler_fn, tz_handler_fn_arn, utc, tz, datefmt):
-    # GIVEN
+def test_lambda_tz_with_utc(tz_handler_fn, tz_handler_fn_arn, tz, datefmt):
+    # GIVEN UTC=True
+    utc = True
     payload = json.dumps({"utc": utc, "tz": tz, "datefmt": datefmt})
 
-    # WHEN
+    # WHEN invoking sample hander using combination of timezone and date format
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=tz_handler_fn_arn, payload=payload)
     data_fetcher.get_lambda_response(lambda_arn=tz_handler_fn_arn, payload=payload)
 
-    # THEN
+    # get log with matching service id from logger in sample handler
     logs = data_fetcher.get_logs(
         function_name=tz_handler_fn,
         start_time=execution_time,
@@ -75,20 +75,40 @@ def test_lambda_tz(tz_handler_fn, tz_handler_fn_arn, utc, tz, datefmt):
     assert len(result_list) > 0
     result = result_list[0]
 
-    # When UTC
-    if utc:
-        # then use gmt converter
-        assert result.message == "gmtime_converter"
-    # When not UTC
-    else:
-        # then use local time converter
-        assert result.message == "localtime_converter"
+    # Then lambda handler use gmt converter, timezone always in UTC
+    assert result.message == "gmtime_converter"
+    assert result.timestamp[-5:] == "+0000"
 
-    if utc:
-        assert result.timestamp[-5:] == "+0000"
-    else:
-        os.environ["TZ"] = tz
-        time.tzset()
-        assert result.timestamp[-5:] == time.strftime("%z", time.localtime())
 
-    print(result)
+# test on combination of tz,datefmt params on
+@pytest.mark.xdist_group(name="logger")
+@pytest.mark.parametrize("tz", ["US/Eastern", "UTC", "Asia/Shanghai"])
+@pytest.mark.parametrize("datefmt", ["%z", None])
+def test_lambda_tz_without_utc(tz_handler_fn, tz_handler_fn_arn, tz, datefmt):
+    # GIVEN UTC=False
+    utc = False
+    payload = json.dumps({"utc": utc, "tz": tz, "datefmt": datefmt})
+
+    # WHEN invoking sample handler using combination of timezone and date format
+    _, execution_time = data_fetcher.get_lambda_response(lambda_arn=tz_handler_fn_arn, payload=payload)
+    data_fetcher.get_lambda_response(lambda_arn=tz_handler_fn_arn, payload=payload)
+
+    # get log with matching service id from logger in sample handler
+    logs = data_fetcher.get_logs(
+        function_name=tz_handler_fn,
+        start_time=execution_time,
+        minimum_log_entries=1,
+        filter_expression='{ $.service = "' + f"{utc}-{datefmt}-{tz}" + '" }',
+    )
+    result_list = logs.logs
+
+    assert len(result_list) > 0
+    result = result_list[0]
+
+    # then Lambda handler use localtime converter
+    assert result.message == "localtime_converter"
+
+    # set Tz and assert result is the same as lambda output
+    os.environ["TZ"] = tz
+    time.tzset()
+    assert result.timestamp[-5:] == time.strftime("%z", time.localtime())
