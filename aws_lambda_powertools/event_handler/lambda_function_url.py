@@ -52,5 +52,13 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: Optional[bool] = False,
     ):
-        super().__init__(ProxyEventType.LambdaFunctionUrlEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.LambdaFunctionUrlEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )

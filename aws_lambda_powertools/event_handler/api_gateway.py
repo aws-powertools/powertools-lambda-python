@@ -1375,7 +1375,7 @@ class ApiGatewayResolver(BaseRouter):
             output["servers"] = servers
         else:
             # If the servers property is not provided, or is an empty array, the default value would be a Server Object
-            # with a url value of /.
+            # with an url value of /.
             output["servers"] = [Server(url="/")]
 
         components: Dict[str, Dict[str, Any]] = {}
@@ -1757,7 +1757,7 @@ class ApiGatewayResolver(BaseRouter):
             logger.exception(exc)
             if self._debug:
                 # If the user has turned on debug mode,
-                # we'll let the original exception propagate so
+                # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
                 return ResponseBuilder(
                     Response(
@@ -1981,9 +1981,17 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: Optional[bool] = False,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
-        super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.APIGatewayProxyEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )
 
     # override route to ignore trailing "/" in routes for REST API
     def route(
@@ -2032,9 +2040,17 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: Optional[bool] = False,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
-        super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.APIGatewayProxyEventV2,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )
 
 
 class ALBResolver(ApiGatewayResolver):
@@ -2046,6 +2062,7 @@ class ALBResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: Optional[bool] = False,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
-        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)

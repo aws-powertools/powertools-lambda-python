@@ -272,5 +272,5 @@ def test_openapi_with_embed_body_param():
     # Ensure that the custom body schema actually points to the real user class
     components = schema.components
     assert "Body_handler_users_post" in components.schemas
-    body_posthandler_schema = components.schemas["Body_handler_users_post"]
-    assert body_posthandler_schema.properties["user"].ref == "#/components/schemas/User"
+    body_post_handler_schema = components.schemas["Body_handler_users_post"]
+    assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
