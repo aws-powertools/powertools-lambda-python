@@ -567,7 +567,7 @@ class Route:
         from aws_lambda_powertools.event_handler.openapi.compat import ModelField, get_schema_from_model_field
         from aws_lambda_powertools.event_handler.openapi.params import Body
 
-        # Check tat there is a body field and it's a Pydantic's model field
+        # Check that there is a body field and it's a Pydantic's model field
         if not body_field:
             return None
 
