@@ -3479,7 +3479,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
     <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h4 id="headers">Headers<a class="headerlink" href="#headers" title="Permanent link">&para;</a></h4>
-<p>Similarly to <a href="#query-strings-and-payload">Query strings</a>, you can access headers as dictionary via <code>app.current_event.headers</code>, or by name via <code>get_header_value</code>.</p>
+<p>Similarly to <a href="#query-strings-and-payload">Query strings</a>, you can access headers as dictionary via <code>app.current_event.headers</code>, or by name via <code>get_header_value</code>. If you prefer a case-insensitive lookup of the header value, the <code>app.current_event.get_header_value</code> function automatically handles it.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Accessing HTTP Headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -7041,7 +7041,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-10-05
+      2023-10-11
     
   </small>
 </div>
