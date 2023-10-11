@@ -433,6 +433,9 @@ class Route:
         model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
     ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Returns the OpenAPI path and definitions for the route.
+        """
         from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params
 
         path = {}
