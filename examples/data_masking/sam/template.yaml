@@ -24,7 +24,7 @@ Resources:
   DataMaskingFunctionExample:
     Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
     Properties:
-      Handler: app.lambda_handler
+      Handler: data_masking_function_example.lambda_handler
       CodeUri: ../src
       Description: Data Masking Function Example
       MemorySize: 1024                  # TODO: Recommended to use 1024 MB due to 
