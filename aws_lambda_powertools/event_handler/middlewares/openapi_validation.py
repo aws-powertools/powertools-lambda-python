@@ -29,7 +29,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     """
     OpenAPIValidationMiddleware is a middleware that validates the request against the OpenAPI schema defined by the
     Lambda handler. It also validates the response against the OpenAPI schema defined by the Lambda handler. It
-    should not be used directly, but rather through the `enable_validation` parameter of the `APIGatewayProxyHandler`.
+    should not be used directly, but rather through the `enable_validation` parameter of the `ApiGatewayResolver`.
 
     Examples
     --------
@@ -40,13 +40,13 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     from pydantic import BaseModel
 
     from aws_lambda_powertools.event_handler.api_gateway import (
-        APIGatewayProxyHandler,
+        APIGatewayRestResolver,
     )
 
     class Todo(BaseModel):
       name: str
 
-    app = APIGatewayProxyHandler(enable_validation=True)
+    app = APIGatewayRestResolver(enable_validation=True)
 
     @app.get("/todos")
     def get_todos(): List[Todo]:
