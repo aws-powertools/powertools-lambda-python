@@ -271,12 +271,16 @@ def _request_body_to_args(
     )
 
     for field in required_params:
+        # This sets the location to:
+        # { "user": { object } } if field.alias == user
+        # { { object } if field_alias is omitted
         loc: Tuple[str, ...] = ("body", field.alias)
         if field_alias_omitted:
             loc = ("body",)
 
         value: Optional[Any] = None
 
+        # Now that we know what to look for, try to get the value from the received body
         if received_body is not None:
             try:
                 value = received_body.get(field.alias)
@@ -294,6 +298,7 @@ def _request_body_to_args(
 
         # MAINTENANCE: Handle byte and file fields
 
+        # Finally, validate the value
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
