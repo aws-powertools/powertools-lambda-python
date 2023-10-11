@@ -319,6 +319,22 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
     --8<-- "examples/logger/src/logging_uncaught_exceptions_output.json"
     ```
 
+#### Stack trace logging
+
+By default, the Logger will automatically include the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
+
+=== "logging_stacktrace.py"
+
+    ```python hl_lines="7 15"
+    --8<-- "examples/logger/src/logging_stacktrace.py"
+    ```
+
+=== "logging_stacktrace_output.json"
+
+    ```json hl_lines="9-27"
+    --8<-- "examples/logger/src/logging_stacktrace_output.json"
+    ```
+
 ### Date formatting
 
 Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0000`.
@@ -570,9 +586,11 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
 
 #### Setting timestamp to custom Timezone
 
-By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in UTC.
+By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in **UTC**.
 
-However, if you want to use your preferred timezone to format your log instead, you can use the timezone environment variable `TZ`: Either set it as AWS Lambda environment variable, or setup this value directly in your Lambda function.
+<!-- markdownlint-disable MD013 -->
+If you prefer to log in a specific timezone, you can configure it by setting the `TZ` environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. [Click here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime){target="_blank"} for a comprehensive list of available Lambda environment variables.
+<!-- markdownlint-enable MD013 -->
 
 ???+ tip
     `TZ` environment variable will be ignored if `utc` is set to `True`
