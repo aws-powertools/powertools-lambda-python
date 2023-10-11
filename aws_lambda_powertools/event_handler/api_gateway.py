@@ -252,7 +252,7 @@ class Route:
         cache_control: Optional[str],
         summary: Optional[str],
         description: Optional[str],
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]],
+        responses: Optional[Dict[int, Dict[str, Any]]],
         response_description: Optional[str],
         tags: Optional[List["Tag"]],
         operation_id: Optional[str],
@@ -281,7 +281,7 @@ class Route:
             The OpenAPI summary for this route
         description: Optional[str]
             The OpenAPI description for this route
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]]
+        responses: Optional[Dict[int, Dict[str, Any]]]
             The OpenAPI responses for this route
         response_description: Optional[str]
             The OpenAPI response description for this route
@@ -467,40 +467,45 @@ class Route:
                 operation["requestBody"] = request_body_oai
 
         # Add the response to the OpenAPI operation
-        responses = operation.setdefault("responses", {})
-        success_response = responses.setdefault("200", {})
-        success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
-        success_response["content"] = {"application/json": {"schema": {}}}
-        json_response = success_response["content"].setdefault("application/json", {})
+        if self.responses:
+            operation["responses"] = self.responses
+        else:
+            responses = operation.setdefault("responses", self.responses or {})
 
-        # Add the response schema to the OpenAPI response
-        json_response.update(
-            self._openapi_operation_return(
-                operation_id=self.operation_id,
-                param=dependant.return_param,
-                model_name_map=model_name_map,
-                field_mapping=field_mapping,
-            ),
-        )
+            # Handle the default 200 response
+            success_response = responses.setdefault(200, {})
+            success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
+            success_response["content"] = {"application/json": {"schema": {}}}
+            json_response = success_response["content"].setdefault("application/json", {})
 
-        # Add validation responses
-        operation["responses"]["422"] = {
-            "description": "Validation Error",
-            "content": {
-                "application/json": {
-                    "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                },
-            },
-        }
-
-        # We need to add the validation error schema to the definitions once
-        if "ValidationError" not in definitions:
-            definitions.update(
-                {
-                    "ValidationError": validation_error_definition,
-                    "HTTPValidationError": validation_error_response_definition,
-                },
+            # Add the response schema to the OpenAPI response
+            json_response.update(
+                self._openapi_operation_return(
+                    operation_id=self.operation_id,
+                    param=dependant.return_param,
+                    model_name_map=model_name_map,
+                    field_mapping=field_mapping,
+                ),
             )
+
+            # Add validation responses
+            operation["responses"][422] = {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            }
+
+            # We need to add the validation error schema to the definitions once
+            if "ValidationError" not in definitions:
+                definitions.update(
+                    {
+                        "ValidationError": validation_error_definition,
+                        "HTTPValidationError": validation_error_response_definition,
+                    },
+                )
 
         path[self.method.lower()] = operation
 
@@ -781,7 +786,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -838,7 +843,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -889,7 +894,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -941,7 +946,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -993,7 +998,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -1044,7 +1049,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -1262,7 +1267,7 @@ class ApiGatewayResolver(BaseRouter):
         debug: Optional[bool]
             Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_DEV"
             environment variable
-        serializer : Callable, optional
+        serializer: Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
         strip_prefixes: List[Union[str, Pattern]], optional
             optional list of prefixes to be removed from the request path before doing the routing.
@@ -1293,8 +1298,8 @@ class ApiGatewayResolver(BaseRouter):
 
             self.use([OpenAPIValidationMiddleware()])
 
-            # When using validation, we need to skip the serializer, as the middleware is doing it automatically
-            # However, if the user is using a custom serializer, we need to abort
+            # When using validation, we need to skip the serializer, as the middleware is doing it automatically.
+            # However, if the user is using a custom serializer, we need to abort.
             if serializer:
                 raise ValueError("Cannot use a custom serializer when using validation")
 
@@ -1494,7 +1499,7 @@ class ApiGatewayResolver(BaseRouter):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -1931,7 +1936,7 @@ class Router(BaseRouter):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
@@ -2003,7 +2008,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,

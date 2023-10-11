@@ -96,7 +96,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 app.context["_route_args"] = values
                 response = next_middleware(app)
 
-                # Process the response body, if it exists
+                # Process the response body if it exists
                 raw_response = jsonable_encoder(response.body)
 
                 # Validate and serialize the response
