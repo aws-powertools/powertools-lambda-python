@@ -1,9 +1,11 @@
+import os
+
 from aws_lambda_powertools.utilities.data_masking import DataMasking
-from aws_lambda_powertools.utilities.data_masking.constants import KMS_KEY_ARN
 from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import AwsEncryptionSdkProvider
 
+KMS_KEY_ARN = os.environ["KMS_KEY_ARN"]
 
-def lambda_handler(event, context: LambdaContext):
+def lambda_handler(event, context):
 
     data = {
         "id": 1,

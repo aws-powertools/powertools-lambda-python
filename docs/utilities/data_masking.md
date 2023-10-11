@@ -25,7 +25,7 @@ Decrypt: This is the process of reversing the encryption process, converting cip
 
 ### IAM Permissions
 
-If using the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Encrypt`, `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
+If using the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
 
 If using any other encryption provider, make sure to have the permissions for your role that it requires.
 
@@ -33,7 +33,7 @@ If not using any encryption services and just masking data, your Lambda does not
 
 ### Required resources
 
-If using the AWS Encryption SDK, you must have an AWS KMS key with Encrypt, Decrypt, and GenerateDataKey permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
+If using the AWS Encryption SDK, you must have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
 
 If using any other encryption provider, you must have the resources required for that provider.
 

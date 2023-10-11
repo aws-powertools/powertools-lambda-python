@@ -38,7 +38,9 @@ Resources:
       Policies:
         Statement:
         - Effect: Allow
-          Action: kms:*
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
           Resource: !GetAtt MyKMSKey.Arn
       Tracing: Active
       Events:
@@ -68,7 +70,9 @@ Resources:
       Policies:
         Statement:
         - Effect: Allow
-          Action: kms:*
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
           Resource: !GetAtt MyKMSKey.Arn
       Tracing: Active
       Events:
@@ -98,7 +102,9 @@ Resources:
       Policies:
         Statement:
         - Effect: Allow
-          Action: kms:*
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
           Resource: !GetAtt MyKMSKey.Arn
       Tracing: Active
       Events:

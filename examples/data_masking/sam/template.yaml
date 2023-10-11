@@ -1,0 +1,57 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Powertools for AWS Lambda (Python) data masking example
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+  Function:
+    Timeout: 5
+    Runtime: python3.10
+    Tracing: Active
+Resources:
+  MyKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Enabled: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: "*"
+          Principal:
+            AWS: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":root" ] ]
+  DataMaskingFunctionExample:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: ../src
+      Description: Data Masking Function Example
+      MemorySize: 1024                  # TODO: Recommended to use 1024 MB due to 
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action:
+            - kms:Decrypt
+            - kms:GenerateDataKey
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+
+Outputs:
+  KMSKeyArn:
+    Description: ARN of the KMS Key
+    Value: !GetAtt MyKMSKey.Arn
+
+  DataMaskingFunctionExample:
+    Description: Data Masking Function Example
+    Value: !GetAtt DataMaskingFunctionExample.Arn
