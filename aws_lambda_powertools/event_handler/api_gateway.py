@@ -306,7 +306,7 @@ class Route:
         self.response_description = response_description
         self.tags = tags or []
         self.middlewares = middlewares or []
-        self.operation_id = operation_id or (self.method.title() + self.func.__name__.title())
+        self.operation_id = operation_id or self._generate_operation_id()
 
         # _middleware_stack_built is used to ensure the middleware stack is only built once.
         self._middleware_stack_built = False
@@ -661,6 +661,12 @@ class Route:
         )
 
         return {"name": f"Return {operation_id}", "schema": return_schema}
+
+    def _generate_operation_id(self) -> str:
+        operation_id = self.func.__name__ + self.path
+        operation_id = re.sub(r"\W", "_", operation_id)
+        operation_id = operation_id + "_" + self.method.lower()
+        return operation_id
 
 
 class ResponseBuilder:

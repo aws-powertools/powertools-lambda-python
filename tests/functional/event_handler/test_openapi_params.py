@@ -36,7 +36,7 @@ def test_openapi_no_params():
 
     get = path.get
     assert get.summary == "GET /"
-    assert get.operationId == "GetHandler"
+    assert get.operationId == "handler__get"
 
     assert get.responses is not None
     assert "200" in get.responses.keys()
@@ -69,7 +69,7 @@ def test_openapi_with_scalar_params():
 
     get = path.get
     assert get.summary == "GET /users/<user_id>"
-    assert get.operationId == "GetHandler"
+    assert get.operationId == "handler_users__user_id__get"
     assert len(get.parameters) == 2
 
     parameter = get.parameters[0]
@@ -267,10 +267,10 @@ def test_openapi_with_embed_body_param():
     request_body = post.requestBody
     assert request_body.required is True
     # Notice here we craft a specific schema for the embedded user
-    assert request_body.content[JSON_CONTENT_TYPE].schema_.ref == "#/components/schemas/Body_PostHandler"
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.ref == "#/components/schemas/Body_handler_users_post"
 
     # Ensure that the custom body schema actually points to the real user class
     components = schema.components
-    assert "Body_PostHandler" in components.schemas
-    body_posthandler_schema = components.schemas["Body_PostHandler"]
+    assert "Body_handler_users_post" in components.schemas
+    body_posthandler_schema = components.schemas["Body_handler_users_post"]
     assert body_posthandler_schema.properties["user"].ref == "#/components/schemas/User"
