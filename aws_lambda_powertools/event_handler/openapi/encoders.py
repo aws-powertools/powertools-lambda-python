@@ -36,8 +36,6 @@ def jsonable_encoder(  # noqa: PLR0911
     This is a modified version of fastapi.encoders.jsonable_encoder that supports
     encoding of pydantic.BaseModel objects.
 
-    This function is used to encode the response body of a FastAPI endpoint.
-
     Parameters
     ----------
     obj : Any
