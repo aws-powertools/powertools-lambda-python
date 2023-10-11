@@ -471,17 +471,17 @@ class Route:
 
         # Add the response to the OpenAPI operation
         if self.responses:
+            # If the user supplied responses, we use them and don't set a default 200 response
             operation["responses"] = self.responses
         else:
+            # Set the default 200 response
             responses = operation.setdefault("responses", self.responses or {})
-
-            # Handle the default 200 response
             success_response = responses.setdefault(200, {})
             success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
             success_response["content"] = {"application/json": {"schema": {}}}
             json_response = success_response["content"].setdefault("application/json", {})
 
-            # Add the response schema to the OpenAPI response
+            # Add the response schema to the OpenAPI 200 response
             json_response.update(
                 self._openapi_operation_return(
                     operation_id=self.operation_id,
@@ -491,7 +491,7 @@ class Route:
                 ),
             )
 
-            # Add validation responses
+            # Add validation failure response (422)
             operation["responses"][422] = {
                 "description": "Validation Error",
                 "content": {
@@ -501,7 +501,7 @@ class Route:
                 },
             }
 
-            # We need to add the validation error schema to the definitions once
+            # Add the validation error schema to the definitions, but only if it hasn't been added yet
             if "ValidationError" not in definitions:
                 definitions.update(
                     {
