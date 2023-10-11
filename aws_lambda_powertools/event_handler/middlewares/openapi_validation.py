@@ -239,6 +239,8 @@ def _request_params_to_args(
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
         loc = (field_info.in_.value, field.alias)
+
+        # If we don't have a value, see if it's required or has a default
         if value is None:
             if field.required:
                 errors.append(get_missing_field_error(loc=loc))
@@ -246,6 +248,7 @@ def _request_params_to_args(
                 values[field.name] = deepcopy(field.default)
             continue
 
+        # Finally, validate the value
         values[field.name] = _validate_field(field=field, value=value, loc=loc, existing_errors=errors)
 
     return values, errors
