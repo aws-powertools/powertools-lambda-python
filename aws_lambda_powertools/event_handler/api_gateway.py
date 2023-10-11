@@ -293,7 +293,7 @@ class Route:
             The list of route middlewares to be called in order.
         """
         self.method = method.upper()
-        self.path = path
+        self.path = "/" if path.strip() == "" else path
         self.rule = rule
         self.func = func
         self._middleware_stack = func

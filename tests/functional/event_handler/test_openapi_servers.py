@@ -1,9 +1,9 @@
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import Server
 
 
 def test_openapi_schema_default_server():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     schema = app.get_openapi_schema(title="Hello API", version="1.0.0")
     assert schema.servers
@@ -12,7 +12,7 @@ def test_openapi_schema_default_server():
 
 
 def test_openapi_schema_custom_server():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     schema = app.get_openapi_schema(
         title="Hello API",

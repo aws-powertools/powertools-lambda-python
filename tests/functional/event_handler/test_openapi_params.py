@@ -5,7 +5,7 @@ from typing import List
 from pydantic import BaseModel
 from typing_extensions import Annotated
 
-from aws_lambda_powertools.event_handler.api_gateway import ApiGatewayResolver
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.models import (
     Example,
     Parameter,
@@ -18,7 +18,7 @@ JSON_CONTENT_TYPE = "application/json"
 
 
 def test_openapi_no_params():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/")
     def handler():
@@ -51,7 +51,7 @@ def test_openapi_no_params():
 
 
 def test_openapi_with_scalar_params():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/users/<user_id>")
     def handler(user_id: str, include_extra: bool = False):
@@ -92,7 +92,7 @@ def test_openapi_with_scalar_params():
 
 
 def test_openapi_with_custom_params():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/users", summary="Get Users", operation_id="GetUsers", description="Get paginated users", tags=["Users"])
     def handler(
@@ -128,7 +128,7 @@ def test_openapi_with_custom_params():
 
 
 def test_openapi_with_scalar_returns():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @app.get("/")
     def handler() -> str:
@@ -146,7 +146,7 @@ def test_openapi_with_scalar_returns():
 
 
 def test_openapi_with_pydantic_returns():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     class User(BaseModel):
         name: str
@@ -173,7 +173,7 @@ def test_openapi_with_pydantic_returns():
 
 
 def test_openapi_with_pydantic_nested_returns():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     class Order(BaseModel):
         date: datetime
@@ -198,7 +198,7 @@ def test_openapi_with_pydantic_nested_returns():
 
 
 def test_openapi_with_dataclass_return():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     @dataclass
     class User:
@@ -226,7 +226,7 @@ def test_openapi_with_dataclass_return():
 
 
 def test_openapi_with_body_param():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     class User(BaseModel):
         name: str
@@ -248,7 +248,7 @@ def test_openapi_with_body_param():
 
 
 def test_openapi_with_embed_body_param():
-    app = ApiGatewayResolver()
+    app = APIGatewayRestResolver()
 
     class User(BaseModel):
         name: str
