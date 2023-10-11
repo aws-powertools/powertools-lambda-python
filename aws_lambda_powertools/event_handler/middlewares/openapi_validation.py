@@ -311,6 +311,9 @@ def _validate_field(
     loc: Tuple[str, ...],
     existing_errors: List[Dict[str, Any]],
 ):
+    """
+    Validate a field, and append any errors to the existing_errors list.
+    """
     validated_value, errors = field.validate(value, value, loc=loc)
 
     if isinstance(errors, list):
@@ -331,6 +334,7 @@ def _get_embed_body(
     field_info = field.field_info
     embed = getattr(field_info, "embed", None)
 
+    # If the field is an embed, and the field alias is omitted, we need to wrap the received body in the field alias.
     field_alias_omitted = len(required_params) == 1 and not embed
     if field_alias_omitted:
         received_body = {field.alias: received_body}
