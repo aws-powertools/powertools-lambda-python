@@ -7,41 +7,40 @@ description: Utility
 
 The data masking utility provides a simple solution to conceal incoming data so that sensitive information is not passed downstream or logged.
 
-
 ## Key features
 
 * Mask data irreversibly without having to install any encryption library.
-* Out of the box integration with AWS Encryption SDK to easily encrypt and decrypt data.
+* Out of the box integration with the [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank" rel="nofollow"} to easily encrypt and decrypt data.
 * Install any encryption provider and connect it with our new Data Masker class to easily mask, encrypt, and decrypt data.
-
 
 ## Terminology
 
-Mask: This refers to concealing or partially replacing sensitive information with a non-sensitive placeholder or mask. The key characteristic of this operation is that it is irreversible, meaning the original sensitive data cannot be retrieved from the masked data. Masking is commonly applied when displaying data to users or for anonymizing data in non-reversible scenarios.
+Mask: This refers to concealing or partially replacing sensitive information with a non-sensitive placeholder or mask. The key characteristic of this operation is that it is irreversible, meaning the original sensitive data cannot be retrieved from the masked data. Masking is commonly applied when displaying data to users or for anonymizing data in non-reversible scenarios. For example, display the last four digits of a credit card number as "**** **** **** 1234".
 
-Encrypt: This is the process of transforming plaintext data into a ciphertext format using an encryption algorithm and a cryptographic key. Encryption is a reversible process, meaning the original data can be retrieved (decrypted) using the appropriate decryption key.
+Encrypt: This is the process of transforming plaintext data into a ciphertext format using an encryption algorithm and a cryptographic key. Encryption is a reversible process, meaning the original data can be retrieved (decrypted) using the appropriate decryption key. You can use this, for instance, to encrypt any PII (personally identifiable information) of your customers and make sure only the people with the right permissions are allowed to decrypt and view the plaintext PII data, in accordance with GDPR.
 
-Decrypt: This is the process of reversing the encryption process, converting ciphertext back into plaintext using a decryption algorithm and the correct decryption key. Decryption is applied to recover the original data from its encrypted form. Decryption requires an encryption key that only authorized users have.
+Decrypt: This is the process of reversing the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key that only authorized personnel should have access to.
 
 ## Getting started
 
 ### IAM Permissions
 
-If using the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Encrypt`,  `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
+If using the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Encrypt`, `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
 
 If using any other encryption provider, make sure to have the permissions for your role that it requires.
 
 If not using any encryption services and just masking data, your Lambda does not need any additional permissions to use this utility.
 
-
 ### Required resources
 
-If using the AWS Encryption SDK, you must have a KMS key with Encrypt, Decrypt, and GenerateDataKey permissions. 
+If using the AWS Encryption SDK, you must have an AWS KMS key with Encrypt, Decrypt, and GenerateDataKey permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
 
 If using any other encryption provider, you must have the resources required for that provider.
 
+## Using the utility
 
 ### Masking data
+
 You can mask data without having to install any encryption library.
 
 === "getting_started_mask_data.py"
@@ -50,6 +49,7 @@ You can mask data without having to install any encryption library.
     ```
 
 ### Encryting and decrypting data
+
 In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. You can still use the masking feature while using any encryption provider.
 
 === "getting_started_encrypt_data.py"
@@ -60,6 +60,15 @@ In order to encrypt data, you must use either our out-of-the-box integration wit
 ## Advanced
 
 ### Adjusting configurations for AWS Encryption SDK
+
+You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify these values at `utilities/data_masking/constants.py`.
+
+The `CACHE_CAPACITY` value is currently set at `100`. This value represents the maximum number of entries that can be retained in the local cryptographic materials cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.caches.local.html){target="_blank" rel="nofollow"} for more information.
+
+The `MAX_CACHE_AGE_SECONDS` value is currently set at `300`. It represents the maximum time (in seconds) that a cache entry may be kept in the cache.
+
+The `MAX_MESSAGES_ENCRYPTED` value is currently set at `200`. It represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this and `MAX_CACHE_AGE_SECONDS`.
+
 
 ### Create your own encryption provider
 
