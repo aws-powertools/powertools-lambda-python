@@ -57,6 +57,22 @@ In order to encrypt data, you must use either our out-of-the-box integration wit
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
+### SAM template example
+=== "template.yaml"
+    ```yaml hl_lines="11-23 30 33-39 46"
+    --8<-- "examples/data_masking/sam/template.yaml"
+    ```
+
+=== "data_masking_function_example.py"
+    ```python hl_lines="8 47-50"
+    --8<-- "examples/data_masking/src/data_masking_function_example.py"
+    ```
+
+=== "output.json"
+    ```json
+    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
+    ```
+
 ## Advanced
 
 ### Adjusting configurations for AWS Encryption SDK
