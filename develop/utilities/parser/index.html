@@ -1883,6 +1883,61 @@ installed without binary files</a>:</p>
 <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">LambdaContext</span><span class="p">())</span>
 <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="n">context</span><span class="o">=</span><span class="n">LambdaContext</span><span class="p">())</span> <span class="c1"># also works if event is a JSON string</span>
 </code></pre></div></td></tr></table></div>
+<p>Alternatively, you can automatically extract the model from the <code>event</code> without the need to include the model parameter in the <code>event_parser</code> function.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code>    <span class="kn">import</span> <span class="nn">json</span>
+
+    <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">validator</span>
+
+    <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser</span> <span class="kn">import</span> <span class="n">event_parser</span>
+    <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.parser.models</span> <span class="kn">import</span> <span class="n">APIGatewayProxyEventV2Model</span>
+    <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+    <span class="k">class</span> <span class="nc">CancelOrder</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+        <span class="n">order_id</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+
+
+    <span class="k">class</span> <span class="nc">CancelOrderModel</span><span class="p">(</span><span class="n">APIGatewayProxyEventV2Model</span><span class="p">):</span>
+        <span class="n">body</span><span class="p">:</span> <span class="n">CancelOrder</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">transform_body_to_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="hll">    <span class="nd">@event_parser</span>
+</span><span class="hll">    <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">CancelOrderModel</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+</span>        <span class="n">cancel_order</span><span class="p">:</span> <span class="n">CancelOrder</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">body</span>
+
+        <span class="k">assert</span> <span class="n">cancel_order</span><span class="o">.</span><span class="n">order_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</code></pre></div></td></tr></table></div>
 <h4 id="parse-function">parse function<a class="headerlink" href="#parse-function" title="Permanent link">&para;</a></h4>
 <p>Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Using standalone parse function for more flexibility</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2756,7 +2811,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" rel="n
   <small>
     
       Last update:
-      2023-10-05
+      2023-10-12
     
   </small>
 </div>
