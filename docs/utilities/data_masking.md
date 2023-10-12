@@ -44,7 +44,7 @@ If using any other encryption provider, you must have the resources required for
 You can mask data without having to install any encryption library.
 
 === "getting_started_mask_data.py"
-    ```python hl_lines="3 10"
+    ```python hl_lines="1 6 21 35 44"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
     ```
 
@@ -53,7 +53,7 @@ You can mask data without having to install any encryption library.
 In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. You can still use the masking feature while using any encryption provider.
 
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="3 10"
+    ```python hl_lines="3-4 6 23-26 40 54 63 77 80 94"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
@@ -72,25 +72,52 @@ The `MAX_MESSAGES_ENCRYPTED` value is currently set at `200`. It represents the 
 
 ### Create your own encryption provider
 
-You can create your own custom encryption provider by inheriting the `BaseProvider` class, and implementing both the `encrypt()` and `decrypt()` methods in order to encrypt and decrypt data using your custom encryption provider. You can also either use your own data serializer and deserializer by passing the `BaseProvider` class a `json_serializer` and `json_deserializer` argument, or you can use the default.
+You can create your own custom encryption provider by inheriting the `BaseProvider` class, and implementing the `encrypt()` and `decrypt()` methods, and optionally the `mask()` method. You can also either use your own data serializer and deserializer by passing the `BaseProvider` class a `json_serializer` and `json_deserializer` argument, or you can use the default.
 
-All masking logic is handled by the `mask()` and methods from the `BaseProvider` class.
+<!-- markdownlint-disable MD031 MD040 -->
+<center>
+```mermaid
+classDiagram
+    direction LR
+    class BaseProvider {
+        <<interface>>
+        +encrypt(data: Any)
+        +decrypt(data: str)
+        +mask(data: Any)
+    }
 
-Here is an examples of implementing a custom encryption using an external encryption library like [ItsDangerous](https://itsdangerous.palletsprojects.com/en/2.1.x/){target="_blank" rel="nofollow"}, a widely popular encryption library.
+    class YourCustomEncryptionProvider {
+        +encrypt(data: Any)
+        +decrypt(data: str)
+        +mask(data: Any)
+    }
+
+    BaseProvider <|-- YourCustomEncryptionProvider : implement
+```
+<i>Visual representation to bring your own encryption provider</i>
+</center>
+
+* **`encrypt()`** – handles all logic for how to encrypt any data
+* **`decrypt()`** – handles all logic for how to decrypt encrypted data
+* **`mask()`** – handles all logic for how to irreversably mask data (optional)
+
+You can then use this custom encryption provider class as the `provider` argument when creating a new `DataMasking` instance to use the encryption and decryption algorithms of the encryption library you have chosen.
+
+Here is an example of implementing a custom encryption using an external encryption library like [ItsDangerous](https://itsdangerous.palletsprojects.com/en/2.1.x/){target="_blank" rel="nofollow"}, a widely popular encryption library.
 
 === "working_with_own_provider.py"
-    ```python hl_lines="5 13 20 24"
+    ```python hl_lines="1-2 19-22 36 50 59 73 76 90"
     --8<-- "examples/data_masking/src/working_with_own_provider.py"
     ```
 
 === "custom_provider.py"
-    ```python hl_lines="6 9 17 24"
+    ```python hl_lines="1 3 6 8 11 16"
     --8<-- "examples/data_masking/src/custom_provider.py"
     ```
 
 ## Testing your code
 
-For unit testing your applications, you can mock the calls to the data masking utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the pytest monkeypatch fixture to patch the `data_masking.encrypt` method.
+For unit testing your applications, you can mock the calls to the data masking utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the pytest monkeypatch fixture to patch the `data_masking.decrypt` method.
 
 === "test_single_mock.py"
     ```python hl_lines="4 8"

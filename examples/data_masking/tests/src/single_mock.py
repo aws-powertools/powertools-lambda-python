@@ -3,9 +3,10 @@ from __future__ import annotations
 import base64
 from typing import Any, Callable, Dict, Union
 
-from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import AwsEncryptionSdkProvider
+
 
 class FakeEncryptionKeyProvider(BaseProvider):
     def __init__(
