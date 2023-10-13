@@ -891,8 +891,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#setting-timestamp-to-utc" class="md-nav__link">
-    Setting timestamp to UTC
+  <a href="#setting-timestamp-to-custom-timezone" class="md-nav__link">
+    Setting timestamp to custom Timezone
   </a>
   
 </li>
@@ -2008,8 +2008,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#setting-timestamp-to-utc" class="md-nav__link">
-    Setting timestamp to UTC
+  <a href="#setting-timestamp-to-custom-timezone" class="md-nav__link">
+    Setting timestamp to custom Timezone
   </a>
   
 </li>
@@ -2262,8 +2262,8 @@
 </tr>
 <tr>
 <td><strong>timestamp</strong>: <code>str</code></td>
-<td><code>2021-05-03 10:20:19,650+0200</code></td>
-<td>Timestamp with milliseconds, by default uses local timezone</td>
+<td><code>2021-05-03 10:20:19,650+0000</code></td>
+<td>Timestamp with milliseconds, by default uses default AWS Lambda timezone (UTC)</td>
 </tr>
 <tr>
 <td><strong>service</strong>: <code>str</code></td>
@@ -2358,7 +2358,7 @@
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:9&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">        </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 </span><span class="hll"><span class="w">        </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -2373,7 +2373,7 @@
 </span><span class="hll"><span class="w">            </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect_payment&quot;</span><span class="p">,</span>
 </span><span class="hll"><span class="w">            </span><span class="nt">&quot;charge_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ch_AZFlk2345C0&quot;</span>
 </span><span class="hll"><span class="w">        </span><span class="p">},</span>
-</span><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -2504,7 +2504,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:10&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -2575,7 +2575,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:13&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;correlation_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;correlation_id_value&quot;</span>
 </span><span class="p">}</span>
@@ -2644,7 +2644,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:11&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -2719,7 +2719,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:11&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;order_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;order_id_value&quot;</span>
 </span><span class="p">}</span>
@@ -2774,7 +2774,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:8&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-11-26 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-11-26 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1123&quot;</span>
 </span><span class="p">}</span>
@@ -2826,7 +2826,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:9&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1123&quot;</span>
 </span><span class="p">}</span>
@@ -2890,7 +2890,7 @@
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:9&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;sample_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;value&quot;</span>
 <span class="w">    </span><span class="p">},</span>
@@ -2898,7 +2898,7 @@
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:12&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment without sample key&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">]</span>
@@ -2971,7 +2971,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:10&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;special_key&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;debug_key&quot;</span><span class="p">,</span>
 </span><span class="w">    </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
@@ -2998,7 +2998,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:10&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span>
 </span><span class="w">    </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -3069,7 +3069,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:15&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Received a HTTP 5xx error&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;exception_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;RuntimeError&quot;</span><span class="p">,</span>
 </span><span class="hll"><span class="w">    </span><span class="nt">&quot;exception&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Traceback (most recent call last):\n  File \&quot;&lt;input&gt;\&quot;, line 2, in &lt;module&gt; RuntimeError: Unable to fullfil request&quot;</span>
@@ -3140,7 +3140,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;ERROR&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;log_uncaught_exception_hook:756&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-11-16 13:51:29,198+0100&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-11-16 13:51:29,198+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;exception&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Traceback (most recent call last):\n  File \&quot;&lt;input&gt;\&quot;, line 52, in &lt;module&gt;\n    handler({}, {})\n  File \&quot;&lt;input&gt;\&quot;, line 17, in handler\n    ret.raise_for_status()\n  File \&quot;&lt;input&gt;/lib/python3.9/site-packages/requests/models.py\&quot;, line 1021, in raise_for_status\n    raise HTTPError(http_error_msg, response=self)\nrequests.exceptions.HTTPError: 500 Server Error: INTERNAL SERVER ERROR for url: http://httpbin.org/status/500&quot;</span><span class="p">,</span>
 </span><span class="hll"><span class="w">    </span><span class="nt">&quot;exception_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;HTTPError&quot;</span>
@@ -3252,11 +3252,11 @@
 </div>
 </div>
 <h3 id="date-formatting">Date formatting<a class="headerlink" href="#date-formatting" title="Permanent link">&para;</a></h3>
-<p>Logger uses Python's standard logging date format with the addition of timezone: <code>2021-05-03 11:47:12,494+0200</code>.</p>
+<p>Logger uses Python's standard logging date format with the addition of timezone: <code>2021-05-03 11:47:12,494+0000</code>.</p>
 <p>You can easily change the date format using one of the following parameters:</p>
 <ul>
 <li><strong><code>datefmt</code></strong>. You can pass any <a href="https://strftime.org/" rel="nofollow" target="_blank">strftime format codes</a>. Use <code>%F</code> if you need milliseconds.</li>
-<li><strong><code>use_rfc3339</code></strong>. This flag will use a format compliant with both RFC3339 and ISO8601: <code>2022-10-27T16:27:43.738+02:00</code></li>
+<li><strong><code>use_rfc3339</code></strong>. This flag will use a format compliant with both RFC3339 and ISO8601: <code>2022-10-27T16:27:43.738+00:00</code></li>
 </ul>
 <details class="tip" open="open">
 <summary>Prefer using <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" rel="nofollow" target="_blank">datetime string formats</a>?</summary>
@@ -3305,7 +3305,7 @@
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:6&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28T14:35:03.210+02:00&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28T14:35:03.210+00:00&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
@@ -3349,6 +3349,12 @@
 <td>Disables log deduplication filter protection to use Pytest Live Log feature.</td>
 <td><code>POWERTOOLS_LOG_DEDUPLICATION_DISABLED</code></td>
 <td><code>false</code></td>
+</tr>
+<tr>
+<td><strong>TZ</strong></td>
+<td>Sets timezone when using Logger, e.g., <code>US/Eastern</code>. Timezone is defaulted to UTC when <code>TZ</code> is not set</td>
+<td><code>TZ</code></td>
+<td><code>None</code> (UTC)</td>
 </tr>
 </tbody>
 </table>
@@ -3462,7 +3468,7 @@
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:12&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -3559,7 +3565,7 @@
 <span class="hll"><span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:7&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Verifying whether order_id is present&quot;</span><span class="p">,</span>
-</span><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -3572,7 +3578,7 @@
 <span class="hll"><span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;collect.handler:7&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-05-03 11:47:12,494+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;cold_start&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;function_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span><span class="p">,</span>
@@ -3625,7 +3631,7 @@
 </tr>
 <tr>
 <td><strong><code>utc</code></strong></td>
-<td>set logging timestamp to UTC</td>
+<td>enforce logging timestamp to UTC (ignore <code>TZ</code> environment variable)</td>
 <td><code>False</code></td>
 </tr>
 <tr>
@@ -3875,13 +3881,13 @@
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;[&lt;module&gt;] overriding_log_records&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Collecting payment&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28 14:40:43,801+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28 14:40:43,801+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Calculating points&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28 14:40:43,801+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-10-28 14:40:43,801+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;loyalty&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">]</span>
@@ -3939,14 +3945,14 @@
 <span class="hll"><span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hello world&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:11&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 11:25:40,143+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 11:25:40,143+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="hll"><span class="w">        </span><span class="nt">&quot;request_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123&quot;</span><span class="p">,</span>
 </span><span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:12&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 11:25:40,144+0200&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 11:25:40,144+0000&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;order&quot;</span><span class="p">,</span>
 <span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hello universe&quot;</span>
 <span class="w">    </span><span class="p">}</span>
@@ -3955,25 +3961,48 @@
 </div>
 </div>
 </div>
-<h4 id="setting-timestamp-to-utc">Setting timestamp to UTC<a class="headerlink" href="#setting-timestamp-to-utc" title="Permanent link">&para;</a></h4>
-<p>By default, this Logger and standard logging library emits records using local time timestamp. You can override this behavior via <code>utc</code> parameter:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">setting_utc_timestamp.py</label><label for="__tabbed_20_2">setting_utc_timestamp_output.json</label></div>
+<h4 id="setting-timestamp-to-custom-timezone">Setting timestamp to custom Timezone<a class="headerlink" href="#setting-timestamp-to-custom-timezone" title="Permanent link">&para;</a></h4>
+<p>By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in <strong>UTC</strong>.</p>
+<!-- markdownlint-disable MD013 -->
+<p>If you prefer to log in a specific timezone, you can configure it by setting the <code>TZ</code> environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. <a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime" target="_blank">Click here</a> for a comprehensive list of available Lambda environment variables.</p>
+<!-- markdownlint-enable MD013 -->
+
+<details class="tip" open="open">
+<summary>Tip</summary>
+<p><code>TZ</code> environment variable will be ignored if <code>utc</code> is set to <code>True</code></p>
+</details>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">setting_custom_timezone.py</label><label for="__tabbed_20_2">setting_custom_timezone_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Local time&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 
-<span class="hll"><span class="n">logger_in_utc</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">utc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span class="n">logger_in_utc</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;GMT time zone&quot;</span><span class="p">)</span>
+<span class="n">logger_in_utc</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">)</span>
+<span class="n">logger_in_utc</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Logging with default AWS Lambda timezone: UTC time&quot;</span><span class="p">)</span>
+
+<span class="hll"><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;TZ&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;US/Eastern&quot;</span>
+</span><span class="n">time</span><span class="o">.</span><span class="n">tzset</span><span class="p">()</span>  <span class="c1"># (1)!</span>
+
+<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">)</span>
+</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Logging with US Eastern timezone&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
+<ol>
+<li>if you set TZ in your Lambda function, <code>time.tzset()</code> need to be called. You don't need it when setting TZ in AWS Lambda environment variable</li>
+</ol>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3993,18 +4022,18 @@
 <span class="normal">15</span>
 <span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:4&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Local time&quot;</span><span class="p">,</span>
-<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 11:39:49,421+0200&quot;</span><span class="p">,</span>
-</span><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
+<span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;module&gt;:7&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;Logging with default AWS Lambda timezone: UTC time&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="s2">&quot;2023-10-09 21:33:55,733+0000&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="s2">&quot;payment&quot;</span>
 <span class="w">    </span><span class="p">},</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:7&quot;</span><span class="p">,</span>
-<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;GMT time zone&quot;</span><span class="p">,</span>
-<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 09:39:49,421+0100&quot;</span><span class="p">,</span>
-</span><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;order&quot;</span>
+<span class="w">        </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="s2">&quot;&lt;module&gt;:13&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;message&quot;</span><span class="p">:</span><span class="s2">&quot;Logging with US Eastern timezone&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="s2">&quot;2023-10-09 17:33:55,734-0400&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="s2">&quot;order&quot;</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">]</span>
 </code></pre></div></td></tr></table></div>
@@ -4072,7 +4101,7 @@
 </span><span class="hll"><span class="w">        </span><span class="nt">&quot;ingestion_time&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24T10:12:09.526365&quot;</span><span class="p">,</span>
 </span><span class="hll"><span class="w">        </span><span class="nt">&quot;serialize_me&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;non-serializable: Unserializable&gt;&quot;</span>
 </span><span class="w">    </span><span class="p">},</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 12:12:09,526+0200&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2022-06-24 12:12:09,526+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span>
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
@@ -4156,7 +4185,7 @@
 <span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;level&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;module&gt;:16&quot;</span><span class="p">,</span>
-<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-12-30 13:41:53,413+0100&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2021-12-30 13:41:53,413+0000&quot;</span><span class="p">,</span>
 <span class="w">    </span><span class="nt">&quot;service&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;payment&quot;</span><span class="p">,</span>
 <span class="hll"><span class="w">    </span><span class="nt">&quot;event&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;hello&quot;</span>
 </span><span class="p">}</span>
@@ -4678,7 +4707,7 @@ for the given name and level to the logging module. By default, this logs all bo
   <small>
     
       Last update:
-      2023-10-10
+      2023-10-13
     
   </small>
 </div>
