@@ -118,6 +118,12 @@ handler(event=payload, context=LambdaContext())
 handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
 ```
 
+Alternatively, you can automatically extract the model from the `event` without the need to include the model parameter in the `event_parser` function.
+
+```python hl_lines="23 24"
+    --8<-- "examples/parser/src/using_the_model_from_event.py"
+```
+
 #### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
@@ -192,6 +198,7 @@ Parser comes with the following built-in models:
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
+| **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                         |
 
 #### Extending built-in models
 

@@ -12,12 +12,12 @@ from aws_encryption_sdk import (
 )
 
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
-from aws_lambda_powertools.utilities.data_masking.constants import (
+from aws_lambda_powertools.utilities._data_masking.constants import (
     CACHE_CAPACITY,
     MAX_CACHE_AGE_SECONDS,
     MAX_MESSAGES_ENCRYPTED,
 )
-from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
 
 class ContextMismatchError(Exception):
