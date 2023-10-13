@@ -4,8 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.26.0"></a>
+## [v2.26.0] - 2023-10-13
+## Code Refactoring
+
+* **data-masking:** disable e2e tests. ([#3204](https://github.com/aws-powertools/powertools-lambda-python/issues/3204))
+
 ## Maintenance
 
+* version bump
 
 
 <a name="v2.25.1"></a>
@@ -3834,7 +3842,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.0...HEAD
+[v2.26.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.1...v2.26.0
 [v2.25.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.0...v2.25.1
 [v2.25.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.24.0...v2.25.0
 [v2.24.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.23.1...v2.24.0

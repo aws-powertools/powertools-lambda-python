@@ -122,15 +122,27 @@ When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/d
 
 #### VPC Lattice
 
-When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you can use `VPCLatticeResolver`.
+When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you can use `VPCLatticeV2Resolver`.
 
-=== "getting_started_vpclattice_resolver.py"
+=== "Payload v2 (Recommended)"
+
+    ```python hl_lines="5 11" title="Using VPC Lattice resolver"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclatticev2_resolver.py"
+    ```
+
+=== "Payload v2 (Recommended) - Sample Event"
+
+    ```json hl_lines="2 3" title="Example payload delivered to the handler"
+    --8<-- "examples/event_handler_rest/src/getting_started_vpclatticev2_resolver.json"
+    ```
+
+=== "Payload v1"
 
     ```python hl_lines="5 11" title="Using VPC Lattice resolver"
     --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.py"
     ```
 
-=== "getting_started_vpclattice_resolver.json"
+=== "Payload v1 - Sample Event"
 
     ```json hl_lines="2 3" title="Example payload delivered to the handler"
     --8<-- "examples/event_handler_rest/src/getting_started_vpclattice_resolver.json"
@@ -227,7 +239,7 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 #### Headers
 
-Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`.
+Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`. If you prefer a case-insensitive lookup of the header value, the `app.current_event.get_header_value` function automatically handles it.
 
 ```python hl_lines="19" title="Accessing HTTP Headers"
 --8<-- "examples/event_handler_rest/src/accessing_request_details_headers.py"

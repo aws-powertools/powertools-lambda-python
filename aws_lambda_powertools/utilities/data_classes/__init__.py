@@ -27,7 +27,7 @@ from .secrets_manager_event import SecretsManagerEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
-from .vpc_lattice import VPCLatticeEvent
+from .vpc_lattice import VPCLatticeEvent, VPCLatticeEventV2
 
 __all__ = [
     "APIGatewayProxyEvent",
@@ -56,4 +56,5 @@ __all__ = [
     "event_source",
     "AWSConfigRuleEvent",
     "VPCLatticeEvent",
+    "VPCLatticeEventV2",
 ]
