@@ -1,16 +1,16 @@
 [
     {
-        "level": "INFO",
-        "location": "<module>:4",
-        "message": "Local time",
-        "timestamp": "2022-06-24 11:39:49,421+0200",
-        "service": "payment"
+        "level":"INFO",
+        "location":"<module>:7",
+        "message":"Logging with default AWS Lambda timezone: UTC time",
+        "timestamp":"2023-10-09 21:33:55,733+0000",
+        "service":"payment"
     },
     {
-        "level": "INFO",
-        "location": "<module>:7",
-        "message": "GMT time zone",
-        "timestamp": "2022-06-24 09:39:49,421+0100",
-        "service": "order"
+        "level":"INFO",
+        "location":"<module>:13",
+        "message":"Logging with US Eastern timezone",
+        "timestamp":"2023-10-09 17:33:55,734-0400",
+        "service":"order"
     }
 ]
