@@ -129,7 +129,7 @@ class AppConfigProvider(BaseProvider):
 
         # The return of get_latest_configuration can be null because this value is supposed to be cached
         # on the customer side.
-        # We created dict that stores the most recently retrieved value for a specific configuration.
+        # We created a dictionary that stores the most recently retrieved value for a specific configuration.
         # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
             self.last_returned_value[name] = return_value
