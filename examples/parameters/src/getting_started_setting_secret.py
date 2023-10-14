@@ -20,7 +20,7 @@ def lambda_handler(event: dict, context: LambdaContext):
         jwt_token = access_token(client_id=client_id, client_secret=client_secret, audience=audience)
 
         # set-secret will create a new secret if it doesn't exist and return the version id
-        update_secret_version_id = parameters.set_secret(name="/lambda-powertools/jwt_token", value=jwt_token)
+        update_secret_version_id = parameters.set_secret(name="/aws-powertools/jwt_token", value=jwt_token)
 
         return {"access_token": "updated", "statusCode": 200, "update_secret_version_id": update_secret_version_id}
     except parameters.exceptions.SetParameterError as error:
