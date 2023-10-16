@@ -64,14 +64,11 @@ class RedisConnection:
 
         from aws_lambda_powertools.utilities.idempotency import (
             RedisCachePersistenceLayer,
-            RedisConfig,
             idempotent,
         )
         from aws_lambda_powertools.utilities.typing import LambdaContext
 
-        config = RedisConfig(host="localhost", port="6379, mode="standalone")
-
-        persistence_layer = RedisCachePersistenceLayer(config=config)
+        persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379, mode="standalone")
 
 
         @dataclass

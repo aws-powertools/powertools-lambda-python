@@ -80,10 +80,6 @@ def persistence_store_standalone_redis():
     return RedisCachePersistenceLayer(client=redis_client)
 
 
-def test_idempotent_create_redis_client_with_config(redis_config):
-    RedisCachePersistenceLayer(config=redis_config)
-
-
 # test basic
 def test_idempotent_function_and_lambda_handler_redis_basic(
     # idempotency_config: IdempotencyConfig,

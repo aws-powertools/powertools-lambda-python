@@ -570,8 +570,8 @@ You can quickly start by initializing the `RedisCachePersistenceLayer` class and
 
     1. Notice we rely on this field to be true
 
-=== "Use Redis Config Class"
-    ```python hl_lines="4-8 11 13 27"
+=== "Use Persistence Layer with Redis config variables"
+    ```python hl_lines="4-8 10 24"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
@@ -617,7 +617,7 @@ This persistence layer is built-in, and you can use an existing Redis service. W
 
 === "Customizing RedisPersistenceLayer to suit your data structure"
 
-    ```python hl_lines="10-16"
+    ```python hl_lines="14-20"
     --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
     ```
 
@@ -625,7 +625,6 @@ When using Redis as a persistence layer, you can alter the attribute names by pa
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
 | --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **config**         |                    | `None` | You can pass in the configs to establish the corresponding Redis client |
 | **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
 | **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
 | **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
