@@ -1,17 +1,11 @@
+from __future__ import annotations
+
 import datetime
 import logging
-from dataclasses import dataclass
-from typing import Any, Dict, Optional, Union
-
-from typing_extensions import Literal
-
-try:
-    import redis
-except ImportError:
-    redis = None  # type:ignore
-
+from typing import Any, Dict
 
 import redis
+from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -28,26 +22,16 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 logger = logging.getLogger(__name__)
 
 
-@dataclass(repr=False, order=False)
-class RedisConfig:
-    host: Optional[str]
-    port: Optional[int]
-    username: Optional[str]
-    password: Optional[str]
-    db_index: Optional[int]
-    url: Optional[str]
-    mode: Optional[Literal["standalone", "cluster"]] = "standalone"
-
+class RedisConnection:
     def __init__(
         self,
-        host: Optional[str] = None,
-        port: Optional[int] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        db_index: Optional[int] = None,
-        url: Optional[str] = None,
-        mode: Optional[Literal["standalone", "cluster"]] = "standalone",
-        **extra_options,
+        host: str | None,
+        username: str | None,
+        password: str | None,
+        url: str | None,
+        db_index: int = 0,
+        port: int = 6379,
+        mode: Literal["standalone", "cluster"] = "standalone",
     ) -> None:
         """
         Initialize Redis connection which will be used in redis persistence_store to support idempotency
@@ -119,8 +103,6 @@ class RedisConfig:
 
         ```
         """
-        self.extra_options: dict = {}
-
         self.url = url
         self.host = host
         self.port = port
@@ -128,14 +110,46 @@ class RedisConfig:
         self.password = password
         self.db_index = db_index
         self.mode = mode
-        self.extra_options.update(**extra_options)
+
+    def _init_client(self) -> redis.Redis | redis.cluster.RedisCluster:
+        logger.info(f"Trying to connect to Redis: {self.host}")
+        if self.mode == "standalone":
+            client = redis.Redis
+        elif self.mode == "cluster":
+            client = redis.cluster.RedisCluster
+        else:
+            raise IdempotencyRedisClientConfigError(f"Mode {self.mode} not supported")
+
+        try:
+            if self.url:
+                logger.debug(f"Using URL format to connect to Redis: {self.host}")
+                return client.from_url(url=self.url)
+            else:
+                logger.debug(f"Using other parameters to connect to Redis: {self.host}")
+                return client(  # type: ignore
+                    host=self.host,
+                    port=self.port,
+                    username=self.username,
+                    password=self.password,
+                    db=self.db_index,
+                    decode_responses=True,
+                )
+        except redis.exceptions.ConnectionError as exc:
+            logger.debug(f"Cannot connect in Redis: {self.host}")
+            raise IdempotencyRedisConnectionError("Could not to connect to Redis", exc) from exc
 
 
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
-        client: Optional[Union[redis.Redis, redis.cluster.RedisCluster]] = None,
-        config: Optional[RedisConfig] = None,
+        host: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        url: str | None = None,
+        db_index: int = 0,
+        port: int = 6379,
+        mode: Literal["standalone", "cluster"] = "standalone",
+        client: redis.Redis | redis.cluster.RedisCluster | None = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
         status_attr: str = "status",
         data_attr: str = "data",
@@ -192,11 +206,15 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
         # Initialize Redis client with Redis config if no client is passed in
         if client is None:
-            if config is None:
-                raise IdempotencyRedisClientConfigError("Both client and config param are empty")
-
-            self.config = config
-            self.client = self._init_client()
+            self.client = RedisConnection(
+                host=host,
+                port=port,
+                username=username,
+                password=password,
+                db_index=db_index,
+                url=url,
+                mode=mode,
+            )._init_client()
         else:
             self.client = client
 
@@ -211,35 +229,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
         super(RedisCachePersistenceLayer, self).__init__()
-
-    def _init_client(self) -> Union[redis.Redis, redis.cluster.RedisCluster]:
-        client: Union[redis.Redis, redis.cluster.RedisCluster]
-        logger.info(f"Trying to connect to Redis: {self.config.host}")
-        if self.config.mode == "standalone":
-            client = redis.Redis  # type: ignore
-        elif self.config.mode == "cluster":
-            client = redis.cluster.RedisCluster  # type: ignore
-        else:
-            raise IdempotencyRedisClientConfigError(f"Mode {self.config.mode} not supported")
-
-        try:
-            if self.config.url:
-                logger.debug(f"Using URL format to connect to Redis: {self.config.host}")
-                return client.from_url(url=self.config.url)
-            else:
-                logger.debug(f"Using other parameters to connect to Redis: {self.config.host}")
-                return client(  # type: ignore
-                    host=self.config.host,
-                    port=self.config.port,
-                    username=self.config.username,
-                    password=self.config.password,
-                    db=self.config.db_index,
-                    decode_responses=True,
-                    **self.config.extra_options,
-                )
-        except redis.exceptions.ConnectionError as exc:
-            logger.debug(f"Cannot connect in Redis: {self.config.host}")
-            raise IdempotencyRedisConnectionError("Could not to connect to Redis", exc) from exc
 
     def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
         in_progress_expiry_timestamp = item.get(self.in_progress_expiry_attr)

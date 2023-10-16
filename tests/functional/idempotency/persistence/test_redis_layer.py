@@ -5,7 +5,6 @@ import pytest
 
 from aws_lambda_powertools.utilities.idempotency import (
     RedisCachePersistenceLayer,
-    RedisConfig,
 )
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -79,11 +78,6 @@ def persistence_store_standalone_redis():
         decode_responses=True,
     )
     return RedisCachePersistenceLayer(client=redis_client)
-
-
-@pytest.fixture
-def redis_config():
-    return RedisConfig(host="localhost", port="63005", mode="standalone", ssl=False)
 
 
 def test_idempotent_create_redis_client_with_config(redis_config):
