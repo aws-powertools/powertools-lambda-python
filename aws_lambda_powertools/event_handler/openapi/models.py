@@ -373,7 +373,7 @@ class Operation(BaseModel):
     parameters: Optional[List[Union[Parameter, Reference]]] = None
     requestBody: Optional[Union[RequestBody, Reference]] = None
     # Using Any for Specification Extensions
-    responses: Optional[Dict[str, Union[Response, Any]]] = None
+    responses: Optional[Dict[int, Union[Response, Any]]] = None
     callbacks: Optional[Dict[str, Union[Dict[str, "PathItem"], Reference]]] = None
     deprecated: Optional[bool] = None
     security: Optional[List[Dict[str, List[str]]]] = None

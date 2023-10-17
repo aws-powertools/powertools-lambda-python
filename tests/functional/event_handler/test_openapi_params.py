@@ -39,8 +39,8 @@ def test_openapi_no_params():
     assert get.operationId == "handler__get"
 
     assert get.responses is not None
-    assert "200" in get.responses.keys()
-    response = get.responses["200"]
+    assert 200 in get.responses.keys()
+    response = get.responses[200]
     assert response.description == "Successful Response"
 
     assert JSON_CONTENT_TYPE in response.content
@@ -140,7 +140,7 @@ def test_openapi_with_scalar_returns():
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content[JSON_CONTENT_TYPE]
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
     assert response.schema_.title == "Return"
     assert response.schema_.type == "string"
 
@@ -161,7 +161,7 @@ def test_openapi_with_pydantic_returns():
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content[JSON_CONTENT_TYPE]
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
     reference = response.schema_
     assert reference.ref == "#/components/schemas/User"
 
@@ -214,7 +214,7 @@ def test_openapi_with_dataclass_return():
     get = schema.paths["/"].get
     assert get.parameters is None
 
-    response = get.responses["200"].content[JSON_CONTENT_TYPE]
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
     reference = response.schema_
     assert reference.ref == "#/components/schemas/User"
 

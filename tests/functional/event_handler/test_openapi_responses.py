@@ -10,11 +10,11 @@ def test_openapi_default_response():
 
     schema = app.get_openapi_schema()
     responses = schema.paths["/"].get.responses
-    assert "200" in responses.keys()
-    assert responses["200"].description == "Successful Response"
+    assert 200 in responses.keys()
+    assert responses[200].description == "Successful Response"
 
-    assert "422" in responses.keys()
-    assert responses["422"].description == "Validation Error"
+    assert 422 in responses.keys()
+    assert responses[422].description == "Validation Error"
 
 
 def test_openapi_200_response_with_description():
@@ -26,11 +26,11 @@ def test_openapi_200_response_with_description():
 
     schema = app.get_openapi_schema()
     responses = schema.paths["/"].get.responses
-    assert "200" in responses.keys()
-    assert responses["200"].description == "Custom response"
+    assert 200 in responses.keys()
+    assert responses[200].description == "Custom response"
 
-    assert "422" in responses.keys()
-    assert responses["422"].description == "Validation Error"
+    assert 422 in responses.keys()
+    assert responses[422].description == "Validation Error"
 
 
 def test_openapi_200_custom_response():
@@ -42,8 +42,8 @@ def test_openapi_200_custom_response():
 
     schema = app.get_openapi_schema()
     responses = schema.paths["/"].get.responses
-    assert "202" in responses.keys()
-    assert responses["202"].description == "Custom response"
+    assert 202 in responses.keys()
+    assert responses[202].description == "Custom response"
 
-    assert "200" not in responses.keys()
-    assert "422" not in responses.keys()
+    assert 200 not in responses.keys()
+    assert 422 not in responses.keys()
