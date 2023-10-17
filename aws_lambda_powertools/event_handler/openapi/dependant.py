@@ -239,7 +239,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     else:
         if not isinstance(param_field.field_info, Body):
-            raise AssertionError(f"Param: {param_field.name} can only be a request body, using Body()")
+            raise AssertionError(f"Param: {param_field.name} can only be a request body, use Body()")
         return True
 
 

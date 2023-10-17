@@ -2,9 +2,9 @@ import sys
 from typing import Any, Callable, Dict, List, TypeVar, Union
 
 if sys.version_info >= (3, 8):
-    from typing import Literal, Protocol, TypedDict, get_args
+    from typing import Literal, Protocol, TypedDict
 else:
-    from typing_extensions import Literal, Protocol, TypedDict, get_args
+    from typing_extensions import Literal, Protocol, TypedDict
 
 if sys.version_info >= (3, 9):
     from typing import Annotated
@@ -17,12 +17,12 @@ else:
     from typing_extensions import NotRequired
 
 
-# Even though `get_origin` was added in Python 3.8, it only handles Annotated correctly on 3.10.
+# Even though `get_args` and `get_origin` were added in Python 3.8, they only handle Annotated correctly on 3.10.
 # So for python < 3.10 we use the backport from typing_extensions.
 if sys.version_info >= (3, 10):
-    from typing import TypeAlias, get_origin
+    from typing import TypeAlias, get_args, get_origin
 else:
-    from typing_extensions import TypeAlias, get_origin
+    from typing_extensions import TypeAlias, get_args, get_origin
 
 AnyCallableT = TypeVar("AnyCallableT", bound=Callable[..., Any])  # noqa: VNE001
 # JSON primitives only, mypy doesn't support recursive tho
