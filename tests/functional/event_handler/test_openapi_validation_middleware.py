@@ -1,10 +1,10 @@
 import json
 
 from pydantic import BaseModel
-from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body
+from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")

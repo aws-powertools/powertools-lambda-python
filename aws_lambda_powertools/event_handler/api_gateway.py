@@ -26,8 +26,6 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Literal
-
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.types import (
@@ -39,6 +37,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
