@@ -107,17 +107,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-alpha"
-version = "2.100.0a0"
+version = "2.101.1a0"
 description = "The CDK Construct Library for AWS::APIGatewayv2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-alpha-2.100.0a0.tar.gz", hash = "sha256:80ae7d1ca69d009bf1d1eac664937452faff46ab5a450703d1598a434ec1b0b6"},
-    {file = "aws_cdk.aws_apigatewayv2_alpha-2.100.0a0-py3-none-any.whl", hash = "sha256:5693a062808c16eac66c4b3a61f338ab16226455c254c93cce477c05da1cd11d"},
+    {file = "aws-cdk.aws-apigatewayv2-alpha-2.101.1a0.tar.gz", hash = "sha256:b8e127c3c24a970256f035d2ba6c9a1ca90754009f16647d5e495e646d31b620"},
+    {file = "aws_cdk.aws_apigatewayv2_alpha-2.101.1a0-py3-none-any.whl", hash = "sha256:54dde8188aa688fe680483b92ce4df1bffbe772ada40589e6b8f3e4e1e919a13"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.100.0,<3.0.0"
+aws-cdk-lib = ">=2.101.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.89.0,<2.0.0"
 publication = ">=0.0.3"
@@ -125,18 +125,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-authorizers-alpha"
-version = "2.100.0a0"
+version = "2.101.1a0"
 description = "Authorizers for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.100.0a0.tar.gz", hash = "sha256:9bb30a2b1cd7af0da1b2259105943f1eb27b3b9db74fabf9eaca2f23a589c940"},
-    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.100.0a0-py3-none-any.whl", hash = "sha256:c9ecfccb68205fb9e6a5002d797c8dada76a4251621c4cb14232c9a1ea871915"},
+    {file = "aws-cdk.aws-apigatewayv2-authorizers-alpha-2.101.1a0.tar.gz", hash = "sha256:7d1dc12e3ee50c8f7f57755ec90611e00e479ac8198644706dd336078df15f18"},
+    {file = "aws_cdk.aws_apigatewayv2_authorizers_alpha-2.101.1a0-py3-none-any.whl", hash = "sha256:8bfa2f4ddbc13a5457ae8008df224137ca45bd8cee0101e35e2d7942d8a19ccf"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.100.0.a0"
-aws-cdk-lib = ">=2.100.0,<3.0.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.101.1.a0"
+aws-cdk-lib = ">=2.101.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.89.0,<2.0.0"
 publication = ">=0.0.3"
@@ -144,18 +144,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-apigatewayv2-integrations-alpha"
-version = "2.100.0a0"
+version = "2.101.1a0"
 description = "Integrations for AWS APIGateway V2"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.100.0a0.tar.gz", hash = "sha256:a5d2e0ede184e7f375fd11842c7c25a4aeb0844bf0a73d73fee0d4efdc8cdaa2"},
-    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.100.0a0-py3-none-any.whl", hash = "sha256:162607adc03602b7babedbeac4de0b8ba51d58ac28996a5aa45872ad2eccfa1e"},
+    {file = "aws-cdk.aws-apigatewayv2-integrations-alpha-2.101.1a0.tar.gz", hash = "sha256:99211b227e8ee0f28b15096b9137383ec1fd15de28775dae34d2077ce9f21ddc"},
+    {file = "aws_cdk.aws_apigatewayv2_integrations_alpha-2.101.1a0-py3-none-any.whl", hash = "sha256:fecd4ba09492b880803d42dc1f16b10af90875a03d5f6c354a5cdb49abd35a3f"},
 ]
 
 [package.dependencies]
-"aws-cdk.aws-apigatewayv2-alpha" = "2.100.0.a0"
-aws-cdk-lib = ">=2.100.0,<3.0.0"
+"aws-cdk.aws-apigatewayv2-alpha" = "2.101.1.a0"
+aws-cdk-lib = ">=2.101.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.89.0,<2.0.0"
 publication = ">=0.0.3"
@@ -163,13 +163,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.100.0"
+version = "2.101.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.100.0.tar.gz", hash = "sha256:39d6ab3ffcd87b60a541b4714f0ecefd169055a647376521728d64786393680a"},
-    {file = "aws_cdk_lib-2.100.0-py3-none-any.whl", hash = "sha256:8c43fe03e1e9e7dc9a4f8003d1c4e04c5ac5fe2ec4a44928695785dff6d086ee"},
+    {file = "aws-cdk-lib-2.101.1.tar.gz", hash = "sha256:8f806e7d98d54f9c563d199f608b70989ab7e2cd8d0335b6a21af0b022f34d39"},
+    {file = "aws_cdk_lib-2.101.1-py3-none-any.whl", hash = "sha256:ccd71da043868292c06ef592dd1729fd77c83188240639eec88e561fd2f112b8"},
 ]
 
 [package.dependencies]
@@ -339,17 +339,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.28.63"
+version = "1.28.64"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.28.63-py3-none-any.whl", hash = "sha256:65d052ec13197460586ee385aa2d6bba0e7378d2d2c7f3e93c044c43ae1ca782"},
-    {file = "boto3-1.28.63.tar.gz", hash = "sha256:94218aba2feb5b404b665b8d76c172dc654f79b4c5fa0e9e92459c098da87bf4"},
+    {file = "boto3-1.28.64-py3-none-any.whl", hash = "sha256:a99150a30c038c73e89662836820a8cce914afab5ea377942a37c484b85f4438"},
+    {file = "boto3-1.28.64.tar.gz", hash = "sha256:a5cf93b202568e9d378afdc84be55a6dedf11d30156289fe829e23e6d7dccabb"},
 ]
 
 [package.dependencies]
-botocore = ">=1.31.63,<1.32.0"
+botocore = ">=1.31.64,<1.32.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.7.0,<0.8.0"
 
@@ -358,13 +358,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.31.63"
+version = "1.31.64"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.31.63-py3-none-any.whl", hash = "sha256:cb9db5db5af865b1fc2e1405b967db5d78dd0f4d84e5dc1974e082733c1034b7"},
-    {file = "botocore-1.31.63.tar.gz", hash = "sha256:6e582c811ea74f25bdb490ac372b2645de4a60286b42ddd8c69f3b6df82b6b12"},
+    {file = "botocore-1.31.64-py3-none-any.whl", hash = "sha256:7b709310343a5b430ec9025b2e17c0bac6b16c05f1ac1d9521dece3f10c71bac"},
+    {file = "botocore-1.31.64.tar.gz", hash = "sha256:d8eb4b724ac437343359b318d73de0cfae0fecb24095827e56135b0ad6b44caf"},
 ]
 
 [package.dependencies]
@@ -1090,13 +1090,13 @@ smmap = ">=3.0.1,<6"
 
 [[package]]
 name = "gitpython"
-version = "3.1.37"
+version = "3.1.38"
 description = "GitPython is a Python library used to interact with Git repositories"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "GitPython-3.1.37-py3-none-any.whl", hash = "sha256:5f4c4187de49616d710a77e98ddf17b4782060a1788df441846bddefbb89ab33"},
-    {file = "GitPython-3.1.37.tar.gz", hash = "sha256:f9b9ddc0761c125d5780eab2d64be4873fc6817c2899cbcb34b02344bdc7bc54"},
+    {file = "GitPython-3.1.38-py3-none-any.whl", hash = "sha256:9e98b672ffcb081c2c8d5aa630d4251544fb040fb158863054242f24a2a2ba30"},
+    {file = "GitPython-3.1.38.tar.gz", hash = "sha256:4d683e8957c8998b58ddb937e3e6cd167215a180e1ffd4da769ab81c620a89fe"},
 ]
 
 [package.dependencies]
@@ -1104,7 +1104,7 @@ gitdb = ">=4.0.1,<5"
 typing-extensions = {version = ">=3.7.4.3", markers = "python_version < \"3.8\""}
 
 [package.extras]
-test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-sugar"]
+test = ["black", "coverage[toml]", "ddt (>=1.1.1,!=1.4.3)", "mock", "mypy", "pre-commit", "pytest", "pytest-cov", "pytest-instafail", "pytest-subtests", "pytest-sugar"]
 
 [[package]]
 name = "h11"
@@ -1846,13 +1846,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.28.48"
-description = "Type annotations for boto3.CloudFormation 1.28.48 service generated with mypy-boto3-builder 7.19.0"
+version = "1.28.64"
+description = "Type annotations for boto3.CloudFormation 1.28.64 service generated with mypy-boto3-builder 7.19.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudformation-1.28.48.tar.gz", hash = "sha256:efbe4073397800824287c8d52a65383112862f903b16fd587b5113449652371b"},
-    {file = "mypy_boto3_cloudformation-1.28.48-py3-none-any.whl", hash = "sha256:653e14414abc9fab8d29d693f138639a1325322fb6ba1b06ca90a6ccb11dfd94"},
+    {file = "mypy-boto3-cloudformation-1.28.64.tar.gz", hash = "sha256:b353d52a5607c54d2916f4bde26e9be90920635beb9ffb9255cd862dca3b56bf"},
+    {file = "mypy_boto3_cloudformation-1.28.64-py3-none-any.whl", hash = "sha256:f5c9012d7fbf9c39bb314ac192e14115dbca9495e364479a16e1fa21cac23d78"},
 ]
 
 [package.dependencies]
@@ -1958,13 +1958,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-xray"
-version = "1.28.47"
-description = "Type annotations for boto3.XRay 1.28.47 service generated with mypy-boto3-builder 7.19.0"
+version = "1.28.64"
+description = "Type annotations for boto3.XRay 1.28.64 service generated with mypy-boto3-builder 7.19.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-xray-1.28.47.tar.gz", hash = "sha256:d4e893a5b6819b668096ce00ed969904d00cf034d1b9073034a243ab794e28c6"},
-    {file = "mypy_boto3_xray-1.28.47-py3-none-any.whl", hash = "sha256:3af3f00c48fd379fe264ab4050f5fcb1dba8a404a8cd8b0b08aa3ec70860b2d0"},
+    {file = "mypy-boto3-xray-1.28.64.tar.gz", hash = "sha256:0657a2317de5e296fe4e0c784a3594c4c8bd8d63f801594650472e773a9619de"},
+    {file = "mypy_boto3_xray-1.28.64-py3-none-any.whl", hash = "sha256:5c7135fa5aa3e4eabd5689ac266ed2fb129da9da9f641d47d4d982e1d526ed61"},
 ]
 
 [package.dependencies]
@@ -3237,4 +3237,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "e23cb05914e590e6ea36706dc2ceb696d6b7266feab5cdfb97e4b09ebec3a514"
+content-hash = "dcde96bc52b44afc59b3361fbfc205b38c54fea32f74b7244c4171b2a6deb989"

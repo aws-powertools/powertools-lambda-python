@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **deps:** bump squidfunk/mkdocs-material from `cb38dc2` to `df9409b` in /docs ([#3216](https://github.com/aws-powertools/powertools-lambda-python/issues/3216))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3215](https://github.com/aws-powertools/powertools-lambda-python/issues/3215))
+* **deps-dev:** bump the boto-typing group with 2 updates ([#3211](https://github.com/aws-powertools/powertools-lambda-python/issues/3211))
 
 
 <a name="v2.26.0"></a>
