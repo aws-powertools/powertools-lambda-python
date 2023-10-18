@@ -789,7 +789,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -846,7 +846,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -897,7 +897,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -949,7 +949,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -1001,7 +1001,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -1052,7 +1052,7 @@ class BaseRouter(ABC):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable]] = None,
@@ -1257,7 +1257,7 @@ class ApiGatewayResolver(BaseRouter):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
-        enable_validation: Optional[bool] = False,
+        enable_validation: bool = False,
     ):
         """
         Parameters
@@ -1502,7 +1502,7 @@ class ApiGatewayResolver(BaseRouter):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -1988,7 +1988,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
-        enable_validation: Optional[bool] = False,
+        enable_validation: bool = False,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
         super().__init__(
@@ -2011,7 +2011,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         summary: Optional[str] = None,
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
-        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List["Tag"]] = None,
         operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -2047,7 +2047,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
-        enable_validation: Optional[bool] = False,
+        enable_validation: bool = False,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
         super().__init__(
@@ -2069,7 +2069,7 @@ class ALBResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
-        enable_validation: Optional[bool] = False,
+        enable_validation: bool = False,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)

@@ -52,7 +52,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
-        enable_validation: Optional[bool] = False,
+        enable_validation: bool = False,
     ):
         super().__init__(
             ProxyEventType.LambdaFunctionUrlEvent,
