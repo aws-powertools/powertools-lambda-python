@@ -95,3 +95,9 @@ class IdempotencyRedisConnectionError(BaseError):
     """
     Redis connection error
     """
+
+
+class IdempotencyOrphanRecordError(BaseError):
+    """
+    Redis Orphan Record found, need to be removed
+    """

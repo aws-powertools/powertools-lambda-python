@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import datetime
+import json
 import logging
-from typing import Any, Dict
+from typing import Any, Callable, Dict, Optional
 
 import redis
 from typing_extensions import Literal
@@ -11,6 +12,7 @@ from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
+    IdempotencyOrphanRecordError,
     IdempotencyRedisClientConfigError,
     IdempotencyRedisConnectionError,
 )
@@ -20,8 +22,6 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 )
 
 logger = logging.getLogger(__name__)
-orphan_lock = "OrphanLock"
-orphan_lock_timeout = 10
 
 
 class RedisConnection:
@@ -112,6 +112,7 @@ class RedisConnection:
 
     def _init_client(self) -> redis.Redis | redis.cluster.RedisCluster:
         logger.info(f"Trying to connect to Redis: {self.host}")
+        client: type[redis.Redis | redis.cluster.RedisCluster]
         if self.mode == "standalone":
             client = redis.Redis
         elif self.mode == "cluster":
@@ -154,6 +155,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
+        json_serializer: Optional[Callable] = None,
+        json_deserializer: Optional[Callable] = None,
     ):
         """
         Initialize the Redis Persistence Layer
@@ -173,7 +176,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             Redis hash attribute name for response data, by default "data"
         validation_key_attr: str, optional
             Redis hash attribute name for hashed representation of the parts of the event used for validation
-
+        json_serializer : Callable, optional
+            function to serialize Python `obj` to a JSON document in `str`, `bytes`, `bytearray` format,
+            by default json.dumps
+        json_deserializer : Callable, optional
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `obj`,
+            by default json.loads
         Examples
         --------
 
@@ -229,7 +237,18 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
+        self._json_serializer = json_serializer or json.dumps
+        self._json_deserializer = json_deserializer or json.loads
         super(RedisCachePersistenceLayer, self).__init__()
+        self._orphan_lock_timeout = min(10, self.expires_after_seconds)
+
+    def _get_expiry_second(self, expery_timestamp: int | None) -> int:
+        """
+        return seconds of timedelta from now to the given unix timestamp
+        """
+        if expery_timestamp:
+            return expery_timestamp - int(datetime.datetime.now().timestamp())
+        return self.expires_after_seconds
 
     def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
         in_progress_expiry_timestamp = item.get(self.in_progress_expiry_attr)
@@ -245,12 +264,14 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
     def _get_record(self, idempotency_key) -> DataRecord:
         # See: https://redis.io/commands/hgetall/
-        response = self.client.hgetall(idempotency_key)
+        response = self.client.get(idempotency_key)
 
         try:
-            item = response
+            item = self._json_deserializer(response)
         except KeyError:
             raise IdempotencyItemNotFoundError
+        except json.JSONDecodeError:
+            raise IdempotencyOrphanRecordError
         return self._item_to_data_record(idempotency_key, item)
 
     def _put_in_progress_record(self, data_record: DataRecord) -> None:
@@ -283,30 +304,37 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             # The idempotency key does not exist:
             #    - first time that this invocation key is used
             #    - previous invocation with the same key was deleted due to TTL
+            #    - SET see https://redis.io/commands/set/
 
-            logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
+            logger.debug(f"Putting record on Redis for idempotency key: {item['name']}")
 
-            pipe = self.client.pipeline(transaction=True)
-            for key, value in item["mapping"].items():
-                pipe.hsetnx(name=item["name"], key=key, value=value)
-            pipe.expireat(name=data_record.idempotency_key, when=data_record.expiry_timestamp)
-            result_list = pipe.execute()
+            encoded_item = self._json_serializer(item["mapping"])
 
-            # a zero in list means one of the operation is failed
-            if 0 not in result_list:
+            ttl = self._get_expiry_second(item["mapping"][self.expiry_attr])
+            redis_response = self.client.set(name=item["name"], value=encoded_item, ex=ttl, nx=True)
+
+            # redis_response=True means redis set succeed, we return on success.(99% request should end up here)
+            # redis_response=None means this is the case where idempotency record is hit. continue checking
+            if redis_response:
                 return
 
-            # handle key already exist error
-            idempotency_record = self.client.hgetall(data_record.idempotency_key)
-            if len(idempotency_record) == 0:
-                # somthing wired happend, hsetnx failed however there's no record. we raise an error
-                raise IdempotencyItemNotFoundError
+            # fetch from redis and check if it's still valid
+            encoded_idempotency_record = self.client.get(item["name"])
 
-            # record already exists.
+            try:
+                idempotency_record = self._json_deserializer(encoded_idempotency_record)
+            except json.JSONDecodeError:
+                # found a currupted record, treat as Orphan Record.
+                raise IdempotencyOrphanRecordError
+
+            if len(idempotency_record) == 0:
+                # somthing wired happend, hsetnx failed however there's no record. treat as Orphan Record.
+                raise IdempotencyOrphanRecordError
+
             # status is completed, so raise exception because it exists and still valid
             if idempotency_record[self.status_attr] == STATUS_CONSTANTS["COMPLETED"] and int(
                 idempotency_record[self.expiry_attr],
-            ) < int(now.timestamp() * 1000):
+            ) > int(now.timestamp()):
                 raise IdempotencyItemAlreadyExistsError
 
             # checking if in_progress_expiry_attr exists
@@ -315,30 +343,29 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                 idempotency_record[self.in_progress_expiry_attr],
             ) > int(now.timestamp() * 1000):
                 raise IdempotencyItemAlreadyExistsError
-            # hset type must set expiration after adding the record
-            # Need to review this to get ttl in seconds
-            # Q: What if Lambda function timed out here? This record will be here forever
-            # Q: should we replace self.expires_after_seconds with _get_expiry_timestamp? more consistent
 
             # If the code reaches here means we found an Orphan record.
-            # It could be a case where Redis expire not working properly or a bug in our code
-            # we need to add a lock(in case another istance is doing same thing) and overwrite key with current payload.
-            pipe.hsetnx(name=item["name"] + "lock", key=orphan_lock, value="True")
-            pipe.expire(name=item["name"] + "lock", time=orphan_lock_timeout)
-            result_list = pipe.execute()
-            if 0 in result_list:
-                # lock failed to aquire
-                raise IdempotencyItemAlreadyExistsError
-
-            # overwrite orpahn record and set timeout
-            pipe.hset(**item)
-            pipe.expireat(name=data_record.idempotency_key, when=data_record.expiry_timestamp)
-            pipe.execute()
+            # It could be a case where Previous hander timed out, Redis expire not working properly,
+            # or a bug in our code. we need to add a lock(in case another istance is doing same thing)
+            # then overwrite key with current payload.
+            raise IdempotencyOrphanRecordError
 
         except redis.exceptions.RedisError:
             raise redis.exceptions.RedisError
         except redis.exceptions.RedisClusterException:
             raise redis.exceptions.RedisClusterException
+        except IdempotencyOrphanRecordError:
+            # deal with orphan record here
+            # aquire a lock for default 10 seconds
+            lock = self.client.set(name=item["name"] + ":lock", value="True", ex=self._orphan_lock_timeout, nx=True)
+            logger.debug("acquiring lock to overwrite orphan record")
+            if not lock:
+                # lock failed to aquire, means encountered a race condition. just return
+                raise IdempotencyItemAlreadyExistsError
+
+            # overwrite orphan record and set timeout, no nx here for we need to overwrite
+            self.client.set(name=item["name"], value=encoded_item, ex=ttl)
+            # lock was not removed here intentionally. Prevent another orphan fix in race condition.
         except Exception as e:
             logger.debug(f"encountered non-redis exception:{e}")
             raise e
@@ -363,11 +390,14 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             "mapping": {
                 self.data_attr: data_record.response_data,
                 self.status_attr: data_record.status,
+                self.expiry_attr: data_record.expiry_timestamp,
             },
         }
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
         # should we check if this key has expriation already set?
-        self.client.hset(**item)
+        encoded_item = self._json_serializer(item["mapping"])
+        ttl = self._get_expiry_second(data_record.expiry_timestamp)
+        self.client.set(name=item["name"], value=encoded_item, ex=ttl)
 
     def _delete_record(self, data_record: DataRecord) -> None:
         # This function only works when Lambda handler has already been invoked once
