@@ -2,8 +2,8 @@ import json
 
 import pytest
 
-from aws_lambda_powertools.utilities.data_masking.base import DataMasking
-from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities._data_masking.base import DataMasking
+from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
 
 
 @pytest.fixture

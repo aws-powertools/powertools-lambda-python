@@ -99,7 +99,8 @@ class AppConfigProvider(BaseProvider):
         self.current_version = ""
 
         self._next_token: Dict[str, str] = {}  # nosec - token for get_latest_configuration executions
-        self.last_returned_value = ""
+        # Dict to store the recently retrieved value for a specific configuration.
+        self.last_returned_value: Dict[str, str] = {}
 
     def _get(self, name: str, **sdk_options) -> str:
         """
@@ -126,10 +127,14 @@ class AppConfigProvider(BaseProvider):
         return_value = response["Configuration"].read()
         self._next_token[name] = response["NextPollConfigurationToken"]
 
+        # The return of get_latest_configuration can be null because this value is supposed to be cached
+        # on the customer side.
+        # We created a dictionary that stores the most recently retrieved value for a specific configuration.
+        # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
-            self.last_returned_value = return_value
+            self.last_returned_value[name] = return_value
 
-        return self.last_returned_value
+        return self.last_returned_value[name]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
