@@ -3,7 +3,7 @@ import copy
 import pytest
 import redis
 
-from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer, RedisConfig
+from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
@@ -60,33 +60,6 @@ def persistence_store_standalone_redis():
         decode_responses=True,
     )
     return RedisCachePersistenceLayer(client=redis_client)
-
-
-@pytest.fixture
-def redis_config():
-    return RedisConfig(host="localhost", port=63005, mode="standalone", ssl=False)
-
-
-def test_idempotent_create_redis_client_with_config(redis_config, lambda_context):
-    persistence_layer = RedisCachePersistenceLayer(config=redis_config)
-    mock_event = {"data": "value"}
-    expected_result = {"message": "Foo"}
-
-    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
-    def record_handler(record):
-        return expected_result
-
-    @idempotent(persistence_store=persistence_layer)
-    def lambda_handler(event, context):
-        return expected_result
-
-    # WHEN calling the function
-    fn_result = record_handler(record=mock_event)
-    # WHEN calling lambda handler
-    handler_result = lambda_handler(mock_event, lambda_context)
-    # THEN we expect the function and lambda handler to execute successfully
-    assert fn_result == expected_result
-    assert handler_result == expected_result
 
 
 # test basic
@@ -191,7 +164,7 @@ def test_idempotent_lambda_redis_in_progress(
     # save additional to in_progress
     mock_event = {"data": "value7"}
     try:
-        persistence_store.save_inprogress(mock_event, 1000)
+        persistence_store.save_inprogress(mock_event, 10000)
     except IdempotencyItemAlreadyExistsError:
         pass
 

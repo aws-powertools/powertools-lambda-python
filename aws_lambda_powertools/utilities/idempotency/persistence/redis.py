@@ -20,6 +20,8 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 )
 
 logger = logging.getLogger(__name__)
+orphan_lock = "OrphanLock"
+orphan_lock_timeout = 10
 
 
 class RedisConnection:
@@ -148,6 +150,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         mode: Literal["standalone", "cluster"] = "standalone",
         client: redis.Redis | redis.cluster.RedisCluster | None = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
+        expiry_attr: str = "expiration",
         status_attr: str = "status",
         data_attr: str = "data",
         validation_key_attr: str = "validation",
@@ -222,6 +225,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             raise IdempotencyRedisClientConfigError
 
         self.in_progress_expiry_attr = in_progress_expiry_attr
+        self.expiry_attr = expiry_attr
         self.status_attr = status_attr
         self.data_attr = data_attr
         self.validation_key_attr = validation_key_attr
@@ -249,18 +253,17 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             raise IdempotencyItemNotFoundError
         return self._item_to_data_record(idempotency_key, item)
 
-    def _put_record(self, data_record: DataRecord) -> None:
+    def _put_in_progress_record(self, data_record: DataRecord) -> None:
         item: Dict[str, Any] = {}
-
-        # Redis works with hset to support hashing keys with multiple attributes
-        # See: https://redis.io/commands/hset/
         item = {
             "name": data_record.idempotency_key,
             "mapping": {
                 self.status_attr: data_record.status,
+                self.expiry_attr: data_record.expiry_timestamp,
             },
         }
 
+        # means we are saving in_progress
         if data_record.in_progress_expiry_timestamp is not None:
             item["mapping"][self.in_progress_expiry_attr] = data_record.in_progress_expiry_timestamp
 
@@ -280,28 +283,58 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             # The idempotency key does not exist:
             #    - first time that this invocation key is used
             #    - previous invocation with the same key was deleted due to TTL
-            idempotency_record = self.client.hgetall(data_record.idempotency_key)
-            print(idempotency_record)
-            if len(idempotency_record) > 0:
-                # record already exists.
-
-                # status is completed, so raise exception because it exists and still valid
-                if idempotency_record[self.status_attr] == STATUS_CONSTANTS["COMPLETED"]:
-                    raise IdempotencyItemAlreadyExistsError
-
-                # checking if in_progress_expiry_attr exists
-                # if in_progress_expiry_attr exist, must be lower than now
-                if self.in_progress_expiry_attr in idempotency_record and int(
-                    idempotency_record[self.in_progress_expiry_attr],
-                ) > int(now.timestamp() * 1000):
-                    raise IdempotencyItemAlreadyExistsError
 
             logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
-            self.client.hset(**item)
+
+            pipe = self.client.pipeline(transaction=True)
+            for key, value in item["mapping"].items():
+                pipe.hsetnx(name=item["name"], key=key, value=value)
+            pipe.expireat(name=data_record.idempotency_key, when=data_record.expiry_timestamp)
+            result_list = pipe.execute()
+
+            # a zero in list means one of the operation is failed
+            if 0 not in result_list:
+                return
+
+            # handle key already exist error
+            idempotency_record = self.client.hgetall(data_record.idempotency_key)
+            if len(idempotency_record) == 0:
+                # somthing wired happend, hsetnx failed however there's no record. we raise an error
+                raise IdempotencyItemNotFoundError
+
+            # record already exists.
+            # status is completed, so raise exception because it exists and still valid
+            if idempotency_record[self.status_attr] == STATUS_CONSTANTS["COMPLETED"] and int(
+                idempotency_record[self.expiry_attr],
+            ) < int(now.timestamp() * 1000):
+                raise IdempotencyItemAlreadyExistsError
+
+            # checking if in_progress_expiry_attr exists
+            # if in_progress_expiry_attr exist, must be lower than now
+            if self.in_progress_expiry_attr in idempotency_record and int(
+                idempotency_record[self.in_progress_expiry_attr],
+            ) > int(now.timestamp() * 1000):
+                raise IdempotencyItemAlreadyExistsError
             # hset type must set expiration after adding the record
             # Need to review this to get ttl in seconds
+            # Q: What if Lambda function timed out here? This record will be here forever
             # Q: should we replace self.expires_after_seconds with _get_expiry_timestamp? more consistent
-            self.client.expire(name=data_record.idempotency_key, time=self.expires_after_seconds)
+
+            # If the code reaches here means we found an Orphan record.
+            # It could be a case where Redis expire not working properly or a bug in our code
+            # we need to add a lock(in case another istance is doing same thing) and overwrite key with current payload.
+            pipe.hsetnx(name=item["name"] + "lock", key=orphan_lock, value="True")
+            pipe.expire(name=item["name"] + "lock", time=orphan_lock_timeout)
+            result_list = pipe.execute()
+            if 0 in result_list:
+                # lock failed to aquire
+                raise IdempotencyItemAlreadyExistsError
+
+            # overwrite orpahn record and set timeout
+            pipe.hset(**item)
+            pipe.expireat(name=data_record.idempotency_key, when=data_record.expiry_timestamp)
+            pipe.execute()
+
         except redis.exceptions.RedisError:
             raise redis.exceptions.RedisError
         except redis.exceptions.RedisClusterException:
@@ -310,6 +343,18 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             logger.debug(f"encountered non-redis exception:{e}")
             raise e
 
+    def _put_record(self, data_record: DataRecord) -> None:
+        # Redis works with hset to support hashing keys with multiple attributes
+        # See: https://redis.io/commands/hset/
+
+        # current this function only support set in_progress. set complete should use update_record
+        if data_record.status != STATUS_CONSTANTS["INPROGRESS"]:
+            raise NotImplementedError
+
+        # seperate in_progress logic in case we use _put_record to save other record in the future
+        self._put_in_progress_record(data_record=data_record)
+
+    # Q:Will here accidentally create race?
     def _update_record(self, data_record: DataRecord) -> None:
         item: Dict[str, Any] = {}
 
@@ -321,6 +366,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             },
         }
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
+        # should we check if this key has expriation already set?
         self.client.hset(**item)
 
     def _delete_record(self, data_record: DataRecord) -> None:

@@ -381,7 +381,7 @@ class BasePersistenceLayer(ABC):
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
             timestamp = (now + period).timestamp()
-
+            # change this to fit in redis
             data_record.in_progress_expiry_timestamp = int(timestamp * 1000)
         else:
             warnings.warn(
@@ -389,6 +389,7 @@ class BasePersistenceLayer(ABC):
                 "Did you call register_lambda_context on IdempotencyConfig?",
                 stacklevel=2,
             )
+            # set the default value to 15 minute
 
         logger.debug(f"Saving in progress record for idempotency key: {data_record.idempotency_key}")
 
