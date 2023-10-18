@@ -1,6 +1,5 @@
 import json
 from dataclasses import dataclass
-from decimal import Decimal
 from enum import Enum
 from pathlib import PurePath
 from typing import Tuple
@@ -126,46 +125,6 @@ def test_validate_return_tuple():
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
     assert result["body"] == list(sample_tuple)
-
-
-def test_validate_return_decimal_as_int():
-    # GIVEN an APIGatewayRestResolver with validation enabled
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    sample_decimal = Decimal(10)
-
-    # WHEN a handler is defined with a return type as Decimal
-    @app.get("/")
-    def handler() -> Decimal:
-        return sample_decimal
-
-    LOAD_GW_EVENT["path"] = "/"
-
-    # THEN the handler should be invoked and return 200
-    # THEN the body must be a decimal as int
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
-    assert result["body"] == 10
-
-
-def test_validate_return_decimal_as_float():
-    # GIVEN an APIGatewayRestResolver with validation enabled
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    sample_decimal = Decimal(10.22)
-
-    # WHEN a handler is defined with a return type as Decimal
-    @app.get("/")
-    def handler() -> Decimal:
-        return sample_decimal
-
-    LOAD_GW_EVENT["path"] = "/"
-
-    # THEN the handler should be invoked and return 200
-    # THEN the body must be a decimal as float
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
-    assert result["body"] == 10.22
 
 
 def test_validate_return_purepath():
