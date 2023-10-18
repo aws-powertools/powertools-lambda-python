@@ -146,6 +146,8 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         if self.utc:
             self.converter = time.gmtime
+        else:
+            self.converter = time.localtime
 
         self.keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**self.keys_combined)

@@ -189,7 +189,7 @@ class BaseProxyEvent(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case-sensitive look up
+            Whether to use a case-sensitive look up. By default we make a case-insensitive lookup.
         Returns
         -------
         str, optional
