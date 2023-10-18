@@ -145,7 +145,7 @@ def test_validate_return_decimal_as_int():
     # THEN the body must be a decimal as int
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == "10"
+    assert result["body"] == 10
 
 
 def test_validate_return_decimal_as_float():
@@ -165,7 +165,7 @@ def test_validate_return_decimal_as_float():
     # THEN the body must be a decimal as float
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == "10.22"
+    assert result["body"] == 10.22
 
 
 def test_validate_return_purepath():
