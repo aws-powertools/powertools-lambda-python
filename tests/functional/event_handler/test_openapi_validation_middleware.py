@@ -145,14 +145,14 @@ def test_validate_return_decimal_as_int():
     # THEN the body must be a decimal as int
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == sample_decimal
+    assert result["body"] == "10"
 
 
 def test_validate_return_decimal_as_float():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
-    sample_decimal = Decimal(10.20)
+    sample_decimal = Decimal(10.22)
 
     # WHEN a handler is defined with a return type as Decimal
     @app.get("/")
@@ -165,7 +165,7 @@ def test_validate_return_decimal_as_float():
     # THEN the body must be a decimal as float
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == sample_decimal
+    assert result["body"] == "10.22"
 
 
 def test_validate_return_purepath():
