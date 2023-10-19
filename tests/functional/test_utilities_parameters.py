@@ -510,6 +510,72 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
     finally:
         stubber.deactivate()
 
+def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.set_parameter() with a non-cached value
+    """
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Version": mock_version,
+        "Tier": "Standard"
+    }
+    expected_params = {
+        "Name": mock_name,
+        "Value": mock_value,
+        "Type": "String",
+        "Overwrite": False,
+        "Tier": "Standard",
+    }
+    stubber.add_response("put_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        version = provider._set(mock_name, mock_value)
+
+        assert version == mock_version
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider._set() without specifying the config
+    """
+
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
+
+    # Create a new provider
+    provider = parameters.SSMProvider()
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Version": mock_version,
+        "Tier": "Advanced"
+    }
+    expected_params = {
+        "Name": mock_name,
+        "Value": mock_value,
+        "Type": "SecureString",
+        "Overwrite": False,
+        "Tier": "Advanced",
+    }
+    stubber.add_response("put_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        version = provider._set(mock_name, mock_value)
+
+        assert version == mock_version
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):
     """
