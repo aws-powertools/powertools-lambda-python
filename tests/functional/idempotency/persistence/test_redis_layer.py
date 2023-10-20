@@ -1,3 +1,4 @@
+# ruff: noqa
 import copy
 import time as t
 
@@ -10,7 +11,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
-    IdempotencyRedisClientConfigError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent,
@@ -50,7 +50,8 @@ class MockRedis:
 
     # not covered by test yet.
     def expire(self, name, time):
-        self.expire_dict[name] = t.time() + time
+        if time != 0:
+            self.expire_dict[name] = t.time() + time
 
     # return {} if no match
     def hgetall(self, name):
@@ -66,6 +67,33 @@ class MockRedis:
 
     def delete(self, name):
         self.cache.pop(name, {})
+
+    def set(self, name, value, ex: int = 0, nx: bool = False):
+        # expire existing
+        if self.expire_dict.get(name, t.time() + 1) < t.time():
+            self.cache.pop(name, {})
+
+        if isinstance(value, str):
+            value = value.encode()
+
+        # nx logic
+        if name in self.cache and nx:
+            return None
+
+        self.cache[name] = value
+        self.expire(name, ex)
+        return True
+
+    def get(self, name: str):
+        if self.expire_dict.get(name, t.time() + 1) < t.time():
+            self.cache.pop(name, {})
+
+        resp = self.cache.get(name, None)
+
+        if resp and self.decode_responses:
+            resp = resp.decode("utf-8")
+
+        return resp
 
 
 @pytest.fixture
@@ -105,17 +133,6 @@ def test_idempotent_function_and_lambda_handler_redis_basic(
     # THEN we expect the function and lambda handler to execute successfully
     assert fn_result == expected_result
     assert handler_result == expected_result
-
-
-def test_idempotent_lambda_redis_no_decode():
-    redis_client = MockRedis(
-        host="localhost",
-        port="63005",
-        decode_responses=False,
-    )
-    # decode_responses=False will not be accepted
-    with pytest.raises(IdempotencyRedisClientConfigError):
-        RedisCachePersistenceLayer(client=redis_client)
 
 
 def test_idempotent_function_and_lambda_handler_redis_cache(
@@ -211,21 +228,3 @@ def test_idempotent_lambda_redis_delete(
     result = {"message": "Foo2"}
     handler_result2 = lambda_handler(mock_event, lambda_context)
     assert handler_result2 == result
-
-
-"""def test_idempotent_lambda_redis_credential(lambda_context):
-    redis_client = MockRedis(
-                host='localhost',
-                port='63005',
-                decode_responses=True,
-                )
-    pwd = "terriblePassword"
-    usr = "test_acl_denial"
-    redis_client.acl_setuser(username=usr, enabled=True, passwords="+"+pwd,keys='*',commands=['+hgetall','-set'])
-    redis_client.auth(password=pwd,username=usr)
-
-    @idempotent(persistence_store=RedisCachePersistenceLayer(connection=redis_client))
-    def lambda_handler(event, _):
-        return True
-    with pytest.raises(IdempotencyPersistenceLayerError):
-        handler_result = lambda_handler("test_Acl", lambda_context)"""

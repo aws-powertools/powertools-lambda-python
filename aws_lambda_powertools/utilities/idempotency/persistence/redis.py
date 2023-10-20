@@ -224,7 +224,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             raise IdempotencyRedisClientConfigError
         if not self.client.get_connection_kwargs().get("decode_responses", False):
             warnings.warn(
-                "Redis connection with `decode_responses=False` might casue lower performance",
+                "Redis connection with `decode_responses=False` may casue lower performance",
                 stacklevel=2,
             )
 

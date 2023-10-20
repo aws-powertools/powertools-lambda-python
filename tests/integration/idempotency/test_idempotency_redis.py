@@ -1,5 +1,4 @@
 import copy
-import json
 
 import pytest
 import redis
@@ -207,14 +206,3 @@ def test_idempotent_lambda_redis_credential(lambda_context):
 
     with pytest.raises(IdempotencyPersistenceLayerError):
         lambda_handler("test_Acl", lambda_context)
-
-
-def test_redis_decode():
-    redis_client = redis.Redis(
-        host="localhost",
-        port="63005",
-        decode_responses=True,
-    )
-
-    redis_client.set(name="test", value=json.dumps({"1": 2, "3": 4}))
-    print(json.loads(redis_client.get(name="test")))
