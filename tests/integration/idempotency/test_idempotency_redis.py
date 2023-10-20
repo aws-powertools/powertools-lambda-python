@@ -1,4 +1,5 @@
 import copy
+import json
 
 import pytest
 import redis
@@ -9,7 +10,6 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
     IdempotencyPersistenceLayerError,
-    IdempotencyRedisClientConfigError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent,
@@ -57,7 +57,7 @@ def persistence_store_standalone_redis():
     redis_client = redis.Redis(
         host="localhost",
         port=63005,
-        decode_responses=True,
+        decode_responses=False,
     )
     return RedisCachePersistenceLayer(client=redis_client)
 
@@ -87,17 +87,6 @@ def test_idempotent_function_and_lambda_handler_redis_basic(
     # THEN we expect the function and lambda handler to execute successfully
     assert fn_result == expected_result
     assert handler_result == expected_result
-
-
-def test_idempotent_lambda_redis_no_decode():
-    redis_client = redis.Redis(
-        host="localhost",
-        port="63005",
-        decode_responses=False,
-    )
-    # decode_responses=False will not be accepted
-    with pytest.raises(IdempotencyRedisClientConfigError):
-        RedisCachePersistenceLayer(client=redis_client)
 
 
 def test_idempotent_function_and_lambda_handler_redis_cache(
@@ -218,3 +207,14 @@ def test_idempotent_lambda_redis_credential(lambda_context):
 
     with pytest.raises(IdempotencyPersistenceLayerError):
         lambda_handler("test_Acl", lambda_context)
+
+
+def test_redis_decode():
+    redis_client = redis.Redis(
+        host="localhost",
+        port="63005",
+        decode_responses=True,
+    )
+
+    redis_client.set(name="test", value=json.dumps({"1": 2, "3": 4}))
+    print(json.loads(redis_client.get(name="test")))
