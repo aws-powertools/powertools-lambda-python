@@ -68,6 +68,7 @@ class MockRedis:
     def delete(self, name):
         self.cache.pop(name, {})
 
+    # return None if nx failed, return True if done
     def set(self, name, value, ex: int = 0, nx: bool = False):
         # expire existing
         if self.expire_dict.get(name, t.time() + 1) < t.time():
@@ -84,6 +85,7 @@ class MockRedis:
         self.expire(name, ex)
         return True
 
+    # return None if not found
     def get(self, name: str):
         if self.expire_dict.get(name, t.time() + 1) < t.time():
             self.cache.pop(name, {})
@@ -97,9 +99,17 @@ class MockRedis:
 
 
 @pytest.fixture
+def persistence_store_standalone_redis_no_decode():
+    redis_client = MockRedis(
+        host="localhost",
+        port="63005",
+        decode_responses=False,
+    )
+    return RedisCachePersistenceLayer(client=redis_client)
+
+
+@pytest.fixture
 def persistence_store_standalone_redis():
-    # you will need to handle yourself the connection to pass again the password
-    # and avoid AuthenticationError at redis queries
     redis_client = MockRedis(
         host="localhost",
         port="63005",
@@ -108,9 +118,7 @@ def persistence_store_standalone_redis():
     return RedisCachePersistenceLayer(client=redis_client)
 
 
-# test basic
 def test_idempotent_function_and_lambda_handler_redis_basic(
-    # idempotency_config: IdempotencyConfig,
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
     lambda_context,
 ):
@@ -152,32 +160,76 @@ def test_idempotent_function_and_lambda_handler_redis_cache(
     def lambda_handler(event, context):
         return result
 
-    # WHEN calling the function
+    # WHEN calling the function and handler with idempotency
     fn_result = record_handler(record=mock_event)
-    # WHEN calling lambda handler
     handler_result = lambda_handler(mock_event, lambda_context)
     # THEN we expect the function and lambda handler to execute successfully
     assert fn_result == expected_result
     assert handler_result == expected_result
 
-    # modify the return to check if idem cache works
     result = {"message": "Bar"}
+    # Given idempotency record already in Redis
+    # When we modified the actual function output and run the second time
     fn_result2 = record_handler(record=mock_event)
-    # Second time calling lambda handler, test if same result
     handler_result2 = lambda_handler(mock_event, lambda_context)
+    # Then the result should be the same as first time
     assert fn_result2 == expected_result
     assert handler_result2 == expected_result
 
-    # modify the mock event to check if we got updated result
+    # Given idempotency record already in Redis
+    # When we modified the actual function output and use a different payload
     mock_event = {"data": "value3"}
     fn_result3 = record_handler(record=mock_event)
-    # thrid time calling lambda handler, test if result updated
     handler_result3 = lambda_handler(mock_event, lambda_context)
+    # Then the result should be the actual function output
     assert fn_result3 == result
     assert handler_result3 == result
 
 
-# test idem-inprogress
+def test_idempotent_function_and_lambda_handler_redis_basic_no_decode(
+    persistence_store_standalone_redis_no_decode: RedisCachePersistenceLayer,
+    lambda_context,
+):
+    # GIVEN redis client passed in has decode_responses=False
+    mock_event = {"data": "value-nodecode"}
+    persistence_layer = persistence_store_standalone_redis_no_decode
+    result = {"message": "Foo"}
+    expected_result = copy.deepcopy(result)
+
+    @idempotent_function(persistence_store=persistence_layer, data_keyword_argument="record")
+    def record_handler(record):
+        return result
+
+    @idempotent(persistence_store=persistence_layer)
+    def lambda_handler(event, context):
+        return result
+
+    # WHEN calling the function and handler with idempotency
+    fn_result = record_handler(record=mock_event)
+    handler_result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the function and lambda handler to execute successfully
+    assert fn_result == expected_result
+    assert handler_result == expected_result
+
+    result = {"message": "Bar"}
+    # Given idempotency record already in Redis
+    # When we modified the actual function output and run the second time
+    fn_result2 = record_handler(record=mock_event)
+    handler_result2 = lambda_handler(mock_event, lambda_context)
+    # Then the result should be the same as first time
+    assert fn_result2 == expected_result
+    assert handler_result2 == expected_result
+
+    # Given idempotency record already in Redis
+    # When we modified the actual function output and use a different payload
+    mock_event = {"data": "value3"}
+    fn_result3 = record_handler(record=mock_event)
+    handler_result3 = lambda_handler(mock_event, lambda_context)
+    # Then the result should be the actual function output
+    assert fn_result3 == result
+    assert handler_result3 == result
+
+
 def test_idempotent_lambda_redis_in_progress(
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
     lambda_context,
@@ -194,20 +246,19 @@ def test_idempotent_lambda_redis_in_progress(
     def lambda_handler(event, context):
         return lambda_response
 
-    # register the context first
+    # Given in_progress idempotency record already in Redis
     lambda_handler(mock_event, lambda_context)
-    # save additional to in_progress
     mock_event = {"data": "value7"}
     try:
         persistence_store.save_inprogress(mock_event, 1000)
     except IdempotencyItemAlreadyExistsError:
         pass
-
+    # when invoking with same payload
+    # then should raise IdempotencyAlreadyInProgressError
     with pytest.raises(IdempotencyAlreadyInProgressError):
         lambda_handler(mock_event, lambda_context)
 
 
-# test -remove
 def test_idempotent_lambda_redis_delete(
     persistence_store_standalone_redis: RedisCachePersistenceLayer,
     lambda_context,
@@ -222,9 +273,11 @@ def test_idempotent_lambda_redis_delete(
 
     handler_result = lambda_handler(mock_event, lambda_context)
     assert handler_result == result
-
-    # delete the idem and handler should output new result
+    # Given the idempotency record from the first run deleted
     persistence_layer.delete_record(mock_event, IdempotencyItemNotFoundError)
     result = {"message": "Foo2"}
+    # When lambda hander run for the second time
     handler_result2 = lambda_handler(mock_event, lambda_context)
+
+    # Then lambda handler should return a actual function output
     assert handler_result2 == result
