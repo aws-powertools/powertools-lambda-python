@@ -763,6 +763,7 @@ The following companies, among others, use Powertools:
 * [Propellor.ai](https://www.propellor.ai/){target="_blank" rel="nofollow"}
 * [TopSport](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
 * [Trek10](https://www.trek10.com/){target="_blank" rel="nofollow"}
+* [Vertex Pharmaceuticals](https://www.vrtx.com/){target="_blank" rel="nofollow"}
 
 ### Sharing your work
 
