@@ -1,10 +1,20 @@
 from dataclasses import dataclass
 from typing import List
 
+import pytest
 from pydantic import BaseModel
 from pydantic.color import Color
 
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
+
+
+@pytest.fixture
+def pydanticv1_only():
+    from pydantic import __version__
+
+    version = __version__.split(".")
+    if version[0] != "1":
+        pytest.skip("pydanticv1 test only")
 
 
 def test_openapi_encode_include():
@@ -37,6 +47,7 @@ def test_openapi_encode_pydantic():
     assert result == {"name": "John", "order": {"quantity": 2}}
 
 
+@pytest.mark.usefixtures("pydanticv1_only")
 def test_openapi_encode_pydantic_root_types():
     class User(BaseModel):
         __root__: List[str]
