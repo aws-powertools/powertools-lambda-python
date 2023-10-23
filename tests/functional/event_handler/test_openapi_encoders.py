@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from typing import List
 
@@ -97,7 +98,7 @@ def test_openapi_encode_scalars():
     assert result == 1
 
     result = jsonable_encoder(1.0)
-    assert result == 1.0
+    assert math.isclose(result, 1.0)
 
     result = jsonable_encoder(True)
     assert result is True
@@ -151,7 +152,7 @@ def test_openapi_encode_decimal():
     from decimal import Decimal
 
     result = jsonable_encoder(Decimal("1.0"))
-    assert result == 1.0
+    assert math.isclose(result, 1.0)
 
     result = jsonable_encoder(Decimal("1"))
     assert result == 1
