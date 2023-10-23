@@ -238,7 +238,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         super(RedisCachePersistenceLayer, self).__init__()
         self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
-    def _get_expiry_second(self, expery_timestamp: int | None) -> int:
+    def _get_expiry_second(self, expery_timestamp: int | None = None) -> int:
         """
         return seconds of timedelta from now to the given unix timestamp
         """
@@ -259,10 +259,9 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         )
 
     def _get_record(self, idempotency_key) -> DataRecord:
-        # See: https://redis.io/commands/hgetall/
-        response = self.client.get(idempotency_key)
-
+        # See: https://redis.io/commands/get/
         try:
+            response = self.client.get(idempotency_key)
             item = self._json_deserializer(response)  # type: ignore
         except KeyError:
             raise IdempotencyItemNotFoundError
