@@ -258,7 +258,7 @@ def get_flat_params(dependant: Dependant) -> List[ModelField]:
         A list of ModelField objects containing the flat parameters from the Dependant object.
 
     """
-    flat_dependant = get_flat_dependant(dependant, skip_repeats=True)
+    flat_dependant = get_flat_dependant(dependant)
     return (
         flat_dependant.path_params
         + flat_dependant.query_params

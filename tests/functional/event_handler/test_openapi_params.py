@@ -11,7 +11,14 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     ParameterInType,
     Schema,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Body, Query
+from aws_lambda_powertools.event_handler.openapi.params import (
+    Body,
+    Header,
+    Param,
+    ParamTypes,
+    Query,
+    _create_model_field,
+)
 from aws_lambda_powertools.shared.types import Annotated
 
 JSON_CONTENT_TYPE = "application/json"
@@ -274,3 +281,35 @@ def test_openapi_with_embed_body_param():
     assert "Body_handler_users_post" in components.schemas
     body_post_handler_schema = components.schemas["Body_handler_users_post"]
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
+
+
+def test_create_header():
+    header = Header(convert_underscores=True)
+    assert header.convert_underscores is True
+
+
+def test_create_body():
+    body = Body(embed=True, examples=[Example(summary="Example 1", value=10)])
+    assert body.embed is True
+
+
+# Tests that when we try to create a model without a field type, we return None
+def test_create_empty_model_field():
+    result = _create_model_field(None, int, "name", False)
+    assert result is None
+
+
+# Tests that when we try to crate a param model without a source, we default to "query"
+def test_create_model_field_with_empty_in():
+    field_info = Param()
+
+    result = _create_model_field(field_info, int, "name", False)
+    assert result.field_info.in_ == ParamTypes.query
+
+
+# Tests that when we try to create a model field with convert_underscore, we convert the field name
+def test_create_model_field_convert_underscore():
+    field_info = Header(alias=None, convert_underscores=True)
+
+    result = _create_model_field(field_info, int, "user_id", False)
+    assert result.alias == "user-id"

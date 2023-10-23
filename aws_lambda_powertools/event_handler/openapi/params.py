@@ -47,7 +47,6 @@ class Dependant:
         cookie_params: Optional[List[ModelField]] = None,
         body_params: Optional[List[ModelField]] = None,
         return_param: Optional[ModelField] = None,
-        dependencies: Optional[List["Dependant"]] = None,
         name: Optional[str] = None,
         call: Optional[Callable[..., Any]] = None,
         request_param_name: Optional[str] = None,
@@ -63,7 +62,6 @@ class Dependant:
         self.cookie_params = cookie_params or []
         self.body_params = body_params or []
         self.return_param = return_param or None
-        self.dependencies = dependencies or []
         self.request_param_name = request_param_name
         self.websocket_param_name = websocket_param_name
         self.http_connection_param_name = http_connection_param_name
@@ -618,8 +616,6 @@ class File(Form):
 
 def get_flat_dependant(
     dependant: Dependant,
-    *,
-    skip_repeats: bool = False,
     visited: Optional[List[CacheKey]] = None,
 ) -> Dependant:
     """
@@ -647,7 +643,7 @@ def get_flat_dependant(
         visited = []
     visited.append(dependant.cache_key)
 
-    flat_dependant = Dependant(
+    return Dependant(
         path_params=dependant.path_params.copy(),
         query_params=dependant.query_params.copy(),
         header_params=dependant.header_params.copy(),
@@ -655,19 +651,6 @@ def get_flat_dependant(
         body_params=dependant.body_params.copy(),
         path=dependant.path,
     )
-    for sub_dependant in dependant.dependencies:
-        if skip_repeats and sub_dependant.cache_key in visited:
-            continue
-
-        flat_sub = get_flat_dependant(sub_dependant, skip_repeats=skip_repeats, visited=visited)
-
-        flat_dependant.path_params.extend(flat_sub.path_params)
-        flat_dependant.query_params.extend(flat_sub.query_params)
-        flat_dependant.header_params.extend(flat_sub.header_params)
-        flat_dependant.cookie_params.extend(flat_sub.cookie_params)
-        flat_dependant.body_params.extend(flat_sub.body_params)
-
-    return flat_dependant
 
 
 def analyze_param(
