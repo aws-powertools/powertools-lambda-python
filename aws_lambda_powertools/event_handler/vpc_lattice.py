@@ -48,9 +48,10 @@ class VPCLatticeResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """Amazon VPC Lattice resolver"""
-        super().__init__(ProxyEventType.VPCLatticeEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(ProxyEventType.VPCLatticeEvent, cors, debug, serializer, strip_prefixes, enable_validation)
 
 
 class VPCLatticeV2Resolver(ApiGatewayResolver):
@@ -93,6 +94,7 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """Amazon VPC Lattice resolver"""
-        super().__init__(ProxyEventType.VPCLatticeEventV2, cors, debug, serializer, strip_prefixes)
+        super().__init__(ProxyEventType.VPCLatticeEventV2, cors, debug, serializer, strip_prefixes, enable_validation)

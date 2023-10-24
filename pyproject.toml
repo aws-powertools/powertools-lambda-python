@@ -169,6 +169,7 @@ exclude = '''
     | buck-out
     | build
     | dist
+    | aws_lambda_powertools/event_handler/openapi/compat.py
   )/
   | example
 )

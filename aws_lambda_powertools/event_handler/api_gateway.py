@@ -9,13 +9,35 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
-from typing import Any, Callable, Dict, List, Match, Optional, Pattern, Set, Tuple, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Match,
+    Optional,
+    Pattern,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.types import (
+    COMPONENT_REF_PREFIX,
+    METHODS_WITH_BODY,
+    validation_error_definition,
+    validation_error_response_definition,
+)
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
@@ -34,7 +56,25 @@ _SAFE_URI = "-._~()'!*:@,;=+&$"  # https://www.ietf.org/rfc/rfc3986.txt
 # API GW/ALB decode non-safe URI chars; we must support them too
 _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
+_DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.compat import (
+        JsonSchemaValue,
+        ModelField,
+    )
+    from aws_lambda_powertools.event_handler.openapi.models import (
+        Contact,
+        License,
+        OpenAPI,
+        Server,
+        Tag,
+    )
+    from aws_lambda_powertools.event_handler.openapi.params import Dependant
+    from aws_lambda_powertools.event_handler.openapi.types import (
+        TypeModelOrEnum,
+    )
 
 
 class ProxyEventType(Enum):
@@ -203,11 +243,18 @@ class Route:
     def __init__(
         self,
         method: str,
+        path: str,
         rule: Pattern,
         func: Callable,
         cors: bool,
         compress: bool,
         cache_control: Optional[str],
+        summary: Optional[str],
+        description: Optional[str],
+        responses: Optional[Dict[int, Dict[str, Any]]],
+        response_description: Optional[str],
+        tags: Optional[List["Tag"]],
+        operation_id: Optional[str],
         middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
@@ -217,6 +264,8 @@ class Route:
 
         method: str
             The HTTP method, example "GET"
+        path: str
+            The path of the route
         rule: Pattern
             The route rule, example "/my/path"
         func: Callable
@@ -227,20 +276,45 @@ class Route:
             Whether or not to enable gzip compression for this route
         cache_control: Optional[str]
             The cache control header value, example "max-age=3600"
+        summary: Optional[str]
+            The OpenAPI summary for this route
+        description: Optional[str]
+            The OpenAPI description for this route
+        responses: Optional[Dict[int, Dict[str, Any]]]
+            The OpenAPI responses for this route
+        response_description: Optional[str]
+            The OpenAPI response description for this route
+        tags: Optional[List[Tag]]
+            The list of OpenAPI tags to be used for this route
+        operation_id: Optional[str]
+            The OpenAPI operationId for this route
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
         self.method = method.upper()
+        self.path = "/" if path.strip() == "" else path
         self.rule = rule
         self.func = func
         self._middleware_stack = func
         self.cors = cors
         self.compress = compress
         self.cache_control = cache_control
+        self.summary = summary
+        self.description = description
+        self.responses = responses
+        self.response_description = response_description
+        self.tags = tags or []
         self.middlewares = middlewares or []
+        self.operation_id = operation_id or self._generate_operation_id()
 
         # _middleware_stack_built is used to ensure the middleware stack is only built once.
         self._middleware_stack_built = False
+
+        # _dependant is used to cache the dependant model for the handler function
+        self._dependant: Optional["Dependant"] = None
+
+        # _body_field is used to cache the dependant model for the body field
+        self._body_field: Optional["ModelField"] = None
 
     def __call__(
         self,
@@ -331,6 +405,275 @@ class Route:
             self._middleware_stack = MiddlewareFrame(current_middleware=handler, next_middleware=self._middleware_stack)
 
         self._middleware_stack_built = True
+
+    @property
+    def dependant(self) -> "Dependant":
+        if self._dependant is None:
+            from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
+
+            self._dependant = get_dependant(path=self.path, call=self.func)
+
+        return self._dependant
+
+    @property
+    def body_field(self) -> Optional["ModelField"]:
+        if self._body_field is None:
+            from aws_lambda_powertools.event_handler.openapi.dependant import get_body_field
+
+            self._body_field = get_body_field(dependant=self.dependant, name=self.operation_id)
+
+        return self._body_field
+
+    def _get_openapi_path(
+        self,
+        *,
+        dependant: "Dependant",
+        operation_ids: Set[str],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
+    ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+        """
+        Returns the OpenAPI path and definitions for the route.
+        """
+        from aws_lambda_powertools.event_handler.openapi.dependant import get_flat_params
+
+        path = {}
+        definitions: Dict[str, Any] = {}
+
+        # Gather all the route parameters
+        operation = self._openapi_operation_metadata(operation_ids=operation_ids)
+        parameters: List[Dict[str, Any]] = []
+        all_route_params = get_flat_params(dependant)
+        operation_params = self._openapi_operation_parameters(
+            all_route_params=all_route_params,
+            model_name_map=model_name_map,
+            field_mapping=field_mapping,
+        )
+        parameters.extend(operation_params)
+
+        # Add the parameters to the OpenAPI operation
+        if parameters:
+            all_parameters = {(param["in"], param["name"]): param for param in parameters}
+            required_parameters = {(param["in"], param["name"]): param for param in parameters if param.get("required")}
+            all_parameters.update(required_parameters)
+            operation["parameters"] = list(all_parameters.values())
+
+        # Add the request body to the OpenAPI operation, if applicable
+        if self.method.upper() in METHODS_WITH_BODY:
+            request_body_oai = self._openapi_operation_request_body(
+                body_field=self.body_field,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            )
+            if request_body_oai:
+                operation["requestBody"] = request_body_oai
+
+        # Add the response to the OpenAPI operation
+        if self.responses:
+            # If the user supplied responses, we use them and don't set a default 200 response
+            operation["responses"] = self.responses
+        else:
+            # Set the default 200 response
+            responses = operation.setdefault("responses", self.responses or {})
+            success_response = responses.setdefault(200, {})
+            success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
+            success_response["content"] = {"application/json": {"schema": {}}}
+            json_response = success_response["content"].setdefault("application/json", {})
+
+            # Add the response schema to the OpenAPI 200 response
+            json_response.update(
+                self._openapi_operation_return(
+                    operation_id=self.operation_id,
+                    param=dependant.return_param,
+                    model_name_map=model_name_map,
+                    field_mapping=field_mapping,
+                ),
+            )
+
+            # Add validation failure response (422)
+            operation["responses"][422] = {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            }
+
+            # Add the validation error schema to the definitions, but only if it hasn't been added yet
+            if "ValidationError" not in definitions:
+                definitions.update(
+                    {
+                        "ValidationError": validation_error_definition,
+                        "HTTPValidationError": validation_error_response_definition,
+                    },
+                )
+
+        path[self.method.lower()] = operation
+
+        # Generate the response schema
+        return path, definitions
+
+    def _openapi_operation_summary(self) -> str:
+        """
+        Returns the OpenAPI operation summary. If the user has not provided a summary, we
+        generate one based on the route path and method.
+        """
+        return self.summary or f"{self.method.upper()} {self.path}"
+
+    def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
+        """
+        Returns the OpenAPI operation metadata. If the user has not provided a description, we
+        generate one based on the route path and method.
+        """
+        operation: Dict[str, Any] = {}
+
+        # Ensure tags is added to the operation
+        if self.tags:
+            operation["tags"] = self.tags
+
+        # Ensure summary is added to the operation
+        operation["summary"] = self._openapi_operation_summary()
+
+        # Ensure description is added to the operation
+        if self.description:
+            operation["description"] = self.description
+
+        # Ensure operationId is unique
+        if self.operation_id in operation_ids:
+            message = f"Duplicate Operation ID {self.operation_id} for function {self.func.__name__}"
+            file_name = getattr(self.func, "__globals__", {}).get("__file__")
+            if file_name:
+                message += f" in {file_name}"
+            warnings.warn(message, stacklevel=1)
+
+        # Adds the operation
+        operation_ids.add(self.operation_id)
+        operation["operationId"] = self.operation_id
+
+        return operation
+
+    @staticmethod
+    def _openapi_operation_request_body(
+        *,
+        body_field: Optional["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[Tuple["ModelField", Literal["validation", "serialization"]], "JsonSchemaValue"],
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Returns the OpenAPI operation request body.
+        """
+        from aws_lambda_powertools.event_handler.openapi.compat import ModelField, get_schema_from_model_field
+        from aws_lambda_powertools.event_handler.openapi.params import Body
+
+        # Check that there is a body field and it's a Pydantic's model field
+        if not body_field:
+            return None
+
+        if not isinstance(body_field, ModelField):
+            raise AssertionError(f"Expected ModelField, got {body_field}")
+
+        # Generate the request body schema
+        body_schema = get_schema_from_model_field(
+            field=body_field,
+            model_name_map=model_name_map,
+            field_mapping=field_mapping,
+        )
+
+        field_info = cast(Body, body_field.field_info)
+        request_media_type = field_info.media_type
+        required = body_field.required
+        request_body_oai: Dict[str, Any] = {}
+        if required:
+            request_body_oai["required"] = required
+
+        # Generate the request body media type
+        request_media_content: Dict[str, Any] = {"schema": body_schema}
+        request_body_oai["content"] = {request_media_type: request_media_content}
+        return request_body_oai
+
+    @staticmethod
+    def _openapi_operation_parameters(
+        *,
+        all_route_params: Sequence["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[
+            Tuple["ModelField", Literal["validation", "serialization"]],
+            "JsonSchemaValue",
+        ],
+    ) -> List[Dict[str, Any]]:
+        """
+        Returns the OpenAPI operation parameters.
+        """
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            get_schema_from_model_field,
+        )
+        from aws_lambda_powertools.event_handler.openapi.params import Param
+
+        parameters = []
+        for param in all_route_params:
+            field_info = param.field_info
+            field_info = cast(Param, field_info)
+            if not field_info.include_in_schema:
+                continue
+
+            param_schema = get_schema_from_model_field(
+                field=param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            )
+
+            parameter = {
+                "name": param.alias,
+                "in": field_info.in_.value,
+                "required": param.required,
+                "schema": param_schema,
+            }
+
+            if field_info.description:
+                parameter["description"] = field_info.description
+
+            if field_info.deprecated:
+                parameter["deprecated"] = field_info.deprecated
+
+            parameters.append(parameter)
+
+        return parameters
+
+    @staticmethod
+    def _openapi_operation_return(
+        *,
+        operation_id: str,
+        param: Optional["ModelField"],
+        model_name_map: Dict["TypeModelOrEnum", str],
+        field_mapping: Dict[
+            Tuple["ModelField", Literal["validation", "serialization"]],
+            "JsonSchemaValue",
+        ],
+    ) -> Dict[str, Any]:
+        """
+        Returns the OpenAPI operation return.
+        """
+        if param is None:
+            return {}
+
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            get_schema_from_model_field,
+        )
+
+        return_schema = get_schema_from_model_field(
+            field=param,
+            model_name_map=model_name_map,
+            field_mapping=field_mapping,
+        )
+
+        return {"name": f"Return {operation_id}", "schema": return_schema}
+
+    def _generate_operation_id(self) -> str:
+        operation_id = self.func.__name__ + self.path
+        operation_id = re.sub(r"\W", "_", operation_id)
+        operation_id = operation_id + "_" + self.method.lower()
+        return operation_id
 
 
 class ResponseBuilder:
@@ -443,6 +786,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -494,6 +843,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -518,7 +873,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "GET", cors, compress, cache_control, middlewares)
+        return self.route(
+            rule,
+            "GET",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def post(
         self,
@@ -526,6 +894,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -551,7 +925,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "POST", cors, compress, cache_control, middlewares)
+        return self.route(
+            rule,
+            "POST",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def put(
         self,
@@ -559,6 +946,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -584,7 +977,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PUT", cors, compress, cache_control, middlewares)
+        return self.route(
+            rule,
+            "PUT",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def delete(
         self,
@@ -592,6 +998,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -616,7 +1028,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "DELETE", cors, compress, cache_control, middlewares)
+        return self.route(
+            rule,
+            "DELETE",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def patch(
         self,
@@ -624,6 +1049,12 @@ class BaseRouter(ABC):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -651,7 +1082,20 @@ class BaseRouter(ABC):
             return app.resolve(event, context)
         ```
         """
-        return self.route(rule, "PATCH", cors, compress, cache_control, middlewares)
+        return self.route(
+            rule,
+            "PATCH",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     def _push_processed_stack_frame(self, frame: str):
         """
@@ -676,7 +1120,7 @@ class BaseRouter(ABC):
 
 class MiddlewareFrame:
     """
-    creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
+    Creates a Middle Stack Wrapper instance to be used as a "Frame" in the overall stack of
     middleware functions.  Each instance contains the current middleware and the next
     middleware function to be called in the stack.
 
@@ -813,6 +1257,7 @@ class ApiGatewayResolver(BaseRouter):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """
         Parameters
@@ -824,12 +1269,14 @@ class ApiGatewayResolver(BaseRouter):
         debug: Optional[bool]
             Enables debug mode, by default False. Can be also be enabled by "POWERTOOLS_DEV"
             environment variable
-        serializer : Callable, optional
+        serializer: Callable, optional
             function to serialize `obj` to a JSON formatted `str`, by default json.dumps
         strip_prefixes: List[Union[str, Pattern]], optional
             optional list of prefixes to be removed from the request path before doing the routing.
             This is often used with api gateways with multiple custom mappings.
             Each prefix can be a static string or a compiled regex pattern
+        enable_validation: Optional[bool]
+            Enables validation of the request body against the route schema, by default False.
         """
         self._proxy_type = proxy_type
         self._dynamic_routes: List[Route] = []
@@ -840,12 +1287,210 @@ class ApiGatewayResolver(BaseRouter):
         self._cors_enabled: bool = cors is not None
         self._cors_methods: Set[str] = {"OPTIONS"}
         self._debug = self._has_debug(debug)
+        self._enable_validation = enable_validation
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
+
+        if self._enable_validation:
+            from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
+
+            self.use([OpenAPIValidationMiddleware()])
+
+            # When using validation, we need to skip the serializer, as the middleware is doing it automatically.
+            # However, if the user is using a custom serializer, we need to abort.
+            if serializer:
+                raise ValueError("Cannot use a custom serializer when using validation")
+
+            # Install a dummy serializer
+            self._serializer = lambda args: args  # type: ignore
+
+    def get_openapi_schema(
+        self,
+        *,
+        title: str = "Powertools API",
+        version: str = "1.0.0",
+        openapi_version: str = "3.1.0",
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        tags: Optional[List["Tag"]] = None,
+        servers: Optional[List["Server"]] = None,
+        terms_of_service: Optional[str] = None,
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
+    ) -> "OpenAPI":
+        """
+        Returns the OpenAPI schema as a pydantic model.
+
+        Parameters
+        ----------
+        title: str
+            The title of the application.
+        version: str
+            The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
+        openapi_version: str, default = "3.1.0"
+            The version of the OpenAPI Specification (which the document uses).
+        summary: str, optional
+            A short summary of what the application does.
+        description: str, optional
+            A verbose explanation of the application behavior.
+        tags: List[Tag], optional
+            A list of tags used by the specification with additional metadata.
+        servers: List[Server], optional
+            An array of Server Objects, which provide connectivity information to a target server.
+        terms_of_service: str, optional
+            A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: Contact, optional
+            The contact information for the exposed API.
+        license_info:
+            The license information for the exposed API.
+
+        Returns
+        -------
+        OpenAPI: pydantic model
+            The OpenAPI schema as a pydantic model.
+        """
+
+        from aws_lambda_powertools.event_handler.openapi.compat import (
+            GenerateJsonSchema,
+            get_compat_model_name_map,
+            get_definitions,
+        )
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server
+        from aws_lambda_powertools.event_handler.openapi.types import (
+            COMPONENT_REF_TEMPLATE,
+        )
+
+        # Start with the bare minimum required for a valid OpenAPI schema
+        info: Dict[str, Any] = {"title": title, "version": version}
+
+        optional_fields = {
+            "summary": summary,
+            "description": description,
+            "termsOfService": terms_of_service,
+            "contact": contact,
+            "license": license_info,
+        }
+
+        info.update({field: value for field, value in optional_fields.items() if value})
+
+        output: Dict[str, Any] = {"openapi": openapi_version, "info": info}
+        if servers:
+            output["servers"] = servers
+        else:
+            # If the servers property is not provided, or is an empty array, the default value would be a Server Object
+            # with an url value of /.
+            output["servers"] = [Server(url="/")]
+
+        components: Dict[str, Dict[str, Any]] = {}
+        paths: Dict[str, Dict[str, Any]] = {}
+        operation_ids: Set[str] = set()
+
+        all_routes = self._dynamic_routes + self._static_routes
+        all_fields = self._get_fields_from_routes(all_routes)
+        model_name_map = get_compat_model_name_map(all_fields)
+
+        # Collect all models and definitions
+        schema_generator = GenerateJsonSchema(ref_template=COMPONENT_REF_TEMPLATE)
+        field_mapping, definitions = get_definitions(
+            fields=all_fields,
+            schema_generator=schema_generator,
+            model_name_map=model_name_map,
+        )
+
+        # Add routes to the OpenAPI schema
+        for route in all_routes:
+            result = route._get_openapi_path(
+                dependant=route.dependant,
+                operation_ids=operation_ids,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
+            )
+            if result:
+                path, path_definitions = result
+                if path:
+                    paths.setdefault(route.path, {}).update(path)
+                if path_definitions:
+                    definitions.update(path_definitions)
+
+        if definitions:
+            components["schemas"] = {k: definitions[k] for k in sorted(definitions)}
+        if components:
+            output["components"] = components
+        if tags:
+            output["tags"] = tags
+
+        output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
+
+        return OpenAPI(**output)
+
+    def get_openapi_json_schema(
+        self,
+        *,
+        title: str = "Powertools API",
+        version: str = "1.0.0",
+        openapi_version: str = "3.1.0",
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        tags: Optional[List["Tag"]] = None,
+        servers: Optional[List["Server"]] = None,
+        terms_of_service: Optional[str] = None,
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
+    ) -> str:
+        """
+        Returns the OpenAPI schema as a JSON serializable dict
+
+        Parameters
+        ----------
+        title: str
+            The title of the application.
+        version: str
+            The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
+        openapi_version: str, default = "3.1.0"
+            The version of the OpenAPI Specification (which the document uses).
+        summary: str, optional
+            A short summary of what the application does.
+        description: str, optional
+            A verbose explanation of the application behavior.
+        tags: List[Tag], optional
+            A list of tags used by the specification with additional metadata.
+        servers: List[Server], optional
+            An array of Server Objects, which provide connectivity information to a target server.
+        terms_of_service: str, optional
+            A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: Contact, optional
+            The contact information for the exposed API.
+        license_info:
+            The license information for the exposed API.
+
+        Returns
+        -------
+        str
+            The OpenAPI schema as a JSON serializable dict.
+        """
+        from aws_lambda_powertools.event_handler.openapi.compat import model_json
+
+        return model_json(
+            self.get_openapi_schema(
+                title=title,
+                version=version,
+                openapi_version=openapi_version,
+                summary=summary,
+                description=description,
+                tags=tags,
+                servers=servers,
+                terms_of_service=terms_of_service,
+                contact=contact,
+                license_info=license_info,
+            ),
+            by_alias=True,
+            exclude_none=True,
+            indent=2,
+        )
 
     def route(
         self,
@@ -854,6 +1499,12 @@ class ApiGatewayResolver(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -861,19 +1512,24 @@ class ApiGatewayResolver(BaseRouter):
         def register_resolver(func: Callable):
             methods = (method,) if isinstance(method, str) else method
             logger.debug(f"Adding route using rule {rule} and methods: {','.join((m.upper() for m in methods))}")
-            if cors is None:
-                cors_enabled = self._cors_enabled
-            else:
-                cors_enabled = cors
+
+            cors_enabled = self._cors_enabled if cors is None else cors
 
             for item in methods:
                 _route = Route(
                     item,
+                    rule,
                     self._compile_regex(rule),
                     func,
                     cors_enabled,
                     compress,
                     cache_control,
+                    summary,
+                    description,
+                    responses,
+                    response_description,
+                    tags,
+                    operation_id,
                     middlewares,
                 )
 
@@ -886,13 +1542,8 @@ class ApiGatewayResolver(BaseRouter):
                 else:
                     self._static_routes.append(_route)
 
-                route_key = item + rule
-                if route_key in self._route_keys:
-                    warnings.warn(
-                        f"A route like this was already registered. method: '{item}' rule: '{rule}'",
-                        stacklevel=2,
-                    )
-                self._route_keys.append(route_key)
+                self._create_route_key(item, rule)
+
                 if cors_enabled:
                     logger.debug(f"Registering method {item.upper()} to Allow Methods in CORS")
                     self._cors_methods.add(item.upper())
@@ -945,6 +1596,15 @@ class ApiGatewayResolver(BaseRouter):
 
     def __call__(self, event, context) -> Any:
         return self.resolve(event, context)
+
+    def _create_route_key(self, item: str, rule: str):
+        route_key = item + rule
+        if route_key in self._route_keys:
+            warnings.warn(
+                f"A route like this was already registered. method: '{item}' rule: '{rule}'",
+                stacklevel=2,
+            )
+        self._route_keys.append(route_key)
 
     @staticmethod
     def _has_debug(debug: Optional[bool] = None) -> bool:
@@ -1104,7 +1764,7 @@ class ApiGatewayResolver(BaseRouter):
             logger.exception(exc)
             if self._debug:
                 # If the user has turned on debug mode,
-                # we'll let the original exception propagate so
+                # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
                 return ResponseBuilder(
                     Response(
@@ -1229,6 +1889,36 @@ class ApiGatewayResolver(BaseRouter):
             # Still need to ignore for mypy checks or will cause failures (false-positive)
             self.route(*new_route, middlewares=middlewares)(func)  # type: ignore
 
+    @staticmethod
+    def _get_fields_from_routes(routes: Sequence[Route]) -> List["ModelField"]:
+        """
+        Returns a list of fields from the routes
+        """
+
+        from aws_lambda_powertools.event_handler.openapi.compat import ModelField
+        from aws_lambda_powertools.event_handler.openapi.dependant import (
+            get_flat_params,
+        )
+
+        body_fields_from_routes: List["ModelField"] = []
+        responses_from_routes: List["ModelField"] = []
+        request_fields_from_routes: List["ModelField"] = []
+
+        for route in routes:
+            if route.body_field:
+                if not isinstance(route.body_field, ModelField):
+                    raise AssertionError("A request body myst be a Pydantic Field")
+                body_fields_from_routes.append(route.body_field)
+
+            params = get_flat_params(route.dependant)
+            request_fields_from_routes.extend(params)
+
+            if route.dependant.return_param:
+                responses_from_routes.append(route.dependant.return_param)
+
+        flat_models = list(responses_from_routes + request_fields_from_routes + body_fields_from_routes)
+        return flat_models
+
 
 class Router(BaseRouter):
     """Router helper class to allow splitting ApiGatewayResolver into multiple files"""
@@ -1246,13 +1936,31 @@ class Router(BaseRouter):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
             # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
             methods = (method,) if isinstance(method, str) else tuple(method)
 
-            route_key = (rule, methods, cors, compress, cache_control)
+            route_key = (
+                rule,
+                methods,
+                cors,
+                compress,
+                cache_control,
+                summary,
+                description,
+                responses,
+                response_description,
+                tags,
+                operation_id,
+            )
 
             # Collate Middleware for routes
             if middlewares is not None:
@@ -1280,9 +1988,17 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """Amazon API Gateway REST and HTTP API v1 payload resolver"""
-        super().__init__(ProxyEventType.APIGatewayProxyEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.APIGatewayProxyEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )
 
     # override route to ignore trailing "/" in routes for REST API
     def route(
@@ -1292,10 +2008,29 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cors: Optional[bool] = None,
         compress: bool = False,
         cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List["Tag"]] = None,
+        operation_id: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
-        return super().route(rule.rstrip("/"), method, cors, compress, cache_control, middlewares)
+        return super().route(
+            rule.rstrip("/"),
+            method,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            middlewares,
+        )
 
     # Override _compile_regex to exclude trailing slashes for route resolution
     @staticmethod
@@ -1312,9 +2047,17 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """Amazon API Gateway HTTP API v2 payload resolver"""
-        super().__init__(ProxyEventType.APIGatewayProxyEventV2, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.APIGatewayProxyEventV2,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )
 
 
 class ALBResolver(ApiGatewayResolver):
@@ -1326,6 +2069,7 @@ class ALBResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
-        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)
