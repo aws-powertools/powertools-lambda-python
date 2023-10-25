@@ -104,7 +104,7 @@ def test_validate_return_type():
     # THEN the body must be 123
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == 123
+    assert result["body"] == "123"
 
 
 def test_validate_return_tuple():
@@ -124,7 +124,7 @@ def test_validate_return_tuple():
     # THEN the body must be a tuple
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == list(sample_tuple)
+    assert result["body"] == "[1, 2, 3]"
 
 
 def test_validate_return_purepath():
@@ -145,7 +145,7 @@ def test_validate_return_purepath():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == sample_path.as_posix()
+    assert result["body"] == json.dumps(sample_path.as_posix())
 
 
 def test_validate_return_enum():
@@ -166,7 +166,7 @@ def test_validate_return_enum():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == "powertools"
+    assert result["body"] == '"powertools"'
 
 
 def test_validate_return_dataclass():
@@ -186,10 +186,10 @@ def test_validate_return_dataclass():
     LOAD_GW_EVENT["path"] = "/"
 
     # THEN the handler should be invoked and return 200
-    # THEN the body must be a dict
+    # THEN the body must be a JSON object
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == {"name": "John", "age": 30}
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
 def test_validate_return_model():
@@ -208,10 +208,10 @@ def test_validate_return_model():
     LOAD_GW_EVENT["path"] = "/"
 
     # THEN the handler should be invoked and return 200
-    # THEN the body must be a dict
+    # THEN the body must be a JSON object
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == {"name": "John", "age": 30}
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
 def test_validate_invalid_return_model():
@@ -254,10 +254,10 @@ def test_validate_body_param():
     LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
 
     # THEN the handler should be invoked and return 200
-    # THEN the body must be a dict
+    # THEN the body must be a JSON object
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == {"name": "John", "age": 30}
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
 def test_validate_embed_body_param():

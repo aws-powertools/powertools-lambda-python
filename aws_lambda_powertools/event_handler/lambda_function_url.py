@@ -62,3 +62,7 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
         )
+
+    def _get_base_path(self) -> str:
+        stage = self.current_event.request_context.stage
+        return f"/{stage}" if stage else "/"

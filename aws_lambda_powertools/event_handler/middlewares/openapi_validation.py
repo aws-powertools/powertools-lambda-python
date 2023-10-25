@@ -99,8 +99,14 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 # Process the response body if it exists
                 raw_response = jsonable_encoder(response.body)
 
-                # Validate and serialize the response
-                return self._serialize_response(field=route.dependant.return_param, response_content=raw_response)
+                # Validate and serialize the response, if it's JSON
+                if response.is_json():
+                    response.body = json.dumps(
+                        self._serialize_response(field=route.dependant.return_param, response_content=raw_response),
+                        sort_keys=True,
+                    )
+
+                return response
         except RequestValidationError as e:
             return Response(
                 status_code=422,
