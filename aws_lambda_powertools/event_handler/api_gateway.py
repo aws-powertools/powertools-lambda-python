@@ -1595,7 +1595,7 @@ class ApiGatewayResolver(BaseRouter):
             base_path = self._get_base_path()
 
             if swagger_base_url:
-                swagger_js = f"{swagger_base_url}/swagger-ui-bundle.js"
+                swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
                 swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
             else:
                 swagger_js = f"{base_path}/swagger.js"
