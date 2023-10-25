@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import Tuple
+from typing import List, Tuple
 
 import pytest
 from pydantic import BaseModel
@@ -113,6 +113,24 @@ def test_validate_return_type():
     assert result["body"] == "123"
 
 
+def test_validate_return_list():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a return type
+    @app.get("/")
+    def handler() -> List[int]:
+        return [123, 234]
+
+    LOAD_GW_EVENT["path"] = "/"
+
+    # THEN the handler should be invoked and return 200
+    # THEN the body must be [123, 234]
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+    assert result["body"] == "[123, 234]"
+
+
 def test_validate_return_tuple():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
@@ -143,7 +161,7 @@ def test_validate_return_purepath():
     # WHEN return value is a PurePath
     @app.get("/")
     def handler() -> str:
-        return sample_path
+        return sample_path.as_posix()
 
     LOAD_GW_EVENT["path"] = "/"
 
@@ -264,6 +282,30 @@ def test_validate_body_param():
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
+
+
+def test_validate_body_param_with_invalid_date():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Model) -> Model:
+        return user
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = "{"  # invalid JSON
+
+    # THEN the handler should be invoked and return 422
+    # THEN the body must have the "json_invalid" error message
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 422
+    assert "json_invalid" in result["body"]
 
 
 def test_validate_embed_body_param():
