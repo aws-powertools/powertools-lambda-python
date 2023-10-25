@@ -96,23 +96,26 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 app.context["_route_args"] = values
                 response = next_middleware(app)
 
-                # Process the response body if it exists
-                raw_response = jsonable_encoder(response.body)
-
-                # Validate and serialize the response, if it's JSON
-                if response.is_json():
-                    response.body = json.dumps(
-                        self._serialize_response(field=route.dependant.return_param, response_content=raw_response),
-                        sort_keys=True,
-                    )
-
-                return response
+                return self._handle_response(route=route, response=response)
         except RequestValidationError as e:
             return Response(
                 status_code=422,
                 content_type="application/json",
                 body=json.dumps({"detail": e.errors()}),
             )
+
+    def _handle_response(self, *, route: Route, response: Response):
+        # Process the response body if it exists
+        raw_response = jsonable_encoder(response.body)
+
+        # Validate and serialize the response, if it's JSON
+        if response.is_json():
+            response.body = json.dumps(
+                self._serialize_response(field=route.dependant.return_param, response_content=raw_response),
+                sort_keys=True,
+            )
+
+        return response
 
     def _serialize_response(
         self,
