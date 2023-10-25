@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import PurePath
 from typing import Tuple
 
+import pytest
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
@@ -12,6 +13,11 @@ from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+
+
+def test_validate_with_customn_serializer():
+    with pytest.raises(ValueError):
+        APIGatewayRestResolver(enable_validation=True, serializer=json.dumps)
 
 
 def test_validate_scalars():

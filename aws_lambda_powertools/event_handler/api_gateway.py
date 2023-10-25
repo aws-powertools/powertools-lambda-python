@@ -70,7 +70,6 @@ if TYPE_CHECKING:
         License,
         OpenAPI,
         Server,
-        Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
@@ -263,7 +262,7 @@ class Route:
         description: Optional[str],
         responses: Optional[Dict[int, Dict[str, Any]]],
         response_description: Optional[str],
-        tags: Optional[List["Tag"]],
+        tags: Optional[List[str]],
         operation_id: Optional[str],
         include_in_schema: bool,
         middlewares: Optional[List[Callable[..., Response]]],
@@ -295,7 +294,7 @@ class Route:
             The OpenAPI responses for this route
         response_description: Optional[str]
             The OpenAPI response description for this route
-        tags: Optional[List[Tag]]
+        tags: Optional[List[str]]
             The list of OpenAPI tags to be used for this route
         operation_id: Optional[str]
             The OpenAPI operationId for this route
@@ -543,7 +542,7 @@ class Route:
 
         # Ensure tags is added to the operation
         if self.tags:
-            operation["tags"] = self.tags
+            operation["tags"] = [{"name": tag for tag in self.tags}]
 
         # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
@@ -802,7 +801,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -860,7 +859,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -913,7 +912,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -967,7 +966,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -1021,7 +1020,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -1074,7 +1073,7 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable]] = None,
@@ -1339,7 +1338,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1360,7 +1359,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1447,7 +1446,7 @@ class ApiGatewayResolver(BaseRouter):
         if components:
             output["components"] = components
         if tags:
-            output["tags"] = tags
+            output["tags"] = [{"name": tag} for tag in tags]
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
@@ -1461,7 +1460,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1482,7 +1481,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1527,7 +1526,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = "3.1.0",
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1552,7 +1551,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1675,7 +1674,7 @@ class ApiGatewayResolver(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -2117,7 +2116,7 @@ class Router(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
@@ -2195,7 +2194,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
