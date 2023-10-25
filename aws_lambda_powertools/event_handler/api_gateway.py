@@ -2180,7 +2180,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
 
     def _get_base_path(self) -> str:
         stage = self.current_event.request_context.stage
-        return f"/{stage}" if stage else "/"
+        return f"/{stage}" if stage and stage != "$default" else "/"
 
     # override route to ignore trailing "/" in routes for REST API
     def route(
@@ -2242,6 +2242,10 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             strip_prefixes,
             enable_validation,
         )
+
+    def _get_base_path(self) -> str:
+        stage = self.current_event.request_context.stage
+        return f"/{stage}" if stage and stage != "$default" else "/"
 
 
 class ALBResolver(ApiGatewayResolver):
