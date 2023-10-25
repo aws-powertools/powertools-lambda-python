@@ -94,8 +94,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             else:
                 # Re-write the route_args with the validated values, and call the next middleware
                 app.context["_route_args"] = values
+
+                # Call the handler by calling the next middleware
                 response = next_middleware(app)
 
+                # Process the response
                 return self._handle_response(route=route, response=response)
         except RequestValidationError as e:
             return Response(
@@ -106,14 +109,15 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
     def _handle_response(self, *, route: Route, response: Response):
         # Process the response body if it exists
-        raw_response = jsonable_encoder(response.body)
+        if response.body:
+            raw_response = jsonable_encoder(response.body)
 
-        # Validate and serialize the response, if it's JSON
-        if response.is_json():
-            response.body = json.dumps(
-                self._serialize_response(field=route.dependant.return_param, response_content=raw_response),
-                sort_keys=True,
-            )
+            # Validate and serialize the response, if it's JSON
+            if response.is_json():
+                response.body = json.dumps(
+                    self._serialize_response(field=route.dependant.return_param, response_content=raw_response),
+                    sort_keys=True,
+                )
 
         return response
 
