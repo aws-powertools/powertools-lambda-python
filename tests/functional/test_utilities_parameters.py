@@ -960,6 +960,53 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
         stubber.deactivate()
 
 
+def test_ssm_provider_get_multiple_with_decrypt_environment_variable(monkeypatch, mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.get_multiple() with decrypt value replaced by environment variable
+    """
+
+    # Setting environment variable to override the default value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", "true")
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ],
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": True}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
+    finally:
+        stubber.deactivate()
+
+
 def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.get_multiple() with a non-cached path
