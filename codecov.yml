@@ -1,0 +1,2 @@
+ignore:
+  - "aws_lambda_powertools/event_handler/openapi/compat.py"

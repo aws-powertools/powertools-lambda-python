@@ -188,7 +188,7 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(self, path: str, decrypt: Optional[bool] = None, recursive: bool = False, **sdk_options) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 
@@ -203,6 +203,12 @@ class SSMProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
         """
+
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
+        decrypt = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
+        )
 
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Path"] = path
