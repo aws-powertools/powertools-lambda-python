@@ -29,6 +29,8 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -1334,8 +1336,8 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
         tags: Optional[List[str]] = None,
@@ -1456,8 +1458,8 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
         tags: Optional[List[str]] = None,
@@ -1521,9 +1523,9 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         path: str = "/swagger",
-        title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        title: str = "Powertools for AWS Lambda (Python) API",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
         tags: Optional[List[str]] = None,
@@ -1577,7 +1579,6 @@ class ApiGatewayResolver(BaseRouter):
                     status_code=200,
                     content_type="text/javascript",
                     body=body,
-                    compress=True,
                 )
 
             @self.get("/swagger.css", include_in_schema=False)
@@ -1587,7 +1588,6 @@ class ApiGatewayResolver(BaseRouter):
                     status_code=200,
                     content_type="text/css",
                     body=body,
-                    compress=True,
                 )
 
         @self.get(path, middlewares=middlewares, include_in_schema=False)
@@ -1616,51 +1616,12 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
             )
 
-            body = f"""
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Swagger UI</title>
-    <link rel="stylesheet" type="text/css" href="{swagger_css}">
-</head>
-
-<body>
-    <div id="swagger-ui">
-        Loading...
-    </div>
-</body>
-
-<script src="{swagger_js}"></script>
-
-<script>
-  var swaggerUIOptions = {{
-    dom_id: "#swagger-ui",
-    docExpansion: "list",
-    deepLinking: true,
-    filter: true,
-    spec: JSON.parse(`
-        {spec}
-    `.trim()),
-    presets: [
-      SwaggerUIBundle.presets.apis,
-      SwaggerUIBundle.SwaggerUIStandalonePreset
-    ],
-    plugins: [
-      SwaggerUIBundle.plugins.DownloadUrl
-    ]
-  }}
-
-  var ui = SwaggerUIBundle(swaggerUIOptions)
-</script>
-</html>
-            """.strip()
+            body = generate_swagger_html(spec, swagger_js, swagger_css)
 
             return Response(
                 status_code=200,
                 content_type="text/html",
                 body=body,
-                compress=True,
             )
 
     def route(
