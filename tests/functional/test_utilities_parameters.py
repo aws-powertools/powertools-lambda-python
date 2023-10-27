@@ -960,7 +960,13 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
         stubber.deactivate()
 
 
-def test_ssm_provider_get_multiple_with_decrypt_environment_variable(monkeypatch, mock_name, mock_value, mock_version, config):
+def test_ssm_provider_get_multiple_with_decrypt_environment_variable(
+    monkeypatch,
+    mock_name,
+    mock_value,
+    mock_version,
+    config,
+):
     """
     Test SSMProvider.get_multiple() with decrypt value replaced by environment variable
     """

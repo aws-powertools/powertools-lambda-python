@@ -260,11 +260,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
     def _get_record(self, idempotency_key) -> DataRecord:
         # See: https://redis.io/commands/get/
-        try:
-            response = self.client.get(idempotency_key)
-            item = self._json_deserializer(response)  # type: ignore
-        except KeyError:
+        response = self.client.get(idempotency_key)
+        # key not found
+        if not response:
             raise IdempotencyItemNotFoundError
+        try:
+            item = self._json_deserializer(response)
         except json.JSONDecodeError:
             raise IdempotencyOrphanRecordError
         return self._item_to_data_record(idempotency_key, item)
@@ -317,30 +318,20 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             #    - previous invocation timed out (Orphan Record)
             #    - previous invocation record expired but not deleted by Redis (Orphan Record)
 
-            encoded_idempotency_record = self.client.get(item["name"])
-
-            try:
-                idempotency_record = self._json_deserializer(encoded_idempotency_record)  # type: ignore
-            except json.JSONDecodeError:
-                # found a corrupted record, treat as Orphan Record.
-                raise IdempotencyOrphanRecordError
-
-            if len(idempotency_record) == 0:
-                # Set in Redis with nx failed however there's no record. return to idempotency to retry
-                raise IdempotencyItemNotFoundError
+            idempotency_record = self._get_record(item["name"])
 
             # status is completed and expiry_attr timestamp still larger than current timestamp
             # found a valid completed record
-            if idempotency_record[self.status_attr] == STATUS_CONSTANTS["COMPLETED"] and int(
-                idempotency_record[self.expiry_attr],
-            ) > int(now.timestamp()):
+            if idempotency_record.status == STATUS_CONSTANTS["COMPLETED"] and not idempotency_record.is_expired:
                 raise IdempotencyItemAlreadyExistsError
 
             # in_progress_expiry_attr exist means status is in_progress, and still larger than current timestamp,
             # found a vaild in_progress record
-            if self.in_progress_expiry_attr in idempotency_record and int(
-                idempotency_record[self.in_progress_expiry_attr],
-            ) > int(now.timestamp() * 1000):
+            if (
+                idempotency_record.status == STATUS_CONSTANTS["INPROGRESS"]
+                and idempotency_record.in_progress_expiry_timestamp
+                and idempotency_record.in_progress_expiry_timestamp > int(now.timestamp() * 1000)
+            ):
                 raise IdempotencyItemAlreadyExistsError
 
             # If the code reaches here means we found an Orphan record.

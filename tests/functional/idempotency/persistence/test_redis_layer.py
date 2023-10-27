@@ -3,19 +3,36 @@ import copy
 import time as t
 
 import pytest
+from unittest.mock import patch
 
 from aws_lambda_powertools.utilities.idempotency import (
     RedisCachePersistenceLayer,
 )
+import datetime
+
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    STATUS_CONSTANTS,
+    DataRecord,
+)
+
+from unittest import mock
+
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
+    IdempotencyRedisConnectionError,
+    IdempotencyRedisClientConfigError,
+    IdempotencyOrphanRecordError,
+    IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent,
     idempotent_function,
+    IdempotencyConfig,
 )
+
+redis_badhost = "badhost"
 
 
 @pytest.fixture
@@ -33,23 +50,78 @@ def lambda_context():
     return LambdaContext()
 
 
-class MockRedis:
-    def __init__(self, decode_responses, cache: dict = None, **kwargs):
+class RedisExceptions:
+    class RedisClusterException(Exception):
+        "mock cluster exception"
+
+    class RedisError(Exception):
+        "mock redis exception"
+
+    class ConnectionError(Exception):
+        "mock connection exception"
+
+
+class MockRedisBase:
+    # use this class to test no get_connection_kwargs error
+    exceptions = RedisExceptions
+
+    def __call__(self, *args, **kwargs):
+        if kwargs.get("host") == redis_badhost:
+            raise self.exceptions.ConnectionError
+        self.__dict__.update(kwargs)
+        return self
+
+    @property
+    def Redis(self):
+        self.mode = "standalone"
+        return self
+
+    @property
+    def cluster(self):
+        return self
+
+    @property
+    def RedisCluster(self):
+        self.mode = "cluster"
+        return self
+
+    # use this to mimic Redis error
+    def close(self):
+        self.closed = True
+
+
+class MockRedis(MockRedisBase):
+    def __init__(self, decode_responses=False, cache: dict = None, **kwargs):
         self.cache = cache or {}
         self.expire_dict = {}
         self.decode_responses = decode_responses
         self.acl = {}
         self.username = ""
+        self.mode = ""
+        self.url = ""
+        self.__dict__.update(kwargs)
+        self.closed = False
+        super(MockRedis, self).__init__()
+
+    def check_closed(self):
+        if self.closed == False:
+            return
+        if self.mode == "cluster":
+            raise self.exceptions.RedisClusterException
+        raise self.exceptions.RedisError
 
     def hset(self, name, mapping):
+        self.check_closed()
         self.expire_dict.pop(name, {})
         self.cache[name] = mapping
 
     def from_url(self, url: str):
-        pass
+        self.url = url
+        return self
 
     # not covered by test yet.
     def expire(self, name, time):
+        self.check_closed()
         if time != 0:
             self.expire_dict[name] = t.time() + time
 
@@ -66,11 +138,13 @@ class MockRedis:
         self.username = username
 
     def delete(self, name):
+        self.check_closed()
         self.cache.pop(name, {})
 
     # return None if nx failed, return True if done
     def set(self, name, value, ex: int = 0, nx: bool = False):
         # expire existing
+        self.check_closed()
         if self.expire_dict.get(name, t.time() + 1) < t.time():
             self.cache.pop(name, {})
 
@@ -87,6 +161,7 @@ class MockRedis:
 
     # return None if not found
     def get(self, name: str):
+        self.check_closed()
         if self.expire_dict.get(name, t.time() + 1) < t.time():
             self.cache.pop(name, {})
 
@@ -116,6 +191,136 @@ def persistence_store_standalone_redis():
         decode_responses=True,
     )
     return RedisCachePersistenceLayer(client=redis_client)
+
+
+@pytest.fixture
+def orphan_record():
+    return DataRecord(
+        idempotency_key="test_orphan_key",
+        status=STATUS_CONSTANTS["INPROGRESS"],
+        in_progress_expiry_timestamp=int(datetime.datetime.now().timestamp() * 1000 - 1),
+    )
+
+
+@pytest.fixture
+def valid_record():
+    return DataRecord(
+        idempotency_key="test_orphan_key",
+        status=STATUS_CONSTANTS["INPROGRESS"],
+        in_progress_expiry_timestamp=int(datetime.datetime.now().timestamp() * 1000 + 1000),
+    )
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_connection():
+    # when RedisCachePersistenceLayer is init with the following params
+    redis_conf = {
+        "host": "host",
+        "port": "port",
+        "mode": "cluster",
+        "username": "redis_user",
+        "password": "redis_pass",
+        "db_index": "db_index",
+    }
+    layer = RedisCachePersistenceLayer(**redis_conf)
+    redis_conf["db"] = redis_conf["db_index"]
+    redis_conf.pop("db_index")
+    # then these paramas should be passed down to mock Redis identically
+    for k, v in redis_conf.items():
+        assert layer.client.__dict__.get(k) == v
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_connection_conn_error():
+    # when RedisCachePersistenceLayer is init with a bad host
+    # then should raise IdempotencyRedisConnectionError
+    with pytest.raises(IdempotencyRedisConnectionError):
+        layer = RedisCachePersistenceLayer(host=redis_badhost)
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_connection_conf_error():
+    # when RedisCachePersistenceLayer is init with a not_supported_mode in mode param
+    # then should raise IdempotencyRedisClientConfigError
+    with pytest.raises(IdempotencyRedisClientConfigError):
+        layer = RedisCachePersistenceLayer(mode="not_supported_mode")
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_key_error():
+    # when RedisCachePersistenceLayer is trying to get a non-exist key
+    # then should raise IdempotencyItemNotFoundError
+    with pytest.raises(IdempotencyItemNotFoundError):
+        layer = RedisCachePersistenceLayer(host="host")
+        layer._get_record(idempotency_key="not_exist")
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_key_corrupted():
+    # when RedisCachePersistenceLayer got a non-json formatted record
+    # then should raise IdempotencyOrphanRecordError
+    with pytest.raises(IdempotencyOrphanRecordError):
+        layer = RedisCachePersistenceLayer(url="sample_url")
+        layer.client.set("corrupted_json", "not_json_string")
+        layer._get_record(idempotency_key="corrupted_json")
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_orphan_record(orphan_record, valid_record):
+    layer = RedisCachePersistenceLayer(host="host")
+    # Given orphan record exist
+    layer._put_in_progress_record(orphan_record)
+    # When we are tyring to update the record
+    layer._put_in_progress_record(valid_record)
+    # Then orphan record will be overwritten
+    assert (
+        layer._get_record(valid_record.idempotency_key).in_progress_expiry_timestamp
+        == valid_record.in_progress_expiry_timestamp
+    )
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_orphan_record_lock(orphan_record, valid_record):
+    layer = RedisCachePersistenceLayer(host="host")
+    # Given orphan record exist, lock also exist
+    layer._put_in_progress_record(orphan_record)
+    layer.client.set("test_orphan_key:lock", "True")
+    #  when trying to overwrite the record
+    # Then we should raise IdempotencyItemAlreadyExistsError
+    with pytest.raises(IdempotencyItemAlreadyExistsError):
+        layer._put_in_progress_record(valid_record)
+    # And the record should not be overwritten
+    assert (
+        layer._get_record(valid_record.idempotency_key).in_progress_expiry_timestamp
+        == orphan_record.in_progress_expiry_timestamp
+    )
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_error_in_progress(valid_record):
+    layer = RedisCachePersistenceLayer(host="host", mode="standalone")
+    layer.client.close()
+    # given a Redis is returning RedisError
+    # when trying to save inprogress
+    # then layer should raise RedisExceptions.RedisError
+    with pytest.raises(RedisExceptions.RedisError):
+        layer._put_in_progress_record(valid_record)
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_item_to_datarecord_conversion(valid_record):
+    layer = RedisCachePersistenceLayer(host="host", mode="standalone")
+    item = {
+        "status": STATUS_CONSTANTS["INPROGRESS"],
+        layer.in_progress_expiry_attr: str(int(datetime.datetime.now().timestamp() * 1000)),
+    }
+    # given we have a dict of datarecord
+    # when calling _item_to_data_record
+    record = layer._item_to_data_record(idempotency_key="abc", item=item)
+    # then all valid fields in dict should be copied into data_record
+    assert record.idempotency_key == "abc"
+    assert record.status == STATUS_CONSTANTS["INPROGRESS"]
+    assert record.in_progress_expiry_timestamp == int(item[layer.in_progress_expiry_attr])
 
 
 def test_idempotent_function_and_lambda_handler_redis_basic(
@@ -184,6 +389,61 @@ def test_idempotent_function_and_lambda_handler_redis_cache(
     # Then the result should be the actual function output
     assert fn_result3 == result
     assert handler_result3 == result
+
+
+def test_idempotent_function_and_lambda_handler_redis_event_key(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+    lambda_context,
+):
+    mock_event = {"body": '{"user_id":"xyz","time":"1234"}'}
+    persistence_layer = persistence_store_standalone_redis
+    result = {"message": "Foo"}
+    expected_result = copy.deepcopy(result)
+    config = IdempotencyConfig(event_key_jmespath='powertools_json(body).["user_id"]')
+
+    @idempotent(persistence_store=persistence_layer, config=config)
+    def lambda_handler(event, context):
+        return result
+
+    # WHEN calling the function and handler with idempotency and event_key_jmespath config to only verify user_id
+    handler_result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the function and lambda handler to execute successfully
+    assert handler_result == expected_result
+
+    result = {"message": "Bar"}
+    mock_event = {"body": '{"user_id":"xyz","time":"2345"}'}
+    # Given idempotency record already in Redis
+    # When we modified the actual function output, time in mock event and run the second time
+    handler_result2 = lambda_handler(mock_event, lambda_context)
+    # Then the result should be the same as first time
+    assert handler_result2 == expected_result
+
+
+def test_idempotent_function_and_lambda_handler_redis_validation(
+    persistence_store_standalone_redis: RedisCachePersistenceLayer,
+    lambda_context,
+):
+    mock_event = {"user_id": "xyz", "time": "1234"}
+    persistence_layer = persistence_store_standalone_redis
+    result = {"message": "Foo"}
+    expected_result = copy.deepcopy(result)
+    config = IdempotencyConfig(event_key_jmespath="user_id", payload_validation_jmespath="time")
+
+    @idempotent(persistence_store=persistence_layer, config=config)
+    def lambda_handler(event, context):
+        return result
+
+    # WHEN calling the function and handler with idempotency and event_key_jmespath,payload_validation_jmespath
+    handler_result = lambda_handler(mock_event, lambda_context)
+    # THEN we expect the function and lambda handler to execute successfully
+
+    result = {"message": "Bar"}
+    mock_event = {"user_id": "xyz", "time": "2345"}
+    # Given idempotency record already in Redis
+    # When we modified the payload where validation is on and invoke again.
+    # Then should raise IdempotencyValidationError
+    with pytest.raises(IdempotencyValidationError):
+        handler_result2 = lambda_handler(mock_event, lambda_context)
 
 
 def test_idempotent_function_and_lambda_handler_redis_basic_no_decode(
@@ -281,3 +541,13 @@ def test_idempotent_lambda_redis_delete(
 
     # Then lambda handler should return a actual function output
     assert handler_result2 == result
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedisBase())
+def test_redis_connection_get_kwargs_error():
+    # when Layer is init with a redis client that doesn't have get_connection_kwargs method
+
+    # then should raise IdempotencyRedisClientConfigError
+
+    with pytest.raises(IdempotencyRedisClientConfigError):
+        layer = RedisCachePersistenceLayer(host="testhost")
