@@ -1252,7 +1252,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def __init__(
         self,
-        proxy_type: Enum = ProxyEventType.APIGatewayProxyEvent,
+        proxy_type: Optional[Enum] = ProxyEventType.APIGatewayProxyEvent,
         cors: Optional[CORSConfig] = None,
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
@@ -1262,8 +1262,8 @@ class ApiGatewayResolver(BaseRouter):
         """
         Parameters
         ----------
-        proxy_type: ProxyEventType
-            Proxy request type, defaults to API Gateway V1
+        proxy_type: Optional[ProxyEventType]
+            Proxy request type, defaults to API Gateway V1. Passing None will use an existing ProxyEvent
         cors: CORSConfig
             Optionally configure and enabled CORS. Not each route will need to have to cors=True
         debug: Optional[bool]
@@ -1557,7 +1557,7 @@ class ApiGatewayResolver(BaseRouter):
 
         Parameters
         ----------
-        event: Dict[str, Any]
+        event: Union[Dict[str, Any], BaseProxyEvent]
             Event
         context: LambdaContext
             Lambda context
@@ -1567,18 +1567,15 @@ class ApiGatewayResolver(BaseRouter):
             Returns the dict response
         """
         if isinstance(event, BaseProxyEvent):
-            warnings.warn(
-                "You don't need to serialize event to Event Source Data Class when using Event Handler; "
-                "see issue #1152",
-                stacklevel=2,
-            )
-            event = event.raw_event
+            BaseRouter.current_event = event
+            if self._debug:
+                print(self._json_dump(event.raw_event))
+        else:
+            # Populate router(s) dependencies without keeping a reference to each registered router
+            BaseRouter.current_event = self._to_proxy_event(event)
+            if self._debug:
+                print(self._json_dump(event))
 
-        if self._debug:
-            print(self._json_dump(event))
-
-        # Populate router(s) dependencies without keeping a reference to each registered router
-        BaseRouter.current_event = self._to_proxy_event(event)
         BaseRouter.lambda_context = context
 
         response = self._resolve().build(self.current_event, self._cors)
