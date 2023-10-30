@@ -62,7 +62,7 @@ def test_firehose_trigger_event_kinesis_no_envelope():
 
     metadata_01: KinesisFirehoseRecordMetadata = record_01.kinesisRecordMetadata
     assert metadata_01.partitionKey == "4d1ad2b9-24f8-4b9d-a088-76e9947c317a"
-    assert metadata_01.subsequenceNumber == ""
+    assert metadata_01.subsequenceNumber == 0
     assert metadata_01.shardId == "shardId-000000000000"
     assert metadata_01.approximateArrivalTimestamp == 1664028820148
     assert metadata_01.sequenceNumber == "49546986683135544286507457936321625675700192471156785154"
@@ -74,7 +74,7 @@ def test_firehose_trigger_event_kinesis_no_envelope():
 
     metadata_02: KinesisFirehoseRecordMetadata = record_02.kinesisRecordMetadata
     assert metadata_02.partitionKey == "4d1ad2b9-24f8-4b9d-a088-76e9947c318a"
-    assert metadata_02.subsequenceNumber == ""
+    assert metadata_02.subsequenceNumber == 0
     assert metadata_02.shardId == "shardId-000000000001"
     assert metadata_02.approximateArrivalTimestamp == 1664028793294
     assert metadata_02.sequenceNumber == "49546986683135544286507457936321625675700192471156785155"
