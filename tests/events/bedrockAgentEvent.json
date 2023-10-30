@@ -1,0 +1,26 @@
+{
+  "sessionId": "12345678912345",
+  "agent": {
+    "alias": "TSTALIASID",
+    "name": "test",
+    "version": "DRAFT",
+    "id": "8ZXY0W8P1H"
+  },
+  "inputText": "ABC12345",
+  "sessionAttributes": {},
+  "messageVersion": "1.0",
+  "actionGroups": [
+    {
+      "httpMethod": "GET",
+      "apiPath": "/claims/{claimId}/identify-missing-documents",
+      "actionGroup": "ClaimManagementActionGroup",
+      "parameters": [
+        {
+          "name": "claimId",
+          "type": "string",
+          "value": "ABC12345"
+        }
+      ]
+    }
+  ]
+}
