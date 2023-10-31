@@ -258,7 +258,23 @@ You can use `append_context` when you want to share data between your App and Ro
 	```python hl_lines="29"
     --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
 	```
+### Batch processing
+We also support Appsync batching mechanism for Lambda Resolvers. In case you want to handle multiple events in a batch to avoid multiple lambda executions just configure your Appsync to group multiple events together and then annotate your function with `@batch_resolver` decorator. Batch resolver will execute your function with every event in the provided batch list.
 
+???+ info
+    If you want to understand more how to configure batch processing for the appsynch, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}
+
+=== "batch_resolvers.py"
+  	```python hl_lines="79-81"
+    --8<-- "examples/event_handler_graphql/src/batch_resolvers.py"
+  	```
+
+#### Async
+Alternatively, you can use async batch processor. Use it if you want to benefit from concurrency and keeping the order of execution is not required for you.
+=== "batch_async_resolvers.py"
+  	```python hl_lines="90-92"
+    --8<-- "examples/event_handler_graphql/src/batch_async_resolvers.py"
+  	```
 ## Testing your code
 
 You can test your resolvers by passing a mocked or actual AppSync Lambda event that you're expecting.
