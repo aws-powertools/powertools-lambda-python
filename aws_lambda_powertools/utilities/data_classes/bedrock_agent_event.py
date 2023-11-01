@@ -47,28 +47,6 @@ class BedrockAgentRequestBody(DictWrapper):
         return {k: BedrockAgentRequestMedia(v) for k, v in self["content"].items()}
 
 
-class BedrockAgentActionGroup(DictWrapper):
-    @property
-    def action_group(self) -> str:
-        return self["actionGroup"]
-
-    @property
-    def api_path(self) -> str:
-        return self["apiPath"]
-
-    @property
-    def http_method(self) -> str:
-        return self["httpMethod"]
-
-    @property
-    def parameters(self) -> List[BedrockAgentProperty]:
-        return [BedrockAgentProperty(x) for x in self["parameters"]]
-
-    @property
-    def request_body(self) -> BedrockAgentRequestBody:
-        return BedrockAgentRequestBody(self["requestBody"])
-
-
 class BedrockAgentEvent(DictWrapper):
     """
     Bedrock Agent input event
@@ -89,8 +67,24 @@ class BedrockAgentEvent(DictWrapper):
         return self["sessionId"]
 
     @property
-    def action_groups(self) -> List[BedrockAgentActionGroup]:
-        return [BedrockAgentActionGroup(x) for x in self["actionGroups"]]
+    def action_group(self) -> str:
+        return self["actionGroup"]
+
+    @property
+    def api_path(self) -> str:
+        return self["apiPath"]
+
+    @property
+    def http_method(self) -> str:
+        return self["httpMethod"]
+
+    @property
+    def parameters(self) -> List[BedrockAgentProperty]:
+        return [BedrockAgentProperty(x) for x in self["parameters"]]
+
+    @property
+    def request_body(self) -> BedrockAgentRequestBody:
+        return BedrockAgentRequestBody(self["requestBody"])
 
     @property
     def agent(self) -> BedrockAgentInfo:
@@ -99,6 +93,10 @@ class BedrockAgentEvent(DictWrapper):
     @property
     def session_attributes(self) -> Dict[str, str]:
         return self["sessionAttributes"]
+
+    @property
+    def prompt_session_attributes(self) -> Dict[str, str]:
+        return self["promptSessionAttributes"]
 
 
 class BedrockAgentResponseMedia(DictWrapper):
@@ -141,5 +139,5 @@ class BedrockAgentResponseEvent(DictWrapper):
         return self["messageVersion"]
 
     @property
-    def responses(self) -> List[BedrockAgentResponsePayload]:
-        return [BedrockAgentResponsePayload(x) for x in self["response"]]
+    def response(self) -> BedrockAgentResponsePayload:
+        return BedrockAgentResponsePayload(self["response"])

@@ -1,16 +1,14 @@
 {
   "messageVersion": "1.0",
-  "response": [
-    {
-      "actionGroup": "ClaimManagementActionGroup",
-      "apiPath": "/claims/{claimId}/identify-missing-documents",
-      "httpMethod": "GET",
-      "httpStatusCode": 200,
-      "responseBody": {
-        "application/json": {
-          "body": "This is the response"
-        }
+  "response": {
+    "actionGroup": "ClaimManagementActionGroup",
+    "apiPath": "/claims/{claimId}/identify-missing-documents",
+    "httpMethod": "GET",
+    "httpStatusCode": 200,
+    "responseBody": {
+      "application/json": {
+        "body": "This is the response"
       }
     }
-  ]
+  }
 }
