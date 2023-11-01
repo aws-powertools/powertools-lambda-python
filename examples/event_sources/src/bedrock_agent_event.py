@@ -8,17 +8,16 @@ logger = Logger()
 @event_source(data_class=BedrockAgentEvent)
 def lambda_handler(event: BedrockAgentEvent, context: LambdaContext) -> dict:
     input_text = event.input_text
-    action = event.action_groups[0]
 
-    logger.info(f"Bedrock Agent {action.action_group} invoked with input", input_text=input_text)
+    logger.info(f"Bedrock Agent {event.action_group} invoked with input", input_text=input_text)
 
     return {
         "message_version": "1.0",
         "responses": [
             {
-                "action_group": action.action_group,
-                "api_path": action.api_path,
-                "http_method": action.http_method,
+                "action_group": event.action_group,
+                "api_path": event.api_path,
+                "http_method": event.http_method,
                 "http_status_code": 200,
                 "response_body": {"application/json": {"body": "This is the response"}},
             },
