@@ -97,8 +97,3 @@ class BedrockAgentEvent(DictWrapper):
     @property
     def prompt_session_attributes(self) -> Dict[str, str]:
         return self["promptSessionAttributes"]
-
-    @property
-    def api_path(self) -> str:
-        return self["apiPath"]
-
