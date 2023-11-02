@@ -98,46 +98,7 @@ class BedrockAgentEvent(DictWrapper):
     def prompt_session_attributes(self) -> Dict[str, str]:
         return self["promptSessionAttributes"]
 
-
-class BedrockAgentResponseMedia(DictWrapper):
-    @property
-    def body(self) -> str:
-        return self["body"]
-
-
-class BedrockAgentResponsePayload(DictWrapper):
-    @property
-    def action_group(self) -> str:
-        return self["actionGroup"]
-
     @property
     def api_path(self) -> str:
         return self["apiPath"]
 
-    @property
-    def http_method(self) -> str:
-        return self["httpMethod"]
-
-    @property
-    def http_status_code(self) -> int:
-        return self["httpStatusCode"]
-
-    @property
-    def response_body(self) -> Dict[str, BedrockAgentResponseMedia]:
-        return {k: BedrockAgentResponseMedia(v) for k, v in self["responseBody"].items()}
-
-
-class BedrockAgentResponseEvent(DictWrapper):
-    """
-    Bedrock Agent output event
-
-    See: https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html
-    """
-
-    @property
-    def message_version(self) -> str:
-        return self["messageVersion"]
-
-    @property
-    def response(self) -> BedrockAgentResponsePayload:
-        return BedrockAgentResponsePayload(self["response"])
