@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -79,12 +79,12 @@ class BedrockAgentEvent(DictWrapper):
         return self["httpMethod"]
 
     @property
-    def parameters(self) -> List[BedrockAgentProperty]:
-        return [BedrockAgentProperty(x) for x in self["parameters"]]
+    def parameters(self) -> Optional[List[BedrockAgentProperty]]:
+        return [BedrockAgentProperty(x) for x in self["parameters"]] if self.get("parameters") else None
 
     @property
-    def request_body(self) -> BedrockAgentRequestBody:
-        return BedrockAgentRequestBody(self["requestBody"])
+    def request_body(self) -> Optional[BedrockAgentRequestBody]:
+        return BedrockAgentRequestBody(self["requestBody"]) if self.get("requestBody") else None
 
     @property
     def agent(self) -> BedrockAgentInfo:
