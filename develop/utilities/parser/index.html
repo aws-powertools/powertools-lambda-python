@@ -2039,6 +2039,10 @@ installed without binary files</a>:</p>
 <td>Lambda Event Source payload for Amazon API Gateway v2 payload</td>
 </tr>
 <tr>
+<td><strong>BedrockAgentEventModel</strong></td>
+<td>Lambda Event Source payload for Bedrock Agents</td>
+</tr>
+<tr>
 <td><strong>CloudFormationCustomResourceCreateModel</strong></td>
 <td>Lambda Event Source payload for AWS CloudFormation <code>CREATE</code> operation</td>
 </tr>
@@ -2494,6 +2498,11 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" rel="n
 <td>1. Parses data using <code>VpcLatticeModel</code>. <br/> 2. Parses <code>value</code> key using your model and returns it.</td>
 <td><code>Model</code></td>
 </tr>
+<tr>
+<td><strong>BedrockAgentEnvelope</strong></td>
+<td>1. Parses data using <code>BedrockAgentEventModel</code>. <br/> 2. Parses <code>inputText</code> key using your model and returns it.</td>
+<td><code>Model</code></td>
+</tr>
 </tbody>
 </table>
 <h4 id="bringing-your-own-envelope">Bringing your own envelope<a class="headerlink" href="#bringing-your-own-envelope" title="Permanent link">&para;</a></h4>
@@ -2811,7 +2820,7 @@ with <a href="https://pydantic-docs.helpmanual.io/usage/types/#json-type" rel="n
   <small>
     
       Last update:
-      2023-10-12
+      2023-11-02
     
   </small>
 </div>
