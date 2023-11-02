@@ -34,5 +34,5 @@ class BedrockAgentEventModel(BaseModel):
     session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
     prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")
     agent: BedrockAgentModel
-    parameters: Optional[List[BedrockAgentPropertyModel]]
+    parameters: Optional[List[BedrockAgentPropertyModel]] = Field(None, required=False)
     request_body: Optional[BedrockAgentRequestBodyModel] = Field(None, alias="requestBody")
