@@ -104,3 +104,8 @@ class MyKinesisFirehoseBusiness(BaseModel):
 class MyVpcLatticeBusiness(BaseModel):
     username: str
     name: str
+
+
+class MyBedrockAgentBusiness(BaseModel):
+    username: str
+    name: str

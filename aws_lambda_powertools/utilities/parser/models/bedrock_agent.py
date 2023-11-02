@@ -31,8 +31,8 @@ class BedrockAgentEventModel(BaseModel):
     action_group: str = Field(..., alias="actionGroup")
     api_path: str = Field(..., alias="apiPath")
     http_method: str = Field(..., alias="httpMethod")
-    session_attributes: Dict[str, str] = Field(..., alias="sessionAttributes")
-    prompt_session_attributes: Dict[str, str] = Field(..., alias="promptSessionAttributes")
+    session_attributes: Dict[str, str] = Field({}, alias="sessionAttributes")
+    prompt_session_attributes: Dict[str, str] = Field({}, alias="promptSessionAttributes")
     agent: BedrockAgentModel
     parameters: Optional[List[BedrockAgentPropertyModel]]
-    request_body: Optional[BedrockAgentRequestBodyModel] = Field(..., alias="requestBody")
+    request_body: Optional[BedrockAgentRequestBodyModel] = Field(None, alias="requestBody")
