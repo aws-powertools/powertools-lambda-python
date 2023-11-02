@@ -45,6 +45,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
+    BedrockAgentEvent,
     LambdaFunctionUrlEvent,
     VPCLatticeEvent,
     VPCLatticeEventV2,
@@ -85,6 +86,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEvent = "APIGatewayProxyEvent"
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
+    BedrockAgentEvent = "BedrockAgentEvent"
     VPCLatticeEvent = "VPCLatticeEvent"
     VPCLatticeEventV2 = "VPCLatticeEventV2"
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
@@ -1315,6 +1317,7 @@ class ApiGatewayResolver(BaseRouter):
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
+        self.response_builder_class = ResponseBuilder
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -1784,7 +1787,7 @@ class ApiGatewayResolver(BaseRouter):
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
-    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
+    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:  # noqa: PLR0911
         """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
             logger.debug("Converting event to API Gateway REST API contract")
@@ -1792,6 +1795,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
             logger.debug("Converting event to API Gateway HTTP API contract")
             return APIGatewayProxyEventV2(event)
+        if self._proxy_type == ProxyEventType.BedrockAgentEvent:
+            logger.debug("Converting event to Bedrock Agent contract")
+            return BedrockAgentEvent(event)
         if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
             logger.debug("Converting event to Lambda Function URL contract")
             return LambdaFunctionUrlEvent(event)
@@ -1869,9 +1875,9 @@ class ApiGatewayResolver(BaseRouter):
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:
-            return ResponseBuilder(handler(NotFoundError()))
+            return self.response_builder_class(handler(NotFoundError()))
 
-        return ResponseBuilder(
+        return self.response_builder_class(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
@@ -1886,7 +1892,7 @@ class ApiGatewayResolver(BaseRouter):
             # Reset Processed stack for Middleware (for debugging purposes)
             self._reset_processed_stack()
 
-            return ResponseBuilder(
+            return self.response_builder_class(
                 self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
@@ -1903,7 +1909,7 @@ class ApiGatewayResolver(BaseRouter):
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
-                return ResponseBuilder(
+                return self.response_builder_class(
                     Response(
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
@@ -1942,12 +1948,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self._lookup_exception_handler(type(exp))
         if handler:
             try:
-                return ResponseBuilder(handler(exp), route)
+                return self.response_builder_class(handler(exp), route)
             except ServiceError as service_error:
                 exp = service_error
 
         if isinstance(exp, ServiceError):
-            return ResponseBuilder(
+            return self.response_builder_class(
                 Response(
                     status_code=exp.status_code,
                     content_type=content_types.APPLICATION_JSON,

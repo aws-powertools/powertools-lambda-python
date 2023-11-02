@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer, NoopSerializer
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
 
 class BedrockAgentInfo(DictWrapper):
@@ -47,7 +48,7 @@ class BedrockAgentRequestBody(DictWrapper):
         return {k: BedrockAgentRequestMedia(v) for k, v in self["content"].items()}
 
 
-class BedrockAgentEvent(DictWrapper):
+class BedrockAgentEvent(BaseProxyEvent):
     """
     Bedrock Agent input event
 
@@ -97,3 +98,11 @@ class BedrockAgentEvent(DictWrapper):
     @property
     def prompt_session_attributes(self) -> Dict[str, str]:
         return self["promptSessionAttributes"]
+
+    # For compatibility with BaseProxyEvent
+    @property
+    def path(self) -> str:
+        return self["apiPath"]
+
+    def header_serializer(self) -> BaseHeadersSerializer:
+        return NoopSerializer()
