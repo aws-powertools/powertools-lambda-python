@@ -178,6 +178,7 @@ Parser comes with the following built-in models:
 | **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
 | **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
 | **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
+| **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents    |
 | **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
 | **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                 |
 | **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                 |
@@ -356,6 +357,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 | **VpcLatticeEnvelope**        | 1. Parses data using `VpcLatticeModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
+| **BedrockAgentEnvelope**      | 1. Parses data using `BedrockAgentEventModel`. <br/> 2. Parses `inputText` key using your model and returns it.                                                                                                       | `Model`                            |
 
 #### Bringing your own envelope
 
