@@ -85,6 +85,7 @@ Log Data Event for Troubleshooting
 | [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
+| [Bedrock Agent](#bedrock-agent)                                           | `BedrockAgent`                                     |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -482,6 +483,14 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 === "Event - ScheduledNotification"
     ```json
     --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
+    ```
+
+### Bedrock Agent
+
+=== "app.py"
+
+    ```python hl_lines="2 8 10"
+    --8<-- "examples/event_sources/src/bedrock_agent_event.py"
     ```
 
 ### CloudWatch Dashboard Custom Widget
