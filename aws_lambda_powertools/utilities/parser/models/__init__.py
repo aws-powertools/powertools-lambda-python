@@ -18,6 +18,13 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .bedrock_agent import (
+    BedrockAgentEventModel,
+    BedrockAgentModel,
+    BedrockAgentPropertyModel,
+    BedrockAgentRequestBodyModel,
+    BedrockAgentRequestMediaModel,
+)
 from .cloudformation_custom_resource import (
     CloudFormationCustomResourceBaseModel,
     CloudFormationCustomResourceCreateModel,
@@ -165,4 +172,9 @@ __all__ = [
     "CloudFormationCustomResourceBaseModel",
     "VpcLatticeModel",
     "VpcLatticeV2Model",
+    "BedrockAgentModel",
+    "BedrockAgentPropertyModel",
+    "BedrockAgentEventModel",
+    "BedrockAgentRequestBodyModel",
+    "BedrockAgentRequestMediaModel",
 ]
