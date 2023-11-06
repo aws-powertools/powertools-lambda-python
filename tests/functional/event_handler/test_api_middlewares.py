@@ -406,7 +406,7 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     ],
 )
 def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInstance, event):
-    # GIVEN two global middlewares: one for App and one for Router
+    # GIVEN a router instance
     router = Router()
 
     def app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
@@ -416,6 +416,7 @@ def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInst
 
         return response
 
+    # WHEN we register a route with a middleware
     @router.get("/path", middlewares=[app_middleware])
     def dummy_route():
         # if the middleware is executed, the context variable will be available
@@ -430,6 +431,7 @@ def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInst
     app.include_router(router, prefix="/my")
 
     # THEN resolving a request must execute the middleware
+    # THEN return a successful response http 200 status code
     result = app(event, {})
 
     assert result["statusCode"] == 200
