@@ -413,6 +413,29 @@ def test_response_with_compress_enabled():
     assert headers["Content-Encoding"] == ["gzip"]
 
 
+def test_response_is_json_without_content_type():
+    response = Response(200, None, "")
+
+    assert response.is_json() is False
+
+
+def test_response_is_json_with_json_content_type():
+    response = Response(200, content_types.APPLICATION_JSON, "")
+    assert response.is_json() is True
+
+
+def test_response_is_json_with_multiple_json_content_types():
+    response = Response(
+        200,
+        None,
+        "",
+        {
+            "Content-Type": [content_types.APPLICATION_JSON, content_types.APPLICATION_JSON],
+        },
+    )
+    assert response.is_json() is True
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
