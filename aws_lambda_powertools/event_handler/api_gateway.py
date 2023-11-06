@@ -2140,8 +2140,17 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         )
 
     def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway REST API: stage variable is used in the path
+        # 3. API Gateway REST Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
         stage = self.current_event.request_context.stage
-        return f"/{stage}" if stage and stage != "$default" else "/"
+        if stage and stage != "$default" and self.current_event.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
 
     # override route to ignore trailing "/" in routes for REST API
     def route(
@@ -2205,8 +2214,17 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         )
 
     def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway HTTP API: stage variable is used in the path
+        # 3. API Gateway HTTP Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
         stage = self.current_event.request_context.stage
-        return f"/{stage}" if stage and stage != "$default" else "/"
+        if stage and stage != "$default" and self.current_event.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
 
 
 class ALBResolver(ApiGatewayResolver):
@@ -2224,4 +2242,5 @@ class ALBResolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)
 
     def _get_base_path(self) -> str:
-        return "/"
+        # ALB doesn't have a stage variable, so we just return an empty string
+        return ""
