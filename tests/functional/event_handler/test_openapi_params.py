@@ -10,6 +10,7 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     Parameter,
     ParameterInType,
     Schema,
+    Tag,
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
@@ -118,7 +119,7 @@ def test_openapi_with_custom_params():
     assert get.summary == "Get Users"
     assert get.operationId == "GetUsers"
     assert get.description == "Get paginated users"
-    assert get.tags == ["Users"]
+    assert get.tags == [Tag(name="Users")]
 
     parameter = get.parameters[0]
     assert parameter.required is False
@@ -150,6 +151,54 @@ def test_openapi_with_scalar_returns():
     response = get.responses[200].content[JSON_CONTENT_TYPE]
     assert response.schema_.title == "Return"
     assert response.schema_.type == "string"
+
+
+def test_openapi_with_omitted_param():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler(page: Annotated[str, Query(include_in_schema=False)]):
+        return page
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters is None
+
+
+def test_openapi_with_description():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler(page: Annotated[str, Query(description="This is a description")]):
+        return page
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert len(get.parameters) == 1
+
+    parameter = get.parameters[0]
+    assert parameter.description == "This is a description"
+
+
+def test_openapi_with_deprecated():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler(page: Annotated[str, Query(deprecated=True)]):
+        return page
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert len(get.parameters) == 1
+
+    parameter = get.parameters[0]
+    assert parameter.deprecated is True
 
 
 def test_openapi_with_pydantic_returns():
@@ -281,6 +330,48 @@ def test_openapi_with_embed_body_param():
     assert "Body_handler_users_post" in components.schemas
     body_post_handler_schema = components.schemas["Body_handler_users_post"]
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
+
+
+def test_openapi_with_tags():
+    app = APIGatewayRestResolver()
+
+    @app.get("/users")
+    def handler():
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema(tags=["Orders"])
+    assert len(schema.tags) == 1
+
+    tag = schema.tags[0]
+    assert tag.name == "Orders"
+
+
+def test_openapi_operation_with_tags():
+    app = APIGatewayRestResolver()
+
+    @app.get("/users", tags=["Users"])
+    def handler():
+        raise NotImplementedError()
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/users"].get
+    assert len(get.tags) == 1
+
+    tag = get.tags[0]
+    assert tag.name == "Users"
+
+
+def test_openapi_with_excluded_operations():
+    app = APIGatewayRestResolver()
+
+    @app.get("/secret", include_in_schema=False)
+    def secret():
+        return "password"
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 0
 
 
 def test_create_header():

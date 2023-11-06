@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -28,6 +29,8 @@ from typing import (
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -69,7 +72,6 @@ if TYPE_CHECKING:
         License,
         OpenAPI,
         Server,
-        Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
@@ -236,6 +238,15 @@ class Response:
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 
+    def is_json(self) -> bool:
+        """
+        Returns True if the response is JSON, based on the Content-Type.
+        """
+        content_type = self.headers.get("Content-Type", "")
+        if isinstance(content_type, list):
+            content_type = content_type[0]
+        return content_type.startswith("application/json")
+
 
 class Route:
     """Internally used Route Configuration"""
@@ -253,8 +264,9 @@ class Route:
         description: Optional[str],
         responses: Optional[Dict[int, Dict[str, Any]]],
         response_description: Optional[str],
-        tags: Optional[List["Tag"]],
+        tags: Optional[List[str]],
         operation_id: Optional[str],
+        include_in_schema: bool,
         middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
@@ -284,10 +296,12 @@ class Route:
             The OpenAPI responses for this route
         response_description: Optional[str]
             The OpenAPI response description for this route
-        tags: Optional[List[Tag]]
+        tags: Optional[List[str]]
             The list of OpenAPI tags to be used for this route
         operation_id: Optional[str]
             The OpenAPI operationId for this route
+        include_in_schema: bool
+            Whether or not to include this route in the OpenAPI schema
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -304,6 +318,7 @@ class Route:
         self.responses = responses
         self.response_description = response_description
         self.tags = tags or []
+        self.include_in_schema = include_in_schema
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
 
@@ -483,7 +498,6 @@ class Route:
             # Add the response schema to the OpenAPI 200 response
             json_response.update(
                 self._openapi_operation_return(
-                    operation_id=self.operation_id,
                     param=dependant.return_param,
                     model_name_map=model_name_map,
                     field_mapping=field_mapping,
@@ -530,7 +544,7 @@ class Route:
 
         # Ensure tags is added to the operation
         if self.tags:
-            operation["tags"] = self.tags
+            operation["tags"] = [{"name": tag for tag in self.tags}]
 
         # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
@@ -643,7 +657,6 @@ class Route:
     @staticmethod
     def _openapi_operation_return(
         *,
-        operation_id: str,
         param: Optional["ModelField"],
         model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[
@@ -667,7 +680,7 @@ class Route:
             field_mapping=field_mapping,
         )
 
-        return {"name": f"Return {operation_id}", "schema": return_schema}
+        return {"schema": return_schema}
 
     def _generate_operation_id(self) -> str:
         operation_id = self.func.__name__ + self.path
@@ -790,8 +803,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -847,8 +861,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -885,6 +900,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -898,8 +914,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -937,6 +954,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -950,8 +968,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -989,6 +1008,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1002,8 +1022,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -1040,6 +1061,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1053,8 +1075,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -1094,6 +1117,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1312,11 +1336,11 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1337,7 +1361,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1345,7 +1369,7 @@ class ApiGatewayResolver(BaseRouter):
             A URL to the Terms of Service for the API. MUST be in the format of a URL.
         contact: Contact, optional
             The contact information for the exposed API.
-        license_info:
+        license_info: License, optional
             The license information for the exposed API.
 
         Returns
@@ -1403,6 +1427,9 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
+            if not route.include_in_schema:
+                continue
+
             result = route._get_openapi_path(
                 dependant=route.dependant,
                 operation_ids=operation_ids,
@@ -1421,7 +1448,7 @@ class ApiGatewayResolver(BaseRouter):
         if components:
             output["components"] = components
         if tags:
-            output["tags"] = tags
+            output["tags"] = [{"name": tag} for tag in tags]
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
@@ -1431,11 +1458,11 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1456,7 +1483,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1464,7 +1491,7 @@ class ApiGatewayResolver(BaseRouter):
             A URL to the Terms of Service for the API. MUST be in the format of a URL.
         contact: Contact, optional
             The contact information for the exposed API.
-        license_info:
+        license_info: License, optional
             The license information for the exposed API.
 
         Returns
@@ -1492,6 +1519,111 @@ class ApiGatewayResolver(BaseRouter):
             indent=2,
         )
 
+    def enable_swagger(
+        self,
+        *,
+        path: str = "/swagger",
+        title: str = "Powertools for AWS Lambda (Python) API",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        servers: Optional[List["Server"]] = None,
+        terms_of_service: Optional[str] = None,
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
+        swagger_base_url: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Response]]] = None,
+    ):
+        """
+        Returns the OpenAPI schema as a JSON serializable dict
+
+        Parameters
+        ----------
+        path: str, default = "/swagger"
+            The path to the swagger UI.
+        title: str
+            The title of the application.
+        version: str
+            The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
+        openapi_version: str, default = "3.1.0"
+            The version of the OpenAPI Specification (which the document uses).
+        summary: str, optional
+            A short summary of what the application does.
+        description: str, optional
+            A verbose explanation of the application behavior.
+        tags: List[str], optional
+            A list of tags used by the specification with additional metadata.
+        servers: List[Server], optional
+            An array of Server Objects, which provide connectivity information to a target server.
+        terms_of_service: str, optional
+            A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: Contact, optional
+            The contact information for the exposed API.
+        license_info: License, optional
+            The license information for the exposed API.
+        swagger_base_url: str, optional
+            The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
+        middlewares: List[Callable[..., Response]], optional
+            List of middlewares to be used for the swagger route.
+        """
+        from aws_lambda_powertools.event_handler.openapi.models import Server
+
+        if not swagger_base_url:
+
+            @self.get("/swagger.js", include_in_schema=False)
+            def swagger_js():
+                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js").read()
+                return Response(
+                    status_code=200,
+                    content_type="text/javascript",
+                    body=body,
+                )
+
+            @self.get("/swagger.css", include_in_schema=False)
+            def swagger_css():
+                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
+                return Response(
+                    status_code=200,
+                    content_type="text/css",
+                    body=body,
+                )
+
+        @self.get(path, middlewares=middlewares, include_in_schema=False)
+        def swagger_handler():
+            base_path = self._get_base_path()
+
+            if swagger_base_url:
+                swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
+                swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
+            else:
+                swagger_js = f"{base_path}/swagger.js"
+                swagger_css = f"{base_path}/swagger.css"
+
+            openapi_servers = servers or [Server(url=(base_path or "/"))]
+
+            spec = self.get_openapi_json_schema(
+                title=title,
+                version=version,
+                openapi_version=openapi_version,
+                summary=summary,
+                description=description,
+                tags=tags,
+                servers=openapi_servers,
+                terms_of_service=terms_of_service,
+                contact=contact,
+                license_info=license_info,
+            )
+
+            body = generate_swagger_html(spec, swagger_js, swagger_css)
+
+            return Response(
+                status_code=200,
+                content_type="text/html",
+                body=body,
+            )
+
     def route(
         self,
         rule: str,
@@ -1503,8 +1635,9 @@ class ApiGatewayResolver(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1530,6 +1663,7 @@ class ApiGatewayResolver(BaseRouter):
                     response_description,
                     tags,
                     operation_id,
+                    include_in_schema,
                     middlewares,
                 )
 
@@ -1605,6 +1739,9 @@ class ApiGatewayResolver(BaseRouter):
                 stacklevel=2,
             )
         self._route_keys.append(route_key)
+
+    def _get_base_path(self) -> str:
+        raise NotImplementedError()
 
     @staticmethod
     def _has_debug(debug: Optional[bool] = None) -> bool:
@@ -1940,8 +2077,9 @@ class Router(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -1960,6 +2098,7 @@ class Router(BaseRouter):
                 response_description,
                 tags,
                 operation_id,
+                include_in_schema,
             )
 
             # Collate Middleware for routes
@@ -2000,6 +2139,19 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             enable_validation,
         )
 
+    def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway REST API: stage variable is used in the path
+        # 3. API Gateway REST Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
+        stage = self.current_event.request_context.stage
+        if stage and stage != "$default" and self.current_event.request_context.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
+
     # override route to ignore trailing "/" in routes for REST API
     def route(
         self,
@@ -2012,8 +2164,9 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
@@ -2029,6 +2182,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -2059,6 +2213,19 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             enable_validation,
         )
 
+    def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway HTTP API: stage variable is used in the path
+        # 3. API Gateway HTTP Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
+        stage = self.current_event.request_context.stage
+        if stage and stage != "$default" and self.current_event.request_context.http.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
+
 
 class ALBResolver(ApiGatewayResolver):
     current_event: ALBEvent
@@ -2073,3 +2240,7 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)
+
+    def _get_base_path(self) -> str:
+        # ALB doesn't have a stage variable, so we just return an empty string
+        return ""
