@@ -53,6 +53,9 @@ class VPCLatticeResolver(ApiGatewayResolver):
         """Amazon VPC Lattice resolver"""
         super().__init__(ProxyEventType.VPCLatticeEvent, cors, debug, serializer, strip_prefixes, enable_validation)
 
+    def _get_base_path(self) -> str:
+        return ""
+
 
 class VPCLatticeV2Resolver(ApiGatewayResolver):
     """VPC Lattice resolver
@@ -98,3 +101,6 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
     ):
         """Amazon VPC Lattice resolver"""
         super().__init__(ProxyEventType.VPCLatticeEventV2, cors, debug, serializer, strip_prefixes, enable_validation)
+
+    def _get_base_path(self) -> str:
+        return ""
