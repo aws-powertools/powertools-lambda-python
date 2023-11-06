@@ -2017,7 +2017,8 @@ class ApiGatewayResolver(BaseRouter):
                 new_route = (rule, *route[1:])
 
             # Middlewares are stored by route separately - must grab them to include
-            middlewares = router._routes_with_middleware.get(new_route)
+            # Middleware store the route without prefix, so we must not include prefix when grabbing
+            middlewares = router._routes_with_middleware.get(route)
 
             # Need to use "type: ignore" here since mypy does not like a named parameter after
             # tuple expansion since may cause duplicate named parameters in the function signature.

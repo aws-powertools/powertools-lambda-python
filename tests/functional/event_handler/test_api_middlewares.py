@@ -405,6 +405,44 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
         (APIGatewayHttpResolver(), API_RESTV2_EVENT),
     ],
 )
+def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInstance, event):
+    # GIVEN two global middlewares: one for App and one for Router
+    router = Router()
+
+    def app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
+        # inject a variable into resolver context
+        app.append_context(injected="injected_value")
+        response = next_middleware(app)
+
+        return response
+
+    @router.get("/path", middlewares=[app_middleware])
+    def dummy_route():
+        # if the middleware is executed, the context variable will be available
+        # Otherwise, an exception will be raised
+        injected_context = app.context["injected"]
+
+        assert injected_context == "injected_value"
+
+        return Response(status_code=200, body="works!")
+
+    # WHEN register the route with a prefix
+    app.include_router(router, prefix="/my")
+
+    # THEN resolving a request must execute the middleware
+    result = app(event, {})
+
+    assert result["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
+    "app, event",
+    [
+        (ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent), API_REST_EVENT),
+        (APIGatewayRestResolver(), API_REST_EVENT),
+        (APIGatewayHttpResolver(), API_RESTV2_EVENT),
+    ],
+)
 def test_api_gateway_middleware_order_with_include_router_first(app: EventHandlerInstance, event):
     # GIVEN two global middlewares: one for App and one for Router
     router = Router()
