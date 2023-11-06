@@ -1601,7 +1601,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js = f"{base_path}/swagger.js"
                 swagger_css = f"{base_path}/swagger.css"
 
-            openapi_servers = servers or [Server(url=base_path)]
+            openapi_servers = servers or [Server(url=(base_path or "/"))]
 
             spec = self.get_openapi_json_schema(
                 title=title,
