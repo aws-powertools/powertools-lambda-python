@@ -65,4 +65,6 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
 
     def _get_base_path(self) -> str:
         stage = self.current_event.request_context.stage
-        return f"/{stage}" if stage and stage != "$default" else "/"
+        if stage and stage != "$default" and self.current_event.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""

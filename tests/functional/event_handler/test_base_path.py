@@ -21,7 +21,7 @@ def test_base_path_api_gateway_rest():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""
 
 
 def test_base_path_api_gateway_http():
@@ -38,7 +38,7 @@ def test_base_path_api_gateway_http():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""
 
 
 def test_base_path_alb():
@@ -53,7 +53,7 @@ def test_base_path_alb():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""
 
 
 def test_base_path_lambda_function_url():
@@ -70,7 +70,7 @@ def test_base_path_lambda_function_url():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""
 
 
 def test_vpc_lattice():
@@ -85,7 +85,7 @@ def test_vpc_lattice():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""
 
 
 def test_vpc_latticev2():
@@ -100,4 +100,4 @@ def test_vpc_latticev2():
 
     result = app(event, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"/"'
+    assert result["body"] == ""

@@ -54,7 +54,7 @@ class VPCLatticeResolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.VPCLatticeEvent, cors, debug, serializer, strip_prefixes, enable_validation)
 
     def _get_base_path(self) -> str:
-        return "/"
+        return ""
 
 
 class VPCLatticeV2Resolver(ApiGatewayResolver):
@@ -103,4 +103,4 @@ class VPCLatticeV2Resolver(ApiGatewayResolver):
         super().__init__(ProxyEventType.VPCLatticeEventV2, cors, debug, serializer, strip_prefixes, enable_validation)
 
     def _get_base_path(self) -> str:
-        return "/"
+        return ""
