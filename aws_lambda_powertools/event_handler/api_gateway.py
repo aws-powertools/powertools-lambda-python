@@ -2222,7 +2222,7 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
         #
         # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
         stage = self.current_event.request_context.stage
-        if stage and stage != "$default" and self.current_event.request_context.route_key.startswith(f"/{stage}"):
+        if stage and stage != "$default" and self.current_event.request_context.http.path.startswith(f"/{stage}"):
             return f"/{stage}"
         return ""
 
