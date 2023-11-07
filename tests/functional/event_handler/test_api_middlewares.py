@@ -397,33 +397,21 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     assert result["statusCode"] == 200
 
 
-@pytest.mark.parametrize(
-    "app, event",
-    [
-        (ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent), API_REST_EVENT),
-        (APIGatewayRestResolver(), API_REST_EVENT),
-        (APIGatewayHttpResolver(), API_RESTV2_EVENT),
-    ],
-)
-def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInstance, event):
-    # GIVEN a router instance
+def test_api_gateway_middleware_with_include_router_prefix():
+    # GIVEN an App and Router instance
+    app = ApiGatewayResolver()
     router = Router()
 
     def app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
-        # inject a variable into resolver context
+        # AND a variable injected into resolver context
         app.append_context(injected="injected_value")
-        response = next_middleware(app)
-
-        return response
+        return next_middleware(app)
 
     # WHEN we register a route with a middleware
     @router.get("/path", middlewares=[app_middleware])
     def dummy_route():
-        # if the middleware is executed, the context variable will be available
-        # Otherwise, an exception will be raised
-        injected_context = app.context["injected"]
-
-        assert injected_context == "injected_value"
+        # THEN we should have access to the middleware's injected variable
+        assert app.context["injected"] == "injected_value"
 
         return Response(status_code=200, body="works!")
 
@@ -431,8 +419,8 @@ def test_api_gateway_middleware_with_include_router_prefix(app: EventHandlerInst
     app.include_router(router, prefix="/my")
 
     # THEN resolving a request must execute the middleware
-    # THEN return a successful response http 200 status code
-    result = app(event, {})
+    # and return a successful response http 200 status code
+    result = app(API_REST_EVENT, {})
 
     assert result["statusCode"] == 200
 

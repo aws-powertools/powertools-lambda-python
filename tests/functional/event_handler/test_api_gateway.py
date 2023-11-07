@@ -1197,6 +1197,27 @@ def test_api_gateway_request_path_equals_strip_prefix():
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
+def test_api_gateway_app_with_strip_prefix_and_route_prefix():
+    # GIVEN a strip_prefix matches the request path
+    # and a router instance
+    app = ApiGatewayResolver(strip_prefixes=["/foo"])
+    router = Router()
+    event = {"httpMethod": "GET", "path": "/foo/bar/users", "resource": "/users"}
+
+    @router.get("/users")
+    def base():
+        return {}
+
+    # THEN we can register the router with a prefix
+    app.include_router(router, prefix="/bar")
+
+    result = app(event, {})
+
+    # THEN process event correctly
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
 def test_api_gateway_app_router():
     # GIVEN a Router with registered routes
     app = ApiGatewayResolver()

@@ -2008,6 +2008,7 @@ class ApiGatewayResolver(BaseRouter):
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
+        # Iterate through the routes defined in the router to configure and apply middlewares for each route
         for route, func in router._routes.items():
             new_route = route
 
