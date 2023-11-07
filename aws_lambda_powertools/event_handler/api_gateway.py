@@ -15,6 +15,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generic,
     List,
     Match,
     Optional,
@@ -23,6 +24,7 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
@@ -62,6 +64,8 @@ _UNSAFE_URI = r"%<> \[\]{}|^"
 _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
+
+ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -691,14 +695,14 @@ class Route:
         return operation_id
 
 
-class ResponseBuilder:
+class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
     def __init__(self, response: Response, route: Optional[Route] = None):
         self.response = response
         self.route = route
 
-    def _add_cors(self, event: BaseProxyEvent, cors: CORSConfig):
+    def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         self.response.headers.update(cors.to_dict(event.get_header_value("Origin")))
 
@@ -711,7 +715,7 @@ class ResponseBuilder:
     def _has_compression_enabled(
         route_compression: bool,
         response_compression: Optional[bool],
-        event: BaseProxyEvent,
+        event: ResponseEventT,
     ) -> bool:
         """
         Checks if compression is enabled.
@@ -724,7 +728,7 @@ class ResponseBuilder:
             A boolean indicating whether compression is enabled or not in the route setting.
         response_compression: bool, optional
             A boolean indicating whether compression is enabled or not in the response setting.
-        event: BaseProxyEvent
+        event: Generic[ResponseEventT]
             The event object containing the request details.
 
         Returns
@@ -754,7 +758,7 @@ class ResponseBuilder:
         gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
         self.response.body = gzip.compress(self.response.body) + gzip.flush()
 
-    def _route(self, event: BaseProxyEvent, cors: Optional[CORSConfig]):
+    def _route(self, event: ResponseEventT, cors: Optional[CORSConfig]):
         """Optionally handle any of the route's configure response handling"""
         if self.route is None:
             return
@@ -769,7 +773,7 @@ class ResponseBuilder:
         ):
             self._compress()
 
-    def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
+    def build(self, event: ResponseEventT, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
 
@@ -1317,7 +1321,7 @@ class ApiGatewayResolver(BaseRouter):
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
-        self._response_builder_class = ResponseBuilder
+        self._response_builder_class = ResponseBuilder[BaseProxyEvent]
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
