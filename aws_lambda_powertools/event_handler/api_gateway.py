@@ -210,7 +210,7 @@ class Response:
         self,
         status_code: int,
         content_type: Optional[str] = None,
-        body: Union[str, bytes, None] = None,
+        body: Union[Any, None] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
@@ -1317,7 +1317,7 @@ class ApiGatewayResolver(BaseRouter):
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
-        self.response_builder_class = ResponseBuilder
+        self._response_builder_class = ResponseBuilder
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -1875,9 +1875,9 @@ class ApiGatewayResolver(BaseRouter):
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:
-            return self.response_builder_class(handler(NotFoundError()))
+            return self._response_builder_class(handler(NotFoundError()))
 
-        return self.response_builder_class(
+        return self._response_builder_class(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
@@ -1892,7 +1892,7 @@ class ApiGatewayResolver(BaseRouter):
             # Reset Processed stack for Middleware (for debugging purposes)
             self._reset_processed_stack()
 
-            return self.response_builder_class(
+            return self._response_builder_class(
                 self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
@@ -1909,7 +1909,7 @@ class ApiGatewayResolver(BaseRouter):
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
-                return self.response_builder_class(
+                return self._response_builder_class(
                     Response(
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
@@ -1948,12 +1948,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self._lookup_exception_handler(type(exp))
         if handler:
             try:
-                return self.response_builder_class(handler(exp), route)
+                return self._response_builder_class(handler(exp), route)
             except ServiceError as service_error:
                 exp = service_error
 
         if isinstance(exp, ServiceError):
-            return self.response_builder_class(
+            return self._response_builder_class(
                 Response(
                     status_code=exp.status_code,
                     content_type=content_types.APPLICATION_JSON,

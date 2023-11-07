@@ -1,6 +1,8 @@
 import logging
 from typing import Any, Dict, Optional, cast
 
+from typing_extensions import override
+
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.api_gateway import CORSConfig, ProxyEventType, ResponseBuilder
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
@@ -10,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class BedrockResponseBuilder(ResponseBuilder):
+    @override
     def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
@@ -68,4 +71,4 @@ class BedrockAgentResolver(ApiGatewayResolver):
             None,
             enable_validation,
         )
-        self.response_builder_class = BedrockResponseBuilder
+        self._response_builder_class = BedrockResponseBuilder

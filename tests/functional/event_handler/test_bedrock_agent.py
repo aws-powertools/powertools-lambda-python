@@ -30,13 +30,13 @@ def test_bedrock_agent_event():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == {"output": claims_response}
+    assert body == json.dumps({"output": claims_response})
 
 
 def test_bedrock_agent_event_with_response():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
-    output = json.dumps({"output": claims_response})
+    output = {"output": claims_response}
 
     @app.get("/claims")
     def claims():
@@ -56,7 +56,7 @@ def test_bedrock_agent_event_with_response():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == output
+    assert body == json.dumps(output)
 
 
 def test_bedrock_agent_event_with_no_matches():
