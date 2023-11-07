@@ -1,13 +1,13 @@
-import logging
 from typing import Any, Dict
 
 from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
-from aws_lambda_powertools.event_handler.api_gateway import ProxyEventType, ResponseBuilder
+from aws_lambda_powertools.event_handler.api_gateway import (
+    ProxyEventType,
+    ResponseBuilder,
+)
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
-
-logger = logging.getLogger(__name__)
 
 
 class BedrockResponseBuilder(ResponseBuilder):
