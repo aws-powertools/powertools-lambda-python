@@ -1,6 +1,5 @@
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer, NoopSerializer
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
 
@@ -103,6 +102,3 @@ class BedrockAgentEvent(BaseProxyEvent):
     @property
     def path(self) -> str:
         return self["apiPath"]
-
-    def header_serializer(self) -> BaseHeadersSerializer:
-        return NoopSerializer()

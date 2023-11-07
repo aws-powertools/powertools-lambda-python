@@ -123,12 +123,3 @@ class SingleValueHeadersSerializer(BaseHeadersSerializer):
                 payload["headers"][key] = values[-1]
 
         return payload
-
-
-class NoopSerializer(BaseHeadersSerializer):
-    """
-    Noop serializer that doesn't do anything. This is useful for resolvers that don't need to set headers or cookies.
-    """
-
-    def serialize(self, headers: Dict[str, Union[str, List[str]]], cookies: List[Cookie]) -> Dict[str, Any]:
-        return {}
