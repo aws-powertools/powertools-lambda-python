@@ -79,6 +79,29 @@ def test_bedrock_agent_event_with_no_matches():
     assert result["response"]["httpStatusCode"] == 404
 
 
+def test_bedrock_agent_event_with_validation_error():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims")
+    def claims() -> Dict[str, Any]:
+        return "oh no, this is not a dict"  # type: ignore
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as BedrockAgentEvent
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/claims"
+    assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
+    assert result["response"]["httpMethod"] == "GET"
+    assert result["response"]["httpStatusCode"] == 422
+
+    body = result["response"]["responseBody"]["application/json"]["body"]
+    assert "value is not a valid dict" in body
+
+
 def test_bedrock_agent_event_with_exception():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
