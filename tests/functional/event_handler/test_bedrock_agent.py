@@ -77,3 +77,34 @@ def test_bedrock_agent_event_with_no_matches():
     assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
     assert result["response"]["httpMethod"] == "GET"
     assert result["response"]["httpStatusCode"] == 404
+
+
+def test_bedrock_agent_event_with_exception():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.exception_handler(RuntimeError)
+    def handle_runtime_error(ex: RuntimeError):
+        return Response(
+            status_code=500,
+            content_type=content_types.TEXT_PLAIN,
+            body="Something went wrong",
+        )
+
+    @app.get("/claims")
+    def claims():
+        raise RuntimeError()
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEvent.json"), {})
+
+    # THEN process the exception correctly
+    # AND return 500 because of the internal server error
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/claims"
+    assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
+    assert result["response"]["httpMethod"] == "GET"
+    assert result["response"]["httpStatusCode"] == 500
+
+    body = result["response"]["responseBody"]["text/plain"]["body"]
+    assert body == "Something went wrong"

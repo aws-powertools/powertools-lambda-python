@@ -241,6 +241,7 @@ class Response:
         self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
         self.cookies = cookies or []
         self.compress = compress
+        self.content_type = content_type
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
 

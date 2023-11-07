@@ -30,7 +30,7 @@ class BedrockResponseBuilder(ResponseBuilder):
                 "httpMethod": event.http_method,
                 "httpStatusCode": self.response.status_code,
                 "responseBody": {
-                    "application/json": {
+                    self.response.content_type: {
                         "body": self.response.body,
                     },
                 },
