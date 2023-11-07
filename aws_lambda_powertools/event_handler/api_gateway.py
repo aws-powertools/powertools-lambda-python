@@ -728,7 +728,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
             A boolean indicating whether compression is enabled or not in the route setting.
         response_compression: bool, optional
             A boolean indicating whether compression is enabled or not in the response setting.
-        event: Generic[ResponseEventT]
+        event: ResponseEventT
             The event object containing the request details.
 
         Returns
