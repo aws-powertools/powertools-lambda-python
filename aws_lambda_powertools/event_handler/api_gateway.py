@@ -1787,7 +1787,7 @@ class ApiGatewayResolver(BaseRouter):
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
-    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:  # noqa: PLR0911
+    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:  # noqa: PLR0911  # ignore many returns
         """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
             logger.debug("Converting event to API Gateway REST API contract")
