@@ -214,7 +214,7 @@ class Response:
         self,
         status_code: int,
         content_type: Optional[str] = None,
-        body: Union[Any, None] = None,
+        body: Any = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
