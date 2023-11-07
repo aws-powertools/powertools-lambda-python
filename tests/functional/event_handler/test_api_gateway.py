@@ -1198,22 +1198,21 @@ def test_api_gateway_request_path_equals_strip_prefix():
 
 
 def test_api_gateway_app_with_strip_prefix_and_route_prefix():
-    # GIVEN a strip_prefix matches the request path
-    # and a router instance
-    app = ApiGatewayResolver(strip_prefixes=["/foo"])
+    # GIVEN all routes are stripped from its version e.g., /v1
+    app = ApiGatewayResolver(strip_prefixes=["/v1"])
     router = Router()
-    event = {"httpMethod": "GET", "path": "/foo/bar/users", "resource": "/users"}
 
-    @router.get("/users")
-    def base():
-        return {}
+    event = {"httpMethod": "GET", "path": "/v1/users/leandro", "resource": "/users"}
 
-    # THEN we can register the router with a prefix
-    app.include_router(router, prefix="/bar")
+    @router.get("<user_id>")
+    def base(user_id: str):
+        return {"user": user_id}
 
+    # WHEN a router is included prefixing all routes with "/users/"
+    app.include_router(router, prefix="/users/")
     result = app(event, {})
 
-    # THEN process event correctly
+    # THEN route correctly to the registered route after stripping each prefix (global + router)
     assert result["statusCode"] == 200
 
 
