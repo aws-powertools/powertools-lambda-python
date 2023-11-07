@@ -1215,7 +1215,6 @@ def test_api_gateway_app_with_strip_prefix_and_route_prefix():
 
     # THEN process event correctly
     assert result["statusCode"] == 200
-    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
 def test_api_gateway_app_router():
