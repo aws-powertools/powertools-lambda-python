@@ -397,6 +397,34 @@ def test_api_gateway_middleware_order_with_include_router_last(app: EventHandler
     assert result["statusCode"] == 200
 
 
+def test_api_gateway_middleware_with_include_router_prefix():
+    # GIVEN an App and Router instance
+    app = ApiGatewayResolver()
+    router = Router()
+
+    def app_middleware(app: EventHandlerInstance, next_middleware: NextMiddleware):
+        # AND a variable injected into resolver context
+        app.append_context(injected="injected_value")
+        return next_middleware(app)
+
+    # WHEN we register a route with a middleware
+    @router.get("/path", middlewares=[app_middleware])
+    def dummy_route():
+        # THEN we should have access to the middleware's injected variable
+        assert app.context["injected"] == "injected_value"
+
+        return Response(status_code=200, body="works!")
+
+    # WHEN register the route with a prefix
+    app.include_router(router, prefix="/my")
+
+    # THEN resolving a request must execute the middleware
+    # and return a successful response http 200 status code
+    result = app(API_REST_EVENT, {})
+
+    assert result["statusCode"] == 200
+
+
 @pytest.mark.parametrize(
     "app, event",
     [

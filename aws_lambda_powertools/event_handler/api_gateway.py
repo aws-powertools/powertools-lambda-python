@@ -2008,6 +2008,7 @@ class ApiGatewayResolver(BaseRouter):
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
+        # Iterate through the routes defined in the router to configure and apply middlewares for each route
         for route, func in router._routes.items():
             new_route = route
 
@@ -2017,7 +2018,8 @@ class ApiGatewayResolver(BaseRouter):
                 new_route = (rule, *route[1:])
 
             # Middlewares are stored by route separately - must grab them to include
-            middlewares = router._routes_with_middleware.get(new_route)
+            # Middleware store the route without prefix, so we must not include prefix when grabbing
+            middlewares = router._routes_with_middleware.get(route)
 
             # Need to use "type: ignore" here since mypy does not like a named parameter after
             # tuple expansion since may cause duplicate named parameters in the function signature.

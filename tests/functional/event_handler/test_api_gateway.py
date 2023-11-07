@@ -1197,6 +1197,25 @@ def test_api_gateway_request_path_equals_strip_prefix():
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
 
 
+def test_api_gateway_app_with_strip_prefix_and_route_prefix():
+    # GIVEN all routes are stripped from its version e.g., /v1
+    app = ApiGatewayResolver(strip_prefixes=["/v1"])
+    router = Router()
+
+    event = {"httpMethod": "GET", "path": "/v1/users/leandro", "resource": "/users"}
+
+    @router.get("<user_id>")
+    def base(user_id: str):
+        return {"user": user_id}
+
+    # WHEN a router is included prefixing all routes with "/users/"
+    app.include_router(router, prefix="/users/")
+    result = app(event, {})
+
+    # THEN route correctly to the registered route after stripping each prefix (global + router)
+    assert result["statusCode"] == 200
+
+
 def test_api_gateway_app_router():
     # GIVEN a Router with registered routes
     app = ApiGatewayResolver()
