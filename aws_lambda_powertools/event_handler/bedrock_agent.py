@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class BedrockResponseBuilder(ResponseBuilder):
     """
-    Bedrock Response Builder. This builds the response dict to be returned by the lambda when using Bedrock Agents.
+    Bedrock Response Builder. This builds the response dict to be returned by Lambda when using Bedrock Agents.
 
     Since the payload format is different from the standard API Gateway Proxy event, we override the build method.
     """
