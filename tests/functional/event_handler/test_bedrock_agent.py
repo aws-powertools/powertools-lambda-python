@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
+from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
 
@@ -99,7 +100,10 @@ def test_bedrock_agent_event_with_validation_error():
     assert result["response"]["httpStatusCode"] == 422
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert "value is not a valid dict" in body
+    if PYDANTIC_V2:
+        assert "should be a valid dictionary" in body
+    else:
+        assert "value is not a valid dict" in body
 
 
 def test_bedrock_agent_event_with_exception():
