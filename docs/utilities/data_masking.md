@@ -166,7 +166,7 @@ For unit testing your applications, you can mock the calls to the data masking u
 
 === "test_single_mock.py"
     ```python hl_lines="4 8"
-    --8<-- "examples/data_masking/tests/test_single_mock.py"
+    --8<-- "examples/data_masking/tests/test_data_masking_single_mock.py"
     ```
 
 === "single_mock.py"
@@ -178,5 +178,5 @@ If we need to use this pattern across multiple tests, we can avoid repetition by
 
 === "test_with_fixture.py"
     ```python hl_lines="5 10"
-    --8<-- "examples/data_masking/tests/test_with_fixture.py"
+    --8<-- "examples/data_masking/tests/test_data_masking_with_fixture.py"
     ```
