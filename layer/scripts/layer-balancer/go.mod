@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/aws/aws-sdk-go-v2 v1.22.1
 	github.com/aws/aws-sdk-go-v2/config v1.22.2
-	github.com/aws/aws-sdk-go-v2/service/lambda v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/lambda v1.44.0
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29
 	golang.org/x/sync v0.5.0
 )
