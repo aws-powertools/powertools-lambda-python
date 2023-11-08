@@ -163,13 +163,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.103.0"
+version = "2.103.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.7"
 files = [
-    {file = "aws-cdk-lib-2.103.0.tar.gz", hash = "sha256:20537833c3dc74223448aba9e604571ae002a86f3509daa6d0a0343d61fb36cb"},
-    {file = "aws_cdk_lib-2.103.0-py3-none-any.whl", hash = "sha256:e4db9f423506ca3bb7ded913f2bc430d5b8d4e83823d78de7fa10afc5ba8a5ba"},
+    {file = "aws-cdk-lib-2.103.1.tar.gz", hash = "sha256:798d5acdb4603d9f49466216781686a1e2dcf7d9bd2ffdc05a002730739e92a3"},
+    {file = "aws_cdk_lib-2.103.1-py3-none-any.whl", hash = "sha256:e558c5ae5ee7a5fe0560368cee65d1ace28a203078fa98ce99007c539085e083"},
 ]
 
 [package.dependencies]
@@ -517,13 +517,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.83.0"
+version = "0.83.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.7, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.83.0.tar.gz", hash = "sha256:212251e17322c630506ff02117ff53586037bec3a7161f7cb081c7afde9fd2ca"},
-    {file = "cfn_lint-0.83.0-py3-none-any.whl", hash = "sha256:e2f8d763d1cec9f9cbed58b0461b04c8c294199844d65a35e42ed3400314f181"},
+    {file = "cfn-lint-0.83.1.tar.gz", hash = "sha256:9629138f98d83898c7ffc63f67a3106af67f267d6cee7943253f1f813655293d"},
+    {file = "cfn_lint-0.83.1-py3-none-any.whl", hash = "sha256:e801e9ca384f8c0fbbcd3e342cad5b038d6ca60214b81e70e2710b4dc3339567"},
 ]
 
 [package.dependencies]
@@ -1898,13 +1898,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.28.66"
-description = "Type annotations for boto3.DynamoDB 1.28.66 service generated with mypy-boto3-builder 7.19.0"
+version = "1.28.73"
+description = "Type annotations for boto3.DynamoDB 1.28.73 service generated with mypy-boto3-builder 7.18.2"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-dynamodb-1.28.66.tar.gz", hash = "sha256:62431d3d9072dd71551623d3d933f5c3aff0f011730281449ff2f56bb742033c"},
-    {file = "mypy_boto3_dynamodb-1.28.66-py3-none-any.whl", hash = "sha256:e2caf668d9861cc354543e456ca3f7d930bd46d4d2a3cf52f9e93f1073a3dc18"},
+    {file = "mypy-boto3-dynamodb-1.28.73.tar.gz", hash = "sha256:c112d096f9e310f77104bdf068b15497468be7a47af064e980fb1e3b6273f459"},
+    {file = "mypy_boto3_dynamodb-1.28.73-py3-none-any.whl", hash = "sha256:b30b79584300f52c9999a8f7249a5817e5863bcb26c636934dcc3ecf81e37b09"},
 ]
 
 [package.dependencies]
@@ -3288,4 +3288,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "8fae79e588109e06bb9ea9a86a28593ffbdd60ae8494d5f05f75e2bf244e1fad"
+content-hash = "832ac94da5532f0d502d6fa7f5fb07ee513e2821b91715bfe94a5e3fc11723bc"
