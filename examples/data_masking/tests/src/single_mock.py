@@ -38,6 +38,6 @@ def handler(event, context):
     data_masker = DataMasking(provider=provider)
 
     encrypted = data_masker.encrypt(data=data)
-    decrypted = data_masker.decrypt(data=encrypted)
+    data_masker.decrypt(data=encrypted)
 
     return {"message": "mock_value"}

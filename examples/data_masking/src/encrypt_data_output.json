@@ -1,0 +1,13 @@
+{
+    "id": 1,
+    "name": "John Doe",
+    "age": 30,
+    "email": "InRoaXMgaXMgYSBzdHJpbmciHsLZGx2na-XzP_TB5Bf2LNU1bLc",
+    "address": {
+        "street": "XMgYSB_KDddaDJYMb-JpbmGnagTklwQ-msdaDLP",
+        "city": "Anytown",
+        "state": "CA",
+        "zip": "12345"
+    },
+    "company_address": "B_KDddaDJYMb-93daSFGmnrtepytrejPNVXX98"
+}

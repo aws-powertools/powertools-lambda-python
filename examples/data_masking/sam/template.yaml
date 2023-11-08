@@ -27,7 +27,7 @@ Resources:
       Handler: data_masking_function_example.lambda_handler
       CodeUri: ../src
       Description: Data Masking Function Example
-      MemorySize: 1024                  # TODO: Recommended to use 1024 MB due to 
+      MemorySize: 128
       Architectures:
       - x86_64
       Policies:

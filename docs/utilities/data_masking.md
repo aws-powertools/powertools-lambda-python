@@ -15,37 +15,45 @@ The data masking utility provides a simple solution to conceal incoming data so 
 
 ## Terminology
 
-Mask: This refers to concealing or partially replacing sensitive information with a non-sensitive placeholder or mask. The key characteristic of this operation is that it is irreversible, meaning the original sensitive data cannot be retrieved from the masked data. Masking is commonly applied when displaying data to users or for anonymizing data in non-reversible scenarios. For example, display the last four digits of a credit card number as "**** **** **** 1234".
+**Mask**: This refers to concealing or partially replacing sensitive information with a non-sensitive placeholder or mask. The key characteristic of this operation is that it is irreversible, meaning the original sensitive data cannot be retrieved from the masked data. Masking is commonly applied when displaying data to users or for anonymizing data in non-reversible scenarios. For example, display the last four digits of a credit card number as "**** **** **** 1234".
 
-Encrypt: This is the process of transforming plaintext data into a ciphertext format using an encryption algorithm and a cryptographic key. Encryption is a reversible process, meaning the original data can be retrieved (decrypted) using the appropriate decryption key. You can use this, for instance, to encrypt any PII (personally identifiable information) of your customers and make sure only the people with the right permissions are allowed to decrypt and view the plaintext PII data, in accordance with GDPR.
+**Encrypt**: This is the process of transforming plaintext data into a ciphertext format using an encryption algorithm and a cryptographic key. Encryption is a reversible process, meaning the original data can be retrieved (decrypted) using the appropriate decryption key. You can use this, for instance, to encrypt any PII (personally identifiable information) of your customers and make sure only the people with the right permissions are allowed to decrypt and view the plaintext PII data, in accordance with GDPR.
 
-Decrypt: This is the process of reversing the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key that only authorized personnel should have access to.
+**Decrypt**: This is the process of reversing the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key that only authorized personnel should have access to.
 
 ## Getting started
 
 ### IAM Permissions
 
-If using the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
+To use the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
 
-If using any other encryption provider, make sure to have the permissions for your role that it requires.
+For any other encryption provider, make sure to have the permissions for your role that it requires.
 
-If not using any encryption services and just masking data, your Lambda does not need any additional permissions to use this utility.
+If not using any encryption services and only masking data, your Lambda does not need any additional permissions to use this utility.
 
 ### Required resources
 
-If using the AWS Encryption SDK, you must have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
+To use the AWS Encryption SDK, you must have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
 
-If using any other encryption provider, you must have the resources required for that provider.
+For any other encryption provider, you must have the resources required for that provider.
 
 ## Using the utility
+
+#### Working with JSON
+When using the data masking utility with dictionaries or JSON objects, you can provide a list of keys to conceal the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can conceal values of nested keys by using dot notation.
 
 ### Masking data
 
 You can mask data without having to install any encryption library.
 
 === "getting_started_mask_data.py"
-    ```python hl_lines="1 6 21 35 44"
+    ```python hl_lines="1 6 27"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
+    ```
+
+=== "output.json"
+    ```json hl_lines="5 7 12"
+    --8<-- "examples/data_masking/src/mask_data_output.json"
     ```
 
 ### Encryting and decrypting data
@@ -53,9 +61,20 @@ You can mask data without having to install any encryption library.
 In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. You can still use the masking feature while using any encryption provider.
 
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="3-4 6 23-26 40 54 63 77 80 94"
+    ```python hl_lines="3-4 6 29 32 34"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
+
+=== "encrypted_output.json"
+    ```json hl_lines="5-7 12"
+    --8<-- "examples/data_masking/src/encrypt_data_output.json"
+    ```
+
+=== "decrypted_output.json"
+    ```json hl_lines="5-7 12-17"
+    --8<-- "examples/data_masking/src/decrypt_data_output.json"
+    ```
+
 
 ### SAM template example
 === "template.yaml"
@@ -122,13 +141,23 @@ You can then use this custom encryption provider class as the `provider` argumen
 Here is an example of implementing a custom encryption using an external encryption library like [ItsDangerous](https://itsdangerous.palletsprojects.com/en/2.1.x/){target="_blank" rel="nofollow"}, a widely popular encryption library.
 
 === "working_with_own_provider.py"
-    ```python hl_lines="1-2 19-22 36 50 59 73 76 90"
+    ```python hl_lines="1-2 25 28 30"
     --8<-- "examples/data_masking/src/working_with_own_provider.py"
     ```
 
 === "custom_provider.py"
     ```python hl_lines="1 3 6 8 11 16"
     --8<-- "examples/data_masking/src/custom_provider.py"
+    ```
+
+=== "encrypted_output.json"
+    ```json hl_lines="5-7 12"
+    --8<-- "examples/data_masking/src/encrypt_data_output.json"
+    ```
+
+=== "decrypted_output.json"
+    ```json hl_lines="5-7 12-17"
+    --8<-- "examples/data_masking/src/decrypt_data_output.json"
     ```
 
 ## Testing your code

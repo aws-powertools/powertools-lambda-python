@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.data_masking import DataMasking
 
 
-def lambda_handler(event, context: LambdaContext):
+def lambda_handler(event, context):
 
     data_masker = DataMasking()
 
@@ -16,30 +16,12 @@ def lambda_handler(event, context: LambdaContext):
             "state": "CA", 
             "zip": "12345",
         },
+        "company_address": {
+            "street": "456 ACME Ave", 
+            "city": "Anytown", 
+            "state": "CA", 
+            "zip": "12345",
+        },
     }
 
-    masked = data_masker.mask(data=data, fields=["email", "address.street"])
-    # masked = {
-    #     "id": 1,
-    #     "name": "John Doe",
-    #     "age": 30,
-    #     "email": "*****",
-    #     "address": {
-    #         "street": "*****",
-    #         "city": "Anytown",
-    #         "state": "CA",
-    #         "zip": "12345"
-    #     },
-    # }
-
-    masked = data_masker.mask(data=data, fields=["address"])
-    # masked = {
-    #     "id": 1,
-    #     "name": "John Doe",
-    #     "age": 30,
-    #     "email": "johndoe@example.com",
-    #     "address": "*****"
-    # }
-
-    masked = data_masker.mask(data=data)
-    # masked = "*****"
+    data_masker.mask(data=data, fields=["email", "address.street", "company_address"])
