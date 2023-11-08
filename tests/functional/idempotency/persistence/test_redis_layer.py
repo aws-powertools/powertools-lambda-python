@@ -1,5 +1,6 @@
 # ruff: noqa
 import copy
+import json
 import time as t
 
 import pytest
@@ -16,7 +17,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 )
 
 from unittest import mock
-
+from multiprocessing import Process, Manager
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
@@ -91,7 +92,7 @@ class MockRedisBase:
 
 
 class MockRedis(MockRedisBase):
-    def __init__(self, decode_responses=False, cache: dict = None, **kwargs):
+    def __init__(self, decode_responses=False, cache: dict = None, mock_latency_ms: int = 0, **kwargs):
         self.cache = cache or {}
         self.expire_dict = {}
         self.decode_responses = decode_responses
@@ -101,9 +102,13 @@ class MockRedis(MockRedisBase):
         self.url = ""
         self.__dict__.update(kwargs)
         self.closed = False
+        self.mock_latency_ms = mock_latency_ms
         super(MockRedis, self).__init__()
 
+    # check_closed is called before every mock redis operation
     def check_closed(self):
+        if self.mock_latency_ms != 0:
+            t.sleep(self.mock_latency_ms / 1000)
         if self.closed == False:
             return
         if self.mode == "cluster":
@@ -127,6 +132,7 @@ class MockRedis(MockRedisBase):
 
     # return {} if no match
     def hgetall(self, name):
+        self.check_closed()
         if self.expire_dict.get(name, t.time() + 1) < t.time():
             self.cache.pop(name, {})
         return self.cache.get(name, {})
@@ -551,3 +557,49 @@ def test_redis_connection_get_kwargs_error():
 
     with pytest.raises(IdempotencyRedisClientConfigError):
         layer = RedisCachePersistenceLayer(host="testhost")
+
+
+def test_redis_orphan_record_race_condition(lambda_context, capsys):
+    redis_client = MockRedis(
+        host="localhost",
+        port="63005",
+        decode_responses=True,
+        mock_latency_ms=200,
+    )
+    manager = Manager()
+    # use a thread safe dict
+    redis_client.expire_dict = manager.dict()
+    redis_client.cache = manager.dict()
+    # given a mock redis client with latency, orphan record exists
+    layer = RedisCachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value4"}
+    lambda_response = {"foo": "bar"}
+
+    @idempotent(persistence_store=layer)
+    def lambda_handler(event, context):
+        print("lambda executed")
+        if redis_client.cache.get("exec_count", None) != None:
+            redis_client.cache["exec_count"] += 1
+        return lambda_response
+
+    # run handler for the first time to create a valid record in cache
+    lambda_handler(mock_event, lambda_context)
+    # modify the cache to create the orphan record
+    for key, item in redis_client.cache.items():
+        json_dict = json.loads(item)
+        json_dict["expiration"] = int(t.time()) - 4000
+        redis_client.cache[key] = json.dumps(json_dict).encode()
+    # Given orpahn idempotency record with same payload already in Redis
+    # When running two lambda handler at the same time
+    redis_client.cache["exec_count"] = 0
+    p1 = Process(target=lambda_handler, args=(mock_event, lambda_context))
+    p2 = Process(target=lambda_handler, args=(mock_event, lambda_context))
+    p1.start()
+    t.sleep(0.01)
+    p2.start()
+    p1.join()
+    p2.join()
+    # print(redis_client.cache)
+    # Then only one handler will actually run
+    assert redis_client.cache["exec_count"] == 1
