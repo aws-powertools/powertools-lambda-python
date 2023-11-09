@@ -98,7 +98,13 @@ class BedrockAgentEvent(BaseProxyEvent):
     def prompt_session_attributes(self) -> Dict[str, str]:
         return self["promptSessionAttributes"]
 
-    # For compatibility with BaseProxyEvent
+    # The following methods add compatibility with BaseProxyEvent
     @property
     def path(self) -> str:
         return self["apiPath"]
+
+    @property
+    def query_string_parameters(self) -> Optional[Dict[str, str]]:
+        # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
+        # together with the other parameters. So we just return all parameters here.
+        return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
