@@ -17,7 +17,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 )
 
 from unittest import mock
-from multiprocessing import Process, Manager
+from multiprocessing import Process, Manager, Lock
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
@@ -103,6 +103,7 @@ class MockRedis(MockRedisBase):
         self.__dict__.update(kwargs)
         self.closed = False
         self.mock_latency_ms = mock_latency_ms
+        self.nx_lock = Lock()
         super(MockRedis, self).__init__()
 
     # check_closed is called before every mock redis operation
@@ -157,12 +158,15 @@ class MockRedis(MockRedisBase):
         if isinstance(value, str):
             value = value.encode()
 
-        # nx logic
-        if name in self.cache and nx:
-            return None
+        # nx logic, acquire a lock for multiprocessing safety
+        with self.nx_lock:
+            # key exist, nx mode will just return None
+            if name in self.cache and nx:
+                return None
 
-        self.cache[name] = value
-        self.expire(name, ex)
+            # key doesn't exist, set the key
+            self.cache[name] = value
+            self.expire(name, ex)
         return True
 
     # return None if not found
@@ -559,12 +563,12 @@ def test_redis_connection_get_kwargs_error():
         layer = RedisCachePersistenceLayer(host="testhost")
 
 
-def test_redis_orphan_record_race_condition(lambda_context, capsys):
+def test_redis_orphan_record_race_condition(lambda_context):
     redis_client = MockRedis(
         host="localhost",
         port="63005",
         decode_responses=True,
-        mock_latency_ms=200,
+        mock_latency_ms=50,
     )
     manager = Manager()
     # use a thread safe dict
@@ -585,21 +589,56 @@ def test_redis_orphan_record_race_condition(lambda_context, capsys):
 
     # run handler for the first time to create a valid record in cache
     lambda_handler(mock_event, lambda_context)
-    # modify the cache to create the orphan record
+    # modify the cache expiration to create the orphan record
     for key, item in redis_client.cache.items():
         json_dict = json.loads(item)
         json_dict["expiration"] = int(t.time()) - 4000
         redis_client.cache[key] = json.dumps(json_dict).encode()
-    # Given orpahn idempotency record with same payload already in Redis
+    # Given orphan idempotency record with same payload already in Redis
     # When running two lambda handler at the same time
     redis_client.cache["exec_count"] = 0
     p1 = Process(target=lambda_handler, args=(mock_event, lambda_context))
     p2 = Process(target=lambda_handler, args=(mock_event, lambda_context))
     p1.start()
-    t.sleep(0.01)
     p2.start()
     p1.join()
     p2.join()
-    # print(redis_client.cache)
+    # Then only one handler will actually run
+    assert redis_client.cache["exec_count"] == 1
+
+
+# race condition on empty record
+def test_redis_race_condition(lambda_context):
+    redis_client = MockRedis(
+        host="localhost",
+        port="63005",
+        decode_responses=True,
+        mock_latency_ms=50,
+    )
+    manager = Manager()
+    # use a thread safe dict
+    redis_client.expire_dict = manager.dict()
+    redis_client.cache = manager.dict()
+    # given a mock redis client with latency, orphan record exists
+    layer = RedisCachePersistenceLayer(client=redis_client)
+
+    mock_event = {"data": "value4"}
+    lambda_response = {"foo": "bar"}
+
+    @idempotent(persistence_store=layer)
+    def lambda_handler(event, context):
+        print("lambda executed")
+        if redis_client.cache.get("exec_count", None) != None:
+            redis_client.cache["exec_count"] += 1
+        return lambda_response
+
+    # When running two lambda handler at the same time
+    redis_client.cache["exec_count"] = 0
+    p1 = Process(target=lambda_handler, args=(mock_event, lambda_context))
+    p2 = Process(target=lambda_handler, args=(mock_event, lambda_context))
+    p1.start()
+    p2.start()
+    p1.join()
+    p2.join()
     # Then only one handler will actually run
     assert redis_client.cache["exec_count"] == 1
