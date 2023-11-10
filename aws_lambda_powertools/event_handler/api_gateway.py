@@ -1829,7 +1829,8 @@ class ApiGatewayResolver(BaseRouter):
                 # Add matched Route reference into the Resolver context
                 self.append_context(_route=route, _path=path)
 
-                return self._call_route(route, match_results.groupdict())  # pass fn args
+                route_keys = self._convert_matches_into_route_keys(match_results)
+                return self._call_route(route, route_keys)  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
@@ -1857,6 +1858,10 @@ class ApiGatewayResolver(BaseRouter):
                     return "/"
 
         return path
+
+    def _convert_matches_into_route_keys(self, match: Match) -> Dict[str, str]:
+        """Converts the regex match into a dict of route keys"""
+        return match.groupdict()
 
     @staticmethod
     def _path_starts_with(path: str, prefix: str):

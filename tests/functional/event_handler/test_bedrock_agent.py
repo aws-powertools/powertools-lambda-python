@@ -34,6 +34,28 @@ def test_bedrock_agent_event():
     assert body == json.dumps({"output": claims_response})
 
 
+def test_bedrock_agent_with_path_params():
+    # GIVEN a Bedrock Agent event
+    app = BedrockAgentResolver()
+
+    @app.get("/claims/<claim_id>")
+    def claims(claim_id: str):
+        assert isinstance(app.current_event, BedrockAgentEvent)
+        assert app.lambda_context == {}
+        assert claim_id == "123"
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentEventWithPathParams.json"), {})
+
+    # THEN process event correctly
+    # AND set the current_event type as BedrockAgentEvent
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/claims/<claim_id>"
+    assert result["response"]["actionGroup"] == "ClaimManagementActionGroup"
+    assert result["response"]["httpMethod"] == "GET"
+    assert result["response"]["httpStatusCode"] == 200
+
+
 def test_bedrock_agent_event_with_response():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
