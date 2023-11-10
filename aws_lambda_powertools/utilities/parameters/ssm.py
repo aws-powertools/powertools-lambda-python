@@ -188,7 +188,13 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def _get_multiple(self, path: str, decrypt: Optional[bool] = None, recursive: bool = False, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(
+        self,
+        path: str,
+        decrypt: Optional[bool] = None,
+        recursive: bool = False,
+        **sdk_options,
+    ) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 

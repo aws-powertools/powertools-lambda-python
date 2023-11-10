@@ -363,9 +363,24 @@ class Response(BaseModel):
             extra = "allow"
 
 
+# https://swagger.io/specification/#tag-object
+class Tag(BaseModel):
+    name: str
+    description: Optional[str] = None
+    externalDocs: Optional[ExternalDocumentation] = None
+
+    if PYDANTIC_V2:
+        model_config = {"extra": "allow"}
+
+    else:
+
+        class Config:
+            extra = "allow"
+
+
 # https://swagger.io/specification/#operation-object
 class Operation(BaseModel):
-    tags: Optional[List[str]] = None
+    tags: Optional[List[Tag]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
@@ -530,21 +545,6 @@ class Components(BaseModel):
     # Using Any for Specification Extensions
     callbacks: Optional[Dict[str, Union[Dict[str, PathItem], Reference, Any]]] = None
     pathItems: Optional[Dict[str, Union[PathItem, Reference]]] = None
-
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
-
-
-# https://swagger.io/specification/#tag-object
-class Tag(BaseModel):
-    name: str
-    description: Optional[str] = None
-    externalDocs: Optional[ExternalDocumentation] = None
 
     if PYDANTIC_V2:
         model_config = {"extra": "allow"}

@@ -9,11 +9,13 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from functools import partial
 from http import HTTPStatus
+from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
+    Generic,
     List,
     Match,
     Optional,
@@ -22,12 +24,15 @@ from typing import (
     Set,
     Tuple,
     Type,
+    TypeVar,
     Union,
     cast,
 )
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
+from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -42,6 +47,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     ALBEvent,
     APIGatewayProxyEvent,
     APIGatewayProxyEventV2,
+    BedrockAgentEvent,
     LambdaFunctionUrlEvent,
     VPCLatticeEvent,
     VPCLatticeEventV2,
@@ -59,6 +65,8 @@ _NAMED_GROUP_BOUNDARY_PATTERN = rf"(?P\1[{_SAFE_URI}{_UNSAFE_URI}\\w]+)"
 _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 
+ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
+
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.compat import (
         JsonSchemaValue,
@@ -69,7 +77,6 @@ if TYPE_CHECKING:
         License,
         OpenAPI,
         Server,
-        Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
@@ -83,6 +90,7 @@ class ProxyEventType(Enum):
     APIGatewayProxyEvent = "APIGatewayProxyEvent"
     APIGatewayProxyEventV2 = "APIGatewayProxyEventV2"
     ALBEvent = "ALBEvent"
+    BedrockAgentEvent = "BedrockAgentEvent"
     VPCLatticeEvent = "VPCLatticeEvent"
     VPCLatticeEventV2 = "VPCLatticeEventV2"
     LambdaFunctionUrlEvent = "LambdaFunctionUrlEvent"
@@ -206,7 +214,7 @@ class Response:
         self,
         status_code: int,
         content_type: Optional[str] = None,
-        body: Union[str, bytes, None] = None,
+        body: Any = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
@@ -233,8 +241,18 @@ class Response:
         self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
         self.cookies = cookies or []
         self.compress = compress
+        self.content_type = content_type
         if content_type:
             self.headers.setdefault("Content-Type", content_type)
+
+    def is_json(self) -> bool:
+        """
+        Returns True if the response is JSON, based on the Content-Type.
+        """
+        content_type = self.headers.get("Content-Type", "")
+        if isinstance(content_type, list):
+            content_type = content_type[0]
+        return content_type.startswith("application/json")
 
 
 class Route:
@@ -253,8 +271,9 @@ class Route:
         description: Optional[str],
         responses: Optional[Dict[int, Dict[str, Any]]],
         response_description: Optional[str],
-        tags: Optional[List["Tag"]],
+        tags: Optional[List[str]],
         operation_id: Optional[str],
+        include_in_schema: bool,
         middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
@@ -284,10 +303,12 @@ class Route:
             The OpenAPI responses for this route
         response_description: Optional[str]
             The OpenAPI response description for this route
-        tags: Optional[List[Tag]]
+        tags: Optional[List[str]]
             The list of OpenAPI tags to be used for this route
         operation_id: Optional[str]
             The OpenAPI operationId for this route
+        include_in_schema: bool
+            Whether or not to include this route in the OpenAPI schema
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -304,6 +325,7 @@ class Route:
         self.responses = responses
         self.response_description = response_description
         self.tags = tags or []
+        self.include_in_schema = include_in_schema
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
 
@@ -483,7 +505,6 @@ class Route:
             # Add the response schema to the OpenAPI 200 response
             json_response.update(
                 self._openapi_operation_return(
-                    operation_id=self.operation_id,
                     param=dependant.return_param,
                     model_name_map=model_name_map,
                     field_mapping=field_mapping,
@@ -530,7 +551,7 @@ class Route:
 
         # Ensure tags is added to the operation
         if self.tags:
-            operation["tags"] = self.tags
+            operation["tags"] = [{"name": tag for tag in self.tags}]
 
         # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
@@ -643,7 +664,6 @@ class Route:
     @staticmethod
     def _openapi_operation_return(
         *,
-        operation_id: str,
         param: Optional["ModelField"],
         model_name_map: Dict["TypeModelOrEnum", str],
         field_mapping: Dict[
@@ -667,7 +687,7 @@ class Route:
             field_mapping=field_mapping,
         )
 
-        return {"name": f"Return {operation_id}", "schema": return_schema}
+        return {"schema": return_schema}
 
     def _generate_operation_id(self) -> str:
         operation_id = self.func.__name__ + self.path
@@ -676,14 +696,14 @@ class Route:
         return operation_id
 
 
-class ResponseBuilder:
+class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
     def __init__(self, response: Response, route: Optional[Route] = None):
         self.response = response
         self.route = route
 
-    def _add_cors(self, event: BaseProxyEvent, cors: CORSConfig):
+    def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
         self.response.headers.update(cors.to_dict(event.get_header_value("Origin")))
 
@@ -696,7 +716,7 @@ class ResponseBuilder:
     def _has_compression_enabled(
         route_compression: bool,
         response_compression: Optional[bool],
-        event: BaseProxyEvent,
+        event: ResponseEventT,
     ) -> bool:
         """
         Checks if compression is enabled.
@@ -709,7 +729,7 @@ class ResponseBuilder:
             A boolean indicating whether compression is enabled or not in the route setting.
         response_compression: bool, optional
             A boolean indicating whether compression is enabled or not in the response setting.
-        event: BaseProxyEvent
+        event: ResponseEventT
             The event object containing the request details.
 
         Returns
@@ -739,7 +759,7 @@ class ResponseBuilder:
         gzip = zlib.compressobj(9, zlib.DEFLATED, zlib.MAX_WBITS | 16)
         self.response.body = gzip.compress(self.response.body) + gzip.flush()
 
-    def _route(self, event: BaseProxyEvent, cors: Optional[CORSConfig]):
+    def _route(self, event: ResponseEventT, cors: Optional[CORSConfig]):
         """Optionally handle any of the route's configure response handling"""
         if self.route is None:
             return
@@ -754,7 +774,7 @@ class ResponseBuilder:
         ):
             self._compress()
 
-    def build(self, event: BaseProxyEvent, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
+    def build(self, event: ResponseEventT, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
         self._route(event, cors)
 
@@ -790,8 +810,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -847,8 +868,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -885,6 +907,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -898,8 +921,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -937,6 +961,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -950,8 +975,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -989,6 +1015,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1002,8 +1029,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -1040,6 +1068,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1053,8 +1082,9 @@ class BaseRouter(ABC):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -1094,6 +1124,7 @@ class BaseRouter(ABC):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -1291,6 +1322,7 @@ class ApiGatewayResolver(BaseRouter):
         self._strip_prefixes = strip_prefixes
         self.context: Dict = {}  # early init as customers might add context before event resolution
         self.processed_stack_frames = []
+        self._response_builder_class = ResponseBuilder[BaseProxyEvent]
 
         # Allow for a custom serializer or a concise json serialization
         self._serializer = serializer or partial(json.dumps, separators=(",", ":"), cls=Encoder)
@@ -1312,11 +1344,11 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1337,7 +1369,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1345,7 +1377,7 @@ class ApiGatewayResolver(BaseRouter):
             A URL to the Terms of Service for the API. MUST be in the format of a URL.
         contact: Contact, optional
             The contact information for the exposed API.
-        license_info:
+        license_info: License, optional
             The license information for the exposed API.
 
         Returns
@@ -1403,6 +1435,9 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
+            if not route.include_in_schema:
+                continue
+
             result = route._get_openapi_path(
                 dependant=route.dependant,
                 operation_ids=operation_ids,
@@ -1421,7 +1456,7 @@ class ApiGatewayResolver(BaseRouter):
         if components:
             output["components"] = components
         if tags:
-            output["tags"] = tags
+            output["tags"] = [{"name": tag} for tag in tags]
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
@@ -1431,11 +1466,11 @@ class ApiGatewayResolver(BaseRouter):
         self,
         *,
         title: str = "Powertools API",
-        version: str = "1.0.0",
-        openapi_version: str = "3.1.0",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1456,7 +1491,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[Tag], optional
+        tags: List[str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1464,7 +1499,7 @@ class ApiGatewayResolver(BaseRouter):
             A URL to the Terms of Service for the API. MUST be in the format of a URL.
         contact: Contact, optional
             The contact information for the exposed API.
-        license_info:
+        license_info: License, optional
             The license information for the exposed API.
 
         Returns
@@ -1492,6 +1527,111 @@ class ApiGatewayResolver(BaseRouter):
             indent=2,
         )
 
+    def enable_swagger(
+        self,
+        *,
+        path: str = "/swagger",
+        title: str = "Powertools for AWS Lambda (Python) API",
+        version: str = DEFAULT_API_VERSION,
+        openapi_version: str = DEFAULT_OPENAPI_VERSION,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        servers: Optional[List["Server"]] = None,
+        terms_of_service: Optional[str] = None,
+        contact: Optional["Contact"] = None,
+        license_info: Optional["License"] = None,
+        swagger_base_url: Optional[str] = None,
+        middlewares: Optional[List[Callable[..., Response]]] = None,
+    ):
+        """
+        Returns the OpenAPI schema as a JSON serializable dict
+
+        Parameters
+        ----------
+        path: str, default = "/swagger"
+            The path to the swagger UI.
+        title: str
+            The title of the application.
+        version: str
+            The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
+        openapi_version: str, default = "3.1.0"
+            The version of the OpenAPI Specification (which the document uses).
+        summary: str, optional
+            A short summary of what the application does.
+        description: str, optional
+            A verbose explanation of the application behavior.
+        tags: List[str], optional
+            A list of tags used by the specification with additional metadata.
+        servers: List[Server], optional
+            An array of Server Objects, which provide connectivity information to a target server.
+        terms_of_service: str, optional
+            A URL to the Terms of Service for the API. MUST be in the format of a URL.
+        contact: Contact, optional
+            The contact information for the exposed API.
+        license_info: License, optional
+            The license information for the exposed API.
+        swagger_base_url: str, optional
+            The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
+        middlewares: List[Callable[..., Response]], optional
+            List of middlewares to be used for the swagger route.
+        """
+        from aws_lambda_powertools.event_handler.openapi.models import Server
+
+        if not swagger_base_url:
+
+            @self.get("/swagger.js", include_in_schema=False)
+            def swagger_js():
+                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js").read()
+                return Response(
+                    status_code=200,
+                    content_type="text/javascript",
+                    body=body,
+                )
+
+            @self.get("/swagger.css", include_in_schema=False)
+            def swagger_css():
+                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
+                return Response(
+                    status_code=200,
+                    content_type="text/css",
+                    body=body,
+                )
+
+        @self.get(path, middlewares=middlewares, include_in_schema=False)
+        def swagger_handler():
+            base_path = self._get_base_path()
+
+            if swagger_base_url:
+                swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
+                swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
+            else:
+                swagger_js = f"{base_path}/swagger.js"
+                swagger_css = f"{base_path}/swagger.css"
+
+            openapi_servers = servers or [Server(url=(base_path or "/"))]
+
+            spec = self.get_openapi_json_schema(
+                title=title,
+                version=version,
+                openapi_version=openapi_version,
+                summary=summary,
+                description=description,
+                tags=tags,
+                servers=openapi_servers,
+                terms_of_service=terms_of_service,
+                contact=contact,
+                license_info=license_info,
+            )
+
+            body = generate_swagger_html(spec, swagger_js, swagger_css)
+
+            return Response(
+                status_code=200,
+                content_type="text/html",
+                body=body,
+            )
+
     def route(
         self,
         rule: str,
@@ -1503,8 +1643,9 @@ class ApiGatewayResolver(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1530,6 +1671,7 @@ class ApiGatewayResolver(BaseRouter):
                     response_description,
                     tags,
                     operation_id,
+                    include_in_schema,
                     middlewares,
                 )
 
@@ -1606,6 +1748,9 @@ class ApiGatewayResolver(BaseRouter):
             )
         self._route_keys.append(route_key)
 
+    def _get_base_path(self) -> str:
+        raise NotImplementedError()
+
     @staticmethod
     def _has_debug(debug: Optional[bool] = None) -> bool:
         # It might have been explicitly switched off (debug=False)
@@ -1647,7 +1792,7 @@ class ApiGatewayResolver(BaseRouter):
         rule_regex: str = re.sub(_DYNAMIC_ROUTE_PATTERN, _NAMED_GROUP_BOUNDARY_PATTERN, rule)
         return re.compile(base_regex.format(rule_regex))
 
-    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:
+    def _to_proxy_event(self, event: Dict) -> BaseProxyEvent:  # noqa: PLR0911  # ignore many returns
         """Convert the event dict to the corresponding data class"""
         if self._proxy_type == ProxyEventType.APIGatewayProxyEvent:
             logger.debug("Converting event to API Gateway REST API contract")
@@ -1655,6 +1800,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._proxy_type == ProxyEventType.APIGatewayProxyEventV2:
             logger.debug("Converting event to API Gateway HTTP API contract")
             return APIGatewayProxyEventV2(event)
+        if self._proxy_type == ProxyEventType.BedrockAgentEvent:
+            logger.debug("Converting event to Bedrock Agent contract")
+            return BedrockAgentEvent(event)
         if self._proxy_type == ProxyEventType.LambdaFunctionUrlEvent:
             logger.debug("Converting event to Lambda Function URL contract")
             return LambdaFunctionUrlEvent(event)
@@ -1681,7 +1829,8 @@ class ApiGatewayResolver(BaseRouter):
                 # Add matched Route reference into the Resolver context
                 self.append_context(_route=route, _path=path)
 
-                return self._call_route(route, match_results.groupdict())  # pass fn args
+                route_keys = self._convert_matches_into_route_keys(match_results)
+                return self._call_route(route, route_keys)  # pass fn args
 
         logger.debug(f"No match found for path {path} and method {method}")
         return self._not_found(method)
@@ -1710,6 +1859,10 @@ class ApiGatewayResolver(BaseRouter):
 
         return path
 
+    def _convert_matches_into_route_keys(self, match: Match) -> Dict[str, str]:
+        """Converts the regex match into a dict of route keys"""
+        return match.groupdict()
+
     @staticmethod
     def _path_starts_with(path: str, prefix: str):
         """Returns true if the `path` starts with a prefix plus a `/`"""
@@ -1732,9 +1885,9 @@ class ApiGatewayResolver(BaseRouter):
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:
-            return ResponseBuilder(handler(NotFoundError()))
+            return self._response_builder_class(handler(NotFoundError()))
 
-        return ResponseBuilder(
+        return self._response_builder_class(
             Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
@@ -1749,7 +1902,7 @@ class ApiGatewayResolver(BaseRouter):
             # Reset Processed stack for Middleware (for debugging purposes)
             self._reset_processed_stack()
 
-            return ResponseBuilder(
+            return self._response_builder_class(
                 self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
@@ -1766,7 +1919,7 @@ class ApiGatewayResolver(BaseRouter):
                 # If the user has turned on debug mode,
                 # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
-                return ResponseBuilder(
+                return self._response_builder_class(
                     Response(
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
@@ -1805,12 +1958,12 @@ class ApiGatewayResolver(BaseRouter):
         handler = self._lookup_exception_handler(type(exp))
         if handler:
             try:
-                return ResponseBuilder(handler(exp), route)
+                return self._response_builder_class(handler(exp), route)
             except ServiceError as service_error:
                 exp = service_error
 
         if isinstance(exp, ServiceError):
-            return ResponseBuilder(
+            return self._response_builder_class(
                 Response(
                     status_code=exp.status_code,
                     content_type=content_types.APPLICATION_JSON,
@@ -1871,6 +2024,7 @@ class ApiGatewayResolver(BaseRouter):
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
+        # Iterate through the routes defined in the router to configure and apply middlewares for each route
         for route, func in router._routes.items():
             new_route = route
 
@@ -1880,7 +2034,8 @@ class ApiGatewayResolver(BaseRouter):
                 new_route = (rule, *route[1:])
 
             # Middlewares are stored by route separately - must grab them to include
-            middlewares = router._routes_with_middleware.get(new_route)
+            # Middleware store the route without prefix, so we must not include prefix when grabbing
+            middlewares = router._routes_with_middleware.get(route)
 
             # Need to use "type: ignore" here since mypy does not like a named parameter after
             # tuple expansion since may cause duplicate named parameters in the function signature.
@@ -1940,8 +2095,9 @@ class Router(BaseRouter):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -1960,6 +2116,7 @@ class Router(BaseRouter):
                 response_description,
                 tags,
                 operation_id,
+                include_in_schema,
             )
 
             # Collate Middleware for routes
@@ -2000,6 +2157,19 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             enable_validation,
         )
 
+    def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway REST API: stage variable is used in the path
+        # 3. API Gateway REST Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
+        stage = self.current_event.request_context.stage
+        if stage and stage != "$default" and self.current_event.request_context.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
+
     # override route to ignore trailing "/" in routes for REST API
     def route(
         self,
@@ -2012,8 +2182,9 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         description: Optional[str] = None,
         responses: Optional[Dict[int, Dict[str, Any]]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
-        tags: Optional[List["Tag"]] = None,
+        tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
@@ -2029,6 +2200,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             response_description,
             tags,
             operation_id,
+            include_in_schema,
             middlewares,
         )
 
@@ -2059,6 +2231,19 @@ class APIGatewayHttpResolver(ApiGatewayResolver):
             enable_validation,
         )
 
+    def _get_base_path(self) -> str:
+        # 3 different scenarios:
+        #
+        # 1. SAM local: even though a stage variable is sent to the Lambda function, it's not used in the path
+        # 2. API Gateway HTTP API: stage variable is used in the path
+        # 3. API Gateway HTTP Custom Domain: stage variable is not used in the path
+        #
+        # To solve the 3 scenarios, we try to match the beginning of the path with the stage variable
+        stage = self.current_event.request_context.stage
+        if stage and stage != "$default" and self.current_event.request_context.http.path.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""
+
 
 class ALBResolver(ApiGatewayResolver):
     current_event: ALBEvent
@@ -2073,3 +2258,7 @@ class ALBResolver(ApiGatewayResolver):
     ):
         """Amazon Application Load Balancer (ALB) resolver"""
         super().__init__(ProxyEventType.ALBEvent, cors, debug, serializer, strip_prefixes, enable_validation)
+
+    def _get_base_path(self) -> str:
+        # ALB doesn't have a stage variable, so we just return an empty string
+        return ""

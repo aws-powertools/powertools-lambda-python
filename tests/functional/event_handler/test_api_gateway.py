@@ -413,6 +413,29 @@ def test_response_with_compress_enabled():
     assert headers["Content-Encoding"] == ["gzip"]
 
 
+def test_response_is_json_without_content_type():
+    response = Response(200, None, "")
+
+    assert response.is_json() is False
+
+
+def test_response_is_json_with_json_content_type():
+    response = Response(200, content_types.APPLICATION_JSON, "")
+    assert response.is_json() is True
+
+
+def test_response_is_json_with_multiple_json_content_types():
+    response = Response(
+        200,
+        None,
+        "",
+        {
+            "Content-Type": [content_types.APPLICATION_JSON, content_types.APPLICATION_JSON],
+        },
+    )
+    assert response.is_json() is True
+
+
 def test_compress():
     # GIVEN a function that has compress=True
     # AND an event with a "Accept-Encoding" that include gzip
@@ -1172,6 +1195,25 @@ def test_api_gateway_request_path_equals_strip_prefix():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
+def test_api_gateway_app_with_strip_prefix_and_route_prefix():
+    # GIVEN all routes are stripped from its version e.g., /v1
+    app = ApiGatewayResolver(strip_prefixes=["/v1"])
+    router = Router()
+
+    event = {"httpMethod": "GET", "path": "/v1/users/leandro", "resource": "/users"}
+
+    @router.get("<user_id>")
+    def base(user_id: str):
+        return {"user": user_id}
+
+    # WHEN a router is included prefixing all routes with "/users/"
+    app.include_router(router, prefix="/users/")
+    result = app(event, {})
+
+    # THEN route correctly to the registered route after stripping each prefix (global + router)
+    assert result["statusCode"] == 200
 
 
 def test_api_gateway_app_router():
