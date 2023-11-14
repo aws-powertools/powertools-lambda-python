@@ -1,4 +1,4 @@
-from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities._data_masking import DataMasking
 
 
 def lambda_handler(event, context):

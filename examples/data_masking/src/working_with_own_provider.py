@@ -1,4 +1,4 @@
-from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+from aws_lambda_powertools.utilities._data_masking.base import DataMasking
 from examples.data_masking.src.custom_provider import MyCustomEncryption
 
 
