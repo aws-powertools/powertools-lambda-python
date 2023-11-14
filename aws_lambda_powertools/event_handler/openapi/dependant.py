@@ -14,12 +14,12 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
-    File,
-    Form,
-    Header,
     Param,
     ParamTypes,
     Query,
+    _File,
+    _Form,
+    _Header,
     analyze_param,
     create_response_field,
     get_flat_dependant,
@@ -235,7 +235,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     elif is_scalar_field(field=param_field):
         return False
-    elif isinstance(param_field.field_info, (Query, Header)) and is_scalar_sequence_field(param_field):
+    elif isinstance(param_field.field_info, (Query, _Header)) and is_scalar_sequence_field(param_field):
         return False
     else:
         if not isinstance(param_field.field_info, Body):
@@ -326,10 +326,12 @@ def get_body_field_info(
     if not required:
         body_field_info_kwargs["default"] = None
 
-    if any(isinstance(f.field_info, File) for f in flat_dependant.body_params):
-        body_field_info: Type[Body] = File
-    elif any(isinstance(f.field_info, Form) for f in flat_dependant.body_params):
-        body_field_info = Form
+    if any(isinstance(f.field_info, _File) for f in flat_dependant.body_params):
+        # MAINTENANCE: body_field_info: Type[Body] = _File
+        raise NotImplementedError("_File fields are not supported in request bodies")
+    elif any(isinstance(f.field_info, _Form) for f in flat_dependant.body_params):
+        # MAINTENANCE: body_field_info: Type[Body] = _Form
+        raise NotImplementedError("_Form fields are not supported in request bodies")
     else:
         body_field_info = Body
 

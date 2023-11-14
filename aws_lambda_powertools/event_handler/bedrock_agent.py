@@ -1,3 +1,4 @@
+from re import Match
 from typing import Any, Dict
 
 from typing_extensions import override
@@ -75,3 +76,12 @@ class BedrockAgentResolver(ApiGatewayResolver):
             enable_validation=enable_validation,
         )
         self._response_builder_class = BedrockResponseBuilder
+
+    @override
+    def _convert_matches_into_route_keys(self, match: Match) -> Dict[str, str]:
+        # In Bedrock Agents, all the parameters come inside the "parameters" key, not on the apiPath
+        # So we have to search for route parameters in the parameters key
+        parameters: Dict[str, str] = {}
+        if match.groupdict() and self.current_event.parameters:
+            parameters = {parameter["name"]: parameter["value"] for parameter in self.current_event.parameters}
+        return parameters
