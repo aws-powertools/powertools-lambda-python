@@ -1,5 +1,5 @@
 from aws_lambda_powertools.utilities._data_masking.base import DataMasking
-from examples.data_masking.src.custom_provider import MyCustomEncryption
+from examples.data_masking.src.custom_data_masking_provider import MyCustomEncryption
 
 
 def lambda_handler():
