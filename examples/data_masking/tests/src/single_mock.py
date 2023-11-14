@@ -16,12 +16,12 @@ class FakeEncryptionKeyProvider(BaseProvider):
     ):
         super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
 
-    def encrypt(self, data: bytes | str, **kwargs) -> str:
+    def encrypt(self, data, **kwargs) -> str:
         data = self.json_serializer(data)
         ciphertext = base64.b64encode(data).decode()
         return ciphertext
 
-    def decrypt(self, data: bytes, **kwargs) -> Any:
+    def decrypt(self, data, **kwargs) -> Any:
         ciphertext_decoded = base64.b64decode(data)
         ciphertext = self.json_deserializer(ciphertext_decoded)
         return ciphertext
