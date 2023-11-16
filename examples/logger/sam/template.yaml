@@ -10,7 +10,7 @@ Globals:
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: payment
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
