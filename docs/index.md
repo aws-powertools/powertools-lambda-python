@@ -722,7 +722,7 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 | **POWERTOOLS_PARAMETERS_MAX_AGE**         | Adjust how long values are kept in cache (in seconds)                                  | [Parameters](./utilities/parameters.md#adjusting-cache-ttl){target="_blank"}             | `5`                   |
 | **POWERTOOLS_PARAMETERS_SSM_DECRYPT**     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters.md#ssmprovider){target="_blank"}                     | `false`               |
 | **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#optimizing-for-non-production-environments) | `false`               |
-| **LOG_LEVEL**                             | Sets logging level                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `INFO`                |
+| **POWERTOOLS_LOG_LEVEL**                  | Sets logging level                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `INFO`                |
 
 ### Optimizing for non-production environments
 
