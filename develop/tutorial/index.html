@@ -2329,7 +2329,7 @@ Successfully<span class="w"> </span>created/updated<span class="w"> </span>stack
 </span><span class="hll"><span class="n">formatter</span> <span class="o">=</span> <span class="n">jsonlogger</span><span class="o">.</span><span class="n">JsonFormatter</span><span class="p">(</span><span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> </span><span class="si">%(levelname)s</span><span class="s2"> </span><span class="si">%(name)s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
 </span><span class="hll"><span class="n">logHandler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
 </span><span class="hll"><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logHandler</span><span class="p">)</span>
-</span><span class="hll"><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;LOG_LEVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">))</span>
+</span><span class="hll"><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;POWERTOOLS_LOG_LEVEL&quot;</span><span class="p">,</span> <span class="s2">&quot;INFO&quot;</span><span class="p">))</span>
 </span>
 <span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
 
@@ -2363,7 +2363,7 @@ python-json-logger
 <ul>
 <li><strong>L7</strong>: Creates an application logger named <code>APP</code>.</li>
 <li><strong>L8-11</strong>: Configures handler and formatter.</li>
-<li><strong>L12</strong>: Sets the logging level set in the <code>LOG_LEVEL</code> environment variable, or <code>INFO</code> as a sentinel value.</li>
+<li><strong>L12</strong>: Sets the logging level set in the <code>POWERTOOLS_LOG_LEVEL</code> environment variable, or <code>INFO</code> as a sentinel value.</li>
 </ul>
 <p>After that, we use this logger in our application code to record the required information. We see logs structured as follows:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">JSON output</label><label for="__tabbed_6_2">Normal output</label></div>
@@ -2446,7 +2446,7 @@ python-json-logger
 </code></pre></div></td></tr></table></div>
 <p>Let's break this down:</p>
 <ul>
-<li><strong>L5</strong>: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set <code>INFO</code> as the logging level if <code>LOG_LEVEL</code> env var isn't set.</li>
+<li><strong>L5</strong>: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set <code>INFO</code> as the logging level if <code>POWERTOOLS_LOG_LEVEL</code> env var isn't set.</li>
 <li><strong>L22</strong>: We use <code>logger.inject_lambda_context</code> decorator to inject key information from Lambda context into every log.</li>
 <li><strong>L22</strong>: We also instruct Logger to use the incoming API Gateway Request ID as a <a href="../core/logger/##set_correlation_id-method" target="_blank">correlation id</a> automatically.</li>
 <li><strong>L22</strong>: Since we're in dev, we also use <code>log_event=True</code> to automatically log each incoming request for debugging. This can be also set via <a href="./#environment-variables" target="_blank">environment variables</a>.</li>
@@ -3281,7 +3281,7 @@ aws-xray-sdk
   <small>
     
       Last update:
-      2023-08-02
+      2023-11-16
     
   </small>
 </div>
