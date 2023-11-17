@@ -1,6 +1,6 @@
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
 
 class BedrockAgentInfo(DictWrapper):
@@ -47,7 +47,7 @@ class BedrockAgentRequestBody(DictWrapper):
         return {k: BedrockAgentRequestMedia(v) for k, v in self["content"].items()}
 
 
-class BedrockAgentEvent(DictWrapper):
+class BedrockAgentEvent(BaseProxyEvent):
     """
     Bedrock Agent input event
 
@@ -97,3 +97,14 @@ class BedrockAgentEvent(DictWrapper):
     @property
     def prompt_session_attributes(self) -> Dict[str, str]:
         return self["promptSessionAttributes"]
+
+    # The following methods add compatibility with BaseProxyEvent
+    @property
+    def path(self) -> str:
+        return self["apiPath"]
+
+    @property
+    def query_string_parameters(self) -> Optional[Dict[str, str]]:
+        # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
+        # together with the other parameters. So we just return all parameters here.
+        return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None

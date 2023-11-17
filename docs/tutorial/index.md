@@ -392,7 +392,7 @@ The first option could be to use the standard Python Logger, and use a specializ
     formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
     logHandler.setFormatter(formatter)
     logger.addHandler(logHandler)
-    logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
+    logger.setLevel(os.getenv("POWERTOOLS_LOG_LEVEL", "INFO"))
 
     app = APIGatewayRestResolver()
 
@@ -424,7 +424,7 @@ With just a few lines our logs will now output to `JSON` format. We've taken the
 
 * **L7**: Creates an application logger named `APP`.
 * **L8-11**: Configures handler and formatter.
-* **L12**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
+* **L12**: Sets the logging level set in the `POWERTOOLS_LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
 
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 
@@ -485,7 +485,7 @@ def lambda_handler(event, context):
 
 Let's break this down:
 
-* **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
+* **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `POWERTOOLS_LOG_LEVEL` env var isn't set.
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
 * **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method){target="_blank"} automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.

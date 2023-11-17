@@ -19,10 +19,10 @@ Logger provides an opinionated logger with output structured as JSON.
 
 Logger requires two settings:
 
-| Setting           | Description                                                         | Environment variable      | Constructor parameter |
-| ----------------- | ------------------------------------------------------------------- | ------------------------- | --------------------- |
-| **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `LOG_LEVEL`               | `level`               |
-| **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`             |
+| Setting           | Description                                                         | Environment variable                                | Constructor parameter |
+| ----------------- | ------------------------------------------------------------------- | --------------------------------------------------- | --------------------- |
+| **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `POWERTOOLS_LOG_LEVEL`                              | `level`               |
+| **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME`                           | `service`             |
 
 There are some [other environment variables](#environment-variables) which can be set to modify Logger's settings at a global scope.
 
@@ -273,6 +273,70 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
     ```json hl_lines="7"
     --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
+
+### Log levels
+
+The default log level is `INFO`. It can be set using the `level` constructor option, `setLevel()` method or by using the `POWERTOOLS_LOG_LEVEL` environment variable.
+
+We support the following log levels:
+
+| Level      | Numeric value | Standard logging
+| ---------- | ------------- | -----------------
+| `DEBUG`    | 10            | `logging.DEBUG`
+| `INFO`     | 20            | `logging.INFO`
+| `WARNING`  | 30            | `logging.WARNING`
+| `ERROR`    | 40            | `logging.ERROR`
+| `CRITICAL` | 50            | `logging.CRITICAL`
+
+If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `10`.
+
+=== "setting_log_level_constructor.py"
+
+    ```python hl_lines="3"
+    --8<-- "examples/logger/src/setting_log_level_via_constructor.py"
+    ```
+
+=== "setting_log_level_programmatically.py"
+
+    ```python hl_lines="6 9 12"
+    --8<-- "examples/logger/src/setting_log_level_programmatically.py"
+    ```
+
+#### AWS Lambda Advanced Logging Controls (ALC)
+
+<!-- markdownlint-disable MD013 -->
+With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced){target="_blank"}, you can control the output format of your logs as either `TEXT` or `JSON` and specify the minimum accepted log level for your application. Regardless of the output format setting in Lambda, we will always output JSON formatted logging messages.
+<!-- markdownlint-enable MD013 -->
+
+When you have this feature enabled, log messages that don’t meet the configured log level are discarded by Lambda. For example, if you set the minimum log level to `WARN`, you will only receive `WARN` and `ERROR` messages in your AWS CloudWatch Logs, all other log levels will be discarded by Lambda.
+
+```mermaid
+sequenceDiagram
+    title Lambda ALC allows WARN logs only
+    participant Lambda service
+    participant Lambda function
+    participant Application Logger
+    Note over Lambda service: AWS_LAMBDA_LOG_LEVEL="WARN"
+    Lambda service->>Lambda function: Invoke (event)
+    Lambda function->>Lambda function: Calls handler
+    Lambda function->>Application Logger: logger.warn("Something happened")
+    Lambda function-->>Application Logger: logger.debug("Something happened")
+    Lambda function-->>Application Logger: logger.info("Something happened")
+    Lambda service->>Lambda service: DROP INFO and DEBUG logs
+    Lambda service->>CloudWatch Logs: Ingest error logs
+```
+
+**Priority of log level settings in Powertools for AWS Lambda**
+
+When the Advanced Logging Controls feature is enabled, we are unable to increase the minimum log level below the `AWS_LAMBDA_LOG_LEVEL` environment variable value, see [AWS Lambda service documentation](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-log-level){target="_blank"} for more details.
+
+We prioritise log level settings in this order:
+
+1. `AWS_LAMBDA_LOG_LEVEL` environment variable
+2. Setting the log level in code using the `level` constructor option, or by calling the `logger.setLevel()` method
+3. `POWERTOOLS_LOG_LEVEL` environment variable
+
+In the event you have set a log level in Powertools to a level that is lower than the ACL setting, we will output a warning log message informing you that your messages will be discarded by Lambda.
 
 ### Logging exceptions
 

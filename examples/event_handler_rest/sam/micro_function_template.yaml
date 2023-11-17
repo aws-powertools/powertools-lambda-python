@@ -37,7 +37,7 @@ Resources:
             MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
-                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOG_LEVEL: INFO
             Tags:
                 LambdaPowertools: python
 
@@ -60,4 +60,4 @@ Resources:
             MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
-                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOG_LEVEL: INFO

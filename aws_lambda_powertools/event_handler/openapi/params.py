@@ -308,7 +308,7 @@ class Query(Param):
         )
 
 
-class Header(Param):
+class _Header(Param):
     """
     A class used internally to represent a header parameter in a path operation.
     """
@@ -471,7 +471,7 @@ class Body(FieldInfo):
         return f"{self.__class__.__name__}({self.default})"
 
 
-class Form(Body):
+class _Form(Body):
     """
     A class used internally to represent a form parameter in a path operation.
     """
@@ -543,7 +543,7 @@ class Form(Body):
         )
 
 
-class File(Form):
+class _File(_Form):
     """
     A class used internally to represent a file parameter in a path operation.
     """

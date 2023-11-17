@@ -378,11 +378,22 @@ def test_logger_level_as_int(service_name):
 
 def test_logger_level_env_var_as_int(monkeypatch, service_name):
     # GIVEN Logger is initialized
-    # WHEN log level is explicitly defined via LOG_LEVEL env as int
+    # WHEN log level is explicitly defined via POWERTOOLS_LOG_LEVEL env as int
     # THEN Logger should propagate ValueError
     # since env vars can only be string
     # and '50' is not a correct log level
-    monkeypatch.setenv("LOG_LEVEL", 50)
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_ENV, 50)
+    with pytest.raises(ValueError, match="Unknown level: '50'"):
+        Logger(service=service_name)
+
+
+def test_logger_level_env_var_legacy_as_int(monkeypatch, service_name):
+    # GIVEN Logger is initialized
+    # WHEN log level is explicitly defined via legacy env LOG_LEVEL env as int
+    # THEN Logger should propagate ValueError
+    # since env vars can only be string
+    # and '50' is not a correct log level
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV, 50)
     with pytest.raises(ValueError, match="Unknown level: '50'"):
         Logger(service=service_name)
 
@@ -993,3 +1004,75 @@ def test_logger_logs_stack_trace_with_non_default_value(service_name, stdout):
     handler({}, lambda_context)
     log = capture_logging_output(stdout)
     assert "stack_trace" not in log
+
+
+def test_define_log_level_via_advanced_logging_controls(
+    monkeypatch,
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized with log level set to None
+    # GIVEN AWS Lambda Advanced Logging Controls is set to DEBUG
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "DEBUG")
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging statements are issued
+    logger.debug("Hello")
+
+    # THEN Lambda log level must be DEBUG
+    log = capture_logging_output(stdout)
+    assert log["level"] == "DEBUG"
+
+
+def test_log_level_advanced_logging_controler_preference_over_powertools_log_level(
+    monkeypatch,
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized with log level set to INFO
+    # GIVEN AWS Lambda Advanced Logging Controls is set to DEBUG
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "DEBUG")
+    logger = Logger(service=service_name, stream=stdout, level="INFO")
+
+    # WHEN logging statements are issued
+    logger.debug("Hello")
+
+    # THEN Lambda log level must be DEBUG because it takes precedence over POWERTOOLS_LOG_LEVEL
+    log = capture_logging_output(stdout)
+    assert log["level"] == "DEBUG"
+
+
+def test_log_level_advanced_logging_controler_warning_different_log_levels_using_constructor(
+    monkeypatch,
+    service_name,
+    stdout,
+):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+
+    # WHEN Logger is initialized with log level set to DEBUG
+    # THEN Logger should propagate a warning
+    with pytest.warns(UserWarning):
+        logger = Logger(service=service_name, stream=stdout, level="DEBUG")
+
+    # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
+    assert logger.log_level == logging.INFO
+
+
+def test_log_level_advanced_logging_controler_warning_different_log_levels_using_set_level(
+    monkeypatch,
+    service_name,
+    stdout,
+):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    # GIVEN Logger is initialized with log level set to None
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN Logger setLevel is set to DEBUG
+    # THEN Logger should propagate a warning
+    with pytest.warns(UserWarning):
+        logger.setLevel(level="DEBUG")
+
+    # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
+    assert logger.log_level == logging.INFO

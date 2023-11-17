@@ -10,7 +10,7 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_SERVICE_NAME: hello
 
 Resources:
