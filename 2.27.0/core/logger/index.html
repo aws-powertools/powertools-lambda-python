@@ -3133,33 +3133,44 @@
 </div>
 </div>
 <h4 id="aws-lambda-advanced-logging-controls-alc">AWS Lambda Advanced Logging Controls (ALC)<a class="headerlink" href="#aws-lambda-advanced-logging-controls-alc" title="Permanent link">&para;</a></h4>
+<div class="admonition question">
+<p class="admonition-title">When is it useful?</p>
+<p>When you want to set a logging policy to drop informational or verbose logs for one or all AWS Lambda functions, regardless of runtime and logger used.</p>
+</div>
 <!-- markdownlint-disable MD013 -->
-<p>With <a href="https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced" target="_blank">AWS Lambda Advanced Logging Controls (ALC)</a>, you can control the output format of your logs as either <code>TEXT</code> or <code>JSON</code> and specify the minimum accepted log level for your application. Regardless of the output format setting in Lambda, we will always output JSON formatted logging messages.</p>
+<p>With <a href="https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced" target="_blank">AWS Lambda Advanced Logging Controls (ALC)</a>, you can enforce a minimum log level that Lambda will accept from your application code.</p>
+<p>When enabled, you should keep <code>Logger</code> and ALC log level in sync to avoid data loss.</p>
+<p>Here's a sequence diagram to demonstrate how ALC will drop both <code>INFO</code> and <code>DEBUG</code> logs emitted from <code>Logger</code>, when ALC log level is stricter than <code>Logger</code>.</p>
 <!-- markdownlint-enable MD013 -->
 
-<p>When you have this feature enabled, log messages that don’t meet the configured log level are discarded by Lambda. For example, if you set the minimum log level to <code>WARN</code>, you will only receive <code>WARN</code> and <code>ERROR</code> messages in your AWS CloudWatch Logs, all other log levels will be discarded by Lambda.</p>
 <pre class="mermaid"><code>sequenceDiagram
     title Lambda ALC allows WARN logs only
     participant Lambda service
     participant Lambda function
     participant Application Logger
+
     Note over Lambda service: AWS_LAMBDA_LOG_LEVEL="WARN"
+    Note over Application Logger: POWERTOOLS_LOG_LEVEL="DEBUG"
+
     Lambda service-&gt;&gt;Lambda function: Invoke (event)
     Lambda function-&gt;&gt;Lambda function: Calls handler
-    Lambda function-&gt;&gt;Application Logger: logger.warn("Something happened")
+    Lambda function-&gt;&gt;Application Logger: logger.error("Something happened")
     Lambda function--&gt;&gt;Application Logger: logger.debug("Something happened")
     Lambda function--&gt;&gt;Application Logger: logger.info("Something happened")
-    Lambda service-&gt;&gt;Lambda service: DROP INFO and DEBUG logs
+    Lambda service--xLambda service: DROP INFO and DEBUG logs
     Lambda service-&gt;&gt;CloudWatch Logs: Ingest error logs</code></pre>
 <p><strong>Priority of log level settings in Powertools for AWS Lambda</strong></p>
-<p>When the Advanced Logging Controls feature is enabled, we are unable to increase the minimum log level below the <code>AWS_LAMBDA_LOG_LEVEL</code> environment variable value, see <a href="...docs link">AWS Lambda service documentation</a> for more details.</p>
 <p>We prioritise log level settings in this order:</p>
 <ol>
 <li><code>AWS_LAMBDA_LOG_LEVEL</code> environment variable</li>
-<li>Setting the log level in code using the <code>level</code> constructor option, or by calling the <code>logger.setLevel()</code> method</li>
+<li>Explicit log level in <code>Logger</code> constructor, or by calling the <code>logger.setLevel()</code> method</li>
 <li><code>POWERTOOLS_LOG_LEVEL</code> environment variable</li>
 </ol>
-<p>In the event you have set a log level in Powertools to a level that is lower than the ACL setting, we will output a warning log message informing you that your messages will be discarded by Lambda.</p>
+<p>If you set <code>Logger</code> level lower than ALC, we will emit a warning informing you that your messages will be discarded by Lambda.</p>
+<blockquote>
+<p><strong>NOTE</strong></p>
+<p>With ALC enabled, we are unable to increase the minimum log level below the <code>AWS_LAMBDA_LOG_LEVEL</code> environment variable value, see <a href="https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-log-level" target="_blank">AWS Lambda service documentation</a> for more details.</p>
+</blockquote>
 <h3 id="logging-exceptions">Logging exceptions<a class="headerlink" href="#logging-exceptions" title="Permanent link">&para;</a></h3>
 <p>Use <code>logger.exception</code> method to log contextual information about exceptions. Logger will include <code>exception_name</code> and <code>exception</code> keys to aid troubleshooting and error enumeration.</p>
 <details class="tip" open="open">
@@ -4857,7 +4868,7 @@ for the given name and level to the logging module. By default, this logs all bo
   <small>
     
       Last update:
-      2023-11-16
+      2023-11-17
     
   </small>
 </div>
