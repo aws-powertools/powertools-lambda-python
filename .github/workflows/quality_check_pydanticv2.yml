@@ -65,7 +65,7 @@ jobs:
       - name: Install dependencies
         run: make dev
       - name: Test with pytest
-        run: make test
+        run: make test-pydanticv2
       - name: Security baseline
         run: make security-baseline
       - name: Complexity baseline
