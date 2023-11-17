@@ -64,13 +64,5 @@ jobs:
         run: poetry add "pydantic=^2.0.3"
       - name: Install dependencies
         run: make dev
-      - name: Formatting and Linting
-        run: make lint
-      - name: Static type checking
-        run: make mypy
       - name: Test with pytest
-        run: make test
-      - name: Security baseline
-        run: make security-baseline
-      - name: Complexity baseline
-        run: make complexity-baseline
+        run: make test-pydanticv2
