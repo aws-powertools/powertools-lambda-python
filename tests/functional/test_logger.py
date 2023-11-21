@@ -1081,7 +1081,7 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
 
 def test_logger_add_remove_filter(stdout, service_name):
     # GIVEN a Logger with a custom logging filter
-    class ApiKeyFilter(logging.Filter):
+    class ApiKeyFilter(logging.Filter):  # NOSONAR  # need filter to test actual impl.
         def filter(self, record):
             if getattr(record, "api_key", None):
                 record.api_key = "REDACTED"
