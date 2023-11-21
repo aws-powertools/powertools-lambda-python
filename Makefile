@@ -33,6 +33,9 @@ test:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+test-pydanticv2:
+	poetry run pytest -m "not perf" --ignore tests/e2e
+
 unit-test:
 	poetry run pytest tests/unit
 

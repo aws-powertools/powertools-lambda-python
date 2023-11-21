@@ -11,13 +11,18 @@ Globals:
       MaxAge: "'300'"
     BinaryMediaTypes: # see Binary responses section
       - "*~1*" # converts to */* for any binary type
+      # NOTE: use this stricter version if you're also using CORS; */* doesn't work with CORS
+      # see: https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779
+      # - "image~1*" # converts to image/*
+      # - "*~1csv" # converts to */csv, eg text/csv, application/csv
+
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.11
     Tracing: Active
     Environment:
       Variables:
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: example

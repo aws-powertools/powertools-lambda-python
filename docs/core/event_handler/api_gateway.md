@@ -573,8 +573,8 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                           | Purpose                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Middleware                                                                                                                | Purpose                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
@@ -648,15 +648,15 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 ### Binary responses
 
+???+ warning "Amazon API Gateway does not support `*/*` binary media type [when CORS is also configured](https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779){target='blank'}."
+    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
+
 For convenience, we automatically base64 encode binary responses. You can also use in combination with `compress` parameter if your client supports gzip.
 
 Like `compress` feature, the client must send the `Accept` header with the correct media type.
 
-???+ warning
-    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
+!!! note "Lambda Function URLs handle binary media types automatically."
 
-???+ note
-    Lambda Function URLs handle binary media types automatically.
 === "binary_responses.py"
 
     ```python hl_lines="17 23"

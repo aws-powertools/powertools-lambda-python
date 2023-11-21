@@ -4,8 +4,50 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **logger:** improve ALC messaging in the PT context ([#3359](https://github.com/aws-powertools/powertools-lambda-python/issues/3359))
+* **logger:** Fix ALC link ([#3352](https://github.com/aws-powertools/powertools-lambda-python/issues/3352))
+
 ## Maintenance
 
+* **ci:** lint and type checking removal in Pydantic v2 quality check ([#3360](https://github.com/aws-powertools/powertools-lambda-python/issues/3360))
+* **deps:** bump squidfunk/mkdocs-material from `f486dc9` to `2c57e4d` in /docs ([#3366](https://github.com/aws-powertools/powertools-lambda-python/issues/3366))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3353](https://github.com/aws-powertools/powertools-lambda-python/issues/3353))
+* **deps-dev:** bump aws-cdk from 2.109.0 to 2.110.0 ([#3361](https://github.com/aws-powertools/powertools-lambda-python/issues/3361))
+* **deps-dev:** bump the boto-typing group with 11 updates ([#3362](https://github.com/aws-powertools/powertools-lambda-python/issues/3362))
+* **deps-dev:** bump aws-cdk-lib from 2.108.1 to 2.110.0 ([#3365](https://github.com/aws-powertools/powertools-lambda-python/issues/3365))
+* **deps-dev:** bump aws-cdk from 2.108.1 to 2.109.0 ([#3354](https://github.com/aws-powertools/powertools-lambda-python/issues/3354))
+* **deps-dev:** bump cfn-lint from 0.83.2 to 0.83.3 ([#3363](https://github.com/aws-powertools/powertools-lambda-python/issues/3363))
+* **deps-dev:** bump ruff from 0.1.5 to 0.1.6 ([#3364](https://github.com/aws-powertools/powertools-lambda-python/issues/3364))
+
+
+<a name="v2.27.0"></a>
+## [v2.27.0] - 2023-11-16
+## Features
+
+* **logger:** Adding support to new env variables ([#3348](https://github.com/aws-powertools/powertools-lambda-python/issues/3348))
+
+## Maintenance
+
+* version bump
+* **deps:** bump actions/github-script from 6.4.1 to 7.0.0 ([#3330](https://github.com/aws-powertools/powertools-lambda-python/issues/3330))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3340](https://github.com/aws-powertools/powertools-lambda-python/issues/3340))
+* **deps:** bump fastjsonschema from 2.18.1 to 2.19.0 ([#3337](https://github.com/aws-powertools/powertools-lambda-python/issues/3337))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3345](https://github.com/aws-powertools/powertools-lambda-python/issues/3345))
+* **deps:** bump actions/dependency-review-action from 3.1.2 to 3.1.3 ([#3331](https://github.com/aws-powertools/powertools-lambda-python/issues/3331))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3329](https://github.com/aws-powertools/powertools-lambda-python/issues/3329))
+* **deps:** bump datadog-lambda from 4.81.0 to 4.82.0 ([#3338](https://github.com/aws-powertools/powertools-lambda-python/issues/3338))
+* **deps-dev:** bump cfn-lint from 0.83.1 to 0.83.2 ([#3335](https://github.com/aws-powertools/powertools-lambda-python/issues/3335))
+* **deps-dev:** bump aws-cdk from 2.108.0 to 2.108.1 ([#3344](https://github.com/aws-powertools/powertools-lambda-python/issues/3344))
+* **deps-dev:** bump sentry-sdk from 1.34.0 to 1.35.0 ([#3334](https://github.com/aws-powertools/powertools-lambda-python/issues/3334))
+* **deps-dev:** bump pytest-xdist from 3.3.1 to 3.4.0 ([#3332](https://github.com/aws-powertools/powertools-lambda-python/issues/3332))
+* **deps-dev:** bump aws-cdk-lib from 2.107.0 to 2.108.1 ([#3343](https://github.com/aws-powertools/powertools-lambda-python/issues/3343))
+* **deps-dev:** bump aws-cdk from 2.106.0 to 2.106.1 ([#3328](https://github.com/aws-powertools/powertools-lambda-python/issues/3328))
+* **deps-dev:** bump aws-cdk-lib from 2.105.0 to 2.106.0 ([#3319](https://github.com/aws-powertools/powertools-lambda-python/issues/3319))
+* **deps-dev:** bump aws-cdk from 2.105.0 to 2.106.0 ([#3320](https://github.com/aws-powertools/powertools-lambda-python/issues/3320))
+* **deps-dev:** bump aws-cdk from 2.106.1 to 2.108.0 ([#3341](https://github.com/aws-powertools/powertools-lambda-python/issues/3341))
+* **deps-dev:** bump aws-cdk-lib from 2.106.0 to 2.107.0 ([#3333](https://github.com/aws-powertools/powertools-lambda-python/issues/3333))
 
 
 <a name="v2.26.1"></a>
@@ -3981,7 +4023,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.0...HEAD
+[v2.27.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.1...v2.27.0
 [v2.26.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.0...v2.26.1
 [v2.26.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.1...v2.26.0
 [v2.25.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.25.0...v2.25.1
