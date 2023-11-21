@@ -508,7 +508,7 @@ class Logger:
         self,
         msg: object,
         *args,
-        exc_info=True,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
@@ -683,6 +683,12 @@ class Logger:
 
     def addHandler(self, handler: logging.Handler) -> None:
         return self._logger.addHandler(handler)
+
+    def addFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.addFilter(filter)
+
+    def removeFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.removeFilter(filter)
 
     @property
     def registered_handler(self) -> logging.Handler:
