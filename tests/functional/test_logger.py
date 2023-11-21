@@ -568,6 +568,24 @@ def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     assert request_id == log["correlation_id"]
 
 
+def test_logger_set_correlation_id_path_custom_functions(lambda_context, stdout, service_name):
+    # GIVEN an initialized Logger
+    # AND a Lambda handler decorated with a JMESPath expression using Powertools custom functions
+    logger = Logger(service=service_name, stream=stdout)
+
+    @logger.inject_lambda_context(correlation_id_path="Records[*].powertools_json(body).id")
+    def handler(event, context):
+        ...
+
+    # WHEN handler is called
+    request_id = "xxx-111-222"
+    mock_event = {"Records": [{"body": json.dumps({"id": request_id})}]}
+    handler(mock_event, lambda_context)
+
+    # THEN there should be no exception and correlation ID should match
+    assert logger.get_correlation_id() == [request_id]
+
+
 def test_logger_append_remove_keys(stdout, service_name):
     # GIVEN a Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
