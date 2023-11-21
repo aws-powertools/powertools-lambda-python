@@ -5,6 +5,7 @@ import json
 import logging
 import random
 import re
+import secrets
 import string
 import sys
 import warnings
@@ -1076,3 +1077,23 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
 
     # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
     assert logger.log_level == logging.INFO
+
+
+def test_logger_add_filter(stdout, service_name):
+    # GIVEN a Logger with a custom logging filter
+    class MyFilter(logging.Filter):
+        def filter(self, record):
+            if getattr(record, "api_key", None):
+                record.api_key = "REDACTED"
+
+            return True
+
+    logger = Logger(service=service_name, stream=stdout)
+    logger.addFilter(MyFilter())
+
+    # WHEN a new log statement is issued
+    logger.info("log", api_key=secrets.token_urlsafe())
+
+    # THEN logging filter should be called and mutate the log record accordingly
+    log = capture_logging_output(stdout)
+    assert log["api_key"] == "REDACTED"
