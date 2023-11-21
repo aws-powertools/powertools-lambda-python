@@ -1079,21 +1079,26 @@ def test_log_level_advanced_logging_controler_warning_different_log_levels_using
     assert logger.log_level == logging.INFO
 
 
-def test_logger_add_filter(stdout, service_name):
+def test_logger_add_remove_filter(stdout, service_name):
     # GIVEN a Logger with a custom logging filter
-    class MyFilter(logging.Filter):
+    class ApiKeyFilter(logging.Filter):
         def filter(self, record):
             if getattr(record, "api_key", None):
                 record.api_key = "REDACTED"
 
             return True
 
+    redact_api_key_filter = ApiKeyFilter()
     logger = Logger(service=service_name, stream=stdout)
-    logger.addFilter(MyFilter())
+    logger.addFilter(redact_api_key_filter)
 
     # WHEN a new log statement is issued
-    logger.info("log", api_key=secrets.token_urlsafe())
+    # AND another log statement is issued after filter is removed
+    logger.info("filtered", api_key=secrets.token_urlsafe())
+    logger.removeFilter(redact_api_key_filter)
+    logger.info("unfiltered", api_key=secrets.token_urlsafe())
 
     # THEN logging filter should be called and mutate the log record accordingly
-    log = capture_logging_output(stdout)
-    assert log["api_key"] == "REDACTED"
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["api_key"] == "REDACTED"
+    assert log[1]["api_key"] != "REDACTED"
