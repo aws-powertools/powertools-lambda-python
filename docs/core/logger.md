@@ -85,10 +85,10 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 ### Setting a Correlation ID
 
-You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
+You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}, including [our custom JMESPath Functions](../utilities/jmespath_functions.md#powertools_json-function).
 
 ???+ tip
-	You can retrieve correlation IDs via `get_correlation_id` method
+	You can retrieve correlation IDs via `get_correlation_id` method.
 
 === "set_correlation_id.py"
 
