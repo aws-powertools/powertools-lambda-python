@@ -507,7 +507,7 @@ class Logger:
         self,
         msg: object,
         *args,
-        exc_info=True,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
