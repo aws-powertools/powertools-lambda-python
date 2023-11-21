@@ -2216,7 +2216,12 @@
 <span class="normal">53</span>
 <span class="normal">54</span>
 <span class="normal">55</span>
-<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
 <span class="nt">Transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless-2016-10-31</span>
 <span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Hello world event handler API Gateway</span>
 
@@ -2229,9 +2234,14 @@
 <span class="w">      </span><span class="nt">MaxAge</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;300&#39;&quot;</span>
 <span class="w">    </span><span class="nt">BinaryMediaTypes</span><span class="p">:</span><span class="w"> </span><span class="c1"># see Binary responses section</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*~1*&quot;</span><span class="w"> </span><span class="c1"># converts to */* for any binary type</span>
+<span class="w">      </span><span class="c1"># NOTE: use this stricter version if you&#39;re also using CORS; */* doesn&#39;t work with CORS</span>
+<span class="w">      </span><span class="c1"># see: https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779</span>
+<span class="w">      </span><span class="c1"># - &quot;image~1*&quot; # converts to image/*</span>
+<span class="w">      </span><span class="c1"># - &quot;*~1csv&quot; # converts to */csv, eg text/csv, application/csv</span>
+
 <span class="w">  </span><span class="nt">Function</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.9</span>
+<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
 <span class="w">    </span><span class="nt">Tracing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Active</span>
 <span class="w">    </span><span class="nt">Environment</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">Variables</span><span class="p">:</span>
@@ -5236,16 +5246,15 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </div>
 </div>
 <h3 id="binary-responses">Binary responses<a class="headerlink" href="#binary-responses" title="Permanent link">&para;</a></h3>
-<p>For convenience, we automatically base64 encode binary responses. You can also use in combination with <code>compress</code> parameter if your client supports gzip.</p>
-<p>Like <code>compress</code> feature, the client must send the <code>Accept</code> header with the correct media type.</p>
 <details class="warning" open="open">
-<summary>Warning</summary>
+<summary>Amazon API Gateway does not support <code>*/*</code> binary media type <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779" target="blank">when CORS is also configured</a>.</summary>
 <p>This feature requires API Gateway to configure binary media types, see <a href="#required-resources">our sample infrastructure</a> for reference.</p>
 </details>
-<details class="note" open="open">
-<summary>Note</summary>
-<p>Lambda Function URLs handle binary media types automatically.</p>
-</details>
+<p>For convenience, we automatically base64 encode binary responses. You can also use in combination with <code>compress</code> parameter if your client supports gzip.</p>
+<p>Like <code>compress</code> feature, the client must send the <code>Accept</code> header with the correct media type.</p>
+<div class="admonition note">
+<p class="admonition-title">Lambda Function URLs handle binary media types automatically.</p>
+</div>
 <div class="tabbed-set tabbed-alternate" data-tabs="17:4"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><input id="__tabbed_17_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">binary_responses.py</label><label for="__tabbed_17_2">binary_responses_logo.svg</label><label for="__tabbed_17_3">binary_responses.json</label><label for="__tabbed_17_4">binary_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -6431,24 +6440,32 @@ your development, building, deployment tooling need to accommodate the distinct 
 <span class="normal">60</span>
 <span class="normal">61</span>
 <span class="normal">62</span>
-<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;2010-09-09&#39;</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
 <span class="nt">Transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless-2016-10-31</span>
 <span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
 <span class="w">    </span><span class="no">micro-function-example</span>
 
 <span class="nt">Globals</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">Api</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">TracingEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">Cors</span><span class="p">:</span><span class="w"> </span><span class="c1"># see CORS section</span>
-<span class="w">      </span><span class="nt">AllowOrigin</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;https://example.com&#39;&quot;</span>
-<span class="w">      </span><span class="nt">AllowHeaders</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;Content-Type,Authorization,X-Amz-Date&#39;&quot;</span>
-<span class="w">      </span><span class="nt">MaxAge</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;300&#39;&quot;</span>
-<span class="w">    </span><span class="nt">BinaryMediaTypes</span><span class="p">:</span><span class="w"> </span><span class="c1"># see Binary responses section</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*~1*&quot;</span><span class="w"> </span><span class="c1"># converts to */* for any binary type</span>
+<span class="w">    </span><span class="nt">Api</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">TracingEnabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">Cors</span><span class="p">:</span><span class="w"> </span><span class="c1"># see CORS section</span>
+<span class="w">            </span><span class="nt">AllowOrigin</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;https://example.com&#39;&quot;</span>
+<span class="w">            </span><span class="nt">AllowHeaders</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;Content-Type,Authorization,X-Amz-Date&#39;&quot;</span>
+<span class="w">            </span><span class="nt">MaxAge</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&#39;300&#39;&quot;</span>
+<span class="w">        </span><span class="nt">BinaryMediaTypes</span><span class="p">:</span><span class="w"> </span><span class="c1"># see Binary responses section</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;*~1*&quot;</span><span class="w"> </span><span class="c1"># converts to */* for any binary type</span>
+<span class="w">            </span><span class="c1"># NOTE: use this stricter version if you&#39;re also using CORS; */* doesn&#39;t work with CORS</span>
+<span class="w">            </span><span class="c1"># see: https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779</span>
+<span class="w">            </span><span class="c1"># - &quot;image~1*&quot; # converts to image/*</span>
+<span class="w">            </span><span class="c1"># - &quot;*~1csv&quot; # converts to */csv, eg text/csv, application/csv</span>
 
-<span class="w">  </span><span class="nt">Function</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
-<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
+<span class="w">    </span><span class="nt">Function</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">        </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
 
 <span class="nt">Resources</span><span class="p">:</span>
 <span class="w">    </span><span class="c1"># Lambda Function Solely For /users endpoint</span>
@@ -7041,7 +7058,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-10-24
+      2023-11-21
     
   </small>
 </div>
