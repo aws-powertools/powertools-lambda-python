@@ -67,7 +67,7 @@ def _is_cold_start() -> bool:
     return cold_start
 
 
-class Logger:
+class Logger(logging.Logger):
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -682,6 +682,9 @@ class Logger:
 
     def addHandler(self, handler: logging.Handler) -> None:
         return self._logger.addHandler(handler)
+
+    def addFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.addFilter(filter)
 
     @property
     def registered_handler(self) -> logging.Handler:
