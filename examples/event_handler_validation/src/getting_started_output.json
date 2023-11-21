@@ -1,0 +1,9 @@
+{
+  "statusCode": 200,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "cookies": [],
+  "body": "hello world",
+  "isBase64Encoded": false
+}

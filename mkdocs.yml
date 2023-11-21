@@ -20,7 +20,9 @@ nav:
               - Amazon CloudWatch EMF: core/metrics.md
               - Datadog: core/metrics/datadog.md
           - Event Handler:
-              - core/event_handler/api_gateway.md
+              - REST API:
+                  - core/event_handler/api_gateway/index.md
+                  - core/event_handler/openapi.md
               - core/event_handler/appsync.md
           - utilities/parameters.md
           - utilities/batch.md
