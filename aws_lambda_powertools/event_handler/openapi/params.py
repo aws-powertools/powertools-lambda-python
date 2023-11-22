@@ -15,7 +15,8 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     field_annotation_is_scalar,
     get_annotation_from_field_info,
 )
-from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2, CacheKey
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 from aws_lambda_powertools.shared.types import Annotated, Literal, get_args, get_origin
 
 """
