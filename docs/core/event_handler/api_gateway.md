@@ -270,6 +270,9 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 
 #### Handling validation errors
 
+???+ note "Pydantic v1 vs v2"
+	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
+
 Any **incoming request that fails validation** will result in a `HTTP 422: Unprocessable Entity error` response.
 
 Below is a sample error response for failed validation due to incorrect input:
@@ -285,9 +288,6 @@ Below is a sample error response for failed validation due to incorrect input:
     ```json hl_lines="2 3"
     --8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
     ```
-
-???+ note "Pydantic v1 vs v2"
-	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
 
 ### Accessing request details
 
