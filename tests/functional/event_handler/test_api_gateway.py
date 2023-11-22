@@ -368,7 +368,7 @@ def test_override_route_compress_parameter():
     # AND the Response object with compress=False
     app = ApiGatewayResolver()
     mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
-    expected_value = '{"test": "value"}'
+    expected_value = {"test": "value"}
 
     @app.get("/my/request", compress=True)
     def with_compression() -> Response:
@@ -382,7 +382,7 @@ def test_override_route_compress_parameter():
 
     # THEN the response is not compressed
     assert result["isBase64Encoded"] is False
-    assert result["body"] == expected_value
+    assert json.loads(result["body"]) == expected_value
     assert result["multiValueHeaders"].get("Content-Encoding") is None
 
 
@@ -682,7 +682,7 @@ def test_custom_cors_config():
 def test_no_content_response():
     # GIVEN a response with no content-type or body
     response = Response(status_code=204, content_type=None, body=None, headers=None)
-    response_builder = ResponseBuilder(response)
+    response_builder = ResponseBuilder(response, serializer=json.dumps)
 
     # WHEN calling to_dict
     result = response_builder.build(APIGatewayProxyEvent(LOAD_GW_EVENT))
@@ -1528,7 +1528,7 @@ def test_exception_handler_service_error():
     # THEN call the exception_handler
     assert result["statusCode"] == 500
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert result["body"] == "CUSTOM ERROR FORMAT"
+    assert result["body"] == '"CUSTOM ERROR FORMAT"'
 
 
 def test_exception_handler_not_found():
@@ -1824,11 +1824,11 @@ def test_route_match_prioritize_full_match():
 
     @router.get("/my/{path}")
     def dynamic_handler() -> Response:
-        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "dynamic"}))
+        return Response(200, content_types.APPLICATION_JSON, {"hello": "dynamic"})
 
     @router.get("/my/path")
     def static_handler() -> Response:
-        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "static"}))
+        return Response(200, content_types.APPLICATION_JSON, {"hello": "static"})
 
     app.include_router(router)
 

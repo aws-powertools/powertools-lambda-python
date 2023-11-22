@@ -790,6 +790,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
+        elif self.response.is_json():
+            self.response.body = self.serializer(self.response.body)
 
         # We only apply the serializer when the content type is JSON and the
         # body is not a str, to avoid double encoding
