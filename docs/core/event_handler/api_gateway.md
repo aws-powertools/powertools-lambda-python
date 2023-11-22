@@ -358,6 +358,18 @@ In the following example, we use a new `Query` OpenAPI type to add one out of ma
 2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
 3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
 
+#### Validating path parameters
+
+Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to add constraints.
+
+For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
+
+```python title="validating_path.py"
+--8<-- "examples/event_handler_rest/src/validating_path.py"
+```
+
+1. `Path` is a special OpenAPI type that allows us to constrain todo_id to be less than 999.
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
