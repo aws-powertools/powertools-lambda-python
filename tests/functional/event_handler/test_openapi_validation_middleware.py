@@ -6,7 +6,7 @@ from typing import List, Tuple
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
@@ -330,3 +330,51 @@ def test_validate_embed_body_param():
     LOAD_GW_EVENT["body"] = json.dumps({"user": {"name": "John", "age": 30}})
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
+
+
+def test_validate_response_return():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Model) -> Response[Model]:
+        return Response(body=user, status_code=200)
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+
+    # THEN the handler should be invoked and return 200
+    # THEN the body must be a dict
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+    assert result["body"] == {"name": "John", "age": 30}
+
+
+def test_validate_response_invalid_return():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Model) -> Response[Model]:
+        return Response(body=user, status_code=200)
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = json.dumps({})
+
+    # THEN the handler should be invoked and return 422
+    # THEN the body should have the word missing
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
