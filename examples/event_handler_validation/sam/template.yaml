@@ -33,7 +33,7 @@ Resources:
       Description: API handler function
       Events:
         AnyApiEvent:
-          Type: HttpApi
+          Type: Api
           Properties:
             # NOTE: this is a catch-all rule to simplify the documentation.
             # explicit routes and methods are recommended for prod instead (see below)

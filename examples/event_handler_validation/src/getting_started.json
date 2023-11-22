@@ -1,42 +1,36 @@
 {
-  "version": "2.0",
-  "routeKey": "$default",
-  "rawPath": "/todos/1",
-  "rawQueryString": "",
-  "cookies": [
-    "cookie1",
-    "cookie2"
-  ],
+  "version": "1.0",
+  "resource": "/todos/1",
+  "path": "/todos/1",
+  "httpMethod": "GET",
   "headers": {
-    "header1": "value1",
-    "header2": "value1,value2"
+    "Origin": "https://aws.amazon.com"
   },
-  "queryStringParameters": {
-    "parameter1": "value1,value2",
-    "parameter2": "value"
-  },
+  "multiValueHeaders": {},
+  "queryStringParameters": {},
+  "multiValueQueryStringParameters": {},
   "requestContext": {
     "accountId": "123456789012",
-    "apiId": "api-id",
+    "apiId": "id",
+    "authorizer": {
+      "claims": null,
+      "scopes": null
+    },
     "domainName": "id.execute-api.us-east-1.amazonaws.com",
     "domainPrefix": "id",
-    "http": {
-      "method": "GET",
-      "path": "/todos/1",
-      "protocol": "HTTP/1.1",
-      "sourceIp": "192.0.2.1",
-      "userAgent": "agent"
-    },
-    "requestId": "id",
-    "routeKey": "$default",
-    "stage": "$default",
-    "time": "12/Mar/2020:19:03:58 +0000",
-    "timeEpoch": 1583348638390
+    "extendedRequestId": "request-id",
+    "httpMethod": "GET",
+    "path": "/todos",
+    "protocol": "HTTP/1.1",
+    "requestId": "id=",
+    "requestTime": "04/Mar/2020:19:15:17 +0000",
+    "requestTimeEpoch": 1583349317135,
+    "resourceId": null,
+    "resourcePath": "/todos/1",
+    "stage": "$default"
   },
-  "pathParameters": {},
-  "isBase64Encoded": false,
-  "stageVariables": {
-    "stageVariable1": "value1",
-    "stageVariable2": "value2"
-  }
+  "pathParameters": null,
+  "stageVariables": null,
+  "body": "",
+  "isBase64Encoded": false
 }
