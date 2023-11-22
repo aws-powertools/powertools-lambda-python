@@ -229,6 +229,41 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 ???+ note
     It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
 
+### Data validation
+
+!!! note "This changes the authoring experience by relying on Python's type annotations"
+    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} to ease migrations in either direction.
+
+All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`.
+
+With this feature, we can now express how we expect our incoming data and response to look like. This moves data validation responsibilities to Event Handler resolvers, reducing a ton of boilerplate code.
+
+Any incoming data that does not match what you expect will result in a `HTTP 422: Unprocessable Entity error` response.
+
+Let's rewrite the previous examples to signal our resolver what shape we expect our data to be.
+
+=== "data_validation.py"
+
+    ```python hl_lines="10 13 15 20"
+    --8<-- "examples/event_handler_rest/src/data_validation.py"
+    ```
+
+    1. This enforces data validation at runtime. Any validation error will return `HTTP 422: Unprocessable Entity error`.
+    2. Defining a route remains exactly as before.
+    3. By default, URL Paths will be `str`. Here we are telling our resolver it should be `int`, so it converts it for us. <br/><br/> We're also saying the return should be `str` instead of a dictionary in the previous example.
+
+=== "data_validation.json"
+
+    ```json hl_lines="4"
+    --8<-- "examples/event_handler_rest/src/data_validation.json"
+    ```
+
+=== "data_validation_output.json"
+
+    ```json hl_lines="2 8"
+    --8<-- "examples/event_handler_rest/src/data_validation_output.json"
+    ```
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
