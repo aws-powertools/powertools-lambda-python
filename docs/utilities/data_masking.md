@@ -5,7 +5,31 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The data masking utility provides a simple solution to conceal incoming data so that sensitive information is not passed downstream or logged.
+The data masking utility provides a simple solution to obfuscate (mask or encrypt) incoming data so that sensitive information is not passed downstream or logged.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    Source: Customer information <br/><br/> Sensitive data <br/><br/> PII <br/><br/>
+    LambdaInit: Lambda invocation
+    Processor: Data Masker
+    Handler: Your function
+    YourLogic: Your logic to mask or encrypt data
+    LambdaResponse: Logs
+
+    Source --> LambdaInit
+
+    LambdaInit --> Processor
+    Processor --> Handler
+
+    state Processor {
+        [*] --> Handler
+        Handler --> YourLogic
+    }
+
+    Handler --> Processor: Collect results
+    Processor --> LambdaResponse: Obfuscated data
+```
 
 ## Key features
 
@@ -15,39 +39,67 @@ The data masking utility provides a simple solution to conceal incoming data so 
 
 ## Terminology
 
-**Mask**: This refers to concealing or partially replacing sensitive information with a non-sensitive placeholder or mask. The key characteristic of this operation is that it is irreversible, meaning the original sensitive data cannot be retrieved from the masked data. Masking is commonly applied when displaying data to users or for anonymizing data in non-reversible scenarios. For example, display the last four digits of a credit card number as "**** **** **** 1234".
+**Masking** irreversibly replaces sensitive information with a non-sensitive placeholder or mask. For example, display the last four digits of a credit card number as `"**** **** **** 1234"`.
 
-**Encrypt**: This is the process of transforming plaintext data into a ciphertext format using an encryption algorithm and a cryptographic key. Encryption is a reversible process, meaning the original data can be retrieved (decrypted) using the appropriate decryption key. You can use this, for instance, to encrypt any PII (personally identifiable information) of your customers and make sure only the people with the right permissions are allowed to decrypt and view the plaintext PII data, in accordance with GDPR.
+**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. Encryption can be reversed with the correct decryption key. This allows you to encrypt any PII (personally identifiable information) and make sure only the users with appropirate permissions can decrypt it to view the plaintext.
 
-**Decrypt**: This is the process of reversing the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key that only authorized personnel should have access to.
+**Decrypting** reverses the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key.
 
 ## Getting started
 
-### IAM Permissions
+### Install
+
+If not using any encryption services and only masking data, your Lambda function does not need any additional permissions or resources to use this utility.
+
+#### Using AWS Encryption SDK
 
 To use the AWS Encryption SDK, your Lambda function IAM Role must have `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
 
+You must also have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
+
+#### Using a custom encryption provider
+
 For any other encryption provider, make sure to have the permissions for your role that it requires.
 
-If not using any encryption services and only masking data, your Lambda does not need any additional permissions to use this utility.
+### Working with nested data
 
-### Required resources
+#### JSON
+When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can obfuscate values of nested keys by using dot notation.
 
-To use the AWS Encryption SDK, you must have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
+???+ note
+    If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluding 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
 
-For any other encryption provider, you must have the resources required for that provider.
+=== "AWS Serverless Application Model (SAM) example"
+    ```yaml hl_lines="11-23 30 33-39 46"
+    --8<-- "examples/data_masking/sam/template.yaml"
+    ```
 
-## Using the utility
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/large_data_input.json"
+    ```
 
-#### Working with JSON
-When using the data masking utility with dictionaries or JSON objects, you can provide a list of keys to conceal the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can conceal values of nested keys by using dot notation.
+=== "data_masking_function_example.py"
+    ```python hl_lines="8 20-22"
+    --8<-- "examples/data_masking/src/data_masking_function_example.py"
+    ```
+
+=== "output.json"
+    ```json
+    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
+    ```
 
 ### Masking data
 
 You can mask data without having to install any encryption library.
 
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/generic_data_input.json"
+    ```
+
 === "getting_started_mask_data.py"
-    ```python hl_lines="1 6 27"
+    ```python hl_lines="1 6 10"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
     ```
 
@@ -60,8 +112,13 @@ You can mask data without having to install any encryption library.
 
 In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. You can still use the masking feature while using any encryption provider.
 
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/generic_data_input.json"
+    ```
+
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="3-4 6 29 32 34"
+    ```python hl_lines="3-4 12-13"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
@@ -75,35 +132,21 @@ In order to encrypt data, you must use either our out-of-the-box integration wit
     --8<-- "examples/data_masking/src/decrypt_data_output.json"
     ```
 
-
-### SAM template example
-=== "template.yaml"
-    ```yaml hl_lines="11-23 30 33-39 46"
-    --8<-- "examples/data_masking/sam/template.yaml"
-    ```
-
-=== "data_masking_function_example.py"
-    ```python hl_lines="8 47-50"
-    --8<-- "examples/data_masking/src/data_masking_function_example.py"
-    ```
-
-=== "output.json"
-    ```json
-    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
-    ```
-
 ## Advanced
 
 ### Adjusting configurations for AWS Encryption SDK
 
-You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify these values at `utilities/data_masking/constants.py`.
+You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values in `utilities/data_masking/provider/kms/aws_encryption_sdk.py`.
 
-The `CACHE_CAPACITY` value is currently set at `100`. This value represents the maximum number of entries that can be retained in the local cryptographic materials cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.caches.local.html){target="_blank" rel="nofollow"} for more information.
+#### Caching
 
-The `MAX_CACHE_AGE_SECONDS` value is currently set at `300`. It represents the maximum time (in seconds) that a cache entry may be kept in the cache.
+The `CACHE_CAPACITY` value is currently set to `100`. This value represents the maximum number of entries that can be retained in the local cryptographic materials cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.caches.local.html){target="_blank" rel="nofollow"} for more information.
 
-The `MAX_MESSAGES_ENCRYPTED` value is currently set at `200`. It represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this and `MAX_CACHE_AGE_SECONDS`.
+The `MAX_CACHE_AGE_SECONDS` value is currently set to `300`. It represents the maximum time (in seconds) that a cache entry may be kept in the cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
 
+#### Limit messages
+
+The `MAX_MESSAGES_ENCRYPTED` value is currently set to `200`. It represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
 
 ### Create your own encryption provider
 
@@ -140,14 +183,19 @@ You can then use this custom encryption provider class as the `provider` argumen
 
 Here is an example of implementing a custom encryption using an external encryption library like [ItsDangerous](https://itsdangerous.palletsprojects.com/en/2.1.x/){target="_blank" rel="nofollow"}, a widely popular encryption library.
 
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/generic_data_input.json"
+    ```
+
 === "working_with_own_provider.py"
-    ```python hl_lines="1-2 25 28 30"
+    ```python hl_lines="1-2 9-10"
     --8<-- "examples/data_masking/src/working_with_own_provider.py"
     ```
 
 === "custom_provider.py"
-    ```python hl_lines="1 3 6 8 11 16"
-    --8<-- "examples/data_masking/src/custom_provider.py"
+    ```python hl_lines="1 3 8"
+    --8<-- "examples/data_masking/src/custom_data_masking_provider.py"
     ```
 
 === "encrypted_output.json"

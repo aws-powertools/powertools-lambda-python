@@ -6,7 +6,7 @@ Description: >
 Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
     Timeout: 5
-    Runtime: python3.10
+    Runtime: python3.11
     Tracing: Active
 Resources:
   MyKMSKey:
@@ -27,7 +27,7 @@ Resources:
       Handler: data_masking_function_example.lambda_handler
       CodeUri: ../src
       Description: Data Masking Function Example
-      MemorySize: 128
+      MemorySize: 1024
       Architectures:
       - x86_64
       Policies:

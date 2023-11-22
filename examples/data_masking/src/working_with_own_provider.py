@@ -2,25 +2,9 @@ from aws_lambda_powertools.utilities._data_masking.base import DataMasking
 from examples.data_masking.src.custom_data_masking_provider import MyCustomEncryption
 
 
-def lambda_handler():
-    data = {
-        "id": 1,
-        "name": "John Doe",
-        "age": 30,
-        "email": "johndoe@example.com",
-        "address": {
-            "street": "123 Main St", 
-            "city": "Anytown", 
-            "state": "CA", 
-            "zip": "12345",
-        },
-        "company_address": {
-            "street": "456 ACME Ave", 
-            "city": "Anytown", 
-            "state": "CA", 
-            "zip": "12345",
-        },
-    }
+def lambda_handler(event, context):
+
+    data = event["body"]
 
     encryption_provider = MyCustomEncryption(secret="secret-key")
     data_masker = DataMasking(provider=encryption_provider)
