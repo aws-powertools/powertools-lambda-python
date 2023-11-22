@@ -32,6 +32,7 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
 from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
@@ -1971,6 +1972,17 @@ class ApiGatewayResolver(BaseRouter):
                 return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
             except ServiceError as service_error:
                 exp = service_error
+
+        if isinstance(exp, RequestValidationError):
+            return self._response_builder_class(
+                response=Response(
+                    status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                    content_type=content_types.APPLICATION_JSON,
+                    body={"statusCode": HTTPStatus.UNPROCESSABLE_ENTITY, "message": exp.errors()},
+                ),
+                serializer=self._serializer,
+                route=route,
+            )
 
         if isinstance(exp, ServiceError):
             return self._response_builder_class(
