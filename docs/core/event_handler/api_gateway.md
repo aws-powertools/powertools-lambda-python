@@ -242,15 +242,19 @@ Any **incoming request that fails validation** will result in a `HTTP 422: Unpro
 
 Let's rewrite the previous examples to signal our resolver what shape we expect our data to be.
 
+<!-- markdownlint-disable MD013 -->
+
 === "data_validation.py"
 
-    ```python hl_lines="10 13 15 20"
+    ```python hl_lines="13 16 25 29"
     --8<-- "examples/event_handler_rest/src/data_validation.py"
     ```
 
     1. This enforces data validation at runtime. Any validation error will return `HTTP 422: Unprocessable Entity error`.
-    2. Defining a route remains exactly as before.
-    3. By default, URL Paths will be `str`. Here we are telling our resolver it should be `int`, so it converts it for us. <br/><br/> We're also saying the return should be `str` instead of a dictionary in the previous example.
+    2. We create a Pydantic model to define how our data looks like.
+    3. Defining a route remains exactly as before.
+    4. By default, URL Paths will be `str`. Here, we are telling our resolver it should be `int`, so it converts it for us. <br/><br/> Lastly, we're also saying the return should be our `Todo`. This will help us later when we touch OpenAPI auto-documentation.
+    5. We convert our newly fetched todo data into our `Todo` model to ensure it's valid. <br/><br/> Our resolver takes care of converting our validated model into a valid end-user response. <br/><br/> **NOTE**. You're not limited to a Pydantic model, you could also return `dict` like before.
 
 === "data_validation.json"
 
@@ -263,6 +267,8 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
     ```json hl_lines="2 8"
     --8<-- "examples/event_handler_rest/src/data_validation_output.json"
     ```
+
+<!-- markdownlint-enable MD013 -->
 
 ### Accessing request details
 
