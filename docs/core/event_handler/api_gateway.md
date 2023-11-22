@@ -350,13 +350,31 @@ In the following example, we use a new `Query` OpenAPI type to add one out of ma
 * `completed`, when set, should have at minimum 4 characters
 * Doesn't match? Event Handler will return a validation error response
 
-```python hl_lines="1 8 26" title="validating_query_strings.py"
---8<-- "examples/event_handler_rest/src/validating_query_strings.py"
-```
+<!-- markdownlint-disable MD013 -->
 
-1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
-2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
-3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+=== "validating_query_strings.py"
+
+    ```python hl_lines="1 8 26"
+    --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
+    ```
+
+    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
+    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+
+=== "skip_validating_query_strings.py"
+
+    If you don't want to validate query strings but simply let Event Handler inject them as parameters, you can omit `Query` type annotation.
+
+    This is merely for your convenience.
+
+    ```python hl_lines="1 8 25"
+    --8<-- "examples/event_handler_rest/src/skip_validating_query_strings.py"
+    ```
+
+    1. `completed` is still the same query string as before, except we simply state it's an string. No `Query` or `Annotated` to validate it.
+
+<!-- markdownlint-enable MD013 -->
 
 #### Validating path parameters
 
