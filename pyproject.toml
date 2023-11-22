@@ -44,7 +44,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.6.2"
-datadog-lambda = { version = "^4.77.0", optional = true }
+datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -88,7 +88,7 @@ ijson = "^3.2.2"
 typed-ast = { version = "^1.5.5", python = "< 3.8"}
 hvac = "^1.2.1"
 aws-requests-auth = "^0.4.3"
-datadog-lambda = "^4.82.0"
+datadog-lambda = "^5.83.0"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
