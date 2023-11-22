@@ -16,17 +16,12 @@ Comprehensive data validation and OpenAPI generation based on introspection of P
 
 To use validation and OpenAPI features with our core utility, you must first ensure that pydantic is installed as it is a prerequisite. This utility framework supports both pydantic version 1 and version 2. For detailed guidance on setting up the parser, visit the [Parser documentation](./../../../../utilities/parser/#getting-started).
 
-This documentation specifically focuses on the utility's validation and OpenAPI capabilities. These features are built on top of the Event Handler, thereby streamlining the process of validating inputs and outputs and automatically generating OpenAPI specifications based on your API definitions.
+This documentation specifically focuses on the utility's validation and OpenAPI capabilities. These features are built on top of the Event Handler utility, thereby streamlining the process of validating inputs and outputs and automatically generating OpenAPI specifications based on your API definitions.
 
 ### Basic usage
 
-To enable the validation logic, you need to pass the `enable_validation` parameter to your REST API resolver. This changes the way your resolver gets called. We will inspect
-your handler do termine the input and output parameters, and will validate / coerce the data before calling your handler.
-
-To enable the validation mechanism within your REST API, you'll need to use the `enable_validation` parameter when defining your API resolver.
-This modifies the invocation process of your resolver function. Powertools will analyze your handler to identify the input and output parameters.
-Once these parameters are determined, we ensure that the data is validated and coerced accordingly before it ever reaches your handler.
-This process is designed to enforce a layer of integrity, so that your functions operate on clean and verified inputs, leading to more reliable and maintainable code.
+Enable the REST API's validation by setting the `enable_validation` parameter in your API resolver. This changes how your resolver is called.
+Powertools examines your handler to pinpoint input and output parameters, then validates and coerces the data before it reaches your handler.
 
 === "getting_started.py"
 
@@ -46,9 +41,9 @@ This process is designed to enforce a layer of integrity, so that your functions
     --8<-- "examples/event_handler_validation/src/getting_started_output.json"
     ```
 
-If the validation process encounters data that does not conform to the specified input schema, the system triggers a validation error. This results in an HTTP 442 Unprocessable Entity error, which indicates that the input was understood by the server but contained invalid fields.
+When data fails to match the input schema during validation, a validation error occurs, leading to an HTTP 422 Unprocessable Entity error, signaling that the server understood the input but found invalid fields.
 
-Here's an example of what the error response might look like when the validation fails due to bad input:
+Below is a sample error response for failed validation due to incorrect input:
 
 === "bad_input_event.json"
 
@@ -63,13 +58,13 @@ Here's an example of what the error response might look like when the validation
     ```
 
 ???+ note "Pydantic v1 vs v2"
-	Pydantic version 1 and version 2 might describe these validation errors differently. Hence, you should consult the relevant version's documentation to understand the exact format and style of the error messages for the version you are using.
+	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
 
 ### Using Pydantic models
 
-Pydantic models provide a powerful syntax for declaring complex data structures along with the rules to validate the incoming data. These models can be used directly as input parameters or return types, letting you take full advantage of Pydantic's breadth of features, including data coercion, default values, and advanced validation.
+Pydantic models allow you to define complex data structures and validation rules. Use these models as input parameters or return types to leverage Pydantic's features like data coercion, default values, and advanced validation.
 
-Let's take a look at how you can utilize Pydantic models:
+Here's how to use Pydantic models:
 
 === "getting_started_pydantic.py"
 
@@ -91,14 +86,11 @@ Let's take a look at how you can utilize Pydantic models:
 
 ### SwaggerUI
 
-Swagger UI provides a web-based interface for visualizing and interacting with your API's resources. By enabling Swagger UI for your API, you create an interactive documentation page that can be used for testing and exploring your API endpoints in real-time.
-
-WARNING: this will create a publicly accessible Swagger UI page. See Advanced for how to customize and protect your
-Swagger UI
+Swagger UI offers a web interface for visualizing and interacting with your API's resources. Enable Swagger UI to generate an interactive documentation page for testing and exploring your API endpoints in real time.
 
 ???+ warning "Publicly accessible by default"
-	The Swagger UI page will be publicly accessible when enabled. If your API contains sensitive endpoints or you wish to restrict access to the documentation, it's crucial to consider adding authentication mechanisms or other protections.
-	See the [Customize the Swagger UI](#customizing-the-swagger-ui) section of this documentation to learn details on customizing and securing your Swagger UI, ensuring it suits your specific requirements while providing the necessary protection for your API's interactive documentation.
+	Enabling Swagger UI makes it public. To protect sensitive API endpoints or restrict documentation access, consider implementing authentication or other security measures.
+	See the [Customize the Swagger UI](#customizing-the-swagger-ui) section for instructions on customizing and securing your Swagger UI to meet your needs and safeguard your interactive API documentation.
 
 ```python hl_lines="9 10"
 --8<-- "examples/event_handler_validation/src/swagger.py"
@@ -112,11 +104,11 @@ Here's an example of what it looks like by default:
 
 ### Customizing parameters
 
-Annotations are a useful way to enrich your API's parameters with metadata and validation constraints, thereby enhancing the functionality and documentation of your API. Python's [Annotated type, introduced in PEP 593](https://peps.python.org/pep-0593/), allows you to attach additional metadata to type hints, which can then be used by your validation library or documentation tools.
+Use annotations to add metadata and validation constraints to your API's parameters, improving functionality and documentation. Python's [Annotated type from PEP 593](https://peps.python.org/pep-0593/) lets you append metadata to type hints for use by validation libraries or documentation tools.
 
-If you are working with parameters that are part of the URL path, query strings, or request bodies, certain specialized classes or decorators are often available to assist with defining these parameters more explicitly. This can include specifying default values, validation rules, and descriptions for better OpenAPI generation.
+For URL path, query string, or request body parameters, use specialized classes or decorators to define parameters with defaults, validation rules, and descriptions for enhanced OpenAPI output.
 
-Here is an example demonstrating how you might customize your API parameters using annotations:
+Below is an example of customizing API parameters with annotations:
 
 ```python hl_lines="1 7 19 20"
 --8<-- "examples/event_handler_validation/src/customizing_parameters.py"
@@ -125,11 +117,9 @@ Here is an example demonstrating how you might customize your API parameters usi
 ???+ note
 	Powertools doesn't have support for files, form data, and header parameters at the moment. If you're interested in this, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE).
 
-Adding titles and descriptions to your parameters is beneficial because it clarifies the intended use and constraints of the API for end-users and developers alike.
-When the API is rendered in OpenAPI documentation tools, these annotations will be converted into readable descriptions, providing a self-explanatory interface for interacting with your API.
-This can significantly improve the developer experience and reduce the learning curve for new users of your API.
+Titles and descriptions clarify parameter use and constraints for both end-users and developers. In OpenAPI documentation tools, these annotations become readable descriptions, offering a self-explanatory API interface. This enhances the developer experience and eases the learning curve for new API users.
 
-Here's a table of all possible customizations you can do:
+Below is a table detailing all possible parameter customizations:
 
 | Field name            | Type          | Description                                                                                                                                 |
 |-----------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------|
@@ -156,10 +146,9 @@ Here's a table of all possible customizations you can do:
 
 ### Body parameters
 
-Handling JSON objects in the body of your API requests is simple with Pydantic models. We automate the parsing of the request bodies using the models you define,
-ensuring that the data structures rescived are aligned with your API's expectations.
+With Pydantic models, managing JSON objects in API request bodies is straightforward. The models you define automatically parse request bodies, confirming that received data structures match your API's specifications.
 
-Here's how to define and parse body parameters using a Pydantic model:
+To define and parse body parameters with a Pydantic model, follow this example:
 
 === "body_parsing.py"
 
@@ -179,7 +168,7 @@ Here's how to define and parse body parameters using a Pydantic model:
     --8<-- "examples/event_handler_validation/src/body_parsing_output.json"
     ```
 
-When using the Body wrapper with embed, your JSON payload will need to be provided as a nested object under a key that matches the name of the parameter:
+When you use the Body wrapper with the `embed` option, nest your JSON payload under a key that corresponds to the parameter name.
 
 === "body_parsing_embed.py"
 
@@ -201,8 +190,9 @@ When using the Body wrapper with embed, your JSON payload will need to be provid
 
 ### Customizing API operations
 
-Customizing your API endpoints involves adding specific metadata to your endpoint definitions, allowing you to provde descriptive documentation for API consumers and offer additional instructions to the underlying framework.
-Below is a detailed explanation of various fields that you can customize:
+Customize your API endpoints by adding metadata to endpoint definitions. This provides descriptive documentation for API consumers and gives extra instructions to the framework.
+
+Here's a breakdown of various customizable fields:
 
 | Field Name             | Type                        | Description                                                                                                                                                                                                                                                                                                      |
 |------------------------|-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -214,7 +204,7 @@ Below is a detailed explanation of various fields that you can customize:
 | `operation_id`         | `str`                       | A unique identifier for the operation, which can be used for referencing this operation in documentation or code. This ID must be unique across all operations described in the API.                                                                                                                             |
 | `include_in_schema`    | `bool`                      | A boolean value that determines whether or not this operation should be included in the OpenAPI schema. Setting it to `False` can hide the endpoint from generated documentation and schema exports, which might be useful for private or experimental endpoints.                                                |
 
-To apply these customizations, you add additional parameters when declaring your routes:
+To implement these customizations, include extra parameters when defining your routes:
 
 === "Customizing API operations metadata"
 
@@ -224,9 +214,9 @@ To apply these customizations, you add additional parameters when declaring your
 
 ### Generating OpenAPI specifications
 
-OpenAPI specifications are integral to understanding and interacting with modern web APIs. They describe the entire API, including routes, parameters, responses, and more. This specification can be machine-generated from your codebase, ensuring it remains up-to-date with your API's implementation.
+OpenAPI specifications detail web APIs, covering routes, parameters, responses, etc. They can be auto-generated from your code, keeping them synchronized with your API's actual implementation.
 
-With Powertools, these specifications can be outputted as a Pydantic object or as a raw JSON schema string:
+Powertools allows exporting these specifications as a Pydantic object or a JSON schema string:
 
 === "OpenAPI specification as a Pydantic object"
 
@@ -247,17 +237,17 @@ With Powertools, these specifications can be outputted as a Pydantic object or a
     ```
 
 ???+ note "Why opt for the Pydantic object?"
-	Having the OpenAPI specification as a Pydantic object provides several advantages:
+	The OpenAPI specification as a Pydantic object offers benefits:
 
-	1. **Post-Processing:** You may wish to programmatically alter or enrich the OpenAPI specification after it's generated but before you serve it or pass it on. For instance, you could add examples, merge multiple specifications, or adjust descriptions dynamically.
-	2. **Internal Use:** Maybe your goal is not to expose the specification externally but to utilize it within your system for validation, mocking, or other quality assurance techniques.
-	3. **Dynamic Behavior:** If you need to control the representation of the schema based on conditions not expressible statically in the code (e.g., user permissions, environment variables), a Pydantic object could be manipulated prior to serialization.
-	4. **Fragment Reuse:** If your setup involves microservices or a plugin architecture, you might need to generate partial schemas and combine them into a larger API gateway schema.
-	5. **Testing and Automation:** For testing purposes, it’s often useful to have the schema in a manipulatable form to validate that certain changes are present or to automate API tests.
+	1. **Post-Processing:** Alter or enrich the specification programmatically after generation, such as adding examples, merging specs, or updating descriptions.
+	2. **Internal Use:** Use the specification within your system for validation, mocking, or other quality assurance methods, rather than exposing it externally.
+	3. **Dynamic Behavior:** Manipulate the schema representation before serialization to reflect conditions like user permissions or environment variables.
+	4. **Fragment Reuse:** In microservices or plugin architectures, generate partial schemas to assemble into a comprehensive API gateway schema.
+	5. **Testing and Automation:** For testing, a manipulatable schema form is useful to confirm changes or automate API tests.
 
 #### Customizing OpenAPI metadata
 
-Customizing the OpenAPI metadata allows you to provide detailed, top-level information about your API. Here's how you can define and customize this metadata:
+Defining and customizing OpenAPI metadata gives detailed, top-level information about your API. Here's the method to set and tailor this metadata:
 
 | Field Name         | Type           | Description                                                                                                                                                                         |
 |--------------------|----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -272,7 +262,7 @@ Customizing the OpenAPI metadata allows you to provide detailed, top-level infor
 | `contact`          | `Contact`      | A Contact object containing contact details of the organization or individuals maintaining the API. This may include fields such as name, URL, and email.                           |
 | `license_info`     | `License`      | A License object providing the license details for the API, typically including the name of the license and the URL to the full license text.                                       |
 
-To apply these customizations, you add additional parameters when exporting your OpenAPI specification:
+Include extra parameters when exporting your OpenAPI specification to apply these customizations:
 
 === "Customizing OpenAPI metadata"
 
@@ -282,9 +272,9 @@ To apply these customizations, you add additional parameters when exporting your
 
 ### Customizing the Swagger UI
 
-By default, the Swagger UI may be served under the `/swagger` path, but customization options are often provided to allow you to serve the documentation from a different path, as well as to define where the necessary Swagger UI assets are loaded from.
+The Swagger UI appears by default at the `/swagger` path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.
 
-Here is an example of how you could configure the loading of the Swagger UI from a custom path or CDN. Additionally, the Swagger UI assets such as the CSS and JavaScript bundles are directed to load from a specified CDN base URL.
+Below is an example configuration for serving Swagger UI from a custom path or CDN, with assets like CSS and JavaScript loading from a chosen CDN base URL.
 
 === "Customizing Swagger path and CDN"
 
@@ -297,8 +287,7 @@ Here is an example of how you could configure the loading of the Swagger UI from
 
 === "Using middlewares with the Swagger UI"
 
-To complement these customizations, it's possible to introduce middleware on the Swagger UI endpoiunt.
-Middleware can be used for tasks like adding security headers, user authentication, or other processing that needs to occur on requests serving the Swagger UI.
+You can enhance these customizations by adding middleware to the Swagger UI endpoint. Middleware can handle tasks such as adding security headers, user authentication, or other request processing for serving the Swagger UI.
 
    ```python hl_lines="7 13-18 21"
    --8<-- "examples/event_handler_validation/src/swagger_middlewares.py"
@@ -306,5 +295,5 @@ Middleware can be used for tasks like adding security headers, user authenticati
 
 ## Testing your code
 
-For comprehensive guidance on how to test your code effectively, please refer to the documentation specific to the [REST API documentation](../api_gateway/#testing-your-code).
-The referenced documentation will provide you with best practices, testing techniques, and examples on how to write tests for your API code.
+For detailed instructions on testing your code, consult the [REST API documentation](../api_gateway/#testing-your-code).
+This guide offers best practices, testing methods, and examples for writing API tests.
