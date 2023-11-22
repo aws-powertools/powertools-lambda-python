@@ -289,6 +289,37 @@ Below is a sample error response for failed validation due to incorrect input:
     --8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
     ```
 
+#### Validating payloads
+
+!!! info "We will automatically validate, inject, and convert incoming request payloads based on models via type annotation."
+
+Let's improve our previous example by handling the creation of todo items via `HTTP POST`.
+
+What we want is for Event Handler to convert the incoming payload as an instance of our `Todo` model. We handle the creation of that `todo`, and then return the `ID` of the newly created `todo`.
+
+=== "validating_payloads.py"
+
+    ```python hl_lines="13 16 24 25"
+    --8<-- "examples/event_handler_rest/src/validating_payloads.py"
+    ```
+
+    1. This enforces data validation at runtime. Any validation error will return `HTTP 422: Unprocessable Entity error`.
+    2. We create a Pydantic model to define how our data looks like.
+    3. We define `Todo` as our type annotation. Event Handler then uses this model to validate and inject the incoming request as `Todo`.
+    4. Lastly, we return the ID of our newly created `todo` item. <br/><br/> Because we specify the return type (`str`), Event Handler will take care of serializing this as a JSON string.
+
+=== "validating_payloads.json"
+
+    ```json hl_lines="21 22 33"
+    --8<-- "examples/event_handler_rest/src/validating_payloads.json"
+    ```
+
+=== "body_parsing_output.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/event_handler_validation/src/body_parsing_output.json"
+    ```
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
