@@ -316,6 +316,11 @@ class Route:
         """
         self.method = method.upper()
         self.path = "/" if path.strip() == "" else path
+
+        # OpenAPI spec only understands paths with { }. So we'll have to convert Powertools' < >.
+        # https://swagger.io/specification/#path-templating
+        self.openapi_path = re.sub(r"<(.*?)>", lambda m: f"{{{''.join(m.group(1))}}}", self.path)
+
         self.rule = rule
         self.func = func
         self._middleware_stack = func
@@ -435,7 +440,7 @@ class Route:
         if self._dependant is None:
             from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
 
-            self._dependant = get_dependant(path=self.path, call=self.func)
+            self._dependant = get_dependant(path=self.openapi_path, call=self.func)
 
         return self._dependant
 
@@ -542,7 +547,7 @@ class Route:
         Returns the OpenAPI operation summary. If the user has not provided a summary, we
         generate one based on the route path and method.
         """
-        return self.summary or f"{self.method.upper()} {self.path}"
+        return self.summary or f"{self.method.upper()} {self.openapi_path}"
 
     def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
         """
@@ -692,7 +697,7 @@ class Route:
         return {"schema": return_schema}
 
     def _generate_operation_id(self) -> str:
-        operation_id = self.func.__name__ + self.path
+        operation_id = self.func.__name__ + self.openapi_path
         operation_id = re.sub(r"\W", "_", operation_id)
         operation_id = operation_id + "_" + self.method.lower()
         return operation_id
@@ -1452,7 +1457,7 @@ class ApiGatewayResolver(BaseRouter):
             if result:
                 path, path_definitions = result
                 if path:
-                    paths.setdefault(route.path, {}).update(path)
+                    paths.setdefault(route.openapi_path, {}).update(path)
                 if path_definitions:
                     definitions.update(path_definitions)
 
