@@ -702,7 +702,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def __init__(
         self,
         response: Response,
-        serializer: Optional[Callable[[Any], str]] = json.dumps,
+        serializer: Callable[[Any], str] = json.dumps,
         route: Optional[Route] = None,
     ):
         self.response = response
