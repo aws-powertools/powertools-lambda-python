@@ -17,6 +17,14 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
+### Install
+
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}."
+
+**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
+
+As of now, both Pydantic V1 and V2 are supported. For a future major version, we will only support Pydantic V2.
+
 ### Required resources
 
 <!-- markdownlint-disable-next-line MD013 -->
@@ -573,8 +581,8 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                           | Purpose                                                                                                                                    |
-| ---------------------------------------------------------------------------------------------------- |--------------------------------------------------------------------------------------------------------------------------------------------|
+| Middleware                                                                                                                | Purpose                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
