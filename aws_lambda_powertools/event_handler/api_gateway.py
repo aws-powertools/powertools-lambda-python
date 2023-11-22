@@ -699,7 +699,12 @@ class Route:
 class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
-    def __init__(self, response: Response, serializer: Callable[[Any], str], route: Optional[Route] = None):
+    def __init__(
+        self,
+        response: Response,
+        serializer: Optional[Callable[[Any], str]] = json.dumps,
+        route: Optional[Route] = None,
+    ):
         self.response = response
         self.serializer = serializer
         self.route = route
