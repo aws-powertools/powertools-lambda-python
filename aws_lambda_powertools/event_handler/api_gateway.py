@@ -66,6 +66,7 @@ _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
+ResponseT = TypeVar("ResponseT")
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -207,14 +208,14 @@ class CORSConfig:
         return headers
 
 
-class Response:
+class Response(Generic[ResponseT]):
     """Response data class that provides greater control over what is returned from the proxy event"""
 
     def __init__(
         self,
         status_code: int,
         content_type: Optional[str] = None,
-        body: Any = None,
+        body: Optional[ResponseT] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,

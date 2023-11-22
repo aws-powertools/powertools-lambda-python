@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
 
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     Required,
@@ -724,11 +725,22 @@ def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -
         # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
         if get_origin(annotation) is Annotated:
             field_info, type_annotation = get_field_info_annotated_type(annotation, value, is_path_param)
+        # If the annotation is a Response type, we recursively call this function with the inner type
+        elif get_origin(annotation) is Response:
+            field_info, type_annotation = get_field_info_response_type(annotation, value)
         # If the annotation is not an Annotated type, we use it as the type annotation
         else:
             type_annotation = annotation
 
     return field_info, type_annotation
+
+
+def get_field_info_response_type(annotation, value) -> Tuple[Optional[FieldInfo], Any]:
+    # Example: get_args(Response[inner_type]) == (inner_type,)  # noqa: ERA001
+    (inner_type,) = get_args(annotation)
+
+    # Recursively resolve the inner type
+    return get_field_info_and_type_annotation(inner_type, value, False)
 
 
 def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:
