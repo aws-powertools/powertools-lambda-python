@@ -24,7 +24,7 @@ class BedrockResponseBuilder(ResponseBuilder):
         self._route(event, None)
 
         body = self.response.body
-        if self.response.is_json():
+        if self.response.is_json() and not isinstance(self.response.body, str):
             body = self.serializer(self.response.body)
 
         return {
