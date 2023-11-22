@@ -23,6 +23,10 @@ class BedrockResponseBuilder(ResponseBuilder):
         """Build the full response dict to be returned by the lambda"""
         self._route(event, None)
 
+        body = self.response.body
+        if self.response.is_json():
+            body = self.serializer(self.response.body)
+
         return {
             "messageVersion": "1.0",
             "response": {
@@ -32,7 +36,7 @@ class BedrockResponseBuilder(ResponseBuilder):
                 "httpStatusCode": self.response.status_code,
                 "responseBody": {
                     self.response.content_type: {
-                        "body": self.response.body,
+                        "body": body,
                     },
                 },
             },
