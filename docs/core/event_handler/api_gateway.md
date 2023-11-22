@@ -273,15 +273,28 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 ???+ note "Pydantic v1 vs v2"
 	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
 
-Any **incoming request that fails validation** will result in a `HTTP 422: Unprocessable Entity error` response.
+Any **incoming request that fails validation** will lead to a `HTTP 422: Unprocessable Entity error` response. When they occur, by default they will look similar to this:
 
-Below is a sample error response for failed validation due to incorrect input:
+```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
+--8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
+```
 
-=== "data_validation_error.json"
+However, you can customize the response by catching the `RequestValidationError` exception.
 
-    ```json hl_lines="4"
-    --8<-- "examples/event_handler_rest/src/data_validation_error.json"
+???+ question "When is this useful?"
+    In production, you might want to hide detailed error information as to why validation failed to prevent abuse.
+
+    Alternatively, you might have a standard on how to return API errors across your company.
+
+Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` but with minimum information.
+
+=== "data_validation_error.py"
+
+    ```python hl_lines="8 24-25 31"
+    --8<-- "examples/event_handler_rest/src/data_validation_error.py"
     ```
+
+    1. We use [exception handler](#exception-handling) decorator to catch **any** request validation errors. <br/><br/> Then, we log the detailed reason as to why it failed while returning a custom `Response` object to hide that from them.
 
 === "data_validation_error_output.json"
 
