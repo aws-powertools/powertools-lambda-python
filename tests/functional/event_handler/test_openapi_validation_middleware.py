@@ -163,7 +163,7 @@ def test_validate_return_purepath():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == json.dumps(sample_path.as_posix())
+    assert result["body"] == sample_path.as_posix()
 
 
 def test_validate_return_enum():
@@ -184,7 +184,7 @@ def test_validate_return_enum():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"powertools"'
+    assert result["body"] == "powertools"
 
 
 def test_validate_return_dataclass():
