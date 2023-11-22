@@ -238,8 +238,6 @@ All resolvers can optionally coerce and validate incoming requests by setting `e
 
 With this feature, we can now express how we expect our incoming data and response to look like. This moves data validation responsibilities to Event Handler resolvers, reducing a ton of boilerplate code.
 
-Any **incoming request that fails validation** will result in a `HTTP 422: Unprocessable Entity error` response.
-
 Let's rewrite the previous examples to signal our resolver what shape we expect our data to be.
 
 <!-- markdownlint-disable MD013 -->
@@ -269,6 +267,27 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
     ```
 
 <!-- markdownlint-enable MD013 -->
+
+#### Handling validation errors
+
+Any **incoming request that fails validation** will result in a `HTTP 422: Unprocessable Entity error` response.
+
+Below is a sample error response for failed validation due to incorrect input:
+
+=== "data_validation_error.json"
+
+    ```json hl_lines="4"
+    --8<-- "examples/event_handler_rest/src/data_validation_error.json"
+    ```
+
+=== "data_validation_error_output.json"
+
+    ```json hl_lines="2 3"
+    --8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
+    ```
+
+???+ note "Pydantic v1 vs v2"
+	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
 
 ### Accessing request details
 
