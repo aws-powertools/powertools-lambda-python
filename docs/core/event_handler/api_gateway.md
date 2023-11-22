@@ -333,6 +333,28 @@ What we want is for Event Handler to convert the incoming payload as an instance
     --8<-- "examples/event_handler_rest/src/validating_payloads_output.json"
     ```
 
+#### Validating query strings
+
+!!! info "We will automatically validate and inject incoming query strings via type annotation."
+
+With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
+
+We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
+
+In the following example, we use a new `Query` OpenAPI type to add one out of many possible constraints, which should read as:
+
+* `completed` is a query string with a `None` as its default value
+* `completed`, when set, should have at minimum 4 characters
+* Doesn't match? Event Handler will return a validation error response
+
+```python hl_lines="1 8 26"
+--8<-- "examples/event_handler_rest/src/validating_query_strings.py"
+```
+
+1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
+3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
