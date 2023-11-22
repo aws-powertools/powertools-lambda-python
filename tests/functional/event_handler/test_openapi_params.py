@@ -70,13 +70,13 @@ def test_openapi_with_scalar_params():
     assert schema.info.version == "0.2.2"
 
     assert len(schema.paths.keys()) == 1
-    assert "/users/<user_id>" in schema.paths
+    assert "/users/{user_id}" in schema.paths
 
-    path = schema.paths["/users/<user_id>"]
+    path = schema.paths["/users/{user_id}"]
     assert path.get
 
     get = path.get
-    assert get.summary == "GET /users/<user_id>"
+    assert get.summary == "GET /users/{user_id}"
     assert get.operationId == "handler_users__user_id__get"
     assert len(get.parameters) == 2
 
