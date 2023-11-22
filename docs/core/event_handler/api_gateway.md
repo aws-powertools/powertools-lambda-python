@@ -330,7 +330,7 @@ What we want is for Event Handler to convert the incoming payload as an instance
 === "validating_payloads_output.json"
 
     ```json hl_lines="3"
-    --8<-- "examples/event_handler_validation/src/validating_payloads_output.json"
+    --8<-- "examples/event_handler_rest/src/validating_payloads_output.json"
     ```
 
 ### Accessing request details
