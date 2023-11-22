@@ -252,7 +252,7 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
     2. We create a Pydantic model to define how our data looks like.
     3. Defining a route remains exactly as before.
     4. By default, URL Paths will be `str`. Here, we are telling our resolver it should be `int`, so it converts it for us. <br/><br/> Lastly, we're also saying the return should be our `Todo`. This will help us later when we touch OpenAPI auto-documentation.
-    5. We convert our newly fetched todo data into our `Todo` model to ensure it's valid. <br/><br/> Our resolver takes care of converting our validated model into a valid end-user response. <br/><br/> **NOTE**. You're not limited to a Pydantic model, you could also return `dict` like before.
+    5. `todo.json()` returns a dictionary. However, Event Handler knows the response should be `Todo` so it converts and validates accordingly.
 
 === "data_validation.json"
 
@@ -310,9 +310,11 @@ Let's improve our previous example by handling the creation of todo items via `H
 
 What we want is for Event Handler to convert the incoming payload as an instance of our `Todo` model. We handle the creation of that `todo`, and then return the `ID` of the newly created `todo`.
 
+Even better, we can also let Event Handler validate and convert our response according to type annotations, further reducing boilerplate.
+
 === "validating_payloads.py"
 
-    ```python hl_lines="13 16 24 25"
+    ```python hl_lines="13 16 24 33"
     --8<-- "examples/event_handler_rest/src/validating_payloads.py"
     ```
 
@@ -320,6 +322,7 @@ What we want is for Event Handler to convert the incoming payload as an instance
     2. We create a Pydantic model to define how our data looks like.
     3. We define `Todo` as our type annotation. Event Handler then uses this model to validate and inject the incoming request as `Todo`.
     4. Lastly, we return the ID of our newly created `todo` item. <br/><br/> Because we specify the return type (`str`), Event Handler will take care of serializing this as a JSON string.
+    5. Note that the return type is `List[Todo]`. <br><br> Event Handler will take the return (`todo.json`), and validate each list item against `Todo` model before returning the response accordingly.
 
 === "validating_payloads.json"
 
@@ -347,7 +350,7 @@ In the following example, we use a new `Query` OpenAPI type to add one out of ma
 * `completed`, when set, should have at minimum 4 characters
 * Doesn't match? Event Handler will return a validation error response
 
-```python hl_lines="1 8 26"
+```python hl_lines="1 8 26" title="validating_query_strings.py"
 --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
 ```
 

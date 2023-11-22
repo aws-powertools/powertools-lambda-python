@@ -1,4 +1,4 @@
-from typing import Annotated, Optional  # (1)!
+from typing import Annotated, List, Optional  # (1)!
 
 import requests
 from pydantic import BaseModel, Field
@@ -23,7 +23,7 @@ class Todo(BaseModel):
 
 @app.get("/todos")
 @tracer.capture_method
-def get_todos(completed: Annotated[Optional[str], Query(min_length=4)] = None) -> Todo:  # (3)!
+def get_todos(completed: Annotated[Optional[str], Query(min_length=4)] = None) -> List[Todo]:  # (3)!
     url = "https://jsonplaceholder.typicode.com/todos"
 
     if completed is not None:
@@ -32,7 +32,7 @@ def get_todos(completed: Annotated[Optional[str], Query(min_length=4)] = None) -
     todo = requests.get(url)
     todo.raise_for_status()
 
-    return Todo(**todo.json()[0])
+    return todo.json()
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)

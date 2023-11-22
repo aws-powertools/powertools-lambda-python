@@ -26,7 +26,7 @@ def get_todo_by_id(todo_id: int) -> Todo:  # (4)!
     todo = requests.get(f"https://jsonplaceholder.typicode.com/todos/{todo_id}")
     todo.raise_for_status()
 
-    return Todo(**todo.json())  # (5)!
+    return todo.json()  # (5)!
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)

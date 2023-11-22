@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import requests
 from pydantic import BaseModel, Field
@@ -28,13 +28,13 @@ def create_todo(todo: Todo) -> str:  # (3)!
     return response.json()["id"]  # (4)!
 
 
-@app.get("/todos/<todo_id>")
+@app.get("/todos")
 @tracer.capture_method
-def get_todo_by_id(todo_id: int) -> Todo:
-    todo = requests.get(f"https://jsonplaceholder.typicode.com/todos/{todo_id}")
+def get_todos() -> List[Todo]:
+    todo = requests.get("https://jsonplaceholder.typicode.com/todos")
     todo.raise_for_status()
 
-    return Todo(**todo.json())
+    return todo.json()  # (5)!
 
 
 @logger.inject_lambda_context(correlation_id_path=correlation_paths.API_GATEWAY_HTTP)
