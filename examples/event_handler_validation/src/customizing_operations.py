@@ -1,9 +1,9 @@
 import requests
 
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-app = APIGatewayHttpResolver(enable_validation=True)
+app = APIGatewayRestResolver(enable_validation=True)
 
 
 @app.get(

@@ -3,11 +3,11 @@ from typing import Annotated, Optional
 import requests
 from pydantic import BaseModel, Field
 
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-app = APIGatewayHttpResolver(enable_validation=True)
+app = APIGatewayRestResolver(enable_validation=True)
 
 
 class Todo(BaseModel):

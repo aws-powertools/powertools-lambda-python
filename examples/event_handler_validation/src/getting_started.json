@@ -20,7 +20,7 @@
     "domainPrefix": "id",
     "extendedRequestId": "request-id",
     "httpMethod": "GET",
-    "path": "/todos",
+    "path": "/todos/1",
     "protocol": "HTTP/1.1",
     "requestId": "id=",
     "requestTime": "04/Mar/2020:19:15:17 +0000",

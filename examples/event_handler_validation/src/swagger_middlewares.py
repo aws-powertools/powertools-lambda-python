@@ -3,14 +3,14 @@ from typing import List
 import requests
 from pydantic import BaseModel, EmailStr, Field
 
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.middlewares import NextMiddleware
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-app = APIGatewayHttpResolver(enable_validation=True)
+app = APIGatewayRestResolver(enable_validation=True)
 
 
-def swagger_middleware(app: APIGatewayHttpResolver, next_middleware: NextMiddleware) -> Response:
+def swagger_middleware(app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:
     is_authenticated = ...
     if not is_authenticated:
         return Response(status_code=400, body="Unauthorized")
