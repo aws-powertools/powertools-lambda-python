@@ -681,7 +681,7 @@ def test_custom_cors_config():
 def test_no_content_response():
     # GIVEN a response with no content-type or body
     response = Response(status_code=204, content_type=None, body=None, headers=None)
-    response_builder = ResponseBuilder(response, serializer=json.dumps)
+    response_builder = ResponseBuilder(response)
 
     # WHEN calling to_dict
     result = response_builder.build(APIGatewayProxyEvent(LOAD_GW_EVENT))
