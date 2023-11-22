@@ -379,7 +379,7 @@ def test_override_route_compress_parameter():
     # WHEN calling the event handler
     result = handler(mock_event, None)
 
-    # THEN then the response is not compressed
+    # THEN the response is not compressed
     assert result["isBase64Encoded"] is False
     assert result["body"] == expected_value
     assert result["multiValueHeaders"].get("Content-Encoding") is None
