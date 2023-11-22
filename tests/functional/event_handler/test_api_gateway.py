@@ -1528,7 +1528,7 @@ def test_exception_handler_service_error():
     # THEN call the exception_handler
     assert result["statusCode"] == 500
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
-    assert result["body"] == '"CUSTOM ERROR FORMAT"'
+    assert result["body"] == "CUSTOM ERROR FORMAT"
 
 
 def test_exception_handler_not_found():
