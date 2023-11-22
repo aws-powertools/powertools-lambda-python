@@ -343,7 +343,7 @@ def test_validate_response_return():
     # WHEN a handler is defined with a body parameter
     @app.post("/")
     def handler(user: Model) -> Response[Model]:
-        return Response(body=user, status_code=200)
+        return Response(body=user, status_code=200, content_type="application/json")
 
     LOAD_GW_EVENT["httpMethod"] = "POST"
     LOAD_GW_EVENT["path"] = "/"
@@ -353,7 +353,7 @@ def test_validate_response_return():
     # THEN the body must be a dict
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == {"name": "John", "age": 30}
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
 def test_validate_response_invalid_return():
