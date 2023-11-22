@@ -238,7 +238,7 @@ All resolvers can optionally coerce and validate incoming requests by setting `e
 
 With this feature, we can now express how we expect our incoming data and response to look like. This moves data validation responsibilities to Event Handler resolvers, reducing a ton of boilerplate code.
 
-Any incoming data that does not match what you expect will result in a `HTTP 422: Unprocessable Entity error` response.
+Any **incoming request that fails validation** will result in a `HTTP 422: Unprocessable Entity error` response.
 
 Let's rewrite the previous examples to signal our resolver what shape we expect our data to be.
 
