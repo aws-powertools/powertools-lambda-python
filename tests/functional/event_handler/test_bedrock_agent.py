@@ -31,7 +31,7 @@ def test_bedrock_agent_event():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == json.dumps({"output": claims_response})
+    assert json.loads(body) == {"output": claims_response}
 
 
 def test_bedrock_agent_with_path_params():
@@ -79,7 +79,7 @@ def test_bedrock_agent_event_with_response():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == json.dumps(output)
+    assert json.loads(body) == output
 
 
 def test_bedrock_agent_event_with_no_matches():
