@@ -796,11 +796,6 @@ class ResponseBuilder(Generic[ResponseEventT]):
         elif self.response.is_json() and not isinstance(self.response.body, str):
             self.response.body = self.serializer(self.response.body)
 
-        # We only apply the serializer when the content type is JSON and the
-        # body is not a str, to avoid double encoding
-        elif self.response.is_json() and not isinstance(self.response.body, str):
-            self.response.body = self.serializer(self.response.body)
-
         return {
             "statusCode": self.response.status_code,
             "body": self.response.body,
