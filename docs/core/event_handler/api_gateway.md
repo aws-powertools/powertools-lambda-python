@@ -889,6 +889,40 @@ This will enable full tracebacks errors in the response, print request and respo
 
 ### OpenAPI
 
+When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your API's parameters.
+
+In OpenAPI documentation tools like [SwaggerUI](#enabling-swaggerui), these annotations become readable descriptions, offering a self-explanatory API interface. This reduces boilerplate code while improving functionality and enabling auto-documentation.
+
+???+ note
+	We don't have support for files, form data, and header parameters at the moment. If you're interested in this, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE).
+
+#### Customizing OpenAPI parameters
+
+Whenever you use OpenAPI parameters to validate [query strings](#validating-query-strings) or [path parameters](#validating-path-parameters), you can enhance validation and OpenAPI documentation by using any of these parameters:
+
+| Field name            | Type          | Description                                                                                                                                                                |
+| --------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alias`               | `str`         | Alternative name for a field, used when serializing and deserializing data                                                                                                 |
+| `validation_alias`    | `str`         | Alternative name for a field during validation (but not serialization)                                                                                                     |
+| `serialization_alias` | `str`         | Alternative name for a field during serialization (but not during validation)                                                                                              |
+| `description`         | `str`         | Human-readable description                                                                                                                                                 |
+| `gt`                  | `float`       | Greater than. If set, value must be greater than this. Only applicable to numbers                                                                                          |
+| `ge`                  | `float`       | Greater than or equal. If set, value must be greater than or equal to this. Only applicable to numbers                                                                     |
+| `lt`                  | `float`       | Less than. If set, value must be less than this. Only applicable to numbers                                                                                                |
+| `le`                  | `float`       | Less than or equal. If set, value must be less than or equal to this. Only applicable to numbers                                                                           |
+| `min_length`          | `int`         | Minimum length for strings                                                                                                                                                 |
+| `max_length`          | `int`         | Maximum length for strings                                                                                                                                                 |
+| `pattern`             | `string`      | A regular expression that the string must match.                                                                                                                           |
+| `strict`              | `bool`        | If `True`, strict validation is applied to the field. See [Strict Mode](https://docs.pydantic.dev/latest/concepts/strict_mode/){target"_blank" rel="nofollow"} for details |
+| `multiple_of`         | `float`       | Value must be a multiple of this. Only applicable to numbers                                                                                                               |
+| `allow_inf_nan`       | `bool`        | Allow `inf`, `-inf`, `nan`. Only applicable to numbers                                                                                                                     |
+| `max_digits`          | `int`         | Maximum number of allow digits for strings                                                                                                                                 |
+| `decimal_places`      | `int`         | Maximum number of decimal places allowed for numbers                                                                                                                       |
+| `examples`            | `List\[Any\]` | List of examples of the field                                                                                                                                              |
+| `deprecated`          | `bool`        | Marks the field as deprecated                                                                                                                                              |
+| `include_in_schema`   | `bool`        | If `False` the field will not be part of the exported OpenAPI schema                                                                                                       |
+| `json_schema_extra`   | `JsonDict`    | Any additional JSON schema data for the schema property                                                                                                                    |
+
 #### Customizing API operations
 
 Customize your API endpoints by adding metadata to endpoint definitions. This provides descriptive documentation for API consumers and gives extra instructions to the framework.
