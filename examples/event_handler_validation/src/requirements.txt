@@ -1,3 +1,0 @@
-requests
-aws_lambda_powertools[tracer]
-pydantic[email]

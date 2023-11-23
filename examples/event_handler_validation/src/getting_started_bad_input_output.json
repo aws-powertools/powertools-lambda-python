@@ -1,9 +1,0 @@
-{
-  "statusCode": 422,
-  "body": "{\"detail\": [{\"type\": \"int_parsing\", \"loc\": [\"path\", \"todo_id\"], \"msg\": \"Input should be a valid integer, unable to parse string as an integer\", \"input\": \"apples\", \"url\": \"https://errors.pydantic.dev/2.5/v/int_parsing\"}]}",
-  "isBase64Encoded": false,
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "cookies": []
-}
