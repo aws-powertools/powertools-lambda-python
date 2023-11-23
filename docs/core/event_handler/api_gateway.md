@@ -11,6 +11,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
+* Support for OpenAPI and data validation for requests/responses
 
 ## Getting started
 
