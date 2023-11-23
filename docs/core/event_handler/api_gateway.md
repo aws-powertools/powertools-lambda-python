@@ -484,7 +484,7 @@ There are some important **caveats** that you should know before enabling it:
 | **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                     |
 | You need to expose **new routes**                | You'll need to expose the following paths to Lambda: `/swagger`, `/swagger.css`, `/swagger.js`; ignore if you're routing all paths already.                                              |
 
-```python hl_lines="9 10" title="enabling_swagger.py"
+```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
 ```
 
