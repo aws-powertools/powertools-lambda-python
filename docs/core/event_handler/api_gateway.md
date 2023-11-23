@@ -408,7 +408,7 @@ Just like we learned in [query string validation](#validating-query-strings), we
 
 For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
 
-```python hl_lines="1 8 26" title="validating_path.py"
+```python hl_lines="8 10 27" title="validating_path.py"
 --8<-- "examples/event_handler_rest/src/validating_path.py"
 ```
 
