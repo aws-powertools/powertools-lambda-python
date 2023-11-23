@@ -1,9 +1,10 @@
 {
   "statusCode": 200,
-  "headers": {
-    "Content-Type": "application/json"
-  },
-  "cookies": [],
-  "body": "hello world",
-  "isBase64Encoded": false
+  "body": "Hello world",
+  "isBase64Encoded": false,
+  "multiValueHeaders": {
+    "Content-Type": [
+      "application/json"
+    ]
+  }
 }

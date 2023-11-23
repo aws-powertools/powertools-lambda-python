@@ -262,7 +262,7 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 
 === "data_validation_output.json"
 
-    ```json hl_lines="2 8"
+    ```json hl_lines="2-3"
     --8<-- "examples/event_handler_rest/src/data_validation_output.json"
     ```
 
@@ -276,30 +276,28 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 Any **incoming request that fails validation** will lead to a `HTTP 422: Unprocessable Entity error` response. When they occur, by default they will look similar to this:
 
 ```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
---8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
+--8<-- "examples/event_handler_rest/src/data_validation_error_unsanitized_output.json"
 ```
 
 However, you can customize the response by catching the `RequestValidationError` exception.
 
 ???+ question "When is this useful?"
-    In production, you might want to hide detailed error information as to why validation failed to prevent abuse.
-
-    Alternatively, you might have a standard on how to return API errors across your company.
+    In production, you might want to hide detailed error information to prevent abuse, or you have a standard for API errors.
 
 Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` but with minimum information.
 
-=== "data_validation_error.py"
+=== "data_validation_sanitized_error.py"
 
     ```python hl_lines="8 24-25 31"
-    --8<-- "examples/event_handler_rest/src/data_validation_error.py"
+    --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error.py"
     ```
 
     1. We use [exception handler](#exception-handling) decorator to catch **any** request validation errors. <br/><br/> Then, we log the detailed reason as to why it failed while returning a custom `Response` object to hide that from them.
 
-=== "data_validation_error_output.json"
+=== "data_validation_sanitized_error_output.json"
 
     ```json hl_lines="2 3"
-    --8<-- "examples/event_handler_rest/src/data_validation_error_output.json"
+    --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error_output.json"
     ```
 
 #### Validating payloads
@@ -326,7 +324,7 @@ Even better, we can also let Event Handler validate and convert our response acc
 
 === "validating_payloads.json"
 
-    ```json hl_lines="21 22 33"
+    ```json hl_lines="3 5-6"
     --8<-- "examples/event_handler_rest/src/validating_payloads.json"
     ```
 
@@ -395,7 +393,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     This is merely for your convenience.
 
-    ```python hl_lines="1 8 25"
+    ```python hl_lines="25"
     --8<-- "examples/event_handler_rest/src/skip_validating_query_strings.py"
     ```
 

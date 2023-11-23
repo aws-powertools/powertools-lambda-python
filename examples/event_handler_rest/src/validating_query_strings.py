@@ -4,14 +4,14 @@ import requests
 from pydantic import BaseModel, Field
 
 from aws_lambda_powertools import Logger, Tracer
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Query  # (2)!
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
 logger = Logger()
-app = APIGatewayHttpResolver(enable_validation=True)
+app = APIGatewayRestResolver(enable_validation=True)
 
 
 class Todo(BaseModel):
