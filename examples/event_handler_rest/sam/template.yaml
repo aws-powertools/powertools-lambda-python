@@ -13,7 +13,7 @@ Globals:
       - "*~1*" # converts to */* for any binary type
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.11
     Tracing: Active
     Environment:
       Variables:
@@ -54,3 +54,21 @@ Resources:
         #   Properties:
         #     Path: /todos
         #     Method: POST
+
+        ## Swagger UI specific routes
+
+        # SwaggerUI:
+        #     Type: Api
+        #     Properties:
+        #         Path: /swagger
+        #         Method: GET
+        # SwaggerUICSS:
+        #     Type: Api
+        #     Properties:
+        #         Path: /swagger.css
+        #         Method: GET
+        # SwaggerUIJS:
+        #     Type: Api
+        #     Properties:
+        #         Path: /swagger.js
+        #         Method: GET
