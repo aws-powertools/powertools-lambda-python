@@ -345,7 +345,7 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 === "validating_payload_subset.py"
 
-    ```python hl_lines="1 7 21"
+    ```python hl_lines="7 8 22"
     --8<-- "examples/event_handler_rest/src/validating_payload_subset.py"
     ```
 
