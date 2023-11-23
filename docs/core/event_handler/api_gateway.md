@@ -9,7 +9,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 * Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
-* Built-in integration with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"} for self-documented event schema
+* Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
 * Support for OpenAPI and data validation for requests/responses
 
@@ -20,7 +20,7 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}."
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
 **When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
 
@@ -416,7 +416,7 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 ### Accessing request details
 
-Event Handler integrates with [Event Source Data Classes utilities](../../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
+Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
 
 That is why you see `app.resolve(event, context)` in every example. This allows Event Handler to resolve requests, and expose data like `app.lambda_context` and  `app.current_event`.
 
@@ -494,7 +494,7 @@ There are some important **caveats** that you should know before enabling it:
 
 Here's an example of what it looks like by default:
 
-![Swagger UI picture](../../../media/swagger.png)
+![Swagger UI picture](../../media/swagger.png)
 
 ### Custom Domain API Mappings
 
@@ -651,8 +651,8 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 #### Global middlewares
 
 <center>
-![Combining middlewares](../../../media/middlewares_normal_processing-light.svg#only-light)
-![Combining middlewares](../../../media/middlewares_normal_processing-dark.svg#only-dark)
+![Combining middlewares](../../media/middlewares_normal_processing-light.svg#only-light)
+![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
 
 _Request flowing through multiple registered middlewares_
 </center>
@@ -692,8 +692,8 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 #### Returning early
 
 <center>
-![Short-circuiting middleware chain](../../../media/middlewares_early_return-light.svg#only-light)
-![Short-circuiting middleware chain](../../../media/middlewares_early_return-dark.svg#only-dark)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-light.svg#only-light)
+![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
 
 _Interrupting request flow by returning early_
 </center>
@@ -740,8 +740,8 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     An exception wasn't caught by any middleware during `next_middleware()` block, therefore it propagates all the way back to the client as HTTP 500.
 
     <center>
-    ![Unhandled exceptions](../../../media/middlewares_unhandled_route_exception-light.svg#only-light)
-    ![Unhandled exceptions](../../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-light.svg#only-light)
+    ![Unhandled exceptions](../../media/middlewares_unhandled_route_exception-dark.svg#only-dark)
 
     _Unhandled route exceptions propagate back to the client_
     </center>
@@ -751,8 +751,8 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     An exception was only caught by the third middleware, resuming the normal execution of each `After` logic for the second and first middleware.
 
     <center>
-    ![Middleware handling exceptions](../../../media/middlewares_catch_route_exception-light.svg#only-light)
-    ![Middleware handling exceptions](../../../media/middlewares_catch_route_exception-dark.svg#only-dark)
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-light.svg#only-light)
+    ![Middleware handling exceptions](../../media/middlewares_catch_route_exception-dark.svg#only-dark)
 
     _Unhandled route exceptions propagate back to the client_
     </center>
@@ -762,8 +762,8 @@ While there isn't anything special on how to use [`try/catch`](https://docs.pyth
     The third middleware short-circuited the chain by raising an exception and completely skipping the fourth middleware. Because we only caught it in  the first middleware, it skipped the `After` logic in the second middleware.
 
     <center>
-    ![Catching exceptions](../../../media/middlewares_catch_exception-light.svg#only-light)
-    ![Catching exceptions](../../../media/middlewares_catch_exception-dark.svg#only-dark)
+    ![Catching exceptions](../../media/middlewares_catch_exception-light.svg#only-light)
+    ![Catching exceptions](../../media/middlewares_catch_exception-dark.svg#only-dark)
 
     _Middleware handling short-circuit exceptions_
     </center>
@@ -792,7 +792,7 @@ These are native middlewares that may become native features depending on custom
 
 | Middleware                                                                                                                | Purpose                                                                                                                                    |
 | ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../../utilities/validation.md){target="_blank"} |
+| [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
 
@@ -900,7 +900,7 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../../index.md#environment-variables){target="_blank"}.
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank"}.
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
@@ -1156,7 +1156,7 @@ Both single (monolithic) and multiple functions (micro) offer different set of t
 
 #### Monolithic function
 
-![Monolithic function sample](./../../../media/monolithic-function.png)
+![Monolithic function sample](./../../media/monolithic-function.png)
 
 A monolithic function means that your final code artifact will be deployed to a single function. This is generally the best approach to start.
 
@@ -1175,7 +1175,7 @@ _**Downsides**_
 
 #### Micro function
 
-![Micro function sample](./../../../media/micro-function.png)
+![Micro function sample](./../../media/micro-function.png)
 
 A micro function means that your final code artifact will be different to each function deployed. This is generally the approach to start if you're looking for fine-grain control and/or high load on certain parts of your service.
 
