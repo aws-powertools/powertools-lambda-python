@@ -232,7 +232,7 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 ### Data validation
 
 !!! note "This changes the authoring experience by relying on Python's type annotations"
-    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} to ease migrations in either direction.
+    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction.
 
 All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`.
 
@@ -344,7 +344,7 @@ With the addition of the [`Annotated` type starting in Python 3.9](https://docs.
 
 We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
-In the following example, we use a new `Query` OpenAPI type to add one out of many possible constraints, which should read as:
+In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
 * `completed` is a query string with a `None` as its default value
 * `completed`, when set, should have at minimum 4 characters
@@ -378,7 +378,7 @@ In the following example, we use a new `Query` OpenAPI type to add one out of ma
 
 #### Validating path parameters
 
-Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to add constraints.
+Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to [add constraints](#customizing-openapi-parameters).
 
 For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
 
