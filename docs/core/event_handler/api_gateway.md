@@ -336,11 +336,38 @@ Even better, we can also let Event Handler validate and convert our response acc
     --8<-- "examples/event_handler_rest/src/validating_payloads_output.json"
     ```
 
+##### Validating payload subset
+
+With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
+
+We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that our payload is located in a particular JSON key.
+
+!!! note "Event Handler will match the parameter name with the JSON key to validate and inject what you want."
+
+=== "validating_payload_subset.py"
+
+    ```python hl_lines="1 7 21"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset.py"
+    ```
+
+    1. `Body` is a special OpenAPI type that can add additional constraints to a request payload.
+    2. `Body(embed=True)` instructs Event Handler to look up inside the payload for a key.<br><br> This means Event Handler will look up for a key named `todo`, validate the value against `Todo`, and inject it.
+
+=== "validating_payload_subset.json"
+
+    ```json hl_lines="3-4 6"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset.json"
+    ```
+
+=== "validating_payload_subset_output.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset_output.json"
+    ```
+
 #### Validating query strings
 
 !!! info "We will automatically validate and inject incoming query strings via type annotation."
-
-With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
 
 We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
