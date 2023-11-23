@@ -121,11 +121,11 @@ def test_bedrock_agent_event_with_validation_error():
     assert result["response"]["httpMethod"] == "GET"
     assert result["response"]["httpStatusCode"] == 422
 
-    body = result["response"]["responseBody"]["application/json"]["body"]
+    body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
     if PYDANTIC_V2:
-        assert "should be a valid dictionary" in body
+        assert body["detail"][0]["type"] == "dict_type"
     else:
-        assert "value is not a valid dict" in body
+        assert body["detail"][0]["type"] == "type_error.dict"
 
 
 def test_bedrock_agent_event_with_exception():
