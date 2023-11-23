@@ -1,0 +1,9 @@
+{
+  "statusCode": 422,
+  "body": "Invalid data",
+  "isBase64Encoded": false,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "cookies": []
+}
