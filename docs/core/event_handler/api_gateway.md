@@ -233,7 +233,9 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 ### Data validation
 
 !!! note "This changes the authoring experience by relying on Python's type annotations"
-    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction.
+    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction. We support both Pydantic models and Python's dataclass.
+
+    For brevity, we'll focus on Pydantic only.
 
 All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`.
 
