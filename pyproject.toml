@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.27.0"
+version = "2.27.1"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -44,7 +44,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
 typing-extensions = "^4.6.2"
-datadog-lambda = { version = "^4.77.0", optional = true }
+datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
 
 [tool.poetry.dev-dependencies]
@@ -62,21 +62,21 @@ radon = "^6.0.1"
 xenon = "^0.9.1"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^1.1.2"
-pytest-xdist = "^3.4.0"
-aws-cdk-lib = "^2.110.0"
+pytest-xdist = "^3.5.0"
+aws-cdk-lib = "^2.110.1"
 "aws-cdk.aws-apigatewayv2-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-integrations-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-authorizers-alpha" = "^2.38.1-alpha.0"
 pytest-benchmark = "^4.0.0"
 mypy-boto3-appconfig = "^1.29.0"
-mypy-boto3-cloudformation = "^1.29.0"
+mypy-boto3-cloudformation = "^1.29.3"
 mypy-boto3-cloudwatch = "^1.29.0"
 mypy-boto3-dynamodb = "^1.29.0"
 mypy-boto3-lambda = "^1.29.2"
 mypy-boto3-logs = "^1.29.0"
 mypy-boto3-secretsmanager = "^1.29.0"
 mypy-boto3-ssm = "^1.29.2"
-mypy-boto3-s3 = "^1.29.0"
+mypy-boto3-s3 = "^1.29.5"
 mypy-boto3-xray = "^1.29.0"
 types-requests = "^2.31.0"
 typing-extensions = "^4.6.2"
@@ -88,7 +88,7 @@ ijson = "^3.2.2"
 typed-ast = { version = "^1.5.5", python = "< 3.8"}
 hvac = "^1.2.1"
 aws-requests-auth = "^0.4.3"
-datadog-lambda = "^4.82.0"
+datadog-lambda = "^5.83.0"
 
 [tool.poetry.extras]
 parser = ["pydantic"]

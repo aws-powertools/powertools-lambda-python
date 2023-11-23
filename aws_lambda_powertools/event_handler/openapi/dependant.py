@@ -124,7 +124,7 @@ def get_typed_signature(call: Callable[..., Any]) -> inspect.Signature:
 
 def get_path_param_names(path: str) -> Set[str]:
     """
-    Returns the path parameter names from a path template. Those are the strings between < and >.
+    Returns the path parameter names from a path template. Those are the strings between { and }.
 
     Parameters
     ----------
@@ -137,7 +137,7 @@ def get_path_param_names(path: str) -> Set[str]:
         The path parameter names
 
     """
-    return set(re.findall("<(.*?)>", path))
+    return set(re.findall("{(.*?)}", path))
 
 
 def get_dependant(
