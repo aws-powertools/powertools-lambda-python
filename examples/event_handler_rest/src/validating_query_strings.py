@@ -1,4 +1,4 @@
-from typing import Annotated, List, Optional  # (1)!
+from typing import List, Optional
 
 import requests
 from pydantic import BaseModel, Field
@@ -7,6 +7,7 @@ from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.event_handler.openapi.params import Query  # (2)!
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.shared.types import Annotated  # (1)!
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
