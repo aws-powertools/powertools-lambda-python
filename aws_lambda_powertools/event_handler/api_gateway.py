@@ -1979,11 +1979,14 @@ class ApiGatewayResolver(BaseRouter):
                 exp = service_error
 
         if isinstance(exp, RequestValidationError):
+            # For security reasons, we hide msg details (don't leak Python, Pydantic or file names)
+            errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
+
             return self._response_builder_class(
                 response=Response(
                     status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                     content_type=content_types.APPLICATION_JSON,
-                    body={"statusCode": HTTPStatus.UNPROCESSABLE_ENTITY, "message": exp.errors()},
+                    body={"statusCode": HTTPStatus.UNPROCESSABLE_ENTITY, "detail": errors},
                 ),
                 serializer=self._serializer,
                 route=route,
