@@ -270,23 +270,21 @@ Let's rewrite the previous examples to signal our resolver what shape we expect 
 
 #### Handling validation errors
 
-???+ note "Pydantic v1 vs v2"
-	Pydantic versions 1 and 2 may report validation errors differently. Refer to the documentation for your specific version to grasp the precise format and style of the error messages.
+!!! info "By default, we hide extended error details for security reasons _(e.g., pydantic url, Pydantic code)_."
 
-Any **incoming request that fails validation** will lead to a `HTTP 422: Unprocessable Entity error` response. When they occur, by default they will look similar to this:
+Any incoming request that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
 
 ```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
 --8<-- "examples/event_handler_rest/src/data_validation_error_unsanitized_output.json"
 ```
 
-However, you can customize the response by catching the `RequestValidationError` exception.
+You can customize the error message by catching the `RequestValidationError` exception. This is useful when you might have a security policy to return opaque validation errors, or have a company standard for API validation errors.
 
-???+ question "When is this useful?"
-    In production, you might want to hide detailed error information to prevent abuse, or you have a standard for API errors.
-
-Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` but with minimum information.
+Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` with an opaque error.
 
 === "data_validation_sanitized_error.py"
+
+    Note that Pydantic versions [1](https://docs.pydantic.dev/1.10/usage/models/#error-handling){target="_blank" rel="nofollow"} and [2](https://docs.pydantic.dev/latest/errors/errors/){target="_blank" rel="nofollow"} report validation detailed errors differently.
 
     ```python hl_lines="8 24-25 31"
     --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error.py"
