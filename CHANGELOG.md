@@ -4,12 +4,20 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.28.0"></a>
+## [v2.28.0] - 2023-11-23
 ## Bug Fixes
 
+* **event_handler:** hide error details by default ([#3406](https://github.com/aws-powertools/powertools-lambda-python/issues/3406))
 * **event_handler:** fix format for OpenAPI path templating ([#3399](https://github.com/aws-powertools/powertools-lambda-python/issues/3399))
 * **event_handler:** lazy load Pydantic to improve cold start ([#3397](https://github.com/aws-powertools/powertools-lambda-python/issues/3397))
 * **event_handler:** allow fine grained Response with data validation ([#3394](https://github.com/aws-powertools/powertools-lambda-python/issues/3394))
 * **event_handler:** apply serialization as the last operation for middlewares ([#3392](https://github.com/aws-powertools/powertools-lambda-python/issues/3392))
+
+## Documentation
+
+* **event_handlers:** new data validation and OpenAPI feature ([#3386](https://github.com/aws-powertools/powertools-lambda-python/issues/3386))
 
 ## Features
 
@@ -17,9 +25,14 @@
 
 ## Maintenance
 
+* version bump
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3389](https://github.com/aws-powertools/powertools-lambda-python/issues/3389))
+* **deps:** bump datadog-lambda from 4.82.0 to 5.83.0 ([#3401](https://github.com/aws-powertools/powertools-lambda-python/issues/3401))
+* **deps-dev:** bump aws-cdk-lib from 2.110.0 to 2.110.1 ([#3402](https://github.com/aws-powertools/powertools-lambda-python/issues/3402))
 * **deps-dev:** bump pytest-xdist from 3.4.0 to 3.5.0 ([#3387](https://github.com/aws-powertools/powertools-lambda-python/issues/3387))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3400](https://github.com/aws-powertools/powertools-lambda-python/issues/3400))
 * **deps-dev:** bump sentry-sdk from 1.35.0 to 1.36.0 ([#3388](https://github.com/aws-powertools/powertools-lambda-python/issues/3388))
+* **deps-dev:** bump aws-cdk from 2.110.0 to 2.110.1 ([#3403](https://github.com/aws-powertools/powertools-lambda-python/issues/3403))
 
 
 <a name="v2.27.1"></a>
@@ -4057,7 +4070,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.28.0...HEAD
+[v2.28.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.1...v2.28.0
 [v2.27.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.0...v2.27.1
 [v2.27.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.1...v2.27.0
 [v2.26.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.26.0...v2.26.1
