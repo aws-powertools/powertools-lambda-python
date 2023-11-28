@@ -789,17 +789,18 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def build(self, event: ResponseEventT, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
+
+        # We only apply the serializer when the content type is JSON and the
+        # body is not a str, to avoid double encoding
+        if self.response.is_json() and not isinstance(self.response.body, str):
+            self.response.body = self.serializer(self.response.body)
+
         self._route(event, cors)
 
         if isinstance(self.response.body, bytes):
             logger.debug("Encoding bytes response with base64")
             self.response.base64_encoded = True
             self.response.body = base64.b64encode(self.response.body).decode()
-
-        # We only apply the serializer when the content type is JSON and the
-        # body is not a str, to avoid double encoding
-        elif self.response.is_json() and not isinstance(self.response.body, str):
-            self.response.body = self.serializer(self.response.body)
 
         return {
             "statusCode": self.response.status_code,
