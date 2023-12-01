@@ -4,6 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump squidfunk/mkdocs-material from `fc42bac` to `8c72011` in /docs ([#3416](https://github.com/aws-powertools/powertools-lambda-python/issues/3416))
+* **deps:** bump actions/dependency-review-action from 3.1.3 to 3.1.4 ([#3426](https://github.com/aws-powertools/powertools-lambda-python/issues/3426))
+* **deps-dev:** bump aws-cdk from 2.110.1 to 2.111.0 ([#3418](https://github.com/aws-powertools/powertools-lambda-python/issues/3418))
+* **deps-dev:** bump the boto-typing group with 11 updates ([#3427](https://github.com/aws-powertools/powertools-lambda-python/issues/3427))
+* **deps-dev:** bump aws-cdk-lib from 2.110.1 to 2.111.0 ([#3428](https://github.com/aws-powertools/powertools-lambda-python/issues/3428))
+* **layers:** Update log retention to 10 years ([#3424](https://github.com/aws-powertools/powertools-lambda-python/issues/3424))
+
 
 <a name="v2.28.1"></a>
 ## [v2.28.1] - 2023-11-28
