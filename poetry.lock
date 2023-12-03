@@ -2764,13 +2764,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.36.0"
+version = "1.38.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.36.0.tar.gz", hash = "sha256:f32dd16547f2f45e1c71a96fd4a48925e629541f7ddfe3d5d25ef7d5e94eb3c8"},
-    {file = "sentry_sdk-1.36.0-py2.py3-none-any.whl", hash = "sha256:25d574f94fdf72199e331c2401fdac60d01b5be8f32822174c51c3ff0fc2f8cb"},
+    {file = "sentry-sdk-1.38.0.tar.gz", hash = "sha256:8feab81de6bbf64f53279b085bd3820e3e737403b0a0d9317f73a2c3374ae359"},
+    {file = "sentry_sdk-1.38.0-py2.py3-none-any.whl", hash = "sha256:0017fa73b8ae2d4e57fd2522ee3df30453715b29d2692142793ec5d5f90b94a6"},
 ]
 
 [package.dependencies]
