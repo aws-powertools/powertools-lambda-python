@@ -51,7 +51,7 @@ aws-encryption-sdk = { version = "^3.1.1", optional = true }
 coverage = {extras = ["toml"], version = "^7.2"}
 pytest = "^7.4.3"
 black = "^23.3"
-boto3 = "^1.18"
+boto3 = "^1.26.164"
 isort = "^5.11.5"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.11.1"

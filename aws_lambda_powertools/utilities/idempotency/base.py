@@ -14,8 +14,10 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    STATUS_CONSTANTS,
     BasePersistenceLayer,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
+    STATUS_CONSTANTS,
     DataRecord,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
@@ -118,11 +120,15 @@ class IdempotencyHandler:
                 data=self.data,
                 remaining_time_in_millis=self._get_remaining_time_in_millis(),
             )
-        except IdempotencyKeyError:
+        except (IdempotencyKeyError, IdempotencyValidationError):
             raise
-        except IdempotencyItemAlreadyExistsError:
-            # Now we know the item already exists, we can retrieve it
-            record = self._get_idempotency_record()
+        except IdempotencyItemAlreadyExistsError as exc:
+            # We now know the item exists
+            # Attempt to retrieve the record from the exception where ReturnValuesOnConditionCheckFailure is supported
+            record = exc.old_data_record
+            if record is None:
+                # Perform a GET on the record
+                record = self._get_idempotency_record()
             if record is not None:
                 return self._handle_for_status(record)
         except Exception as exc:

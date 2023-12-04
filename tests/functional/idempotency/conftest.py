@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import json
 from decimal import Decimal
 from unittest import mock
@@ -9,6 +10,7 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
@@ -131,6 +133,7 @@ def expected_params_put_item(hashed_idempotency_key):
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -159,6 +162,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -206,7 +210,9 @@ def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
 
 @pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
-    return hash_idempotency_key(lambda_apigw_event["requestContext"])
+    return hashlib.md5(
+        json.dumps(lambda_apigw_event["requestContext"], cls=Encoder, sort_keys=True).encode(),
+    ).hexdigest()
 
 
 @pytest.fixture

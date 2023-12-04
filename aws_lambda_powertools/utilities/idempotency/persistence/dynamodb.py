@@ -15,8 +15,9 @@ from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
+    IdempotencyValidationError,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     STATUS_CONSTANTS,
     DataRecord,
 )
@@ -234,16 +235,51 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     ":now_in_millis": {"N": str(int(now.timestamp() * 1000))},
                     ":inprogress": {"S": STATUS_CONSTANTS["INPROGRESS"]},
                 },
+                **(
+                    {"ReturnValuesOnConditionCheckFailure": "ALL_OLD"}  # type: ignore
+                    if self.boto3_supports_condition_check_failure(boto3.__version__)
+                    else {}
+                ),
             )
         except ClientError as exc:
             error_code = exc.response.get("Error", {}).get("Code")
             if error_code == "ConditionalCheckFailedException":
+                old_data_record = self._item_to_data_record(exc.response["Item"]) if "Item" in exc.response else None
+                if old_data_record is not None:
+                    logger.debug(
+                        f"Failed to put record for already existing idempotency key: "
+                        f"{data_record.idempotency_key} with status: {old_data_record.status}, "
+                        f"expiry_timestamp: {old_data_record.expiry_timestamp}, "
+                        f"and in_progress_expiry_timestamp: {old_data_record.in_progress_expiry_timestamp}",
+                    )
+                    self._save_to_cache(data_record=old_data_record)
+
+                    try:
+                        self._validate_hashed_payload(old_data_record=old_data_record, data_record=data_record)
+                    except IdempotencyValidationError as ive:
+                        raise ive from exc
+
+                    raise IdempotencyItemAlreadyExistsError(old_data_record=old_data_record) from exc
+
                 logger.debug(
                     f"Failed to put record for already existing idempotency key: {data_record.idempotency_key}",
                 )
-                raise IdempotencyItemAlreadyExistsError from exc
-            else:
-                raise
+                raise IdempotencyItemAlreadyExistsError() from exc
+
+            raise
+
+    @staticmethod
+    def boto3_supports_condition_check_failure(boto3_version: str):
+        version = boto3_version.split(".")
+        # Only supported in boto3 1.26.164 and above
+        if len(version) >= 3 and int(version[0]) == 1 and int(version[1]) == 26 and int(version[2]) >= 164:
+            return True
+        if len(version) >= 2 and int(version[0]) == 1 and int(version[1]) > 26:
+            return True
+        if int(version[0]) > 1:
+            return True
+
+        return False
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")

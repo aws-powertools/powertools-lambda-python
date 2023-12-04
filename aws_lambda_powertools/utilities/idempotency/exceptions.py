@@ -5,6 +5,8 @@ Idempotency errors
 
 from typing import Optional, Union
 
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
+
 
 class BaseError(Exception):
     """
@@ -29,6 +31,20 @@ class IdempotencyItemAlreadyExistsError(BaseError):
     """
     Item attempting to be inserted into persistence store already exists and is not expired
     """
+
+    def __init__(self, *args: Optional[Union[str, Exception]], old_data_record: Optional[DataRecord] = None):
+        self.message = str(args[0]) if args else ""
+        self.details = "".join(str(arg) for arg in args[1:]) if args[1:] else None
+        self.old_data_record = old_data_record
+
+    def __str__(self):
+        """
+        Return all arguments formatted or original message
+        """
+        old_data_record = f" from [{(str(self.old_data_record))}]" if self.old_data_record else ""
+        details = f" - ({self.details})" if self.details else ""
+
+        return f"{self.message}{details}{old_data_record}"
 
 
 class IdempotencyItemNotFoundError(BaseError):

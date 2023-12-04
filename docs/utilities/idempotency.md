@@ -100,8 +100,8 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
 ???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
-    result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
+    result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation.
+    Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
     estimate the cost.
 
 ### Idempotent decorator
