@@ -2,6 +2,8 @@ import decimal
 import json
 import math
 
+from aws_lambda_powertools.shared.functions import dataclass_to_dict, is_dataclass, is_pydantic, pydantic_to_dict
+
 
 class Encoder(json.JSONEncoder):
     """Custom JSON encoder to allow for serialization of Decimals, Pydantic and Dataclasses.
@@ -15,16 +17,10 @@ class Encoder(json.JSONEncoder):
                 return math.nan
             return str(obj)
 
-        # Pydantic model (v1/v2)
-        if hasattr(obj, "json"):
-            from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
+        if is_pydantic(obj):
+            return pydantic_to_dict(obj)
 
-            return _model_dump(obj)
-
-        # Standard dataclass
-        if hasattr(obj, "__dataclass_fields__"):
-            import dataclasses
-
-            return dataclasses.asdict(obj)
+        if is_dataclass(obj):
+            return dataclass_to_dict(obj)
 
         return super().default(obj)
