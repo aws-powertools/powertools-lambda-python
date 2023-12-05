@@ -180,11 +180,6 @@ class RequestContextV2Authorizer(DictWrapper):
         return jwt.get("scopes")
 
     @property
-    def get_lambda(self) -> Optional[Dict[str, Any]]:
-        """Lambda authorization context details"""
-        return self.get("lambda")
-
-    @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
         """IAM authorization details used for making the request."""
         iam = self.get("iam")

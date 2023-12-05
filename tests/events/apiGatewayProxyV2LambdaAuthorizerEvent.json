@@ -24,10 +24,16 @@
         "stage": "$default",
         "requestId": "id",
         "authorizer": {
-            "lambda": {
-                "key": "value"
+            "jwt": {
+              "claims": {
+                "claim1": "value1"
+              },
+              "scopes": [
+                "scope1",
+                "scope2"
+              ]
             }
-        },
+          },
         "apiId": "api-id",
         "domainName": "id.execute-api.us-east-1.amazonaws.com",
         "domainPrefix": "id",
