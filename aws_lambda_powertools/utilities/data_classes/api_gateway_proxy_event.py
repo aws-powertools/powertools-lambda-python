@@ -33,15 +33,24 @@ class APIGatewayEventAuthorizer(DictWrapper):
         """The authorizer latency in ms."""
         return self.get("integrationLatency")
 
-    def get_context(self) -> Optional[Dict[str, Any]]:
-        """Retrieve the authorization context details for Lambda.
+    def get_context(self) -> Dict[str, Any]:
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+                Example
+                --------
+
+        ```python
+                ctx: dict = ...request_context.authorizer.get_context()
+
+                tenant_id = ctx.get("tenant_id")
+                ```
 
         Returns:
         --------
-            Optional[Dict[str, Any]]
-            A dictionary containing Lambda authorization context details, or None if the information is not available.
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
         """
-        return self
+        return self._data
 
 
 class APIGatewayEventRequestContext(BaseRequestContext):
@@ -195,14 +204,23 @@ class RequestContextV2Authorizer(DictWrapper):
         return self.get("lambda")
 
     def get_context(self) -> Optional[Dict[str, Any]]:
-        """Retrieve the authorization context details for Lambda.
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+                Example
+                --------
+
+        ```python
+                ctx: dict = ...request_context.authorizer.get_context()
+
+                tenant_id = ctx.get("tenant_id")
+                ```
 
         Returns:
         --------
-            Optional[Dict[str, Any]]
-            A dictionary containing Lambda authorization context details, or None if the information is not available.
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
         """
-        return self.get("lambda")
+        return self.get("lambda", {})
 
     @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
