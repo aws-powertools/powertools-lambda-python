@@ -22,8 +22,6 @@ from typing import (
     overload,
 )
 
-import jmespath
-
 from aws_lambda_powertools.logging import compat
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -31,6 +29,7 @@ from aws_lambda_powertools.shared.functions import (
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
+from aws_lambda_powertools.utilities import jmespath_utils
 
 from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
@@ -443,7 +442,9 @@ class Logger:
                 self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
 
             if correlation_id_path:
-                self.set_correlation_id(jmespath.search(correlation_id_path, event))
+                self.set_correlation_id(
+                    jmespath_utils.extract_data_from_envelope(envelope=correlation_id_path, data=event),
+                )
 
             if log_event:
                 logger.debug("Event received")
@@ -507,7 +508,7 @@ class Logger:
         self,
         msg: object,
         *args,
-        exc_info=True,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
@@ -682,6 +683,12 @@ class Logger:
 
     def addHandler(self, handler: logging.Handler) -> None:
         return self._logger.addHandler(handler)
+
+    def addFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.addFilter(filter)
+
+    def removeFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.removeFilter(filter)
 
     @property
     def registered_handler(self) -> logging.Handler:
