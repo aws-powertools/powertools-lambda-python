@@ -20,6 +20,7 @@ def validator(
     outbound_formats: Optional[Dict] = None,
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
 
@@ -128,7 +129,7 @@ def validator(
         logger.debug("Validating inbound event")
         validate_data_against_schema(data=event, schema=inbound_schema, formats=inbound_formats)
 
-    response = handler(event, context)
+    response = handler(event, context, **kwargs)
 
     if outbound_schema:
         logger.debug("Validating outbound event")
