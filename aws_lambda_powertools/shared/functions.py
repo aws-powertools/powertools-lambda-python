@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import dataclasses
 import itertools
 import logging
 import os
@@ -168,8 +167,86 @@ def extract_event_from_common_models(data: Any) -> Dict | Any:
         return data.raw_event
 
     # Is it a Pydantic Model?
-    if callable(getattr(data, "dict", None)):
-        return data.dict()
+    if is_pydantic(data):
+        return pydantic_to_dict(data)
 
-    # Is it a Dataclass? If not return as is
-    return dataclasses.asdict(data) if dataclasses.is_dataclass(data) else data
+    # Is it a Dataclass?
+    if is_dataclass(data):
+        return dataclass_to_dict(data)
+
+    # Return as is
+    return data
+
+
+def is_pydantic(data) -> bool:
+    """Whether data is a Pydantic model by checking common field available in v1/v2
+
+    Parameters
+    ----------
+    data: BaseModel
+        Pydantic model
+
+    Returns
+    -------
+    bool
+        Whether it's a Pydantic model
+    """
+    return getattr(data, "json", False)
+
+
+def is_dataclass(data) -> bool:
+    """Whether data is a dataclass
+
+    Parameters
+    ----------
+    data: dataclass
+        Dataclass obj
+
+    Returns
+    -------
+    bool
+        Whether it's a Dataclass
+    """
+    return getattr(data, "__dataclass_fields__", False)
+
+
+def pydantic_to_dict(data) -> dict:
+    """Dump Pydantic model v1 and v2 as dict.
+
+    Note we use lazy import since Pydantic is an optional dependency.
+
+    Parameters
+    ----------
+    data: BaseModel
+        Pydantic model
+
+    Returns
+    -------
+
+    dict:
+        Pydantic model serialized to dict
+    """
+    from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
+
+    return _model_dump(data)
+
+
+def dataclass_to_dict(data) -> dict:
+    """Dump standard dataclass as dict.
+
+    Note we use lazy import to prevent bloating other code parts.
+
+    Parameters
+    ----------
+    data: dataclass
+        Dataclass
+
+    Returns
+    -------
+
+    dict:
+        Pydantic model serialized to dict
+    """
+    import dataclasses
+
+    return dataclasses.asdict(data)

@@ -709,7 +709,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
     def __init__(
         self,
         response: Response,
-        serializer: Callable[[Any], str] = json.dumps,
+        serializer: Callable[[Any], str] = partial(json.dumps, separators=(",", ":"), cls=Encoder),
         route: Optional[Route] = None,
     ):
         self.response = response
