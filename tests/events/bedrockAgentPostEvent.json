@@ -1,0 +1,35 @@
+{
+  "actionGroup": "ClaimManagementActionGroup",
+  "messageVersion": "1.0",
+  "sessionId": "12345678912345",
+  "sessionAttributes": {},
+  "promptSessionAttributes": {},
+  "inputText": "Send reminders to all pending documents",
+  "agent": {
+    "alias": "TSTALIASID",
+    "name": "test",
+    "version": "DRAFT",
+    "id": "8ZXY0W8P1H"
+  },
+  "httpMethod": "POST",
+  "apiPath": "/send-reminders",
+  "requestBody": {
+    "content": {
+      "application/json": {
+        "properties": [
+          {
+            "name": "claimId",
+            "type": "string",
+            "value": "20"
+          },
+          {
+            "name": "pendingDocuments",
+            "type": "string",
+            "value": "social number and vat"
+          }
+        ]
+      }
+    }
+  },
+  "parameters": []
+}

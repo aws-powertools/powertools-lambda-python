@@ -1,6 +1,7 @@
 from .apigw import ApiGatewayEnvelope
 from .apigwv2 import ApiGatewayV2Envelope
 from .base import BaseEnvelope
+from .bedrock_agent import BedrockAgentEnvelope
 from .cloudwatch import CloudWatchLogsEnvelope
 from .dynamodb import DynamoDBStreamEnvelope
 from .event_bridge import EventBridgeEnvelope
@@ -16,6 +17,7 @@ from .vpc_latticev2 import VpcLatticeV2Envelope
 __all__ = [
     "ApiGatewayEnvelope",
     "ApiGatewayV2Envelope",
+    "BedrockAgentEnvelope",
     "CloudWatchLogsEnvelope",
     "DynamoDBStreamEnvelope",
     "EventBridgeEnvelope",

@@ -18,7 +18,7 @@ from aws_lambda_powertools.shared.functions import (
 from aws_lambda_powertools.shared.types import Literal
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
-from .exceptions import GetParameterError, SetParameterError
+from .exceptions import GetParameterError
 from .types import TransformOptions
 
 if TYPE_CHECKING:
@@ -191,67 +191,13 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def _set(
+    def _get_multiple(
         self,
         path: str,
-        value: str,
-        *, # force keyword arguments
-        parameter_type: SSM_PARAMETER_TYPES = "String",
-        overwrite: bool = False,
-        tier: SSM_PARAMETER_TIER = "Standard",
-        description: Optional[str] = None,
-        kms_key_id: Optional[str] = None,
+        decrypt: Optional[bool] = None,
+        recursive: bool = False,
         **sdk_options,
-    ) -> int:
-        """
-        Retrieve a parameter value or return the cached value
-
-        Parameters
-        ----------
-        path: str
-            The fully qualified name includes the complete hierarchy of the parameter path and name.
-        value: str
-            The parameter value
-        parameter_type: str, optional
-            Type of the parameter.  Allowed values are String, StringList, and SecureString
-        overwrite: bool, optional
-            If the parameter value should be overwritten, False by default
-        tier: str, optional
-            The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
-        description: str, optional
-            The description of the parameter
-        kms_key_id: str, optional
-            The KMS key id to use to encrypt the parameter
-        sdk_options: dict, optional
-            Dictionary of options that will be passed to the Parameter Store get_parameter API call
-
-        Raises
-        ------
-        SetParameterError
-            When the parameter provider fails to set a parameter value for
-            a given name.
-        """
-
-        sdk_options["Name"] = path
-        sdk_options["Value"] = value
-        sdk_options["Type"] = parameter_type
-        sdk_options["Overwrite"] = overwrite
-        sdk_options["Tier"] = tier
-
-        if description:
-            sdk_options["Description"] = description
-        if kms_key_id:
-            sdk_options["KeyId"] = kms_key_id
-
-        try:
-            value = self.client.put_parameter(**sdk_options)
-            version = value["Version"]
-        except Exception as exc:
-            raise SetParameterError(str(exc)) from exc
-
-        return version
-
-    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
+    ) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 
@@ -266,6 +212,12 @@ class SSMProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
         """
+
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
+        decrypt = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
+        )
 
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Path"] = path
@@ -768,7 +720,7 @@ def get_parameters(
 def set_parameter(
     path: str,
     value: str,
-    *, # force keyword arguments
+    *,  # force keyword arguments
     parameter_type: SSM_PARAMETER_TYPES = "String",
     overwrite: bool = False,
     tier: SSM_PARAMETER_TIER = "Standard",
@@ -836,7 +788,7 @@ def set_parameter(
         tier=tier,
         description=description,
         kms_key_id=kms_key_id,
-        **sdk_options
+        **sdk_options,
     )
 
 

@@ -1,0 +1,10 @@
+{
+  "statusCode": 200,
+  "body": "Hello world",
+  "isBase64Encoded": false,
+  "multiValueHeaders": {
+    "Content-Type": [
+      "application/json"
+    ]
+  }
+}
