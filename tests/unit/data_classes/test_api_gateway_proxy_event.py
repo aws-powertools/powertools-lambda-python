@@ -200,6 +200,11 @@ def test_api_gateway_proxy_v2_lambda_authorizer_event():
 
     request_context = parsed_event.request_context
     assert request_context is not None
+
+    lambda_props = request_context.authorizer.get_lambda
+    assert lambda_props is not None
+    assert lambda_props.get("tenantId") == raw_event["requestContext"]["authorizer"]["lambda"]["tenantId"]
+
     jwt_claims = request_context.authorizer.jwt_claim
     assert jwt_claims is not None
     assert jwt_claims.get("claim1") == raw_event["requestContext"]["authorizer"]["jwt"]["claims"]["claim1"]

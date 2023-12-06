@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic.networks import IPvAnyNetwork
 
 from aws_lambda_powertools.utilities.parser.types import Literal
@@ -31,6 +31,7 @@ class RequestContextV2AuthorizerJwt(BaseModel):
 class RequestContextV2Authorizer(BaseModel):
     jwt: Optional[RequestContextV2AuthorizerJwt] = None
     iam: Optional[RequestContextV2AuthorizerIam] = None
+    lambda_value: Optional[Dict[str, Any]] = Field(None, alias="lambda")
 
 
 class RequestContextV2Http(BaseModel):

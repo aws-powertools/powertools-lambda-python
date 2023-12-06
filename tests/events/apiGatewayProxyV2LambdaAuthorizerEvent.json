@@ -32,6 +32,9 @@
                 "scope1",
                 "scope2"
               ]
+            },
+            "lambda": {
+                "tenantId": "123-456-789-012"
             }
           },
         "apiId": "api-id",

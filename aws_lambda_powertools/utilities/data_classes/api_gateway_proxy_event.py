@@ -74,6 +74,16 @@ class APIGatewayEventRequestContext(BaseRequestContext):
     def authorizer(self) -> APIGatewayEventAuthorizer:
         return APIGatewayEventAuthorizer(self._data["requestContext"]["authorizer"])
 
+    def get_context(self) -> Optional[Dict[str, Any]]:
+        """Retrieve the authorization context details for Lambda.
+
+        Returns:
+        --------
+            Optional[Dict[str, Any]]
+            A dictionary containing Lambda authorization context details, or None if the information is not available.
+        """
+        return self.get("requestContext", {}).get("authorizer", {})
+
 
 class APIGatewayProxyEvent(BaseProxyEvent):
     """AWS Lambda proxy V1
@@ -178,6 +188,21 @@ class RequestContextV2Authorizer(DictWrapper):
     def jwt_scopes(self) -> Optional[List[str]]:
         jwt = self.get("jwt") or {}  # not available in FunctionURL
         return jwt.get("scopes")
+
+    @property
+    def get_lambda(self) -> Optional[Dict[str, Any]]:
+        """Lambda authorization context details"""
+        return self.get("lambda")
+
+    def get_context(self) -> Optional[Dict[str, Any]]:
+        """Retrieve the authorization context details for Lambda.
+
+        Returns:
+        --------
+            Optional[Dict[str, Any]]
+            A dictionary containing Lambda authorization context details, or None if the information is not available.
+        """
+        return self.get("lambda")
 
     @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
