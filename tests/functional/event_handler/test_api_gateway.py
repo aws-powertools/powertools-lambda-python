@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
+from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
@@ -1465,7 +1466,6 @@ def test_exception_handler_with_data_validation():
 
     @app.exception_handler(RequestValidationError)
     def handle_validation_error(ex: RequestValidationError):
-        print(f"request path is '{app.current_event.path}'")
         return Response(
             status_code=422,
             content_type=content_types.TEXT_PLAIN,
@@ -1484,6 +1484,34 @@ def test_exception_handler_with_data_validation():
     assert result["statusCode"] == 422
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_PLAIN]
     assert result["body"] == "Invalid data. Number of errors: 1"
+
+
+def test_exception_handler_with_data_validation_pydantic_response():
+    # GIVEN a resolver with an exception handler defined for RequestValidationError
+    app = ApiGatewayResolver(enable_validation=True)
+
+    class Err(BaseModel):
+        msg: str
+
+    @app.exception_handler(RequestValidationError)
+    def handle_validation_error(ex: RequestValidationError):
+        return Response(
+            status_code=422,
+            content_type=content_types.APPLICATION_JSON,
+            body=Err(msg=f"Invalid data. Number of errors: {len(ex.errors())}"),
+        )
+
+    @app.get("/my/path")
+    def get_lambda(param: int):
+        ...
+
+    # WHEN calling the event handler
+    # AND a RequestValidationError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN exception handler's pydantic response should be serialized correctly
+    assert result["statusCode"] == 422
+    assert result["body"] == '{"msg":"Invalid data. Number of errors: 1"}'
 
 
 def test_data_validation_error():
