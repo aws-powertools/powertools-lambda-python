@@ -40,7 +40,7 @@ class APIGatewayEventAuthorizer(DictWrapper):
         --------
 
         ```python
-        ctx: dict = ...request_context.authorizer.get_context()
+        ctx: dict = request_context.authorizer.get_context()
 
         tenant_id = ctx.get("tenant_id")
         ```
@@ -210,7 +210,7 @@ class RequestContextV2Authorizer(DictWrapper):
         --------
 
         ```python
-        ctx: dict = ...request_context.authorizer.get_context()
+        ctx: dict = request_context.authorizer.get_context()
 
         tenant_id = ctx.get("tenant_id")
         ```
