@@ -1,21 +1,25 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
     micro-function-example
 
 Globals:
-  Api:
-    TracingEnabled: true
-    Cors: # see CORS section
-      AllowOrigin: "'https://example.com'"
-      AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
-      MaxAge: "'300'"
-    BinaryMediaTypes: # see Binary responses section
-      - "*~1*" # converts to */* for any binary type
+    Api:
+        TracingEnabled: true
+        Cors: # see CORS section
+            AllowOrigin: "'https://example.com'"
+            AllowHeaders: "'Content-Type,Authorization,X-Amz-Date'"
+            MaxAge: "'300'"
+        BinaryMediaTypes: # see Binary responses section
+            - "*~1*" # converts to */* for any binary type
+            # NOTE: use this stricter version if you're also using CORS; */* doesn't work with CORS
+            # see: https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779
+            # - "image~1*" # converts to image/*
+            # - "*~1csv" # converts to */csv, eg text/csv, application/csv
 
-  Function:
-    Timeout: 5
-    Runtime: python3.11
+    Function:
+        Timeout: 5
+        Runtime: python3.11
 
 Resources:
     # Lambda Function Solely For /users endpoint
@@ -37,7 +41,7 @@ Resources:
             MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
-                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOG_LEVEL: INFO
             Tags:
                 LambdaPowertools: python
 
@@ -60,4 +64,4 @@ Resources:
             MemorySize: 128 # Each Lambda Function can have it's own memory configuration
             Environment:
                 Variables:
-                    LOG_LEVEL: INFO
+                    POWERTOOLS_LOG_LEVEL: INFO

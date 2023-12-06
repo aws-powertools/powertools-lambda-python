@@ -15,9 +15,9 @@ from typing_extensions import Annotated, Literal, get_origin, get_args
 from pydantic import BaseModel, create_model
 from pydantic.fields import FieldInfo
 
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
-    PYDANTIC_V2,
     ModelNameMap,
     UnionType,
 )
