@@ -113,6 +113,7 @@ def test_lambda_function_url_event_iam():
     authorizer = request_context.authorizer
     assert authorizer is not None
     assert authorizer.jwt is None
+    assert authorizer.lambda_value is None
 
     iam = authorizer.iam
     iam_raw = raw_event["requestContext"]["authorizer"]["iam"]
