@@ -6,6 +6,7 @@ import logging
 import os
 import random
 import sys
+import warnings
 from typing import (
     IO,
     TYPE_CHECKING,
@@ -21,16 +22,15 @@ from typing import (
     overload,
 )
 
-import jmespath
-
 from aws_lambda_powertools.logging import compat
-
-from ..shared import constants
-from ..shared.functions import (
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
+from aws_lambda_powertools.utilities import jmespath_utils
+
 from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
@@ -76,7 +76,7 @@ class Logger:
     ---------------------
     POWERTOOLS_SERVICE_NAME : str
         service name
-    LOG_LEVEL: str
+    POWERTOOLS_LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
     POWERTOOLS_LOGGER_SAMPLE_RATE: float
         sampling rate ranging from 0 to 1, 1 being 100% sampling
@@ -220,6 +220,7 @@ class Logger:
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         use_rfc3339: bool = False,
+        serialize_stacktrace: bool = True,
         **kwargs,
     ) -> None:
         self.service = resolve_env_var_choice(
@@ -253,6 +254,7 @@ class Logger:
             "log_record_order": log_record_order,
             "utc": utc,
             "use_rfc3339": use_rfc3339,
+            "serialize_stacktrace": serialize_stacktrace,
         }
 
         self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
@@ -295,7 +297,7 @@ class Logger:
         if self.child or is_logger_preconfigured:
             return
 
-        self.setLevel(self._determine_log_level(log_level))
+        self.setLevel(log_level)
         self._configure_sampling()
         self.addHandler(self.logger_handler)
         self.structure_logs(formatter_options=formatter_options, **kwargs)
@@ -440,7 +442,9 @@ class Logger:
                 self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
 
             if correlation_id_path:
-                self.set_correlation_id(jmespath.search(correlation_id_path, event))
+                self.set_correlation_id(
+                    jmespath_utils.extract_data_from_envelope(envelope=correlation_id_path, data=event),
+                )
 
             if log_event:
                 logger.debug("Event received")
@@ -504,7 +508,7 @@ class Logger:
         self,
         msg: object,
         *args,
-        exc_info=True,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
@@ -674,11 +678,17 @@ class Logger:
             return self.registered_formatter.log_format.get("correlation_id")
         return None
 
-    def setLevel(self, level: Union[str, int]) -> None:
-        return self._logger.setLevel(level)
+    def setLevel(self, level: Union[str, int, None]) -> None:
+        return self._logger.setLevel(self._determine_log_level(level))
 
     def addHandler(self, handler: logging.Handler) -> None:
         return self._logger.addHandler(handler)
+
+    def addFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.addFilter(filter)
+
+    def removeFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.removeFilter(filter)
 
     @property
     def registered_handler(self) -> logging.Handler:
@@ -712,17 +722,88 @@ class Logger:
         """
         return self._logger.handlers
 
-    @staticmethod
-    def _determine_log_level(level: Union[str, int, None]) -> Union[str, int]:
-        """Returns preferred log level set by the customer in upper case"""
-        if isinstance(level, int):
-            return level
+    def _get_aws_lambda_log_level(self) -> Optional[str]:
+        """
+        Retrieve the log level for AWS Lambda from the Advanced Logging Controls feature.
+        Returns:
+            Optional[str]: The corresponding logging level.
+        """
 
-        log_level: Optional[str] = level or os.getenv("LOG_LEVEL")
-        if log_level is None:
+        return constants.LAMBDA_ADVANCED_LOGGING_LEVELS.get(os.getenv(constants.LAMBDA_LOG_LEVEL_ENV))
+
+    def _get_powertools_log_level(self, level: Union[str, int, None]) -> Optional[str]:
+        """Retrieve the log level for Powertools from the environment variable or level parameter.
+        If log level is an integer, we convert to its respective string level `logging.getLevelName()`.
+        If no log level is provided, we check env vars for the log level: POWERTOOLS_LOG_LEVEL_ENV and POWERTOOLS_LOG_LEVEL_LEGACY_ENV.
+        Parameters:
+        -----------
+        level : Union[str, int, None]
+            The specified log level as a string, integer, or None.
+        Environment variables
+        ---------------------
+        POWERTOOLS_LOG_LEVEL : str
+            log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
+        LOG_LEVEL (Legacy) : str
+            log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
+        Returns:
+        --------
+        Optional[str]:
+            The corresponding logging level. Returns None if the log level is not explicitly specified.
+        """  # noqa E501
+
+        # Extract log level from Powertools Logger env vars
+        log_level_env = os.getenv(constants.POWERTOOLS_LOG_LEVEL_ENV) or os.getenv(
+            constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV,
+        )
+        # If level is an int (logging.INFO), return its respective string ("INFO")
+        if isinstance(level, int):
+            return logging.getLevelName(level)
+
+        return level or log_level_env
+
+    def _determine_log_level(self, level: Union[str, int, None]) -> Union[str, int]:
+        """Determine the effective log level considering Lambda and Powertools preferences.
+        It emits an UserWarning if Lambda ALC log level is lower than Logger log level.
+        Parameters:
+        -----------
+        level: Union[str, int, None]
+            The specified log level as a string, integer, or None.
+        Returns:
+        ----------
+            Union[str, int]: The effective logging level.
+        """
+
+        # This function consider the following order of precedence:
+        # 1 - If a log level is set using AWS Lambda Advanced Logging Controls, it sets it.
+        # 2 - If a log level is passed to the constructor, it sets it
+        # 3 - If a log level is set via setLevel, it sets it.
+        # 4 - If a log level is set via Powertools env variables, it sets it.
+        # 5 - If none of the above is true, the default log level applies INFO.
+
+        lambda_log_level = self._get_aws_lambda_log_level()
+        powertools_log_level = self._get_powertools_log_level(level)
+
+        if powertools_log_level and lambda_log_level:
+            # If Powertools log level is set and higher than AWS Lambda Advanced Logging Controls, emit a warning
+            if logging.getLevelName(lambda_log_level) > logging.getLevelName(powertools_log_level):
+                warnings.warn(
+                    f"Current log level ({powertools_log_level}) does not match AWS Lambda Advanced Logging Controls "
+                    f"minimum log level ({lambda_log_level}). This can lead to data loss, consider adjusting them.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+
+        # AWS Lambda Advanced Logging Controls takes precedence over Powertools log level and we use this
+        if lambda_log_level:
+            return lambda_log_level
+
+        # Check if Powertools log level is None, which means it's not set
+        # We assume INFO as the default log level
+        if powertools_log_level is None:
             return logging.INFO
 
-        return log_level.upper()
+        # Powertools log level is set, we use this
+        return powertools_log_level.upper()
 
 
 def set_package_logger(

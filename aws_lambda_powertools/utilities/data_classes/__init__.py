@@ -6,6 +6,7 @@ from .alb_event import ALBEvent
 from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV2
 from .appsync_resolver_event import AppSyncResolverEvent
 from .aws_config_rule_event import AWSConfigRuleEvent
+from .bedrock_agent_event import BedrockAgentEvent
 from .cloud_watch_custom_widget_event import CloudWatchDashboardCustomWidgetEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
 from .code_pipeline_job_event import CodePipelineJobEvent
@@ -27,7 +28,7 @@ from .secrets_manager_event import SecretsManagerEvent
 from .ses_event import SESEvent
 from .sns_event import SNSEvent
 from .sqs_event import SQSEvent
-from .vpc_lattice import VPCLatticeEvent
+from .vpc_lattice import VPCLatticeEvent, VPCLatticeEventV2
 
 __all__ = [
     "APIGatewayProxyEvent",
@@ -35,6 +36,7 @@ __all__ = [
     "SecretsManagerEvent",
     "AppSyncResolverEvent",
     "ALBEvent",
+    "BedrockAgentEvent",
     "CloudWatchDashboardCustomWidgetEvent",
     "CloudWatchLogsEvent",
     "CodePipelineJobEvent",
@@ -56,4 +58,5 @@ __all__ = [
     "event_source",
     "AWSConfigRuleEvent",
     "VPCLatticeEvent",
+    "VPCLatticeEventV2",
 ]

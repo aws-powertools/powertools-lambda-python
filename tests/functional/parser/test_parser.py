@@ -93,3 +93,28 @@ def test_parser_event_as_json_string(dummy_event, dummy_schema):
         return event
 
     handle_no_envelope(dummy_event, LambdaContext())
+
+
+def test_parser_event_with_type_hint(dummy_event, dummy_schema):
+    @event_parser
+    def handler(event: dummy_schema, _: LambdaContext):
+        assert event.message == "hello world"
+
+    handler(dummy_event["payload"], LambdaContext())
+
+
+def test_parser_event_without_type_hint(dummy_event, dummy_schema):
+    @event_parser
+    def handler(event, _):
+        assert event.message == "hello world"
+
+    with pytest.raises(exceptions.InvalidModelTypeError):
+        handler(dummy_event["payload"], LambdaContext())
+
+
+def test_parser_event_with_type_hint_and_non_default_argument(dummy_event, dummy_schema):
+    @event_parser
+    def handler(evt: dummy_schema, _: LambdaContext):
+        assert evt.message == "hello world"
+
+    handler(dummy_event["payload"], LambdaContext())

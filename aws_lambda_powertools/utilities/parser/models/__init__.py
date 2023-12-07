@@ -18,6 +18,13 @@ from .apigwv2 import (
     RequestContextV2AuthorizerJwt,
     RequestContextV2Http,
 )
+from .bedrock_agent import (
+    BedrockAgentEventModel,
+    BedrockAgentModel,
+    BedrockAgentPropertyModel,
+    BedrockAgentRequestBodyModel,
+    BedrockAgentRequestMediaModel,
+)
 from .cloudformation_custom_resource import (
     CloudFormationCustomResourceBaseModel,
     CloudFormationCustomResourceCreateModel,
@@ -89,6 +96,7 @@ from .ses import (
 from .sns import SnsModel, SnsNotificationModel, SnsRecordModel
 from .sqs import SqsAttributesModel, SqsModel, SqsMsgAttributeModel, SqsRecordModel
 from .vpc_lattice import VpcLatticeModel
+from .vpc_latticev2 import VpcLatticeV2Model
 
 __all__ = [
     "APIGatewayProxyEventV2Model",
@@ -163,4 +171,10 @@ __all__ = [
     "CloudFormationCustomResourceCreateModel",
     "CloudFormationCustomResourceBaseModel",
     "VpcLatticeModel",
+    "VpcLatticeV2Model",
+    "BedrockAgentModel",
+    "BedrockAgentPropertyModel",
+    "BedrockAgentEventModel",
+    "BedrockAgentRequestBodyModel",
+    "BedrockAgentRequestMediaModel",
 ]

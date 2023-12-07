@@ -21,7 +21,7 @@ Logger requires two settings:
 
 | Setting           | Description                                                         | Environment variable      | Constructor parameter |
 | ----------------- | ------------------------------------------------------------------- | ------------------------- | --------------------- |
-| **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `LOG_LEVEL`               | `level`               |
+| **Logging level** | Sets how verbose Logger should be (INFO, by default)                | `POWERTOOLS_LOG_LEVEL`    | `level`               |
 | **Service**       | Sets **service** key that will be present across all log statements | `POWERTOOLS_SERVICE_NAME` | `service`             |
 
 There are some [other environment variables](#environment-variables) which can be set to modify Logger's settings at a global scope.
@@ -39,7 +39,7 @@ Your Logger will include the following keys to your structured logging:
 | **level**: `str`           | `INFO`                                | Logging level                                                                                                                        |
 | **location**: `str`        | `collect.handler:1`                   | Source code location where statement was executed                                                                                    |
 | **message**: `Any`         | `Collecting payment`                  | Unserializable JSON values are casted as `str`                                                                                       |
-| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0200`        | Timestamp with milliseconds, by default uses local timezone                                                                          |
+| **timestamp**: `str`       | `2021-05-03 10:20:19,650+0000`        | Timestamp with milliseconds, by default uses default AWS Lambda timezone (UTC)                                                       |
 | **service**: `str`         | `payment`                             | Service name defined, by default `service_undefined`                                                                                 |
 | **xray_trace_id**: `str`   | `1-5759e988-bd862e3fe1be46a994272793` | When [tracing is enabled](https://docs.aws.amazon.com/lambda/latest/dg/services-xray.html){target="_blank"}, it shows X-Ray Trace ID |
 | **sampling_rate**: `float` | `0.1`                                 | When enabled, it shows sampling rate in percentage e.g. 10%                                                                          |
@@ -85,10 +85,10 @@ When debugging in non-production environments, you can instruct Logger to log th
 
 ### Setting a Correlation ID
 
-You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
+You can set a Correlation ID using `correlation_id_path` param by passing a [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}, including [our custom JMESPath Functions](../utilities/jmespath_functions.md#powertools_json-function).
 
 ???+ tip
-	You can retrieve correlation IDs via `get_correlation_id` method
+	You can retrieve correlation IDs via `get_correlation_id` method.
 
 === "set_correlation_id.py"
 
@@ -274,6 +274,80 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
     --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
 
+### Log levels
+
+The default log level is `INFO`. It can be set using the `level` constructor option, `setLevel()` method or by using the `POWERTOOLS_LOG_LEVEL` environment variable.
+
+We support the following log levels:
+
+| Level      | Numeric value | Standard logging   |
+| ---------- | ------------- | ------------------ |
+| `DEBUG`    | 10            | `logging.DEBUG`    |
+| `INFO`     | 20            | `logging.INFO`     |
+| `WARNING`  | 30            | `logging.WARNING`  |
+| `ERROR`    | 40            | `logging.ERROR`    |
+| `CRITICAL` | 50            | `logging.CRITICAL` |
+
+If you want to access the numeric value of the current log level, you can use the `log_level` property. For example, if the current log level is `INFO`, `logger.log_level` property will return `10`.
+
+=== "setting_log_level_constructor.py"
+
+    ```python hl_lines="3"
+    --8<-- "examples/logger/src/setting_log_level_via_constructor.py"
+    ```
+
+=== "setting_log_level_programmatically.py"
+
+    ```python hl_lines="6 9 12"
+    --8<-- "examples/logger/src/setting_log_level_programmatically.py"
+    ```
+
+#### AWS Lambda Advanced Logging Controls (ALC)
+
+!!! question "When is it useful?"
+    When you want to set a logging policy to drop informational or verbose logs for one or all AWS Lambda functions, regardless of runtime and logger used.
+
+<!-- markdownlint-disable MD013 -->
+With [AWS Lambda Advanced Logging Controls (ALC)](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-advanced){target="_blank"}, you can enforce a minimum log level that Lambda will accept from your application code.
+
+When enabled, you should keep `Logger` and ALC log level in sync to avoid data loss.
+
+Here's a sequence diagram to demonstrate how ALC will drop both `INFO` and `DEBUG` logs emitted from `Logger`, when ALC log level is stricter than `Logger`.
+<!-- markdownlint-enable MD013 -->
+
+```mermaid
+sequenceDiagram
+    title Lambda ALC allows WARN logs only
+    participant Lambda service
+    participant Lambda function
+    participant Application Logger
+
+    Note over Lambda service: AWS_LAMBDA_LOG_LEVEL="WARN"
+    Note over Application Logger: POWERTOOLS_LOG_LEVEL="DEBUG"
+
+    Lambda service->>Lambda function: Invoke (event)
+    Lambda function->>Lambda function: Calls handler
+    Lambda function->>Application Logger: logger.error("Something happened")
+    Lambda function-->>Application Logger: logger.debug("Something happened")
+    Lambda function-->>Application Logger: logger.info("Something happened")
+    Lambda service--xLambda service: DROP INFO and DEBUG logs
+    Lambda service->>CloudWatch Logs: Ingest error logs
+```
+
+**Priority of log level settings in Powertools for AWS Lambda**
+
+We prioritise log level settings in this order:
+
+1. `AWS_LAMBDA_LOG_LEVEL` environment variable
+2. Explicit log level in `Logger` constructor, or by calling the `logger.setLevel()` method
+3. `POWERTOOLS_LOG_LEVEL` environment variable
+
+If you set `Logger` level lower than ALC, we will emit a warning informing you that your messages will be discarded by Lambda.
+
+> **NOTE**
+>
+> With ALC enabled, we are unable to increase the minimum log level below the `AWS_LAMBDA_LOG_LEVEL` environment variable value, see [AWS Lambda service documentation](https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html#monitoring-cloudwatchlogs-log-level){target="_blank"} for more details.
+
 ### Logging exceptions
 
 Use `logger.exception` method to log contextual information about exceptions. Logger will include `exception_name` and `exception` keys to aid troubleshooting and error enumeration.
@@ -319,14 +393,30 @@ Logger can optionally log uncaught exceptions by setting `log_uncaught_exception
     --8<-- "examples/logger/src/logging_uncaught_exceptions_output.json"
     ```
 
+#### Stack trace logging
+
+By default, the Logger will automatically include the full stack trace in JSON format when using `logger.exception`. If you want to disable this feature, set `serialize_stacktrace=False` during initialization."
+
+=== "logging_stacktrace.py"
+
+    ```python hl_lines="7 15"
+    --8<-- "examples/logger/src/logging_stacktrace.py"
+    ```
+
+=== "logging_stacktrace_output.json"
+
+    ```json hl_lines="9-27"
+    --8<-- "examples/logger/src/logging_stacktrace_output.json"
+    ```
+
 ### Date formatting
 
-Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0200`.
+Logger uses Python's standard logging date format with the addition of timezone: `2021-05-03 11:47:12,494+0000`.
 
 You can easily change the date format using one of the following parameters:
 
 * **`datefmt`**. You can pass any [strftime format codes](https://strftime.org/){target="_blank" rel="nofollow"}. Use `%F` if you need milliseconds.
-* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+02:00`
+* **`use_rfc3339`**. This flag will use a format compliant with both RFC3339 and ISO8601: `2022-10-27T16:27:43.738+00:00`
 
 ???+ tip "Prefer using [datetime string formats](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes){target="_blank" rel="nofollow"}?"
 	Use `use_datetime_directive` flag along with `datefmt` to instruct Logger to use `datetime` instead of `time.strftime`.
@@ -347,11 +437,12 @@ You can easily change the date format using one of the following parameters:
 
 The following environment variables are available to configure Logger at a global scope:
 
-| Setting                   | Description                                                                  | Environment variable                    | Default |
-|---------------------------|------------------------------------------------------------------------------|-----------------------------------------|---------|
-| **Event Logging**         | Whether to log the incoming event.                                           | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false` |
-| **Debug Sample Rate**     | Sets the debug log sampling.                                                 | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`     |
-| **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature. | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false` |
+| Setting                   | Description                                                                                            | Environment variable                    | Default      |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------ |
+| **Event Logging**         | Whether to log the incoming event.                                                                     | `POWERTOOLS_LOGGER_LOG_EVENT`           | `false`      |
+| **Debug Sample Rate**     | Sets the debug log sampling.                                                                           | `POWERTOOLS_LOGGER_SAMPLE_RATE`         | `0`          |
+| **Disable Deduplication** | Disables log deduplication filter protection to use Pytest Live Log feature.                           | `POWERTOOLS_LOG_DEDUPLICATION_DISABLED` | `false`      |
+| **TZ**                    | Sets timezone when using Logger, e.g., `US/Eastern`. Timezone is defaulted to UTC when `TZ` is not set | `TZ`                                    | `None` (UTC) |
 
 [`POWERTOOLS_LOGGER_LOG_EVENT`](#logging-incoming-event) can also be set on a per-method basis, and [`POWERTOOLS_LOGGER_SAMPLE_RATE`](#sampling-debug-logs) on a per-instance basis. These parameter values will override the environment variable value.
 
@@ -448,7 +539,7 @@ If you prefer configuring it separately, or you'd want to bring this JSON Format
 | **`json_default`**           | function to coerce unserializable values, when no custom serializer/deserializer is set                                  | `str`                                                         |
 | **`datefmt`**                | string directives (strftime) to format log timestamp                                                                     | `%Y-%m-%d %H:%M:%S,%F%z`, where `%F` is a custom ms directive |
 | **`use_datetime_directive`** | format the `datefmt` timestamps using `datetime`, not `time`  (also supports the custom `%F` directive for milliseconds) | `False`                                                       |
-| **`utc`**                    | set logging timestamp to UTC                                                                                             | `False`                                                       |
+| **`utc`**                    | enforce logging timestamp to UTC (ignore `TZ` environment variable)                                                      | `False`                                                       |
 | **`log_record_order`**       | set order of log keys when logging                                                                                       | `["level", "location", "message", "timestamp"]`               |
 | **`kwargs`**                 | key-value to be included in log messages                                                                                 | `None`                                                        |
 
@@ -567,17 +658,26 @@ You can change the order of [standard Logger keys](#standard-structured-keys) or
     --8<-- "examples/logger/src/reordering_log_keys_output.json"
     ```
 
-#### Setting timestamp to UTC
+#### Setting timestamp to custom Timezone
 
-By default, this Logger and standard logging library emits records using local time timestamp. You can override this behavior via `utc` parameter:
+By default, this Logger and the standard logging library emit records with the default AWS Lambda timestamp in **UTC**.
 
-=== "setting_utc_timestamp.py"
+<!-- markdownlint-disable MD013 -->
+If you prefer to log in a specific timezone, you can configure it by setting the `TZ` environment variable. You can do this either as an AWS Lambda environment variable or directly within your Lambda function settings. [Click here](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html#configuration-envvars-runtime){target="_blank"} for a comprehensive list of available Lambda environment variables.
+<!-- markdownlint-enable MD013 -->
 
-    ```python hl_lines="6"
+???+ tip
+    `TZ` environment variable will be ignored if `utc` is set to `True`
+
+=== "setting_custom_timezone.py"
+
+    ```python hl_lines="9 12"
     --8<-- "examples/logger/src/setting_utc_timestamp.py"
     ```
 
-=== "setting_utc_timestamp_output.json"
+    1.  if you set TZ in your Lambda function, `time.tzset()` need to be called. You don't need it when setting TZ in AWS Lambda environment variable
+
+=== "setting_custom_timezone_output.json"
 
     ```json hl_lines="6 13"
     --8<-- "examples/logger/src/setting_utc_timestamp_output.json"

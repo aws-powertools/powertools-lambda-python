@@ -52,5 +52,19 @@ class LambdaFunctionUrlResolver(ApiGatewayResolver):
         debug: Optional[bool] = None,
         serializer: Optional[Callable[[Dict], str]] = None,
         strip_prefixes: Optional[List[Union[str, Pattern]]] = None,
+        enable_validation: bool = False,
     ):
-        super().__init__(ProxyEventType.LambdaFunctionUrlEvent, cors, debug, serializer, strip_prefixes)
+        super().__init__(
+            ProxyEventType.LambdaFunctionUrlEvent,
+            cors,
+            debug,
+            serializer,
+            strip_prefixes,
+            enable_validation,
+        )
+
+    def _get_base_path(self) -> str:
+        stage = self.current_event.request_context.stage
+        if stage and stage != "$default" and self.current_event.request_context.http.method.startswith(f"/{stage}"):
+            return f"/{stage}"
+        return ""

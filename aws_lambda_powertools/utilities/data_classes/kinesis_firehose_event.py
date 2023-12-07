@@ -201,7 +201,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
         return self._metadata["sequenceNumber"]
 
     @property
-    def subsequence_number(self) -> str:
+    def subsequence_number(self) -> int:
         """Kinesis stream sub-sequence number; present only when Kinesis Stream is source
 
         Note: this will only be present for Kinesis streams using record aggregation

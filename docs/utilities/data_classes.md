@@ -85,6 +85,7 @@ Log Data Event for Troubleshooting
 | [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
+| [Bedrock Agent](#bedrock-agent)                                           | `BedrockAgent`                                     |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -103,7 +104,8 @@ Log Data Event for Troubleshooting
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
-| [VPC Lattice](#vpc-lattice)                                               | `VPCLatticeEvent`                                  |
+| [VPC Lattice V2](#vpc-lattice-v2)                                         | `VPCLatticeV2Event`                                |
+| [VPC Lattice V1](#vpc-lattice-v1)                                         | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
@@ -481,6 +483,14 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 === "Event - ScheduledNotification"
     ```json
     --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
+    ```
+
+### Bedrock Agent
+
+=== "app.py"
+
+    ```python hl_lines="2 8 10"
+    --8<-- "examples/event_sources/src/bedrock_agent_event.py"
     ```
 
 ### CloudWatch Dashboard Custom Widget
@@ -1180,7 +1190,25 @@ AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [
             do_something_with(record.body)
     ```
 
-### VPC Lattice
+### VPC Lattice V2
+
+You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service using [Payload V2](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html#vpc-lattice-receiving-events){target="_blank"}.
+
+[Click here](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"} for more information about using AWS Lambda with Amazon VPC Lattice.
+
+=== "app.py"
+
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/vpc_lattice_v2.py"
+    ```
+
+=== "Lattice Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/src/vpc_lattice_v2_payload.json"
+    ```
+
+### VPC Lattice V1
 
 You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.
 

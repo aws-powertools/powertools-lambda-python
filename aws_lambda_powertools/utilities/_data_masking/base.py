@@ -1,11 +1,15 @@
 import json
 from typing import Optional, Union
 
-from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
 
 class DataMasking:
     """
+    Note: This utility is currently in a Non-General Availability (Non-GA) phase and may have limitations.
+    Please DON'T USE THIS utility in production environments.
+    Keep in mind that when we transition to General Availability (GA), there might be breaking changes introduced.
+
     A utility class for masking sensitive data within various data types.
 
     This class provides methods for masking sensitive information, such as personal

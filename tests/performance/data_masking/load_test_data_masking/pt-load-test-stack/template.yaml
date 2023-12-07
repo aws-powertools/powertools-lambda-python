@@ -52,7 +52,7 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
           POWERTOOLS_METRICS_NAMESPACE: Powertools
-          LOG_LEVEL: INFO
+          POWERTOOLS_LOG_LEVEL: INFO
           KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
       Tags:
         LambdaPowertools: python
@@ -82,7 +82,7 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
           POWERTOOLS_METRICS_NAMESPACE: Powertools
-          LOG_LEVEL: INFO
+          POWERTOOLS_LOG_LEVEL: INFO
           KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
       Tags:
         LambdaPowertools: python
@@ -112,7 +112,7 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
           POWERTOOLS_METRICS_NAMESPACE: Powertools
-          LOG_LEVEL: INFO
+          POWERTOOLS_LOG_LEVEL: INFO
           KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
       Tags:
         LambdaPowertools: python

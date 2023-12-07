@@ -93,7 +93,7 @@ jobs:
           - region: "ap-south-1"
             has_arm64_support: "true"
           - region: "ap-south-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "ap-southeast-1"
             has_arm64_support: "true"
           - region: "ap-southeast-2"
@@ -101,19 +101,19 @@ jobs:
           - region: "ap-southeast-3"
             has_arm64_support: "true"
           - region: "ap-southeast-4"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "ca-central-1"
             has_arm64_support: "true"
           - region: "eu-central-1"
             has_arm64_support: "true"
           - region: "eu-central-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "eu-north-1"
             has_arm64_support: "true"
           - region: "eu-south-1"
             has_arm64_support: "true"
           - region: "eu-south-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "eu-west-1"
             has_arm64_support: "true"
           - region: "eu-west-2"
@@ -121,9 +121,9 @@ jobs:
           - region: "eu-west-3"
             has_arm64_support: "true"
           - region: "il-central-1"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "me-central-1"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "me-south-1"
             has_arm64_support: "true"
           - region: "sa-east-1"
@@ -138,7 +138,7 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608  # v4.1.0
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -156,11 +156,11 @@ jobs:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d # v3.8.1
+        uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@61a6322f88396a6271a6ee3565807d608ecaddd1 # v4.7.0
+        uses: actions/setup-python@b64ffcaf5b410884ad320a9cfac8866006a109aa # v4.8.0
         with:
           python-version: "3.11"
           cache: "pip"

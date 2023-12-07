@@ -66,7 +66,7 @@ def idempotent(
     """
 
     if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
-        return handler(event, context)
+        return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
     config.register_lambda_context(context)
@@ -91,6 +91,7 @@ def idempotent_function(
     persistence_store: BasePersistenceLayer,
     config: Optional[IdempotencyConfig] = None,
     output_serializer: Optional[Union[BaseIdempotencySerializer, Type[BaseIdempotencyModelSerializer]]] = None,
+    **kwargs: Any,
 ) -> Any:
     """
     Decorator to handle idempotency of any function
@@ -136,6 +137,7 @@ def idempotent_function(
                 persistence_store=persistence_store,
                 config=config,
                 output_serializer=output_serializer,
+                **kwargs,
             ),
         )
 
