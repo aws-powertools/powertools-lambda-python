@@ -6,20 +6,42 @@
 
 ## Maintenance
 
+* **deps:** bump datadog-lambda from 5.84.0 to 5.85.0 ([#3466](https://github.com/aws-powertools/powertools-lambda-python/issues/3466))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3467](https://github.com/aws-powertools/powertools-lambda-python/issues/3467))
+* **deps-dev:** bump aws-cdk from 2.113.0 to 2.114.1 ([#3464](https://github.com/aws-powertools/powertools-lambda-python/issues/3464))
+
+
+<a name="v2.29.0"></a>
+## [v2.29.0] - 2023-12-06
+## Bug Fixes
+
+* **event_handler:** serialize pydantic/dataclasses in exception handler ([#3455](https://github.com/aws-powertools/powertools-lambda-python/issues/3455))
+* **metrics:** lambda_handler typing, and **kwargs preservation all middlewares ([#3460](https://github.com/aws-powertools/powertools-lambda-python/issues/3460))
+
+## Features
+
+* **event_sources:** add get_context() to standardize API Gateway Lambda Authorizer context in v1 and v2 ([#3454](https://github.com/aws-powertools/powertools-lambda-python/issues/3454))
+
+## Maintenance
+
+* version bump
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3441](https://github.com/aws-powertools/powertools-lambda-python/issues/3441))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 3.0.1 to 3.0.2 ([#3449](https://github.com/aws-powertools/powertools-lambda-python/issues/3449))
+* **deps:** bump datadog-lambda from 5.83.0 to 5.84.0 ([#3438](https://github.com/aws-powertools/powertools-lambda-python/issues/3438))
 * **deps:** bump cryptography from 41.0.4 to 41.0.6 ([#3431](https://github.com/aws-powertools/powertools-lambda-python/issues/3431))
 * **deps:** bump squidfunk/mkdocs-material from `fc42bac` to `8c72011` in /docs ([#3416](https://github.com/aws-powertools/powertools-lambda-python/issues/3416))
 * **deps:** bump actions/dependency-review-action from 3.1.3 to 3.1.4 ([#3426](https://github.com/aws-powertools/powertools-lambda-python/issues/3426))
+* **deps:** bump actions/setup-python from 4.7.1 to 4.8.0 ([#3456](https://github.com/aws-powertools/powertools-lambda-python/issues/3456))
 * **deps:** bump pypa/gh-action-pypi-publish from 1.8.10 to 1.8.11 ([#3433](https://github.com/aws-powertools/powertools-lambda-python/issues/3433))
-* **deps:** bump datadog-lambda from 5.83.0 to 5.84.0 ([#3438](https://github.com/aws-powertools/powertools-lambda-python/issues/3438))
-* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3441](https://github.com/aws-powertools/powertools-lambda-python/issues/3441))
-* **deps-dev:** bump aws-cdk from 2.111.0 to 2.112.0 ([#3440](https://github.com/aws-powertools/powertools-lambda-python/issues/3440))
-* **deps-dev:** bump aws-cdk-lib from 2.110.1 to 2.111.0 ([#3428](https://github.com/aws-powertools/powertools-lambda-python/issues/3428))
+* **deps-dev:** bump cfn-lint from 0.83.3 to 0.83.4 ([#3450](https://github.com/aws-powertools/powertools-lambda-python/issues/3450))
+* **deps-dev:** bump ruff from 0.1.6 to 0.1.7 ([#3458](https://github.com/aws-powertools/powertools-lambda-python/issues/3458))
 * **deps-dev:** bump sentry-sdk from 1.36.0 to 1.38.0 ([#3435](https://github.com/aws-powertools/powertools-lambda-python/issues/3435))
+* **deps-dev:** bump aws-cdk-lib from 2.110.1 to 2.111.0 ([#3428](https://github.com/aws-powertools/powertools-lambda-python/issues/3428))
+* **deps-dev:** bump aws-cdk from 2.112.0 to 2.113.0 ([#3448](https://github.com/aws-powertools/powertools-lambda-python/issues/3448))
 * **deps-dev:** bump aws-cdk from 2.110.1 to 2.111.0 ([#3418](https://github.com/aws-powertools/powertools-lambda-python/issues/3418))
 * **deps-dev:** bump the boto-typing group with 11 updates ([#3427](https://github.com/aws-powertools/powertools-lambda-python/issues/3427))
-* **deps-dev:** bump aws-cdk from 2.112.0 to 2.113.0 ([#3448](https://github.com/aws-powertools/powertools-lambda-python/issues/3448))
-* **deps-dev:** bump cfn-lint from 0.83.3 to 0.83.4 ([#3450](https://github.com/aws-powertools/powertools-lambda-python/issues/3450))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3457](https://github.com/aws-powertools/powertools-lambda-python/issues/3457))
+* **deps-dev:** bump aws-cdk from 2.111.0 to 2.112.0 ([#3440](https://github.com/aws-powertools/powertools-lambda-python/issues/3440))
 * **layers:** Update log retention to 10 years ([#3424](https://github.com/aws-powertools/powertools-lambda-python/issues/3424))
 
 
@@ -4099,7 +4121,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.28.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.29.0...HEAD
+[v2.29.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.28.1...v2.29.0
 [v2.28.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.28.0...v2.28.1
 [v2.28.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.1...v2.28.0
 [v2.27.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.27.0...v2.27.1

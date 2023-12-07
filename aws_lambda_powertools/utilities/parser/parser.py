@@ -15,11 +15,12 @@ logger = logging.getLogger(__name__)
 
 @lambda_handler_decorator
 def event_parser(
-    handler: Callable[[Any, LambdaContext], EventParserReturnType],
+    handler: Callable[..., EventParserReturnType],
     event: Dict[str, Any],
     context: LambdaContext,
     model: Optional[Type[Model]] = None,
     envelope: Optional[Type[Envelope]] = None,
+    **kwargs: Any,
 ) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
@@ -93,9 +94,13 @@ def event_parser(
             "or as the type hint of `event` in the handler that it wraps",
         )
 
-    parsed_event = parse(event=event, model=model, envelope=envelope) if envelope else parse(event=event, model=model)
+    if envelope:
+        parsed_event = parse(event=event, model=model, envelope=envelope)
+    else:
+        parsed_event = parse(event=event, model=model)
+
     logger.debug(f"Calling handler {handler.__name__}")
-    return handler(parsed_event, context)
+    return handler(parsed_event, context, **kwargs)
 
 
 @overload
@@ -104,7 +109,7 @@ def parse(event: Dict[str, Any], model: Type[Model]) -> Model:
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]):
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> Model:
     ...  # pragma: no cover
 
 
