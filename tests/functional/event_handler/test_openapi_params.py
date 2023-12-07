@@ -4,7 +4,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.openapi.models import (
     Example,
     Parameter,
@@ -70,13 +70,13 @@ def test_openapi_with_scalar_params():
     assert schema.info.version == "0.2.2"
 
     assert len(schema.paths.keys()) == 1
-    assert "/users/<user_id>" in schema.paths
+    assert "/users/{user_id}" in schema.paths
 
-    path = schema.paths["/users/<user_id>"]
+    path = schema.paths["/users/{user_id}"]
     assert path.get
 
     get = path.get
-    assert get.summary == "GET /users/<user_id>"
+    assert get.summary == "GET /users/{user_id}"
     assert get.operationId == "handler_users__user_id__get"
     assert len(get.parameters) == 2
 
@@ -150,6 +150,24 @@ def test_openapi_with_scalar_returns():
 
     response = get.responses[200].content[JSON_CONTENT_TYPE]
     assert response.schema_.title == "Return"
+    assert response.schema_.type == "string"
+
+
+def test_openapi_with_response_returns():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler() -> Response[Annotated[str, Body(title="Response title")]]:
+        return Response(body="Hello, world", status_code=200)
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters is None
+
+    response = get.responses[200].content[JSON_CONTENT_TYPE]
+    assert response.schema_.title == "Response title"
     assert response.schema_.type == "string"
 
 

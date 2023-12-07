@@ -42,3 +42,18 @@ COMPACT_INDENT = None
 
 POWERTOOLS_DEV_ENV: str = "POWERTOOLS_DEV"
 POWERTOOLS_DEBUG_ENV: str = "POWERTOOLS_DEBUG"
+POWERTOOLS_LOG_LEVEL_ENV: str = "POWERTOOLS_LOG_LEVEL"
+POWERTOOLS_LOG_LEVEL_LEGACY_ENV: str = "LOG_LEVEL"
+LAMBDA_LOG_LEVEL_ENV: str = "AWS_LAMBDA_LOG_LEVEL"
+
+# Mapping of Lambda log levels to Python logging levels
+# https://docs.aws.amazon.com/lambda/latest/dg/configuration-logging.html#configuration-logging-log-levels
+LAMBDA_ADVANCED_LOGGING_LEVELS = {
+    None: None,
+    "TRACE": "NOTSET",
+    "DEBUG": "DEBUG",
+    "INFO": "INFO",
+    "WARN": "WARNING",
+    "ERROR": "ERROR",
+    "FATAL": "CRITICAL",
+}

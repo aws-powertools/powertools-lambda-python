@@ -1,0 +1,9 @@
+{
+  "statusCode": 422,
+  "body": "{\"statusCode\": 422, \"detail\": [{\"type\": \"int_parsing\", \"loc\": [\"path\", \"todo_id\"]}]}",
+  "isBase64Encoded": false,
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "cookies": []
+}

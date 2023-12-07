@@ -1,11 +1,12 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Dict
 
 from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
+from aws_lambda_powertools.shared.types import AnyCallableT
 
 
 class Metrics:
@@ -129,16 +130,18 @@ class Metrics:
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         default_dimensions: Dict[str, str] | None = None,
+        **kwargs,
     ):
         return self.provider.log_metrics(
             lambda_handler=lambda_handler,
             capture_cold_start_metric=capture_cold_start_metric,
             raise_on_empty_metrics=raise_on_empty_metrics,
             default_dimensions=default_dimensions,
+            **kwargs,
         )
 
     def set_default_dimensions(self, **dimensions) -> None:

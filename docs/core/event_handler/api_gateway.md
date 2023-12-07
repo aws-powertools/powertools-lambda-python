@@ -11,11 +11,20 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 * Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
 * Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
 * Works with micro function (one or a few routes) and monolithic functions (all routes)
+* Support for OpenAPI and data validation for requests/responses
 
 ## Getting started
 
 ???+ tip
     All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
+
+### Install
+
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
+
+**When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
+
+As of now, both Pydantic V1 and V2 are supported. For a future major version, we will only support Pydantic V2.
 
 ### Required resources
 
@@ -221,6 +230,190 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 ???+ note
     It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
 
+### Data validation
+
+!!! note "This changes the authoring experience by relying on Python's type annotations"
+    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction. We support both Pydantic models and Python's dataclass.
+
+    For brevity, we'll focus on Pydantic only.
+
+All resolvers can optionally coerce and validate incoming requests by setting `enable_validation=True`.
+
+With this feature, we can now express how we expect our incoming data and response to look like. This moves data validation responsibilities to Event Handler resolvers, reducing a ton of boilerplate code.
+
+Let's rewrite the previous examples to signal our resolver what shape we expect our data to be.
+
+<!-- markdownlint-disable MD013 -->
+
+=== "data_validation.py"
+
+    ```python hl_lines="13 16 25 29"
+    --8<-- "examples/event_handler_rest/src/data_validation.py"
+    ```
+
+    1. This enforces data validation at runtime. Any validation error will return `HTTP 422: Unprocessable Entity error`.
+    2. We create a Pydantic model to define how our data looks like.
+    3. Defining a route remains exactly as before.
+    4. By default, URL Paths will be `str`. Here, we are telling our resolver it should be `int`, so it converts it for us. <br/><br/> Lastly, we're also saying the return should be our `Todo`. This will help us later when we touch OpenAPI auto-documentation.
+    5. `todo.json()` returns a dictionary. However, Event Handler knows the response should be `Todo` so it converts and validates accordingly.
+
+=== "data_validation.json"
+
+    ```json hl_lines="4"
+    --8<-- "examples/event_handler_rest/src/data_validation.json"
+    ```
+
+=== "data_validation_output.json"
+
+    ```json hl_lines="2-3"
+    --8<-- "examples/event_handler_rest/src/data_validation_output.json"
+    ```
+
+<!-- markdownlint-enable MD013 -->
+
+#### Handling validation errors
+
+!!! info "By default, we hide extended error details for security reasons _(e.g., pydantic url, Pydantic code)_."
+
+Any incoming request that fails validation will lead to a `HTTP 422: Unprocessable Entity error` response that will look similar to this:
+
+```json hl_lines="2 3" title="data_validation_error_unsanitized_output.json"
+--8<-- "examples/event_handler_rest/src/data_validation_error_unsanitized_output.json"
+```
+
+You can customize the error message by catching the `RequestValidationError` exception. This is useful when you might have a security policy to return opaque validation errors, or have a company standard for API validation errors.
+
+Here's an example where we catch validation errors, log all details for further investigation, and return the same `HTTP 422` with an opaque error.
+
+=== "data_validation_sanitized_error.py"
+
+    Note that Pydantic versions [1](https://docs.pydantic.dev/1.10/usage/models/#error-handling){target="_blank" rel="nofollow"} and [2](https://docs.pydantic.dev/latest/errors/errors/){target="_blank" rel="nofollow"} report validation detailed errors differently.
+
+    ```python hl_lines="8 24-25 31"
+    --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error.py"
+    ```
+
+    1. We use [exception handler](#exception-handling) decorator to catch **any** request validation errors. <br/><br/> Then, we log the detailed reason as to why it failed while returning a custom `Response` object to hide that from them.
+
+=== "data_validation_sanitized_error_output.json"
+
+    ```json hl_lines="2 3"
+    --8<-- "examples/event_handler_rest/src/data_validation_sanitized_error_output.json"
+    ```
+
+#### Validating payloads
+
+!!! info "We will automatically validate, inject, and convert incoming request payloads based on models via type annotation."
+
+Let's improve our previous example by handling the creation of todo items via `HTTP POST`.
+
+What we want is for Event Handler to convert the incoming payload as an instance of our `Todo` model. We handle the creation of that `todo`, and then return the `ID` of the newly created `todo`.
+
+Even better, we can also let Event Handler validate and convert our response according to type annotations, further reducing boilerplate.
+
+=== "validating_payloads.py"
+
+    ```python hl_lines="13 16 24 33"
+    --8<-- "examples/event_handler_rest/src/validating_payloads.py"
+    ```
+
+    1. This enforces data validation at runtime. Any validation error will return `HTTP 422: Unprocessable Entity error`.
+    2. We create a Pydantic model to define how our data looks like.
+    3. We define `Todo` as our type annotation. Event Handler then uses this model to validate and inject the incoming request as `Todo`.
+    4. Lastly, we return the ID of our newly created `todo` item. <br/><br/> Because we specify the return type (`str`), Event Handler will take care of serializing this as a JSON string.
+    5. Note that the return type is `List[Todo]`. <br><br> Event Handler will take the return (`todo.json`), and validate each list item against `Todo` model before returning the response accordingly.
+
+=== "validating_payloads.json"
+
+    ```json hl_lines="3 5-6"
+    --8<-- "examples/event_handler_rest/src/validating_payloads.json"
+    ```
+
+=== "validating_payloads_output.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/event_handler_rest/src/validating_payloads_output.json"
+    ```
+
+##### Validating payload subset
+
+With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
+
+We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that our payload is located in a particular JSON key.
+
+!!! note "Event Handler will match the parameter name with the JSON key to validate and inject what you want."
+
+=== "validating_payload_subset.py"
+
+    ```python hl_lines="7 8 22"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset.py"
+    ```
+
+    1. `Body` is a special OpenAPI type that can add additional constraints to a request payload.
+    2. `Body(embed=True)` instructs Event Handler to look up inside the payload for a key.<br><br> This means Event Handler will look up for a key named `todo`, validate the value against `Todo`, and inject it.
+
+=== "validating_payload_subset.json"
+
+    ```json hl_lines="3-4 6"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset.json"
+    ```
+
+=== "validating_payload_subset_output.json"
+
+    ```json hl_lines="3"
+    --8<-- "examples/event_handler_rest/src/validating_payload_subset_output.json"
+    ```
+
+#### Validating query strings
+
+!!! info "We will automatically validate and inject incoming query strings via type annotation."
+
+We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
+
+In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+
+* `completed` is a query string with a `None` as its default value
+* `completed`, when set, should have at minimum 4 characters
+* Doesn't match? Event Handler will return a validation error response
+
+<!-- markdownlint-disable MD013 -->
+
+=== "validating_query_strings.py"
+
+    ```python hl_lines="8 10 27"
+    --8<-- "examples/event_handler_rest/src/validating_query_strings.py"
+    ```
+
+    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
+    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+
+=== "skip_validating_query_strings.py"
+
+    If you don't want to validate query strings but simply let Event Handler inject them as parameters, you can omit `Query` type annotation.
+
+    This is merely for your convenience.
+
+    ```python hl_lines="25"
+    --8<-- "examples/event_handler_rest/src/skip_validating_query_strings.py"
+    ```
+
+    1. `completed` is still the same query string as before, except we simply state it's an string. No `Query` or `Annotated` to validate it.
+
+<!-- markdownlint-enable MD013 -->
+
+#### Validating path parameters
+
+Just like we learned in [query string validation](#validating-query-strings), we can use a new `Path` OpenAPI type to [add constraints](#customizing-openapi-parameters).
+
+For example, we could validate that `<todo_id>` dynamic path should be no greater than three digits.
+
+```python hl_lines="8 10 27" title="validating_path.py"
+--8<-- "examples/event_handler_rest/src/validating_path.py"
+```
+
+1. `Path` is a special OpenAPI type that allows us to constrain todo_id to be less than 999.
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
@@ -278,6 +471,30 @@ We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 4
 ```python hl_lines="6-11 23 28 33 38 43" title="Raising common HTTP Status errors (4xx, 5xx)"
 --8<-- "examples/event_handler_rest/src/raising_http_errors.py"
 ```
+
+### Enabling SwaggerUI
+
+!!! note "This feature requires [data validation](#data-validation) feature to be enabled."
+
+Behind the scenes, the [data validation](#data-validation) feature auto-generates an OpenAPI specification from your routes and type annotations. You can use [Swagger UI](https://swagger.io/tools/swagger-ui/){target="_blank" rel="nofollow"} to visualize and interact with your newly auto-documented API.
+
+There are some important **caveats** that you should know before enabling it:
+
+| Caveat                                           | Description                                                                                                                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Swagger UI is **publicly accessible by default** | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism. |
+| **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                     |
+| You need to expose **new routes**                | You'll need to expose the following paths to Lambda: `/swagger`, `/swagger.css`, `/swagger.js`; ignore if you're routing all paths already.                                              |
+
+```python hl_lines="12-13" title="enabling_swagger.py"
+--8<-- "examples/event_handler_rest/src/enabling_swagger.py"
+```
+
+1. `enable_swagger` creates a route to serve Swagger UI and allows quick customizations. <br><br> You can also include  middlewares to protect or enhance the overall experience.
+
+Here's an example of what it looks like by default:
+
+![Swagger UI picture](../../media/swagger.png)
 
 ### Custom Domain API Mappings
 
@@ -573,8 +790,8 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                           | Purpose                                                                                                                                 |
-| ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Middleware                                                                                                                | Purpose                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
@@ -648,15 +865,15 @@ You can compress with gzip and base64 encode your responses via `compress` param
 
 ### Binary responses
 
+???+ warning "Amazon API Gateway does not support `*/*` binary media type [when CORS is also configured](https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779){target='blank'}."
+    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
+
 For convenience, we automatically base64 encode binary responses. You can also use in combination with `compress` parameter if your client supports gzip.
 
 Like `compress` feature, the client must send the `Accept` header with the correct media type.
 
-???+ warning
-    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
+!!! note "Lambda Function URLs handle binary media types automatically."
 
-???+ note
-    Lambda Function URLs handle binary media types automatically.
 === "binary_responses.py"
 
     ```python hl_lines="17 23"
@@ -695,6 +912,112 @@ This will enable full tracebacks errors in the response, print request and respo
 ```python hl_lines="11" title="Enabling debug mode"
 --8<-- "examples/event_handler_rest/src/debug_mode.py"
 ```
+
+### OpenAPI
+
+When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your API's parameters.
+
+In OpenAPI documentation tools like [SwaggerUI](#enabling-swaggerui), these annotations become readable descriptions, offering a self-explanatory API interface. This reduces boilerplate code while improving functionality and enabling auto-documentation.
+
+???+ note
+	We don't have support for files, form data, and header parameters at the moment. If you're interested in this, please [open an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE).
+
+#### Customizing OpenAPI parameters
+
+Whenever you use OpenAPI parameters to validate [query strings](#validating-query-strings) or [path parameters](#validating-path-parameters), you can enhance validation and OpenAPI documentation by using any of these parameters:
+
+| Field name            | Type          | Description                                                                                                                                                                |
+| --------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `alias`               | `str`         | Alternative name for a field, used when serializing and deserializing data                                                                                                 |
+| `validation_alias`    | `str`         | Alternative name for a field during validation (but not serialization)                                                                                                     |
+| `serialization_alias` | `str`         | Alternative name for a field during serialization (but not during validation)                                                                                              |
+| `description`         | `str`         | Human-readable description                                                                                                                                                 |
+| `gt`                  | `float`       | Greater than. If set, value must be greater than this. Only applicable to numbers                                                                                          |
+| `ge`                  | `float`       | Greater than or equal. If set, value must be greater than or equal to this. Only applicable to numbers                                                                     |
+| `lt`                  | `float`       | Less than. If set, value must be less than this. Only applicable to numbers                                                                                                |
+| `le`                  | `float`       | Less than or equal. If set, value must be less than or equal to this. Only applicable to numbers                                                                           |
+| `min_length`          | `int`         | Minimum length for strings                                                                                                                                                 |
+| `max_length`          | `int`         | Maximum length for strings                                                                                                                                                 |
+| `pattern`             | `string`      | A regular expression that the string must match.                                                                                                                           |
+| `strict`              | `bool`        | If `True`, strict validation is applied to the field. See [Strict Mode](https://docs.pydantic.dev/latest/concepts/strict_mode/){target"_blank" rel="nofollow"} for details |
+| `multiple_of`         | `float`       | Value must be a multiple of this. Only applicable to numbers                                                                                                               |
+| `allow_inf_nan`       | `bool`        | Allow `inf`, `-inf`, `nan`. Only applicable to numbers                                                                                                                     |
+| `max_digits`          | `int`         | Maximum number of allow digits for strings                                                                                                                                 |
+| `decimal_places`      | `int`         | Maximum number of decimal places allowed for numbers                                                                                                                       |
+| `examples`            | `List\[Any\]` | List of examples of the field                                                                                                                                              |
+| `deprecated`          | `bool`        | Marks the field as deprecated                                                                                                                                              |
+| `include_in_schema`   | `bool`        | If `False` the field will not be part of the exported OpenAPI schema                                                                                                       |
+| `json_schema_extra`   | `JsonDict`    | Any additional JSON schema data for the schema property                                                                                                                    |
+
+#### Customizing API operations
+
+Customize your API endpoints by adding metadata to endpoint definitions. This provides descriptive documentation for API consumers and gives extra instructions to the framework.
+
+Here's a breakdown of various customizable fields:
+
+| Field Name             | Type                        | Description                                                                                                                                                                                                                                                                                                      |
+| ---------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `summary`              | `str`                       | A concise overview of the main functionality of the endpoint. This brief introduction is usually displayed in autogenerated API documentation and helps consumers quickly understand what the endpoint does.                                                                                                     |
+| `description`          | `str`                       | A more detailed explanation of the endpoint, which can include information about the operation's behavior, including side effects, error states, and other operational guidelines.                                                                                                                               |
+| `responses`            | `Dict[int, Dict[str, Any]]` | A dictionary that maps each HTTP status code to a Response Object as defined by the [OpenAPI Specification](https://swagger.io/specification/#response-object). This allows you to describe expected responses, including default or error messages, and their corresponding schemas for different status codes. |
+| `response_description` | `str`                       | Provides the default textual description of the response sent by the endpoint when the operation is successful. It is intended to give a human-readable understanding of the result.                                                                                                                             |
+| `tags`                 | `List[str]`                 | Tags are a way to categorize and group endpoints within the API documentation. They can help organize the operations by resources or other heuristic.                                                                                                                                                            |
+| `operation_id`         | `str`                       | A unique identifier for the operation, which can be used for referencing this operation in documentation or code. This ID must be unique across all operations described in the API.                                                                                                                             |
+| `include_in_schema`    | `bool`                      | A boolean value that determines whether or not this operation should be included in the OpenAPI schema. Setting it to `False` can hide the endpoint from generated documentation and schema exports, which might be useful for private or experimental endpoints.                                                |
+
+To implement these customizations, include extra parameters when defining your routes:
+
+```python hl_lines="11-20" title="customizing_api_operations.py"
+--8<-- "examples/event_handler_rest/src/customizing_api_operations.py"
+```
+
+#### Customizing Swagger UI
+
+???+note "Customizing the Swagger metadata"
+	The `enable_swagger` method accepts the same metadata as described at [Customizing OpenAPI metadata](#customizing-openapi-metadata).
+
+The Swagger UI appears by default at the `/swagger` path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.
+
+Below is an example configuration for serving Swagger UI from a custom path or CDN, with assets like CSS and JavaScript loading from a chosen CDN base URL.
+
+=== "customizing_swagger.py"
+
+    ```python hl_lines="10"
+    --8<-- "examples/event_handler_rest/src/customizing_swagger.py"
+    ```
+
+=== "customizing_swagger_middlewares.py"
+
+   A Middleware can handle tasks such as adding security headers, user authentication, or other request processing for serving the Swagger UI.
+
+   ```python hl_lines="7 13-18 21"
+   --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
+   ```
+
+#### Customizing OpenAPI metadata
+
+Defining and customizing OpenAPI metadata gives detailed, top-level information about your API. Here's the method to set and tailor this metadata:
+
+| Field Name         | Type           | Description                                                                                                                                                                         |
+| ------------------ | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`            | `str`          | The title for your API. It should be a concise, specific name that can be used to identify the API in documentation or listings.                                                    |
+| `version`          | `str`          | The version of the API you are documenting. This could reflect the release iteration of the API and helps clients understand the evolution of the API.                              |
+| `openapi_version`  | `str`          | Specifies the version of the OpenAPI Specification on which your API is based. For most contemporary APIs, the default value would be `3.0.0` or higher.                            |
+| `summary`          | `str`          | A short and informative summary that can provide an overview of what the API does. This can be the same as or different from the title but should add context or information.       |
+| `description`      | `str`          | A verbose description that can include Markdown formatting, providing a full explanation of the API's purpose, functionalities, and general usage instructions.                     |
+| `tags`             | `List[str]`    | A collection of tags that categorize endpoints for better organization and navigation within the documentation. This can group endpoints by their functionality or other criteria.  |
+| `servers`          | `List[Server]` | An array of Server objects, which specify the URL to the server and a description for its environment (production, staging, development, etc.), providing connectivity information. |
+| `terms_of_service` | `str`          | A URL that points to the terms of service for your API. This could provide legal information and user responsibilities related to the usage of the API.                             |
+| `contact`          | `Contact`      | A Contact object containing contact details of the organization or individuals maintaining the API. This may include fields such as name, URL, and email.                           |
+| `license_info`     | `License`      | A License object providing the license details for the API, typically including the name of the license and the URL to the full license text.                                       |
+
+Include extra parameters when exporting your OpenAPI specification to apply these customizations:
+
+=== "customizing_api_metadata.py"
+
+    ```python hl_lines="25-31"
+    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
+    ```
 
 ### Custom serializer
 

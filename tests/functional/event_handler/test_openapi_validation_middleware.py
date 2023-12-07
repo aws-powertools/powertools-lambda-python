@@ -4,20 +4,14 @@ from enum import Enum
 from pathlib import PurePath
 from typing import List, Tuple
 
-import pytest
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
-
-
-def test_validate_with_customn_serializer():
-    with pytest.raises(ValueError):
-        APIGatewayRestResolver(enable_validation=True, serializer=json.dumps)
 
 
 def test_validate_scalars():
@@ -128,7 +122,7 @@ def test_validate_return_list():
     # THEN the body must be [123, 234]
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == "[123, 234]"
+    assert json.loads(result["body"]) == [123, 234]
 
 
 def test_validate_return_tuple():
@@ -148,7 +142,7 @@ def test_validate_return_tuple():
     # THEN the body must be a tuple
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == "[1, 2, 3]"
+    assert json.loads(result["body"]) == [1, 2, 3]
 
 
 def test_validate_return_purepath():
@@ -169,7 +163,7 @@ def test_validate_return_purepath():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == json.dumps(sample_path.as_posix())
+    assert result["body"] == sample_path.as_posix()
 
 
 def test_validate_return_enum():
@@ -190,7 +184,7 @@ def test_validate_return_enum():
     # THEN the body must be a string
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
-    assert result["body"] == '"powertools"'
+    assert result["body"] == "powertools"
 
 
 def test_validate_return_dataclass():
@@ -336,3 +330,51 @@ def test_validate_embed_body_param():
     LOAD_GW_EVENT["body"] = json.dumps({"user": {"name": "John", "age": 30}})
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 200
+
+
+def test_validate_response_return():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Model) -> Response[Model]:
+        return Response(body=user, status_code=200, content_type="application/json")
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+
+    # THEN the handler should be invoked and return 200
+    # THEN the body must be a dict
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
+
+
+def test_validate_response_invalid_return():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    @app.post("/")
+    def handler(user: Model) -> Response[Model]:
+        return Response(body=user, status_code=200)
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = json.dumps({})
+
+    # THEN the handler should be invoked and return 422
+    # THEN the body should have the word missing
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 422
+    assert "missing" in result["body"]
