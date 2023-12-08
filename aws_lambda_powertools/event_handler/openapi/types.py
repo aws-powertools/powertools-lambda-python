@@ -16,13 +16,6 @@ COMPONENT_REF_PREFIX = "#/components/schemas/"
 COMPONENT_REF_TEMPLATE = "#/components/schemas/{model}"
 METHODS_WITH_BODY = {"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"}
 
-try:
-    from pydantic.version import VERSION as PYDANTIC_VERSION
-
-    PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
-except ImportError:
-    PYDANTIC_V2 = False
-
 
 validation_error_definition = {
     "title": "ValidationError",

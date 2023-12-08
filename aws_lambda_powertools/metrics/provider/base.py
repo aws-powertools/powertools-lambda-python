@@ -3,9 +3,10 @@ from __future__ import annotations
 import functools
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, Optional
+from typing import Any
 
 from aws_lambda_powertools.metrics.provider import cold_start
+from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -140,7 +141,7 @@ class BaseProvider(ABC):
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         **kwargs,

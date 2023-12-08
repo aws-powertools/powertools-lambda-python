@@ -32,6 +32,7 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
 from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
@@ -66,6 +67,7 @@ _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION = "Successful Response"
 _ROUTE_REGEX = "^{}$"
 
 ResponseEventT = TypeVar("ResponseEventT", bound=BaseProxyEvent)
+ResponseT = TypeVar("ResponseT")
 
 if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -207,14 +209,14 @@ class CORSConfig:
         return headers
 
 
-class Response:
+class Response(Generic[ResponseT]):
     """Response data class that provides greater control over what is returned from the proxy event"""
 
     def __init__(
         self,
         status_code: int,
         content_type: Optional[str] = None,
-        body: Any = None,
+        body: Optional[ResponseT] = None,
         headers: Optional[Dict[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
@@ -314,6 +316,11 @@ class Route:
         """
         self.method = method.upper()
         self.path = "/" if path.strip() == "" else path
+
+        # OpenAPI spec only understands paths with { }. So we'll have to convert Powertools' < >.
+        # https://swagger.io/specification/#path-templating
+        self.openapi_path = re.sub(r"<(.*?)>", lambda m: f"{{{''.join(m.group(1))}}}", self.path)
+
         self.rule = rule
         self.func = func
         self._middleware_stack = func
@@ -433,7 +440,7 @@ class Route:
         if self._dependant is None:
             from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
 
-            self._dependant = get_dependant(path=self.path, call=self.func)
+            self._dependant = get_dependant(path=self.openapi_path, call=self.func)
 
         return self._dependant
 
@@ -540,7 +547,7 @@ class Route:
         Returns the OpenAPI operation summary. If the user has not provided a summary, we
         generate one based on the route path and method.
         """
-        return self.summary or f"{self.method.upper()} {self.path}"
+        return self.summary or f"{self.method.upper()} {self.openapi_path}"
 
     def _openapi_operation_metadata(self, operation_ids: Set[str]) -> Dict[str, Any]:
         """
@@ -690,7 +697,7 @@ class Route:
         return {"schema": return_schema}
 
     def _generate_operation_id(self) -> str:
-        operation_id = self.func.__name__ + self.path
+        operation_id = self.func.__name__ + self.openapi_path
         operation_id = re.sub(r"\W", "_", operation_id)
         operation_id = operation_id + "_" + self.method.lower()
         return operation_id
@@ -699,8 +706,14 @@ class Route:
 class ResponseBuilder(Generic[ResponseEventT]):
     """Internally used Response builder"""
 
-    def __init__(self, response: Response, route: Optional[Route] = None):
+    def __init__(
+        self,
+        response: Response,
+        serializer: Callable[[Any], str] = partial(json.dumps, separators=(",", ":"), cls=Encoder),
+        route: Optional[Route] = None,
+    ):
         self.response = response
+        self.serializer = serializer
         self.route = route
 
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
@@ -776,6 +789,12 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def build(self, event: ResponseEventT, cors: Optional[CORSConfig] = None) -> Dict[str, Any]:
         """Build the full response dict to be returned by the lambda"""
+
+        # We only apply the serializer when the content type is JSON and the
+        # body is not a str, to avoid double encoding
+        if self.response.is_json() and not isinstance(self.response.body, str):
+            self.response.body = self.serializer(self.response.body)
+
         self._route(event, cors)
 
         if isinstance(self.response.body, bytes):
@@ -1332,14 +1351,6 @@ class ApiGatewayResolver(BaseRouter):
 
             self.use([OpenAPIValidationMiddleware()])
 
-            # When using validation, we need to skip the serializer, as the middleware is doing it automatically.
-            # However, if the user is using a custom serializer, we need to abort.
-            if serializer:
-                raise ValueError("Cannot use a custom serializer when using validation")
-
-            # Install a dummy serializer
-            self._serializer = lambda args: args  # type: ignore
-
     def get_openapi_schema(
         self,
         *,
@@ -1447,7 +1458,7 @@ class ApiGatewayResolver(BaseRouter):
             if result:
                 path, path_definitions = result
                 if path:
-                    paths.setdefault(route.path, {}).update(path)
+                    paths.setdefault(route.openapi_path, {}).update(path)
                 if path_definitions:
                     definitions.update(path_definitions)
 
@@ -1717,7 +1728,7 @@ class ApiGatewayResolver(BaseRouter):
             event = event.raw_event
 
         if self._debug:
-            print(self._json_dump(event))
+            print(self._serializer(event))
 
         # Populate router(s) dependencies without keeping a reference to each registered router
         BaseRouter.current_event = self._to_proxy_event(event)
@@ -1881,19 +1892,23 @@ class ApiGatewayResolver(BaseRouter):
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
                 headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
-                return ResponseBuilder(Response(status_code=204, content_type=None, headers=headers, body=""))
+                return ResponseBuilder(
+                    response=Response(status_code=204, content_type=None, headers=headers, body=""),
+                    serializer=self._serializer,
+                )
 
         handler = self._lookup_exception_handler(NotFoundError)
         if handler:
-            return self._response_builder_class(handler(NotFoundError()))
+            return self._response_builder_class(response=handler(NotFoundError()), serializer=self._serializer)
 
         return self._response_builder_class(
-            Response(
+            response=Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
                 headers=headers,
-                body=self._json_dump({"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"}),
+                body={"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"},
             ),
+            serializer=self._serializer,
         )
 
     def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
@@ -1903,10 +1918,11 @@ class ApiGatewayResolver(BaseRouter):
             self._reset_processed_stack()
 
             return self._response_builder_class(
-                self._to_response(
+                response=self._to_response(
                     route(router_middlewares=self._router_middlewares, app=self, route_arguments=route_arguments),
                 ),
-                route,
+                serializer=self._serializer,
+                route=route,
             )
         except Exception as exc:
             # If exception is handled then return the response builder to reduce noise
@@ -1920,12 +1936,13 @@ class ApiGatewayResolver(BaseRouter):
                 # we'll let the original exception propagate, so
                 # they get more information about what went wrong.
                 return self._response_builder_class(
-                    Response(
+                    response=Response(
                         status_code=500,
                         content_type=content_types.TEXT_PLAIN,
                         body="".join(traceback.format_exc()),
                     ),
-                    route,
+                    serializer=self._serializer,
+                    route=route,
                 )
 
             raise
@@ -1958,18 +1975,33 @@ class ApiGatewayResolver(BaseRouter):
         handler = self._lookup_exception_handler(type(exp))
         if handler:
             try:
-                return self._response_builder_class(handler(exp), route)
+                return self._response_builder_class(response=handler(exp), serializer=self._serializer, route=route)
             except ServiceError as service_error:
                 exp = service_error
 
+        if isinstance(exp, RequestValidationError):
+            # For security reasons, we hide msg details (don't leak Python, Pydantic or file names)
+            errors = [{"loc": e["loc"], "type": e["type"]} for e in exp.errors()]
+
+            return self._response_builder_class(
+                response=Response(
+                    status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+                    content_type=content_types.APPLICATION_JSON,
+                    body={"statusCode": HTTPStatus.UNPROCESSABLE_ENTITY, "detail": errors},
+                ),
+                serializer=self._serializer,
+                route=route,
+            )
+
         if isinstance(exp, ServiceError):
             return self._response_builder_class(
-                Response(
+                response=Response(
                     status_code=exp.status_code,
                     content_type=content_types.APPLICATION_JSON,
-                    body=self._json_dump({"statusCode": exp.status_code, "message": exp.msg}),
+                    body={"statusCode": exp.status_code, "message": exp.msg},
                 ),
-                route,
+                serializer=self._serializer,
+                route=route,
             )
 
         return None
@@ -1995,11 +2027,8 @@ class ApiGatewayResolver(BaseRouter):
         return Response(
             status_code=status_code,
             content_type=content_types.APPLICATION_JSON,
-            body=self._json_dump(result),
+            body=result,
         )
-
-    def _json_dump(self, obj: Any) -> str:
-        return self._serializer(obj)
 
     def include_router(self, router: "Router", prefix: Optional[str] = None) -> None:
         """Adds all routes and context defined in a router

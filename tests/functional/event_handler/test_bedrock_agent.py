@@ -2,7 +2,7 @@ import json
 from typing import Any, Dict
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
-from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
 
@@ -31,7 +31,7 @@ def test_bedrock_agent_event():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == json.dumps({"output": claims_response})
+    assert json.loads(body) == {"output": claims_response}
 
 
 def test_bedrock_agent_with_path_params():
@@ -79,7 +79,7 @@ def test_bedrock_agent_event_with_response():
     assert result["response"]["httpStatusCode"] == 200
 
     body = result["response"]["responseBody"]["application/json"]["body"]
-    assert body == json.dumps(output)
+    assert json.loads(body) == output
 
 
 def test_bedrock_agent_event_with_no_matches():
@@ -121,11 +121,11 @@ def test_bedrock_agent_event_with_validation_error():
     assert result["response"]["httpMethod"] == "GET"
     assert result["response"]["httpStatusCode"] == 422
 
-    body = result["response"]["responseBody"]["application/json"]["body"]
+    body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
     if PYDANTIC_V2:
-        assert "should be a valid dictionary" in body
+        assert body["detail"][0]["type"] == "dict_type"
     else:
-        assert "value is not a valid dict" in body
+        assert body["detail"][0]["type"] == "type_error.dict"
 
 
 def test_bedrock_agent_event_with_exception():

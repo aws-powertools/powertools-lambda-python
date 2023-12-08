@@ -62,59 +62,52 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         values: Dict[str, Any] = {}
         errors: List[Any] = []
 
-        try:
-            # Process path values, which can be found on the route_args
-            path_values, path_errors = _request_params_to_args(
-                route.dependant.path_params,
-                app.context["_route_args"],
+        # Process path values, which can be found on the route_args
+        path_values, path_errors = _request_params_to_args(
+            route.dependant.path_params,
+            app.context["_route_args"],
+        )
+
+        # Process query values
+        query_values, query_errors = _request_params_to_args(
+            route.dependant.query_params,
+            app.current_event.query_string_parameters or {},
+        )
+
+        values.update(path_values)
+        values.update(query_values)
+        errors += path_errors + query_errors
+
+        # Process the request body, if it exists
+        if route.dependant.body_params:
+            (body_values, body_errors) = _request_body_to_args(
+                required_params=route.dependant.body_params,
+                received_body=self._get_body(app),
             )
+            values.update(body_values)
+            errors.extend(body_errors)
 
-            # Process query values
-            query_values, query_errors = _request_params_to_args(
-                route.dependant.query_params,
-                app.current_event.query_string_parameters or {},
-            )
+        if errors:
+            # Raise the validation errors
+            raise RequestValidationError(_normalize_errors(errors))
+        else:
+            # Re-write the route_args with the validated values, and call the next middleware
+            app.context["_route_args"] = values
 
-            values.update(path_values)
-            values.update(query_values)
-            errors += path_errors + query_errors
+            # Call the handler by calling the next middleware
+            response = next_middleware(app)
 
-            # Process the request body, if it exists
-            if route.dependant.body_params:
-                (body_values, body_errors) = _request_body_to_args(
-                    required_params=route.dependant.body_params,
-                    received_body=self._get_body(app),
-                )
-                values.update(body_values)
-                errors.extend(body_errors)
-
-            if errors:
-                # Raise the validation errors
-                raise RequestValidationError(_normalize_errors(errors))
-            else:
-                # Re-write the route_args with the validated values, and call the next middleware
-                app.context["_route_args"] = values
-
-                # Call the handler by calling the next middleware
-                response = next_middleware(app)
-
-                # Process the response
-                return self._handle_response(route=route, response=response)
-        except RequestValidationError as e:
-            return Response(
-                status_code=422,
-                content_type="application/json",
-                body=json.dumps({"detail": e.errors()}),
-            )
+            # Process the response
+            return self._handle_response(route=route, response=response)
 
     def _handle_response(self, *, route: Route, response: Response):
         # Process the response body if it exists
         if response.body:
             # Validate and serialize the response, if it's JSON
             if response.is_json():
-                response.body = json.dumps(
-                    self._serialize_response(field=route.dependant.return_param, response_content=response.body),
-                    sort_keys=True,
+                response.body = self._serialize_response(
+                    field=route.dependant.return_param,
+                    response_content=response.body,
                 )
 
         return response
