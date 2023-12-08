@@ -5,7 +5,7 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The data masking utility provides a simple solution to mask or encrypt incoming data so that sensitive information is not passed downstream or logged.
+The data masking utility can encrypt, decrypt, or irreversibly mask sensitive information to protect data confidentiality.
 
 ```mermaid
 stateDiagram-v2
