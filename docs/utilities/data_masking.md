@@ -61,18 +61,16 @@ To use the AWS Encryption SDK, your Lambda function IAM Role must have the `kms:
 
 You must also have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
 
-#### Using a custom encryption provider
-
-If using your own encryption provider, make sure to have the necessary resources and permissions for your Lambda function's role.
-
 ### Working with nested data
 
 #### JSON
 
 When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can select values of nested keys by using dot notation.
 
+<!-- markdownlint-disable MD013 -->
 ???+ note
     If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
+<!-- markdownlint-enable MD013 -->
 
 === "AWS Serverless Application Model (SAM) example"
     ```yaml hl_lines="11-23 30 33-39 46"
@@ -145,73 +143,17 @@ You have the option to modify some of the configurations we have set as defaults
 
 #### Caching
 
+<!-- markdownlint-disable MD013 -->
 The `CACHE_CAPACITY` value is currently set to `100`. This value represents the maximum number of entries that can be retained in the local cryptographic materials cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.caches.local.html){target="_blank" rel="nofollow"} for more information.
 
 The `MAX_CACHE_AGE_SECONDS` value is currently set to `300`. This represents the maximum time (in seconds) that a cache entry may be kept in the cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
+<!-- markdownlint-enable MD013 -->
 
 #### Limit messages
 
+<!-- markdownlint-disable MD013 -->
 The `MAX_MESSAGES_ENCRYPTED` value is currently set to `200`. This represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
-
-### Create your own encryption provider
-
-You can create your own custom encryption provider by inheriting the `BaseProvider` class, and implementing the `encrypt()` and `decrypt()` methods, and optionally the `mask()` method. You can also either use your own data serializer and deserializer by passing the `BaseProvider` class a `json_serializer` and `json_deserializer` argument, or you can use the default.
-
-<!-- markdownlint-disable MD031 MD040 -->
-<center>
-```mermaid
-classDiagram
-    direction LR
-    class BaseProvider {
-        <<interface>>
-        +encrypt(data: Any)
-        +decrypt(data: str)
-        +mask(data: Any)
-    }
-
-    class YourCustomEncryptionProvider {
-        +encrypt(data: Any)
-        +decrypt(data: str)
-        +mask(data: Any)
-    }
-
-    BaseProvider <|-- YourCustomEncryptionProvider : implement
-```
-<i>Visual representation to bring your own encryption provider</i>
-</center>
-
-* **`encrypt()`** – handles all logic for how to encrypt any data
-* **`decrypt()`** – handles all logic for how to decrypt encrypted data
-* **`mask()`** – handles all logic for how to irreversably mask data (optional)
-
-You can then use this custom encryption provider class as the `provider` argument when creating a new `DataMasking` instance to use the encryption and decryption algorithms of the encryption library you have chosen.
-
-Here is an example of implementing a custom encryption using an external encryption library like [ItsDangerous](https://itsdangerous.palletsprojects.com/en/2.1.x/){target="_blank" rel="nofollow"}, a widely popular encryption library.
-
-=== "input.json"
-    ```json
-    --8<-- "examples/data_masking/src/generic_data_input.json"
-    ```
-
-=== "custom_provider.py"
-    ```python hl_lines="1 3 6 8"
-    --8<-- "examples/data_masking/src/custom_data_masking_provider.py"
-    ```
-
-=== "working_with_own_provider.py"
-    ```python hl_lines="1-2 9-10"
-    --8<-- "examples/data_masking/src/working_with_own_provider.py"
-    ```
-
-=== "encrypted_output.json"
-    ```json hl_lines="5-7 12"
-    --8<-- "examples/data_masking/src/encrypt_data_output.json"
-    ```
-
-=== "decrypted_output.json"
-    ```json hl_lines="5-7 12-17"
-    --8<-- "examples/data_masking/src/decrypt_data_output.json"
-    ```
+<!-- markdownlint-enable MD013 -->
 
 ## Testing your code
 
