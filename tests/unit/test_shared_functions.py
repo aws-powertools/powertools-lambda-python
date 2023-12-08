@@ -146,14 +146,14 @@ def test_abs_lambda_path_empty():
     # Given Env is not set
     os.environ["LAMBDA_TASK_ROOT"] = ""
     # Then path = os.getcwd
-    assert abs_lambda_path() == f"{Path.cwd()}/"
+    assert abs_lambda_path() == f"{Path.cwd()}"
 
 
 def test_abs_lambda_path_empty_envvar():
     # Given Env is set
     os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
     # Then path = Env/
-    assert abs_lambda_path() == "/var/task/"
+    assert abs_lambda_path() == "/var/task"
 
 
 def test_abs_lambda_path_w_filename():

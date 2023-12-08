@@ -1,9 +1,10 @@
 # NOTE: keeps for compatibility
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List
 
 from aws_lambda_powertools.metrics.provider.datadog.datadog import DatadogProvider
+from aws_lambda_powertools.shared.types import AnyCallableT
 
 
 class DatadogMetrics:
@@ -90,7 +91,7 @@ class DatadogMetrics:
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         default_tags: Dict[str, Any] | None = None,

@@ -5,6 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from pydantic import BaseConfig
 from pydantic.fields import FieldInfo
 
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.openapi.compat import (
     ModelField,
     Required,
@@ -14,7 +15,8 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     field_annotation_is_scalar,
     get_annotation_from_field_info,
 )
-from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2, CacheKey
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 from aws_lambda_powertools.shared.types import Annotated, Literal, get_args, get_origin
 
 """
@@ -115,6 +117,64 @@ class Param(FieldInfo):
         json_schema_extra: Union[Dict[str, Any], None] = None,
         **extra: Any,
     ):
+        """
+        Constructs a new Param.
+
+        Parameters
+        ----------
+        default: Any
+            The default value of the parameter
+        default_factory: Callable[[], Any], optional
+            Callable that will be called when a default value is needed for this field
+        annotation: Any, optional
+            The type annotation of the parameter
+        alias: str, optional
+            The public name of the field
+        alias_priority: int, optional
+            Priority of the alias. This affects whether an alias generator is used
+        validation_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for validation only
+        serialization_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for serialization only
+        title: str, optional
+            The title of the parameter
+        description: str, optional
+            The description of the parameter
+        gt: float, optional
+            Only applies to numbers, required the field to be "greater than"
+        ge: float, optional
+            Only applies to numbers, required the field to be "greater than or equal"
+        lt: float, optional
+            Only applies to numbers, required the field to be "less than"
+        le: float, optional
+            Only applies to numbers, required the field to be "less than or equal"
+        min_length: int, optional
+            Only applies to strings, required the field to have a minimum length
+        max_length: int, optional
+            Only applies to strings, required the field to have a maximum length
+        pattern: str, optional
+            Only applies to strings, requires the field match against a regular expression pattern string
+        discriminator: str, optional
+            Parameter field name for discriminating the type in a tagged union
+        strict: bool, optional
+            Enables Pydantic's strict mode for the field
+        multiple_of: float, optional
+            Only applies to numbers, requires the field to be a multiple of the given value
+        allow_inf_nan: bool, optional
+            Only applies to numbers, requires the field to allow infinity and NaN values
+        max_digits: int, optional
+            Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
+        decimal_places: int, optional
+            Only applies to Decimals, requires the field to have at most a number of decimal places
+        examples: List[Any], optional
+            A list of examples for the parameter
+        deprecated: bool, optional
+            If `True`, the parameter will be marked as deprecated
+        include_in_schema: bool, optional
+            If `False`, the parameter will be excluded from the generated OpenAPI schema
+        json_schema_extra: Dict[str, Any], optional
+            Extra values to include in the generated OpenAPI schema
+        """
         self.deprecated = deprecated
         self.include_in_schema = include_in_schema
 
@@ -205,6 +265,64 @@ class Path(Param):
         json_schema_extra: Union[Dict[str, Any], None] = None,
         **extra: Any,
     ):
+        """
+        Constructs a new Path param.
+
+        Parameters
+        ----------
+        default: Any
+            The default value of the parameter
+        default_factory: Callable[[], Any], optional
+            Callable that will be called when a default value is needed for this field
+        annotation: Any, optional
+            The type annotation of the parameter
+        alias: str, optional
+            The public name of the field
+        alias_priority: int, optional
+            Priority of the alias. This affects whether an alias generator is used
+        validation_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for validation only
+        serialization_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for serialization only
+        title: str, optional
+            The title of the parameter
+        description: str, optional
+            The description of the parameter
+        gt: float, optional
+            Only applies to numbers, required the field to be "greater than"
+        ge: float, optional
+            Only applies to numbers, required the field to be "greater than or equal"
+        lt: float, optional
+            Only applies to numbers, required the field to be "less than"
+        le: float, optional
+            Only applies to numbers, required the field to be "less than or equal"
+        min_length: int, optional
+            Only applies to strings, required the field to have a minimum length
+        max_length: int, optional
+            Only applies to strings, required the field to have a maximum length
+        pattern: str, optional
+            Only applies to strings, requires the field match against a regular expression pattern string
+        discriminator: str, optional
+            Parameter field name for discriminating the type in a tagged union
+        strict: bool, optional
+            Enables Pydantic's strict mode for the field
+        multiple_of: float, optional
+            Only applies to numbers, requires the field to be a multiple of the given value
+        allow_inf_nan: bool, optional
+            Only applies to numbers, requires the field to allow infinity and NaN values
+        max_digits: int, optional
+            Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
+        decimal_places: int, optional
+            Only applies to Decimals, requires the field to have at most a number of decimal places
+        examples: List[Any], optional
+            A list of examples for the parameter
+        deprecated: bool, optional
+            If `True`, the parameter will be marked as deprecated
+        include_in_schema: bool, optional
+            If `False`, the parameter will be excluded from the generated OpenAPI schema
+        json_schema_extra: Dict[str, Any], optional
+            Extra values to include in the generated OpenAPI schema
+        """
         if default is not ...:
             raise AssertionError("Path parameters cannot have a default value")
 
@@ -277,6 +395,64 @@ class Query(Param):
         json_schema_extra: Union[Dict[str, Any], None] = None,
         **extra: Any,
     ):
+        """
+        Constructs a new Query param.
+
+        Parameters
+        ----------
+        default: Any
+            The default value of the parameter
+        default_factory: Callable[[], Any], optional
+            Callable that will be called when a default value is needed for this field
+        annotation: Any, optional
+            The type annotation of the parameter
+        alias: str, optional
+            The public name of the field
+        alias_priority: int, optional
+            Priority of the alias. This affects whether an alias generator is used
+        validation_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for validation only
+        serialization_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for serialization only
+        title: str, optional
+            The title of the parameter
+        description: str, optional
+            The description of the parameter
+        gt: float, optional
+            Only applies to numbers, required the field to be "greater than"
+        ge: float, optional
+            Only applies to numbers, required the field to be "greater than or equal"
+        lt: float, optional
+            Only applies to numbers, required the field to be "less than"
+        le: float, optional
+            Only applies to numbers, required the field to be "less than or equal"
+        min_length: int, optional
+            Only applies to strings, required the field to have a minimum length
+        max_length: int, optional
+            Only applies to strings, required the field to have a maximum length
+        pattern: str, optional
+            Only applies to strings, requires the field match against a regular expression pattern string
+        discriminator: str, optional
+            Parameter field name for discriminating the type in a tagged union
+        strict: bool, optional
+            Enables Pydantic's strict mode for the field
+        multiple_of: float, optional
+            Only applies to numbers, requires the field to be a multiple of the given value
+        allow_inf_nan: bool, optional
+            Only applies to numbers, requires the field to allow infinity and NaN values
+        max_digits: int, optional
+            Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
+        decimal_places: int, optional
+            Only applies to Decimals, requires the field to have at most a number of decimal places
+        examples: List[Any], optional
+            A list of examples for the parameter
+        deprecated: bool, optional
+            If `True`, the parameter will be marked as deprecated
+        include_in_schema: bool, optional
+            If `False`, the parameter will be excluded from the generated OpenAPI schema
+        json_schema_extra: Dict[str, Any], optional
+            Extra values to include in the generated OpenAPI schema
+        """
         super().__init__(
             default=default,
             default_factory=default_factory,
@@ -724,11 +900,22 @@ def get_field_info_and_type_annotation(annotation, value, is_path_param: bool) -
         # If the annotation is an Annotated type, we need to extract the type annotation and the FieldInfo
         if get_origin(annotation) is Annotated:
             field_info, type_annotation = get_field_info_annotated_type(annotation, value, is_path_param)
+        # If the annotation is a Response type, we recursively call this function with the inner type
+        elif get_origin(annotation) is Response:
+            field_info, type_annotation = get_field_info_response_type(annotation, value)
         # If the annotation is not an Annotated type, we use it as the type annotation
         else:
             type_annotation = annotation
 
     return field_info, type_annotation
+
+
+def get_field_info_response_type(annotation, value) -> Tuple[Optional[FieldInfo], Any]:
+    # Example: get_args(Response[inner_type]) == (inner_type,)  # noqa: ERA001
+    (inner_type,) = get_args(annotation)
+
+    # Recursively resolve the inner type
+    return get_field_info_and_type_annotation(inner_type, value, False)
 
 
 def get_field_info_annotated_type(annotation, value, is_path_param: bool) -> Tuple[Optional[FieldInfo], Any]:

@@ -54,7 +54,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
@@ -64,13 +64,5 @@ jobs:
         run: poetry add "pydantic=^2.0.3"
       - name: Install dependencies
         run: make dev
-      - name: Formatting and Linting
-        run: make lint
-      - name: Static type checking
-        run: make mypy
       - name: Test with pytest
-        run: make test
-      - name: Security baseline
-        run: make security-baseline
-      - name: Complexity baseline
-        run: make complexity-baseline
+        run: make test-pydanticv2

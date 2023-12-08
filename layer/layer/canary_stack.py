@@ -143,7 +143,7 @@ class Canary(Construct):
             timeout=Duration.seconds(10),
             runtime=Runtime.PYTHON_3_9,
             architecture=architecture,
-            log_retention=RetentionDays.ONE_MONTH,
+            log_retention=RetentionDays.TEN_YEARS,
             role=execution_role,
             environment={
                 "POWERTOOLS_VERSION": powertools_version,
@@ -166,7 +166,7 @@ class Canary(Construct):
             self,
             "CanaryCustomResource",
             on_event_handler=canary_lambda,
-            log_retention=RetentionDays.ONE_MONTH,
+            log_retention=RetentionDays.TEN_YEARS,
         )
         # force to recreate resource on each deployment with randomized name
         CustomResource(

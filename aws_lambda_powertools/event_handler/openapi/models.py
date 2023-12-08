@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Set, Union
 from pydantic import AnyUrl, BaseModel, Field
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
-from aws_lambda_powertools.event_handler.openapi.types import PYDANTIC_V2
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.shared.types import Annotated, Literal
 
 """

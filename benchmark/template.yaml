@@ -12,7 +12,7 @@ Globals:
         POWERTOOLS_SERVICE_NAME: benchmark
         POWERTOOLS_METRICS_NAMESPACE: LambdaPowertools
         POWERTOOLS_LOGGER_LOG_EVENT: "true"
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
 
 Resources:
   InstrumentedFunction:
