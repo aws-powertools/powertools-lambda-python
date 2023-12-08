@@ -7,7 +7,7 @@ import logging
 import warnings
 from contextlib import contextmanager
 from datetime import timedelta
-from typing import Any, Awaitable, Dict, Union
+from typing import Any, Dict, Union
 
 import redis
 from typing_extensions import Literal, Protocol
@@ -47,7 +47,7 @@ class RedisClientProtocol(Protocol):
     ) -> bool | None:
         ...
 
-    def delete(self, keys: Union[bytes, str, memoryview]) -> Awaitable | Any:
+    def delete(self, keys: Union[bytes, str, memoryview]) -> Any:
         ...
 
     def get_connection_kwargs(self) -> Dict:
