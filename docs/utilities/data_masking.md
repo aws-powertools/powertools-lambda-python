@@ -37,9 +37,9 @@ stateDiagram-v2
 
 ## Key features
 
-* Mask, encrypt, or decrypt data in one or multiple fields
-* Out of the box integration with the [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank" rel="nofollow"} to easily encrypt and decrypt data.
-* Install any encryption provider and connect it with our new Data Masker class to easily mask, encrypt, and decrypt data.
+* Encrypt, decrypt, or irreversibly mask data with ease
+* Remove sensitive information in one or more fields within nested data
+* Seamless integration with [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank" rel="nofollow"} for industry and AWS security best practices
 
 ## Terminology
 
