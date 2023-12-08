@@ -23,7 +23,9 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
         self.platform_args = self._resolve_platform(architecture)
         self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"
-        self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
+        self.build_command = (
+            f"python -m pip install {self.package} {self.build_args} --target {self.target_dir} --verbose"
+        )
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
