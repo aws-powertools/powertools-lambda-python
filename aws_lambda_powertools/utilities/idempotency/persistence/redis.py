@@ -29,21 +29,28 @@ logger = logging.getLogger(__name__)
 
 
 class RedisClientProtocol(Protocol):
-    def get(name: Union[bytes, str, memoryview]) -> Union[Awaitable, Any]:
+    def get(self, name: Union[bytes, str, memoryview]) -> bytes | str | None:
         ...
 
     def set(
-        name: Union[bytes, str, memoryview],
-        value: Union[bytes, memoryview, str, int, float],
-        ex: Union[int, timedelta, None],
-        nx: bool,
-    ) -> Union[Awaitable, Any]:
+        self,
+        name: str | bytes,
+        value: bytes | float | int | str,
+        ex: float | timedelta | None = ...,
+        px: float | timedelta | None = ...,
+        nx: bool = ...,
+        xx: bool = ...,
+        keepttl: bool = ...,
+        get: bool = ...,
+        exat: Any | None = ...,
+        pxat: Any | None = ...,
+    ) -> bool | None:
         ...
 
-    def delete(keys: Union[bytes, str, memoryview]) -> Union[Awaitable, Any]:
+    def delete(self, keys: Union[bytes, str, memoryview]) -> Awaitable | Any:
         ...
 
-    def get_connection_kwargs() -> Dict:
+    def get_connection_kwargs(self) -> Dict:
         ...
 
 
@@ -134,7 +141,7 @@ class RedisConnection:
         self.ssl = ssl
         self.mode = mode
 
-    def _init_client(self) -> redis.Redis | redis.cluster.RedisCluster:
+    def _init_client(self) -> RedisClientProtocol:
         logger.info(f"Trying to connect to Redis: {self.host}")
         client: type[redis.Redis | redis.cluster.RedisCluster]
         if self.mode == "standalone":
@@ -150,7 +157,7 @@ class RedisConnection:
                 return client.from_url(url=self.url)
             else:
                 logger.debug(f"Using other parameters to connect to Redis: {self.host}")
-                return client(  # type: ignore
+                return client(
                     host=self.host,
                     port=self.port,
                     username=self.username,
@@ -174,7 +181,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         db_index: int = 0,
         port: int = 6379,
         mode: Literal["standalone", "cluster"] = "standalone",
-        client: RedisClientProtocol = None,
+        client: RedisClientProtocol | None = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
         expiry_attr: str = "expiration",
         status_attr: str = "status",

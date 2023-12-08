@@ -271,6 +271,6 @@ def abs_lambda_path(relatvie_path="") -> str:
     """
     current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
     if not current_working_directory:
-        current_working_directory = Path.cwd()
+        current_working_directory = str(Path.cwd())
         Path(current_working_directory, relatvie_path)
     return str(Path(current_working_directory, relatvie_path))
