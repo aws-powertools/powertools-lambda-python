@@ -155,6 +155,10 @@ The `MAX_CACHE_AGE_SECONDS` value is currently set to `300`. This represents the
 The `MAX_MESSAGES_ENCRYPTED` value is currently set to `200`. This represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
 <!-- markdownlint-enable MD013 -->
 
+### Creating your own provider
+
+!!! info "In Q1 2024, we will implement support for bringing your own encryption provider."
+
 ## Testing your code
 
 For unit testing your applications, you can mock the calls to the data masking utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the pytest monkeypatch fixture to patch the `data_masking.decrypt` method.
