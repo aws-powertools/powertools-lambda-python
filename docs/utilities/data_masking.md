@@ -39,7 +39,7 @@ stateDiagram-v2
 
 * Encrypt, decrypt, or irreversibly mask data with ease
 * Remove sensitive information in one or more fields within nested data
-* Seamless integration with [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank" rel="nofollow"} for industry and AWS security best practices
+* Seamless integration with [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank"} for industry and AWS security best practices
 
 ## Terminology
 
@@ -53,13 +53,35 @@ stateDiagram-v2
 
 ### Install
 
-If not using any encryption services and only masking data, your Lambda function does not need any additional permissions or resources to use this utility.
+### Required resources
+
+=== "AWS Serverless Application Model (SAM) example"
+    ```yaml hl_lines="11-23 30 33-39 46"
+    --8<-- "examples/data_masking/sam/template.yaml"
+    ```
+
+If your Lambda function only masks data without utilizing any encryption services, it requires no additional permissions or library to use this utility.
 
 #### Using AWS Encryption SDK
 
 To use the AWS Encryption SDK, your Lambda function IAM Role must have the `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
 
-You must also have an AWS KMS key with full read/write permissions. You can create one and learn more on the [AWS KMS console](https://us-east-1.console.aws.amazon.com/kms/home?region=us-east-1#/kms/home){target="_blank" rel="nofollow"}.
+When using AWS Encryption SDK with AWS KMS keys for data encryption and decryption, it's important to be aware that configuring additional permissions in the KMS Key Policy may be necessary. Learn more about KMS Key Policies [here](https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html){target="_blank"}.
+
+=== "data_masking_function_example.py"
+    ```python hl_lines="8 20-22"
+    --8<-- "examples/data_masking/src/data_masking_function_example.py"
+    ```
+
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/large_data_input.json"
+    ```
+
+=== "output.json"
+    ```json
+    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
+    ```
 
 ### Working with nested data
 
@@ -71,26 +93,6 @@ When using the data masking utility with dictionaries or JSON strings, you can p
 ???+ note
     If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
 <!-- markdownlint-enable MD013 -->
-
-=== "AWS Serverless Application Model (SAM) example"
-    ```yaml hl_lines="11-23 30 33-39 46"
-    --8<-- "examples/data_masking/sam/template.yaml"
-    ```
-
-=== "input.json"
-    ```json
-    --8<-- "examples/data_masking/src/large_data_input.json"
-    ```
-
-=== "data_masking_function_example.py"
-    ```python hl_lines="8 20-22"
-    --8<-- "examples/data_masking/src/data_masking_function_example.py"
-    ```
-
-=== "output.json"
-    ```json
-    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
-    ```
 
 ### Masking data
 
