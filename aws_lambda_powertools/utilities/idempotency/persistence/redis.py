@@ -1,13 +1,16 @@
+# ruff: noqa
 from __future__ import annotations
 
 import datetime
 import json
 import logging
 import warnings
-from typing import Any, Dict
+from contextlib import contextmanager
+from datetime import timedelta
+from typing import Any, Awaitable, Dict, Union
 
 import redis
-from typing_extensions import Literal
+from typing_extensions import Literal, Protocol
 
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
@@ -25,15 +28,35 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
 logger = logging.getLogger(__name__)
 
 
+class RedisClientProtocol(Protocol):
+    def get(name: Union[bytes, str, memoryview]) -> Union[Awaitable, Any]:
+        ...
+
+    def set(
+        name: Union[bytes, str, memoryview],
+        value: Union[bytes, memoryview, str, int, float],
+        ex: Union[int, timedelta, None],
+        nx: bool,
+    ) -> Union[Awaitable, Any]:
+        ...
+
+    def delete(keys: Union[bytes, str, memoryview]) -> Union[Awaitable, Any]:
+        ...
+
+    def get_connection_kwargs() -> Dict:
+        ...
+
+
 class RedisConnection:
     def __init__(
         self,
-        host: str | None,
-        username: str | None,
-        password: str | None,
-        url: str | None,
+        host: str = "",
+        username: str = "",
+        password: str = "",
+        url: str = "",
         db_index: int = 0,
         port: int = 6379,
+        ssl: bool = False,
         mode: Literal["standalone", "cluster"] = "standalone",
     ) -> None:
         """
@@ -43,21 +66,20 @@ class RedisConnection:
         ----------
         host: str, optional
             redis host
-        port: int, optional
-            redis port
         username: str, optional
             redis username
         password: str, optional
             redis password
-        db_index: str, optional
-            redis db index
-        mode: str, Literal["standalone","cluster"]
-            set redis client mode, choose from standalone/cluster
         url: str, optional
             redis connection string, using url will override the host/port in the previous parameters
-        extra_options: **kwargs, optional
-            extra kwargs to pass directly into redis client
-
+        db_index: str, optional: default 0
+            redis db index
+        port: int, optional: default 6379
+            redis port
+        mode: str, Literal["standalone","cluster"]
+            set redis client mode, choose from standalone/cluster
+        ssl: bool, optional: default False
+            set whether to use ssl for Redis connection
         Examples
         --------
 
@@ -109,6 +131,7 @@ class RedisConnection:
         self.username = username
         self.password = password
         self.db_index = db_index
+        self.ssl = ssl
         self.mode = mode
 
     def _init_client(self) -> redis.Redis | redis.cluster.RedisCluster:
@@ -134,6 +157,7 @@ class RedisConnection:
                     password=self.password,
                     db=self.db_index,
                     decode_responses=True,
+                    ssl=self.ssl,
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect in Redis: {self.host}")
@@ -143,14 +167,14 @@ class RedisConnection:
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
-        host: str | None = None,
-        username: str | None = None,
-        password: str | None = None,
-        url: str | None = None,
+        host: str = "",
+        username: str = "",
+        password: str = "",
+        url: str = "",
         db_index: int = 0,
         port: int = 6379,
         mode: Literal["standalone", "cluster"] = "standalone",
-        client: redis.Redis | redis.cluster.RedisCluster | None = None,
+        client: RedisClientProtocol = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
         expiry_attr: str = "expiration",
         status_attr: str = "status",
@@ -341,20 +365,34 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         except IdempotencyOrphanRecordError:
             # deal with orphan record here
             # aquire a lock for default 10 seconds
-            lock = self.client.set(name=item["name"] + ":lock", value="True", ex=self._orphan_lock_timeout, nx=True)
-            logger.debug("acquiring lock to overwrite orphan record")
-            if not lock:
-                # lock failed to aquire, means encountered a race condition. Just return
-                raise IdempotencyItemAlreadyExistsError
+            with self._acquire_lock(name=item["name"]):
+                self.client.set(name=item["name"], value=encoded_item, ex=ttl)
 
-            # Overwrite orphan record and set timeout, we don't use nx here for we need to overwrite
-            self.client.set(name=item["name"], value=encoded_item, ex=ttl)
-            # lock was not removed here intentionally. Prevent another orphan fix in race condition.
+            # lock was not removed here intentionally. Prevent another orphan operation in race condition.
         except (redis.exceptions.RedisError, redis.exceptions.RedisClusterException) as e:
             raise e
         except Exception as e:
             logger.debug(f"encountered non-redis exception:{e}")
             raise e
+
+    @contextmanager
+    def _acquire_lock(self, name: str):
+        """
+        aquire a lock for default 10 seconds
+        """
+        try:
+            acquired = self.client.set(name=f"{name}:lock", value="True", ex=self._orphan_lock_timeout, nx=True)
+            logger.debug("acquiring lock to overwrite orphan record")
+            if acquired:
+                logger.debug("lock acquired")
+                yield
+            else:
+                # lock failed to aquire, means encountered a race condition. Just return
+                logger.debug("lock failed to acquire, raise to retry")
+                raise IdempotencyItemAlreadyExistsError
+
+        finally:
+            ...
 
     def _put_record(self, data_record: DataRecord) -> None:
         if data_record.status == STATUS_CONSTANTS["INPROGRESS"]:

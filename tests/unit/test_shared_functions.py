@@ -1,12 +1,14 @@
 import os
 import warnings
 from dataclasses import dataclass
+from pathlib import Path
 
 import pytest
 from pydantic import BaseModel
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
+    abs_lambda_path,
     extract_event_from_common_models,
     powertools_debug_is_set,
     powertools_dev_is_set,
@@ -138,3 +140,33 @@ def test_resolve_max_age_env_var_wins_over_default_value(monkeypatch: pytest.Mon
 
     # THEN the result must be the environment variable value
     assert max_age == 20
+
+
+def test_abs_lambda_path_empty():
+    # Given Env is not set
+    os.environ["LAMBDA_TASK_ROOT"] = ""
+    # Then path = os.getcwd
+    assert abs_lambda_path() == f"{Path.cwd()}/"
+
+
+def test_abs_lambda_path_empty_envvar():
+    # Given Env is set
+    os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
+    # Then path = Env/
+    assert abs_lambda_path() == "/var/task/"
+
+
+def test_abs_lambda_path_w_filename():
+    # Given Env is not set and relative_path provided
+    relatvie_path = "cert/pub.cert"
+    os.environ["LAMBDA_TASK_ROOT"] = ""
+    # Then path = os.getcwd + relative_path
+    assert abs_lambda_path(relatvie_path) == str(Path(Path.cwd(), relatvie_path))
+
+
+def test_abs_lambda_path_w_filename_envvar():
+    # Given Env is set and relative_path provided
+    relatvie_path = "cert/pub.cert"
+    os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
+    # Then path = env + relative_path
+    assert abs_lambda_path(relatvie_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relatvie_path))

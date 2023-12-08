@@ -7,6 +7,7 @@ import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
+from pathlib import Path
 from typing import Any, Dict, Generator, Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
@@ -173,3 +174,26 @@ def extract_event_from_common_models(data: Any) -> Dict | Any:
 
     # Is it a Dataclass? If not return as is
     return dataclasses.asdict(data) if dataclasses.is_dataclass(data) else data
+
+
+def abs_lambda_path(relatvie_path="") -> str:
+    """Return the absolute path from the given relative path to lambda handler
+
+    Parameters
+    ----------
+    path : string
+        the relative path to lambda handler, by default ""
+
+    Returns
+    -------
+    string
+        the absolute path generated from the given relative path.
+        If the environment variable LAMBDA_TASK_ROOT is set, it will use that value.
+        Otherwise, it will use the current working directory.
+        If the path is empty, it will return the current working directory.
+    """
+    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
+    if not current_working_directory:
+        current_working_directory = Path.cwd()
+        Path(current_working_directory, relatvie_path)
+    return Path(current_working_directory, relatvie_path)
