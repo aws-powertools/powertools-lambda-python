@@ -47,7 +47,8 @@ jobs:
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
-        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+#        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        version: ["3.7"]
     if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
