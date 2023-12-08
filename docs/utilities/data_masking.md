@@ -10,25 +10,29 @@ The data masking utility provides a simple solution to mask or encrypt incoming 
 ```mermaid
 stateDiagram-v2
     direction LR
-    Source: Customer information <br/><br/> Sensitive data <br/><br/> PII <br/><br/>
-    LambdaInit: Lambda invocation
-    Processor: Data Masker
-    Handler: Your function
-    YourLogic: Your logic to mask or encrypt data
-    LambdaResponse: Logs
+    LambdaFn: Your Lambda function
+    DataMasking: DataMasking
+    Operation: Masking operation
+    Input: Sensitive value
+    Mask: <strong>Mask</strong>
+    Encrypt: <strong>Encrypt</strong>
+    Decrypt: <strong>Decrypt</strong>
+    Provider: Encryption provider
+    Result: Data transformed <i>(masked, encrypted, or decrypted)</i>
 
-    Source --> LambdaInit
+    LambdaFn --> DataMasking
+    DataMasking --> Operation
 
-    LambdaInit --> Processor
-    Processor --> Handler
-
-    state Processor {
-        [*] --> Handler
-        Handler --> YourLogic
+    state Operation {
+        [*] --> Input
+        Input --> Mask: Irreversible
+        Input --> Encrypt
+        Input --> Decrypt
+        Encrypt --> Provider
+        Decrypt --> Provider
     }
 
-    Handler --> Processor: Collect results
-    Processor --> LambdaResponse: Masked/encrypted data
+    Operation --> Result
 ```
 
 ## Key features
@@ -64,6 +68,7 @@ If using your own encryption provider, make sure to have the necessary resources
 ### Working with nested data
 
 #### JSON
+
 When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can select values of nested keys by using dot notation.
 
 ???+ note
