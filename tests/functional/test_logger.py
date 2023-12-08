@@ -1120,3 +1120,21 @@ def test_logger_add_remove_filter(stdout, service_name):
     log = capture_multiple_logging_statements_output(stdout)
     assert log[0]["api_key"] == "REDACTED"
     assert log[1]["api_key"] != "REDACTED"
+
+
+def test_logger_json_unicode(stdout, service_name):
+    # GIVEN Logger is initialized
+    # WHEN a UTF-8 string is logged
+    logger = Logger(service=service_name, stream=stdout)
+
+    japanese_encoded_string = "\u30b9\u30b3\u30d3\u30eb\u30c7\u30e2\uff12"
+    japanese_string = "スコビルデモ２"
+    japanese_field = "47業レルし化"
+
+    logger.info(japanese_encoded_string, custom_field=japanese_field)
+
+    # THEN string should be JSON stringified without data loss
+    log = capture_logging_output(stdout)
+
+    assert log["message"] == japanese_string
+    assert log["custom_field"] == japanese_field
