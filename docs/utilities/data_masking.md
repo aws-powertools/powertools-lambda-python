@@ -37,7 +37,7 @@ stateDiagram-v2
 
 ## Key features
 
-* Mask data irreversibly without having to install any encryption library.
+* Mask, encrypt, or decrypt data in one or multiple fields
 * Out of the box integration with the [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank" rel="nofollow"} to easily encrypt and decrypt data.
 * Install any encryption provider and connect it with our new Data Masker class to easily mask, encrypt, and decrypt data.
 
