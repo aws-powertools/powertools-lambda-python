@@ -12,7 +12,7 @@ stateDiagram-v2
     direction LR
     LambdaFn: Your Lambda function
     DataMasking: DataMasking
-    Operation: Masking operation
+    Operation: Possible operations
     Input: Sensitive value
     Mask: <strong>Mask</strong>
     Encrypt: <strong>Encrypt</strong>
