@@ -43,11 +43,11 @@ stateDiagram-v2
 
 ## Terminology
 
-**Masking** replaces sensitive information **irreversibly** with a non-sensitive placeholder. For example, display the last four digits of a credit card number as `"**** **** **** 1234"`.
+**Masking** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. Data is replaced in-memory hence why being irreversible.
 
-**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. Encryption can be reversed with the correct decryption key. This allows you to encrypt any PII (personally identifiable information) and make sure only the users with appropirate permissions can decrypt it to view the plaintext.
+**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. This allows you to encrypt any PII (personally identifiable information) to ensure only authorized personnel can decrypt it.
 
-**Decrypting** reverses the encryption process, converting ciphertext back into its original plaintext using a decryption algorithm and the correct decryption key.
+**Decrypting** transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.
 
 ## Getting started
 
