@@ -89,6 +89,8 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 
 When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can select values of nested keys by using dot notation.
 
+fields dict and string
+
 <!-- markdownlint-disable MD013 -->
 ???+ note
     If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
@@ -96,7 +98,7 @@ When using the data masking utility with dictionaries or JSON strings, you can p
 
 ### Masking data
 
-You can mask data without having to install any encryption library.
+You can mask data without having to install any encryption library. Masking data will result in the loss of its original type, and the masked data will always be represented as a string.
 
 === "input.json"
     ```json
@@ -113,9 +115,11 @@ You can mask data without having to install any encryption library.
     --8<-- "examples/data_masking/src/mask_data_output.json"
     ```
 
-### Encryting and decrypting data
+### Encryting data
 
-In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. You can still use the masking feature while using any encryption provider.
+In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. Encrypting data will temporarily result in the loss of its original type, and the encrypted data will be represented as a string while it is in ciphertext form. After decryption, the data will regain its original type.
+
+You can still use the masking feature while using any encryption provider.
 
 === "input.json"
     ```json
@@ -123,13 +127,29 @@ In order to encrypt data, you must use either our out-of-the-box integration wit
     ```
 
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="3-4 12-13"
+    ```python hl_lines="3-4 12-13 15"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
 === "encrypted_output.json"
     ```json hl_lines="5-7 12"
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
+    ```
+
+### Decrypting data
+
+To decrypt data, use the appropriate key to transform ciphertext back into plaintext. Upon decryption, the data will return to its original type.
+
+Decrypting a ciphertext string will transform the data to its original type.
+
+=== "encrypted_input.json"
+    ```json hl_lines="5-7 12"
+    --8<-- "examples/data_masking/src/encrypt_data_output.json"
+    ```
+
+=== "getting_started_encrypt_data.py"
+    ```python hl_lines="3-4 12-13 17"
+    --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
 === "decrypted_output.json"
@@ -139,25 +159,21 @@ In order to encrypt data, you must use either our out-of-the-box integration wit
 
 ## Advanced
 
-### Adjusting configurations for AWS Encryption SDK
+### Providers
 
-You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values in `utilities/data_masking/provider/kms/aws_encryption_sdk.py`.
+#### AWS Encryption SDK
 
-#### Caching
+You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AwsEncryptionSdkProvider`.
 
-<!-- markdownlint-disable MD013 -->
-The `CACHE_CAPACITY` value is currently set to `100`. This value represents the maximum number of entries that can be retained in the local cryptographic materials cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.caches.local.html){target="_blank" rel="nofollow"} for more information.
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **local_cache_capacity**              |  |              `100`                        | The maximum number of entries that can be retained in the local cryptographic materials cache                                                                                |
+| **max_cache_age_seconds**                |                    | `300`                                 | The maximum time (in seconds) that a cache entry may be kept in the cache |
+| **max_messages_encrypted**             |                    | `200`                         | The maximum number of messages that may be encrypted under a cache entry
 
-The `MAX_CACHE_AGE_SECONDS` value is currently set to `300`. This represents the maximum time (in seconds) that a cache entry may be kept in the cache. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
-<!-- markdownlint-enable MD013 -->
+For more information about the parameters for this provider, please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#aws_encryption_sdk.materials_managers.caching.CachingCryptoMaterialsManager){target="_blank" rel="nofollow"}.
 
-#### Limit messages
-
-<!-- markdownlint-disable MD013 -->
-The `MAX_MESSAGES_ENCRYPTED` value is currently set to `200`. This represents the maximum number of messages that may be encrypted under a cache entry. Please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#module-aws_encryption_sdk.materials_managers.caching){target="_blank" rel="nofollow"} for more information about this.
-<!-- markdownlint-enable MD013 -->
-
-### Creating your own provider
+#### Creating your own provider
 
 !!! info "In Q1 2024, we will implement support for bringing your own encryption provider."
 
