@@ -112,6 +112,7 @@ ruff = ">=0.0.272,<0.1.8"
 retry2 = "^0.9.5"
 pytest-socket = "^0.6.0"
 types-redis = "^4.6.0.7"
+testcontainers = {extras = ["redis"], version = "^3.7.1"}
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
