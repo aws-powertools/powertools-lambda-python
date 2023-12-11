@@ -245,7 +245,7 @@ def test_redis_connection_conn_error():
     # when RedisCachePersistenceLayer is init with a bad host
     # then should raise IdempotencyRedisConnectionError
     with pytest.raises(IdempotencyRedisConnectionError):
-        layer = RedisCachePersistenceLayer(host=redis_badhost)
+        RedisCachePersistenceLayer(host=redis_badhost)
 
 
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
@@ -253,7 +253,7 @@ def test_redis_connection_conf_error():
     # when RedisCachePersistenceLayer is init with a not_supported_mode in mode param
     # then should raise IdempotencyRedisClientConfigError
     with pytest.raises(IdempotencyRedisClientConfigError):
-        layer = RedisCachePersistenceLayer(mode="not_supported_mode")
+        RedisCachePersistenceLayer(mode="not_supported_mode")
 
 
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
@@ -560,7 +560,7 @@ def test_redis_connection_get_kwargs_error():
     # then should raise IdempotencyRedisClientConfigError
 
     with pytest.raises(IdempotencyRedisClientConfigError):
-        layer = RedisCachePersistenceLayer(host="testhost")
+        RedisCachePersistenceLayer(host="testhost")
 
 
 def test_redis_orphan_record_race_condition(lambda_context):
