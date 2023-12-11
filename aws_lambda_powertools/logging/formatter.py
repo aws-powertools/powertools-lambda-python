@@ -133,7 +133,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             default=self.json_default,
             separators=(",", ":"),
             indent=self.json_indent,
-            ensure_ascii=False,
+            ensure_ascii=False,  # see #3474
         )
 
         self.datefmt = datefmt
