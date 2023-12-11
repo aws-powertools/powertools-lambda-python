@@ -50,7 +50,7 @@ class RedisConnection:
         self,
         host: str = "",
         username: str = "",
-        password: str = "",
+        password: str = "",  # nosec - password for Redis connection
         url: str = "",
         db_index: int = 0,
         port: int = 6379,
@@ -173,7 +173,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self,
         host: str = "",
         username: str = "",
-        password: str = "",
+        password: str = "",  # nosec - password for Redis connection
         url: str = "",
         db_index: int = 0,
         port: int = 6379,
@@ -270,10 +270,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             self.client = client
 
         if not hasattr(self.client, "get_connection_kwargs"):
-            raise IdempotencyRedisClientConfigError
+            raise IdempotencyRedisClientConfigError(
+                "Error configuring the Redis Client. The client must implement get_connection_kwargs function.",
+            )
         if not self.client.get_connection_kwargs().get("decode_responses", False):
             warnings.warn(
-                "Redis connection with `decode_responses=False` may casue lower performance",
+                "Redis connection with `decode_responses=False` may cause lower performance",
                 stacklevel=2,
             )
 
@@ -287,12 +289,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         super(RedisCachePersistenceLayer, self).__init__()
         self._orphan_lock_timeout = min(10, self.expires_after_seconds)
 
-    def _get_expiry_second(self, expery_timestamp: int | None = None) -> int:
+    def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:
         """
         return seconds of timedelta from now to the given unix timestamp
         """
-        if expery_timestamp:
-            return expery_timestamp - int(datetime.datetime.now().timestamp())
+        if expiry_timestamp:
+            return expiry_timestamp - int(datetime.datetime.now().timestamp())
         return self.expires_after_seconds
 
     def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
@@ -353,12 +355,12 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
             logger.debug(f"Putting record on Redis for idempotency key: {item['name']}")
             encoded_item = self._json_serializer(item["mapping"])
-            ttl = self._get_expiry_second(expery_timestamp=item["mapping"][self.expiry_attr])
+            ttl = self._get_expiry_second(expiry_timestamp=item["mapping"][self.expiry_attr])
 
             redis_response = self.client.set(name=item["name"], value=encoded_item, ex=ttl, nx=True)
 
             # redis_response:True -> Redis set succeed, idempotency key does not exist before
-            # return to idempotency and proceed to handler excution phase. Most cases should return here
+            # return to idempotency and proceed to handler execution phase. Most cases should return here
             if redis_response:
                 return
 
