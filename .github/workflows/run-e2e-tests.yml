@@ -63,7 +63,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@8f152de45cc393bb48ce5d89d36b731f54556e65 # v4.0.0
         with:
-          node-version: "16.12"
+          node-version: "20.10.0"
       - name: Install CDK CLI
         run: |
           npm ci
