@@ -1120,3 +1120,23 @@ def test_logger_add_remove_filter(stdout, service_name):
     log = capture_multiple_logging_statements_output(stdout)
     assert log[0]["api_key"] == "REDACTED"
     assert log[1]["api_key"] != "REDACTED"
+
+
+def test_logger_json_unicode(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN all non-ascii chars are logged as messages
+    # AND non-ascii is also used as ephemeral fields
+    # latest: https://www.unicode.org/versions/Unicode15.1.0/#Summary
+    non_ascii_chars = [chr(i) for i in range(128, 111_411_1)]
+    japanese_field = "47業レルし化"
+    japanese_string = "スコビルデモ２"
+
+    logger.info(non_ascii_chars, **{japanese_field: japanese_string})
+
+    # THEN JSON logs should not try to escape them
+    log = capture_logging_output(stdout)
+
+    assert log["message"] == non_ascii_chars
+    assert log[japanese_field] == japanese_string
