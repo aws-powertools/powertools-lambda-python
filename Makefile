@@ -47,7 +47,7 @@ test-idempotency-redis:
 
 
 e2e-test:
-	python parallel_run_e2e.py
+	poetry run pytest tests/e2e
 
 coverage-html:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=html
