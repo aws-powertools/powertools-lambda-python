@@ -326,17 +326,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.33.10"
+version = "1.33.12"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "boto3-1.33.10-py3-none-any.whl", hash = "sha256:8011445d95499ca9622d8d368ce469d51bc9e82a23b6edd6498f9ae57d69ce9e"},
-    {file = "boto3-1.33.10.tar.gz", hash = "sha256:407b26197aced386e7ce2327ca9199b506dcf248220cfb8fc89d06497dd4522b"},
+    {file = "boto3-1.33.12-py3-none-any.whl", hash = "sha256:475efcff30401041e9c348e20613eca90ab14a224e2f978ca80de98ba3499435"},
+    {file = "boto3-1.33.12.tar.gz", hash = "sha256:2225edaea2fa17274f62707c12d9f7803c998af7089fe8a1ec8e4f1ebf47677e"},
 ]
 
 [package.dependencies]
-botocore = ">=1.33.10,<1.34.0"
+botocore = ">=1.33.12,<1.34.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.8.2,<0.9.0"
 
@@ -345,13 +345,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.33.10"
+version = "1.33.12"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.7"
 files = [
-    {file = "botocore-1.33.10-py3-none-any.whl", hash = "sha256:9619609692a7f99f33093a305a0fb88ca5c83104f97ead3a4405b1e4ba6058f9"},
-    {file = "botocore-1.33.10.tar.gz", hash = "sha256:82be3da9ceac9d847d115a80f0a0dae020c3534ef88839ef907eb3205309fd4a"},
+    {file = "botocore-1.33.12-py3-none-any.whl", hash = "sha256:48b9cfb9c5f7f9634a71782f16a324acb522b65856ad46be69efe04c3322b23c"},
+    {file = "botocore-1.33.12.tar.gz", hash = "sha256:067c94fa88583c04ae897d48a11d2be09f280363b8e794b82d78d631d3a3e910"},
 ]
 
 [package.dependencies]
@@ -970,13 +970,13 @@ dev = ["PyTest", "PyTest-Cov", "bump2version (<1)", "sphinx (<2)", "tox"]
 
 [[package]]
 name = "envier"
-version = "0.4.0"
+version = "0.5.0"
 description = "Python application configuration via the environment"
 optional = false
-python-versions = ">=2.7"
+python-versions = ">=3.7"
 files = [
-    {file = "envier-0.4.0-py3-none-any.whl", hash = "sha256:7b91af0f16ea3e56d91ec082f038987e81b441fc19c657a8b8afe0909740a706"},
-    {file = "envier-0.4.0.tar.gz", hash = "sha256:e68dcd1ed67d8b6313883e27dff3e701b7fba944d2ed4b7f53d0cc2e12364a82"},
+    {file = "envier-0.5.0-py3-none-any.whl", hash = "sha256:5fed6099ee5d7ad4cf664f8bb99d1281d4ab5fadeec8f40ba9458610938293be"},
+    {file = "envier-0.5.0.tar.gz", hash = "sha256:f35ca8605f0c70c2c0367133af9dc1ef16710021dbd0e28c1b0a83070db06768"},
 ]
 
 [package.extras]
@@ -1853,13 +1853,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.33.0"
-description = "Type annotations for boto3.CloudWatch 1.33.0 service generated with mypy-boto3-builder 7.20.3"
+version = "1.33.11"
+description = "Type annotations for boto3.CloudWatch 1.33.11 service generated with mypy-boto3-builder 7.21.0"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "mypy-boto3-cloudwatch-1.33.0.tar.gz", hash = "sha256:67608fcf75e73edbd4cc17a7f0fe7bde98da0bddbda63d831fd7e94fd9be27b5"},
-    {file = "mypy_boto3_cloudwatch-1.33.0-py3-none-any.whl", hash = "sha256:bb4cc4ef724c0dc38f7c4c826382cc37b93642dd632ccf2e0254dd77f2e36bfb"},
+    {file = "mypy-boto3-cloudwatch-1.33.11.tar.gz", hash = "sha256:7b1144d5702cb2aadd92dfa460506d8b0751ce5c446e2a8c4294cb04232319fd"},
+    {file = "mypy_boto3_cloudwatch-1.33.11-py3-none-any.whl", hash = "sha256:e713dd767722dca9170b595caea25a0237a431987ddd82ec38450d3dcf574d25"},
 ]
 
 [package.dependencies]
@@ -3223,4 +3223,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "a35cba05ef4da8d573541385e59092634c0c2a8341e4fe020cd1ed9732d25815"
+content-hash = "6426cacfd613b4ffc5a4c8bfd6971a6d2f22c37dc834c5f793fcedac50bde5f7"
