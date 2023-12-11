@@ -53,14 +53,16 @@ stateDiagram-v2
 
 ### Install
 
+Before you start, you need to create a KMS key to encrypt and decrypt your data - your Lambda function will need read and write access to it.
+
+!!! note "If your Lambda function only masks data without utilizing any encryption services, it requires no additional permissions or library to use this utility."
+
 ### Required resources
 
 === "AWS Serverless Application Model (SAM) example"
     ```yaml hl_lines="16 30 54-55"
     --8<-- "examples/data_masking/sam/template.yaml"
     ```
-
-If your Lambda function only masks data without utilizing any encryption services, it requires no additional permissions or library to use this utility.
 
 #### Using AWS Encryption SDK
 
