@@ -91,9 +91,9 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 
 #### JSON
 
-When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can select values of nested keys by using dot notation.
+When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions. If a `fields` parameter is provided, then the rest of the dictionary or JSON string will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted).
 
-fields dict and string
+If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
 
 <!-- markdownlint-disable MD013 -->
 ???+ note
@@ -121,7 +121,7 @@ You can mask data without having to install any encryption library. Masking data
 
 ### Encryting data
 
-In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. Encrypting data will temporarily result in the loss of its original type, and the encrypted data will be represented as a string while it is in ciphertext form. After decryption, the data will regain its original type.
+In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. Encrypting data will temporarily result in the loss of the data's original type, as the encrypted data will be represented as a string while it is in ciphertext form. After decryption, the data will regain its original type.
 
 You can still use the masking feature while using any encryption provider.
 
@@ -135,7 +135,7 @@ You can still use the masking feature while using any encryption provider.
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
-=== "encrypted_output.json"
+=== "output.json"
     ```json hl_lines="5-7 12"
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
@@ -146,7 +146,7 @@ To decrypt data, use the appropriate key to transform ciphertext back into plain
 
 Decrypting a ciphertext string will transform the data to its original type.
 
-=== "encrypted_input.json"
+=== "input.json"
     ```json hl_lines="5-7 12"
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
@@ -156,7 +156,7 @@ Decrypting a ciphertext string will transform the data to its original type.
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
-=== "decrypted_output.json"
+=== "output.json"
     ```json hl_lines="5-7 12-17"
     --8<-- "examples/data_masking/src/decrypt_data_output.json"
     ```
