@@ -85,6 +85,8 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 
 ### Working with nested data
 
+!!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
+
 #### JSON
 
 When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values. If no fields are provided, the entire data object will be masked or encrypted. You can select values of nested keys by using dot notation.
@@ -175,7 +177,7 @@ For more information about the parameters for this provider, please see the [AWS
 
 #### Creating your own provider
 
-!!! info "In Q1 2024, we will implement support for bringing your own encryption provider."
+!!! info "In Q1 2024, we plan to add support for bringing your own encryption provider."
 
 ## Testing your code
 

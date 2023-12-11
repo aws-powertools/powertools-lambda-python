@@ -8,50 +8,52 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
     Timeout: 5
     Runtime: python3.11
     Tracing: Active
-Resources:
-  MyKMSKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Enabled: true
-      KeyPolicy:
-        Version: 2012-10-17
-        Statement:
-        - Effect: Allow
-          Action: kms:*
-          Resource: "*"
-          Principal:
-            AWS: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":root" ] ]
-  DataMaskingFunctionExample:
-    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
-    Properties:
-      Handler: data_masking_function_example.lambda_handler
-      CodeUri: ../src
-      Description: Data Masking Function Example
-      MemorySize: 1024
-      Architectures:
-      - x86_64
-      Policies:
-        Statement:
-        - Effect: Allow
-          Action:
-            - kms:Decrypt
-            - kms:GenerateDataKey
-          Resource: !GetAtt MyKMSKey.Arn
-      Tracing: Active
-      Environment:
+    Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
           POWERTOOLS_METRICS_NAMESPACE: Powertools
           LOG_LEVEL: INFO
-          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
-      Tags:
-        LambdaPowertools: python
+          KMS_KEY_ARN: !GetAtt DataMaskingKMSKey.Arn
 
-Outputs:
-  KMSKeyArn:
-    Description: ARN of the KMS Key
-    Value: !GetAtt MyKMSKey.Arn
 
+Resources:
+  # Lambda Function
   DataMaskingFunctionExample:
-    Description: Data Masking Function Example
-    Value: !GetAtt DataMaskingFunctionExample.Arn
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: data_masking_function_example.lambda_handler
+      CodeUri: ../src
+      Description: Data Masking Function Example
+      # Cryptographic operations demand more memory usage.
+      # It is recommended to allocate a minimum of 1024MB of memory to your Lambda function
+      # when utilizing the DataMasking Utility.
+      MemorySize: 1024
+      Architectures:
+      - x86_64
+
+  # KMS KEY
+  DataMaskingKMSKey:
+    Type: 'AWS::KMS::Key'
+    Properties:
+      Description: KMS Key for Lambda - DataMasking
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: key-default-1
+        Statement:
+          # To ensure key management security, a KMS Key should have at least one administrator.
+          # In this example, the root account is granted administrator permissions.
+          # In a production environment, it is recommended to configure specific users or roles for enhanced security.
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action: 'kms:*'
+            Resource: '*'
+          # KMS utilizes resource policies, allowing direct access grant to the Lambda Role on the KMS Key.
+          # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt DataMaskingFunctionExampleRole.Arn  # Permission for the Lambda role
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+            Resource: "*"
