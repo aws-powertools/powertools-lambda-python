@@ -26,6 +26,10 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.build_command = (
             f"python -m pip install {self.package} {self.build_args} --target {self.target_dir} --verbose"
         )
+
+        with Path("PIP_COMMAND.txt").open("w") as f:
+            f.write(self.build_command)
+
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
             f"rm -rf {self.target_dir}/*dateutil* {self.target_dir}/urllib3* {self.target_dir}/six* && "
