@@ -40,16 +40,14 @@ permissions:
 
 jobs:
   run:
-    # runs-on: aws-powertools_ubuntu-latest_8-core
-    runs-on: ubuntu-latest
+    runs-on: aws-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
       contents: read  # checkout code
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
-#        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
-        version: ["3.8", "3.9"]
+        version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
     if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
