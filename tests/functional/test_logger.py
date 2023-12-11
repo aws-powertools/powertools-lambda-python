@@ -1124,17 +1124,19 @@ def test_logger_add_remove_filter(stdout, service_name):
 
 def test_logger_json_unicode(stdout, service_name):
     # GIVEN Logger is initialized
-    # WHEN a UTF-8 string is logged
     logger = Logger(service=service_name, stream=stdout)
 
-    japanese_encoded_string = "\u30b9\u30b3\u30d3\u30eb\u30c7\u30e2\uff12"
-    japanese_string = "スコビルデモ２"
+    # WHEN all non-ascii chars are logged as messages
+    # AND non-ascii is also used as ephemeral fields
+    # latest: https://www.unicode.org/versions/Unicode15.1.0/#Summary
+    non_ascii_chars = [chr(i) for i in range(128, 111_411_1)]
     japanese_field = "47業レルし化"
+    japanese_string = "スコビルデモ２"
 
-    logger.info(japanese_encoded_string, custom_field=japanese_field)
+    logger.info(non_ascii_chars, **{japanese_field: japanese_string})
 
-    # THEN string should be JSON stringified without data loss
+    # THEN JSON logs should not try to escape them
     log = capture_logging_output(stdout)
 
-    assert log["message"] == japanese_string
-    assert log["custom_field"] == japanese_field
+    assert log["message"] == non_ascii_chars
+    assert log[japanese_field] == japanese_string
