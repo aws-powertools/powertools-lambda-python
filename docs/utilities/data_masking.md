@@ -56,7 +56,7 @@ stateDiagram-v2
 ### Required resources
 
 === "AWS Serverless Application Model (SAM) example"
-    ```yaml hl_lines="11-23 30 33-39 46"
+    ```yaml hl_lines="16 30 54-55"
     --8<-- "examples/data_masking/sam/template.yaml"
     ```
 
