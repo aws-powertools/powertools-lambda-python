@@ -1,6 +1,7 @@
 import json
 from typing import Optional, Union
 
+from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
 
@@ -141,8 +142,8 @@ class DataMasking:
             # Turn back into dict so can parse it
             my_dict_parsed = json.loads(my_dict_parsed)
         else:
-            raise TypeError(
-                f"Unsupported data type for 'data' parameter. Expected a traversable type, but got {type(data)}.",
+            raise DataMaskingUnsupportedTypeError(
+                f"Unsupported data type. Expected a traversable type (dict or str), but got {type(data)}.",
             )
 
         # For example: ['a.b.c'] in ['a.b.c', 'a.x.y']

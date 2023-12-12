@@ -10,12 +10,17 @@ from aws_encryption_sdk import (
     LocalCryptoMaterialsCache,
     StrictAwsKmsMasterKeyProvider,
 )
+from aws_encryption_sdk.exceptions import DecryptKeyError, GenerateKeyError
 
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
     CACHE_CAPACITY,
     MAX_CACHE_AGE_SECONDS,
     MAX_MESSAGES_ENCRYPTED,
+)
+from aws_lambda_powertools.utilities._data_masking.exceptions import (
+    DataMaskingDecryptKeyError,
+    DataMaskingEncryptKeyError,
 )
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
@@ -80,10 +85,20 @@ class AwsEncryptionSdkProvider(BaseProvider):
         )
 
     def encrypt(self, data: bytes | str | Dict | int, **provider_options) -> str:
-        return self._key_provider.encrypt(data=data, **provider_options)
+        try:
+            return self._key_provider.encrypt(data=data, **provider_options)
+        except GenerateKeyError:
+            raise DataMaskingEncryptKeyError(
+                "Failed to encrypt data - Please make sure you are using a valid Symmetric AWS MSK Key ARN",
+            )
 
     def decrypt(self, data: str, **provider_options) -> Any:
-        return self._key_provider.decrypt(data=data, **provider_options)
+        try:
+            return self._key_provider.decrypt(data=data, **provider_options)
+        except DecryptKeyError:
+            raise DataMaskingDecryptKeyError(
+                "Failed to decrypt data - Please make sure you are using a valid Symmetric AWS MSK Key ARN",
+            )
 
 
 class KMSKeyProvider:

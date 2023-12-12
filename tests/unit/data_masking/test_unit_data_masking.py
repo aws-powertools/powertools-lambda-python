@@ -4,6 +4,7 @@ import pytest
 
 from aws_lambda_powertools.utilities._data_masking.base import DataMasking
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
 
 
 @pytest.fixture
@@ -153,7 +154,7 @@ def test_parsing_unsupported_data_type(data_masker):
     # GIVEN an initialization of the DataMasking class
 
     # WHEN attempting to pass in a list of fields with input data that is not a dict
-    with pytest.raises(TypeError):
+    with pytest.raises(DataMaskingUnsupportedTypeError):
         # THEN the result is a TypeError
         data_masker.mask(42, ["this.field"])
 
