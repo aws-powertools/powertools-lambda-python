@@ -1,5 +1,5 @@
 import json
-from typing import Optional, Union
+from typing import Callable, Optional, Union
 
 from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
@@ -54,7 +54,7 @@ class DataMasking:
     def mask(self, data, fields=None, **provider_options):
         return self._apply_action(data, fields, self.provider.mask, **provider_options)
 
-    def _apply_action(self, data, fields, action, **provider_options):
+    def _apply_action(self, data, fields, action: Callable, **provider_options):
         """
         Helper method to determine whether to apply a given action to the entire input data
         or to specific fields if the 'fields' argument is specified.
@@ -84,7 +84,7 @@ class DataMasking:
         self,
         data: Union[dict, str],
         fields: list,
-        action,
+        action: Callable,
         **provider_options,
     ) -> Union[dict, str]:
         """

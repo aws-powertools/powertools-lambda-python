@@ -82,12 +82,7 @@ class AwsEncryptionSdkProvider(BaseProvider):
         )
 
     def encrypt(self, data: bytes | str | Dict | int, **provider_options) -> str:
-        try:
-            return self._key_provider.encrypt(data=data, **provider_options)
-        except GenerateKeyError:
-            raise DataMaskingEncryptKeyError(
-                "Failed to encrypt data. Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
-            )
+        return self._key_provider.encrypt(data=data, **provider_options)
 
     def decrypt(self, data: str, **provider_options) -> Any:
         return self._key_provider.decrypt(data=data, **provider_options)
@@ -142,11 +137,16 @@ class KMSKeyProvider:
                 The encrypted data, as a base64-encoded string.
         """
         data_encoded = self.json_serializer(data)
-        ciphertext, _ = self.client.encrypt(
-            source=data_encoded,
-            materials_manager=self.cache_cmm,
-            **provider_options,
-        )
+        try:
+            ciphertext, _ = self.client.encrypt(
+                source=data_encoded,
+                materials_manager=self.cache_cmm,
+                **provider_options,
+            )
+        except GenerateKeyError:
+            raise DataMaskingEncryptKeyError(
+                "Failed to encrypt data. Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
+            )
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
