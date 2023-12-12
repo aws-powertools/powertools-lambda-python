@@ -90,8 +90,9 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 !!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
 
 #### JSON
-
+<!-- markdownlint-disable MD013 -->
 When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions. If a `fields` parameter is provided, then the rest of the dictionary or JSON string will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted).
+<!-- markdownlint-enable MD013 -->
 
 If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
 

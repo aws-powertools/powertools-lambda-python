@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+from binascii import Error
 from typing import Any, Callable, Dict, List
 
 import botocore
@@ -10,7 +11,7 @@ from aws_encryption_sdk import (
     LocalCryptoMaterialsCache,
     StrictAwsKmsMasterKeyProvider,
 )
-from aws_encryption_sdk.exceptions import DecryptKeyError, GenerateKeyError
+from aws_encryption_sdk.exceptions import DecryptKeyError, GenerateKeyError, NotSupportedError
 
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
@@ -19,16 +20,12 @@ from aws_lambda_powertools.utilities._data_masking.constants import (
     MAX_MESSAGES_ENCRYPTED,
 )
 from aws_lambda_powertools.utilities._data_masking.exceptions import (
+    DataMaskingContextMismatchError,
     DataMaskingDecryptKeyError,
+    DataMaskingDecryptValueError,
     DataMaskingEncryptKeyError,
 )
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
-
-
-class ContextMismatchError(Exception):
-    def __init__(self, key):
-        super().__init__(f"Encryption Context does not match expected value for key: {key}")
-        self.key = key
 
 
 class AwsEncryptionSdkProvider(BaseProvider):
@@ -89,16 +86,11 @@ class AwsEncryptionSdkProvider(BaseProvider):
             return self._key_provider.encrypt(data=data, **provider_options)
         except GenerateKeyError:
             raise DataMaskingEncryptKeyError(
-                "Failed to encrypt data - Please make sure you are using a valid Symmetric AWS MSK Key ARN",
+                "Failed to encrypt data. Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
             )
 
     def decrypt(self, data: str, **provider_options) -> Any:
-        try:
-            return self._key_provider.decrypt(data=data, **provider_options)
-        except DecryptKeyError:
-            raise DataMaskingDecryptKeyError(
-                "Failed to decrypt data - Please make sure you are using a valid Symmetric AWS MSK Key ARN",
-            )
+        return self._key_provider.decrypt(data=data, **provider_options)
 
 
 class KMSKeyProvider:
@@ -174,19 +166,35 @@ class KMSKeyProvider:
             ciphertext : bytes
                 The decrypted data in bytes
         """
-        ciphertext_decoded = base64.b64decode(data)
+        try:
+            ciphertext_decoded = base64.b64decode(data)
+        except Error:
+            raise DataMaskingDecryptValueError(
+                "Data decryption failed. Please ensure that you are using a field that was previously encrypted.",
+            )
 
         expected_context = provider_options.pop("encryption_context", {})
 
-        ciphertext, decryptor_header = self.client.decrypt(
-            source=ciphertext_decoded,
-            key_provider=self.key_provider,
-            **provider_options,
-        )
+        try:
+            ciphertext, decryptor_header = self.client.decrypt(
+                source=ciphertext_decoded,
+                key_provider=self.key_provider,
+                **provider_options,
+            )
+        except DecryptKeyError:
+            raise DataMaskingDecryptKeyError(
+                "Failed to decrypt data - Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
+            )
+        except (TypeError, NotSupportedError):
+            raise DataMaskingDecryptValueError(
+                "Data decryption failed. Please ensure that you are using a field that was previously encrypted.",
+            )
 
         for key, value in expected_context.items():
             if decryptor_header.encryption_context.get(key) != value:
-                raise ContextMismatchError(key)
+                raise DataMaskingContextMismatchError(
+                    f"Encryption Context does not match expected value for key: {key}",
+                )
 
         ciphertext = self.json_deserializer(ciphertext)
         return ciphertext
