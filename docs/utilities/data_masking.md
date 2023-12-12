@@ -186,7 +186,7 @@ For more information about the parameters for this provider, please see the [AWS
 
 The following sequence diagrams explain how `DataMasking` behaves under different scenarios.
 
-#### Masking operation
+#### Mask operation
 
 Masking operations occur in-memory and we cannot recover the original value.
 
@@ -201,10 +201,35 @@ sequenceDiagram
     Lambda->>DataMasking: .mask(data)
     DataMasking->>DataMasking: replaces data with *****
     Note over Lambda,DataMasking: No encryption providers involved.
-    DataMasking->>Lambda: return masked data
+    DataMasking->>Lambda: data masked
     Lambda-->>Client: Return response
 ```
 <i>Simple masking operation</i>
+</center>
+
+#### Encrypt operation with Encryption SDK (KMS)
+
+We call KMS to generate an unique data key once. It allows us to encrypt this key in-memory, and use it for multiple operations to improve performance and prevent throttling.
+
+> This is known as [envelope encryption](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#enveloping){target="_blank"}.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: encrypt(data)
+    DataMasking->>EncryptionProvider: Request unique data key (kms:GenerateDataKey)
+    DataMasking->>DataMasking: Encrypt data key with wrapping key (in-memory)
+    DataMasking->>DataMasking: Encrypt data with newly encrypted key (in-memory)
+    DataMasking->>Lambda: ciphertext containing encrypted data
+    Lambda-->>Client: Return response
+```
+<i>Encrypting operation using envelope encryption.</i>
 </center>
 
 ## Testing your code
