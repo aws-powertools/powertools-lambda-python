@@ -170,17 +170,42 @@ Decrypting a ciphertext string will transform the data to its original type.
 
 You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AwsEncryptionSdkProvider`.
 
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **local_cache_capacity**              |  |              `100`                        | The maximum number of entries that can be retained in the local cryptographic materials cache                                                                                |
-| **max_cache_age_seconds**                |                    | `300`                                 | The maximum time (in seconds) that a cache entry may be kept in the cache |
-| **max_messages_encrypted**             |                    | `200`                         | The maximum number of messages that may be encrypted under a cache entry
+| Parameter                  | Required | Default | Description                                                                                   |
+| -------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------- |
+| **local_cache_capacity**   |          | `100`   | The maximum number of entries that can be retained in the local cryptographic materials cache |
+| **max_cache_age_seconds**  |          | `300`   | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
+| **max_messages_encrypted** |          | `200`   | The maximum number of messages that may be encrypted under a cache entry                      |
 
 For more information about the parameters for this provider, please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#aws_encryption_sdk.materials_managers.caching.CachingCryptoMaterialsManager){target="_blank" rel="nofollow"}.
 
 #### Creating your own provider
 
 !!! info "In Q1 2024, we plan to add support for bringing your own encryption provider."
+
+### Data masking request flow
+
+The following sequence diagrams explain how `DataMasking` behaves under different scenarios.
+
+#### Masking operation
+
+Masking operations occur in-memory and we cannot recover the original value.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking (in memory)
+    Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: .mask(data)
+    DataMasking->>DataMasking: replaces data with *****
+    Note over Lambda,DataMasking: No encryption providers involved.
+    DataMasking->>Lambda: return masked data
+    Lambda-->>Client: Return response
+```
+<i>Simple masking operation</i>
+</center>
 
 ## Testing your code
 
