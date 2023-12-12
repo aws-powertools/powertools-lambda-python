@@ -198,7 +198,7 @@ sequenceDiagram
     participant Lambda
     participant DataMasking as Data Masking (in memory)
     Client->>Lambda: Invoke (event)
-    Lambda->>DataMasking: .mask(data)
+    Lambda->>DataMasking: mask(data)
     DataMasking->>DataMasking: replaces data with *****
     Note over Lambda,DataMasking: No encryption providers involved.
     DataMasking->>Lambda: data masked
