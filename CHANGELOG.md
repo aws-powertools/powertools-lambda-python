@@ -4,6 +4,12 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump squidfunk/mkdocs-material from `876b39c` to `9af3b7e` in /docs ([#3486](https://github.com/aws-powertools/powertools-lambda-python/issues/3486))
+* **deps-dev:** bump cfn-lint from 0.83.4 to 0.83.5 ([#3487](https://github.com/aws-powertools/powertools-lambda-python/issues/3487))
+* **tests:** temporarily disable E2E parallelism  ([#3484](https://github.com/aws-powertools/powertools-lambda-python/issues/3484))
+
 
 <a name="v2.29.1"></a>
 ## [v2.29.1] - 2023-12-11
@@ -14,6 +20,15 @@
 ## Maintenance
 
 * version bump
+* **deps:** bump squidfunk/mkdocs-material from `8c72011` to `20241c6` in /docs ([#3470](https://github.com/aws-powertools/powertools-lambda-python/issues/3470))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3476](https://github.com/aws-powertools/powertools-lambda-python/issues/3476))
+* **deps:** bump actions/setup-python from 4.8.0 to 5.0.0 ([#3465](https://github.com/aws-powertools/powertools-lambda-python/issues/3465))
+* **deps:** bump squidfunk/mkdocs-material from `20241c6` to `876b39c` in /docs ([#3477](https://github.com/aws-powertools/powertools-lambda-python/issues/3477))
+* **deps:** bump datadog-lambda from 5.84.0 to 5.85.0 ([#3466](https://github.com/aws-powertools/powertools-lambda-python/issues/3466))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3467](https://github.com/aws-powertools/powertools-lambda-python/issues/3467))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3469](https://github.com/aws-powertools/powertools-lambda-python/issues/3469))
+* **deps-dev:** bump aws-cdk from 2.113.0 to 2.114.1 ([#3464](https://github.com/aws-powertools/powertools-lambda-python/issues/3464))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3478](https://github.com/aws-powertools/powertools-lambda-python/issues/3478))
 
 
 <a name="v2.29.0"></a>
