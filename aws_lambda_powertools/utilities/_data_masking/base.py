@@ -1,5 +1,5 @@
 import json
-from typing import Callable, Optional, Union
+from typing import Callable, Iterable, Optional, Union
 
 from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
@@ -51,7 +51,7 @@ class DataMasking:
     def decrypt(self, data, fields=None, **provider_options):
         return self._apply_action(data, fields, self.provider.decrypt, **provider_options)
 
-    def mask(self, data, fields=None, **provider_options):
+    def mask(self, data, fields=None, **provider_options) -> Union[str, Iterable]:
         return self._apply_action(data, fields, self.provider.mask, **provider_options)
 
     def _apply_action(self, data, fields, action: Callable, **provider_options):
