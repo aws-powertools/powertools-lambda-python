@@ -62,6 +62,7 @@ The following companies, among others, use Powertools:
 * [Jit Security](https://www.jit.io/)
 * [Propellor.ai](https://www.propellor.ai/)
 * [TopSport](https://www.topsport.com.au/)
+* [Transformity](https://transformity.tech/)
 * [Trek10](https://www.trek10.com/)
 * [Vertex Pharmaceuticals](https://www.vrtx.com/)
 
