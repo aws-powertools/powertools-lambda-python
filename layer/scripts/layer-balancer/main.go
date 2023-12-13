@@ -172,7 +172,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 					ZipFile: payload,
 				},
 				LayerName:          aws.String(layer.Name),
-				CompatibleRuntimes: []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				CompatibleRuntimes: []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39, types.RuntimePython39, types.RuntimePython310},
 				Description:        aws.String(layer.Description),
 				LicenseInfo:        aws.String("MIT-0"),
 			})
@@ -183,7 +183,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 				},
 				LayerName:               aws.String(layer.Name),
 				CompatibleArchitectures: []types.Architecture{layer.Architecture},
-				CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39, types.RuntimePython39, types.RuntimePython310},
 				Description:             aws.String(layer.Description),
 				LicenseInfo:             aws.String("MIT-0"),
 			})
