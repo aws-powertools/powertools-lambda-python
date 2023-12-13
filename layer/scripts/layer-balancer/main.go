@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -197,7 +197,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 			LayerName:     aws.String(layer.Name),
 			Principal:     aws.String("*"),
 			StatementId:   aws.String("PublicLayerAccess"),
-			VersionNumber: layerVersionResponse.Version,
+			VersionNumber: &layerVersionResponse.Version,
 		})
 		if err != nil {
 			return fmt.Errorf("error making layer public: %w", err)
@@ -260,7 +260,7 @@ func downloadCanonicalLayerZip(ctx context.Context, layer *LayerInfo) ([]byte, e
 		// Gets the Layer content URL from S3
 		getLayerVersionResult, err := lambdaSvc.GetLayerVersion(ctx, &lambda.GetLayerVersionInput{
 			LayerName:     aws.String(layer.Name),
-			VersionNumber: version,
+			VersionNumber: &version,
 		})
 		if err != nil {
 			innerErr = fmt.Errorf("error getting eu-central-1 layer download URL: %w", err)
@@ -275,7 +275,7 @@ func downloadCanonicalLayerZip(ctx context.Context, layer *LayerInfo) ([]byte, e
 		}
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			innerErr = err
 		}
