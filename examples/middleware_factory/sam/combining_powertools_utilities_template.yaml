@@ -5,7 +5,7 @@ Description: Middleware-powertools-utilities example
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.12
     Tracing: Active
     Architectures:
       - x86_64
