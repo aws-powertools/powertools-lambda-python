@@ -21,7 +21,7 @@ Resources:
   # This function is mainly for documentation purposes. In prod, we recommend you split up the encrypt and decrypt
   # calls, so that one function can act as the encryption proxy via HTTP requests, data pipeline, etc.
   # while authorized personnel can call decrypt from scripts or a separate function.
-  DataMaskingFunctionExample:
+  DataMaskingEncryptFunctionExample:
     Type: AWS::Serverless::Function
     Properties:
       Handler: data_masking_function_example.lambda_handler
@@ -31,8 +31,17 @@ Resources:
       # We recommend to allocate a minimum of 1024MB of memory to your Lambda function
       # when utilizing the DataMasking Utility.
       MemorySize: 1024
-      Architectures:
-      - x86_64
+
+  # DataMaskingDecryptFunctionExample:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     Handler: data_masking_function_decrypt.lambda_handler
+  #     CodeUri: ../src
+  #     Description: Data Masking Function Example
+  #     # Cryptographic operations demand more memory usage.
+  #     # We recommend to allocate a minimum of 1024MB of memory to your Lambda function
+  #     # when utilizing the DataMasking Utility.
+  #     MemorySize: 1024
 
   # KMS KEY
   DataMaskingKMSKey:
@@ -55,7 +64,7 @@ Resources:
           # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
           - Effect: Allow
             Principal:
-              AWS: !GetAtt DataMaskingFunctionExampleRole.Arn  # Permission for the Lambda role
+              AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn  # Permission for the Lambda role
             # These IAM permissions are necessary for the envelope encryption that AWS Encryption SDK uses.
             # Envelope encryption randomly generates a data key and encrypts that data key along with your data,
             # so we encrypt in-memory to prevent too many calls to KMS to reduce latency.

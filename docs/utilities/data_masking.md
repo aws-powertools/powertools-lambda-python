@@ -60,7 +60,7 @@ Before you start, you need to create a KMS key to encrypt and decrypt your data 
 ### Required resources
 
 === "AWS Serverless Application Model (SAM) example"
-    ```yaml hl_lines="16 30 54-55"
+    ```yaml hl_lines="16 24 35 59-60 66-67"
     --8<-- "examples/data_masking/sam/template.yaml"
     ```
 
@@ -105,14 +105,14 @@ If `fields` is not provided, the entire data object will be masked (or encrypted
 
 You can mask data without having to install any encryption library. Masking data will result in the loss of its original type, and the masked data will always be represented as a string.
 
-=== "input.json"
-    ```json
-    --8<-- "examples/data_masking/src/generic_data_input.json"
-    ```
-
 === "getting_started_mask_data.py"
     ```python hl_lines="1 6 10"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
+    ```
+
+=== "input.json"
+    ```json
+    --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
 === "output.json"
