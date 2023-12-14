@@ -211,7 +211,7 @@ sequenceDiagram
 
 We call KMS to generate an unique data key that can be used for multiple `encrypt` operation in-memory. It improves performance, cost and prevent throttling.
 
-To make this operation simpler to visualize, we keep caching details in a [separate sequence diagram](#encrypt-operation-with-caching-in-encryption-sdk). Caching is enabled by default.
+To make this operation simpler to visualize, we keep caching details in a [separate sequence diagram](#caching-encrypt-operations-with-encryption-sdk). Caching is enabled by default.
 
 <center>
 ```mermaid
@@ -237,9 +237,22 @@ sequenceDiagram
 <i>Encrypting operation using envelope encryption.</i>
 </center>
 
-#### Encrypt operation with caching in Encryption SDK
+#### Caching encrypt operations with Encryption SDK
 
-TODO
+Without caching, every `encrypt()` operation would generate a new data key. It significantly increases latency and cost for ephemeral and short running environments like Lambda.
+
+With caching, we balance ephemeral Lambda environment performance characteristics with adjustable thresholds to meet your security needs.
+
+!!! info "Data key recycling"
+    We request a new data key when a cached data key exceeds any of the following security thresholds:
+
+    1. **Max age in seconds**
+    2. **Max number of encrypted messages**
+    3. **Max bytes encrypted** across all operations
+
+
+> Diagram tbd
+
 
 ## Testing your code
 
