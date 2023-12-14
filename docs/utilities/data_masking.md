@@ -174,7 +174,8 @@ You have the option to modify some of the configurations we have set as defaults
 | -------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------- |
 | **local_cache_capacity**   |          | `100`   | The maximum number of entries that can be retained in the local cryptographic materials cache |
 | **max_cache_age_seconds**  |          | `300`   | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
-| **max_messages_encrypted** |          | `200`   | The maximum number of messages that may be encrypted under a cache entry                      |
+| **max_messages_encrypted** |          | `4294967296`   | The maximum number of messages that may be encrypted under a cache entry                      |
+| **max_bytes_encrypted** |          | `9223372036854775807`   | The maximum number of bytes that may be encrypted under a cache entry                      |
 
 For more information about the parameters for this provider, please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#aws_encryption_sdk.materials_managers.caching.CachingCryptoMaterialsManager){target="_blank" rel="nofollow"}.
 

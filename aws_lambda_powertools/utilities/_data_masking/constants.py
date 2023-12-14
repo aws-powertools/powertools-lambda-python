@@ -1,5 +1,9 @@
 DATA_MASKING_STRING: str = "*****"
+# The maximum number of entries that can be retained in the local cryptographic materials cache
 CACHE_CAPACITY: int = 100
+# The maximum time (in seconds) that a cache entry may be kept in the cache
 MAX_CACHE_AGE_SECONDS: float = 300.0
-MAX_MESSAGES_ENCRYPTED: int = 200
-# NOTE: You can also set max messages/bytes per data key
+# Maximum number of messages which are allowed to be encrypted under a single cached data key
+MAX_MESSAGES_ENCRYPTED: int = 4294967296  # 2 ** 32
+# Maximum number of bytes which are allowed to be encrypted under a single cached data key
+MAX_BYTES_ENCRYPTED: int = 9223372036854775807  # 2 ** 63 - 1

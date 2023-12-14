@@ -16,6 +16,7 @@ from aws_encryption_sdk.exceptions import DecryptKeyError, GenerateKeyError, Not
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
     CACHE_CAPACITY,
+    MAX_BYTES_ENCRYPTED,
     MAX_CACHE_AGE_SECONDS,
     MAX_MESSAGES_ENCRYPTED,
 )
@@ -67,6 +68,7 @@ class AwsEncryptionSdkProvider(BaseProvider):
         local_cache_capacity: int = CACHE_CAPACITY,
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
+        max_bytes_encrypted: int = MAX_BYTES_ENCRYPTED,
         json_serializer: Callable | None = None,
         json_deserializer: Callable | None = None,
     ):
@@ -77,6 +79,7 @@ class AwsEncryptionSdkProvider(BaseProvider):
             local_cache_capacity=local_cache_capacity,
             max_cache_age_seconds=max_cache_age_seconds,
             max_messages_encrypted=max_messages_encrypted,
+            max_bytes_encrypted=max_bytes_encrypted,
             json_serializer=self.json_serializer,
             json_deserializer=self.json_deserializer,
         )
@@ -103,6 +106,7 @@ class KMSKeyProvider:
         local_cache_capacity: int = CACHE_CAPACITY,
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
+        max_bytes_encrypted: int = MAX_BYTES_ENCRYPTED,
     ):
         session = botocore.session.Session()
         register_feature_to_botocore_session(session, "data-masking")
@@ -118,6 +122,7 @@ class KMSKeyProvider:
             cache=self.cache,
             max_age=max_cache_age_seconds,
             max_messages_encrypted=max_messages_encrypted,
+            max_bytes_encrypted=max_bytes_encrypted,
         )
 
     def encrypt(self, data: bytes | str | Dict | float, **provider_options) -> str:
