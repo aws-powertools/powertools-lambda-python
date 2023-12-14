@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger()
 
-KMS_KEY_ARN: str = os.getenv("KMS_KEY_ARN")
+KMS_KEY_ARN = os.getenv("KMS_KEY_ARN", "")
 encryption_provider = AwsEncryptionSdkProvider(keys=[KMS_KEY_ARN])
 data_masker = DataMasking(provider=encryption_provider)
 
