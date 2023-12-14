@@ -106,7 +106,7 @@ If `fields` is not provided, the entire data object will be masked (or encrypted
 You can mask data without having to install any encryption library. Masking data will result in the loss of its original type, and the masked data will always be represented as a string.
 
 === "getting_started_mask_data.py"
-    ```python hl_lines="1 6 10"
+    ```python hl_lines="4 8 16"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
     ```
 
@@ -122,18 +122,18 @@ You can mask data without having to install any encryption library. Masking data
 
 ### Encryting data
 
-In order to encrypt data, you must use either our out-of-the-box integration with the AWS Encryption SDK, or install another encryption provider of your own. Encrypting data will temporarily result in the loss of the data's original type, as the encrypted data will be represented as a string while it is in ciphertext form. After decryption, the data will regain its original type.
+To encrypt data, utilize our built-in integration with the AWS Encryption SDK. Encrypting data will temporarily result in the loss of the original data type, as it transforms into a [ciphertext](https://en.wikipedia.org/wiki/Ciphertext){target="_blank" rel="nofollow"} string.
 
-You can still use the masking feature while using any encryption provider.
-
-=== "input.json"
-    ```json
-    --8<-- "examples/data_masking/src/generic_data_input.json"
-    ```
+To encrypt your data, you'll need a valid and symmetric [AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/data-protection.html){target="_blank"} key.
 
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="3-4 12-13 15"
+    ```python hl_lines="5-6 12-13 22"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
+    ```
+
+=== "input.json"
+    ```json hl_lines="7-9 14"
+    --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
 === "output.json"

@@ -13,6 +13,6 @@ def lambda_handler(event: dict, context: LambdaContext) -> Dict:
 
     logger.info("Masking fields email, address.street, and company_address")
 
-    fields_masked = data_masker.mask(data=data, fields=["email", "address.street", "company_address"])
+    masked = data_masker.mask(data=data, fields=["email", "address.street", "company_address"])
 
-    return {"fields_masked": fields_masked}
+    return {"payload_masked": masked}
