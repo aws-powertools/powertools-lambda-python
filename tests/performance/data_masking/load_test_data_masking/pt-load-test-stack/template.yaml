@@ -8,7 +8,7 @@ Description: >
 Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
     Timeout: 5
-    Runtime: python3.10
+    Runtime: python3.12
 
     Tracing: Active
   Api:

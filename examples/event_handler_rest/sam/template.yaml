@@ -18,7 +18,7 @@ Globals:
 
   Function:
     Timeout: 5
-    Runtime: python3.11
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:

@@ -5,7 +5,7 @@ Description: Powertools for AWS Lambda (Python) version
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.11
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
@@ -14,7 +14,7 @@ Globals:
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:55
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:56
 
 Resources:
   LoggerLambdaHandlerExample:
