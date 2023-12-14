@@ -227,6 +227,7 @@ sequenceDiagram
     Lambda->>DataMasking: encrypt(data)
     DataMasking->>EncryptionProvider: Create unique data key
     Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking->>DataMasking: Cache new unique data key
     DataMasking->>DataMasking: DATA_KEY.encrypt(data)
     DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
     DataMasking->>DataMasking: Create encrypted message
@@ -250,9 +251,41 @@ With caching, we balance ephemeral Lambda environment performance characteristic
     2. **Max number of encrypted messages**
     3. **Max bytes encrypted** across all operations
 
-
-> Diagram tbd
-
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
+    Lambda->>DataMasking: encrypt(data)
+    DataMasking->>EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking->>DataMasking: Cache new unique data key
+    DataMasking->>DataMasking: DATA_KEY.encrypt(data)
+    DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking->>DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking->>Lambda: Ciphertext from encrypted message
+    Lambda->>DataMasking: encrypt(another_data)
+    DataMasking->>DataMasking: Searches for data key in cache
+    alt Is Data key in cache?
+        DataMasking->>DataMasking: Reuses data key
+    else Is Data key evicted from cache?
+        DataMasking->>EncryptionProvider: Create unique data key
+        DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    end
+    DataMasking->>DataMasking: DATA_KEY.encrypt(data)
+    DataMasking->>DataMasking: Create encrypted message
+    DataMasking->>Lambda: Ciphertext from encrypted message
+    Lambda-->>Client: Return response
+```
+<i>Caching data keys during encrypt operation.</i>
+</center>
 
 ## Testing your code
 
