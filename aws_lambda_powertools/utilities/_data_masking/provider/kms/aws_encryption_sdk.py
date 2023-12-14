@@ -170,7 +170,7 @@ class KMSKeyProvider:
             ciphertext_decoded = base64.b64decode(data)
         except Error:
             raise DataMaskingDecryptValueError(
-                "Data decryption failed. Please ensure that you are using a field that was previously encrypted.",
+                "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
 
         expected_context = provider_options.pop("encryption_context", {})
@@ -187,7 +187,7 @@ class KMSKeyProvider:
             )
         except (TypeError, NotSupportedError):
             raise DataMaskingDecryptValueError(
-                "Data decryption failed. Please ensure that you are using a field that was previously encrypted.",
+                "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
 
         for key, value in expected_context.items():
