@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import json
-from typing import Callable, Iterable, Optional, Union
+import logging
+from typing import Any, Callable, Iterable, Optional, Union
 
 from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
+
+logger = logging.getLogger(__name__)
 
 
 class DataMasking:
@@ -45,23 +50,23 @@ class DataMasking:
     def __init__(self, provider: Optional[BaseProvider] = None):
         self.provider = provider or BaseProvider()
 
-    def encrypt(self, data, fields=None, **provider_options):
+    def encrypt(self, data, fields=None, **provider_options) -> str:
         return self._apply_action(data, fields, self.provider.encrypt, **provider_options)
 
-    def decrypt(self, data, fields=None, **provider_options):
+    def decrypt(self, data, fields=None, **provider_options) -> Any:
         return self._apply_action(data, fields, self.provider.decrypt, **provider_options)
 
     def mask(self, data, fields=None, **provider_options) -> Union[str, Iterable]:
         return self._apply_action(data, fields, self.provider.mask, **provider_options)
 
-    def _apply_action(self, data, fields, action: Callable, **provider_options):
+    def _apply_action(self, data: str | dict, fields, action: Callable, **provider_options):
         """
         Helper method to determine whether to apply a given action to the entire input data
         or to specific fields if the 'fields' argument is specified.
 
         Parameters
         ----------
-        data : any
+        data : str | dict
             The input data to process.
         fields : Optional[List[any]] = None
             A list of fields to apply the action to. If 'None', the action is applied to the entire 'data'.
@@ -76,8 +81,10 @@ class DataMasking:
         """
 
         if fields is not None:
+            logger.debug(f"Running action {action.__name__} with fields {fields}")
             return self._apply_action_to_fields(data, fields, action, **provider_options)
         else:
+            logger.debug(f"Running action {action.__name__} with the entire data")
             return action(data, **provider_options)
 
     def _apply_action_to_fields(
@@ -130,46 +137,46 @@ class DataMasking:
         ```
         """
 
+        data_parsed = {}
+
         if fields is None:
             raise ValueError("No fields specified.")
 
         if isinstance(data, str):
             # Parse JSON string as dictionary
-            my_dict_parsed = json.loads(data)
+            data_parsed = json.loads(data)
         elif isinstance(data, dict):
-            # In case their data has keys that are not strings (i.e. ints), convert it all into a JSON string
-            my_dict_parsed = json.dumps(data)
-            # Turn back into dict so can parse it
-            my_dict_parsed = json.loads(my_dict_parsed)
+            # Convert the data to a JSON string in case it contains non-string keys (e.g., ints)
+            # Parse the JSON string back into a dictionary
+            data_parsed = json.loads(json.dumps(data))
         else:
             raise DataMaskingUnsupportedTypeError(
                 f"Unsupported data type. Expected a traversable type (dict or str), but got {type(data)}.",
             )
 
-        # For example: ['a.b.c'] in ['a.b.c', 'a.x.y']
-        for nested_key in fields:
+        for nested_field in fields:
             # Prevent overriding loop variable
-            curr_nested_key = nested_key
+            current_nested_field = nested_field
 
-            # If the nested_key is not a string, convert it to a string representation
-            if not isinstance(curr_nested_key, str):
-                curr_nested_key = json.dumps(curr_nested_key)
+            # Ensure the nested field is represented as a string
+            if not isinstance(current_nested_field, str):
+                current_nested_field = json.dumps(current_nested_field)
 
-            # Split the nested key string into a list of nested keys
+            # Split the nested field string into a list of nested keys
             # ['a.b.c'] -> ['a', 'b', 'c']
-            keys = curr_nested_key.split(".")
+            nested_keys = current_nested_field.split(".")
 
-            # Initialize a current dictionary to the root dictionary
-            curr_dict = my_dict_parsed
+            # Initialize the current dictionary to the root dictionary
+            current_dict = data_parsed
 
             # Traverse the dictionary hierarchy by iterating through the list of nested keys
-            for key in keys[:-1]:
-                curr_dict = curr_dict[key]
+            for key in nested_keys[:-1]:
+                current_dict = current_dict[key]
 
             # Retrieve the final value of the nested field
-            valtochange = curr_dict[(keys[-1])]
+            target_value = current_dict[nested_keys[-1]]
 
             # Apply the specified 'action' to the target value
-            curr_dict[keys[-1]] = action(valtochange, **provider_options)
+            current_dict[nested_keys[-1]] = action(target_value, **provider_options)
 
-        return my_dict_parsed
+        return data_parsed

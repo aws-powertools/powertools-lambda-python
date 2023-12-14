@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import base64
+import logging
 from binascii import Error
 from typing import Any, Callable, Dict, List
 
@@ -27,6 +28,8 @@ from aws_lambda_powertools.utilities._data_masking.exceptions import (
     DataMaskingEncryptKeyError,
 )
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
+
+logger = logging.getLogger(__name__)
 
 
 class AwsEncryptionSdkProvider(BaseProvider):
