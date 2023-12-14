@@ -209,9 +209,9 @@ sequenceDiagram
 
 #### Encrypt operation with Encryption SDK (KMS)
 
-We call KMS to generate an unique data key once. It allows us to encrypt this key in-memory, and use it for multiple operations to improve performance and prevent throttling.
+We call KMS to generate an unique data key that can be used for multiple `encrypt` operation in-memory. It improves performance, cost and prevent throttling.
 
-> This is known as [envelope encryption](https://docs.aws.amazon.com/kms/latest/developerguide/concepts.html#enveloping){target="_blank"}.
+To make this operation simpler to visualize, we keep caching details in a [separate sequence diagram](#encrypt-operation-with-caching-in-encryption-sdk). Caching is enabled by default.
 
 <center>
 ```mermaid
@@ -222,15 +222,24 @@ sequenceDiagram
     participant DataMasking as Data Masking
     participant EncryptionProvider as Encryption Provider
     Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
     Lambda->>DataMasking: encrypt(data)
-    DataMasking->>EncryptionProvider: Request unique data key (kms:GenerateDataKey)
-    DataMasking->>DataMasking: Encrypt data key with wrapping key (in-memory)
-    DataMasking->>DataMasking: Encrypt data with newly encrypted key (in-memory)
-    DataMasking->>Lambda: ciphertext containing encrypted data
+    DataMasking->>EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking->>DataMasking: DATA_KEY.encrypt(data)
+    DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking->>DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking->>Lambda: Ciphertext from encrypted message
     Lambda-->>Client: Return response
 ```
 <i>Encrypting operation using envelope encryption.</i>
 </center>
+
+#### Encrypt operation with caching in Encryption SDK
+
+TODO
 
 ## Testing your code
 
