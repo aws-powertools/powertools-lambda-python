@@ -2152,7 +2152,7 @@
 <span class="w">  </span><span class="nt">HelloWorldFunction</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Function</span>
 <span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
+<span class="w">      </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.12</span>
 <span class="w">      </span><span class="nt">Handler</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app.py</span>
 <span class="w">      </span><span class="nt">Policies</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Statement</span><span class="p">:</span>
@@ -2327,7 +2327,7 @@
 <span class="kr">resource</span><span class="w"> </span><span class="nc">&quot;aws_lambda_function&quot;</span><span class="w"> </span><span class="nv">&quot;IdempotencyFunction&quot;</span><span class="w"> </span><span class="p">{</span>
 <span class="w">  </span><span class="na">function_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;IdempotencyFunction&quot;</span>
 <span class="w">  </span><span class="na">role</span><span class="w">          </span><span class="o">=</span><span class="w"> </span><span class="nv">aws_iam_role.IdempotencyFunctionRole.arn</span>
-<span class="w">  </span><span class="na">runtime</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;python3.11&quot;</span>
+<span class="w">  </span><span class="na">runtime</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;python3.12&quot;</span>
 <span class="w">  </span><span class="na">handler</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;app.lambda_handler&quot;</span>
 <span class="w">  </span><span class="na">filename</span><span class="w">      </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;lambda.zip&quot;</span>
 
