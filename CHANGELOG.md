@@ -4,6 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **docs:** make the Lambda Layer version consistent ([#3498](https://github.com/aws-powertools/powertools-lambda-python/issues/3498))
+
+## Documentation
+
+* **customer-reference:** add Transformity as a customer reference ([#3497](https://github.com/aws-powertools/powertools-lambda-python/issues/3497))
+
 ## Maintenance
 
 * **deps:** bump squidfunk/mkdocs-material from `876b39c` to `9af3b7e` in /docs ([#3486](https://github.com/aws-powertools/powertools-lambda-python/issues/3486))
