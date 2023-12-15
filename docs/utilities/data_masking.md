@@ -91,7 +91,10 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 
 #### JSON
 <!-- markdownlint-disable MD013 -->
-When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions. If a `fields` parameter is provided, then the rest of the dictionary or JSON string will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted).
+When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions. 
+
+If a `fields` parameter is provided along with a dictionary as the input data, then the rest of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). If a `fields` parameter is provided while the input data is a JSON string, the returned data structure will be a Python dictionary. The values corresponding to the keys given in the `fields` parameter will be accordingly obfuscated, and the content of everything else in the returned object will remain the same as the input data.
+
 <!-- markdownlint-enable MD013 -->
 
 If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
