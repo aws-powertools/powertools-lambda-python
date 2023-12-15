@@ -37,7 +37,7 @@ class DataMasking:
 
         data = {
             "project": "powertools",
-            "sensitive": "xxxxxxxxxx"
+            "sensitive": "password"
         }
 
         masked = masker.mask(data,fields=["sensitive"])

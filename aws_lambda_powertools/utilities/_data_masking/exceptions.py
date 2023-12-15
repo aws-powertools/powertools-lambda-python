@@ -24,5 +24,5 @@ class DataMaskingDecryptValueError(Exception):
 
 class DataMaskingContextMismatchError(Exception):
     """
-    Decrypting an invalid field.
+    Decrypting with the incorrect encryption context.
     """

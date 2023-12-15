@@ -50,16 +50,16 @@ class AwsEncryptionSdkProvider(BaseProvider):
 
     def lambda_handler(event, context):
         provider = AwsEncryptionSdkProvider(["arn:aws:kms:us-east-1:0123456789012:key/key-id"])
-        masker = DataMasking(provider=provider)
+        data_masker = DataMasking(provider=provider)
 
         data = {
             "project": "powertools",
-            "sensitive": "xxxxxxxxxx"
+            "sensitive": "password"
         }
 
-        masked = masker.encrypt(data,fields=["sensitive"])
+        encrypted = data_masker.encrypt(data, fields=["sensitive"])
 
-        return masked
+        return encrypted
 
     ```
     """
