@@ -4,7 +4,7 @@ from typing import List
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
     Example,
     Parameter,
@@ -390,6 +390,38 @@ def test_openapi_with_excluded_operations():
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 0
+
+
+def test_openapi_with_router_response():
+    router = Router()
+
+    @router.put("/example-resource", responses={200: {"description": "Custom response"}})
+    def handler():
+        pass
+
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.include_router(router)
+
+    schema = app.get_openapi_schema()
+    put = schema.paths["/example-resource"].put
+    assert 200 in put.responses.keys()
+    assert put.responses[200].description == "Custom response"
+
+
+def test_openapi_with_router_tags():
+    router = Router()
+
+    @router.put("/example-resource", tags=["Example"])
+    def handler():
+        pass
+
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.include_router(router)
+
+    schema = app.get_openapi_schema()
+    tags = schema.paths["/example-resource"].put.tags
+    assert len(tags) == 1
+    assert tags[0].name == "Example"
 
 
 def test_create_header():
