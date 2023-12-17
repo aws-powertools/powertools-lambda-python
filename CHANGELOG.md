@@ -4,12 +4,22 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
 
 <a name="v2.30.1"></a>
 ## [v2.30.1] - 2023-12-15
+## Bug Fixes
+
+* **event_handler:** allow responses and metadata when using Router ([#3514](https://github.com/aws-powertools/powertools-lambda-python/issues/3514))
+
 ## Maintenance
 
 * version bump
+* **deps-dev:** bump aws-cdk from 2.114.1 to 2.115.0 ([#3508](https://github.com/aws-powertools/powertools-lambda-python/issues/3508))
+* **deps-dev:** bump the boto-typing group with 11 updates ([#3509](https://github.com/aws-powertools/powertools-lambda-python/issues/3509))
+* **deps-dev:** bump sentry-sdk from 1.39.0 to 1.39.1 ([#3512](https://github.com/aws-powertools/powertools-lambda-python/issues/3512))
 
 
 <a name="v2.30.0"></a>
