@@ -1375,7 +1375,7 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
@@ -1497,7 +1497,7 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
@@ -1567,7 +1567,7 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
