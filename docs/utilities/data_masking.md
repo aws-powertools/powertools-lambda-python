@@ -148,6 +148,15 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
 
+#### Including encryption context
+
+For a stronger security posture, you can add metadata to each encryption operation. This is known as encryption context. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
+
+!!! note "Encryption context will be required in [decryption operation](#decrypting-data)."
+    Make sure this metadata is standard and not random unless it's also available during decrypt operations.
+
+!!! todo "Change encrypt/decrypt signature to allow fluid encryption context"
+
 ### Decrypting data
 
 !!! note "About static typing and decryption"
