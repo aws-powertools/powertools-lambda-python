@@ -95,27 +95,6 @@ Before you start, you will need a KMS key to encrypt and decrypt your data. Your
     1. [Key policy examples using IAM Roles](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators){target="_blank"}
     2. [SAM generated CloudFormation Resources](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role){target="_blank"}
 
-### Working with nested data
-
-!!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
-
-#### JSON
-<!-- markdownlint-disable MD013 -->
-When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions.
-
-If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
-
-If a `fields` parameter is provided while the input data is a JSON string, the returned data structure will be a Python dictionary. The values corresponding to the keys given in the `fields` parameter will be accordingly obfuscated, and the content of everything else in the returned object will remain the same as the input data.
-
-<!-- markdownlint-enable MD013 -->
-
-If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
-
-<!-- markdownlint-disable MD013 -->
-???+ note
-    If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
-<!-- markdownlint-enable MD013 -->
-
 ### Masking data
 
 You can mask data without having to install any encryption library. Masking data will result in the loss of its original type, and the masked data will always be represented as a string.
@@ -135,7 +114,7 @@ You can mask data without having to install any encryption library. Masking data
     --8<-- "examples/data_masking/src/mask_data_output.json"
     ```
 
-### Encryting data
+### Encrypting data
 
 To encrypt data, utilize our built-in integration with the AWS Encryption SDK. Encrypting data will temporarily result in the loss of the original data type, as it transforms into a [ciphertext](https://en.wikipedia.org/wiki/Ciphertext){target="_blank" rel="nofollow"} string.
 
@@ -176,6 +155,27 @@ Decrypting a ciphertext string will transform the data to its original type.
     ```json hl_lines="5-7 12-17"
     --8<-- "examples/data_masking/src/decrypt_data_output.json"
     ```
+
+### Working with nested data
+
+!!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
+
+#### JSON
+<!-- markdownlint-disable MD013 -->
+When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions.
+
+If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
+
+If a `fields` parameter is provided while the input data is a JSON string, the returned data structure will be a Python dictionary. The values corresponding to the keys given in the `fields` parameter will be accordingly obfuscated, and the content of everything else in the returned object will remain the same as the input data.
+
+<!-- markdownlint-enable MD013 -->
+
+If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
+
+<!-- markdownlint-disable MD013 -->
+???+ note
+    If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
+<!-- markdownlint-enable MD013 -->
 
 ## Advanced
 
