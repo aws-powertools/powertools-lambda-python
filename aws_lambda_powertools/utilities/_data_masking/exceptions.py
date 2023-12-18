@@ -28,7 +28,7 @@ class DataMaskingContextMismatchError(Exception):
     """
 
 
-class DataMaskingFieldNotFound(Exception):
+class DataMaskingFieldNotFoundError(Exception):
     """
     Field not found.
     """

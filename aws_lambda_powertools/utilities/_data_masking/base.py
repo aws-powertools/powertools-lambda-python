@@ -5,7 +5,7 @@ import logging
 from typing import Any, Callable, Iterable, Optional, Union
 
 from aws_lambda_powertools.utilities._data_masking.exceptions import (
-    DataMaskingFieldNotFound,
+    DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
@@ -180,7 +180,7 @@ class DataMasking:
                         current_dict = current_dict[int(key)]
                 except KeyError:
                     # Handle the case when the key doesn't exist
-                    raise DataMaskingFieldNotFound(f"Key {key} not found in {current_dict}")
+                    raise DataMaskingFieldNotFoundError(f"Key {key} not found in {current_dict}")
 
             last_key = keys[-1]
 
@@ -225,6 +225,6 @@ class DataMasking:
             current_dict = set(elements_list)
         else:
             # Handle the case when the last key doesn't exist
-            raise DataMaskingFieldNotFound(f"Key {last_key} not found in {current_dict}")
+            raise DataMaskingFieldNotFoundError(f"Key {last_key} not found in {current_dict}")
 
         return current_dict

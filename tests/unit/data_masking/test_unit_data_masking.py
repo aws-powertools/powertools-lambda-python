@@ -4,7 +4,10 @@ import pytest
 
 from aws_lambda_powertools.utilities._data_masking.base import DataMasking
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
-from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
+from aws_lambda_powertools.utilities._data_masking.exceptions import (
+    DataMaskingFieldNotFoundError,
+    DataMaskingUnsupportedTypeError,
+)
 
 
 @pytest.fixture
@@ -169,7 +172,7 @@ def test_parsing_nonexistent_fields(data_masker):
     }
 
     # WHEN attempting to pass in fields that do not exist in the input data
-    with pytest.raises(KeyError):
+    with pytest.raises(DataMaskingFieldNotFoundError):
         # THEN the result is a KeyError
         data_masker.mask(data, ["3.1.True"])
 
