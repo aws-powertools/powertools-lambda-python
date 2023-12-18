@@ -83,7 +83,7 @@ AWS Encryption SDK contains non-Python dependencies. This means you should use [
 
 !!! info "By default, we use Amazon Key Management Service (KMS) for encryption and decryption operations."
 
-Before you start, you will need a KMS key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.
+Before you start, you will need a KMS symmetric key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.
 
 **NOTE**. We recommend setting a minimum of 1024MB of memory _(CPU intensive)_, and separate Lambda functions for encrypt and decrypt.
 
