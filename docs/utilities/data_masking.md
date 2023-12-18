@@ -49,7 +49,7 @@ stateDiagram-v2
 
 **Decrypting** transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.
 
-**Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms encrypted data relationship with a context.
+**Encryption context** is a non-secret `key=value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms encrypted data relationship with a context.
 
 **[Encrypted message](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/message-format.html){target="_blank"}** is a portable data structure that includes encrypted data along with copies of the encrypted data key. It includes everything Encryption SDK needs to validate authenticity, integrity, and to decrypt with the right master key.
 
@@ -156,6 +156,7 @@ For a stronger security posture, you can add metadata to each encryption operati
     Make sure this metadata is standard and not random unless it's also available during decrypt operations.
 
 !!! todo "Change encrypt/decrypt signature to allow fluid encryption context"
+    [We need an API change](https://github.com/aws-powertools/powertools-lambda-python/pull/3186#issuecomment-1860778334).
 
 ### Decrypting data
 
