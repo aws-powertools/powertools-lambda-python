@@ -10,7 +10,6 @@ from aws_lambda_powertools.event_handler.openapi.models import (
     Parameter,
     ParameterInType,
     Schema,
-    Tag,
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
@@ -119,7 +118,7 @@ def test_openapi_with_custom_params():
     assert get.summary == "Get Users"
     assert get.operationId == "GetUsers"
     assert get.description == "Get paginated users"
-    assert get.tags == [Tag(name="Users")]
+    assert get.tags == ["Users"]
 
     parameter = get.parameters[0]
     assert parameter.required is False
@@ -378,7 +377,7 @@ def test_openapi_operation_with_tags():
     assert len(get.tags) == 1
 
     tag = get.tags[0]
-    assert tag.name == "Users"
+    assert tag == "Users"
 
 
 def test_openapi_with_excluded_operations():
@@ -421,7 +420,7 @@ def test_openapi_with_router_tags():
     schema = app.get_openapi_schema()
     tags = schema.paths["/example-resource"].put.tags
     assert len(tags) == 1
-    assert tags[0].name == "Example"
+    assert tags[0] == "Example"
 
 
 def test_create_header():
