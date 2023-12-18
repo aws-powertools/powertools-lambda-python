@@ -12,22 +12,20 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
       Variables:
         POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
         POWERTOOLS_LOG_LEVEL: INFO
-        KMS_KEY_ARN: !GetAtt DataMaskingKMSKey.Arn
+        KMS_KEY_ARN: !GetAtt DataMaskingMasterKey.Arn
 
+# In production, we recommend you split up the encrypt and decrypt for fine-grained security.
+# For example, one function can act as the encryption proxy via HTTP requests, data pipeline, etc.,
+# while only authorized personnel can call decrypt via a separate function.
 Resources:
-  # Lambda Function
-  # This function is mainly for documentation purposes. In prod, we recommend you split up the encrypt and decrypt
-  # calls, so that one function can act as the encryption proxy via HTTP requests, data pipeline, etc.
-  # while authorized personnel can call decrypt from scripts or a separate function.
   DataMaskingEncryptFunctionExample:
     Type: AWS::Serverless::Function
     Properties:
       Handler: data_masking_function_example.lambda_handler
       CodeUri: ../src
-      Description: Data Masking Function Example
-      # Cryptographic operations demand more memory usage.
-      # We recommend to allocate a minimum of 1024MB of memory to your Lambda function
-      # when utilizing the DataMasking Utility.
+      Description: Data Masking encryption function
+      # Cryptographic operations demand more CPU. CPU is proportionally allocated based on memory size.
+      # We recommend allocating a minimum of 1024MB of memory.
       MemorySize: 1024
 
   # DataMaskingDecryptFunctionExample:
@@ -35,39 +33,38 @@ Resources:
   #   Properties:
   #     Handler: data_masking_function_decrypt.lambda_handler
   #     CodeUri: ../src
-  #     Description: Data Masking Function Example
-  #     # Cryptographic operations demand more memory usage.
-  #     # We recommend to allocate a minimum of 1024MB of memory to your Lambda function
-  #     # when utilizing the DataMasking Utility.
+  #     Description: Data Masking decryption function
+  #     Cryptographic operations demand more CPU. CPU is proportionally allocated based on memory size.
+  #     We recommend allocating a minimum of 1024MB of memory.
   #     MemorySize: 1024
 
   # KMS KEY
-  DataMaskingKMSKey:
+  DataMaskingMasterKey:
     Type: "AWS::KMS::Key"
     Properties:
-      Description: KMS Key for Lambda - DataMasking
+      Description: KMS Key for encryption and decryption using Powertools for AWS Lambda Data masking feature
       KeyPolicy:
         Version: "2012-10-17"
-        Id: key-default-1
+        Id: data-masking-enc-dec
         Statement:
-          # To ensure key management security, a KMS Key should have at least one administrator.
+          # For security reasons, ensure your KMS Key has at least one administrator.
           # In this example, the root account is granted administrator permissions.
-          # In a production environment, it is recommended to configure specific users or roles for enhanced security.
+          # However, in production we recommended configuring specific IAM Roles for enhanced security.
           - Effect: Allow
             Principal:
               AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action: "kms:*"
             Resource: "*"
-          # KMS utilizes resource policies, allowing direct access grant to the Lambda Role on the KMS Key.
+          # KMS supports IAM resource policies to grant Lambda's IAM Role access to the KMS Key.
           # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
           - Effect: Allow
             Principal:
               AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn # Permission for the Lambda role
             # These IAM permissions are necessary for the envelope encryption that AWS Encryption SDK uses.
-            # Envelope encryption randomly generates a data key and encrypts that data key along with your data,
-            # so we encrypt in-memory to prevent too many calls to KMS to reduce latency.
             # For more details: https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption
             Action:
+              # We use `Decrypt` to decrypt encrypted data key
               - kms:Decrypt
+              # We use `GeneratedDataKey` to create an unique and random data key for encryption
               - kms:GenerateDataKey
             Resource: "*"
