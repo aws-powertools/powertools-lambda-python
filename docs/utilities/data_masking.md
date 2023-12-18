@@ -49,6 +49,19 @@ stateDiagram-v2
 
 **Decrypting** transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.
 
+**Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms data decryption is related to a given context.
+
+**Envelope encryption** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management (_you own the master key_), isolates compromises to data key, and scales faster with large data volumes.
+
+<center>
+```mermaid
+graph LR
+    M(Master key) --> |Encrypts| D(Data key)
+    D(Data key) --> |Encrypts| S(Sensitive data)
+```
+<i>Envelope encryption visualized.</i>
+</center>
+
 ## Getting started
 
 ### Install
