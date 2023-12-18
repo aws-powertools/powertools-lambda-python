@@ -120,21 +120,26 @@ Masking will erase the original data and replace with `*****`. This means you ca
 
 ### Encrypting data
 
-To encrypt data, utilize our built-in integration with the AWS Encryption SDK. Encrypting data will temporarily result in the loss of the original data type, as it transforms into a [ciphertext](https://en.wikipedia.org/wiki/Ciphertext){target="_blank" rel="nofollow"} string.
+!!! note "About static typing and encryption"
+    Encrypting data may lead to a different data type, as it always transforms into a string _(`<ciphertext>`)_.
 
-To encrypt your data, you'll need a valid and symmetric [AWS KMS](https://docs.aws.amazon.com/kms/latest/developerguide/data-protection.html){target="_blank"} key.
+To encrypt, you will need an [encryption provider](#providers). Here, we will use `AWSEncryptionSDKProvider`.
 
 === "getting_started_encrypt_data.py"
-    ```python hl_lines="5-6 12-13 22"
+
+    ```python hl_lines="5-6 11-12 23"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
-=== "input.json"
+    1. You can use more than one KMS Key for higher availability with increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
+    2. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be encrypted.
+
+=== "generic_data_input.json"
     ```json hl_lines="7-9 14"
     --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
-=== "output.json"
+=== "encrypt_data_output.json"
     ```json hl_lines="5-7 12"
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
