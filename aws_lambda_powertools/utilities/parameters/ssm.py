@@ -661,6 +661,48 @@ def get_parameter(
     )
 
 
+@overload
+def get_parameters(
+    path: str,
+    transform: None = None,
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, str]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["json"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, dict]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["binary"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, bytes]:
+    ...
+
+
 def get_parameters(
     path: str,
     transform: Optional[str] = None,
