@@ -51,6 +51,8 @@ stateDiagram-v2
 
 **Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms encrypted data relationship with a context.
 
+**[Encrypted message](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/message-format.html){target="_blank"}** is a portable data structure that includes encrypted data along with copies of the encrypted data key. It includes everything Encryption SDK needs to validate authenticity, integrity, and to decrypt with the right master key.
+
 <!-- markdownlint-disable MD013 -->
 **[Envelope encryption](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption){target="_blank"}** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management _(you own the master key)_, isolates compromises to data key, and scales better with large data volumes.
 <!-- markdownlint-enable MD013 -->
@@ -304,7 +306,7 @@ sequenceDiagram
 
 Without caching, every `encrypt()` operation would generate a new data key. It significantly increases latency and cost for ephemeral and short running environments like Lambda.
 
-With caching, we balance ephemeral Lambda environment performance characteristics with adjustable thresholds to meet your security needs.
+With caching, we balance ephemeral Lambda environment performance characteristics with [adjustable thresholds](#aws-encryption-sdk) to meet your security needs.
 
 !!! info "Data key recycling"
     We request a new data key when a cached data key exceeds any of the following security thresholds:
