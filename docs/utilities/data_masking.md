@@ -85,7 +85,7 @@ AWS Encryption SDK contains non-Python dependencies. This means you should use [
 
 Before you start, you will need a KMS symmetric key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.
 
-**NOTE**. We recommend setting a minimum of 1024MB of memory _(CPU intensive)_, and separate Lambda functions for encrypt and decrypt.
+**NOTE**. We recommend setting a minimum of 1024MB of memory _(CPU intensive)_, and separate Lambda functions for encrypt and decrypt. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597){target="_blank"} and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923){target="_blank"}.
 
 === "AWS Serverless Application Model (SAM) example"
     ```yaml hl_lines="15 29 41 61 66-67"
@@ -194,11 +194,6 @@ If a `fields` parameter is provided while the input data is a JSON string, the r
 <!-- markdownlint-enable MD013 -->
 
 If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
-
-<!-- markdownlint-disable MD013 -->
-???+ note
-    If you're using our example [AWS Serverless Application Model (SAM) template](#using-a-custom-encryption-provider), you will notice we have configured the Lambda function to use a memory size of 1024 MB. We compared the performances of Lambda functions of several different memory sizes and concluded 1024 MB was the most optimal size for this feature. For more information, you can see the full reports of our [load tests](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597) and [traces](https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923).
-<!-- markdownlint-enable MD013 -->
 
 ## Advanced
 
