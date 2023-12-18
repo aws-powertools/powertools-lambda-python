@@ -148,13 +148,6 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
 
-#### Including encryption context
-
-For a stronger security posture, you can add metadata to each encryption operation. This is known as encryption context. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
-
-!!! todo "Change encrypt/decrypt signature to allow fluid encryption context"
-    [We need an API change](https://github.com/aws-powertools/powertools-lambda-python/pull/3186#issuecomment-1860778334).
-
 ### Decrypting data
 
 !!! note "About static typing and decryption"
@@ -187,6 +180,34 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
     ```json hl_lines="5-7 12-17"
     --8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
     ```
+
+### Additional authenticated data (AAD)
+
+For a stronger security posture, you can add metadata to each encryption operation. This is known as **encryption context**. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
+
+**NOTE**. Only string values are supported.
+
+!!! todo "Change encrypt/decrypt signature to allow fluid encryption context"
+    [We need an API change](https://github.com/aws-powertools/powertools-lambda-python/pull/3186#issuecomment-1860778334).
+
+!!! question "Why non-sensitive data?"
+     Because it is stored in plaintext in AWS CloudTrail; it could be seen by anyone with access to CloudTrail. Unless you [intentionally disabled KMS events in a custom trail](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
+
+!!! todo "Explain decryption context not being a strict exact match due to random data."
+
+=== "getting_started_encrypt_context.py"
+
+    ```python hl_lines="27-30"
+    --8<-- "examples/data_masking/src/getting_started_encrypt_context.py"
+    ```
+
+=== "getting_started_decrypt_context.py"
+
+    ```python hl_lines="26"
+    --8<-- "examples/data_masking/src/getting_started_decrypt_context.py"
+    ```
+
+    1. We use `tenant_id` to be sure the data we're decrypting belongs to this tenant.
 
 ### Working with nested data
 
