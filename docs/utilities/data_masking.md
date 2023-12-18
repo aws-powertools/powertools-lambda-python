@@ -83,6 +83,8 @@ AWS Encryption SDK contains non-Python dependencies. This means you should use [
 
 Before you start, you will need a KMS key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.
 
+**NOTE**. We recommend setting a minimum of 1024MB of memory _(CPU intensive)_, and separate Lambda functions for encrypt and decrypt.
+
 === "AWS Serverless Application Model (SAM) example"
     ```yaml hl_lines="16 24 35 59-60 66-67"
     --8<-- "examples/data_masking/sam/template.yaml"
