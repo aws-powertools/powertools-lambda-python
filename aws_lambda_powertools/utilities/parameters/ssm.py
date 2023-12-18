@@ -545,9 +545,45 @@ class SSMProvider(BaseProvider):
             )
 
 
+@overload
 def get_parameter(
     name: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> str:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["json"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> dict:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["binary"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> bytes:
+    ...
+
+
+def get_parameter(
+    name: str,
+    transform: Optional[Literal["json", "binary"]] = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
