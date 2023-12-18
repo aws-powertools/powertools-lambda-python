@@ -64,13 +64,24 @@ graph LR
 
 ## Getting started
 
+???+ tip
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
+
 ### Install
 
-Before you start, you need to create a KMS key to encrypt and decrypt your data - your Lambda function will need read and write access to it.
+!!! note "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
 
-!!! note "If your Lambda function only masks data without utilizing any encryption services, it requires no additional permissions or library to use this utility."
+Add `aws-lambda-powertools[datamasking-aws-sdk]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will install the [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank"}.
+
+<!-- markdownlint-disable MD013 -->
+AWS Encryption SDK contains non-Python dependencies. This means you should use [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/using-sam-cli-build.html#using-sam-cli-build-options-container){target="_blank"} or [official build container images](https://gallery.ecr.aws/search?searchTerm=sam%2Fbuild-python&popularRegistries=amazon){target="_blank"} when building your application for AWS Lambda. Local development should work as expected.
+<!-- markdownlint-enable MD013 -->
 
 ### Required resources
+
+!!! info "By default, we use Amazon Key Management Service (KMS) for encryption and decryption operations."
+
+Before you start, you will need a KMS key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.
 
 === "AWS Serverless Application Model (SAM) example"
     ```yaml hl_lines="16 24 35 59-60 66-67"
