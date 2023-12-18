@@ -125,13 +125,15 @@ Masking will erase the original data and replace with `*****`. This means you ca
 
 To encrypt, you will need an [encryption provider](#providers). Here, we will use `AWSEncryptionSDKProvider`.
 
+Under the hood, we delegate a [number of operations](#encrypt-operation-with-encryption-sdk-kms) to AWS Encryption SDK to authenticate, create a portable encryption message, and actual data encryption.
+
 === "getting_started_encrypt_data.py"
 
     ```python hl_lines="5-6 11-12 23"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
-    1. You can use more than one KMS Key for higher availability with increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
+    1. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
     2. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be encrypted.
 
 === "generic_data_input.json"
@@ -146,23 +148,35 @@ To encrypt, you will need an [encryption provider](#providers). Here, we will us
 
 ### Decrypting data
 
-To decrypt data, use the appropriate key to transform ciphertext back into plaintext. Upon decryption, the data will return to its original type.
+!!! note "About static typing and decryption"
+    Decrypting data may lead to a different data type, as encrypted data is always a string _(`<ciphertext>`)_.
 
-Decrypting a ciphertext string will transform the data to its original type.
+To decrypt, you will need an [encryption provider](#providers). Here, we will use `AWSEncryptionSDKProvider`.
 
-=== "input.json"
+Under the hood, we delegate a [number of operations](#decrypt-operation-with-encryption-sdk-kms) to AWS Encryption SDK to verify authentication, integrity, and actual ciphertext decryption.
+
+=== "getting_started_decrypt_data.py"
+
+    **NOTE**. Decryption only works with KMS Key ARN.
+
+    ```python hl_lines="5-6 11-12 23"
+    --8<-- "examples/data_masking/src/getting_started_decrypt_data.py"
+    ```
+
+    1. Note that KMS key alias or key ID won't work.
+    2. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will call `Decrypt` API with all master keys when trying to decrypt the data key.
+    3. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter.
+
+=== "encrypt_data_output.json"
+
     ```json hl_lines="5-7 12"
     --8<-- "examples/data_masking/src/encrypt_data_output.json"
     ```
 
-=== "getting_started_encrypt_data.py"
-    ```python hl_lines="3-4 12-13 17"
-    --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
-    ```
+=== "getting_started_decrypt_data_output.json"
 
-=== "output.json"
     ```json hl_lines="5-7 12-17"
-    --8<-- "examples/data_masking/src/decrypt_data_output.json"
+    --8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
     ```
 
 ### Working with nested data
