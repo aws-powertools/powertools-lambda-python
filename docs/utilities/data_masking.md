@@ -183,7 +183,7 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
 ### Additional authenticated data (AAD)
 
-For a stronger security posture, you can add metadata to each encryption operation. This is known as **encryption context**. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
+For a stronger security posture, you can add metadata to each encryption operation, and verify one or more of them during decryption. This is known as **encryption context**. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
 
 **NOTE**. Only string values are supported.
 
