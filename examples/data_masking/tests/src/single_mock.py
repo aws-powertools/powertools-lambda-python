@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Union
 
 from aws_lambda_powertools.utilities._data_masking.base import DataMasking
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AwsEncryptionSdkProvider
+from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
 
 
 class FakeEncryptionKeyProvider(BaseProvider):
@@ -31,7 +31,7 @@ def handler(event, context):
     data = "mock_value"
 
     fake_key_provider = FakeEncryptionKeyProvider()
-    provider = AwsEncryptionSdkProvider(
+    provider = AWSEncryptionSDKProvider(
         keys=["dummy"],
         key_provider=fake_key_provider,
     )

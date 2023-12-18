@@ -44,7 +44,7 @@ class BaseProvider:
         def mask(self, data) -> Union[str, Iterable]:
             # Implementation logic for data masking
             pass
-            
+
     def lambda_handler(event, context):
         provider = MyCustomProvider(["secret-key"])
         data_masker = DataMasking(provider=provider)
@@ -83,13 +83,13 @@ class BaseProvider:
 
     def mask(self, data) -> Union[str, Iterable]:
         """
-        This method irreversibly masks data. 
-        
+        This method irreversibly masks data.
+
         If the data to be masked is of type `str`, `dict`, or `bytes`,
         this method will return a masked string, i.e. "*****".
 
-        If the data to be masked is of an iterable type like `list`, `tuple`, 
-        or `set`, this method will return a new object of the same type as the 
+        If the data to be masked is of an iterable type like `list`, `tuple`,
+        or `set`, this method will return a new object of the same type as the
         input data but with each element replaced by the string "*****".
         """
         if isinstance(data, (str, dict, bytes)):

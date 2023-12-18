@@ -32,9 +32,9 @@ from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 logger = logging.getLogger(__name__)
 
 
-class AwsEncryptionSdkProvider(BaseProvider):
+class AWSEncryptionSDKProvider(BaseProvider):
     """
-    The AwsEncryptionSdkProvider is used as a provider for the DataMasking class.
+    The AWSEncryptionSDKProvider is used as a provider for the DataMasking class.
 
     This provider allows you to perform data masking using the AWS Encryption SDK
     for encryption and decryption. It integrates with the DataMasking class to
@@ -44,12 +44,12 @@ class AwsEncryptionSdkProvider(BaseProvider):
     ```
     from aws_lambda_powertools.utilities.data_masking import DataMasking
     from aws_lambda_powertools.utilities.data_masking.providers.kms.aws_encryption_sdk import (
-        AwsEncryptionSdkProvider,
+        AWSEncryptionSDKProvider,
     )
 
 
     def lambda_handler(event, context):
-        provider = AwsEncryptionSdkProvider(["arn:aws:kms:us-east-1:0123456789012:key/key-id"])
+        provider = AWSEncryptionSDKProvider(["arn:aws:kms:us-east-1:0123456789012:key/key-id"])
         data_masker = DataMasking(provider=provider)
 
         data = {
@@ -130,7 +130,7 @@ class KMSKeyProvider:
 
     def encrypt(self, data: bytes | str | Dict | float, **provider_options) -> str:
         """
-        Encrypt data using the AwsEncryptionSdkProvider.
+        Encrypt data using the AWSEncryptionSDKProvider.
 
         Parameters
         -------

@@ -4,12 +4,12 @@ from typing import Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AwsEncryptionSdkProvider
+from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 KMS_KEY_ARN = os.getenv("KMS_KEY_ARN", "")
 
-encryption_provider = AwsEncryptionSdkProvider(keys=[KMS_KEY_ARN])
+encryption_provider = AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN])
 data_masker = DataMasking(provider=encryption_provider)
 
 logger = Logger()

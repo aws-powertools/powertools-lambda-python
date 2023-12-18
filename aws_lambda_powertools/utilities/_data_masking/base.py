@@ -4,7 +4,10 @@ import json
 import logging
 from typing import Any, Callable, Iterable, Optional, Union
 
-from aws_lambda_powertools.utilities._data_masking.exceptions import DataMaskingUnsupportedTypeError
+from aws_lambda_powertools.utilities._data_masking.exceptions import (
+    DataMaskingFieldNotFound,
+    DataMaskingUnsupportedTypeError,
+)
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
 logger = logging.getLogger(__name__)
@@ -137,9 +140,56 @@ class DataMasking:
         ```
         """
 
-        data_parsed = {}
+        data_parsed: dict = self._normalize_data_to_parse(fields, data)
 
-        if fields is None:
+        for nested_field in fields:
+            logger.debug(f"Processing nested field: {nested_field}")
+
+            nested_parsed_field = nested_field
+
+            # Ensure the nested field is represented as a string
+            if not isinstance(nested_parsed_field, str):
+                nested_parsed_field = json.dumps(nested_parsed_field)
+
+            # Split the nested field into keys using dot, square brackets as separators
+            # keys = re.split(r"\.|\[|\]", nested_field) # noqa ERA001 - REVIEW THIS
+
+            keys = nested_parsed_field.replace("][", ".").replace("[", ".").replace("]", "").split(".")
+            keys = [key for key in keys if key]  # Remove empty strings from the split
+
+            # Traverse the dictionary hierarchy by iterating through the list of nested keys
+            current_dict = data_parsed
+
+            for key in keys[:-1]:
+                # If enter here, the customer is passing potential list, set or tuple
+                # Example "payload[0]"
+
+                logger.debug(f"Processing {key} in field {nested_field}")
+
+                # It supports dict, list, set and tuple
+                try:
+                    if isinstance(current_dict, dict) and key in current_dict:
+                        # If enter heres, it captures the name of the key
+                        # Example "payload"
+                        current_dict = current_dict[key]
+                    elif (
+                        isinstance(current_dict, (set, tuple, list)) and key.isdigit() and int(key) < len(current_dict)
+                    ):
+                        # If enter heres, it captures the index of the key
+                        # Example "[0]"
+                        current_dict = current_dict[int(key)]
+                except KeyError:
+                    # Handle the case when the key doesn't exist
+                    raise DataMaskingFieldNotFound(f"Key {key} not found in {current_dict}")
+
+            last_key = keys[-1]
+
+            current_dict = self._apply_action_to_specific_type(current_dict, action, last_key, **provider_options)
+
+        return data_parsed
+
+    def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
+        if not fields:
             raise ValueError("No fields specified.")
 
         if isinstance(data, str):
@@ -154,29 +204,27 @@ class DataMasking:
                 f"Unsupported data type. Expected a traversable type (dict or str), but got {type(data)}.",
             )
 
-        for nested_field in fields:
-            # Prevent overriding loop variable
-            current_nested_field = nested_field
-
-            # Ensure the nested field is represented as a string
-            if not isinstance(current_nested_field, str):
-                current_nested_field = json.dumps(current_nested_field)
-
-            # Split the nested field string into a list of nested keys
-            # ['a.b.c'] -> ['a', 'b', 'c']
-            nested_keys = current_nested_field.split(".")
-
-            # Initialize the current dictionary to the root dictionary
-            current_dict = data_parsed
-
-            # Traverse the dictionary hierarchy by iterating through the list of nested keys
-            for key in nested_keys[:-1]:
-                current_dict = current_dict[key]
-
-            # Retrieve the final value of the nested field
-            target_value = current_dict[nested_keys[-1]]
-
-            # Apply the specified 'action' to the target value
-            current_dict[nested_keys[-1]] = action(target_value, **provider_options)
-
         return data_parsed
+
+    def _apply_action_to_specific_type(self, current_dict: dict, action: Callable, last_key, **provider_options):
+        logger.debug("Processing the last fields to apply the action")
+        # Apply the action to the last key (either a specific index or dictionary key)
+        if isinstance(current_dict, dict) and last_key in current_dict:
+            current_dict[last_key] = action(current_dict[last_key], **provider_options)
+        elif isinstance(current_dict, list) and last_key.isdigit() and int(last_key) < len(current_dict):
+            current_dict[int(last_key)] = action(current_dict[int(last_key)], **provider_options)
+        elif isinstance(current_dict, tuple) and last_key.isdigit() and int(last_key) < len(current_dict):
+            index = int(last_key)
+            current_dict = (
+                current_dict[:index] + (action(current_dict[index], **provider_options),) + current_dict[index + 1 :]
+            )
+        elif isinstance(current_dict, set):
+            # Convert the set to a list, apply the action, and convert back to a set
+            elements_list = list(current_dict)
+            elements_list[int(last_key)] = action(elements_list[int(last_key)], **provider_options)
+            current_dict = set(elements_list)
+        else:
+            # Handle the case when the last key doesn't exist
+            raise DataMaskingFieldNotFound(f"Key {last_key} not found in {current_dict}")
+
+        return current_dict

@@ -10,7 +10,7 @@ from aws_lambda_powertools.utilities._data_masking import DataMasking
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 from aws_lambda_powertools.utilities._data_masking.provider.kms import (
-    AwsEncryptionSdkProvider,
+    AWSEncryptionSDKProvider,
 )
 
 
@@ -37,7 +37,7 @@ class FakeEncryptionKeyProvider(BaseProvider):
 def data_masker(monkeypatch) -> DataMasking:
     """DataMasking using AWS Encryption SDK Provider with a fake client"""
     fake_key_provider = FakeEncryptionKeyProvider()
-    provider = AwsEncryptionSdkProvider(
+    provider = AWSEncryptionSDKProvider(
         keys=["dummy"],
         key_provider=fake_key_provider,
     )
@@ -278,6 +278,46 @@ def test_encrypt_json_dict_with_fields(data_masker):
     # WHEN encrypting and then decrypting the encrypted data
     encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
     decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_json_with_list_fields(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "payload": {
+                "first": ["value1", "value2"],
+                "second": [{"key1": [0, 1]}],
+            },
+        },
+    )
+
+    fields_operation = ["payload.first[0]", "payload.second[0].key1[0]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_json_with_tuple_fields(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "payload": {
+                "first": ["value1", "value2"],
+                "second": (0, 1),
+            },
+        },
+    )
+
+    fields_operation = ["payload.first[0]", "payload.second[0]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == json.loads(data)

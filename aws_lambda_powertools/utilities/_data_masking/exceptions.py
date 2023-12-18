@@ -26,3 +26,9 @@ class DataMaskingContextMismatchError(Exception):
     """
     Decrypting with the incorrect encryption context.
     """
+
+
+class DataMaskingFieldNotFound(Exception):
+    """
+    Field not found.
+    """
