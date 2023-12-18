@@ -201,7 +201,7 @@ If `fields` is not provided, the entire data object will be masked (or encrypted
 
 #### AWS Encryption SDK
 
-You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AWSEncryptionSDKProvider`.
+You can modify the following values when initializing the `AWSEncryptionSDKProvider` to best accommodate your security and performance thresholds.
 
 | Parameter                  | Required | Default               | Description                                                                                   |
 | -------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
@@ -209,8 +209,6 @@ You have the option to modify some of the configurations we have set as defaults
 | **max_cache_age_seconds**  |          | `300`                 | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
 | **max_messages_encrypted** |          | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    |          | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
-
-For more information about the parameters for this provider, please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#aws_encryption_sdk.materials_managers.caching.CachingCryptoMaterialsManager){target="_blank" rel="nofollow"}.
 
 #### Creating your own provider
 
