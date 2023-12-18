@@ -201,7 +201,7 @@ If `fields` is not provided, the entire data object will be masked (or encrypted
 
 #### AWS Encryption SDK
 
-You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AwsEncryptionSdkProvider`.
+You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AWSEncryptionSDKProvider`.
 
 | Parameter                  | Required | Default               | Description                                                                                   |
 | -------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
@@ -257,7 +257,7 @@ sequenceDiagram
     participant EncryptionProvider as Encryption Provider
     Client->>Lambda: Invoke (event)
     Lambda->>DataMasking: Init Encryption Provider with master key
-    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
     Lambda->>DataMasking: encrypt(data)
     DataMasking->>EncryptionProvider: Create unique data key
     Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
@@ -288,7 +288,7 @@ sequenceDiagram
     participant EncryptionProvider as Encryption Provider
     Client->>Lambda: Invoke (event)
     Lambda->>DataMasking: Init Encryption Provider with master key
-    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
     Lambda->>DataMasking: decrypt(data)
     DataMasking->>EncryptionProvider: Decrypt encrypted data key
     Note over DataMasking,EncryptionProvider: KMS Decrypt API
@@ -325,7 +325,7 @@ sequenceDiagram
     participant EncryptionProvider as Encryption Provider
     Client->>Lambda: Invoke (event)
     Lambda->>DataMasking: Init Encryption Provider with master key
-    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
     Lambda->>DataMasking: encrypt(data)
     DataMasking->>EncryptionProvider: Create unique data key
     Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
