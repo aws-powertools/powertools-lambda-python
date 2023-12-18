@@ -97,15 +97,19 @@ Before you start, you will need a KMS key to encrypt and decrypt your data. Your
 
 ### Masking data
 
-You can mask data without having to install any encryption library. Masking data will result in the loss of its original type, and the masked data will always be represented as a string.
+!!! note "You can mask data without [installing any dependency](#install)."
+
+Masking will erase the original data and replace with `*****`. This means you cannot recover masked data, and its type will change to `str`.
 
 === "getting_started_mask_data.py"
-    ```python hl_lines="4 8 16"
+    ```python hl_lines="4 8 17"
     --8<-- "examples/data_masking/src/getting_started_mask_data.py"
     ```
 
+    1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
+
 === "input.json"
-    ```json
+    ```json hl_lines="7 9 14"
     --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
