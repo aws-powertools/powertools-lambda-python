@@ -43,15 +43,15 @@ stateDiagram-v2
 
 ## Terminology
 
-**Masking** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. Data is replaced in-memory hence why being irreversible.
+**Masking** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. It replaces data in-memory, hence why being irreversible.
 
-**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. This allows you to encrypt any PII (personally identifiable information) to ensure only authorized personnel can decrypt it.
+**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it.
 
 **Decrypting** transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.
 
-**Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms data decryption is related to a given context.
+**Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms encrypted data relationship with a context.
 
-**Envelope encryption** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management (_you own the master key_), isolates compromises to data key, and scales faster with large data volumes.
+**Envelope encryption** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management _(you own the master key)_, isolates compromises to data key, and scales better with large data volumes.
 
 <center>
 ```mermaid
