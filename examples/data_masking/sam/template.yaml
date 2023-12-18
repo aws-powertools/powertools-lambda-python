@@ -11,7 +11,6 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-        POWERTOOLS_METRICS_NAMESPACE: Powertools
         POWERTOOLS_LOG_LEVEL: INFO
         KMS_KEY_ARN: !GetAtt DataMaskingKMSKey.Arn
 
