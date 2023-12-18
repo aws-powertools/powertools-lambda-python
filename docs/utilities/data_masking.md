@@ -91,7 +91,7 @@ When using AWS Encryption SDK with AWS KMS keys for data encryption and decrypti
 
 #### JSON
 <!-- markdownlint-disable MD013 -->
-When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions. 
+When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions.
 
 If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
 
@@ -175,12 +175,12 @@ Decrypting a ciphertext string will transform the data to its original type.
 
 You have the option to modify some of the configurations we have set as defaults when connecting to the AWS Encryption SDK. You can find and modify the following values when initializing the `AwsEncryptionSdkProvider`.
 
-| Parameter                  | Required | Default | Description                                                                                   |
-| -------------------------- | -------- | ------- | --------------------------------------------------------------------------------------------- |
-| **local_cache_capacity**   |          | `100`   | The maximum number of entries that can be retained in the local cryptographic materials cache |
-| **max_cache_age_seconds**  |          | `300`   | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
-| **max_messages_encrypted** |          | `4294967296`   | The maximum number of messages that may be encrypted under a cache entry                      |
-| **max_bytes_encrypted** |          | `9223372036854775807`   | The maximum number of bytes that may be encrypted under a cache entry                      |
+| Parameter                  | Required | Default               | Description                                                                                   |
+| -------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| **local_cache_capacity**   |          | `100`                 | The maximum number of entries that can be retained in the local cryptographic materials cache |
+| **max_cache_age_seconds**  |          | `300`                 | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
+| **max_messages_encrypted** |          | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
+| **max_bytes_encrypted**    |          | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
 For more information about the parameters for this provider, please see the [AWS Encryption SDK documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.materials_managers.caching.html#aws_encryption_sdk.materials_managers.caching.CachingCryptoMaterialsManager){target="_blank" rel="nofollow"}.
 
@@ -242,6 +242,36 @@ sequenceDiagram
     Lambda-->>Client: Return response
 ```
 <i>Encrypting operation using envelope encryption.</i>
+</center>
+
+#### Decrypt operation with Encryption SDK (KMS)
+
+We call KMS to decrypt the encrypted data key available in the encrypted message. If successful, we run authentication _(context)_ and integrity checks (_algorithm, data key length, etc_) to confirm its proceedings.
+
+Lastly, we decrypt the original encrypted data, throw away the decrypted data key for security reasons, and return the original plaintext data.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AwsEncryptionSdkProvider([KMS_KEY])
+    Lambda->>DataMasking: decrypt(data)
+    DataMasking->>EncryptionProvider: Decrypt encrypted data key
+    Note over DataMasking,EncryptionProvider: KMS Decrypt API
+    DataMasking->>DataMasking: Authentication and integrity checks
+    DataMasking->>DataMasking: DATA_KEY.decrypt(data)
+    DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking->>DataMasking: Discards decrypted data key
+    DataMasking->>Lambda: Plaintext
+    Lambda-->>Client: Return response
+```
+<i>Decrypting operation using envelope encryption.</i>
 </center>
 
 #### Caching encrypt operations with Encryption SDK
