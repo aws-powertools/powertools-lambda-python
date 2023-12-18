@@ -380,7 +380,7 @@ class Tag(BaseModel):
 
 # https://swagger.io/specification/#operation-object
 class Operation(BaseModel):
-    tags: Optional[List[Tag]] = None
+    tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None

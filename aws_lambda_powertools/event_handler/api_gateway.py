@@ -559,7 +559,7 @@ class Route:
 
         # Ensure tags is added to the operation
         if self.tags:
-            operation["tags"] = [{"name": tag for tag in self.tags}]
+            operation["tags"] = self.tags
 
         # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
