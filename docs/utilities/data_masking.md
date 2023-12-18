@@ -51,7 +51,9 @@ stateDiagram-v2
 
 **Encryption context** is a non-secret `key:value` data used for authentication like `tenant_id:<id>`. This adds extra security and confirms encrypted data relationship with a context.
 
-**Envelope encryption** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management _(you own the master key)_, isolates compromises to data key, and scales better with large data volumes.
+<!-- markdownlint-disable MD013 -->
+**[Envelope encryption](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption){target="_blank"}** uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management _(you own the master key)_, isolates compromises to data key, and scales better with large data volumes.
+<!-- markdownlint-enable MD013 -->
 
 <center>
 ```mermaid
@@ -86,9 +88,12 @@ Before you start, you will need a KMS key to encrypt and decrypt your data. Your
 **NOTE**. We recommend setting a minimum of 1024MB of memory _(CPU intensive)_, and separate Lambda functions for encrypt and decrypt.
 
 === "AWS Serverless Application Model (SAM) example"
-    ```yaml hl_lines="16 24 35 59-60 66-67"
+    ```yaml hl_lines="15 29 41 61 66-67"
     --8<-- "examples/data_masking/sam/template.yaml"
     ```
+
+    1. [Key policy examples using IAM Roles](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators){target="_blank"}
+    2. [SAM generated CloudFormation Resources](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role){target="_blank"}
 
 #### Using AWS Encryption SDK
 

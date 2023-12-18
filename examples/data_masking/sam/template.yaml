@@ -34,37 +34,32 @@ Resources:
   #     Handler: data_masking_function_decrypt.lambda_handler
   #     CodeUri: ../src
   #     Description: Data Masking decryption function
-  #     Cryptographic operations demand more CPU. CPU is proportionally allocated based on memory size.
-  #     We recommend allocating a minimum of 1024MB of memory.
   #     MemorySize: 1024
 
-  # KMS KEY
+  # KMS Key
   DataMaskingMasterKey:
     Type: "AWS::KMS::Key"
     Properties:
       Description: KMS Key for encryption and decryption using Powertools for AWS Lambda Data masking feature
+      # KMS Key support both IAM Resource Policies and Key Policies
+      # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
       KeyPolicy:
         Version: "2012-10-17"
         Id: data-masking-enc-dec
         Statement:
           # For security reasons, ensure your KMS Key has at least one administrator.
           # In this example, the root account is granted administrator permissions.
-          # However, in production we recommended configuring specific IAM Roles for enhanced security.
+          # However, we recommended configuring specific IAM Roles for enhanced security in production.
           - Effect: Allow
             Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root" # (1)!
             Action: "kms:*"
             Resource: "*"
-          # KMS supports IAM resource policies to grant Lambda's IAM Role access to the KMS Key.
-          # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
+          # We must grant Lambda's IAM Role access to the KMS Key
           - Effect: Allow
             Principal:
-              AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn # Permission for the Lambda role
-            # These IAM permissions are necessary for the envelope encryption that AWS Encryption SDK uses.
-            # For more details: https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption
+              AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn # (2)!
             Action:
-              # We use `Decrypt` to decrypt encrypted data key
-              - kms:Decrypt
-              # We use `GeneratedDataKey` to create an unique and random data key for encryption
-              - kms:GenerateDataKey
+              - kms:Decrypt # to decrypt encrypted data key
+              - kms:GenerateDataKey # to create an unique and random data key for encryption
             Resource: "*"
