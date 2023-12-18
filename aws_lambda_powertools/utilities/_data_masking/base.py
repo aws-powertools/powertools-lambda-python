@@ -53,7 +53,7 @@ class DataMasking:
     def __init__(self, provider: Optional[BaseProvider] = None):
         self.provider = provider or BaseProvider()
 
-    def encrypt(self, data, fields=None, **provider_options) -> str:
+    def encrypt(self, data, fields=None, **provider_options) -> str | dict:
         return self._apply_action(data, fields, self.provider.encrypt, **provider_options)
 
     def decrypt(self, data, fields=None, **provider_options) -> Any:

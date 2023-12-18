@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+from typing import Iterable
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities._data_masking import DataMasking
@@ -16,11 +17,11 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: dict, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> Iterable | str:
     data = event.get("body", {})
 
     logger.info("Encrypting fields email, address.street, and company_address")
 
-    encrypted: dict = data_masker.encrypt(data, fields=["email", "address.street", "company_address"])  # (2)!
+    encrypted: Iterable = data_masker.encrypt(data, fields=["email", "address.street", "company_address"])  # (2)!
 
     return encrypted

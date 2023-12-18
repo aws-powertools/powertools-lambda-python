@@ -21,7 +21,7 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 
     logger.info("Decrypting email field")
 
-    decrypted: dict = data_masker.encrypt(
+    decrypted = data_masker.decrypt(
         data,
         fields=["email"],
         tenant_id=event.get("tenant_id", ""),  # (1)!

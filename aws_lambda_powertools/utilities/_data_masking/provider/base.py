@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Any, Iterable, Union
 
@@ -75,7 +77,7 @@ class BaseProvider:
     def default_json_deserializer(self, data):
         return json.loads(data.decode("utf-8"))
 
-    def encrypt(self, data) -> str:
+    def encrypt(self, data) -> str | dict:
         raise NotImplementedError("Subclasses must implement encrypt()")
 
     def decrypt(self, data) -> Any:
