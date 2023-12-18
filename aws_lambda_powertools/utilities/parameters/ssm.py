@@ -705,7 +705,7 @@ def get_parameters(
 
 def get_parameters(
     path: str,
-    transform: Optional[str] = None,
+    transform: Optional[Literal["json", "binary"]] = None,
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
