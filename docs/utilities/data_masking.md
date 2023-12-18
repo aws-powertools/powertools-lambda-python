@@ -108,14 +108,14 @@ Masking will erase the original data and replace with `*****`. This means you ca
 
     1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
 
-=== "input.json"
+=== "generic_data_input.json"
     ```json hl_lines="7 9 14"
     --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
-=== "output.json"
+=== "getting_started_mask_data_output.json"
     ```json hl_lines="5 7 12"
-    --8<-- "examples/data_masking/src/mask_data_output.json"
+    --8<-- "examples/data_masking/src/getting_started_mask_data_output.json"
     ```
 
 ### Encrypting data
