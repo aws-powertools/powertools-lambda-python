@@ -36,11 +36,8 @@ class AWSEncryptionSDKProvider(BaseProvider):
     """
     The AWSEncryptionSDKProvider is used as a provider for the DataMasking class.
 
-    This provider allows you to perform data masking using the AWS Encryption SDK
-    for encryption and decryption. It integrates with the DataMasking class to
-    securely encrypt and decrypt sensitive data.
-
-    Usage Example:
+    Usage
+    -------
     ```
     from aws_lambda_powertools.utilities.data_masking import DataMasking
     from aws_lambda_powertools.utilities.data_masking.providers.kms.aws_encryption_sdk import (
@@ -160,7 +157,7 @@ class KMSKeyProvider:
 
     def decrypt(self, data: str, **provider_options) -> Any:
         """
-        Decrypt data using AwsEncryptionSdkProvider.
+        Decrypt data using AWSEncryptionSDKProvider.
 
         Parameters
         -------

@@ -10,26 +10,6 @@ class BaseProvider:
     """
     The BaseProvider class serves as an abstract base class for data masking providers.
 
-    Attributes
-    ----------
-    json_serializer : Callable
-        A callable function responsible for JSON serialization.
-    json_deserializer : Callable
-        A callable function responsible for JSON deserialization.
-
-    Methods
-    -------
-    default_json_serializer(data)
-        Default method for JSON serialization.
-    default_json_deserializer(data)
-        Default method for JSON deserialization.
-    encrypt(data)
-        Abstract method for encrypting data. Subclasses must implement this method.
-    decrypt(data)
-        Abstract method for decrypting data. Subclasses must implement this method.
-    mask(data)
-        Default method for masking data.
-
     Examples
     --------
     ```
@@ -60,16 +40,20 @@ class BaseProvider:
 
         return encrypted
     ```
-
-    Raises
-    -------
-        NotImplementedError
-            If `encrypt()` or `decrypt()` methods are not implemented.
     """
 
     def __init__(self, json_serializer=None, json_deserializer=None) -> None:
         self.json_serializer = json_serializer or self.default_json_serializer
         self.json_deserializer = json_deserializer or self.default_json_deserializer
+
+        """
+        Parameters
+        ----------
+        json_serializer : Callable
+            A callable function responsible for JSON serialization.
+        json_deserializer : Callable
+            A callable function responsible for JSON deserialization.
+        """
 
     def default_json_serializer(self, data):
         return json.dumps(data).encode("utf-8")
@@ -78,9 +62,15 @@ class BaseProvider:
         return json.loads(data.decode("utf-8"))
 
     def encrypt(self, data) -> str | dict:
+        """
+        Abstract method for encrypting data. Subclasses must implement this method.
+        """
         raise NotImplementedError("Subclasses must implement encrypt()")
 
     def decrypt(self, data) -> Any:
+        """
+        Abstract method for decrypting data. Subclasses must implement this method.
+        """
         raise NotImplementedError("Subclasses must implement decrypt()")
 
     def mask(self, data) -> Union[str, Iterable]:

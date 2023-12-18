@@ -19,17 +19,8 @@ class DataMasking:
     Please DON'T USE THIS utility in production environments.
     Keep in mind that when we transition to General Availability (GA), there might be breaking changes introduced.
 
-    A utility class for masking sensitive data within various data types.
-
-    This class provides methods for masking sensitive information, such as personal
-    identifiers or confidential data, within different data types such as strings,
-    dictionaries, lists, and more. It helps protect sensitive information while
-    preserving the structure of the original data.
-
-    Usage:
-    Instantiate an object of this class and use its methods to mask sensitive data
-    based on the data type. Supported data types include strings, dictionaries,
-    and more.
+    The DataMasking class orchestrates masking, encrypting, and decrypting
+    for the base provider.
 
     Example:
     ```
@@ -118,8 +109,8 @@ class DataMasking:
 
         Returns
         -------
-            dict
-                The modified dictionary after applying the action to the
+            dict | str
+                The modified dictionary or string after applying the action to the
             specified fields.
 
         Raises
