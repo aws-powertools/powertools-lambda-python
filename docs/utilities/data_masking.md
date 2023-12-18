@@ -95,27 +95,6 @@ Before you start, you will need a KMS key to encrypt and decrypt your data. Your
     1. [Key policy examples using IAM Roles](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators){target="_blank"}
     2. [SAM generated CloudFormation Resources](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role){target="_blank"}
 
-#### Using AWS Encryption SDK
-
-To use the AWS Encryption SDK, your Lambda function IAM Role must have the `kms:Decrypt` and `kms:GenerateDataKey` IAM permissions.
-
-When using AWS Encryption SDK with AWS KMS keys for data encryption and decryption, it's important to be aware that configuring additional permissions in the KMS Key Policy may be necessary. Learn more about KMS Key Policies [here](https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html){target="_blank"}.
-
-=== "data_masking_function_example.py"
-    ```python hl_lines="8 20-22"
-    --8<-- "examples/data_masking/src/data_masking_function_example.py"
-    ```
-
-=== "input.json"
-    ```json
-    --8<-- "examples/data_masking/src/large_data_input.json"
-    ```
-
-=== "output.json"
-    ```json
-    --8<-- "examples/data_masking/src/data_masking_function_example_output.json"
-    ```
-
 ### Working with nested data
 
 !!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
