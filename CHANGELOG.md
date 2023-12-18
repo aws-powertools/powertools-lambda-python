@@ -4,8 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.30.2"></a>
+## [v2.30.2] - 2023-12-18
+## Bug Fixes
+
+* **event-handler:** fix operation tags schema generation ([#3528](https://github.com/aws-powertools/powertools-lambda-python/issues/3528))
+
 ## Maintenance
 
+* version bump
 
 
 <a name="v2.30.1"></a>
@@ -4177,7 +4185,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.2...HEAD
+[v2.30.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.1...v2.30.2
 [v2.30.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.0...v2.30.1
 [v2.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.29.1...v2.30.0
 [v2.29.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.29.0...v2.29.1
