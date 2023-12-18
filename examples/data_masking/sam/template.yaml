@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   Powertools for AWS Lambda (Python) data masking example
@@ -9,12 +9,11 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
     Runtime: python3.11
     Tracing: Active
     Environment:
-        Variables:
-          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
-          POWERTOOLS_METRICS_NAMESPACE: Powertools
-          LOG_LEVEL: INFO
-          KMS_KEY_ARN: !GetAtt DataMaskingKMSKey.Arn
-
+      Variables:
+        POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+        POWERTOOLS_METRICS_NAMESPACE: Powertools
+        POWERTOOLS_LOG_LEVEL: INFO
+        KMS_KEY_ARN: !GetAtt DataMaskingKMSKey.Arn
 
 Resources:
   # Lambda Function
@@ -45,11 +44,11 @@ Resources:
 
   # KMS KEY
   DataMaskingKMSKey:
-    Type: 'AWS::KMS::Key'
+    Type: "AWS::KMS::Key"
     Properties:
       Description: KMS Key for Lambda - DataMasking
       KeyPolicy:
-        Version: '2012-10-17'
+        Version: "2012-10-17"
         Id: key-default-1
         Statement:
           # To ensure key management security, a KMS Key should have at least one administrator.
@@ -57,14 +56,14 @@ Resources:
           # In a production environment, it is recommended to configure specific users or roles for enhanced security.
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
-            Action: 'kms:*'
-            Resource: '*'
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: "kms:*"
+            Resource: "*"
           # KMS utilizes resource policies, allowing direct access grant to the Lambda Role on the KMS Key.
           # For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
           - Effect: Allow
             Principal:
-              AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn  # Permission for the Lambda role
+              AWS: !GetAtt DataMaskingEncryptFunctionExampleRole.Arn # Permission for the Lambda role
             # These IAM permissions are necessary for the envelope encryption that AWS Encryption SDK uses.
             # Envelope encryption randomly generates a data key and encrypts that data key along with your data,
             # so we encrypt in-memory to prevent too many calls to KMS to reduce latency.
