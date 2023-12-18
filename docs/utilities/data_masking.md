@@ -161,7 +161,7 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
     **NOTE**. Decryption only works with KMS Key ARN.
 
-    ```python hl_lines="5-6 11-12 23"
+    ```python hl_lines="6-7 12-13 24"
     --8<-- "examples/data_masking/src/getting_started_decrypt_data.py"
     ```
 

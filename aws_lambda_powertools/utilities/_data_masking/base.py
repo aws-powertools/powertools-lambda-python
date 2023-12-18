@@ -59,7 +59,7 @@ class DataMasking:
     def decrypt(self, data, fields=None, **provider_options) -> Any:
         return self._apply_action(data, fields, self.provider.decrypt, **provider_options)
 
-    def mask(self, data, fields=None, **provider_options) -> Union[str, Iterable]:
+    def mask(self, data, fields=None, **provider_options) -> str | Iterable:
         return self._apply_action(data, fields, self.provider.mask, **provider_options)
 
     def _apply_action(self, data: str | dict, fields, action: Callable, **provider_options):

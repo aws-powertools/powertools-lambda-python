@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 
 from aws_lambda_powertools import Logger, Tracer

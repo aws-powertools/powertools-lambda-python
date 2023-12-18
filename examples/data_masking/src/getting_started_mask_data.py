@@ -1,4 +1,4 @@
-from typing import Dict
+from __future__ import annotations
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities._data_masking import DataMasking
@@ -9,7 +9,7 @@ data_masker = DataMasking()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: dict, context: LambdaContext) -> Dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data = event.get("body")
 
     logger.info("Masking fields email, address.street, and company_address")

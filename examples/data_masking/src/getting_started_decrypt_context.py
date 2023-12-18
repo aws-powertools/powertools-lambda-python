@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import os
-from typing import Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities._data_masking import DataMasking
@@ -15,7 +16,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: Dict, context: LambdaContext) -> Dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data = event.get("body", {})
 
     logger.info("Decrypting email field")
