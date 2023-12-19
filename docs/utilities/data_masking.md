@@ -210,7 +210,11 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 You can use the `fields` parameter to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is helpful when you want to keep most of the data intact except the sensitive parts.
 
-Use the dot notation `.` to traverse `dict` or `JSON` and only apply `mask`, `encrypt`, or `decrypt` to that field. Here are a few examples:
+Use the dot notation `.` to traverse `dict` or `JSON` and only apply `mask`, `encrypt`, or `decrypt` to that field.
+
+There a
+
+Here are a few examples:
 
 === "Top keys only"
 
@@ -282,14 +286,29 @@ Use the dot notation `.` to traverse `dict` or `JSON` and only apply `mask`, `en
 
 #### JSON
 
+We also support data in JSON string format. We automatically deserialize and handle each field operation as expected.
+
+Note that the return will be a deserialized JSON and your desired fields updated.
+
+=== "Data"
+
+    Expression: `data_masker.mask(data, fields=["card_number", "address.postcode"])`
+
+    ```json
+    --8<-- "examples/data_masking/src/choosing_payload_simple_json.json"
+    ```
+
+=== "Result"
+
+    ```json
+    --8<-- "examples/data_masking/src/choosing_payload_simple_json_output.json"
+    ```
+
 !!! todo "Todo"
     1. Explain about data preservation
-    2. Share example with JSON Strings
 
 <!-- markdownlint-disable MD013 -->
 If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
-
-If a `fields` parameter is provided while the input data is a JSON string, the returned data structure will be a Python dictionary. The values corresponding to the keys given in the `fields` parameter will be accordingly obfuscated, and the content of everything else in the returned object will remain the same as the input data.
 
 <!-- markdownlint-enable MD013 -->
 
