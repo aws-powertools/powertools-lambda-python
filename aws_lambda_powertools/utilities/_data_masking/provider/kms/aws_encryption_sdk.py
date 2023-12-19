@@ -14,7 +14,11 @@ from aws_encryption_sdk import (
     LocalCryptoMaterialsCache,
     StrictAwsKmsMasterKeyProvider,
 )
-from aws_encryption_sdk.exceptions import DecryptKeyError, GenerateKeyError, NotSupportedError
+from aws_encryption_sdk.exceptions import (
+    DecryptKeyError,
+    GenerateKeyError,
+    NotSupportedError,
+)
 
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
@@ -28,6 +32,7 @@ from aws_lambda_powertools.utilities._data_masking.exceptions import (
     DataMaskingDecryptKeyError,
     DataMaskingDecryptValueError,
     DataMaskingEncryptKeyError,
+    DataMaskingUnsupportedTypeError,
 )
 from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
 
@@ -144,8 +149,9 @@ class KMSKeyProvider:
                 The encrypted data, as a base64-encoded string.
         """
         provider_options = provider_options or {}
-        data_encoded = self.json_serializer(data).encode("utf-8")
+        self._validate_encryption_context(encryption_context)
 
+        data_encoded = self.json_serializer(data).encode("utf-8")
         try:
             ciphertext, _ = self.client.encrypt(
                 source=data_encoded,
@@ -177,6 +183,7 @@ class KMSKeyProvider:
                 The decrypted data in bytes
         """
         provider_options = provider_options or {}
+        self._validate_encryption_context(encryption_context)
 
         try:
             ciphertext_decoded = base64.b64decode(data)
@@ -208,3 +215,14 @@ class KMSKeyProvider:
 
         ciphertext = self.json_deserializer(ciphertext.decode("utf-8"))
         return ciphertext
+
+    @staticmethod
+    def _validate_encryption_context(context: dict):
+        if not context:
+            return
+
+        for key, value in context.items():
+            if not isinstance(value, str):
+                raise DataMaskingUnsupportedTypeError(
+                    f"Encryption context values must be string. Received: {key}={value}",
+                )
