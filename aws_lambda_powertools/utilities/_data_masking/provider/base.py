@@ -51,19 +51,19 @@ class BaseProvider:
         self.json_serializer = json_serializer
         self.json_deserializer = json_deserializer
 
-    def encrypt(self, data) -> str | dict:
+    def encrypt(self, data, provider_options: dict | None = None, **encryption_context: str) -> str | dict:
         """
         Abstract method for encrypting data. Subclasses must implement this method.
         """
         raise NotImplementedError("Subclasses must implement encrypt()")
 
-    def decrypt(self, data) -> Any:
+    def decrypt(self, data, provider_options: dict | None = None, **encryption_context: str) -> Any:
         """
         Abstract method for decrypting data. Subclasses must implement this method.
         """
         raise NotImplementedError("Subclasses must implement decrypt()")
 
-    def mask(self, data) -> Union[str, Iterable]:
+    def mask(self, data, **kwargs) -> Union[str, Iterable]:
         """
         This method irreversibly masks data.
 

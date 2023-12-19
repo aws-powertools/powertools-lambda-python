@@ -5,7 +5,7 @@ import functools
 import json
 import logging
 from binascii import Error
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, List
 
 import botocore
 from aws_encryption_sdk import (
@@ -86,11 +86,11 @@ class AWSEncryptionSDKProvider(BaseProvider):
             json_deserializer=json_deserializer,
         )
 
-    def encrypt(self, data: bytes | str | Dict | int, **provider_options) -> str:
-        return self._key_provider.encrypt(data=data, **provider_options)
+    def encrypt(self, data: Any, provider_options: dict | None = None, **encryption_context: str) -> str:
+        return self._key_provider.encrypt(data=data, provider_options=provider_options, **encryption_context)
 
-    def decrypt(self, data: str, **provider_options) -> Any:
-        return self._key_provider.decrypt(data=data, **provider_options)
+    def decrypt(self, data: str, provider_options: dict | None = None, **encryption_context: str) -> Any:
+        return self._key_provider.decrypt(data=data, provider_options=provider_options, **encryption_context)
 
 
 class KMSKeyProvider:
@@ -127,7 +127,7 @@ class KMSKeyProvider:
             max_bytes_encrypted=max_bytes_encrypted,
         )
 
-    def encrypt(self, data: bytes | str | Dict | float, **provider_options) -> str:
+    def encrypt(self, data: Any, provider_options: dict | None = None, **encryption_context: str) -> str:
         """
         Encrypt data using the AWSEncryptionSDKProvider.
 
@@ -143,11 +143,14 @@ class KMSKeyProvider:
             ciphertext : str
                 The encrypted data, as a base64-encoded string.
         """
+        provider_options = provider_options or {}
         data_encoded = self.json_serializer(data).encode("utf-8")
+
         try:
             ciphertext, _ = self.client.encrypt(
                 source=data_encoded,
                 materials_manager=self.cache_cmm,
+                encryption_context=encryption_context,
                 **provider_options,
             )
         except GenerateKeyError:
@@ -157,7 +160,7 @@ class KMSKeyProvider:
         ciphertext = base64.b64encode(ciphertext).decode()
         return ciphertext
 
-    def decrypt(self, data: str, **provider_options) -> Any:
+    def decrypt(self, data: str, provider_options: dict | None = None, **encryption_context: str) -> Any:
         """
         Decrypt data using AWSEncryptionSDKProvider.
 
@@ -173,14 +176,14 @@ class KMSKeyProvider:
             ciphertext : bytes
                 The decrypted data in bytes
         """
+        provider_options = provider_options or {}
+
         try:
             ciphertext_decoded = base64.b64decode(data)
         except Error:
             raise DataMaskingDecryptValueError(
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
-
-        expected_context = provider_options.pop("encryption_context", {})
 
         try:
             ciphertext, decryptor_header = self.client.decrypt(
@@ -197,7 +200,7 @@ class KMSKeyProvider:
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
 
-        for key, value in expected_context.items():
+        for key, value in encryption_context.items():
             if decryptor_header.encryption_context.get(key) != value:
                 raise DataMaskingContextMismatchError(
                     f"Encryption Context does not match expected value for key: {key}",

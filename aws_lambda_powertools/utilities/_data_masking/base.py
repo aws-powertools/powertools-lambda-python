@@ -49,16 +49,47 @@ class DataMasking:
         self.json_serializer = self.provider.json_serializer
         self.json_deserializer = self.provider.json_deserializer
 
-    def encrypt(self, data, fields=None, **provider_options) -> str | dict:
-        return self._apply_action(data, fields, self.provider.encrypt, **provider_options)
+    def encrypt(
+        self,
+        data,
+        fields: list[str] | None = None,
+        provider_options: dict | None = None,
+        **encryption_context: str,
+    ) -> str | dict:
+        return self._apply_action(
+            data=data,
+            fields=fields,
+            action=self.provider.encrypt,
+            provider_options=provider_options or {},
+            **encryption_context,
+        )
 
-    def decrypt(self, data, fields=None, **provider_options) -> Any:
-        return self._apply_action(data, fields, self.provider.decrypt, **provider_options)
+    def decrypt(
+        self,
+        data,
+        fields: list[str] | None = None,
+        provider_options: dict | None = None,
+        **encryption_context: str,
+    ) -> Any:
+        return self._apply_action(
+            data=data,
+            fields=fields,
+            action=self.provider.decrypt,
+            provider_options=provider_options or {},
+            **encryption_context,
+        )
 
-    def mask(self, data, fields=None, **provider_options) -> str | Iterable:
-        return self._apply_action(data, fields, self.provider.mask, **provider_options)
+    def mask(self, data, fields=None) -> str | Iterable:
+        return self._apply_action(data=data, fields=fields, action=self.provider.mask)
 
-    def _apply_action(self, data: str | dict, fields, action: Callable, **provider_options):
+    def _apply_action(
+        self,
+        data: str | dict,
+        fields: list[str] | None,
+        action: Callable,
+        provider_options: dict | None = None,
+        **encryption_context: str,
+    ):
         """
         Helper method to determine whether to apply a given action to the entire input data
         or to specific fields if the 'fields' argument is specified.
@@ -67,11 +98,15 @@ class DataMasking:
         ----------
         data : str | dict
             The input data to process.
-        fields : Optional[List[any]] = None
+        fields : Optional[List[str]]
             A list of fields to apply the action to. If 'None', the action is applied to the entire 'data'.
         action : Callable
-           The action to apply to the data. It should be a callable that performs an operation on the data
-           and returns the modified value.
+            The action to apply to the data. It should be a callable that performs an operation on the data
+            and returns the modified value.
+        provider_options : dict
+            Provider specific keyword arguments to propagate; used as an escape hatch.
+        encryption_context: str
+            Encryption context to use in encrypt and decrypt operations.
 
         Returns
         -------
@@ -81,17 +116,24 @@ class DataMasking:
 
         if fields is not None:
             logger.debug(f"Running action {action.__name__} with fields {fields}")
-            return self._apply_action_to_fields(data, fields, action, **provider_options)
+            return self._apply_action_to_fields(
+                data=data,
+                fields=fields,
+                action=action,
+                options=provider_options,
+                **encryption_context,
+            )
         else:
             logger.debug(f"Running action {action.__name__} with the entire data")
-            return action(data, **provider_options)
+            return action(data=data, provider_options=provider_options, **encryption_context)
 
     def _apply_action_to_fields(
         self,
         data: Union[dict, str],
         fields: list,
         action: Callable,
-        **provider_options,
+        provider_options: dict | None = None,
+        **encryption_context: str,
     ) -> Union[dict, str]:
         """
         This method takes the input data, which can be either a dictionary or a JSON string,
@@ -180,7 +222,13 @@ class DataMasking:
 
             last_key = keys[-1]
 
-            current_dict = self._apply_action_to_specific_type(current_dict, action, last_key, **provider_options)
+            current_dict = self._apply_action_to_specific_type(
+                current_dict,
+                action,
+                last_key,
+                provider_options,
+                **encryption_context,
+            )
 
         return data_parsed
 
@@ -202,22 +250,43 @@ class DataMasking:
 
         return data_parsed
 
-    def _apply_action_to_specific_type(self, current_dict: dict, action: Callable, last_key, **provider_options):
+    def _apply_action_to_specific_type(
+        self,
+        current_dict: dict,
+        action: Callable,
+        last_key,
+        provider_options: dict | None = None,
+        **encryption_context,
+    ):
         logger.debug("Processing the last fields to apply the action")
         # Apply the action to the last key (either a specific index or dictionary key)
         if isinstance(current_dict, dict) and last_key in current_dict:
-            current_dict[last_key] = action(current_dict[last_key], **provider_options)
+            current_dict[last_key] = action(
+                current_dict[last_key],
+                provider_options=provider_options,
+                **encryption_context,
+            )
         elif isinstance(current_dict, list) and last_key.isdigit() and int(last_key) < len(current_dict):
-            current_dict[int(last_key)] = action(current_dict[int(last_key)], **provider_options)
+            current_dict[int(last_key)] = action(
+                current_dict[int(last_key)],
+                provider_options=provider_options,
+                **encryption_context,
+            )
         elif isinstance(current_dict, tuple) and last_key.isdigit() and int(last_key) < len(current_dict):
             index = int(last_key)
             current_dict = (
-                current_dict[:index] + (action(current_dict[index], **provider_options),) + current_dict[index + 1 :]
+                current_dict[:index]
+                + (action(current_dict[index], provider_options=provider_options, **encryption_context),)
+                + current_dict[index + 1 :]
             )
         elif isinstance(current_dict, set):
             # Convert the set to a list, apply the action, and convert back to a set
             elements_list = list(current_dict)
-            elements_list[int(last_key)] = action(elements_list[int(last_key)], **provider_options)
+            elements_list[int(last_key)] = action(
+                elements_list[int(last_key)],
+                provider_options=provider_options,
+                **encryption_context,
+            )
             current_dict = set(elements_list)
         else:
             # Handle the case when the last key doesn't exist
