@@ -190,18 +190,18 @@ For a stronger security posture, you can add metadata to each encryption operati
     2. **Only `string` values are supported**. We will raise `DataMaskingUnsupportedTypeError` for non-string values.
     3. **Use non-sensitive data only**. When using KMS, encryption context is available as plaintext in AWS CloudTrail. Unless you [intentionally disabled KMS events](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
 
-=== "getting_started_encrypt_context.py"
+=== "getting_started_encryption_context.py"
 
     ```python hl_lines="27-29"
-    --8<-- "examples/data_masking/src/getting_started_encrypt_context.py"
+    --8<-- "examples/data_masking/src/getting_started_encryption_context.py"
     ```
 
     1. They must match on `decrypt()` otherwise the operation will fail with `DataMaskingContextMismatchError`.
 
-=== "getting_started_decrypt_context.py"
+=== "getting_started_decryption_context.py"
 
     ```python hl_lines="26-28"
-    --8<-- "examples/data_masking/src/getting_started_decrypt_context.py"
+    --8<-- "examples/data_masking/src/getting_started_decryption_context.py"
     ```
 
     1. They must match otherwise the operation will fail with `DataMaskingContextMismatchError`.
