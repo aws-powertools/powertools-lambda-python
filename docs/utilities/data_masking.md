@@ -300,9 +300,6 @@ Note that the return will be a deserialized JSON and your desired fields updated
     --8<-- "examples/data_masking/src/choosing_payload_simple_json_output.json"
     ```
 
-!!! todo "Todo"
-    1. Explain about data preservation
-
 ## Advanced
 
 ### Data serialization
