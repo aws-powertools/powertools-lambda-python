@@ -4,16 +4,22 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
 
 <a name="v2.30.2"></a>
 ## [v2.30.2] - 2023-12-18
 ## Bug Fixes
 
 * **event-handler:** fix operation tags schema generation ([#3528](https://github.com/aws-powertools/powertools-lambda-python/issues/3528))
+* **event-handler:** set default OpenAPI version to 3.0.0 ([#3527](https://github.com/aws-powertools/powertools-lambda-python/issues/3527))
+* **event-handler:** upgrade Swagger UI to fix regressions ([#3526](https://github.com/aws-powertools/powertools-lambda-python/issues/3526))
 
 ## Maintenance
 
 * version bump
+* **deps-dev:** bump cfn-lint from 0.83.5 to 0.83.6 ([#3521](https://github.com/aws-powertools/powertools-lambda-python/issues/3521))
 
 
 <a name="v2.30.1"></a>
