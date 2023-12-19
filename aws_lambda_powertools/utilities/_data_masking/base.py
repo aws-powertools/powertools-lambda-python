@@ -120,7 +120,7 @@ class DataMasking:
                 data=data,
                 fields=fields,
                 action=action,
-                options=provider_options,
+                provider_options=provider_options,
                 **encryption_context,
             )
         else:
@@ -226,7 +226,7 @@ class DataMasking:
                 current_dict,
                 action,
                 last_key,
-                provider_options,
+                provider_options=provider_options,
                 **encryption_context,
             )
 
