@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
+from typing import Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities._data_masking import DataMasking
@@ -25,9 +25,8 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict | str:
     encrypted: dict | str = data_masker.encrypt(
         data,
         fields=["email"],
-        data_classification="confidential",
+        data_classification="confidential",  # (1)!
         data_type="customer-data",
-        timestamp=datetime.utcnow().isoformat(),
         tenant_id="a06bf973-0734-4b53-9072-39d7ac5b2cba",
     )
 

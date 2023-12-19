@@ -122,7 +122,7 @@ Masking will erase the original data and replace with `*****`. This means you ca
 
 ### Encrypting data
 
-!!! note "About static typing and encryption"
+???+ note "About static typing and encryption"
     Encrypting data may lead to a different data type, as it always transforms into a string _(`<ciphertext>`)_.
 
 To encrypt, you will need an [encryption provider](#providers). Here, we will use `AWSEncryptionSDKProvider`.
@@ -150,7 +150,7 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
 
 ### Decrypting data
 
-!!! note "About static typing and decryption"
+???+ note "About static typing and decryption"
     Decrypting data may lead to a different data type, as encrypted data is always a string _(`<ciphertext>`)_.
 
 To decrypt, you will need an [encryption provider](#providers). Here, we will use `AWSEncryptionSDKProvider`.
@@ -181,33 +181,30 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
     --8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
     ```
 
-### Additional authenticated data (AAD)
+### Encryption context for integrity and authenticity
 
-For a stronger security posture, you can add metadata to each encryption operation, and verify one or more of them during decryption. This is known as **encryption context**. These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
+For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
 
-**NOTE**. Only string values are supported.
-
-!!! todo "Change encrypt/decrypt signature to allow fluid encryption context"
-    [We need an API change](https://github.com/aws-powertools/powertools-lambda-python/pull/3186#issuecomment-1860778334).
-
-!!! question "Why non-sensitive data?"
-     Because it is stored in plaintext in AWS CloudTrail; it could be seen by anyone with access to CloudTrail. Unless you [intentionally disabled KMS events in a custom trail](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
-
-!!! todo "Explain decryption context not being a strict exact match due to random data."
+???+ danger "Important considerations you should know"
+    1. **Exact match verification on decrypt**. Be careful using random data like `timestamps` as encryption context if you can't provide them on decrypt.
+    2. **Only `string` values are supported**. We will raise `DataMaskingUnsupportedTypeError` for non-string values.
+    3. **Use non-sensitive data only**. When using KMS, encryption context is available as plaintext in AWS CloudTrail. Unless you [intentionally disabled KMS events](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
 
 === "getting_started_encrypt_context.py"
 
-    ```python hl_lines="27-30"
+    ```python hl_lines="26-28"
     --8<-- "examples/data_masking/src/getting_started_encrypt_context.py"
     ```
 
+    1. They must match on `decrypt()` otherwise the operation will fail with `DataMaskingContextMismatchError`.
+
 === "getting_started_decrypt_context.py"
 
-    ```python hl_lines="26"
+    ```python hl_lines="26-28"
     --8<-- "examples/data_masking/src/getting_started_decrypt_context.py"
     ```
 
-    1. We use `tenant_id` to be sure the data we're decrypting belongs to this tenant.
+    1. They must match otherwise the operation will fail with `DataMaskingContextMismatchError`.
 
 ### Working with nested data
 
