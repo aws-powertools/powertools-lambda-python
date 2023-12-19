@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 from typing import Any, Iterable, Union
 
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
@@ -41,25 +40,6 @@ class BaseProvider:
         return encrypted
     ```
     """
-
-    def __init__(self, json_serializer=None, json_deserializer=None) -> None:
-        self.json_serializer = json_serializer or self.default_json_serializer
-        self.json_deserializer = json_deserializer or self.default_json_deserializer
-
-        """
-        Parameters
-        ----------
-        json_serializer : Callable
-            A callable function responsible for JSON serialization.
-        json_deserializer : Callable
-            A callable function responsible for JSON deserialization.
-        """
-
-    def default_json_serializer(self, data):
-        return json.dumps(data).encode("utf-8")
-
-    def default_json_deserializer(self, data):
-        return json.loads(data.decode("utf-8"))
 
     def encrypt(self, data) -> str | dict:
         """

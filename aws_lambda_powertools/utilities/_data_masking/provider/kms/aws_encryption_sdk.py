@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import base64
+import functools
+import json
 import logging
 from binascii import Error
 from typing import Any, Callable, Dict, List
@@ -69,10 +71,10 @@ class AWSEncryptionSDKProvider(BaseProvider):
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
         max_bytes_encrypted: int = MAX_BYTES_ENCRYPTED,
-        json_serializer: Callable | None = None,
-        json_deserializer: Callable | None = None,
+        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable = json.loads,
     ):
-        super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
+        super().__init__()
 
         self._key_provider = key_provider or KMSKeyProvider(
             keys=keys,
@@ -80,8 +82,8 @@ class AWSEncryptionSDKProvider(BaseProvider):
             max_cache_age_seconds=max_cache_age_seconds,
             max_messages_encrypted=max_messages_encrypted,
             max_bytes_encrypted=max_bytes_encrypted,
-            json_serializer=self.json_serializer,
-            json_deserializer=self.json_deserializer,
+            json_serializer=json_serializer,
+            json_deserializer=json_deserializer,
         )
 
     def encrypt(self, data: bytes | str | Dict | int, **provider_options) -> str:
@@ -141,7 +143,7 @@ class KMSKeyProvider:
             ciphertext : str
                 The encrypted data, as a base64-encoded string.
         """
-        data_encoded = self.json_serializer(data)
+        data_encoded = self.json_serializer(data).encode("utf-8")
         try:
             ciphertext, _ = self.client.encrypt(
                 source=data_encoded,
@@ -201,5 +203,5 @@ class KMSKeyProvider:
                     f"Encryption Context does not match expected value for key: {key}",
                 )
 
-        ciphertext = self.json_deserializer(ciphertext)
+        ciphertext = self.json_deserializer(ciphertext.decode("utf-8"))
         return ciphertext

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import json
 import logging
 from typing import Any, Callable, Iterable, Optional, Union
@@ -41,8 +42,15 @@ class DataMasking:
     ```
     """
 
-    def __init__(self, provider: Optional[BaseProvider] = None):
+    def __init__(
+        self,
+        provider: Optional[BaseProvider] = None,
+        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable = json.loads,
+    ):
         self.provider = provider or BaseProvider()
+        self.json_serializer = json_serializer
+        self.json_deserializer = json_deserializer
 
     def encrypt(self, data, fields=None, **provider_options) -> str | dict:
         return self._apply_action(data, fields, self.provider.encrypt, **provider_options)
@@ -140,7 +148,7 @@ class DataMasking:
 
             # Ensure the nested field is represented as a string
             if not isinstance(nested_parsed_field, str):
-                nested_parsed_field = json.dumps(nested_parsed_field)
+                nested_parsed_field = self.json_serializer(nested_parsed_field)
 
             # Split the nested field into keys using dot, square brackets as separators
             # keys = re.split(r"\.|\[|\]", nested_field) # noqa ERA001 - REVIEW THIS
@@ -185,11 +193,11 @@ class DataMasking:
 
         if isinstance(data, str):
             # Parse JSON string as dictionary
-            data_parsed = json.loads(data)
+            data_parsed = self.json_deserializer(data)
         elif isinstance(data, dict):
             # Convert the data to a JSON string in case it contains non-string keys (e.g., ints)
             # Parse the JSON string back into a dictionary
-            data_parsed = json.loads(json.dumps(data))
+            data_parsed = self.json_deserializer(self.json_serializer(data))
         else:
             raise DataMaskingUnsupportedTypeError(
                 f"Unsupported data type. Expected a traversable type (dict or str), but got {type(data)}.",

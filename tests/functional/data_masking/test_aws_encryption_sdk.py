@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import base64
 import json
-from typing import Any, Callable, Dict, Union
+from typing import Any
 
 import pytest
 
@@ -15,21 +15,17 @@ from aws_lambda_powertools.utilities._data_masking.provider.kms import (
 
 
 class FakeEncryptionKeyProvider(BaseProvider):
-    def __init__(
-        self,
-        json_serializer: Callable[[Dict], str] | None = None,
-        json_deserializer: Callable[[Union[Dict, str, bool, int, float]], str] | None = None,
-    ):
-        super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
+    def __init__(self):
+        super().__init__()
 
     def encrypt(self, data: bytes | str, **kwargs) -> str:
-        data = self.json_serializer(data)
+        data = json.dumps(data).encode("utf-8")
         ciphertext = base64.b64encode(data).decode()
         return ciphertext
 
     def decrypt(self, data: bytes, **kwargs) -> Any:
-        ciphertext_decoded = base64.b64decode(data)
-        ciphertext = self.json_deserializer(ciphertext_decoded)
+        ciphertext_decoded = base64.b64decode(data).decode("utf-8")
+        ciphertext = json.loads(ciphertext_decoded)
         return ciphertext
 
 
