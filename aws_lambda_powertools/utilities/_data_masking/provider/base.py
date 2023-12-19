@@ -45,8 +45,8 @@ class BaseProvider:
 
     def __init__(
         self,
-        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
-        json_deserializer: Callable = json.loads,
+        json_serializer: Callable[..., str] = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable[[str], Any] = json.loads,
     ) -> None:
         self.json_serializer = json_serializer
         self.json_deserializer = json_deserializer

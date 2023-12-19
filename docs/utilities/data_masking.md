@@ -319,7 +319,13 @@ Before we traverse the data structure, we perform two important operations on in
 
 When decrypting, we revert the operation to restore the original data structure.
 
-!!! danger "TODO - Add an example using a custom serializer/deserializer."
+For compatibility or performance, you can optionally pass your own JSON serializer and deserializer to replace `json.dumps` and `json.loads` respectively:
+
+=== "advanced_custom_serializer.py"
+
+    ```python hl_lines="16"
+    --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
+    ```
 
 ### Providers
 
@@ -475,17 +481,9 @@ sequenceDiagram
 
 ## Testing your code
 
+!!! danger "TODO - Refactor with a fake"
+
 For unit testing your applications, you can mock the calls to the data masking utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the pytest monkeypatch fixture to patch the `data_masking.decrypt` method.
-
-=== "test_single_mock.py"
-    ```python hl_lines="4 8"
-    --8<-- "examples/data_masking/tests/test_data_masking_single_mock.py"
-    ```
-
-=== "single_mock.py"
-    ```python
-    --8<-- "examples/data_masking/tests/src/single_mock.py"
-    ```
 
 If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
 

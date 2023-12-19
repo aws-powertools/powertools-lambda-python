@@ -71,8 +71,8 @@ class AWSEncryptionSDKProvider(BaseProvider):
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
         max_bytes_encrypted: int = MAX_BYTES_ENCRYPTED,
-        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
-        json_deserializer: Callable = json.loads,
+        json_serializer: Callable[..., str] = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable[[str], Any] = json.loads,
     ):
         super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
 
@@ -103,8 +103,8 @@ class KMSKeyProvider:
     def __init__(
         self,
         keys: List[str],
-        json_serializer: Callable,
-        json_deserializer: Callable,
+        json_serializer: Callable[..., str],
+        json_deserializer: Callable[[str], Any],
         local_cache_capacity: int = CACHE_CAPACITY,
         max_cache_age_seconds: float = MAX_CACHE_AGE_SECONDS,
         max_messages_encrypted: int = MAX_MESSAGES_ENCRYPTED,
