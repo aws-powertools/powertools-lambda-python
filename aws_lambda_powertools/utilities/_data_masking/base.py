@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import functools
-import json
 import logging
 from typing import Any, Callable, Iterable, Optional, Union
 
@@ -45,12 +43,11 @@ class DataMasking:
     def __init__(
         self,
         provider: Optional[BaseProvider] = None,
-        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
-        json_deserializer: Callable = json.loads,
     ):
         self.provider = provider or BaseProvider()
-        self.json_serializer = json_serializer
-        self.json_deserializer = json_deserializer
+        # NOTE: we depend on Provider to not confuse customers in passing the same 2 serializers in 2 places
+        self.json_serializer = self.provider.json_serializer
+        self.json_deserializer = self.provider.json_deserializer
 
     def encrypt(self, data, fields=None, **provider_options) -> str | dict:
         return self._apply_action(data, fields, self.provider.encrypt, **provider_options)

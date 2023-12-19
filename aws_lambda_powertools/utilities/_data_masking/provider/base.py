@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, Iterable, Union
+import functools
+import json
+from typing import Any, Callable, Iterable, Union
 
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
 
@@ -40,6 +42,14 @@ class BaseProvider:
         return encrypted
     ```
     """
+
+    def __init__(
+        self,
+        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable = json.loads,
+    ) -> None:
+        self.json_serializer = json_serializer
+        self.json_deserializer = json_deserializer
 
     def encrypt(self, data) -> str | dict:
         """

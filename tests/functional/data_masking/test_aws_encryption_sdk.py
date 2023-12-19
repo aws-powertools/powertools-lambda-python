@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import base64
+import functools
 import json
-from typing import Any
+from typing import Any, Callable
 
 import pytest
 
@@ -15,17 +16,21 @@ from aws_lambda_powertools.utilities._data_masking.provider.kms import (
 
 
 class FakeEncryptionKeyProvider(BaseProvider):
-    def __init__(self):
-        super().__init__()
+    def __init__(
+        self,
+        json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
+        json_deserializer: Callable = json.loads,
+    ) -> None:
+        super().__init__(json_serializer, json_deserializer)
 
     def encrypt(self, data: bytes | str, **kwargs) -> str:
-        data = json.dumps(data).encode("utf-8")
-        ciphertext = base64.b64encode(data).decode()
+        encoded_data: str = self.json_serializer(data)
+        ciphertext = base64.b64encode(encoded_data.encode("utf-8")).decode()
         return ciphertext
 
     def decrypt(self, data: bytes, **kwargs) -> Any:
         ciphertext_decoded = base64.b64decode(data).decode("utf-8")
-        ciphertext = json.loads(ciphertext_decoded)
+        ciphertext = self.json_deserializer(ciphertext_decoded)
         return ciphertext
 
 

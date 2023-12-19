@@ -74,7 +74,7 @@ class AWSEncryptionSDKProvider(BaseProvider):
         json_serializer: Callable = functools.partial(json.dumps, ensure_ascii=False),
         json_deserializer: Callable = json.loads,
     ):
-        super().__init__()
+        super().__init__(json_serializer=json_serializer, json_deserializer=json_deserializer)
 
         self._key_provider = key_provider or KMSKeyProvider(
             keys=keys,
