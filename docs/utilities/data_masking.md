@@ -206,21 +206,92 @@ For a stronger security posture, you can add metadata to each encryption operati
 
     1. They must match otherwise the operation will fail with `DataMaskingContextMismatchError`.
 
-### Working with nested data
+### Choosing parts of your data
 
-!!! info "In Q1 2024, we plan to introduce support for Pydantic models, Dataclasses, and standard Python classes."
+You can use the `fields` parameter to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is helpful when you want to keep most of the data intact except the sensitive parts.
+
+Use the dot notation `.` to traverse `dict` or `JSON` and only apply `mask`, `encrypt`, or `decrypt` to that field. Here are a few examples:
+
+=== "Top keys only"
+
+    Expression: `data_masker.mask(data, fields=["card_number"])`
+
+    === "Data"
+
+        ```json hl_lines="4"
+        --8<-- "examples/data_masking/src/choosing_payload_top_keys.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="4"
+        --8<-- "examples/data_masking/src/choosing_payload_top_keys_output.json"
+        ```
+
+=== "Nested key"
+
+    Expression: `data_masker.mask(data, fields=["address.postcode"])`
+
+    === "Data"
+
+        ```json hl_lines="6"
+        --8<-- "examples/data_masking/src/choosing_payload_nested_key.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="6"
+        --8<-- "examples/data_masking/src/choosing_payload_nested_key_output.json"
+        ```
+
+=== "Multiple keys"
+
+    Expression: `data_masker.mask(data, fields=["address.postcode", "address.street"])`
+
+    === "Data"
+
+        ```json hl_lines="6-7"
+        --8<-- "examples/data_masking/src/choosing_payload_multiple_keys.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="6-7"
+        --8<-- "examples/data_masking/src/choosing_payload_multiple_keys_output.json"
+        ```
+
+=== "All key items"
+
+    Expression: `data_masker.mask(data, fields=["address"])`
+
+    === "Data"
+
+        ```json hl_lines="6-17"
+        --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="6-7"
+        --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys_output.json"
+        ```
+
+!!! note "Current limitations"
+    1. We don't support data slicing `field.subfield[0:2]`.
+    2. Python classes, Dataclasses, and Pydantic models are not supported yet.
 
 #### JSON
-<!-- markdownlint-disable MD013 -->
-When using the data masking utility with dictionaries or JSON strings, you can provide a list of keys to obfuscate the corresponding values to the `fields` parameter. You can select values of nested keys by using dot notation. The `fields` parameter only supports selecting values using basic dot notation and does not provide support for wildcards or any other matching expressions.
 
+!!! todo "Todo"
+    1. Explain about data preservation
+    2. Share example with JSON Strings
+
+<!-- markdownlint-disable MD013 -->
 If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
 
 If a `fields` parameter is provided while the input data is a JSON string, the returned data structure will be a Python dictionary. The values corresponding to the keys given in the `fields` parameter will be accordingly obfuscated, and the content of everything else in the returned object will remain the same as the input data.
 
 <!-- markdownlint-enable MD013 -->
-
-If `fields` is not provided, the entire data object will be masked (or encrypted/decrypted).
 
 ## Advanced
 

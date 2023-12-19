@@ -1,0 +1,19 @@
+{
+    "name": "Leandro",
+    "operation": "non sensitive",
+    "card_number": "1000 4444 333 2222",
+    "address": [
+        {
+            "postcode": 81847,
+            "street": "38986 Joanne Stravenue",
+            "country": "United States",
+            "timezone": "America/La_Paz"
+        },
+        {
+            "postcode": 94400,
+            "street": "623 Kraig Mall",
+            "country": "United States",
+            "timezone": "America/Mazatlan"
+        }
+    ]
+}
