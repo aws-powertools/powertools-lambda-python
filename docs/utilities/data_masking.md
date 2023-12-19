@@ -192,7 +192,7 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 === "getting_started_encrypt_context.py"
 
-    ```python hl_lines="26-28"
+    ```python hl_lines="27-29"
     --8<-- "examples/data_masking/src/getting_started_encrypt_context.py"
     ```
 
