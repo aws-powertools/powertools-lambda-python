@@ -208,19 +208,19 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 ### Choosing parts of your data
 
-You can use the `fields` parameter to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is helpful when you want to keep most of the data intact except the sensitive parts.
+!!! note "We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
 
-Use the dot notation `.` to traverse `dict` or `JSON` and only apply `mask`, `encrypt`, or `decrypt` to that field.
+You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is useful when you want to keep data structure intact except the confidential fields.
 
-There a
+When the field is a `list`, we obfuscate their values to `str` while keeping the data structure and number of items intact. Obfuscating nested data structures from a given field is also supported.
 
-Here are a few examples:
+> Common scenarios
 
 === "Top keys only"
 
-    Expression: `data_masker.mask(data, fields=["card_number"])`
-
     === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["card_number"])`
 
         ```json hl_lines="4"
         --8<-- "examples/data_masking/src/choosing_payload_top_keys.json"
@@ -234,9 +234,9 @@ Here are a few examples:
 
 === "Nested key"
 
-    Expression: `data_masker.mask(data, fields=["address.postcode"])`
-
     === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address.postcode"])`
 
         ```json hl_lines="6"
         --8<-- "examples/data_masking/src/choosing_payload_nested_key.json"
@@ -250,9 +250,9 @@ Here are a few examples:
 
 === "Multiple keys"
 
-    Expression: `data_masker.mask(data, fields=["address.postcode", "address.street"])`
-
     === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address.postcode", "address.street"])`
 
         ```json hl_lines="6-7"
         --8<-- "examples/data_masking/src/choosing_payload_multiple_keys.json"
@@ -266,9 +266,9 @@ Here are a few examples:
 
 === "All key items"
 
-    Expression: `data_masker.mask(data, fields=["address"])`
-
     === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address"])`
 
         ```json hl_lines="6-17"
         --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys.json"
@@ -280,13 +280,9 @@ Here are a few examples:
         --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys_output.json"
         ```
 
-!!! note "Current limitations"
-    1. We don't support data slicing `field.subfield[0:2]`.
-    2. Python classes, Dataclasses, and Pydantic models are not supported yet.
-
 #### JSON
 
-We also support data in JSON string format. We automatically deserialize and handle each field operation as expected.
+We also support data in JSON string format as input. We automatically deserialize it, then handle each field operation as expected.
 
 Note that the return will be a deserialized JSON and your desired fields updated.
 
@@ -307,12 +303,23 @@ Note that the return will be a deserialized JSON and your desired fields updated
 !!! todo "Todo"
     1. Explain about data preservation
 
-<!-- markdownlint-disable MD013 -->
-If a `fields` parameter is provided along with a dictionary as the input data, then the rest of content of the dictionary will remain unchanged, and only the values corresponding to the keys given will be masked (or encrypted/decrypted). However, if there were any non-string keys in the original dictionary, they will be transformed into strings while perserving their original content.
-
-<!-- markdownlint-enable MD013 -->
-
 ## Advanced
+
+### Data serialization
+
+???+ note "Current limitations"
+    1. No support for data slicing `field.subfield[0:2]`.
+    2. No support for accessing fields within a `list`.
+    3. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
+
+Before we traverse the data structure, we perform two important operations on input data:
+
+1. If `JSON string`, **deserialize** using default or provided deserializer.
+2. If `dictionary`, **normalize** into `JSON` to prevent traversing unsupported data types.
+
+When decrypting, we revert the operation to restore the original data structure.
+
+!!! danger "TODO - Add an example using a custom serializer/deserializer."
 
 ### Providers
 
