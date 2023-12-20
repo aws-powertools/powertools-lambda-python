@@ -577,13 +577,25 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
+) -> Union[str, dict, bytes]:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["auto"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
 ) -> bytes:
     ...
 
 
 def get_parameter(
     name: str,
-    transform: Optional[Literal["json", "binary"]] = None,
+    transform: Optional[Literal["json", "binary", "auto"]] = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
@@ -703,9 +715,23 @@ def get_parameters(
     ...
 
 
+@overload
 def get_parameters(
     path: str,
-    transform: Optional[Literal["json", "binary"]] = None,
+    transform: Literal["auto"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Union[Dict[str, bytes], Dict[str, dict], Dict[str, str]]:
+    ...
+
+
+def get_parameters(
+    path: str,
+    transform: Optional[Literal["json", "binary", "auto"]] = None,
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
