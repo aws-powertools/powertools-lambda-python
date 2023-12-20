@@ -595,7 +595,7 @@ def get_parameter(
 
 def get_parameter(
     name: str,
-    transform: Optional[Literal["json", "binary", "auto"]] = None,
+    transform: TransformOptions = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
@@ -731,7 +731,7 @@ def get_parameters(
 
 def get_parameters(
     path: str,
-    transform: Optional[Literal["json", "binary", "auto"]] = None,
+    transform: TransformOptions = None,
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
