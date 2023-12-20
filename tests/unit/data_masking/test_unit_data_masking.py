@@ -101,7 +101,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
     # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    masked_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {
@@ -124,7 +124,7 @@ def test_mask_json_dict_with_fields(data_masker):
     )
 
     # WHEN mask is called with a list of fields specified
-    masked_json_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    masked_json_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_json_string == {
@@ -174,36 +174,4 @@ def test_parsing_nonexistent_fields(data_masker):
     # WHEN attempting to pass in fields that do not exist in the input data
     with pytest.raises(DataMaskingFieldNotFoundError):
         # THEN the result is a KeyError
-        data_masker.mask(data, ["3.1.True"])
-
-
-def test_parsing_nonstring_fields(data_masker):
-    # GIVEN a dict data type
-    data = {
-        "3": {
-            "1": {"None": "hello", "four": "world"},
-            "4": {"33": {"5": "goodbye", "e": "world"}},
-        },
-    }
-
-    # WHEN attempting to pass in a list of fields that are not strings
-    masked = data_masker.mask(data, fields=[3.4])
-
-    # THEN the result is the value of the nested field should be masked as normal
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
-
-
-def test_parsing_nonstring_keys_and_fields(data_masker):
-    # GIVEN a dict data type with integer keys
-    data = {
-        3: {
-            "1": {"None": "hello", "four": "world"},
-            4: {"33": {"5": "goodbye", "e": "world"}},
-        },
-    }
-
-    # WHEN masked with a list of fields that are integer keys
-    masked = data_masker.mask(data, fields=[3.4])
-
-    # THEN the result is the value of the nested field should be masked
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
+        data_masker.mask(data, ["'3'..True"])

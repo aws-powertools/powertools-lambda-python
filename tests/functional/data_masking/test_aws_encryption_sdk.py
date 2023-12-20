@@ -131,7 +131,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
     # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    masked_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {
@@ -154,7 +154,7 @@ def test_mask_json_dict_with_fields(data_masker):
     )
 
     # WHEN mask is called with a list of fields specified
-    masked_json_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    masked_json_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_json_string == {
@@ -258,8 +258,8 @@ def test_encrypt_dict_with_fields(data_masker):
     }
 
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
+    encrypted_data = data_masker.encrypt(data, fields=["a.'1'.None", "a..'4'"])
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == data
@@ -277,8 +277,8 @@ def test_encrypt_json_dict_with_fields(data_masker):
     )
 
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=["a.1.None", "a.b.3.4"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.1.None", "a.b.3.4"])
+    encrypted_data = data_masker.encrypt(data, fields=["a.'1'.None", "a..'4'"])
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == json.loads(data)
@@ -316,6 +316,65 @@ def test_encrypt_json_with_tuple_fields(data_masker):
     )
 
     fields_operation = ["payload.first[0]", "payload.second[0]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_with_encryption_context(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "payload": {
+                "first": ["value1", "value2"],
+                "second": (0, 1),
+            },
+        },
+    )
+
+    fields_operation = ["payload.first[0]", "payload.second[0]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation, data_classification="confidential")
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation, data_classification="confidential")
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_with_complex_dict(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "name": "Leandro",
+            "operation": "non sensitive",
+            "card_number": "1000 4444 333 2222",
+            "address": [
+                {
+                    "postcode": 81847,
+                    "street": "38986 Joanne Stravenue",
+                    "country": "United States",
+                    "timezone": "America/La_Paz",
+                },
+                {
+                    "postcode": 94400,
+                    "street": "623 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+                {
+                    "postcode": 94480,
+                    "street": "123 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+            ],
+        },
+    )
+
+    fields_operation = ["address[*].postcode"]
     # WHEN encrypting and then decrypting the encrypted data
     encrypted_data = data_masker.encrypt(data, fields=fields_operation)
     decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)

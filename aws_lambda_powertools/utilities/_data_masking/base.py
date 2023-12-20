@@ -3,6 +3,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Callable, Iterable, Optional, Union
 
+from jsonpath_ng import parse
+
 from aws_lambda_powertools.utilities._data_masking.exceptions import (
     DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
@@ -180,57 +182,57 @@ class DataMasking:
 
         data_parsed: dict = self._normalize_data_to_parse(fields, data)
 
-        for nested_field in fields:
-            logger.debug(f"Processing nested field: {nested_field}")
+        # Iterate over each field to be parsed.
+        for field_parse in fields:
+            # Parse the field expression using a 'parse' function.
+            json_parse = parse(field_parse)
+            # Find the corresponding data in the normalized data using the parsed expression.
+            result_parse = json_parse.find(data_parsed)
 
-            nested_parsed_field = nested_field
+            # If the data for the field is not found, raise an exception.
+            if not result_parse:
+                raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
 
-            # Ensure the nested field is represented as a string
-            if not isinstance(nested_parsed_field, str):
-                nested_parsed_field = self.json_serializer(nested_parsed_field)
-
-            # Split the nested field into keys using dot, square brackets as separators
-            # keys = re.split(r"\.|\[|\]", nested_field) # noqa ERA001 - REVIEW THIS
-
-            keys = nested_parsed_field.replace("][", ".").replace("[", ".").replace("]", "").split(".")
-            keys = [key for key in keys if key]  # Remove empty strings from the split
-
-            # Traverse the dictionary hierarchy by iterating through the list of nested keys
-            current_dict = data_parsed
-
-            for key in keys[:-1]:
-                # If enter here, the customer is passing potential list, set or tuple
-                # Example "payload[0]"
-
-                logger.debug(f"Processing {key} in field {nested_field}")
-
-                # It supports dict, list, set and tuple
-                try:
-                    if isinstance(current_dict, dict) and key in current_dict:
-                        # If enter heres, it captures the name of the key
-                        # Example "payload"
-                        current_dict = current_dict[key]
-                    elif (
-                        isinstance(current_dict, (set, tuple, list)) and key.isdigit() and int(key) < len(current_dict)
-                    ):
-                        # If enter heres, it captures the index of the key
-                        # Example "[0]"
-                        current_dict = current_dict[int(key)]
-                except KeyError:
-                    # Handle the case when the key doesn't exist
-                    raise DataMaskingFieldNotFoundError(f"Key {key} not found in {current_dict}")
-
-            last_key = keys[-1]
-
-            current_dict = self._apply_action_to_specific_type(
-                current_dict,
-                action,
-                last_key,
-                provider_options=provider_options,
-                **encryption_context,
+            # Update the parsed data using a callback function.
+            json_parse.update(
+                data_parsed,
+                lambda field_value, fields, field_name, action=action, provider_options=provider_options, encryption_context=encryption_context: self._call_action(  # noqa
+                    field_value,
+                    fields,
+                    field_name,
+                    action,
+                    provider_options,
+                    **encryption_context,
+                ),
             )
 
         return data_parsed
+
+    @staticmethod
+    def _call_action(
+        field_value: Any,
+        fields: dict[str, Any],
+        field_name: str,
+        action: Callable,
+        provider_options: dict | None = None,
+        **encryption_context,
+    ) -> None:
+        """
+        Apply a specified action to a field value and update the fields dictionary.
+
+        Params:
+        --------
+        - field_value: Current value of the field being processed.
+        - fields: Dictionary representing the fields being processed (mutable).
+        - field_name: Name of the field being processed.
+        - action: Callable (function or method) to be applied to the field_value.
+        - provider_options: Optional dictionary representing additional options for the action.
+        - **encryption_context: Additional keyword arguments collected into a dictionary.
+
+        Returns:
+        - None: The method does not return any value, as it updates the fields in-place.
+        """
+        fields[field_name] = action(field_value, provider_options=provider_options, **encryption_context)
 
     def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
         if not fields:
@@ -249,47 +251,3 @@ class DataMasking:
             )
 
         return data_parsed
-
-    def _apply_action_to_specific_type(
-        self,
-        current_dict: dict,
-        action: Callable,
-        last_key,
-        provider_options: dict | None = None,
-        **encryption_context,
-    ):
-        logger.debug("Processing the last fields to apply the action")
-        # Apply the action to the last key (either a specific index or dictionary key)
-        if isinstance(current_dict, dict) and last_key in current_dict:
-            current_dict[last_key] = action(
-                current_dict[last_key],
-                provider_options=provider_options,
-                **encryption_context,
-            )
-        elif isinstance(current_dict, list) and last_key.isdigit() and int(last_key) < len(current_dict):
-            current_dict[int(last_key)] = action(
-                current_dict[int(last_key)],
-                provider_options=provider_options,
-                **encryption_context,
-            )
-        elif isinstance(current_dict, tuple) and last_key.isdigit() and int(last_key) < len(current_dict):
-            index = int(last_key)
-            current_dict = (
-                current_dict[:index]
-                + (action(current_dict[index], provider_options=provider_options, **encryption_context),)
-                + current_dict[index + 1 :]
-            )
-        elif isinstance(current_dict, set):
-            # Convert the set to a list, apply the action, and convert back to a set
-            elements_list = list(current_dict)
-            elements_list[int(last_key)] = action(
-                elements_list[int(last_key)],
-                provider_options=provider_options,
-                **encryption_context,
-            )
-            current_dict = set(elements_list)
-        else:
-            # Handle the case when the last key doesn't exist
-            raise DataMaskingFieldNotFoundError(f"Key {last_key} not found in {current_dict}")
-
-        return current_dict
