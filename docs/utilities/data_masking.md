@@ -425,6 +425,16 @@ You can modify the following values when initializing the `AWSEncryptionSDKProvi
 | **max_messages_encrypted** |          | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    |          | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
+**Changing the default algorithm**
+
+The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384` algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.
+
+=== "changing_default_algorithm.py"
+
+    ```python hl_lines="5 29"
+    --8<-- "examples/data_masking/src/changing_default_algorithm.py"
+    ```
+
 #### Creating your own provider
 
 !!! info "In Q1 2024, we plan to add support for bringing your own encryption provider."
