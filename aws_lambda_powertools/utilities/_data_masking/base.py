@@ -1,6 +1,6 @@
 from __future__ import annotations
-import functools
 
+import functools
 import logging
 from numbers import Number
 from typing import Any, Callable, Mapping, Optional, Sequence, Union, overload
@@ -222,6 +222,16 @@ class DataMasking:
 
         data_parsed: dict = self._normalize_data_to_parse(fields, data)
 
+        # For in-place updates, json_parse accepts a callback function
+        # this function must receive 3 args: field_value, fields, field_name
+        # We create a partial callback to pre-populate known options (action, provider opts, enc ctx)
+        update_callback = functools.partial(
+            self._call_action,
+            action=action,
+            provider_options=provider_options,
+            **encryption_context,
+        )
+
         # Iterate over each field to be parsed.
         for field_parse in fields:
             # Parse the field expression using a 'parse' function.
@@ -236,14 +246,9 @@ class DataMasking:
                 if not result_parse:
                     raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
 
-            # For in-place updates, json_parse accepts a callback function that receives 3 args: field_value, fields, field_name
-            # We create a partial callback to pre-populate known provider options (action, provider opts, enc ctx)
-            update_callback = functools.partial(
-                self._call_action, action=action, provider_options=provider_options, **encryption_context
-            )
-
             json_parse.update(
-                data_parsed, lambda field_value, fields, field_name: update_callback(field_value, fields, field_name)
+                data_parsed,
+                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),
             )
 
         return data_parsed
