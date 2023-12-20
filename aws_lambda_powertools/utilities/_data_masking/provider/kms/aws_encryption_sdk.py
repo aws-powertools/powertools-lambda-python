@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 import functools
 import json
 import logging
@@ -20,6 +19,11 @@ from aws_encryption_sdk.exceptions import (
     NotSupportedError,
 )
 
+from aws_lambda_powertools.shared.functions import (
+    base64_decode,
+    bytes_to_base64_string,
+    bytes_to_string,
+)
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
     CACHE_CAPACITY,
@@ -152,6 +156,7 @@ class KMSKeyProvider:
         self._validate_encryption_context(encryption_context)
 
         data_encoded = self.json_serializer(data).encode("utf-8")
+
         try:
             ciphertext, _ = self.client.encrypt(
                 source=data_encoded,
@@ -163,8 +168,8 @@ class KMSKeyProvider:
             raise DataMaskingEncryptKeyError(
                 "Failed to encrypt data. Please ensure you are using a valid Symmetric AWS KMS Key ARN, not KMS Key ID or alias.",  # noqa E501
             )
-        ciphertext = base64.b64encode(ciphertext).decode()
-        return ciphertext
+
+        return bytes_to_base64_string(ciphertext)
 
     def decrypt(self, data: str, provider_options: dict | None = None, **encryption_context: str) -> Any:
         """
@@ -186,7 +191,7 @@ class KMSKeyProvider:
         self._validate_encryption_context(encryption_context)
 
         try:
-            ciphertext_decoded = base64.b64decode(data)
+            ciphertext_decoded = base64_decode(data)
         except Error:
             raise DataMaskingDecryptValueError(
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
@@ -209,8 +214,9 @@ class KMSKeyProvider:
 
         self._compare_encryption_context(encryption_context, decryptor_header)
 
-        ciphertext = self.json_deserializer(ciphertext.decode("utf-8"))
-        return ciphertext
+        decoded_ciphertext = bytes_to_string(ciphertext)
+
+        return self.json_deserializer(decoded_ciphertext)
 
     @staticmethod
     def _validate_encryption_context(context: dict):

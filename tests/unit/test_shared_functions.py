@@ -1,3 +1,4 @@
+import base64
 import os
 import warnings
 from dataclasses import dataclass
@@ -7,6 +8,7 @@ from pydantic import BaseModel
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
+    bytes_to_base64_string,
     extract_event_from_common_models,
     powertools_debug_is_set,
     powertools_dev_is_set,
@@ -138,3 +140,16 @@ def test_resolve_max_age_env_var_wins_over_default_value(monkeypatch: pytest.Mon
 
     # THEN the result must be the environment variable value
     assert max_age == 20
+
+
+def test_bytes_to_base64_string():
+    value = b"test"
+
+    assert bytes_to_base64_string(value) == base64.b64encode(value).decode()
+
+
+def test_bytes_to_base64_string_invalid_type():
+    value = "test"
+
+    with pytest.raises(ValueError, match="is this bytes data?"):
+        bytes_to_base64_string(value)
