@@ -80,6 +80,7 @@ if TYPE_CHECKING:
         License,
         OpenAPI,
         Server,
+        Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
@@ -1360,7 +1361,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1381,7 +1382,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag | str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1403,7 +1404,7 @@ class ApiGatewayResolver(BaseRouter):
             get_compat_model_name_map,
             get_definitions,
         )
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1468,7 +1469,7 @@ class ApiGatewayResolver(BaseRouter):
         if components:
             output["components"] = components
         if tags:
-            output["tags"] = [{"name": tag} for tag in tags]
+            output["tags"] = [Tag(name=tag) if isinstance(tag, str) else tag for tag in tags]
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
@@ -1482,7 +1483,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1503,7 +1504,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag, str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1548,7 +1549,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1573,7 +1574,7 @@ class ApiGatewayResolver(BaseRouter):
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag, str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.

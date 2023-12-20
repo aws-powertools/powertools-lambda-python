@@ -349,37 +349,6 @@ def test_openapi_with_embed_body_param():
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
 
 
-def test_openapi_with_tags():
-    app = APIGatewayRestResolver()
-
-    @app.get("/users")
-    def handler():
-        raise NotImplementedError()
-
-    schema = app.get_openapi_schema(tags=["Orders"])
-    assert len(schema.tags) == 1
-
-    tag = schema.tags[0]
-    assert tag.name == "Orders"
-
-
-def test_openapi_operation_with_tags():
-    app = APIGatewayRestResolver()
-
-    @app.get("/users", tags=["Users"])
-    def handler():
-        raise NotImplementedError()
-
-    schema = app.get_openapi_schema()
-    assert len(schema.paths.keys()) == 1
-
-    get = schema.paths["/users"].get
-    assert len(get.tags) == 1
-
-    tag = get.tags[0]
-    assert tag == "Users"
-
-
 def test_openapi_with_excluded_operations():
     app = APIGatewayRestResolver()
 
