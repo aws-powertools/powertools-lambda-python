@@ -51,7 +51,7 @@ class BaseProvider:
         self.json_serializer = json_serializer
         self.json_deserializer = json_deserializer
 
-    def encrypt(self, data, provider_options: dict | None = None, **encryption_context: str) -> str | dict:
+    def encrypt(self, data, provider_options: dict | None = None, **encryption_context: str) -> str:
         """
         Abstract method for encrypting data. Subclasses must implement this method.
         """

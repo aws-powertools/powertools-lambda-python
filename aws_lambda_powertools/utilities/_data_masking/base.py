@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Callable, Iterable, Optional, Union
+from numbers import Number
+from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Union, overload
 
 from jsonpath_ng import parse
 
@@ -51,13 +52,33 @@ class DataMasking:
         self.json_serializer = self.provider.json_serializer
         self.json_deserializer = self.provider.json_deserializer
 
+    @overload
     def encrypt(
         self,
-        data,
+        data: dict,
+        fields: list[str],
+        provider_options: dict | None = None,
+        **encryption_context: str,
+    ) -> dict:
+        ...
+
+    @overload
+    def encrypt(
+        self,
+        data: Mapping | Sequence | Number,
+        fields: None = None,
+        provider_options: dict | None = None,
+        **encryption_context: str,
+    ) -> str:
+        ...
+
+    def encrypt(
+        self,
+        data: Mapping | Sequence | Number,
         fields: list[str] | None = None,
         provider_options: dict | None = None,
         **encryption_context: str,
-    ) -> str | dict:
+    ) -> str | Mapping:
         return self._apply_action(
             data=data,
             fields=fields,
@@ -86,7 +107,7 @@ class DataMasking:
 
     def _apply_action(
         self,
-        data: str | dict,
+        data,
         fields: list[str] | None,
         action: Callable,
         provider_options: dict | None = None,
