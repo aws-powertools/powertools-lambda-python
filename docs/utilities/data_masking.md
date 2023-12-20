@@ -275,7 +275,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "All key items"
 
-    You want to obfuscate data any data under `address` field.
+    You want to obfuscate data under `address` field.
 
     === "Data"
 
@@ -290,6 +290,80 @@ Here are common scenarios to best visualize how to use `fields`.
         ```json hl_lines="6-7"
         --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys_output.json"
         ```
+
+=== "Complex nested key"
+
+    You want to obfuscate data under `name` field.
+
+    === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["category..name"])`
+
+        ```json hl_lines="6"
+        --8<-- "examples/data_masking/src/choosing_payload_complex_nested_keys.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="6"
+        --8<-- "examples/data_masking/src/choosing_payload_complex_nested_keys_output.json"
+        ```
+
+=== "Accessing list index"
+
+    You want to obfuscate data under `street` field located at the initial index of the address list.
+
+    === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address[1].street"])`
+
+        ```json hl_lines="12"
+        --8<-- "examples/data_masking/src/choosing_payload_list_index.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="12"
+        --8<-- "examples/data_masking/src/choosing_payload_list_index_output.json"
+        ```
+
+=== "All fields in a list"
+
+    You want to obfuscate data under `street` field located at the any index of the address list.
+
+    === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address[*].street"])`
+
+        ```json hl_lines="8 12"
+        --8<-- "examples/data_masking/src/choosing_payload_list_all_index.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="8 12"
+        --8<-- "examples/data_masking/src/choosing_payload_list_all_index_output.json"
+        ```
+
+=== "Slicing a list"
+
+    You want to obfuscate data by slicing a list.
+
+    === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["address[-1].street"])`
+
+        ```json hl_lines="8 12 16"
+        --8<-- "examples/data_masking/src/choosing_payload_list_slice.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="16"
+        --8<-- "examples/data_masking/src/choosing_payload_list_slice_output.json"
+        ```
+
+For comprehensive guidance on using JSONPath syntax, please refer to the official documentation available at [jsonpath-ng](https://github.com/h2non/jsonpath-ng#jsonpath-syntax){target="_blank" rel="nofollow"}
 
 #### JSON
 
@@ -316,9 +390,7 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ### Data serialization
 
 ???+ note "Current limitations"
-    1. No support for data slicing `field.subfield[0:2]`.
-    2. No support for accessing fields within a `list`.
-    3. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
+    1. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
 
 Before we traverse the data structure, we perform two important operations on input data:
 
