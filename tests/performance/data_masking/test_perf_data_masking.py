@@ -3,9 +3,9 @@ from types import ModuleType
 
 import pytest
 
-from aws_lambda_powertools.utilities._data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 
-DATA_MASKING_PACKAGE = "aws_lambda_powertools.utilities._data_masking"
+DATA_MASKING_PACKAGE = "aws_lambda_powertools.utilities.data_masking"
 DATA_MASKING_INIT_SLA: float = 0.002
 DATA_MASKING_NESTED_ENCRYPT_SLA: float = 0.05
 

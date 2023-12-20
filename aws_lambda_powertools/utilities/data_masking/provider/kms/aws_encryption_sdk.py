@@ -26,21 +26,21 @@ from aws_lambda_powertools.shared.functions import (
     bytes_to_string,
 )
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
-from aws_lambda_powertools.utilities._data_masking.constants import (
+from aws_lambda_powertools.utilities.data_masking.constants import (
     CACHE_CAPACITY,
     ENCRYPTED_DATA_KEY_CTX_KEY,
     MAX_BYTES_ENCRYPTED,
     MAX_CACHE_AGE_SECONDS,
     MAX_MESSAGES_ENCRYPTED,
 )
-from aws_lambda_powertools.utilities._data_masking.exceptions import (
+from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingContextMismatchError,
     DataMaskingDecryptKeyError,
     DataMaskingDecryptValueError,
     DataMaskingEncryptKeyError,
     DataMaskingUnsupportedTypeError,
 )
-from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 logger = logging.getLogger(__name__)
 

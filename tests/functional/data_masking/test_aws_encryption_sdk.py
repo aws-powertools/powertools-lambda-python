@@ -7,10 +7,10 @@ from typing import Any, Callable
 
 import pytest
 
-from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
-from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
-from aws_lambda_powertools.utilities._data_masking.provider.kms import (
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities.data_masking.provider.kms import (
     AWSEncryptionSDKProvider,
 )
 

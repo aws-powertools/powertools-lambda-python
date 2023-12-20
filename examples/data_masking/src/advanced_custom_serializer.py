@@ -4,8 +4,8 @@ import os
 
 import ujson
 
-from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import (
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import (
     AWSEncryptionSDKProvider,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext

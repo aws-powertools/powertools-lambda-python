@@ -1,6 +1,6 @@
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
 
 logger = Logger()
 

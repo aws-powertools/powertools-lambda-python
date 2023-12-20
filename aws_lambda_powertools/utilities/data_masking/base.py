@@ -8,11 +8,11 @@ from typing import Any, Callable, Mapping, Optional, Sequence, Union, overload
 
 from jsonpath_ng.ext import parse
 
-from aws_lambda_powertools.utilities._data_masking.exceptions import (
+from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingFieldNotFoundError,
     DataMaskingUnsupportedTypeError,
 )
-from aws_lambda_powertools.utilities._data_masking.provider import BaseProvider
+from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
 
 logger = logging.getLogger(__name__)
 

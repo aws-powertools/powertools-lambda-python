@@ -4,7 +4,7 @@ import functools
 import json
 from typing import Any, Callable, Iterable
 
-from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 
 
 class BaseProvider:
