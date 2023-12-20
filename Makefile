@@ -31,7 +31,7 @@ lint-docs-fix:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli --fix "docs"
 
 test:
-	poetry run pytest -m "not perf" --ignore tests/e2e --ignore tests/integration --cov=aws_lambda_powertools --cov-report=xml
+	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
 test-pydanticv2:
@@ -39,12 +39,6 @@ test-pydanticv2:
 
 unit-test:
 	poetry run pytest tests/unit
-
-test-idempotency-redis:
-	docker run --name test-idempotency-redis -d -p 63005:6379 redis
-	poetry run pytest tests/integration/idempotency;docker stop test-idempotency-redis;docker rm test-idempotency-redis
-
-
 
 e2e-test:
 	poetry run pytest tests/e2e
