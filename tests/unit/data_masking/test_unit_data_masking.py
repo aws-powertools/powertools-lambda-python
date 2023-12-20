@@ -162,6 +162,15 @@ def test_parsing_unsupported_data_type(data_masker):
         data_masker.mask(42, ["this.field"])
 
 
+def test_parsing_with_empty_field(data_masker):
+    # GIVEN an initialization of the DataMasking class
+
+    # WHEN attempting to pass in a list of fields with input data that is not a dict
+    with pytest.raises(ValueError):
+        # THEN the result is a TypeError
+        data_masker.mask(42, [])
+
+
 def test_parsing_nonexistent_fields_with_raise_on_missing_field():
     # GIVEN a dict data type
 

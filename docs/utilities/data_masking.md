@@ -353,6 +353,12 @@ Here are common scenarios to best visualize how to use `fields`.
 
         > Expression: `data_masker.mask(data, fields=["$.address[?(@.postcode > 81846)]"])`
 
+        > `$`: Represents the root of the JSON structure.
+
+        > `.address`: Selects the "address" property within the JSON structure.
+
+        > `(@.postcode > 81846)`: Specifies the condition that elements should meet. It selects elements where the value of the `postcode` property is `greater than 81846`.
+
         ```json hl_lines="8 12"
         --8<-- "examples/data_masking/src/choosing_payload_complex_search.json"
         ```
