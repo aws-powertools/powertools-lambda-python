@@ -7,3 +7,5 @@ MAX_CACHE_AGE_SECONDS: float = 300.0
 MAX_MESSAGES_ENCRYPTED: int = 4294967296  # 2 ** 32
 # Maximum number of bytes which are allowed to be encrypted under a single cached data key
 MAX_BYTES_ENCRYPTED: int = 9223372036854775807  # 2 ** 63 - 1
+
+ENCRYPTED_DATA_KEY_CTX_KEY = "aws-crypto-public-key"

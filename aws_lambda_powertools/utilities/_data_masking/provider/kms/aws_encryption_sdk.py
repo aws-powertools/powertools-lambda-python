@@ -18,6 +18,7 @@ from aws_encryption_sdk.exceptions import (
     GenerateKeyError,
     NotSupportedError,
 )
+from aws_encryption_sdk.structures import MessageHeader
 
 from aws_lambda_powertools.shared.functions import (
     base64_decode,
@@ -27,6 +28,7 @@ from aws_lambda_powertools.shared.functions import (
 from aws_lambda_powertools.shared.user_agent import register_feature_to_botocore_session
 from aws_lambda_powertools.utilities._data_masking.constants import (
     CACHE_CAPACITY,
+    ENCRYPTED_DATA_KEY_CTX_KEY,
     MAX_BYTES_ENCRYPTED,
     MAX_CACHE_AGE_SECONDS,
     MAX_MESSAGES_ENCRYPTED,
@@ -198,6 +200,8 @@ class KMSKeyProvider:
             )
 
         try:
+            decryptor_header: MessageHeader
+
             ciphertext, decryptor_header = self.client.decrypt(
                 source=ciphertext_decoded,
                 key_provider=self.key_provider,
@@ -212,7 +216,7 @@ class KMSKeyProvider:
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
 
-        self._compare_encryption_context(encryption_context, decryptor_header)
+        self._compare_encryption_context(decryptor_header.encryption_context, encryption_context)
 
         decoded_ciphertext = bytes_to_string(ciphertext)
 
@@ -230,12 +234,12 @@ class KMSKeyProvider:
                 )
 
     @staticmethod
-    def _compare_encryption_context(context: dict, decryptor_header):
-        if not context:
-            return
+    def _compare_encryption_context(actual_context: dict, expected_context: dict):
+        # We can safely remove encrypted data key after decryption for exact match verification
+        actual_context.pop(ENCRYPTED_DATA_KEY_CTX_KEY, None)
 
-        for key, value in context.items():
-            if decryptor_header.encryption_context.get(key) != value:
-                raise DataMaskingContextMismatchError(
-                    f"Encryption Context does not match expected value for key: {key}",
-                )
+        # Encryption context could be out of order hence a set
+        if set(actual_context.items()) != set(expected_context.items()):
+            raise DataMaskingContextMismatchError(
+                "Encryption context does not match. You must use the exact same context used during encryption",
+            )
