@@ -1,4 +1,5 @@
 from __future__ import annotations
+import functools
 
 import logging
 from numbers import Number
@@ -235,17 +236,14 @@ class DataMasking:
                 if not result_parse:
                     raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
 
-            # Update the parsed data using a callback function.
+            # For in-place updates, json_parse accepts a callback function that receives 3 args: field_value, fields, field_name
+            # We create a partial callback to pre-populate known provider options (action, provider opts, enc ctx)
+            update_callback = functools.partial(
+                self._call_action, action=action, provider_options=provider_options, **encryption_context
+            )
+
             json_parse.update(
-                data_parsed,
-                lambda field_value, fields, field_name, action=action, provider_options=provider_options, encryption_context=encryption_context: self._call_action(  # noqa
-                    field_value,
-                    fields,
-                    field_name,
-                    action,
-                    provider_options,
-                    **encryption_context,
-                ),
+                data_parsed, lambda field_value, fields, field_name: update_callback(field_value, fields, field_name)
             )
 
         return data_parsed
