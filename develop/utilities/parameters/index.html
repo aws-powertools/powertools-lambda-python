@@ -1909,7 +1909,7 @@
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Retrieve a single parameter</span>
-<span class="hll">        <span class="n">endpoint_comments</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;/lambda-powertools/endpoint_comments&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment] # noqa: E501</span>
+<span class="hll">        <span class="n">endpoint_comments</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get_parameter</span><span class="p">(</span><span class="s2">&quot;/lambda-powertools/endpoint_comments&quot;</span><span class="p">)</span>
 </span>
         <span class="c1"># the value of this parameter is https://jsonplaceholder.typicode.com/comments/</span>
         <span class="n">comments</span><span class="p">:</span> <span class="n">requests</span><span class="o">.</span><span class="n">Response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">endpoint_comments</span><span class="p">)</span>
