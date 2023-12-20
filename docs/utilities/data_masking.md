@@ -435,10 +435,6 @@ The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY
     --8<-- "examples/data_masking/src/changing_default_algorithm.py"
     ```
 
-#### Creating your own provider
-
-!!! info "In Q1 2024, we plan to add support for bringing your own encryption provider."
-
 ### Data masking request flow
 
 The following sequence diagrams explain how `DataMasking` behaves under different scenarios.
