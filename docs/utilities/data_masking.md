@@ -17,7 +17,7 @@ stateDiagram-v2
     Mask: <strong>Mask</strong>
     Encrypt: <strong>Encrypt</strong>
     Decrypt: <strong>Decrypt</strong>
-    Provider: Encryption provider
+    Provider: AWS Encryption SDK provider
     Result: Data transformed <i>(masked, encrypted, or decrypted)</i>
 
     LambdaFn --> DataMasking
