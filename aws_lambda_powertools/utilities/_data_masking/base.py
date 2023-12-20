@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import functools
 import logging
+import warnings
 from numbers import Number
 from typing import Any, Callable, Mapping, Optional, Sequence, Union, overload
 
-from jsonpath_ng import parse
+from jsonpath_ng.ext import parse
 
 from aws_lambda_powertools.utilities._data_masking.exceptions import (
     DataMaskingFieldNotFoundError,
@@ -47,7 +48,7 @@ class DataMasking:
     def __init__(
         self,
         provider: Optional[BaseProvider] = None,
-        raise_on_missing_field: bool = False,
+        raise_on_missing_field: bool = True,
     ):
         self.provider = provider or BaseProvider()
         # NOTE: we depend on Provider to not confuse customers in passing the same 2 serializers in 2 places
@@ -236,19 +237,30 @@ class DataMasking:
         for field_parse in fields:
             # Parse the field expression using a 'parse' function.
             json_parse = parse(field_parse)
+            # Find the corresponding keys in the normalized data using the parsed expression.
+            result_parse = json_parse.find(data_parsed)
 
-            if self.raise_on_missing_field:
-                # Customer wants to raise exception when field is not found
-                # Find the corresponding data in the normalized data using the parsed expression.
-                result_parse = json_parse.find(data_parsed)
-
-                # If the data for the field is not found, raise an exception.
-                if not result_parse:
+            if not result_parse:
+                if self.raise_on_missing_field:
+                    # If the data for the field is not found, raise an exception.
                     raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
+                else:
+                    # If the data for the field is not found, warning.
+                    warnings.warn(f"Field or expression {field_parse} not found in {data_parsed}", stacklevel=2)
+
+            # For in-place updates, json_parse accepts a callback function
+            # that receives 3 args: field_value, fields, field_name
+            # We create a partial callback to pre-populate known provider options (action, provider opts, enc ctx)
+            update_callback = functools.partial(
+                self._call_action,
+                action=action,
+                provider_options=provider_options,
+                **encryption_context,
+            )
 
             json_parse.update(
                 data_parsed,
-                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),
+                lambda field_value, fields, field_name: update_callback(field_value, fields, field_name),  # noqa: B023
             )
 
         return data_parsed

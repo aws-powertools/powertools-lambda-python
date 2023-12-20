@@ -179,7 +179,7 @@ def test_parsing_nonexistent_fields_with_raise_on_missing_field():
         data_masker.mask(data, ["'3'..True"])
 
 
-def test_parsing_nonexistent_fields_without_raise_on_missing_field():
+def test_parsing_nonexistent_fields_warning_on_missing_field():
     # GIVEN a dict data type
 
     data_masker = DataMasking(raise_on_missing_field=False)
@@ -191,7 +191,8 @@ def test_parsing_nonexistent_fields_without_raise_on_missing_field():
     }
 
     # WHEN mask is called with a non-existing field
-    masked_json_string = data_masker.mask(data, fields=["non-existing"])
+    with pytest.warns(UserWarning, match="Field or expression*"):
+        masked_json_string = data_masker.mask(data, fields=["non-existing"])
 
     # THEN the "masked" payload is the same of the original
     assert masked_json_string == data

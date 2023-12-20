@@ -381,3 +381,81 @@ def test_encrypt_with_complex_dict(data_masker):
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_with_slice(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "name": "Leandro",
+            "operation": "non sensitive",
+            "card_number": "1000 4444 333 2222",
+            "address": [
+                {
+                    "postcode": 81847,
+                    "street": "38986 Joanne Stravenue",
+                    "country": "United States",
+                    "timezone": "America/La_Paz",
+                },
+                {
+                    "postcode": 94400,
+                    "street": "623 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+                {
+                    "postcode": 94480,
+                    "street": "123 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+            ],
+        },
+    )
+
+    fields_operation = ["address[-1]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+
+def test_encrypt_with_complex_search(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "name": "Leandro",
+            "operation": "non sensitive",
+            "card_number": "1000 4444 333 2222",
+            "address": [
+                {
+                    "postcode": 81847,
+                    "street": "38986 Joanne Stravenue",
+                    "country": "United States",
+                    "timezone": "America/La_Paz",
+                },
+                {
+                    "postcode": 94400,
+                    "street": "623 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+                {
+                    "postcode": 94480,
+                    "street": "123 Kraig Mall",
+                    "country": "United States",
+                    "timezone": "America/Mazatlan",
+                },
+            ],
+        },
+    )
+
+    fields_operation = ["$.address[?(@.postcode > 81847)]"]
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=["address[1:3]"])
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)

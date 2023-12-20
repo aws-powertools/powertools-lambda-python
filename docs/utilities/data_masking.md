@@ -309,24 +309,6 @@ Here are common scenarios to best visualize how to use `fields`.
         --8<-- "examples/data_masking/src/choosing_payload_complex_nested_keys_output.json"
         ```
 
-=== "Accessing list index"
-
-    You want to obfuscate data under `street` field located at the initial index of the address list.
-
-    === "Data"
-
-        > Expression: `data_masker.mask(data, fields=["address[1].street"])`
-
-        ```json hl_lines="12"
-        --8<-- "examples/data_masking/src/choosing_payload_list_index.json"
-        ```
-
-    === "Result"
-
-        ```json hl_lines="12"
-        --8<-- "examples/data_masking/src/choosing_payload_list_index_output.json"
-        ```
-
 === "All fields in a list"
 
     You want to obfuscate data under `street` field located at the any index of the address list.
@@ -353,7 +335,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
         > Expression: `data_masker.mask(data, fields=["address[-1].street"])`
 
-        ```json hl_lines="8 12 16"
+        ```json hl_lines="16"
         --8<-- "examples/data_masking/src/choosing_payload_list_slice.json"
         ```
 
@@ -363,6 +345,23 @@ Here are common scenarios to best visualize how to use `fields`.
         --8<-- "examples/data_masking/src/choosing_payload_list_slice_output.json"
         ```
 
+=== "Complex expressions"
+
+    You want to obfuscate data by finding for a field with conditional expression.
+
+    === "Data"
+
+        > Expression: `data_masker.mask(data, fields=["$.address[?(@.postcode > 81846)]"])`
+
+        ```json hl_lines="8 12"
+        --8<-- "examples/data_masking/src/choosing_payload_complex_search.json"
+        ```
+
+    === "Result"
+
+        ```json hl_lines="8 12"
+        --8<-- "examples/data_masking/src/choosing_payload_complex_search_output.json"
+        ```
 For comprehensive guidance on using JSONPath syntax, please refer to the official documentation available at [jsonpath-ng](https://github.com/h2non/jsonpath-ng#jsonpath-syntax){target="_blank" rel="nofollow"}
 
 #### JSON
