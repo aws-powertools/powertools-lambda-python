@@ -210,11 +210,18 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is useful when you want to keep data structure intact except the confidential fields.
 
-When the field is a `list`, we obfuscate their values to `str` while keeping the data structure and number of items intact. Obfuscating nested data structures from a given field is also supported.
+When `fields` is present, `mask` and `encrypt` behave differently:
 
-> Common scenarios
+| Operation | Behavior                                                    | Example                 | Obfuscated                      |
+| --------- | ----------------------------------------------------------- | ----------------------- | ------------------------------- |
+| `encrypt` | Obfuscate entire data and replacing with ciphertext string. | `{"cards": ["a", "b"]}` | `{"cards": "ciphertext"}`       |
+| `mask`    | Replace data while keeping collections type intact.         | `{"cards": ["a", "b"]}` | `{"cards": ["*****", "*****"]}` |
+
+Here are common scenarios to best visualize how to use `fields`.
 
 === "Top keys only"
+
+    You want to obfuscate data in the `card_number` field.
 
     === "Data"
 
@@ -232,6 +239,8 @@ When the field is a `list`, we obfuscate their values to `str` while keeping the
 
 === "Nested key"
 
+    You want to obfuscate data in the `postcode` field.
+
     === "Data"
 
         > Expression: `data_masker.mask(data, fields=["address.postcode"])`
@@ -248,6 +257,8 @@ When the field is a `list`, we obfuscate their values to `str` while keeping the
 
 === "Multiple keys"
 
+    You want to obfuscate data in both `postcode` and `street` fields.
+
     === "Data"
 
         > Expression: `data_masker.mask(data, fields=["address.postcode", "address.street"])`
@@ -263,6 +274,8 @@ When the field is a `list`, we obfuscate their values to `str` while keeping the
         ```
 
 === "All key items"
+
+    You want to obfuscate data any data under `address` field.
 
     === "Data"
 
