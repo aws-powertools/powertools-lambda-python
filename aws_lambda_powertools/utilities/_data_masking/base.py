@@ -46,11 +46,13 @@ class DataMasking:
     def __init__(
         self,
         provider: Optional[BaseProvider] = None,
+        raise_on_missing_field: bool = False,
     ):
         self.provider = provider or BaseProvider()
         # NOTE: we depend on Provider to not confuse customers in passing the same 2 serializers in 2 places
         self.json_serializer = self.provider.json_serializer
         self.json_deserializer = self.provider.json_deserializer
+        self.raise_on_missing_field = raise_on_missing_field
 
     @overload
     def encrypt(
@@ -223,12 +225,15 @@ class DataMasking:
         for field_parse in fields:
             # Parse the field expression using a 'parse' function.
             json_parse = parse(field_parse)
-            # Find the corresponding data in the normalized data using the parsed expression.
-            result_parse = json_parse.find(data_parsed)
 
-            # If the data for the field is not found, raise an exception.
-            if not result_parse:
-                raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
+            if self.raise_on_missing_field:
+                # Customer wants to raise exception when field is not found
+                # Find the corresponding data in the normalized data using the parsed expression.
+                result_parse = json_parse.find(data_parsed)
+
+                # If the data for the field is not found, raise an exception.
+                if not result_parse:
+                    raise DataMaskingFieldNotFoundError(f"Field or expression {field_parse} not found in {data_parsed}")
 
             # Update the parsed data using a callback function.
             json_parse.update(

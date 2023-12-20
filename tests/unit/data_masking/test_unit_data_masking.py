@@ -162,8 +162,10 @@ def test_parsing_unsupported_data_type(data_masker):
         data_masker.mask(42, ["this.field"])
 
 
-def test_parsing_nonexistent_fields(data_masker):
+def test_parsing_nonexistent_fields_with_raise_on_missing_field():
     # GIVEN a dict data type
+
+    data_masker = DataMasking(raise_on_missing_field=True)
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -175,3 +177,21 @@ def test_parsing_nonexistent_fields(data_masker):
     with pytest.raises(DataMaskingFieldNotFoundError):
         # THEN the result is a KeyError
         data_masker.mask(data, ["'3'..True"])
+
+
+def test_parsing_nonexistent_fields_without_raise_on_missing_field():
+    # GIVEN a dict data type
+
+    data_masker = DataMasking(raise_on_missing_field=False)
+    data = {
+        "3": {
+            "1": {"None": "hello", "four": "world"},
+            "4": {"33": {"5": "goodbye", "e": "world"}},
+        },
+    }
+
+    # WHEN mask is called with a non-existing field
+    masked_json_string = data_masker.mask(data, fields=["non-existing"])
+
+    # THEN the "masked" payload is the same of the original
+    assert masked_json_string == data
