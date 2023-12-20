@@ -207,11 +207,7 @@ class KMSKeyProvider:
                 "Data decryption failed. Please ensure that you are attempting to decrypt data that was previously encrypted.",  # noqa E501
             )
 
-        for key, value in encryption_context.items():
-            if decryptor_header.encryption_context.get(key) != value:
-                raise DataMaskingContextMismatchError(
-                    f"Encryption Context does not match expected value for key: {key}",
-                )
+        self._compare_encryption_context(encryption_context, decryptor_header)
 
         ciphertext = self.json_deserializer(ciphertext.decode("utf-8"))
         return ciphertext
@@ -225,4 +221,15 @@ class KMSKeyProvider:
             if not isinstance(value, str):
                 raise DataMaskingUnsupportedTypeError(
                     f"Encryption context values must be string. Received: {key}={value}",
+                )
+
+    @staticmethod
+    def _compare_encryption_context(context: dict, decryptor_header):
+        if not context:
+            return
+
+        for key, value in context.items():
+            if decryptor_header.encryption_context.get(key) != value:
+                raise DataMaskingContextMismatchError(
+                    f"Encryption Context does not match expected value for key: {key}",
                 )
