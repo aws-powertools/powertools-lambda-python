@@ -20,7 +20,7 @@ encryption_provider = AWSEncryptionSDKProvider(
 data_masker = DataMasking(provider=encryption_provider)
 
 
-def lambda_handler(event: dict, context: LambdaContext):
-    data = event.get("body", {})
+def lambda_handler(event: dict, context: LambdaContext) -> str:
+    data: dict = event.get("body", {})
 
     return data_masker.encrypt(data)

@@ -17,7 +17,7 @@ logger = Logger()
 
 @logger.inject_lambda_context
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
-    data = event.get("body")
+    data: dict = event.get("body", {})
 
     logger.info("Decrypting fields email, address.street, and company_address")
 

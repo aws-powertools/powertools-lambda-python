@@ -99,8 +99,6 @@ Before you start, you will need a KMS symmetric key to encrypt and decrypt your 
 
 ### Masking data
 
-!!! note "You can mask data without [installing any dependency](#install)."
-
 Masking will erase the original data and replace with `*****`. This means you cannot recover masked data, and its type will change to `str`.
 
 === "getting_started_mask_data.py"
@@ -131,7 +129,7 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
 
 === "getting_started_encrypt_data.py"
 
-    ```python hl_lines="5-6 11-12 23"
+    ```python hl_lines="6-8 14-15 26"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
 
