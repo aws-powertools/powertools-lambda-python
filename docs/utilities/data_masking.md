@@ -572,13 +572,16 @@ sequenceDiagram
 
 ## Testing your code
 
-!!! danger "TODO - Refactor with a fake"
+### Testing mask operation
 
-For unit testing your applications, you can mock the calls to the data masking utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the pytest monkeypatch fixture to patch the `data_masking.decrypt` method.
+Testing your code with a simple mask operation
 
-If we need to use this pattern across multiple tests, we can avoid repetition by refactoring to use our own pytest fixture:
+=== "test_lambda_mask.py"
+    ```python hl_lines="22"
+    --8<-- "examples/data_masking/tests/test_lambda_mask.py"
+    ```
 
-=== "test_with_fixture.py"
-    ```python hl_lines="5 10"
-    --8<-- "examples/data_masking/tests/test_data_masking_with_fixture.py"
+=== "lambda_mask.py"
+    ```python hl_lines="3 12"
+    --8<-- "examples/data_masking/tests/lambda_mask.py"
     ```
