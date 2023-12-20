@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import functools
 import json
-from typing import Any, Callable, Iterable, Union
+from typing import Any, Callable, Iterable
 
 from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
 
@@ -63,7 +63,7 @@ class BaseProvider:
         """
         raise NotImplementedError("Subclasses must implement decrypt()")
 
-    def mask(self, data, **kwargs) -> Union[str, Iterable]:
+    def mask(self, data, **kwargs) -> Iterable[str]:
         """
         This method irreversibly masks data.
 

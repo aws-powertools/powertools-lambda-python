@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from numbers import Number
-from typing import Any, Callable, Iterable, Mapping, Optional, Sequence, Union, overload
+from typing import Any, Callable, Mapping, Optional, Sequence, Union, overload
 
 from jsonpath_ng import parse
 
@@ -102,7 +102,23 @@ class DataMasking:
             **encryption_context,
         )
 
-    def mask(self, data, fields=None) -> str | Iterable:
+    @overload
+    def mask(self, data, fields: None) -> str:
+        ...
+
+    @overload
+    def mask(self, data: list, fields: list[str]) -> list[str]:
+        ...
+
+    @overload
+    def mask(self, data: tuple, fields: list[str]) -> tuple[str]:
+        ...
+
+    @overload
+    def mask(self, data: dict, fields: list[str]) -> dict:
+        ...
+
+    def mask(self, data: Sequence | Mapping, fields: list[str] | None = None) -> str | list[str] | tuple[str] | dict:
         return self._apply_action(data=data, fields=fields, action=self.provider.mask)
 
     def _apply_action(
