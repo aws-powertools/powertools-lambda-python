@@ -617,6 +617,9 @@ class Route:
         if required:
             request_body_oai["required"] = required
 
+        if field_info.description:
+            request_body_oai["description"] = field_info.description
+
         # Generate the request body media type
         request_media_content: Dict[str, Any] = {"schema": body_schema}
         request_body_oai["content"] = {request_media_type: request_media_content}

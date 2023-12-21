@@ -349,6 +349,30 @@ def test_openapi_with_embed_body_param():
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
 
 
+def test_openapi_with_body_description():
+    app = APIGatewayRestResolver()
+
+    class User(BaseModel):
+        name: str
+
+    @app.post("/users")
+    def handler(user: Annotated[User, Body(description="This is a user")]):
+        print(user)
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
+
+    request_body = post.requestBody
+
+    # Description should appear in two places: on the request body and on the schema
+    assert request_body.description == "This is a user"
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
+
+
 def test_openapi_with_excluded_operations():
     app = APIGatewayRestResolver()
 
