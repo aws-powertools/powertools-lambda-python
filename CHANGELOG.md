@@ -4,6 +4,14 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **parameters:** add overload signatures for get_parameter and get_parameters ([#3534](https://github.com/aws-powertools/powertools-lambda-python/issues/3534))
+
+## Features
+
+* **event_handler:** support richer top level Tags ([#3543](https://github.com/aws-powertools/powertools-lambda-python/issues/3543))
+
 ## Maintenance
 
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 3.0.2 to 3.0.3 ([#3536](https://github.com/aws-powertools/powertools-lambda-python/issues/3536))
