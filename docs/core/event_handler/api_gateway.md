@@ -485,6 +485,7 @@ There are some important **caveats** that you should know before enabling it:
 | Swagger UI is **publicly accessible by default** | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism. |
 | **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                     |
 | You need to expose **new routes**                | You'll need to expose the following paths to Lambda: `/swagger`, `/swagger.css`, `/swagger.js`; ignore if you're routing all paths already.                                              |
+| Problems with **{proxy+}** resource and cache    | If you're not using an external CDN for SwaggerUI assets and relying on **Amazon API Gateway cache**, you must specify dedicated paths for `/swagger.js` and `/swagger.css` rather than utilizing `{proxy+}`.                  |
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
