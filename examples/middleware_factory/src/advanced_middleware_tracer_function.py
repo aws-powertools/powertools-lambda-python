@@ -15,7 +15,7 @@ app = APIGatewayRestResolver()
 
 @lambda_handler_decorator(trace_execution=True)
 def middleware_with_advanced_tracing(
-    handler: Callable[[dict, LambdaContext]],
+    handler: Callable[[dict, LambdaContext], dict],
     event: dict,
     context: LambdaContext,
 ) -> dict:
