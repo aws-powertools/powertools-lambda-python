@@ -176,9 +176,9 @@ class BaseInfrastructure(InfrastructureProvider):
             CloudFormation Stack Outputs with output key and value
         """
         stack_file = self._create_temp_cdk_app()
-        synth_command = f"npx cdk synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
+        synth_command = f"npx cdk@latest synth --app 'python {stack_file}' -o {self._cdk_out_dir}"
         deploy_command = (
-            f"npx cdk deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} "
+            f"npx cdk@latest deploy --app '{self._cdk_out_dir}' -O {self._stack_outputs_file} "
             "--require-approval=never --method=direct"
         )
 
