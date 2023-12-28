@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -56,6 +56,7 @@ var regions = []string{
 	"ap-southeast-3",
 	"ap-southeast-4",
 	"ca-central-1",
+	"ca-west-1",
 	"eu-central-1",
 	"eu-central-2",
 	"eu-north-1",
@@ -75,7 +76,7 @@ var regions = []string{
 }
 
 // Add regions that only support x86_64
-var singleArchitectureRegions = []string{}
+var singleArchitectureRegions = []string{"ca-west-1"}
 
 // getLayerVersion returns the latest version of a layer in a region
 func getLayerVersion(ctx context.Context, layerName string, region string) (int64, error) {
@@ -149,6 +150,11 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 		return fmt.Errorf("error getting layer version: %w", err)
 	}
 
+	if currentLayerVersion == 0 {
+		log.Printf("[%s] No layers found in region %s, stating with version 1", layer.Name, region)
+		currentLayerVersion = 1
+	}
+
 	cfg, err := config.LoadDefaultConfig(ctx, config.WithRegion(region))
 	if err != nil {
 		return err
@@ -172,7 +178,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 					ZipFile: payload,
 				},
 				LayerName:          aws.String(layer.Name),
-				CompatibleRuntimes: []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				CompatibleRuntimes: []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39, types.RuntimePython310, types.RuntimePython311, types.RuntimePython312},
 				Description:        aws.String(layer.Description),
 				LicenseInfo:        aws.String("MIT-0"),
 			})
@@ -183,7 +189,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 				},
 				LayerName:               aws.String(layer.Name),
 				CompatibleArchitectures: []types.Architecture{layer.Architecture},
-				CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39},
+				CompatibleRuntimes:      []types.Runtime{types.RuntimePython37, types.RuntimePython38, types.RuntimePython39, types.RuntimePython310, types.RuntimePython311, types.RuntimePython312},
 				Description:             aws.String(layer.Description),
 				LicenseInfo:             aws.String("MIT-0"),
 			})
@@ -197,7 +203,7 @@ func balanceRegionToVersion(ctx context.Context, region string, layer *LayerInfo
 			LayerName:     aws.String(layer.Name),
 			Principal:     aws.String("*"),
 			StatementId:   aws.String("PublicLayerAccess"),
-			VersionNumber: layerVersionResponse.Version,
+			VersionNumber: &layerVersionResponse.Version,
 		})
 		if err != nil {
 			return fmt.Errorf("error making layer public: %w", err)
@@ -260,7 +266,7 @@ func downloadCanonicalLayerZip(ctx context.Context, layer *LayerInfo) ([]byte, e
 		// Gets the Layer content URL from S3
 		getLayerVersionResult, err := lambdaSvc.GetLayerVersion(ctx, &lambda.GetLayerVersionInput{
 			LayerName:     aws.String(layer.Name),
-			VersionNumber: version,
+			VersionNumber: &version,
 		})
 		if err != nil {
 			innerErr = fmt.Errorf("error getting eu-central-1 layer download URL: %w", err)
@@ -275,7 +281,7 @@ func downloadCanonicalLayerZip(ctx context.Context, layer *LayerInfo) ([]byte, e
 		}
 		defer resp.Body.Close()
 
-		body, err := ioutil.ReadAll(resp.Body)
+		body, err := io.ReadAll(resp.Body)
 		if err != nil {
 			innerErr = err
 		}

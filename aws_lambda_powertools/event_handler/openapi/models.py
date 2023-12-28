@@ -207,7 +207,7 @@ class Schema(BaseModel):
     readOnly: Optional[bool] = None
     writeOnly: Optional[bool] = None
     examples: Optional[List["Example"]] = None
-    # Ref: OpenAPI 3.1.0: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.1.0.md#schema-object
+    # Ref: OpenAPI 3.0.0: https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.0.md#schema-object
     # Schema Object
     discriminator: Optional[Discriminator] = None
     xml: Optional[XML] = None
@@ -380,7 +380,7 @@ class Tag(BaseModel):
 
 # https://swagger.io/specification/#operation-object
 class Operation(BaseModel):
-    tags: Optional[List[Tag]] = None
+    tags: Optional[List[str]] = None
     summary: Optional[str] = None
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
