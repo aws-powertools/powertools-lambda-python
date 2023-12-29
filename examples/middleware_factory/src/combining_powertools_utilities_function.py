@@ -26,7 +26,11 @@ feature_flags = FeatureFlags(store=app_config)
 
 
 @lambda_handler_decorator(trace_execution=True)
-def middleware_custom(handler: Callable, event: dict, context: LambdaContext):
+def middleware_custom(
+    handler: Callable[[dict, LambdaContext], dict],
+    event: dict,
+    context: LambdaContext,
+) -> dict:
     # validating the INPUT with the given schema
     # X-Customer-Id header must be informed in all requests
     try:
