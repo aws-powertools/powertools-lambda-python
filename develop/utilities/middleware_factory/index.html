@@ -1649,7 +1649,11 @@
 <span class="normal">47</span>
 <span class="normal">48</span>
 <span class="normal">49</span>
-<span class="normal">50</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
 
@@ -1675,8 +1679,12 @@
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_before</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span>    <span class="c1"># extract payload from a EventBridge event</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_before</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># extract payload from a EventBridge event</span>
     <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
 
     <span class="c1"># check if status_id exists in payload, otherwise add default state before processing payment</span>
@@ -1689,7 +1697,7 @@
 
 
 <span class="hll"><span class="nd">@middleware_before</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span>    <span class="k">try</span><span class="p">:</span>
         <span class="n">payment_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -1775,22 +1783,28 @@
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
 
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.middleware_factory</span> <span class="kn">import</span> <span class="n">lambda_handler_decorator</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">()</span>
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_after</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_after</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="n">execution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
@@ -1812,8 +1826,8 @@
 
 
 <span class="hll"><span class="nd">@middleware_after</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
@@ -1897,7 +1911,12 @@
 <span class="normal">58</span>
 <span class="normal">59</span>
 <span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">base64</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">uuid</span> <span class="kn">import</span> <span class="n">uuid4</span>
@@ -1927,9 +1946,14 @@
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">obfuscate_sensitive_data</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span><span class="hll">    <span class="c1"># extracting payload from a EventBridge event</span>
-</span>    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">obfuscate_sensitive_data</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+    <span class="n">fields</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># extracting payload from a EventBridge event</span>
+    <span class="n">detail</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
     <span class="n">guest_data</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">detail</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;guest&quot;</span><span class="p">)</span>
 
 <span class="hll">    <span class="c1"># Obfuscate fields (email, vat, passport) before calling Lambda handler</span>
@@ -1947,8 +1971,8 @@
     <span class="k">return</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;ascii&quot;</span><span class="p">))</span>
 
 
-<span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
-<span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="hll"><span class="nd">@obfuscate_sensitive_data</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;passport&quot;</span><span class="p">,</span> <span class="s2">&quot;vat&quot;</span><span class="p">])</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 </span>    <span class="k">try</span><span class="p">:</span>
         <span class="n">booking_payload</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">extract_data_from_envelope</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">envelope</span><span class="o">=</span><span class="n">envelopes</span><span class="o">.</span><span class="n">EVENTBRIDGE</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
@@ -2079,7 +2103,10 @@
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
@@ -2095,8 +2122,11 @@
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span><span class="p">(</span><span class="n">trace_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_with_advanced_tracing</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_with_advanced_tracing</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
 <span class="hll">    <span class="n">tracer</span><span class="o">.</span><span class="n">put_metadata</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="s2">&quot;resource&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;resource&quot;</span><span class="p">))</span>
 </span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -2121,8 +2151,8 @@
 
 
 <span class="hll"><span class="nd">@middleware_with_advanced_tracing</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
@@ -2187,7 +2217,10 @@
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
@@ -2201,8 +2234,11 @@
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span><span class="p">(</span><span class="n">trace_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_with_tracing</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
-</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_with_tracing</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="n">response</span> <span class="o">=</span> <span class="n">handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="n">execution_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
@@ -2223,8 +2259,8 @@
 
 
 <span class="hll"><span class="nd">@middleware_with_tracing</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span>    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
@@ -2376,7 +2412,11 @@
 <span class="normal">116</span>
 <span class="normal">117</span>
 <span class="normal">118</span>
-<span class="normal">119</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
 
 <span class="kn">import</span> <span class="nn">boto3</span>
@@ -2404,8 +2444,12 @@
 
 
 <span class="hll"><span class="nd">@lambda_handler_decorator</span><span class="p">(</span><span class="n">trace_execution</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_custom</span><span class="p">(</span><span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
-</span>    <span class="c1"># validating the INPUT with the given schema</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">middleware_custom</span><span class="p">(</span>
+</span>    <span class="n">handler</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">LambdaContext</span><span class="p">],</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># validating the INPUT with the given schema</span>
     <span class="c1"># X-Customer-Id header must be informed in all requests</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">validate</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schemas</span><span class="o">.</span><span class="n">INPUT</span><span class="p">)</span>
@@ -2435,9 +2479,9 @@
     <span class="n">response</span><span class="p">[</span><span class="s2">&quot;headers&quot;</span><span class="p">][</span><span class="s2">&quot;X-Download-Options&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;noopen&quot;</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saving api call in history table&quot;</span><span class="p">)</span>
-    <span class="n">save_api_execution_history</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)),</span> <span class="n">headers</span><span class="p">,</span> <span class="n">request_context</span><span class="p">)</span>
-<span class="hll">
-</span>    <span class="c1"># return lambda execution</span>
+<span class="hll">    <span class="n">save_api_execution_history</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">)),</span> <span class="n">headers</span><span class="p">,</span> <span class="n">request_context</span><span class="p">)</span>
+</span>
+    <span class="c1"># return lambda execution</span>
     <span class="k">return</span> <span class="n">response</span>
 
 
@@ -2998,7 +3042,7 @@
   <small>
     
       Last update:
-      2023-08-10
+      2023-12-29
     
   </small>
 </div>
