@@ -30,7 +30,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 ### Middleware with before logic
 
 === "getting_started_middleware_before_logic_function.py"
-    ```python hl_lines="5 26-31 36 37 39 44 45"
+    ```python hl_lines="5 26 27 36 37 39 44 45"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_before_logic_function.py"
     ```
 
@@ -43,7 +43,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 ### Middleware with after logic
 
 === "getting_started_middleware_after_logic_function.py"
-    ```python hl_lines="8 14-19 24-26 40 41"
+    ```python hl_lines="8 14 15 24-26 40 41"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_after_logic_function.py"
     ```
 
@@ -58,7 +58,7 @@ You can create your own middleware using `lambda_handler_decorator`. The decorat
 You can also have your own keyword arguments after the mandatory arguments.
 
 === "getting_started_middleware_with_params_function.py"
-    ```python hl_lines="6 30-37 41 56 57"
+    ```python hl_lines="6 30 31 41 56 57"
     --8<-- "examples/middleware_factory/src/getting_started_middleware_with_params_function.py"
     ```
 
