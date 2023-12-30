@@ -1,3 +1,6 @@
+import json
+from typing import Dict
+
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from tests.functional.utils import load_event
 
@@ -68,3 +71,15 @@ def test_openapi_swagger_with_custom_base_url_no_embedded_assets():
     LOAD_GW_EVENT["path"] = "/swagger.js"
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 404
+
+
+def test_openapi_swagger_with_enabled_download_spec():
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger(enable_download_spec=True)
+    LOAD_GW_EVENT["path"] = "/swagger.json"
+
+    result = app(LOAD_GW_EVENT, {})
+
+    assert result["statusCode"] == 200
+    assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
+    assert isinstance(json.loads(result["body"]), Dict)
