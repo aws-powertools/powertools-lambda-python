@@ -8,6 +8,10 @@
 
 * **parameters:** add overload signatures for get_parameter and get_parameters ([#3534](https://github.com/aws-powertools/powertools-lambda-python/issues/3534))
 
+## Documentation
+
+* **middleware-factory:** Fix and improve typing ([#3569](https://github.com/aws-powertools/powertools-lambda-python/issues/3569))
+
 ## Features
 
 * **event-handler:** add description to request body in OpenAPI schema ([#3548](https://github.com/aws-powertools/powertools-lambda-python/issues/3548))
@@ -16,11 +20,11 @@
 
 ## Maintenance
 
-* **deps:** bump fastjsonschema from 2.19.0 to 2.19.1 ([#3567](https://github.com/aws-powertools/powertools-lambda-python/issues/3567))
-* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3544](https://github.com/aws-powertools/powertools-lambda-python/issues/3544))
 * **deps:** bump squidfunk/mkdocs-material from `9af3b7e` to `2f29d71` in /docs ([#3559](https://github.com/aws-powertools/powertools-lambda-python/issues/3559))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3544](https://github.com/aws-powertools/powertools-lambda-python/issues/3544))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 3.0.2 to 3.0.3 ([#3536](https://github.com/aws-powertools/powertools-lambda-python/issues/3536))
 * **deps:** bump actions/setup-node from 4.0.0 to 4.0.1 ([#3535](https://github.com/aws-powertools/powertools-lambda-python/issues/3535))
+* **deps:** bump fastjsonschema from 2.19.0 to 2.19.1 ([#3567](https://github.com/aws-powertools/powertools-lambda-python/issues/3567))
 * **deps-dev:** bump aws-cdk from 2.115.0 to 2.116.1 ([#3553](https://github.com/aws-powertools/powertools-lambda-python/issues/3553))
 * **deps-dev:** bump cfn-lint from 0.83.6 to 0.83.7 ([#3554](https://github.com/aws-powertools/powertools-lambda-python/issues/3554))
 * **deps-dev:** bump aws-cdk from 2.116.1 to 2.117.0 ([#3565](https://github.com/aws-powertools/powertools-lambda-python/issues/3565))

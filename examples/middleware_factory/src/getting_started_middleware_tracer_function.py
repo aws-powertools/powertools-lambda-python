@@ -12,8 +12,11 @@ app = APIGatewayRestResolver()
 
 
 @lambda_handler_decorator(trace_execution=True)
-def middleware_with_tracing(handler, event, context) -> Callable:
-
+def middleware_with_tracing(
+    handler: Callable[[dict, LambdaContext], dict],
+    event: dict,
+    context: LambdaContext,
+) -> dict:
     start_time = time.time()
     response = handler(event, context)
     execution_time = time.time() - start_time
