@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Tuple
-from urllib.parse import unquote
+from urllib.parse import unquote_plus
 
 from typing_extensions import Literal
 
@@ -26,10 +26,11 @@ class S3BatchOperationTask(DictWrapper):
 
     @property
     def s3_key(self) -> str:
-        """Get the object key unquote using strict utf-8 encoding"""
-        # note: is it unquote or unquote_plus ? Example uses unquote and is different from S3Event
-        # be strict to decode to avoid mangling the key transparently
-        return unquote(self["s3Key"], encoding="utf-8", errors="strict")
+        """Get the object key unquote_plus using strict utf-8 encoding"""
+        # note: AWS documentation example is using unquote but this actually
+        # contradicts what happens in practice. The key is url encoded with %20
+        # in the inventory file but in the event it is sent with +. So use unquote_plus
+        return unquote_plus(self["s3Key"], encoding="utf-8", errors="strict")
 
     @property
     def s3_version_id(self) -> Optional[str]:
