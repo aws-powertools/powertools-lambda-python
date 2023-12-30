@@ -1559,7 +1559,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
-        enable_download_spec: Optional[bool] = False,
+        enable_download_spec: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
