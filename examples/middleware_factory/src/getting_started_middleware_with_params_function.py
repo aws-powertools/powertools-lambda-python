@@ -28,7 +28,12 @@ class BookingError(Exception):
 
 
 @lambda_handler_decorator
-def obfuscate_sensitive_data(handler, event, context, fields: List) -> Callable:
+def obfuscate_sensitive_data(
+    handler: Callable[[dict, LambdaContext], dict],
+    event: dict,
+    context: LambdaContext,
+    fields: List,
+) -> dict:
     # extracting payload from a EventBridge event
     detail: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
     guest_data: Any = detail.get("guest")
@@ -49,7 +54,7 @@ def obfuscate_data(value: str) -> bytes:
 
 
 @obfuscate_sensitive_data(fields=["email", "passport", "vat"])
-def lambda_handler(event, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     try:
         booking_payload: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
         return {
