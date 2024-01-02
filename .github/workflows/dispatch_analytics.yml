@@ -51,7 +51,14 @@ jobs:
       - name: Invoke Lambda function
         run: |
           payload=$(echo -n '{"githubToken": "${{ secrets.GITHUB_TOKEN }}"}' | base64)
-          aws lambda invoke \
-            --function-name ${{ secrets.AWS_ANALYTICS_DISPATCHER_ARN }} \
-            --payload "$payload" response.json
-          cat response.json
+          response=$(aws lambda invoke \
+            --function-name "${{ secrets.AWS_ANALYTICS_DISPATCHER_ARN }}" \
+            --payload "$payload" \
+            response.json \
+            --query 'FunctionError' \
+            --output text)
+
+          if [ "$response" != "None" ]; then
+            echo "Error invoking lambda function, aborting."
+            exit 1
+          fi
