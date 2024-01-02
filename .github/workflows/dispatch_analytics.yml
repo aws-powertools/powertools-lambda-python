@@ -58,6 +58,8 @@ jobs:
             --query 'FunctionError' \
             --output text)
 
+          jq -C response.json
+
           if [ "$response" != "None" ]; then
             echo "Error invoking lambda function: $response. Aborting."
             exit 1
