@@ -58,7 +58,7 @@ jobs:
             --query 'FunctionError' \
             --output text)
 
-          cat response.json
+          cat response.json ; echo # add newline at the end
 
           if [ "$response" != "None" ]; then
             echo "Error invoking lambda function: $response. Aborting."
