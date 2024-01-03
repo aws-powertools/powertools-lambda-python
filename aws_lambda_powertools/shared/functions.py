@@ -253,24 +253,30 @@ def dataclass_to_dict(data) -> dict:
     return dataclasses.asdict(data)
 
 
-def abs_lambda_path(relatvie_path="") -> str:
-    """Return the absolute path from the given relative path to lambda handler
+def abs_lambda_path(relative_path: str = "") -> str:
+    """Return the absolute path from the given relative path to lambda handler.
 
     Parameters
     ----------
-    path : string
-        the relative path to lambda handler, by default ""
+    relative_path : str, optional
+        The relative path to the lambda handler, by default an empty string.
 
     Returns
     -------
-    string
-        the absolute path generated from the given relative path.
+    str
+        The absolute path generated from the given relative path.
         If the environment variable LAMBDA_TASK_ROOT is set, it will use that value.
         Otherwise, it will use the current working directory.
         If the path is empty, it will return the current working directory.
     """
+    # Retrieve the LAMBDA_TASK_ROOT environment variable or default to an empty string
     current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
+
+    # If LAMBDA_TASK_ROOT is not set, use the current working directory
     if not current_working_directory:
         current_working_directory = str(Path.cwd())
-        Path(current_working_directory, relatvie_path)
-    return str(Path(current_working_directory, relatvie_path))
+
+    # Combine the current working directory and the relative path to get the absolute path
+    absolute_path = str(Path(current_working_directory, relative_path))
+
+    return absolute_path

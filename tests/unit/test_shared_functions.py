@@ -166,7 +166,7 @@ def test_abs_lambda_path_w_filename():
 
 def test_abs_lambda_path_w_filename_envvar():
     # Given Env is set and relative_path provided
-    relatvie_path = "cert/pub.cert"
+    relative_path = "cert/pub.cert"
     os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
     # Then path = env + relative_path
-    assert abs_lambda_path(relatvie_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relatvie_path))
+    assert abs_lambda_path(relative_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relative_path))
