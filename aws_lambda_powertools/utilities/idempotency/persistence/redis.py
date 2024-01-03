@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 class RedisClientProtocol(Protocol):
     def get(self, name: bytes | str | memoryview) -> bytes | str | None:
-        ...
+        raise NotImplementedError
 
     def set(  # noqa
         self,
@@ -38,10 +38,10 @@ class RedisClientProtocol(Protocol):
         px: float | timedelta | None = ...,
         nx: bool = ...,
     ) -> bool | None:
-        ...
+        raise NotImplementedError
 
     def delete(self, keys: bytes | str | memoryview) -> Any:
-        ...
+        raise NotImplementedError
 
 
 class RedisConnection:

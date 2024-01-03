@@ -92,10 +92,9 @@ class MockRedisBase:
 
 
 class MockRedis(MockRedisBase):
-    def __init__(self, decode_responses=False, cache: dict = None, mock_latency_ms: int = 0, **kwargs):
+    def __init__(self, cache: dict = None, mock_latency_ms: int = 0, **kwargs):
         self.cache = cache or {}
         self.expire_dict = {}
-        self.decode_responses = decode_responses
         self.acl = {}
         self.username = ""
         self.mode = ""
@@ -116,11 +115,6 @@ class MockRedis(MockRedisBase):
             raise self.exceptions.RedisClusterException
         raise self.exceptions.RedisError
 
-    def hset(self, name, mapping):
-        self.check_closed()
-        self.expire_dict.pop(name, {})
-        self.cache[name] = mapping
-
     def from_url(self, url: str):
         self.url = url
         return self
@@ -130,16 +124,6 @@ class MockRedis(MockRedisBase):
         self.check_closed()
         if time != 0:
             self.expire_dict[name] = t.time() + time
-
-    # return {} if no match
-    def hgetall(self, name):
-        self.check_closed()
-        if self.expire_dict.get(name, t.time() + 1) < t.time():
-            self.cache.pop(name, {})
-        return self.cache.get(name, {})
-
-    def get_connection_kwargs(self):
-        return {"decode_responses": self.decode_responses}
 
     def auth(self, username, **kwargs):
         self.username = username
@@ -177,9 +161,6 @@ class MockRedis(MockRedisBase):
 
         resp = self.cache.get(name, None)
 
-        if resp and self.decode_responses:
-            resp = resp.decode("utf-8")
-
         return resp
 
 
@@ -188,7 +169,6 @@ def persistence_store_standalone_redis_no_decode():
     redis_client = MockRedis(
         host="localhost",
         port="63005",
-        decode_responses=False,
     )
     return RedisCachePersistenceLayer(client=redis_client)
 
@@ -198,7 +178,6 @@ def persistence_store_standalone_redis():
     redis_client = MockRedis(
         host="localhost",
         port="63005",
-        decode_responses=True,
     )
     return RedisCachePersistenceLayer(client=redis_client)
 
@@ -557,7 +536,6 @@ def test_redis_orphan_record_race_condition(lambda_context):
     redis_client = MockRedis(
         host="localhost",
         port="63005",
-        decode_responses=True,
         mock_latency_ms=50,
     )
     manager = Manager()
@@ -602,7 +580,6 @@ def test_redis_race_condition(lambda_context):
     redis_client = MockRedis(
         host="localhost",
         port="63005",
-        decode_responses=True,
         mock_latency_ms=50,
     )
     manager = Manager()
