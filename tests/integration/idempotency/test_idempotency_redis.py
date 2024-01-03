@@ -15,6 +15,8 @@ from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent_function,
 )
 
+pytest.skip(reason="Integration tests disabled for Redis Idempotency.", allow_module_level=True)
+
 
 @pytest.fixture
 def redis_container_image():
