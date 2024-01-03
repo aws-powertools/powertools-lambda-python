@@ -270,11 +270,6 @@ class BasePersistenceLayer(ABC):
             unix timestamp of expiry date for idempotency record
 
         """
-        # removed for now, seems not being used in redis
-        """ if self.backend == "redis":
-            return self.expires_after_seconds
-        else: """
-
         now = datetime.datetime.now()
         period = datetime.timedelta(seconds=self.expires_after_seconds)
         return int((now + period).timestamp())
