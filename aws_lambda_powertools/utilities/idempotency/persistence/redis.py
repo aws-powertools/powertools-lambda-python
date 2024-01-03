@@ -48,23 +48,25 @@ class RedisClientProtocol(Protocol):
 class RedisConnection:
     def __init__(
         self,
+        url: str = "",
         host: str = "",
+        port: int = 6379,
         username: str = "",
         password: str = "",  # nosec - password for Redis connection
-        url: str = "",
         db_index: int = 0,
-        port: int = 6379,
         mode: Literal["standalone", "cluster"] = "standalone",
         ssl: bool = False,
         ssl_cert_reqs: Literal["required", "optional", "none"] = "none",
     ) -> None:
         """
-        Initialize Redis connection which will be used in redis persistence_store to support idempotency
+        Initialize Redis connection which will be used in redis persistence_store to support Idempotency
 
         Parameters
         ----------
         host: str, optional
             redis host
+        port: int, optional: default 6379
+            redis port
         username: str, optional
             redis username
         password: str, optional
@@ -73,10 +75,8 @@ class RedisConnection:
             redis connection string, using url will override the host/port in the previous parameters
         db_index: str, optional: default 0
             redis db index
-        port: int, optional: default 6379
-            redis port
         mode: str, Literal["standalone","cluster"]
-            set redis client mode, choose from standalone/cluster
+            set redis client mode, choose from standalone/cluster. The default is standalone
         ssl: bool, optional: default False
             set whether to use ssl for Redis connection
         ssl_cert_reqs: str, optional: default "none"
@@ -138,7 +138,7 @@ class RedisConnection:
         self.mode = mode
 
     def _init_client(self) -> RedisClientProtocol:
-        logger.info(f"Trying to connect to Redis: {self.host}")
+        logger.debug(f"Trying to connect to Redis: {self.host}")
         client: type[redis.Redis | redis.cluster.RedisCluster]
         if self.mode == "standalone":
             client = redis.Redis
@@ -171,12 +171,12 @@ class RedisConnection:
 class RedisCachePersistenceLayer(BasePersistenceLayer):
     def __init__(
         self,
+        url: str = "",
         host: str = "",
+        port: int = 6379,
         username: str = "",
         password: str = "",  # nosec - password for Redis connection
-        url: str = "",
         db_index: int = 0,
-        port: int = 6379,
         mode: Literal["standalone", "cluster"] = "standalone",
         ssl: bool = False,
         ssl_cert_reqs: Literal["required", "optional", "none"] = "none",
@@ -193,6 +193,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         ----------
         host: str, optional
             redis host
+        port: int, optional: default 6379
+            redis port
         username: str, optional
             redis username
         password: str, optional
@@ -201,8 +203,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             redis connection string, using url will override the host/port in the previous parameters
         db_index: str, optional: default 0
             redis db index
-        port: int, optional: default 6379
-            redis port
         mode: str, Literal["standalone","cluster"]
             set redis client mode, choose from standalone/cluster
         ssl: bool, optional: default False
@@ -231,7 +231,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         from aws_lambda_powertools.utilities.data_class import(
             RedisCachePersistenceLayer,
         )
-        from aws_lambda_powertools.utilities.idempotency.idempotency import (
+        from aws_lambda_powertools.utilities.idempotency import (
             idempotent,
         )
 
@@ -271,7 +271,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
         if not hasattr(self.client, "get_connection_kwargs"):
             raise IdempotencyRedisClientConfigError(
-                "Error configuring the Redis Client. The client must implement get_connection_kwargs function.",
+                "Error configuring the Redis Client. The Redis library must implement get_connection_kwargs function.",
             )
         if not self.client.get_connection_kwargs().get("decode_responses", False):
             warnings.warn(
