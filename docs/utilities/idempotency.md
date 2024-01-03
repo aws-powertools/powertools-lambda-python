@@ -100,7 +100,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
-    Larger items cannot be written to DynamoDB and will cause exceptions.
+    Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
 
 ???+ info "Info: DynamoDB"
     Each function invocation will generally make 2 requests to DynamoDB. If the
