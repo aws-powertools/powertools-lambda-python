@@ -580,7 +580,7 @@ sequenceDiagram
 
 ### Redis resources
 
-You need an existing Redis service before setting up Redis as persistent storage layer provider. You can also use Redis compatible services like [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/) or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/) as persistent storage layer provider.
+You need an existing Redis service before setting up Redis as persistent storage layer provider. You can also use Redis compatible services like [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as persistent storage layer provider.
 ???+ tip "No existing Redis service?"
     If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as persistent storage layer provider.
 
@@ -594,35 +594,30 @@ You need an existing Redis service before setting up Redis as persistent storage
 
 ### VPC Access
 
-Your Lambda Function must be able to reach the Redis endpoint before using it for idempotency persistent storage layer. In most cases you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html) for your Lambda Function. Using a public accessible Redis is not recommended.
+Your Lambda Function must be able to reach the Redis endpoint before using it for idempotency persistent storage layer. In most cases you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
 
 ???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
-    If you intend to use Amazon ElastiCache for Redis for idempotency persistent storage layer, you can also reference [This AWS Tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html).
-    If you are using Amazon MemoryDB for Redis, reference [This AWS Tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/) for only VPC setup part.
+    If you intend to use Amazon ElastiCache for Redis for idempotency persistent storage layer, you can also reference [This AWS Tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"}.
+    If you are using Amazon MemoryDB for Redis, reference [This AWS Tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} for only VPC setup part.
 
 After VPC setup, you can follow the templates down below to setup Lambda functions with VPC internal subnet access.
 
 === "AWS Serverless Application Model (SAM) example"
 
-    ```yaml hl_lines="8-13"
+    ```yaml hl_lines="9"
     --8<-- "examples/idempotency/templates/sam_redis_vpc.yaml"
     ```
 
-    1. Replace the Security Group ID and Subnet ID to match your Redis' VPC setting.
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
 
 ### Configuring Redis persistence layer
 
-You can quickly start by initializing the `RedisCachePersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler. Check out detailed example of `RedisCachePersistenceLayer` in [Persistence layers section](#redispersistencelayer)
-
-???+ warning "Passing in Redis Client"
-    We support passing in established Redis clients when initializing `RedisPersistenceLayer`. However, this rely on Redis parameter `decode_responses=True` to decode all Redis response. Please make sure this parameter is set when establishing Redis client or `RedisPersistenceLayer` will raise a `IdempotencyRedisClientConfigError`. See example below
+You can quickly start by initializing the `RedisCachePersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler. Check out detailed example of `RedisCachePersistenceLayer` in [Persistence layers section](#redispersistencelayer).
 
 === "Use established Redis Client"
-    ```python hl_lines="4 7 12-16 18 32"
+    ```python hl_lines="4 7 12-15 17 31"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
-
-    1. Notice we rely on this field to be true
 
 === "Use Persistence Layer with Redis config variables"
     ```python hl_lines="4-8 10 24"

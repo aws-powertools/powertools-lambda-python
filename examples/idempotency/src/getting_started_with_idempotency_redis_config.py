@@ -7,7 +7,7 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379, mode="standalone")
+persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379)
 
 
 @dataclass

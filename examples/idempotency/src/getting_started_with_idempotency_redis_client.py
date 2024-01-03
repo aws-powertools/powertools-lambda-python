@@ -12,7 +12,6 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 client = Redis(
     host="localhost",
     port=6379,
-    decode_responses=True,  # (1)!
 )
 
 persistence_layer = RedisCachePersistenceLayer(client=client)

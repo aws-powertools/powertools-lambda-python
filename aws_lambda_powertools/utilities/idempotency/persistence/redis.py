@@ -3,7 +3,6 @@ from __future__ import annotations
 import datetime
 import json
 import logging
-import warnings
 from contextlib import contextmanager
 from datetime import timedelta
 from typing import Any, Dict
@@ -95,7 +94,7 @@ class RedisConnection:
         )
         from aws_lambda_powertools.utilities.typing import LambdaContext
 
-        persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379, mode="standalone")
+        persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379)
 
 
         @dataclass
@@ -228,10 +227,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
         ```python
         from redis import Redis
-        from aws_lambda_powertools.utilities.data_class import(
-            RedisCachePersistenceLayer,
-        )
         from aws_lambda_powertools.utilities.idempotency import (
+            RedisCachePersistenceLayer
             idempotent,
         )
 
@@ -268,16 +265,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             )._init_client()
         else:
             self.client = client
-
-        if not hasattr(self.client, "get_connection_kwargs"):
-            raise IdempotencyRedisClientConfigError(
-                "Error configuring the Redis Client. The Redis library must implement get_connection_kwargs function.",
-            )
-        if not self.client.get_connection_kwargs().get("decode_responses", False):
-            warnings.warn(
-                "Redis connection with `decode_responses=False` may cause lower performance",
-                stacklevel=2,
-            )
 
         self.in_progress_expiry_attr = in_progress_expiry_attr
         self.expiry_attr = expiry_attr
