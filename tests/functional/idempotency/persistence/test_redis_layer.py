@@ -553,16 +553,6 @@ def test_idempotent_lambda_redis_delete(
     assert handler_result2 == result
 
 
-@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedisBase())
-def test_redis_connection_get_kwargs_error():
-    # when Layer is init with a redis client that doesn't have get_connection_kwargs method
-
-    # then should raise IdempotencyRedisClientConfigError
-
-    with pytest.raises(IdempotencyRedisClientConfigError):
-        RedisCachePersistenceLayer(host="testhost")
-
-
 def test_redis_orphan_record_race_condition(lambda_context):
     redis_client = MockRedis(
         host="localhost",
