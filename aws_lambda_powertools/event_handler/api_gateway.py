@@ -445,7 +445,7 @@ class Route:
         if self._dependant is None:
             from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
 
-            self._dependant = get_dependant(path=self.openapi_path, call=self.func)
+            self._dependant = get_dependant(path=self.openapi_path, call=self.func, responses=self.responses)
 
         return self._dependant
 
@@ -525,15 +525,15 @@ class Route:
 
                         # Case 2.1: the 'content' has a model
                         if "model" in payload:
-                            from aws_lambda_powertools.event_handler.openapi.params import analyze_param
-
-                            return_field = analyze_param(
-                                param_name="return",
-                                annotation=cast(OpenAPIResponseContentModel, payload)["model"],
-                                value=None,
-                                is_path_param=False,
-                                is_response_param=True,
+                            # Find the model in the dependant's extra models
+                            return_field = next(
+                                filter(
+                                    lambda model: model.type_ is cast(OpenAPIResponseContentModel, payload)["model"],
+                                    self.dependant.response_extra_models,
+                                ),
                             )
+                            if not return_field:
+                                raise AssertionError("Model declared in custom responses was not found")
 
                             new_payload = self._openapi_operation_return(
                                 param=return_field,
@@ -2150,6 +2150,9 @@ class ApiGatewayResolver(BaseRouter):
 
             if route.dependant.return_param:
                 responses_from_routes.append(route.dependant.return_param)
+
+            if route.dependant.response_extra_models:
+                responses_from_routes.extend(route.dependant.response_extra_models)
 
         flat_models = list(responses_from_routes + request_fields_from_routes + body_fields_from_routes)
         return flat_models
