@@ -1,4 +1,9 @@
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from random import random
+from typing import Union
+
+from pydantic import BaseModel
+
+from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
 
 
 def test_openapi_default_response():
@@ -47,3 +52,69 @@ def test_openapi_200_custom_response():
 
     assert 200 not in responses.keys()
     assert 422 not in responses.keys()
+
+
+def test_openapi_union_response():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class User(BaseModel):
+        pass
+
+    class Order(BaseModel):
+        pass
+
+    @app.get(
+        "/",
+        responses={
+            200: {"description": "200 Response", "content": {"application/json": {"model": User}}},
+            202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
+        },
+    )
+    def handler() -> Response[Union[User, Order]]:
+        if random() > 0.5:
+            return Response(status_code=200, body=User())
+        else:
+            return Response(status_code=202, body=Order())
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 200 in responses.keys()
+    assert responses[200].description == "200 Response"
+    assert responses[200].content["application/json"].schema_.ref == "#/components/schemas/User"
+
+    assert 202 in responses.keys()
+    assert responses[202].description == "202 Response"
+    assert responses[202].content["application/json"].schema_.ref == "#/components/schemas/Order"
+
+
+def test_openapi_union_partial_response():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class User(BaseModel):
+        pass
+
+    class Order(BaseModel):
+        pass
+
+    @app.get(
+        "/",
+        responses={
+            200: {"description": "200 Response"},
+            202: {"description": "202 Response", "content": {"application/json": {"model": Order}}},
+        },
+    )
+    def handler() -> Response[Union[User, Order]]:
+        if random() > 0.5:
+            return Response(status_code=200, body=User())
+        else:
+            return Response(status_code=202, body=Order())
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 200 in responses.keys()
+    assert responses[200].description == "200 Response"
+    assert responses[200].content["application/json"].schema_.anyOf is not None
+
+    assert 202 in responses.keys()
+    assert responses[202].description == "202 Response"
+    assert responses[202].content["application/json"].schema_.ref == "#/components/schemas/Order"
