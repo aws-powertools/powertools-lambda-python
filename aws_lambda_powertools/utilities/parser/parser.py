@@ -173,9 +173,9 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
             return envelope().parse(data=event, model=model)
         except AttributeError as exc:
             raise InvalidEnvelopeError(
-                f"Error: {str(exc)}. Please ensure that both the Input model and Envelope inherit from BaseModel,\n"
-                "And your payload adheres to the specified Input model structure.\n"
-                f"Envelope={envelope} \nModel={model}",
+                f"Error: {str(exc)}. Please ensure that both the Input model and the Envelope inherits from BaseModel,\n"  # noqa E501
+                "and your payload adheres to the specified Input model structure.\n"
+                f"Envelope={envelope}\nModel={model}",
             )
 
     try:
@@ -187,7 +187,7 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
         return model.parse_obj(event)
     except AttributeError as exc:
         raise InvalidModelTypeError(
-            f"Error: {str(exc)}. Please ensure the Input model inherit from BaseModel,\n"
-            "And your payload adheres to the specified Input model structure.\n"
+            f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
+            "and your payload adheres to the specified Input model structure.\n"
             f"Model={model}",
         )
