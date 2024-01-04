@@ -199,6 +199,34 @@ def get_dependant(
         else:
             add_param_to_fields(field=param_field, dependant=dependant)
 
+    _add_return_annotation(dependant, endpoint_signature)
+    _add_extra_responses(dependant, responses)
+
+    return dependant
+
+
+def _add_extra_responses(dependant: Dependant, responses: Optional[Dict[int, OpenAPIResponse]]):
+    # Also add the optional extra responses to the dependant model.
+    if not responses:
+        return
+
+    for response in responses.values():
+        for schema in response.get("content", {}).values():
+            if "model" in schema:
+                response_field = analyze_param(
+                    param_name="return",
+                    annotation=cast(OpenAPIResponseContentModel, schema)["model"],
+                    value=None,
+                    is_path_param=False,
+                    is_response_param=True,
+                )
+                if response_field is None:
+                    raise AssertionError("Response field is None for response model")
+
+                dependant.response_extra_models.append(response_field)
+
+
+def _add_return_annotation(dependant: Dependant, endpoint_signature: inspect.Signature):
     # If the return annotation is not empty, add it to the dependant model.
     return_annotation = endpoint_signature.return_annotation
     if return_annotation is not inspect.Signature.empty:
@@ -213,26 +241,6 @@ def get_dependant(
             raise AssertionError("Param field is None for return annotation")
 
         dependant.return_param = param_field
-
-    # Also add the optional extra responses to the dependant model.
-    if responses:
-        for response in responses.values():
-            if "content" in response:
-                for schema in response["content"].values():
-                    if "model" in schema:
-                        response_field = analyze_param(
-                            param_name="return",
-                            annotation=cast(OpenAPIResponseContentModel, schema)["model"],
-                            value=None,
-                            is_path_param=False,
-                            is_response_param=True,
-                        )
-                        if response_field is None:
-                            raise AssertionError("Response field is None for response model")
-
-                        dependant.response_extra_models.append(response_field)
-
-    return dependant
 
 
 def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
