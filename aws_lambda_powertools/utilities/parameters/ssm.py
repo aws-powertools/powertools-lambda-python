@@ -545,9 +545,57 @@ class SSMProvider(BaseProvider):
             )
 
 
+@overload
 def get_parameter(
     name: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> str:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["json"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> dict:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["binary"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> Union[str, dict, bytes]:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["auto"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> bytes:
+    ...
+
+
+def get_parameter(
+    name: str,
+    transform: TransformOptions = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
@@ -625,9 +673,65 @@ def get_parameter(
     )
 
 
+@overload
 def get_parameters(
     path: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, str]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["json"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, dict]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["binary"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, bytes]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["auto"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Union[Dict[str, bytes], Dict[str, dict], Dict[str, str]]:
+    ...
+
+
+def get_parameters(
+    path: str,
+    transform: TransformOptions = None,
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,

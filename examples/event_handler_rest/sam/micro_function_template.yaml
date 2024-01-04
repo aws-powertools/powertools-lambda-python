@@ -19,7 +19,7 @@ Globals:
 
     Function:
         Timeout: 5
-        Runtime: python3.11
+        Runtime: python3.12
 
 Resources:
     # Lambda Function Solely For /users endpoint

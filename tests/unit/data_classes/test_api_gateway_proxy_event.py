@@ -150,6 +150,10 @@ def test_api_gateway_proxy_event_with_principal_id():
     assert authorizer.integration_latency == raw_event["requestContext"]["authorizer"]["integrationLatency"]
     assert authorizer.get("integrationStatus", "failed") == "failed"
 
+    # Accessing context with direct function
+    context_variables = request_context.authorizer.get_context()
+    assert context_variables.get("user_id") == raw_event["requestContext"]["authorizer"]["user_id"]
+
 
 def test_api_gateway_proxy_v2_event():
     raw_event = load_event("apiGatewayProxyV2Event.json")
@@ -200,9 +204,23 @@ def test_api_gateway_proxy_v2_lambda_authorizer_event():
 
     request_context = parsed_event.request_context
     assert request_context is not None
+
     lambda_props = request_context.authorizer.get_lambda
     assert lambda_props is not None
-    assert lambda_props.get("key") == "value"
+    assert lambda_props.get("tenantId") == raw_event["requestContext"]["authorizer"]["lambda"]["tenantId"]
+
+    # Accessing context with direct function
+    context_variables = request_context.authorizer.get_context()
+    assert context_variables.get("tenantId") == raw_event["requestContext"]["authorizer"]["lambda"]["tenantId"]
+
+    jwt_claims = request_context.authorizer.jwt_claim
+    assert jwt_claims is not None
+    assert jwt_claims.get("claim1") == raw_event["requestContext"]["authorizer"]["jwt"]["claims"]["claim1"]
+
+    jwt_scopes = request_context.authorizer.jwt_scopes
+    assert jwt_scopes is not None
+    assert jwt_scopes[0] == raw_event["requestContext"]["authorizer"]["jwt"]["scopes"][0]
+    assert jwt_scopes[1] == raw_event["requestContext"]["authorizer"]["jwt"]["scopes"][1]
 
 
 def test_api_gateway_proxy_v2_iam_event():

@@ -40,7 +40,7 @@ unit-test:
 	poetry run pytest tests/unit
 
 e2e-test:
-	python parallel_run_e2e.py
+	poetry run pytest tests/e2e
 
 coverage-html:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=html
@@ -84,7 +84,7 @@ complexity-baseline:
 	$(info Maintenability index)
 	poetry run radon mi aws_lambda_powertools
 	$(info Cyclomatic complexity index)
-	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools
+	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump

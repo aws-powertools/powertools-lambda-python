@@ -4,13 +4,12 @@ from typing import List
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response
+from aws_lambda_powertools.event_handler.api_gateway import APIGatewayRestResolver, Response, Router
 from aws_lambda_powertools.event_handler.openapi.models import (
     Example,
     Parameter,
     ParameterInType,
     Schema,
-    Tag,
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
@@ -119,7 +118,7 @@ def test_openapi_with_custom_params():
     assert get.summary == "Get Users"
     assert get.operationId == "GetUsers"
     assert get.description == "Get paginated users"
-    assert get.tags == [Tag(name="Users")]
+    assert get.tags == ["Users"]
 
     parameter = get.parameters[0]
     assert parameter.required is False
@@ -350,35 +349,28 @@ def test_openapi_with_embed_body_param():
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
 
 
-def test_openapi_with_tags():
+def test_openapi_with_body_description():
     app = APIGatewayRestResolver()
 
-    @app.get("/users")
-    def handler():
-        raise NotImplementedError()
+    class User(BaseModel):
+        name: str
 
-    schema = app.get_openapi_schema(tags=["Orders"])
-    assert len(schema.tags) == 1
-
-    tag = schema.tags[0]
-    assert tag.name == "Orders"
-
-
-def test_openapi_operation_with_tags():
-    app = APIGatewayRestResolver()
-
-    @app.get("/users", tags=["Users"])
-    def handler():
-        raise NotImplementedError()
+    @app.post("/users")
+    def handler(user: Annotated[User, Body(description="This is a user")]):
+        print(user)
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
 
-    get = schema.paths["/users"].get
-    assert len(get.tags) == 1
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
 
-    tag = get.tags[0]
-    assert tag.name == "Users"
+    request_body = post.requestBody
+
+    # Description should appear in two places: on the request body and on the schema
+    assert request_body.description == "This is a user"
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
 
 
 def test_openapi_with_excluded_operations():
@@ -390,6 +382,38 @@ def test_openapi_with_excluded_operations():
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 0
+
+
+def test_openapi_with_router_response():
+    router = Router()
+
+    @router.put("/example-resource", responses={200: {"description": "Custom response"}})
+    def handler():
+        pass
+
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.include_router(router)
+
+    schema = app.get_openapi_schema()
+    put = schema.paths["/example-resource"].put
+    assert 200 in put.responses.keys()
+    assert put.responses[200].description == "Custom response"
+
+
+def test_openapi_with_router_tags():
+    router = Router()
+
+    @router.put("/example-resource", tags=["Example"])
+    def handler():
+        pass
+
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.include_router(router)
+
+    schema = app.get_openapi_schema()
+    tags = schema.paths["/example-resource"].put.tags
+    assert len(tags) == 1
+    assert tags[0] == "Example"
 
 
 def test_create_header():

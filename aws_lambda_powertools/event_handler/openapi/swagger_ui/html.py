@@ -17,6 +17,10 @@ def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
 <head>
     <meta charset="UTF-8">
     <title>Swagger UI</title>
+    <meta
+      http-equiv="Cache-control"
+      content="no-cache, no-store, must-revalidate"
+    />
     <link rel="stylesheet" type="text/css" href="{css_url}">
 </head>
 
@@ -34,6 +38,9 @@ def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
     docExpansion: "list",
     deepLinking: true,
     filter: true,
+    layout: "BaseLayout",
+    showExtensions: true,
+    showCommonExtensions: true,
     spec: JSON.parse(`
         {spec}
     `.trim()),

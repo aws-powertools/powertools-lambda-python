@@ -14,7 +14,6 @@ name: Code quality - Pydanticv2
 #
 # Always triggered on new PRs, PR changes and PR merge.
 
-
 on:
   pull_request:
     paths:
@@ -44,22 +43,20 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
-      contents: read  # checkout code only
+      contents: read # checkout code only
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@65d7f2d534ac1bc67fcd62888c5f4f3d2cb2b236 # v4.7.1
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
-      - name: Removing dev dependencies locked to Pydantic v1
-        run: poetry remove cfn-lint
       - name: Replacing Pydantic v1 with v2 > 2.0.3
         run: poetry add "pydantic=^2.0.3"
       - name: Install dependencies
