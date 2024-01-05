@@ -1559,7 +1559,6 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
-        enable_download_spec: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1592,8 +1591,6 @@ class ApiGatewayResolver(BaseRouter):
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
-        enable_download_spec: bool, optional
-            Enable download of the OpenAPI schema as a JSON file at the `<path>.json` (ex. `/swagger.json`).
         """
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
@@ -1617,17 +1614,6 @@ class ApiGatewayResolver(BaseRouter):
                     body=body,
                 )
 
-        if enable_download_spec:
-
-            @self.get(f"{path}.json", include_in_schema=False)
-            def swagger_json():
-                spec = get_swagger_spec()
-                return Response(
-                    status_code=200,
-                    content_type="application/json",
-                    body=spec,
-                )
-
         @self.get(path, middlewares=middlewares, include_in_schema=False)
         def swagger_handler():
             base_path = self._get_base_path()
@@ -1639,19 +1625,9 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js = f"{base_path}/swagger.js"
                 swagger_css = f"{base_path}/swagger.css"
 
-            spec = get_swagger_spec()
-            body = generate_swagger_html(spec, swagger_js, swagger_css)
-
-            return Response(
-                status_code=200,
-                content_type="text/html",
-                body=body,
-            )
-
-        def get_swagger_spec():
             base_path = self._get_base_path()
             openapi_servers = servers or [Server(url=(base_path or "/"))]
-            return self.get_openapi_json_schema(
+            spec = self.get_openapi_json_schema(
                 title=title,
                 version=version,
                 openapi_version=openapi_version,
@@ -1662,6 +1638,22 @@ class ApiGatewayResolver(BaseRouter):
                 terms_of_service=terms_of_service,
                 contact=contact,
                 license_info=license_info,
+            )
+
+            query_params = self.current_event.query_string_parameters or {}
+            if query_params.get("format") == "json":
+                return Response(
+                    status_code=200,
+                    content_type="application/json",
+                    body=spec,
+                )
+
+            body = generate_swagger_html(spec, path, swagger_js, swagger_css)
+
+            return Response(
+                status_code=200,
+                content_type="text/html",
+                body=body,
             )
 
     def route(

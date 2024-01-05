@@ -1,4 +1,4 @@
-def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
+def generate_swagger_html(spec: str, path: str, js_url: str, css_url: str) -> str:
     """
     Generate Swagger UI HTML page
 
@@ -6,6 +6,8 @@ def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
     ----------
     spec: str
         The OpenAPI spec in the JSON format
+    path: str
+        The path to the Swagger documentation
     js_url: str
         The URL to the Swagger UI JavaScript file
     css_url: str
@@ -54,6 +56,7 @@ def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
   }}
 
   var ui = SwaggerUIBundle(swaggerUIOptions)
+  ui.specActions.updateUrl('{path}?format=json');
 </script>
 </html>
             """.strip()

@@ -75,8 +75,9 @@ def test_openapi_swagger_with_custom_base_url_no_embedded_assets():
 
 def test_openapi_swagger_with_enabled_download_spec_and_default_path():
     app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger(enable_download_spec=True)
-    LOAD_GW_EVENT["path"] = "/swagger.json"
+    app.enable_swagger()
+    LOAD_GW_EVENT["path"] = "/swagger"
+    LOAD_GW_EVENT["queryStringParameters"] = {"format": "json"}
 
     result = app(LOAD_GW_EVENT, {})
 
@@ -87,8 +88,9 @@ def test_openapi_swagger_with_enabled_download_spec_and_default_path():
 
 def test_openapi_swagger_with_enabled_download_spec_and_custom_path():
     app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger(path="/fizzbuzz/foobar", enable_download_spec=True)
-    LOAD_GW_EVENT["path"] = "/fizzbuzz/foobar.json"
+    app.enable_swagger(path="/fizzbuzz/foobar")
+    LOAD_GW_EVENT["path"] = "/fizzbuzz/foobar"
+    LOAD_GW_EVENT["queryStringParameters"] = {"format": "json"}
 
     result = app(LOAD_GW_EVENT, {})
 

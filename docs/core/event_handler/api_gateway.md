@@ -1019,21 +1019,6 @@ Include extra parameters when exporting your OpenAPI specification to apply thes
     --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
     ```
 
-#### Exposing the OpenAPI specification
-
-If you would like to be able to download the OpenAPI specification file for generating
-client libraries or hosting the documentation separately, you can set the
-`enable_download_spec` input to `True` when calling `enable_swagger`:
-
-```python
-app.enable_swagger(path="/_swagger", enable_download_spec=True)
-```
-
-With this setting enabled, you can access the specification at `<path>.json`. So, for
-the snippet above, the specification file would be retrievable at `/_swagger.json`.
-To access this endpoint, you will have to add an additional endpoint in your template
-file.
-
 ### Custom serializer
 
 You can instruct event handler to use a custom serializer to best suit your needs, for example take into account Enums when serializing.
