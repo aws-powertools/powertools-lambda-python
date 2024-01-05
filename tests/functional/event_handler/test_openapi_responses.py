@@ -54,6 +54,27 @@ def test_openapi_200_custom_response():
     assert 422 not in responses.keys()
 
 
+def test_openapi_200_custom_schema():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class User(BaseModel):
+        pass
+
+    @app.get(
+        "/",
+        responses={200: {"description": "Custom response", "content": {"application/json": {"schema": User.schema()}}}},
+    )
+    def handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 200 in responses.keys()
+
+    assert responses[200].description == "Custom response"
+    assert responses[200].content["application/json"].schema_.title == "User"
+
+
 def test_openapi_union_response():
     app = APIGatewayRestResolver(enable_validation=True)
 
