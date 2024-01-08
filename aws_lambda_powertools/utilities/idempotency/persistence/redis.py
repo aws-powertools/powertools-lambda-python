@@ -183,7 +183,7 @@ class RedisConnection:
                 return client.from_url(url=self.url)
             else:
                 # Redis in cluster mode doesn't support db parameter
-                extra_param_connection: Dict[str, str] = {}
+                extra_param_connection: Dict[str, Any] = {}
                 if self.mode != "cluster":
                     extra_param_connection = {"db": self.db_index}
 
