@@ -201,7 +201,26 @@ def valid_record():
 
 
 @mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
-def test_redis_connection():
+def test_redis_connection_standalone():
+    # when RedisCachePersistenceLayer is init with the following params
+    redis_conf = {
+        "host": "host",
+        "port": "port",
+        "mode": "standalone",
+        "username": "redis_user",
+        "password": "redis_pass",
+        "db_index": "db_index",
+    }
+    layer = RedisCachePersistenceLayer(**redis_conf)
+    redis_conf["db"] = redis_conf["db_index"]
+    redis_conf.pop("db_index")
+    # then these params should be passed down to mock Redis identically
+    for k, v in redis_conf.items():
+        assert layer.client.__dict__.get(k) == v
+
+
+@mock.patch("aws_lambda_powertools.utilities.idempotency.persistence.redis.redis", MockRedis())
+def test_redis_connection_cluster():
     # when RedisCachePersistenceLayer is init with the following params
     redis_conf = {
         "host": "host",
@@ -212,9 +231,10 @@ def test_redis_connection():
         "db_index": "db_index",
     }
     layer = RedisCachePersistenceLayer(**redis_conf)
-    redis_conf["db"] = redis_conf["db_index"]
+    redis_conf["db"] = None
     redis_conf.pop("db_index")
-    # then these paramas should be passed down to mock Redis identically
+
+    # then these params should be passed down to mock Redis identically
     for k, v in redis_conf.items():
         assert layer.client.__dict__.get(k) == v
 
