@@ -14,7 +14,7 @@ The idempotency utility provides a simple solution to convert your Lambda functi
 * Select a subset of the event as the idempotency key using JMESPath expressions
 * Set a time window in which records with the same payload should be considered duplicates
 * Expires in-progress executions if the Lambda function times out halfway through
-* Support Amazon DynamoDB and Redis as persistence layer
+* Support Amazon DynamoDB and Redis as persistence layers
 
 ## Terminology
 
@@ -53,7 +53,7 @@ classDiagram
 ## Getting started
 
 ???+ note
-    This section uses DynamoDB as default idempotent persistence storage layer. If you are interested in using Redis as persistence storage layer, Check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
+    This section uses DynamoDB as the default idempotent persistence storage layer. If you are interested in using Redis as the persistence storage layer, check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
 
 ### IAM Permissions
 
@@ -66,7 +66,7 @@ Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, 
 
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
-We currently support Amazon DynamoDB and Redis as a storage layer. This example demonstrates how to create a table in DynamoDB. If you want to use Redis, please go to the section [RedisPersistenceLayer](#redispersistencelayer)
+We currently support Amazon DynamoDB and Redis as a storage layer. The following example demonstrates how to create a table in DynamoDB. If you prefer to use Redis, refer go to the section [RedisPersistenceLayer](#redispersistencelayer) section.
 
 **Default table configuration**
 
@@ -341,7 +341,7 @@ If an Exception is raised _outside_ the scope of the decorated function and afte
 
 #### DynamoDBPersistenceLayer
 
-This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).
+This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
 
 === "Customizing DynamoDBPersistenceLayer to suit your table structure"
 
@@ -349,7 +349,7 @@ This persistence layer is built-in, and you can either use an existing DynamoDB 
     --8<-- "examples/idempotency/src/customize_persistence_layer.py"
     ```
 
-When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
+When using DynamoDB as the persistence layer, you can customize the attribute names by passing the following parameters during the initialization of the persistence layer:
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
 | --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -365,7 +365,7 @@ When using DynamoDB as a persistence layer, you can alter the attribute names by
 
 #### RedisPersistenceLayer
 
-This persistence layer is built-in, and you can use an existing Redis service. For optimal performance and compatibility, we strongly advise using a Redis service version 7 or higher.
+This persistence layer is built-in, allowing you to use an existing Redis service. For optimal performance and compatibility, it is strongly recommended to use a Redis service version 7 or higher.
 
 === "Customizing RedisPersistenceLayer to suit your data structure"
 
@@ -373,12 +373,12 @@ This persistence layer is built-in, and you can use an existing Redis service. F
     --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
     ```
 
-When using Redis as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
+When using Redis as the persistence layer, you can customize the attribute names by providing the following parameters upon initialization of the persistence layer:
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
 | --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
 | **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
-| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
+| **status_attr**             |                    | `status`                             | Stores status of the Lambda execution during and after invocation                                        |
 | **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
 | **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation |
 
@@ -580,9 +580,10 @@ sequenceDiagram
 
 ### Redis resources
 
-You need an existing Redis service before setting up Redis as persistent storage layer provider. You can also use Redis compatible services like [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as persistent storage layer provider.
+Before setting up Redis as the persistent storage layer provider, you must have an existing Redis service. We recommend you to use Redis compatible services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as your persistent storage layer provider.
+
 ???+ tip "No existing Redis service?"
-    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as persistent storage layer provider.
+    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as the persistent storage layer provider.
 
 === "AWS CloudFormation example"
 
@@ -594,13 +595,13 @@ You need an existing Redis service before setting up Redis as persistent storage
 
 ### VPC Access
 
-Your Lambda Function must be able to reach the Redis endpoint before using it for idempotency persistent storage layer. In most cases you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
+Your Lambda Function must have network access to the Redis endpoint before using it as the idempotency persistent storage layer. In most cases, you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
 
 ???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
-    If you intend to use Amazon ElastiCache for Redis for idempotency persistent storage layer, you can also reference [This AWS Tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"}.
-    If you are using Amazon MemoryDB for Redis, reference [This AWS Tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} for only VPC setup part.
+    If you plan to use Amazon ElastiCache for Redis as the idempotency persistent storage layer, you may find [this AWS tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"} helpful.
+    For those using Amazon MemoryDB for Redis, refer to [this AWS tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} specifically for the VPC setup guidance.
 
-After VPC setup, you can follow the templates down below to setup Lambda functions with VPC internal subnet access.
+After completing the VPC setup, you can use the templates provided below to set up Lambda functions with access to VPC internal subnets.
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -612,7 +613,7 @@ After VPC setup, you can follow the templates down below to setup Lambda functio
 
 ### Configuring Redis persistence layer
 
-You can quickly start by initializing the `RedisCachePersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler. Check out detailed example of `RedisCachePersistenceLayer` in [Persistence layers section](#redispersistencelayer).
+You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
 
 === "Use established Redis Client"
     ```python hl_lines="4 7 12-15 17 31"
@@ -632,7 +633,7 @@ You can quickly start by initializing the `RedisCachePersistenceLayer` class and
 
 ### Custom advanced settings
 
-For advanced settings, including SSL certificates and the ability to customize parameters such as a custom timeout, you can use the Redis client to accommodate these specific settings.
+For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.
 
 === "Advanced configuration using AWS Secrets"
     ```python hl_lines="8 10 20"
@@ -965,7 +966,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 
 ### Testing with Redis
 
-To test locally, You can either utilize [fakeredis-py](https://github.com/cunla/fakeredis-py) or check out the [MockRedis](https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66) Class we used in our test.
+To test locally, you can either utilize [fakeredis-py](https://github.com/cunla/fakeredis-py) for a simulated Redis environment or refer to the [MockRedis](https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66) class used in our tests to mock Redis operations.
 
 === "test_with_mock_redis.py"
 
@@ -979,7 +980,7 @@ To test locally, You can either utilize [fakeredis-py](https://github.com/cunla/
     --8<-- "examples/idempotency/tests/mock_redis.py"
     ```
 
-If you want to actually setup a Real Redis client for integration test, reference the code below
+If you want to set up a real Redis client for integration testing, you can reference the code provided below.
 
 === "test_with_real_redis.py"
 
