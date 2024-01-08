@@ -8,8 +8,8 @@ from datetime import timedelta
 from typing import Any, Dict
 
 import redis
-from typing_extensions import Literal, Protocol
 
+from aws_lambda_powertools.shared.types import Literal, Protocol
 from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
@@ -310,8 +310,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         return self._item_to_data_record(idempotency_key, item)
 
     def _put_in_progress_record(self, data_record: DataRecord) -> None:
-        item: Dict[str, Any] = {}
-        item = {
+        item: Dict[str, Any] = {
             "name": data_record.idempotency_key,
             "mapping": {
                 self.status_attr: data_record.status,
@@ -416,9 +415,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             raise NotImplementedError
 
     def _update_record(self, data_record: DataRecord) -> None:
-        item: Dict[str, Any] = {}
-
-        item = {
+        item: Dict[str, Any] = {
             "name": data_record.idempotency_key,
             "mapping": {
                 self.data_attr: data_record.response_data,
