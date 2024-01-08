@@ -182,15 +182,20 @@ class RedisConnection:
                 logger.debug(f"Using URL format to connect to Redis: {self.host}")
                 return client.from_url(url=self.url)
             else:
+                # Redis in cluster mode doesn't support db parameter
+                extra_param_connection: Dict[str, str] = {}
+                if self.mode != "cluster":
+                    extra_param_connection = {"db": self.db_index}
+
                 logger.debug(f"Using other parameters to connect to Redis: {self.host}")
                 return client(
                     host=self.host,
                     port=self.port,
                     username=self.username,
                     password=self.password,
-                    db=self.db_index,
                     decode_responses=True,
                     ssl=self.ssl,
+                    **extra_param_connection,
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect in Redis: {self.host}")
