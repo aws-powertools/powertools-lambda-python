@@ -27,6 +27,41 @@ logger = logging.getLogger(__name__)
 
 
 class RedisClientProtocol(Protocol):
+    """
+    Protocol class defining the interface for a Redis client.
+
+    This protocol outlines the expected behavior of a Redis client, allowing for
+    standardization among different implementations and allowing customers to extend it
+    in their own implementation.
+
+    Methods
+    -------
+    - get(name: bytes | str | memoryview) -> bytes | str | None:
+        Retrieves the value associated with the given key.
+
+    - set(
+        name: str | bytes,
+        value: bytes | float | str,
+        ex: float | timedelta | None = ...,
+        px: float | timedelta | None = ...,
+        nx: bool = ...,
+    ) -> bool | None:
+        Sets the value for the specified key with optional parameters.
+
+    - delete(keys: bytes | str | memoryview) -> Any:
+        Deletes one or more keys.
+
+    Note
+    ----
+    - The `ex` parameter represents the expiration time in seconds.
+    - The `px` parameter represents the expiration time in milliseconds.
+    - The `nx` parameter, if True, sets the value only if the key does not exist.
+
+    Raises
+    ------
+    - NotImplementedError: If any of the methods are not implemented by the concrete class.
+    """
+
     def get(self, name: bytes | str | memoryview) -> bytes | str | None:
         raise NotImplementedError
 
