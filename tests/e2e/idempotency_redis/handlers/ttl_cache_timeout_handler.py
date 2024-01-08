@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 
 REDIS_HOST = os.getenv("RedisEndpoint", "")
-persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379, ssl=True)
+persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379)
 config = IdempotencyConfig(expires_after_seconds=1)
 
 

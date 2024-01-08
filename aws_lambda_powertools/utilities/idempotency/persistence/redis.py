@@ -89,8 +89,7 @@ class RedisConnection:
         password: str = "",  # nosec - password for Redis connection
         db_index: int = 0,
         mode: Literal["standalone", "cluster"] = "standalone",
-        ssl: bool = False,
-        ssl_cert_reqs: Literal["required", "optional", "none"] = "none",
+        ssl: bool = True,
     ) -> None:
         """
         Initialize Redis connection which will be used in redis persistence_store to support Idempotency
@@ -111,10 +110,8 @@ class RedisConnection:
             redis db index
         mode: str, Literal["standalone","cluster"]
             set redis client mode, choose from standalone/cluster. The default is standalone
-        ssl: bool, optional: default False
+        ssl: bool, optional: default True
             set whether to use ssl for Redis connection
-        ssl_cert_reqs: str, optional: default "none"
-            set whether to use ssl cert for Redis connection, choose from required/optional/none
 
         Examples
         --------
@@ -168,7 +165,6 @@ class RedisConnection:
         self.password = password
         self.db_index = db_index
         self.ssl = ssl
-        self.ssl_cert_reqs = ssl_cert_reqs
         self.mode = mode
 
     def _init_client(self) -> RedisClientProtocol:
@@ -195,7 +191,6 @@ class RedisConnection:
                     db=self.db_index,
                     decode_responses=True,
                     ssl=self.ssl,
-                    ssl_cert_reqs=self.ssl_cert_reqs,
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect in Redis: {self.host}")
@@ -212,8 +207,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         password: str = "",  # nosec - password for Redis connection
         db_index: int = 0,
         mode: Literal["standalone", "cluster"] = "standalone",
-        ssl: bool = False,
-        ssl_cert_reqs: Literal["required", "optional", "none"] = "none",
+        ssl: bool = True,
         client: RedisClientProtocol | None = None,
         in_progress_expiry_attr: str = "in_progress_expiration",
         expiry_attr: str = "expiration",
@@ -239,10 +233,8 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             redis db index
         mode: str, Literal["standalone","cluster"]
             set redis client mode, choose from standalone/cluster
-        ssl: bool, optional: default False
+        ssl: bool, optional: default True
             set whether to use ssl for Redis connection
-        ssl_cert_reqs: str, optional: default "none"
-            set whether to use ssl cert for Redis connection, choose from required/optional/none
         client: RedisClientProtocol, optional
             You can bring your established Redis client that follows RedisClientProtocol.
             If client is provided, all connection config above will be ignored
@@ -296,7 +288,6 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                 url=url,
                 mode=mode,
                 ssl=ssl,
-                ssl_cert_reqs=ssl_cert_reqs,
             )._init_client()
         else:
             self.client = client
