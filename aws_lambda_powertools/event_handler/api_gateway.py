@@ -1673,7 +1673,7 @@ class ApiGatewayResolver(BaseRouter):
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
-            spec = self.get_openapi_json_schema(
+            spec = self.get_openapi_schema(
                 title=title,
                 version=version,
                 openapi_version=openapi_version,

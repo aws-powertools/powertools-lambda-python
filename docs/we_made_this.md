@@ -96,6 +96,14 @@ This blog post focuses on the importance of idempotency in distributed services 
 
 * [Implementing Idempotency in Serverless Architectures](https://medium.com/@nuatmochoi/implementing-idempotency-in-serverless-architectures-f9079ef1c7da){target="_blank" rel="nofollow"}
 
+### Creating a serverless API using Powertools for AWS Lambda and AWS CDK
+
+This blog post showcases how to use AWS CDK and Powertools for AWS Lambda, along with Amazon API Gateway and AWS Lambda, to effortlessly deploy scalable infrastructure with just a few lines of code.
+
+> **Author: [Thomas Taylor](https://www.linkedin.com/in/iamthomastaylor/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Creating a serverless API using Powertools for AWS Lambda and CDK](https://how.wtf/creating-a-serverless-api-using-aws-lambda-powertools-and-cdk.html){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
