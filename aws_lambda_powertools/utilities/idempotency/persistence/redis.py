@@ -92,24 +92,24 @@ class RedisConnection:
         ssl: bool = True,
     ) -> None:
         """
-        Initialize Redis connection which will be used in redis persistence_store to support Idempotency
+        Initialize Redis connection which will be used in Redis persistence_store to support Idempotency
 
         Parameters
         ----------
         host: str, optional
-            redis host
+            Redis host
         port: int, optional: default 6379
-            redis port
+            Redis port
         username: str, optional
-            redis username
+            Redis username
         password: str, optional
-            redis password
+            Redis password
         url: str, optional
-            redis connection string, using url will override the host/port in the previous parameters
+            Redis connection string, using url will override the host/port in the previous parameters
         db_index: int, optional: default 0
-            redis db index
+            Redis db index
         mode: str, Literal["standalone","cluster"]
-            set redis client mode, choose from standalone/cluster. The default is standalone
+            set Redis client mode, choose from standalone/cluster. The default is standalone
         ssl: bool, optional: default True
             set whether to use ssl for Redis connection
 
@@ -229,19 +229,19 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         Parameters
         ----------
         host: str, optional
-            redis host
+            Redis host
         port: int, optional: default 6379
-            redis port
+            Redis port
         username: str, optional
-            redis username
+            Redis username
         password: str, optional
-            redis password
+            Redis password
         url: str, optional
-            redis connection string, using url will override the host/port in the previous parameters
+            Redis connection string, using url will override the host/port in the previous parameters
         db_index: int, optional: default 0
-            redis db index
+            Redis db index
         mode: str, Literal["standalone","cluster"]
-            set redis client mode, choose from standalone/cluster
+            set Redis client mode, choose from standalone/cluster
         ssl: bool, optional: default True
             set whether to use ssl for Redis connection
         client: RedisClientProtocol, optional
@@ -446,7 +446,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         except (redis.exceptions.RedisError, redis.exceptions.RedisClusterException) as e:
             raise e
         except Exception as e:
-            logger.debug(f"encountered non-redis exception: {e}")
+            logger.debug(f"encountered non-Redis exception: {e}")
             raise e
 
     @contextmanager
