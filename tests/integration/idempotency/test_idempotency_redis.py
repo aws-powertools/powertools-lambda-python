@@ -3,7 +3,6 @@ import copy
 import pytest
 from testcontainers.redis import RedisContainer
 
-from aws_lambda_powertools.utilities.idempotency import RedisCachePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
@@ -13,6 +12,9 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
     idempotent,
     idempotent_function,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+    RedisCachePersistenceLayer,
 )
 
 pytest.skip(reason="Integration tests disabled for Redis Idempotency.", allow_module_level=True)
