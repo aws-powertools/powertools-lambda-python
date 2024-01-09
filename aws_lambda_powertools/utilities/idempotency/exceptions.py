@@ -87,17 +87,17 @@ class IdempotencyNoSerializationModelError(BaseError):
 
 class IdempotencyPersistenceConfigError(BaseError):
     """
-    The Redis connection passed in has unsupported config
+    The idempotency persistency configuration was unsupported
     """
 
 
 class IdempotencyPersistenceConnectionError(BaseError):
     """
-    Redis connection error
+    Idempotency persistence connection error
     """
 
 
 class IdempotencyPersistenceConsistencyError(BaseError):
     """
-    Redis Orphan Record found, need to be removed
+    Idempotency persistency consistency error, needs to be removed
     """
