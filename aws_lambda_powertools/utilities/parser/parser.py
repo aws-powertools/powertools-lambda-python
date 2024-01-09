@@ -171,8 +171,12 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
         try:
             logger.debug(f"Parsing and validating event model with envelope={envelope}")
             return envelope().parse(data=event, model=model)
-        except AttributeError:
-            raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
+        except AttributeError as exc:
+            raise InvalidEnvelopeError(
+                f"Error: {str(exc)}. Please ensure that both the Input model and the Envelope inherits from BaseModel,\n"  # noqa E501
+                "and your payload adheres to the specified Input model structure.\n"
+                f"Envelope={envelope}\nModel={model}",
+            )
 
     try:
         disable_pydantic_v2_warning()
@@ -181,5 +185,9 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
             return model.parse_raw(event)
 
         return model.parse_obj(event)
-    except AttributeError:
-        raise InvalidModelTypeError(f"Input model must implement BaseModel, model={model}")
+    except AttributeError as exc:
+        raise InvalidModelTypeError(
+            f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
+            "and your payload adheres to the specified Input model structure.\n"
+            f"Model={model}",
+        )
