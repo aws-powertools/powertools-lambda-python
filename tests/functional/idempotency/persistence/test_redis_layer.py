@@ -6,7 +6,7 @@ import time as t
 import pytest
 from unittest.mock import patch
 
-from aws_lambda_powertools.utilities.idempotency import (
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
     RedisCachePersistenceLayer,
 )
 import datetime
@@ -22,9 +22,9 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
-    IdempotencyRedisConnectionError,
-    IdempotencyRedisClientConfigError,
-    IdempotencyOrphanRecordError,
+    IdempotencyPersistenceConnectionError,
+    IdempotencyPersistenceConfigError,
+    IdempotencyPersistenceConsistencyError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
@@ -243,7 +243,7 @@ def test_redis_connection_cluster():
 def test_redis_connection_conn_error():
     # when RedisCachePersistenceLayer is init with a bad host
     # then should raise IdempotencyRedisConnectionError
-    with pytest.raises(IdempotencyRedisConnectionError):
+    with pytest.raises(IdempotencyPersistenceConnectionError):
         RedisCachePersistenceLayer(host=redis_badhost)
 
 
@@ -251,7 +251,7 @@ def test_redis_connection_conn_error():
 def test_redis_connection_conf_error():
     # when RedisCachePersistenceLayer is init with a not_supported_mode in mode param
     # then should raise IdempotencyRedisClientConfigError
-    with pytest.raises(IdempotencyRedisClientConfigError):
+    with pytest.raises(IdempotencyPersistenceConfigError):
         RedisCachePersistenceLayer(mode="not_supported_mode")
 
 
@@ -268,7 +268,7 @@ def test_redis_key_error():
 def test_redis_key_corrupted():
     # when RedisCachePersistenceLayer got a non-json formatted record
     # then should raise IdempotencyOrphanRecordError
-    with pytest.raises(IdempotencyOrphanRecordError):
+    with pytest.raises(IdempotencyPersistenceConsistencyError):
         layer = RedisCachePersistenceLayer(url="sample_url")
         layer.client.set("corrupted_json", "not_json_string")
         layer._get_record(idempotency_key="corrupted_json")
@@ -321,7 +321,7 @@ def test_item_to_datarecord_conversion(valid_record):
     layer = RedisCachePersistenceLayer(host="host", mode="standalone")
     item = {
         "status": STATUS_CONSTANTS["INPROGRESS"],
-        layer.in_progress_expiry_attr: str(int(datetime.datetime.now().timestamp() * 1000)),
+        layer.in_progress_expiry_attr: int(datetime.datetime.now().timestamp() * 1000),
     }
     # given we have a dict of datarecord
     # when calling _item_to_data_record
@@ -329,7 +329,7 @@ def test_item_to_datarecord_conversion(valid_record):
     # then all valid fields in dict should be copied into data_record
     assert record.idempotency_key == "abc"
     assert record.status == STATUS_CONSTANTS["INPROGRESS"]
-    assert record.in_progress_expiry_timestamp == int(item[layer.in_progress_expiry_attr])
+    assert record.in_progress_expiry_timestamp == item[layer.in_progress_expiry_attr]
 
 
 def test_idempotent_function_and_lambda_handler_redis_basic(

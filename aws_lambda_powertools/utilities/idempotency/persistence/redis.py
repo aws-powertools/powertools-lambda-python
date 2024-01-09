@@ -14,9 +14,9 @@ from aws_lambda_powertools.utilities.idempotency import BasePersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
-    IdempotencyOrphanRecordError,
-    IdempotencyRedisClientConfigError,
-    IdempotencyRedisConnectionError,
+    IdempotencyPersistenceConfigError,
+    IdempotencyPersistenceConnectionError,
+    IdempotencyPersistenceConsistencyError,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     STATUS_CONSTANTS,
@@ -106,7 +106,7 @@ class RedisConnection:
             redis password
         url: str, optional
             redis connection string, using url will override the host/port in the previous parameters
-        db_index: str, optional: default 0
+        db_index: int, optional: default 0
             redis db index
         mode: str, Literal["standalone","cluster"]
             set redis client mode, choose from standalone/cluster. The default is standalone
@@ -175,7 +175,7 @@ class RedisConnection:
         elif self.mode == "cluster":
             client = redis.cluster.RedisCluster
         else:
-            raise IdempotencyRedisClientConfigError(f"Mode {self.mode} not supported")
+            raise IdempotencyPersistenceConfigError(f"Mode {self.mode} not supported")
 
         try:
             if self.url:
@@ -187,7 +187,7 @@ class RedisConnection:
                 if self.mode != "cluster":
                     extra_param_connection = {"db": self.db_index}
 
-                logger.debug(f"Using other parameters to connect to Redis: {self.host}")
+                logger.debug(f"Using arguments to connect to Redis: {self.host}")
                 return client(
                     host=self.host,
                     port=self.port,
@@ -199,7 +199,7 @@ class RedisConnection:
                 )
         except redis.exceptions.ConnectionError as exc:
             logger.debug(f"Cannot connect in Redis: {self.host}")
-            raise IdempotencyRedisConnectionError("Could not to connect to Redis", exc) from exc
+            raise IdempotencyPersistenceConnectionError("Could not to connect to Redis", exc) from exc
 
 
 class RedisCachePersistenceLayer(BasePersistenceLayer):
@@ -222,6 +222,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
     ):
         """
         Initialize the Redis Persistence Layer
+
         Parameters
         ----------
         host: str, optional
@@ -234,15 +235,15 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             redis password
         url: str, optional
             redis connection string, using url will override the host/port in the previous parameters
-        db_index: str, optional: default 0
+        db_index: int, optional: default 0
             redis db index
         mode: str, Literal["standalone","cluster"]
             set redis client mode, choose from standalone/cluster
         ssl: bool, optional: default True
             set whether to use ssl for Redis connection
         client: RedisClientProtocol, optional
-            You can bring your established Redis client that follows RedisClientProtocol.
-            If client is provided, all connection config above will be ignored
+            Bring your own Redis client that follows RedisClientProtocol.
+            If provided, all other connection configuration options will be ignored
         expiry_attr: str, optional
             Redis json attribute name for expiry timestamp, by default "expiration"
         in_progress_expiry_attr: str, optional
@@ -309,7 +310,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
     def _get_expiry_second(self, expiry_timestamp: int | None = None) -> int:
         """
-        return seconds of timedelta from now to the given unix timestamp
+        Calculates the number of seconds remaining until a specified expiry time
         """
         if expiry_timestamp:
             return expiry_timestamp - int(datetime.datetime.now().timestamp())
@@ -317,8 +318,7 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
 
     def _item_to_data_record(self, idempotency_key: str, item: Dict[str, Any]) -> DataRecord:
         in_progress_expiry_timestamp = item.get(self.in_progress_expiry_attr)
-        if isinstance(in_progress_expiry_timestamp, str):
-            in_progress_expiry_timestamp = int(in_progress_expiry_timestamp)
+
         return DataRecord(
             idempotency_key=idempotency_key,
             status=item[self.status_attr],
@@ -331,13 +331,24 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
     def _get_record(self, idempotency_key) -> DataRecord:
         # See: https://redis.io/commands/get/
         response = self.client.get(idempotency_key)
+
         # key not found
         if not response:
             raise IdempotencyItemNotFoundError
+
         try:
             item = self._json_deserializer(response)
         except json.JSONDecodeError:
-            raise IdempotencyOrphanRecordError
+            # Json decoding error is considered an Consistency error. This scenario will also introduce possible
+            # race condition just like Orphan record does. As two lambda handlers is possible to reach this line
+            # of code almost simultaneously. If we simply regard this record as non-valid record. The two lambda
+            # handlers will both start the overwrite process without knowing each other. Causing this value being
+            # overwritten twice (ultimately two Lambda Handlers will both be executed, which is against idempotency).
+            # So this case should also be handled by the error handling in IdempotencyPersistenceConsistencyError
+            # part to avoid the possible race condition.
+
+            raise IdempotencyPersistenceConsistencyError
+
         return self._item_to_data_record(idempotency_key, item)
 
     def _put_in_progress_record(self, data_record: DataRecord) -> None:
@@ -370,32 +381,38 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             #    - previous invocation with the same key was deleted due to TTL
             #    - SET see https://redis.io/commands/set/
 
-            logger.debug(f"Putting record on Redis for idempotency key: {item['name']}")
+            logger.debug(f"Putting record on Redis for idempotency key: {data_record.idempotency_key}")
             encoded_item = self._json_serializer(item["mapping"])
-            ttl = self._get_expiry_second(expiry_timestamp=item["mapping"][self.expiry_attr])
+            ttl = self._get_expiry_second(expiry_timestamp=data_record.expiry_timestamp)
 
-            redis_response = self.client.set(name=item["name"], value=encoded_item, ex=ttl, nx=True)
+            redis_response = self.client.set(name=data_record.idempotency_key, value=encoded_item, ex=ttl, nx=True)
 
-            # redis_response:True -> Redis set succeed, idempotency key does not exist before
-            # return to idempotency and proceed to handler execution phase. Most cases should return here
+            # If redis_response is True, the Redis SET operation was successful and the idempotency key was not
+            # previously set. This indicates that we can safely proceed to the handler execution phase.
+            # Most invocations should successfully proceed past this point.
             if redis_response:
                 return
 
-            # redis_response:None -> Existing record on Redis, continue to checking phase
-            # The idempotency key exist:
-            #    - previous invocation with the same key and not expired(active idempotency)
-            #    - previous invocation timed out (Orphan Record)
-            #    - previous invocation record expired but not deleted by Redis (Orphan Record)
+            # If redis_response is None, it indicates an existing record in Redis for the given idempotency key.
+            # This could be due to:
+            # - An active idempotency record from a previous invocation that has not yet expired.
+            # - An orphan record where a previous invocation has timed out.
+            # - An expired idempotency record that has not been deleted by Redis.
+            # In any case, we proceed to retrieve the record for further inspection.
 
-            idempotency_record = self._get_record(item["name"])
+            idempotency_record = self._get_record(data_record.idempotency_key)
 
-            # status is completed and expiry_attr timestamp still larger than current timestamp
-            # found a valid completed record
+            # If the status of the idempotency record is 'COMPLETED' and the record has not expired
+            # (i.e., the expiry timestamp is greater than the current timestamp), then a valid completed
+            # record exists. We raise an error to prevent duplicate processing of a request that has already
+            # been completed successfully.
             if idempotency_record.status == STATUS_CONSTANTS["COMPLETED"] and not idempotency_record.is_expired:
                 raise IdempotencyItemAlreadyExistsError
 
-            # in_progress_expiry_attr exist means status is in_progress, and still larger than current timestamp,
-            # found a vaild in_progress record
+            # If the idempotency record has a status of 'INPROGRESS' and has a valid in_progress_expiry_timestamp
+            # (meaning the timestamp is greater than the current timestamp in milliseconds), then we have encountered
+            # a valid in-progress record. This indicates that another process is currently handling the request, and
+            # to maintain idempotency, we raise an error to prevent concurrent processing of the same request.
             if (
                 idempotency_record.status == STATUS_CONSTANTS["INPROGRESS"]
                 and idempotency_record.in_progress_expiry_timestamp
@@ -403,26 +420,36 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
             ):
                 raise IdempotencyItemAlreadyExistsError
 
-            # If the code reaches here means we found an Orphan record.
-            raise IdempotencyOrphanRecordError
+            # Reaching this point indicates that the idempotency record found is an orphan record. An orphan record is
+            # one that is neither completed nor in-progress within its expected time frame. It may result from a
+            # previous invocation that has timed out or an expired record that has yet to be cleaned up by Redis.
+            # We raise an error to handle this exceptional scenario appropriately.
+            raise IdempotencyPersistenceConsistencyError
 
-        except IdempotencyOrphanRecordError:
-            # deal with orphan record here
-            # aquire a lock for default 10 seconds
+        except IdempotencyPersistenceConsistencyError:
+            # Handle an orphan record by attempting to acquire a lock, which by default lasts for 10 seconds.
+            # The purpose of acquiring the lock is to prevent race conditions with other processes that might
+            # also be trying to handle the same orphan record. Once the lock is acquired, we set a new value
+            # for the idempotency record in Redis with the appropriate time-to-live (TTL).
             with self._acquire_lock(name=item["name"]):
                 self.client.set(name=item["name"], value=encoded_item, ex=ttl)
 
-            # lock was not removed here intentionally. Prevent another orphan operation in race condition.
+            # Not removing the lock here serves as a safeguard against race conditions,
+            # preventing another operation from mistakenly treating this record as an orphan while the
+            # current operation is still in progress.
         except (redis.exceptions.RedisError, redis.exceptions.RedisClusterException) as e:
             raise e
         except Exception as e:
-            logger.debug(f"encountered non-redis exception:{e}")
+            logger.debug(f"encountered non-redis exception: {e}")
             raise e
 
     @contextmanager
     def _acquire_lock(self, name: str):
         """
-        aquire a lock for default 10 seconds
+        Attempt to acquire a lock for a specified resource name, with a default timeout.
+        This context manager attempts to set a lock using Redis to prevent concurrent
+        access to a resource identified by 'name'. It uses the 'nx' flag to ensure that
+        the lock is only set if it does not already exist, thereby enforcing mutual exclusion.
         """
         try:
             acquired = self.client.set(name=f"{name}:lock", value="True", ex=self._orphan_lock_timeout, nx=True)
@@ -431,8 +458,10 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
                 logger.debug("lock acquired")
                 yield
             else:
-                # lock failed to aquire, means encountered a race condition. Just return
-                logger.debug("lock failed to acquire, raise to retry")
+                # If the lock acquisition fails, it suggests a race condition has occurred. In this case, instead of
+                # proceeding, we log the event and raise an error to indicate that the current operation should be
+                # retried after the lock is released by the process that currently holds it.
+                logger.debug("lock acquisition failed, raise to retry")
                 raise IdempotencyItemAlreadyExistsError
 
         finally:
@@ -461,8 +490,16 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         self.client.set(name=item["name"], value=encoded_item, ex=ttl)
 
     def _delete_record(self, data_record: DataRecord) -> None:
-        # This function only works when Lambda handler has already been invoked
-        # Or you'll get empty idempotency_key
+        """
+        Deletes the idempotency record associated with a given DataRecord from Redis.
+        This function is designed to be called after a Lambda handler invocation has completed processing.
+        It ensures that the idempotency key associated with the DataRecord is removed from Redis to
+        prevent future conflicts and to maintain the idempotency integrity.
+
+        Note: it is essential that the idempotency key is not empty, as that would indicate the Lambda
+        handler has not been invoked or the key was not properly set.
+        """
         logger.debug(f"Deleting record for idempotency key: {data_record.idempotency_key}")
+
         # See: https://redis.io/commands/del/
         self.client.delete(data_record.idempotency_key)
