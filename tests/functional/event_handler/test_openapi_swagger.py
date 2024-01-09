@@ -73,9 +73,9 @@ def test_openapi_swagger_with_custom_base_url_no_embedded_assets():
     assert result["statusCode"] == 404
 
 
-def test_openapi_swagger_with_enabled_download_spec_and_default_path():
+def test_openapi_swagger_json_view_with_default_path():
     app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger()
+    app.enable_swagger(title="OpenAPI JSON View")
     LOAD_GW_EVENT["path"] = "/swagger"
     LOAD_GW_EVENT["queryStringParameters"] = {"format": "json"}
 
@@ -84,11 +84,12 @@ def test_openapi_swagger_with_enabled_download_spec_and_default_path():
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
     assert isinstance(json.loads(result["body"]), Dict)
+    assert "OpenAPI JSON View" in result["body"]
 
 
-def test_openapi_swagger_with_enabled_download_spec_and_custom_path():
+def test_openapi_swagger_json_view_with_custom_path():
     app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger(path="/fizzbuzz/foobar")
+    app.enable_swagger(path="/fizzbuzz/foobar", title="OpenAPI JSON View")
     LOAD_GW_EVENT["path"] = "/fizzbuzz/foobar"
     LOAD_GW_EVENT["queryStringParameters"] = {"format": "json"}
 
@@ -97,3 +98,4 @@ def test_openapi_swagger_with_enabled_download_spec_and_custom_path():
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
     assert isinstance(json.loads(result["body"]), Dict)
+    assert "OpenAPI JSON View" in result["body"]
