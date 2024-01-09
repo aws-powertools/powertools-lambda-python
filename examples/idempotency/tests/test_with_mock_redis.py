@@ -4,8 +4,10 @@ import pytest
 from mock_redis import MockRedis
 
 from aws_lambda_powertools.utilities.idempotency import (
-    RedisCachePersistenceLayer,
     idempotent,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+    RedisCachePersistenceLayer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 

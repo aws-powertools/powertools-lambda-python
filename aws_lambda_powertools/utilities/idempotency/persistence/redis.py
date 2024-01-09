@@ -121,9 +121,12 @@ class RedisConnection:
         from uuid import uuid4
 
         from aws_lambda_powertools.utilities.idempotency import (
-            RedisCachePersistenceLayer,
             idempotent,
         )
+        from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+            RedisCachePersistenceLayer,
+        )
+
         from aws_lambda_powertools.utilities.typing import LambdaContext
 
         persistence_layer = RedisCachePersistenceLayer(host="localhost", port=6379)
@@ -261,8 +264,11 @@ class RedisCachePersistenceLayer(BasePersistenceLayer):
         ```python
         from redis import Redis
         from aws_lambda_powertools.utilities.idempotency import (
-            RedisCachePersistenceLayer
             idempotent,
+        )
+
+        from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+            RedisCachePersistenceLayer,
         )
 
         client = redis.Redis(

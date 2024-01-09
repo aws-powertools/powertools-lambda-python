@@ -4,7 +4,10 @@ from redis import Redis
 
 from aws_lambda_powertools.shared.functions import abs_lambda_path
 from aws_lambda_powertools.utilities import parameters
-from aws_lambda_powertools.utilities.idempotency import IdempotencyConfig, RedisCachePersistenceLayer, idempotent
+from aws_lambda_powertools.utilities.idempotency import IdempotencyConfig, idempotent
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+    RedisCachePersistenceLayer,
+)
 
 redis_values: Any = parameters.get_secret("redis_info", transform="json")  # (1)!
 
