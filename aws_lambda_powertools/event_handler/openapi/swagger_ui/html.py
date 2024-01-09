@@ -1,24 +1,34 @@
-import json
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
 
 
-def generate_swagger_html(spec: str, js_url: str, css_url: str) -> str:
+def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
     """
     Generate Swagger UI HTML page
 
     Parameters
     ----------
-    spec: str
-        The OpenAPI spec in the JSON format
+    spec: OpenAPI
+        The OpenAPI spec
     js_url: str
         The URL to the Swagger UI JavaScript file
     css_url: str
         The URL to the Swagger UI CSS file
     """
 
+    from aws_lambda_powertools.event_handler.openapi.compat import model_json
+
     # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
     # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not inadvertently
     # close the script tag, and the JSON remains a valid string within the JavaScript code.
-    escaped_spec = json.dumps(json.loads(spec)).replace("</", "<\\/")
+    escaped_spec = model_json(
+        spec,
+        by_alias=True,
+        exclude_none=True,
+        indent=2,
+    ).replace("</", "<\\/")
 
     return f"""
 <!DOCTYPE html>
