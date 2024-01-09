@@ -14,32 +14,6 @@ def test_openapi_swagger():
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == ["text/html"]
 
-    # Using our embedded assets
-    assert "/swagger.css" in result["body"]
-    assert "/swagger.js" in result["body"]
-
-
-def test_openapi_embedded_js():
-    app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger()
-
-    LOAD_GW_EVENT["path"] = "/swagger.js"
-
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
-    assert result["multiValueHeaders"]["Content-Type"] == ["text/javascript"]
-
-
-def test_openapi_embedded_css():
-    app = APIGatewayRestResolver(enable_validation=True)
-    app.enable_swagger()
-
-    LOAD_GW_EVENT["path"] = "/swagger.css"
-
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
-    assert result["multiValueHeaders"]["Content-Type"] == ["text/css"]
-
 
 def test_openapi_swagger_with_custom_base_url():
     app = APIGatewayRestResolver(enable_validation=True)

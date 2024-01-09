@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
 
 
-def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
+def generate_swagger_html(spec: "OpenAPI", swagger_js: str, swagger_css: str, swagger_base_url: str) -> str:
     """
     Generate Swagger UI HTML page
 
@@ -30,6 +30,15 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
         indent=2,
     ).replace("</", "<\\/")
 
+    # If Swagger base URL is present, generate HTML content with linked CSS and JavaScript files
+    # If no Swagger base URL is provided, include CSS and JavaScript directly in the HTML
+    if swagger_base_url:
+        swagger_css_content = f"<link rel='stylesheet' type='text/css' href='{swagger_css}'>"
+        swagger_js_content = f"<script src='{swagger_js}'></script>"
+    else:
+        swagger_css_content = f"<style>{swagger_css}</style>"
+        swagger_js_content = f"<script>{swagger_js}</script>"
+
     return f"""
 <!DOCTYPE html>
 <html>
@@ -40,7 +49,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
       http-equiv="Cache-control"
       content="no-cache, no-store, must-revalidate"
     />
-    <link rel="stylesheet" type="text/css" href="{css_url}">
+    {swagger_css_content}
 </head>
 
 <body>
@@ -49,7 +58,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
     </div>
 </body>
 
-<script src="{js_url}"></script>
+{swagger_js_content}
 
 <script>
   var swaggerUIOptions = {{

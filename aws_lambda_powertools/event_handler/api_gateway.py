@@ -1594,26 +1594,6 @@ class ApiGatewayResolver(BaseRouter):
         """
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
-        if not swagger_base_url:
-
-            @self.get("/swagger.js", include_in_schema=False)
-            def swagger_js():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/javascript",
-                    body=body,
-                )
-
-            @self.get("/swagger.css", include_in_schema=False)
-            def swagger_css():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/css",
-                    body=body,
-                )
-
         @self.get(path, middlewares=middlewares, include_in_schema=False)
         def swagger_handler():
             base_path = self._get_base_path()
@@ -1622,8 +1602,11 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
                 swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
             else:
-                swagger_js = f"{base_path}/swagger.js"
-                swagger_css = f"{base_path}/swagger.css"
+                # We now inject CSS and JS into the SwaggerUI file
+                swagger_js = Path.open(
+                    Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js",
+                ).read()
+                swagger_css = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
@@ -1640,7 +1623,7 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
             )
 
-            body = generate_swagger_html(spec, swagger_js, swagger_css)
+            body = generate_swagger_html(spec, swagger_js, swagger_css, swagger_base_url)
 
             return Response(
                 status_code=200,
