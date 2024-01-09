@@ -6,6 +6,7 @@
 
 ## Maintenance
 
+* **deps-dev:** bump cfn-lint from 0.83.7 to 0.83.8 ([#3603](https://github.com/aws-powertools/powertools-lambda-python/issues/3603))
 
 
 <a name="v2.31.0"></a>
