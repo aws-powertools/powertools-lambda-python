@@ -1592,27 +1592,8 @@ class ApiGatewayResolver(BaseRouter):
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
         """
+        from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
-
-        if not swagger_base_url:
-
-            @self.get("/swagger.js", include_in_schema=False)
-            def swagger_js():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/javascript",
-                    body=body,
-                )
-
-            @self.get("/swagger.css", include_in_schema=False)
-            def swagger_css():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/css",
-                    body=body,
-                )
 
         @self.get(path, middlewares=middlewares, include_in_schema=False)
         def swagger_handler():
@@ -1622,12 +1603,15 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
                 swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
             else:
-                swagger_js = f"{base_path}/swagger.js"
-                swagger_css = f"{base_path}/swagger.css"
+                # We now inject CSS and JS into the SwaggerUI file
+                swagger_js = Path.open(
+                    Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js",
+                ).read()
+                swagger_css = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
-            spec = self.get_openapi_json_schema(
+            spec = self.get_openapi_schema(
                 title=title,
                 version=version,
                 openapi_version=openapi_version,
@@ -1640,7 +1624,28 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
             )
 
-            body = generate_swagger_html(spec, swagger_js, swagger_css)
+            # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
+            # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not
+            # inadvertently close the script tag, and the JSON remains a valid string within the JavaScript code.
+            escaped_spec = model_json(
+                spec,
+                by_alias=True,
+                exclude_none=True,
+                indent=2,
+            ).replace("</", "<\\/")
+
+            # Check for query parameters; if "format" is specified as "json",
+            # respond with the JSON used in the OpenAPI spec
+            # Example: https://www.example.com/swagger?format=json
+            query_params = self.current_event.query_string_parameters or {}
+            if query_params.get("format") == "json":
+                return Response(
+                    status_code=200,
+                    content_type="application/json",
+                    body=escaped_spec,
+                )
+
+            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css, swagger_base_url)
 
             return Response(
                 status_code=200,
