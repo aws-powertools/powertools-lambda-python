@@ -1592,6 +1592,7 @@ class ApiGatewayResolver(BaseRouter):
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
         """
+        from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
         if not swagger_base_url:
@@ -1627,7 +1628,7 @@ class ApiGatewayResolver(BaseRouter):
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
-            spec = self.get_openapi_json_schema(
+            spec = self.get_openapi_schema(
                 title=title,
                 version=version,
                 openapi_version=openapi_version,
@@ -1640,7 +1641,28 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
             )
 
-            body = generate_swagger_html(spec, swagger_js, swagger_css)
+            # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
+            # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not
+            # inadvertently close the script tag, and the JSON remains a valid string within the JavaScript code.
+            escaped_spec = model_json(
+                spec,
+                by_alias=True,
+                exclude_none=True,
+                indent=2,
+            ).replace("</", "<\\/")
+
+            # Check for query parameters; if "format" is specified as "json",
+            # respond with the JSON used in the OpenAPI spec
+            # Example: https://www.example.com/swagger?format=json
+            query_params = self.current_event.query_string_parameters or {}
+            if query_params.get("format") == "json":
+                return Response(
+                    status_code=200,
+                    content_type="application/json",
+                    body=escaped_spec,
+                )
+
+            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css)
 
             return Response(
                 status_code=200,

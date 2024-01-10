@@ -4,6 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps-dev:** bump cfn-lint from 0.83.7 to 0.83.8 ([#3603](https://github.com/aws-powertools/powertools-lambda-python/issues/3603))
+
+
+<a name="v2.31.0"></a>
+## [v2.31.0] - 2024-01-05
 ## Bug Fixes
 
 * **ci:** fail dispatch analytics job when Lambda call fails ([#3579](https://github.com/aws-powertools/powertools-lambda-python/issues/3579))
@@ -11,6 +18,7 @@
 ## Code Refactoring
 
 * **parameters:** add overload signatures for get_parameter and get_parameters ([#3534](https://github.com/aws-powertools/powertools-lambda-python/issues/3534))
+* **parser:** Improve error message when parsing models and envelopes ([#3587](https://github.com/aws-powertools/powertools-lambda-python/issues/3587))
 
 ## Documentation
 
@@ -24,20 +32,23 @@
 
 ## Maintenance
 
+* version bump
 * **ci:** Remove dev dependencies locked to Pydantic v1 within the Pydantic v2 workflow. ([#3582](https://github.com/aws-powertools/powertools-lambda-python/issues/3582))
-* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3544](https://github.com/aws-powertools/powertools-lambda-python/issues/3544))
+* **deps:** bump squidfunk/mkdocs-material from `9af3b7e` to `2f29d71` in /docs ([#3559](https://github.com/aws-powertools/powertools-lambda-python/issues/3559))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 4 updates ([#3593](https://github.com/aws-powertools/powertools-lambda-python/issues/3593))
 * **deps:** bump actions/setup-node from 4.0.0 to 4.0.1 ([#3535](https://github.com/aws-powertools/powertools-lambda-python/issues/3535))
 * **deps:** bump zgosalvez/github-actions-ensure-sha-pinned-actions from 3.0.2 to 3.0.3 ([#3536](https://github.com/aws-powertools/powertools-lambda-python/issues/3536))
-* **deps:** bump squidfunk/mkdocs-material from `9af3b7e` to `2f29d71` in /docs ([#3559](https://github.com/aws-powertools/powertools-lambda-python/issues/3559))
+* **deps:** bump actions/dependency-review-action from 3.1.4 to 3.1.5 ([#3592](https://github.com/aws-powertools/powertools-lambda-python/issues/3592))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 2 updates ([#3544](https://github.com/aws-powertools/powertools-lambda-python/issues/3544))
 * **deps:** bump fastjsonschema from 2.19.0 to 2.19.1 ([#3567](https://github.com/aws-powertools/powertools-lambda-python/issues/3567))
-* **deps-dev:** bump aws-cdk from 2.116.1 to 2.117.0 ([#3565](https://github.com/aws-powertools/powertools-lambda-python/issues/3565))
 * **deps-dev:** bump ruff from 0.1.8 to 0.1.9 ([#3550](https://github.com/aws-powertools/powertools-lambda-python/issues/3550))
-* **deps-dev:** bump pytest from 7.4.3 to 7.4.4 ([#3576](https://github.com/aws-powertools/powertools-lambda-python/issues/3576))
-* **deps-dev:** bump ruff from 0.1.9 to 0.1.10 ([#3583](https://github.com/aws-powertools/powertools-lambda-python/issues/3583))
 * **deps-dev:** bump aws-cdk from 2.115.0 to 2.116.1 ([#3553](https://github.com/aws-powertools/powertools-lambda-python/issues/3553))
-* **deps-dev:** bump cfn-lint from 0.83.6 to 0.83.7 ([#3554](https://github.com/aws-powertools/powertools-lambda-python/issues/3554))
-* **deps-dev:** bump ruff from 0.1.10 to 0.1.11 ([#3588](https://github.com/aws-powertools/powertools-lambda-python/issues/3588))
 * **deps-dev:** bump aws-cdk from 2.117.0 to 2.118.0 ([#3589](https://github.com/aws-powertools/powertools-lambda-python/issues/3589))
+* **deps-dev:** bump cfn-lint from 0.83.6 to 0.83.7 ([#3554](https://github.com/aws-powertools/powertools-lambda-python/issues/3554))
+* **deps-dev:** bump ruff from 0.1.9 to 0.1.10 ([#3583](https://github.com/aws-powertools/powertools-lambda-python/issues/3583))
+* **deps-dev:** bump pytest from 7.4.3 to 7.4.4 ([#3576](https://github.com/aws-powertools/powertools-lambda-python/issues/3576))
+* **deps-dev:** bump aws-cdk from 2.116.1 to 2.117.0 ([#3565](https://github.com/aws-powertools/powertools-lambda-python/issues/3565))
+* **deps-dev:** bump ruff from 0.1.10 to 0.1.11 ([#3588](https://github.com/aws-powertools/powertools-lambda-python/issues/3588))
 
 
 <a name="v2.30.2"></a>
@@ -4223,7 +4234,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.2...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.31.0...HEAD
+[v2.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.2...v2.31.0
 [v2.30.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.1...v2.30.2
 [v2.30.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.0...v2.30.1
 [v2.30.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.29.1...v2.30.0
