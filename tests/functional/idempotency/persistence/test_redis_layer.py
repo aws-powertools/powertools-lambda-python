@@ -435,7 +435,6 @@ def test_idempotent_function_and_lambda_handler_redis_validation(
     mock_event = {"user_id": "xyz", "time": "1234"}
     persistence_layer = persistence_store_standalone_redis
     result = {"message": "Foo"}
-    expected_result = copy.deepcopy(result)
     config = IdempotencyConfig(event_key_jmespath="user_id", payload_validation_jmespath="time")
 
     @idempotent(persistence_store=persistence_layer, config=config)
@@ -443,7 +442,7 @@ def test_idempotent_function_and_lambda_handler_redis_validation(
         return result
 
     # WHEN calling the function and handler with idempotency and event_key_jmespath,payload_validation_jmespath
-    handler_result = lambda_handler(mock_event, lambda_context)
+    lambda_handler(mock_event, lambda_context)
     # THEN we expect the function and lambda handler to execute successfully
 
     result = {"message": "Bar"}
@@ -452,7 +451,7 @@ def test_idempotent_function_and_lambda_handler_redis_validation(
     # When we modified the payload where validation is on and invoke again.
     # Then should raise IdempotencyValidationError
     with pytest.raises(IdempotencyValidationError):
-        handler_result2 = lambda_handler(mock_event, lambda_context)
+        lambda_handler(mock_event, lambda_context)
 
 
 def test_idempotent_function_and_lambda_handler_redis_basic_no_decode(
