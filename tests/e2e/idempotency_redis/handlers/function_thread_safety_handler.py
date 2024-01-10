@@ -4,9 +4,9 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from threading import current_thread
 
 from aws_lambda_powertools.utilities.idempotency import (
-    RedisCachePersistenceLayer,
     idempotent_function,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import RedisCachePersistenceLayer
 
 REDIS_HOST = os.getenv("RedisEndpoint", "")
 persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379)

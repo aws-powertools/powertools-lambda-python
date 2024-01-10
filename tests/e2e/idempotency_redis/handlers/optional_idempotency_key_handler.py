@@ -3,9 +3,9 @@ import uuid
 
 from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
-    RedisCachePersistenceLayer,
     idempotent,
 )
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import RedisCachePersistenceLayer
 
 REDIS_HOST = os.getenv("RedisEndpoint", "")
 persistence_layer = RedisCachePersistenceLayer(host=REDIS_HOST, port=6379)
