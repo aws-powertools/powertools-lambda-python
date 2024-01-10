@@ -2428,17 +2428,7 @@
 <span class="normal">66</span>
 <span class="normal">67</span>
 <span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span>
-<span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
+<span class="normal">69</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
 <span class="nt">Transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless-2016-10-31</span>
 <span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Hello world event handler API Gateway</span>
 
@@ -2506,16 +2496,6 @@
 <span class="w">        </span><span class="c1">#     Type: Api</span>
 <span class="w">        </span><span class="c1">#     Properties:</span>
 <span class="w">        </span><span class="c1">#         Path: /swagger</span>
-<span class="w">        </span><span class="c1">#         Method: GET</span>
-<span class="w">        </span><span class="c1"># SwaggerUICSS:</span>
-<span class="w">        </span><span class="c1">#     Type: Api</span>
-<span class="w">        </span><span class="c1">#     Properties:</span>
-<span class="w">        </span><span class="c1">#         Path: /swagger.css</span>
-<span class="w">        </span><span class="c1">#         Method: GET</span>
-<span class="w">        </span><span class="c1"># SwaggerUIJS:</span>
-<span class="w">        </span><span class="c1">#     Type: Api</span>
-<span class="w">        </span><span class="c1">#     Properties:</span>
-<span class="w">        </span><span class="c1">#         Path: /swagger.js</span>
 <span class="w">        </span><span class="c1">#         Method: GET</span>
 </code></pre></div></td></tr></table></div>
 </div>
@@ -5102,8 +5082,8 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <td>Swagger UI is enabled on a per resolver instance which will limit its accuracy here.</td>
 </tr>
 <tr>
-<td>You need to expose <strong>new routes</strong></td>
-<td>You'll need to expose the following paths to Lambda: <code>/swagger</code>, <code>/swagger.css</code>, <code>/swagger.js</code>; ignore if you're routing all paths already.</td>
+<td>You need to expose a <strong>new route</strong></td>
+<td>You'll need to expose the following path to Lambda: <code>/swagger</code>; ignore if you're routing this path already.</td>
 </tr>
 </tbody>
 </table>
@@ -8915,7 +8895,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2023-11-23
+      2024-01-10
     
   </small>
 </div>
