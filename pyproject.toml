@@ -97,7 +97,7 @@ parser = ["pydantic"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
 redis = ["redis"]
-all = ["pydantic", "aws-xray-sdk", "fastjsonschema","redis"]
+all = ["pydantic", "aws-xray-sdk", "fastjsonschema"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
