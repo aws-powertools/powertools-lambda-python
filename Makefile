@@ -8,13 +8,13 @@ dev:
 	pip install --upgrade pip pre-commit poetry
 	poetry config --local virtualenvs.in-project true
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all datamasking-aws-sdk"
+	poetry install --extras "all datamasking-aws-sdk redis"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all datamasking-aws-sdk"
+	poetry install --extras "all datamasking-aws-sdk redis"
 	pre-commit install
 
 format:
