@@ -369,7 +369,7 @@ This persistence layer is built-in, allowing you to use an existing Redis servic
 
 === "Customizing RedisPersistenceLayer to suit your data structure"
 
-    ```python hl_lines="14-20"
+    ```python hl_lines="9-16"
     --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
     ```
 
@@ -639,14 +639,17 @@ After completing the VPC setup, you can use the templates provided below to set 
 
 You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
 
-=== "Use established Redis Client"
-    ```python hl_lines="4 9-11 14 19 33"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
-    ```
+???+ info
+    We enforce security best practices by using SSL connections in the `RedisCachePersistenceLayer`; to disable it, set `ssl=False`
 
 === "Use Persistence Layer with Redis config variables"
     ```python hl_lines="7-9 12 26"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
+    ```
+
+=== "Use established Redis Client"
+    ```python hl_lines="4 9-11 14 22 36"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
 === "Sample event"

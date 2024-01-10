@@ -1,5 +1,3 @@
-from redis import Redis
-
 from aws_lambda_powertools.utilities.idempotency import (
     idempotent,
 )
@@ -8,14 +6,9 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-redis_client = Redis(
+persistence_layer = RedisCachePersistenceLayer(
     host="localhost",
     port=6379,
-    decode_responses=True,
-)
-
-persistence_layer = RedisCachePersistenceLayer(
-    client=redis_client,
     in_progress_expiry_attr="in_progress_expiration",
     status_attr="status",
     data_attr="data",
