@@ -21,6 +21,11 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS
 
 
+@pytest.fixture
+def default_lambda_path():
+    return "/var/task"
+
+
 def test_resolve_env_var_choice_explicit_wins_over_env_var():
     assert resolve_truthy_env_var_choice(env="true", choice=False) is False
     assert resolve_env_var_choice(env="something", choice=False) is False
@@ -149,11 +154,11 @@ def test_abs_lambda_path_empty():
     assert abs_lambda_path() == f"{Path.cwd()}"
 
 
-def test_abs_lambda_path_empty_envvar():
+def test_abs_lambda_path_empty_envvar(default_lambda_path):
     # Given Env is set
-    os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
+    os.environ["LAMBDA_TASK_ROOT"] = default_lambda_path
     # Then path = Env/
-    assert abs_lambda_path() == "/var/task"
+    assert abs_lambda_path() == default_lambda_path
 
 
 def test_abs_lambda_path_w_filename():
@@ -164,9 +169,9 @@ def test_abs_lambda_path_w_filename():
     assert abs_lambda_path(relatvie_path) == str(Path(Path.cwd(), relatvie_path))
 
 
-def test_abs_lambda_path_w_filename_envvar():
+def test_abs_lambda_path_w_filename_envvar(default_lambda_path):
     # Given Env is set and relative_path provided
     relative_path = "cert/pub.cert"
-    os.environ["LAMBDA_TASK_ROOT"] = "/var/task"
+    os.environ["LAMBDA_TASK_ROOT"] = default_lambda_path
     # Then path = env + relative_path
     assert abs_lambda_path(relative_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relative_path))

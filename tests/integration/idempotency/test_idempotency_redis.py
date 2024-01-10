@@ -161,7 +161,7 @@ def test_idempotent_lambda_redis_delete(
 
         # first run is just to populate function infos for deletion.
         # delete_record won't work if the function was not run yet. bug maybe?
-        handler_result = lambda_handler(mock_event, lambda_context)
+        lambda_handler(mock_event, lambda_context)
         # delete what's might be dirty data
         persistence_layer.delete_record(mock_event, IdempotencyItemNotFoundError)
         # run second time to ensure clean result
