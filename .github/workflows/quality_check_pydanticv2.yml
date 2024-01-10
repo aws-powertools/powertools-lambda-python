@@ -58,7 +58,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
       - name: Replacing Pydantic v1 with v2 > 2.0.3
-        run: poetry add "pydantic=^2.0.3"
+        run: |
+          rm -rf poetry.lock
+          poetry add "pydantic=^2.0.3"
       - name: Install dependencies
         run: make dev
       - name: Test with pytest
