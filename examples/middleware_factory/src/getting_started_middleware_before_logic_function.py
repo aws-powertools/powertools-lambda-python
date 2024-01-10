@@ -24,7 +24,11 @@ class PaymentError(Exception):
 
 
 @lambda_handler_decorator
-def middleware_before(handler, event, context) -> Callable:
+def middleware_before(
+    handler: Callable[[dict, LambdaContext], dict],
+    event: dict,
+    context: LambdaContext,
+) -> dict:
     # extract payload from a EventBridge event
     detail: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
 
@@ -38,7 +42,7 @@ def middleware_before(handler, event, context) -> Callable:
 
 
 @middleware_before
-def lambda_handler(event, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     try:
         payment_payload: dict = extract_data_from_envelope(data=event, envelope=envelopes.EVENTBRIDGE)
         return {

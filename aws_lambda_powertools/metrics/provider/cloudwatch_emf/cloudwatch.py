@@ -7,7 +7,7 @@ import numbers
 import os
 import warnings
 from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List
 
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
@@ -22,6 +22,7 @@ from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWat
 from aws_lambda_powertools.metrics.types import MetricNameUnitResolution
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice
+from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -334,7 +335,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
     def log_metrics(
         self,
-        lambda_handler: Callable[[Dict, Any], Any] | Optional[Callable[[Dict, Any, Optional[Dict]], Any]] = None,
+        lambda_handler: AnyCallableT | None = None,
         capture_cold_start_metric: bool = False,
         raise_on_empty_metrics: bool = False,
         **kwargs,

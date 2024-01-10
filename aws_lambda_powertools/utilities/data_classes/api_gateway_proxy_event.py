@@ -33,6 +33,25 @@ class APIGatewayEventAuthorizer(DictWrapper):
         """The authorizer latency in ms."""
         return self.get("integrationLatency")
 
+    def get_context(self) -> Dict[str, Any]:
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+        Example
+        --------
+
+        ```python
+        ctx: dict = request_context.authorizer.get_context()
+
+        tenant_id = ctx.get("tenant_id")
+        ```
+
+        Returns:
+        --------
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
+        """
+        return self._data
+
 
 class APIGatewayEventRequestContext(BaseRequestContext):
     @property
@@ -183,6 +202,25 @@ class RequestContextV2Authorizer(DictWrapper):
     def get_lambda(self) -> Optional[Dict[str, Any]]:
         """Lambda authorization context details"""
         return self.get("lambda")
+
+    def get_context(self) -> Dict[str, Any]:
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+        Example
+        --------
+
+        ```python
+        ctx: dict = request_context.authorizer.get_context()
+
+        tenant_id = ctx.get("tenant_id")
+        ```
+
+        Returns:
+        --------
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
+        """
+        return self.get("lambda", {}) or {}
 
     @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:

@@ -83,3 +83,21 @@ class IdempotencyNoSerializationModelError(BaseError):
     """
     No model was supplied to the serializer
     """
+
+
+class IdempotencyPersistenceConfigError(BaseError):
+    """
+    The idempotency persistency configuration was unsupported
+    """
+
+
+class IdempotencyPersistenceConnectionError(BaseError):
+    """
+    Idempotency persistence connection error
+    """
+
+
+class IdempotencyPersistenceConsistencyError(BaseError):
+    """
+    Idempotency persistency consistency error, needs to be removed
+    """

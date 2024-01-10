@@ -40,6 +40,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
+from aws_lambda_powertools.event_handler.util import _FrozenDict
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -79,6 +80,7 @@ if TYPE_CHECKING:
         License,
         OpenAPI,
         Server,
+        Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
@@ -558,7 +560,7 @@ class Route:
 
         # Ensure tags is added to the operation
         if self.tags:
-            operation["tags"] = [{"name": tag for tag in self.tags}]
+            operation["tags"] = self.tags
 
         # Ensure summary is added to the operation
         operation["summary"] = self._openapi_operation_summary()
@@ -614,6 +616,9 @@ class Route:
         request_body_oai: Dict[str, Any] = {}
         if required:
             request_body_oai["required"] = required
+
+        if field_info.description:
+            request_body_oai["description"] = field_info.description
 
         # Generate the request body media type
         request_media_content: Dict[str, Any] = {"schema": body_schema}
@@ -1359,7 +1364,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1374,13 +1379,13 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag | str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1402,7 +1407,7 @@ class ApiGatewayResolver(BaseRouter):
             get_compat_model_name_map,
             get_definitions,
         )
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1467,7 +1472,7 @@ class ApiGatewayResolver(BaseRouter):
         if components:
             output["components"] = components
         if tags:
-            output["tags"] = [{"name": tag} for tag in tags]
+            output["tags"] = [Tag(name=tag) if isinstance(tag, str) else tag for tag in tags]
 
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
@@ -1481,7 +1486,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1496,13 +1501,13 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag, str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1547,7 +1552,7 @@ class ApiGatewayResolver(BaseRouter):
         openapi_version: str = DEFAULT_OPENAPI_VERSION,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[List[Union["Tag", str]]] = None,
         servers: Optional[List["Server"]] = None,
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
@@ -1566,13 +1571,13 @@ class ApiGatewayResolver(BaseRouter):
             The title of the application.
         version: str
             The version of the OpenAPI document (which is distinct from the OpenAPI Specification version or the API
-        openapi_version: str, default = "3.1.0"
+        openapi_version: str, default = "3.0.0"
             The version of the OpenAPI Specification (which the document uses).
         summary: str, optional
             A short summary of what the application does.
         description: str, optional
             A verbose explanation of the application behavior.
-        tags: List[str], optional
+        tags: List[Tag, str], optional
             A list of tags used by the specification with additional metadata.
         servers: List[Server], optional
             An array of Server Objects, which provide connectivity information to a target server.
@@ -1587,27 +1592,8 @@ class ApiGatewayResolver(BaseRouter):
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
         """
+        from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
-
-        if not swagger_base_url:
-
-            @self.get("/swagger.js", include_in_schema=False)
-            def swagger_js():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/javascript",
-                    body=body,
-                )
-
-            @self.get("/swagger.css", include_in_schema=False)
-            def swagger_css():
-                body = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
-                return Response(
-                    status_code=200,
-                    content_type="text/css",
-                    body=body,
-                )
 
         @self.get(path, middlewares=middlewares, include_in_schema=False)
         def swagger_handler():
@@ -1617,12 +1603,15 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js = f"{swagger_base_url}/swagger-ui-bundle.min.js"
                 swagger_css = f"{swagger_base_url}/swagger-ui.min.css"
             else:
-                swagger_js = f"{base_path}/swagger.js"
-                swagger_css = f"{base_path}/swagger.css"
+                # We now inject CSS and JS into the SwaggerUI file
+                swagger_js = Path.open(
+                    Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui-bundle.min.js",
+                ).read()
+                swagger_css = Path.open(Path(__file__).parent / "openapi" / "swagger_ui" / "swagger-ui.min.css").read()
 
             openapi_servers = servers or [Server(url=(base_path or "/"))]
 
-            spec = self.get_openapi_json_schema(
+            spec = self.get_openapi_schema(
                 title=title,
                 version=version,
                 openapi_version=openapi_version,
@@ -1635,7 +1624,28 @@ class ApiGatewayResolver(BaseRouter):
                 license_info=license_info,
             )
 
-            body = generate_swagger_html(spec, swagger_js, swagger_css)
+            # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
+            # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not
+            # inadvertently close the script tag, and the JSON remains a valid string within the JavaScript code.
+            escaped_spec = model_json(
+                spec,
+                by_alias=True,
+                exclude_none=True,
+                indent=2,
+            ).replace("</", "<\\/")
+
+            # Check for query parameters; if "format" is specified as "json",
+            # respond with the JSON used in the OpenAPI spec
+            # Example: https://www.example.com/swagger?format=json
+            query_params = self.current_event.query_string_parameters or {}
+            if query_params.get("format") == "json":
+                return Response(
+                    status_code=200,
+                    content_type="application/json",
+                    body=escaped_spec,
+                )
+
+            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css, swagger_base_url)
 
             return Response(
                 status_code=200,
@@ -2130,8 +2140,10 @@ class Router(BaseRouter):
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
-            # Convert methods to tuple. It needs to be hashable as its part of the self._routes dict key
+            # All dict keys needs to be hashable. So we'll need to do some conversions:
             methods = (method,) if isinstance(method, str) else tuple(method)
+            frozen_responses = _FrozenDict(responses) if responses else None
+            frozen_tags = frozenset(tags) if tags else None
 
             route_key = (
                 rule,
@@ -2141,9 +2153,9 @@ class Router(BaseRouter):
                 cache_control,
                 summary,
                 description,
-                responses,
+                frozen_responses,
                 response_description,
-                tags,
+                frozen_tags,
                 operation_id,
                 include_in_schema,
             )
