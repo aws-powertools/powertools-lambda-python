@@ -11,8 +11,6 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
 
 redis_values: Any = parameters.get_secret("redis_info", transform="json")  # (1)!
 
-default_lambda_path = abs_lambda_path()  # (2)!
-
 
 redis_client = Redis(
     host=redis_values.get("REDIS_HOST"),
@@ -22,9 +20,9 @@ redis_client = Redis(
     socket_timeout=10.0,
     ssl=True,
     retry_on_timeout=True,
-    ssl_certfile=f"{default_lambda_path}/redis_user.crt",  # (3)!
-    ssl_keyfile=f"{default_lambda_path}/redis_user_private.key",  # (4)!
-    ssl_ca_certs=f"{default_lambda_path}/redis_ca.pem",  # (5)!
+    ssl_certfile=f"{abs_lambda_path()}/certs/redis_user.crt",  # (2)!
+    ssl_keyfile=f"{abs_lambda_path()}/certs/redis_user_private.key",  # (3)!
+    ssl_ca_certs=f"{abs_lambda_path()}/certs/redis_ca.pem",  # (4)!
 )
 
 persistence_layer = RedisCachePersistenceLayer(client=redis_client)

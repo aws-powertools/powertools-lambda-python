@@ -576,6 +576,30 @@ sequenceDiagram
 <i>Optional idempotency key</i>
 </center>
 
+#### Race condition with Redis
+
+<center>
+```mermaid
+graph TD;
+    A(Existing orphan record in redis)-->A1;
+    A1[Two Lambda invoke at same time]-->B1[Lambda handler1];
+    B1-->B2[Fetch from Redis];
+    B2-->B3[Handler1 got orphan record];
+    B3-->B4[Handler1 acquired lock];
+    B4-->B5[Handler1 overwrite orphan record]
+    B5-->B6[Handler1 continue to execution];
+    A1-->C1[Lambda handler2];
+    C1-->C2[Fetch from Redis];
+    C2-->C3[Handler2 got orphan record];
+    C3-->C4[Handler2 failed to acquire lock];
+    C4-->C5[Handler2 wait and fetch from Redis];
+    C5-->C6[Handler2 return without executing];
+    B6-->D(Lambda handler executed only once);
+    C6-->D;
+```
+<i>Race condition with Redis</i>
+</center>
+
 ## Redis as persistent storage layer provider
 
 ### Redis resources
@@ -616,12 +640,12 @@ After completing the VPC setup, you can use the templates provided below to set 
 You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
 
 === "Use established Redis Client"
-    ```python hl_lines="4 7 12-15 17 31"
+    ```python hl_lines="4 9-11 14 19 33"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
 === "Use Persistence Layer with Redis config variables"
-    ```python hl_lines="4-8 10 24"
+    ```python hl_lines="7-9 12 26"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
@@ -636,7 +660,7 @@ You can quickly get started by initializing the `RedisCachePersistenceLayer` cla
 For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.
 
 === "Advanced configuration using AWS Secrets"
-    ```python hl_lines="8 10 20"
+    ```python hl_lines="7-9 11 13 23"
     --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
     ```
 
@@ -648,7 +672,7 @@ For advanced configurations, such as setting up SSL certificates or customizing 
     }
 
 === "Advanced configuration with local certificates"
-    ```python hl_lines="11 22-24"
+    ```python hl_lines="12 23-25"
     --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
     ```
 
@@ -658,10 +682,9 @@ For advanced configurations, such as setting up SSL certificates or customizing 
     "REDIS_PORT": "6379",
     "REDIS_PASSWORD": "redis-secret"
     }
-    2. Return the absolute path from the given relative path to lambda handler
-    3. redis_user.crt file stored in the root directory of your Lambda function
-    4. redis_user_private.key file stored in the root directory of your Lambda function
-    5. redis_ca.pem file stored in the root directory of your Lambda function
+    2. redis_user.crt file stored in the "certs" directory of your Lambda function
+    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
+    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
 
 ## Advanced
 
