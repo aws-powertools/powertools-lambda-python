@@ -44,6 +44,7 @@ aws-xray-sdk = { version = "^2.8.0", optional = true }
 fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.20.32", optional = true }
+redis = {version = ">=4.4,<6.0", optional = true}
 typing-extensions = "^4.6.2"
 datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
@@ -95,6 +96,7 @@ datadog-lambda = "^5.85.0"
 parser = ["pydantic"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
+redis = ["redis"]
 all = ["pydantic", "aws-xray-sdk", "fastjsonschema"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
@@ -110,6 +112,8 @@ sentry-sdk = "^1.22.2"
 ruff = ">=0.0.272,<0.1.12"
 retry2 = "^0.9.5"
 pytest-socket = "^0.6.0"
+types-redis = "^4.6.0.7"
+testcontainers = {extras = ["redis"], version = "^3.7.1"}
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]
