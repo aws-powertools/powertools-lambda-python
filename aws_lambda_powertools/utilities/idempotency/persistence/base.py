@@ -317,7 +317,6 @@ class BasePersistenceLayer(ABC):
             now = datetime.datetime.now()
             period = datetime.timedelta(milliseconds=remaining_time_in_millis)
             timestamp = (now + period).timestamp()
-
             data_record.in_progress_expiry_timestamp = int(timestamp * 1000)
         else:
             warnings.warn(

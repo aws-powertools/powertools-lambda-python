@@ -67,6 +67,8 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             DynamoDB attribute name for status, by default "status"
         data_attr: str, optional
             DynamoDB attribute name for response data, by default "data"
+        validation_key_attr: str, optional
+            DynamoDB attribute name for hashed representation of the parts of the event used for validation
         boto_config: botocore.config.Config, optional
             Botocore configuration to pass during client initialization
         boto3_session : boto3.Session, optional
