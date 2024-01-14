@@ -33,18 +33,16 @@ class IdempotencyItemAlreadyExistsError(BaseError):
     """
 
     def __init__(self, *args: Optional[Union[str, Exception]], old_data_record: Optional[DataRecord] = None):
-        self.message = str(args[0]) if args else ""
-        self.details = "".join(str(arg) for arg in args[1:]) if args[1:] else None
         self.old_data_record = old_data_record
+        super().__init__(*args)
 
     def __str__(self):
         """
         Return all arguments formatted or original message
         """
         old_data_record = f" from [{(str(self.old_data_record))}]" if self.old_data_record else ""
-        details = f" - ({self.details})" if self.details else ""
-
-        return f"{self.message}{details}{old_data_record}"
+        message = super().__str__()
+        return f"{message}{old_data_record}"
 
 
 class IdempotencyItemNotFoundError(BaseError):

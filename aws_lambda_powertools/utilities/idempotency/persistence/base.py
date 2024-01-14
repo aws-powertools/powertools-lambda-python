@@ -8,7 +8,7 @@ import logging
 import os
 import warnings
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 
 import jmespath
 
@@ -160,16 +160,20 @@ class BasePersistenceLayer(ABC):
         hashed_data = self.hash_function(json.dumps(data, cls=Encoder, sort_keys=True).encode())
         return hashed_data.hexdigest()
 
-    def _validate_payload(self, data: Dict[str, Any], data_record: DataRecord) -> None:
+    def _validate_payload(
+        self,
+        data_payload: Union[Dict[str, Any], DataRecord],
+        stored_data_record: DataRecord,
+    ) -> None:
         """
         Validate that the hashed payload matches data provided and stored data record
 
         Parameters
         ----------
-        data: Dict[str, Any]
+        data_payload: Union[Dict[str, Any], DataRecord]
             Payload
-        data_record: DataRecord
-            DataRecord instance
+        stored_data_record: DataRecord
+            DataRecord fetched from Dynamo or cache
 
         Raises
         ----------
@@ -178,30 +182,13 @@ class BasePersistenceLayer(ABC):
 
         """
         if self.payload_validation_enabled:
-            data_hash = self._get_hashed_payload(data=data)
-            if data_record.payload_hash != data_hash:
+            if isinstance(data_payload, DataRecord):
+                data_hash = data_payload.payload_hash
+            else:
+                data_hash = self._get_hashed_payload(data=data_payload)
+
+            if stored_data_record.payload_hash != data_hash:
                 raise IdempotencyValidationError("Payload does not match stored record for this event key")
-
-    def _validate_hashed_payload(self, old_data_record: DataRecord, data_record: DataRecord) -> None:
-        """
-        Validate that the hashed data provided matches the payload_hash stored data record
-
-        Parameters
-        ----------
-        old_data_record: DataRecord
-            DataRecord instance fetched from Dynamo
-        data_record: DataRecord
-            DataRecord instance which failed insert into Dynamo
-
-        Raises
-        ----------
-        IdempotencyValidationError
-            Payload doesn't match the stored record for the given idempotency key
-
-        """
-        if self.payload_validation_enabled:
-            if old_data_record.payload_hash != data_record.payload_hash:
-                raise IdempotencyValidationError("Hashed payload does not match stored record for this event key")
 
     def _get_expiry_timestamp(self) -> int:
         """
@@ -391,14 +378,14 @@ class BasePersistenceLayer(ABC):
         cached_record = self._retrieve_from_cache(idempotency_key=idempotency_key)
         if cached_record:
             logger.debug(f"Idempotency record found in cache with idempotency key: {idempotency_key}")
-            self._validate_payload(data=data, data_record=cached_record)
+            self._validate_payload(data_payload=data, stored_data_record=cached_record)
             return cached_record
 
         record = self._get_record(idempotency_key=idempotency_key)
 
         self._save_to_cache(data_record=record)
 
-        self._validate_payload(data=data, data_record=record)
+        self._validate_payload(data_payload=data, stored_data_record=record)
         return record
 
     @abstractmethod

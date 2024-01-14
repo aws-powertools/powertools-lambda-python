@@ -257,9 +257,9 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     self._save_to_cache(data_record=old_data_record)
 
                     try:
-                        self._validate_hashed_payload(old_data_record=old_data_record, data_record=data_record)
-                    except IdempotencyValidationError as ive:
-                        raise ive from exc
+                        self._validate_payload(data_payload=data_record, stored_data_record=old_data_record)
+                    except IdempotencyValidationError as idempotency_validation_error:
+                        raise idempotency_validation_error from exc
 
                     raise IdempotencyItemAlreadyExistsError(old_data_record=old_data_record) from exc
 
@@ -271,17 +271,23 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             raise
 
     @staticmethod
-    def boto3_supports_condition_check_failure(boto3_version: str):
-        version = boto3_version.split(".")
-        # Only supported in boto3 1.26.164 and above
-        if len(version) >= 3 and int(version[0]) == 1 and int(version[1]) == 26 and int(version[2]) >= 164:
-            return True
-        if len(version) >= 2 and int(version[0]) == 1 and int(version[1]) > 26:
-            return True
-        if int(version[0]) > 1:
-            return True
+    def boto3_supports_condition_check_failure(boto3_version: str) -> bool:
+        """
+        Check if the installed boto3 version supports condition check failure.
 
-        return False
+        Params
+        ------
+        boto3_version: str
+            The boto3 version
+
+        Returns
+        -------
+        bool
+            True if the boto3 version supports condition check failure, False otherwise.
+        """
+        # Only supported in boto3 1.26.164 and above
+        major, minor, *patch = map(int, boto3_version.split("."))
+        return (major, minor, *patch) >= (1, 26, 164)
 
     def _update_record(self, data_record: DataRecord):
         logger.debug(f"Updating record for idempotency key: {data_record.idempotency_key}")
