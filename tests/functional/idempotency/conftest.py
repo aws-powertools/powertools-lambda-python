@@ -1,5 +1,4 @@
 import datetime
-import hashlib
 import json
 from decimal import Decimal
 from unittest import mock
@@ -10,7 +9,6 @@ from botocore import stub
 from botocore.config import Config
 from jmespath import functions
 
-from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.idempotency import DynamoDBPersistenceLayer
 from aws_lambda_powertools.utilities.idempotency.idempotency import IdempotencyConfig
 from aws_lambda_powertools.utilities.jmespath_utils import extract_data_from_envelope
@@ -210,9 +208,7 @@ def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
 
 @pytest.fixture
 def hashed_validation_key(lambda_apigw_event):
-    return hashlib.md5(
-        json.dumps(lambda_apigw_event["requestContext"], cls=Encoder, sort_keys=True).encode(),
-    ).hexdigest()
+    return hash_idempotency_key(lambda_apigw_event["requestContext"])
 
 
 @pytest.fixture
