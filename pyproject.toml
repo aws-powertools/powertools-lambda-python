@@ -43,7 +43,7 @@ python = "^3.7.4"
 aws-xray-sdk = { version = "^2.8.0", optional = true }
 fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
-boto3 = { version = "^1.20.32", optional = true }
+boto3 = { version = "^1.26.164", optional = true }
 redis = {version = ">=4.4,<6.0", optional = true}
 typing-extensions = "^4.6.2"
 datadog-lambda = { version = ">=4.77,<6.0", optional = true }
@@ -53,7 +53,7 @@ aws-encryption-sdk = { version = "^3.1.1", optional = true }
 coverage = {extras = ["toml"], version = "^7.2"}
 pytest = "^7.4.4"
 black = "^23.3"
-boto3 = "^1.18"
+boto3 = "^1.26.164"
 isort = "^5.11.5"
 pytest-cov = "^4.1.0"
 pytest-mock = "^3.11.1"
