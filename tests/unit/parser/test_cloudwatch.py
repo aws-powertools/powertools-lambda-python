@@ -63,6 +63,37 @@ def test_handle_cloudwatch_trigger_event_no_envelope():
     assert parsed_event.awslogs.decoded_data.logStream == raw_event_decoded["logStream"]
     assert parsed_event.awslogs.decoded_data.subscriptionFilters == raw_event_decoded["subscriptionFilters"]
     assert parsed_event.awslogs.decoded_data.messageType == raw_event_decoded["messageType"]
+    assert parsed_event.awslogs.decoded_data.policyLevel is None
+
+    assert len(parsed_event.awslogs.decoded_data.logEvents) == 2
+
+    log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[0]
+    raw_log_record = raw_event_decoded["logEvents"][0]
+    assert log_record.id == raw_log_record["id"]
+    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
+    assert convert_time == raw_log_record["timestamp"]
+    assert log_record.message == raw_log_record["message"]
+
+    log_record: CloudWatchLogsLogEvent = parsed_event.awslogs.decoded_data.logEvents[1]
+    raw_log_record = raw_event_decoded["logEvents"][1]
+    assert log_record.id == raw_log_record["id"]
+    convert_time = int(round(log_record.timestamp.timestamp() * 1000))
+    assert convert_time == raw_log_record["timestamp"]
+    assert log_record.message == raw_log_record["message"]
+
+
+def test_handle_cloudwatch_trigger_event_no_envelope_with_policylevel():
+    raw_event = load_event("cloudWatchLogEventWithPolicyLevel.json")
+    parsed_event: CloudWatchLogsModel = CloudWatchLogsModel(**raw_event)
+
+    raw_event_decoded = decode_cloudwatch_raw_event(raw_event["awslogs"]["data"])
+
+    assert parsed_event.awslogs.decoded_data.owner == raw_event_decoded["owner"]
+    assert parsed_event.awslogs.decoded_data.logGroup == raw_event_decoded["logGroup"]
+    assert parsed_event.awslogs.decoded_data.logStream == raw_event_decoded["logStream"]
+    assert parsed_event.awslogs.decoded_data.subscriptionFilters == raw_event_decoded["subscriptionFilters"]
+    assert parsed_event.awslogs.decoded_data.messageType == raw_event_decoded["messageType"]
+    assert parsed_event.awslogs.decoded_data.policyLevel == "ACCOUNT_LEVEL_POLICY"
 
     assert len(parsed_event.awslogs.decoded_data.logEvents) == 2
 
