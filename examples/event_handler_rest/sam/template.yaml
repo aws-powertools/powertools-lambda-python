@@ -67,13 +67,3 @@ Resources:
         #     Properties:
         #         Path: /swagger
         #         Method: GET
-        # SwaggerUICSS:
-        #     Type: Api
-        #     Properties:
-        #         Path: /swagger.css
-        #         Method: GET
-        # SwaggerUIJS:
-        #     Type: Api
-        #     Properties:
-        #         Path: /swagger.js
-        #         Method: GET
