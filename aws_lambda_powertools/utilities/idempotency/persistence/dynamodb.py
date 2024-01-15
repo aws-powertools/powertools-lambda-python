@@ -222,6 +222,15 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
             condition_expression = (
                 f"{idempotency_key_not_exist} OR {idempotency_expiry_expired} OR ({inprogress_expiry_expired})"
             )
+
+            # Use DynamoDB's ReturnValuesOnConditionCheckFailure to optimize put and get operations and optimize costs.
+            # This feature is supported in boto3 versions 1.26.164 and later.
+            support_return_on_check_failure = (
+                {"ReturnValuesOnConditionCheckFailure": "ALL_OLD"}
+                if self.boto3_supports_condition_check_failure(boto3.__version__)
+                else {}
+            )
+
             self.client.put_item(
                 TableName=self.table_name,
                 Item=item,
@@ -237,11 +246,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     ":now_in_millis": {"N": str(int(now.timestamp() * 1000))},
                     ":inprogress": {"S": STATUS_CONSTANTS["INPROGRESS"]},
                 },
-                **(
-                    {"ReturnValuesOnConditionCheckFailure": "ALL_OLD"}  # type: ignore
-                    if self.boto3_supports_condition_check_failure(boto3.__version__)
-                    else {}
-                ),
+                **support_return_on_check_failure,  # type: ignore
             )
         except ClientError as exc:
             error_code = exc.response.get("Error", {}).get("Code")
