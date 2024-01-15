@@ -123,13 +123,14 @@ class IdempotencyHandler:
         except (IdempotencyKeyError, IdempotencyValidationError):
             raise
         except IdempotencyItemAlreadyExistsError as exc:
-            # We now know the item exists
-            # Attempt to retrieve the record from the exception where ReturnValuesOnConditionCheckFailure is supported
-            record = exc.old_data_record
-            if record is None:
-                # Perform a GET on the record
-                record = self._get_idempotency_record()
-            if record is not None:
+            # Attempt to retrieve the existing record, either from the exception ReturnValuesOnConditionCheckFailure
+            # or perform a GET operation if the information is not available.
+            # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
+            # way of retrieving the existing record after a failed conditional write operation.
+            record = exc.old_data_record or self._get_idempotency_record()
+
+            # If a record is found, handle it for status
+            if record:
                 return self._handle_for_status(record)
         except Exception as exc:
             raise IdempotencyPersistenceLayerError(
