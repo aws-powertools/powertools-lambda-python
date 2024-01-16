@@ -1,3 +1,4 @@
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 from urllib.parse import unquote_plus
@@ -5,6 +6,135 @@ from urllib.parse import unquote_plus
 from typing_extensions import Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+
+# list of valid result code. Used both in S3BatchOperationResponse and S3BatchOperationResponseRecord
+VALID_RESULT_CODE_TYPES: Tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
+
+
+@dataclass(repr=False, order=False)
+class S3BatchOperationResponseRecord:
+    task_id: str
+    result_code: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
+    result_string: Optional[str] = None
+
+    def asdict(self) -> Dict[str, Any]:
+        if self.result_code not in VALID_RESULT_CODE_TYPES:
+            warnings.warn(
+                stacklevel=2,
+                message=f"The resultCode {self.result_code} is not valid. "
+                "Choose from 'Ok', 'Dropped' or 'ProcessingFailed '",
+            )
+
+        return {
+            "taskId": self.task_id,
+            "resultCode": self.result_code,
+            "resultString": self.result_string,
+        }
+
+
+@dataclass(repr=False, order=False)
+class S3BatchOperationResponse:
+    """S3 Batch Operations response object
+
+    Documentation:
+    --------------
+    - https://docs.aws.amazon.com/lambda/latest/dg/services-s3-batch.html
+    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html#batch-ops-invoke-lambda-custom-functions
+    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_control_LambdaInvokeOperation.html#AmazonS3-Type-control_LambdaInvokeOperation-InvocationSchemaVersion
+
+    Parameters
+    ----------
+    invocation_schema_version : str
+        Specifies the schema version for the payload that Batch Operations sends when invoking
+        an AWS Lambda function., either '1.0' or '2.0'. This must be copied from the event.
+
+    invocation_id : str
+        The identifier of the invocation request. This must be copied from the event.
+
+    treat_missing_keys_as : Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
+        undocumented parameter, defaults to "PermanentFailure"
+
+    results : List[S3BatchOperationResult]
+        results of each S3 Batch Operations task,
+        optional parameter at start. can be added later using `add_result` function.
+
+    Examples
+    --------
+
+    **S3 Batch Operations**
+
+    ```python
+        import boto3
+
+        from botocore.exceptions import ClientError
+
+        from aws_lambda_powertools.utilities.data_classes import (
+            S3BatchOperationEvent,
+            S3BatchOperationResponse,
+            event_source
+        )
+        from aws_lambda_powertools.utilities.typing import LambdaContext
+
+
+        @event_source(data_class=S3BatchOperationEvent)
+        def lambda_handler(event: S3BatchOperationEvent, context: LambdaContext):
+            response = S3BatchOperationResponse(event.invocation_schema_version, event.invocation_id, "PermanentFailure")
+
+            result = None
+            task = event.task
+            src_key: str = task.s3_key
+            src_bucket: str = task.s3_bucket
+
+            s3 = boto3.client("s3", region_name='us-east-1')
+
+            try:
+                dest_bucket, dest_key = do_some_work(s3, src_bucket, src_key)
+                result = task.build_task_batch_response("Succeeded", f"s3://{dest_bucket}/{dest_key}")
+            except ClientError as e:
+                error_code = e.response['Error']['Code']
+                error_message = e.response['Error']['Message']
+                if error_code == 'RequestTimeout':
+                    result = task.build_task_batch_response("TemporaryFailure", "Retry request to Amazon S3 due to timeout.")
+                else:
+                    result = task.build_task_batch_response("PermanentFailure", f"{error_code}: {error_message}")
+            except Exception as e:
+                result = task.build_task_batch_response("PermanentFailure", str(e))
+            finally:
+                response.add_result(result)
+
+            return response.asdict()
+
+    ```
+    """  # noqa: E501
+
+    invocation_schema_version: str
+    invocation_id: str
+    treat_missing_keys_as: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "Succeeded"
+    results: List[S3BatchOperationResponseRecord] = field(default_factory=list)
+
+    def __post_init__(self):
+        if self.treat_missing_keys_as not in VALID_RESULT_CODE_TYPES:
+            warnings.warn(
+                stacklevel=2,
+                message=f"The value {self.treat_missing_keys_as} is not valid for treat_missing_keys_as, "
+                "Choose from 'Succeeded', 'TemporaryFailure', 'PermanentFailure'",
+            )
+
+    def add_result(self, result: S3BatchOperationResponseRecord):
+        self.results.append(result)
+
+    def asdict(self) -> Dict:
+        result_count = len(self.results)
+
+        if result_count != 1:
+            raise ValueError(f"Response must have exactly one result, but got {result_count}")
+
+        return {
+            "invocationSchemaVersion": self.invocation_schema_version,
+            "treatMissingKeysAs": self.treat_missing_keys_as,
+            "invocationId": self.invocation_id,
+            "results": [result.asdict() for result in self.results],
+        }
 
 
 class S3BatchOperationJob(DictWrapper):
@@ -50,6 +180,26 @@ class S3BatchOperationTask(DictWrapper):
             return self.s3_bucket_arn.split(":::")[-1]
         return self["s3Bucket"]
 
+    def build_task_batch_response(
+        self,
+        result_code: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "Succeeded",
+        result_string: str = "",
+    ) -> S3BatchOperationResponseRecord:
+        """Create a S3BatchOperationResponseRecord directly using the record_id and given values
+
+        Parameters
+        ----------
+        result_code : Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "Succeeded"
+            task result, supported value: "Succeeded", "TemporaryFailure", "PermanentFailure"
+        result_string : str
+            string to identify in the report
+        """
+        return S3BatchOperationResponseRecord(
+            task_id=self.task_id,
+            result_code=result_code,
+            result_string=result_string,
+        )
+
 
 class S3BatchOperationEvent(DictWrapper):
     """Amazon S3BatchOperation Event
@@ -86,133 +236,3 @@ class S3BatchOperationEvent(DictWrapper):
     def job(self) -> S3BatchOperationJob:
         """Get the s3 batch operation job"""
         return S3BatchOperationJob(self["job"])
-
-
-# list of valid result code. Used both in S3BatchOperationResult and S3BatchOperationResponse
-VALID_RESULT_CODE_TYPES: Tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
-
-
-@dataclass(repr=False, order=False)
-class S3BatchOperationResult:
-    task_id: str
-    result_code: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
-    result_string: Optional[str] = None
-
-    def __post_init__(self):
-        if self.result_code not in VALID_RESULT_CODE_TYPES:
-            raise ValueError(f"Invalid result_code: {self.result_code}")
-
-    def asdict(self) -> Dict[str, Any]:
-        return {
-            "taskId": self.task_id,
-            "resultCode": self.result_code,
-            "resultString": self.result_string,
-        }
-
-    @classmethod
-    def as_succeeded(cls, task: S3BatchOperationTask, result_string: Optional[str] = None) -> "S3BatchOperationResult":
-        """Create a `Succeeded` result for a given task"""
-        return S3BatchOperationResult(task.task_id, "Succeeded", result_string)
-
-    @classmethod
-    def as_permanent_failure(
-        cls,
-        task: S3BatchOperationTask,
-        result_string: Optional[str] = None,
-    ) -> "S3BatchOperationResult":
-        """Create a `PermanentFailure` result for a given task"""
-        return S3BatchOperationResult(task.task_id, "PermanentFailure", result_string)
-
-    @classmethod
-    def as_temporary_failure(
-        cls,
-        task: S3BatchOperationTask,
-        result_string: Optional[str] = None,
-    ) -> "S3BatchOperationResult":
-        """Create a `TemporaryFailure` result for a given task"""
-        return S3BatchOperationResult(task.task_id, "TemporaryFailure", result_string)
-
-
-@dataclass(repr=False, order=False)
-class S3BatchOperationResponse:
-    """S3 Batch Operations response object
-
-    Documentation:
-    --------------
-    - https://docs.aws.amazon.com/lambda/latest/dg/services-s3-batch.html
-    - https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html#batch-ops-invoke-lambda-custom-functions
-    - https://docs.aws.amazon.com/AmazonS3/latest/API/API_control_LambdaInvokeOperation.html#AmazonS3-Type-control_LambdaInvokeOperation-InvocationSchemaVersion
-
-    Parameters
-    ----------
-    invocation_schema_version : str
-        Specifies the schema version for the payload that Batch Operations sends when invoking
-        an AWS Lambda function., either '1.0' or '2.0'. This must be copied from the event.
-
-    invocation_id : str
-        The identifier of the invocation request. This must be copied from the event.
-
-    treat_missing_keys_as : Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
-        undocumented parameter, defaults to "PermanentFailure"
-
-    results : List[S3BatchOperationResult]
-        results of each S3 Batch Operations task,
-        optional parameter at start. can be added later using `add_result` function.
-
-    Examples
-    --------
-
-    **S3 Batch Operations**
-
-    ```python
-    from aws_lambda_powertools.utilities.typing import LambdaContext
-    from aws_lambda_powertools.utilities.data_classes import (
-        S3BatchOperationEvent,
-        S3BatchOperationResponse,
-        S3BatchOperationResult
-    )
-
-    def lambda_handler(event: dict, context: LambdaContext):
-        s3_event = S3BatchOperationEvent(event)
-        response = S3BatchOperationResponse(s3_event.invocation_schema_version, s3_event.invocation_id)
-        result = None
-
-        task = s3_event.task
-        try:
-            do_work(task.s3_bucket, task.s3_key)
-            result = S3BatchOperationResult.as_succeeded(task)
-        except TimeoutError as e:
-            result = S3BatchOperationResult.as_temporary_failure(task, str(e))
-        except Exception as e:
-            result = S3BatchOperationResult.as_permanent_failure(task, str(e))
-        finally:
-            response.add_result(result)
-
-        return response.asdict()
-    ```
-    """
-
-    invocation_schema_version: str
-    invocation_id: str
-    treat_missing_keys_as: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "PermanentFailure"
-    results: List[S3BatchOperationResult] = field(default_factory=list)
-
-    def __post_init__(self):
-        if self.treat_missing_keys_as not in VALID_RESULT_CODE_TYPES:
-            raise ValueError(f"Invalid treat_missing_keys_as: {self.treat_missing_keys_as}")
-
-    def add_result(self, result: S3BatchOperationResult):
-        self.results.append(result)
-
-    def asdict(self) -> Dict:
-        if not self.results:
-            raise ValueError("Response must have one result")
-        if len(self.results) > 1:
-            raise ValueError("Response cannot have more than one result")
-
-        return {
-            "invocationSchemaVersion": self.invocation_schema_version,
-            "treatMissingKeysAs": self.treat_missing_keys_as,
-            "invocationId": self.invocation_id,
-            "results": [result.asdict() for result in self.results],
-        }
