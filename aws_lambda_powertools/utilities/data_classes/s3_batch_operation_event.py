@@ -9,7 +9,8 @@ from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 class S3BatchOperationJob(DictWrapper):
     @property
-    def id(self) -> str:  # noqa: A003
+    def get_id(self) -> str:
+        # Note: this name conflicts with existing python builtins
         return self["id"]
 
     @property
@@ -26,11 +27,8 @@ class S3BatchOperationTask(DictWrapper):
 
     @property
     def s3_key(self) -> str:
-        """Get the object key unquote_plus using strict utf-8 encoding"""
-        # note: AWS documentation example is using unquote but this actually
-        # contradicts what happens in practice. The key is url encoded with %20
-        # in the inventory file but in the event it is sent with +. So use unquote_plus
-        return unquote_plus(self["s3Key"], encoding="utf-8", errors="strict")
+        """Get the object key using unquote_plus"""
+        return unquote_plus(self["s3Key"])
 
     @property
     def s3_version_id(self) -> Optional[str]:
@@ -67,7 +65,7 @@ class S3BatchOperationEvent(DictWrapper):
         return self["invocationId"]
 
     @property
-    def invocation_schema_version(self) -> str:
+    def invocation_schema_version(self) -> Literal["1.0", "2.0"]:
         """ "
         Get the schema version for the payload that Batch Operations sends when invoking an
         AWS Lambda function. Either '1.0' or '2.0'.

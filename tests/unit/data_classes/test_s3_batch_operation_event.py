@@ -18,7 +18,7 @@ def test_s3_batch_operation_schema_v1():
     assert task.s3_key == task_raw["s3Key"]
 
     job = parsed_event.job
-    assert job.id == raw_event["job"]["id"]
+    assert job.get_id == raw_event["job"]["id"]
     assert job.user_arguments is None
 
     assert parsed_event.invocation_schema_version == raw_event["invocationSchemaVersion"]
@@ -41,7 +41,7 @@ def test_s3_batch_operation_schema_v2():
     assert task.s3_key == task_raw["s3Key"]
 
     job = parsed_event.job
-    assert job.id == raw_event["job"]["id"]
+    assert job.get_id == raw_event["job"]["id"]
     assert job.user_arguments == raw_event["job"]["userArguments"]
 
     assert parsed_event.invocation_schema_version == raw_event["invocationSchemaVersion"]
