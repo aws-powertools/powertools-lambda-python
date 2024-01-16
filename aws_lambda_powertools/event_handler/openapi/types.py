@@ -2,6 +2,8 @@ import types
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Set, Type, Union
 
+from aws_lambda_powertools.shared.types import NotRequired, TypedDict
+
 if TYPE_CHECKING:
     from pydantic import BaseModel  # noqa: F401
 
@@ -43,3 +45,16 @@ validation_error_response_definition = {
         },
     },
 }
+
+
+class OpenAPIResponseContentSchema(TypedDict, total=False):
+    schema: Dict
+
+
+class OpenAPIResponseContentModel(TypedDict):
+    model: Any
+
+
+class OpenAPIResponse(TypedDict):
+    description: str
+    content: NotRequired[Dict[str, Union[OpenAPIResponseContentSchema, OpenAPIResponseContentModel]]]

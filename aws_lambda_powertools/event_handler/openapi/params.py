@@ -49,6 +49,7 @@ class Dependant:
         cookie_params: Optional[List[ModelField]] = None,
         body_params: Optional[List[ModelField]] = None,
         return_param: Optional[ModelField] = None,
+        response_extra_models: Optional[List[ModelField]] = None,
         name: Optional[str] = None,
         call: Optional[Callable[..., Any]] = None,
         request_param_name: Optional[str] = None,
@@ -64,6 +65,7 @@ class Dependant:
         self.cookie_params = cookie_params or []
         self.body_params = body_params or []
         self.return_param = return_param or None
+        self.response_extra_models = response_extra_models or []
         self.request_param_name = request_param_name
         self.websocket_param_name = websocket_param_name
         self.http_connection_param_name = http_connection_param_name
