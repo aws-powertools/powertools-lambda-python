@@ -478,7 +478,7 @@ def test_idempotent_lambda_expired_during_request(
 
     stubber.activate()
 
-    submethod_mocked = mocker.patch.object(DynamoDBPersistenceLayer, "boto3_supports_condition_check_failure")
+    submethod_mocked = mocker.patch.object(persistence_store, "boto3_supports_condition_check_failure")
     submethod_mocked.return_value = False
 
     @idempotent(config=idempotency_config, persistence_store=persistence_store)
