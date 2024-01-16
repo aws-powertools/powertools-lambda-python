@@ -6924,8 +6924,8 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </tr>
 <tr>
 <td><code>responses</code></td>
-<td><code>Dict[int, Dict[str, Any]]</code></td>
-<td>A dictionary that maps each HTTP status code to a Response Object as defined by the <a href="https://swagger.io/specification/#response-object">OpenAPI Specification</a>. This allows you to describe expected responses, including default or error messages, and their corresponding schemas for different status codes.</td>
+<td><code>Dict[int, Dict[str, OpenAPIResponse]]</code></td>
+<td>A dictionary that maps each HTTP status code to a Response Object as defined by the <a href="https://swagger.io/specification/#response-object">OpenAPI Specification</a>. This allows you to describe expected responses, including default or error messages, and their corresponding schemas or models for different status codes.</td>
 </tr>
 <tr>
 <td><code>response_description</code></td>
@@ -8906,7 +8906,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2024-01-10
+      2024-01-16
     
   </small>
 </div>
