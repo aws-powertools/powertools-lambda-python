@@ -3,8 +3,7 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional, Tuple
 from urllib.parse import unquote_plus
 
-from typing_extensions import Literal
-
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 # list of valid result code. Used both in S3BatchOperationResponse and S3BatchOperationResponseRecord
