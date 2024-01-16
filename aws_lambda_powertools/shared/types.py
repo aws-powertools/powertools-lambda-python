@@ -1,10 +1,5 @@
 import sys
-from typing import Any, Callable, Dict, List, TypeVar, Union
-
-if sys.version_info >= (3, 8):
-    from typing import Literal, Protocol, TypedDict
-else:
-    from typing_extensions import Literal, Protocol, TypedDict
+from typing import Any, Callable, Dict, List, Literal, Protocol, TypedDict, TypeVar, Union
 
 if sys.version_info >= (3, 9):
     from typing import Annotated

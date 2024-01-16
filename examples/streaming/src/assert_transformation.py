@@ -3,9 +3,9 @@ import io
 import boto3
 from assert_transformation_module import UpperTransform
 from botocore import stub
+from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities.streaming import S3Object
-from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 
 def test_upper_transform():
@@ -24,7 +24,7 @@ def test_s3_object_with_upper_transform():
     s3_stub = stub.Stubber(s3_client)
     s3_stub.add_response(
         "get_object",
-        {"Body": PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))},
+        {"Body": StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))},
     )
     s3_stub.activate()
 

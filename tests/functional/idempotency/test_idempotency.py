@@ -1,6 +1,5 @@
 import copy
 import datetime
-import sys
 import warnings
 from unittest.mock import MagicMock
 
@@ -156,7 +155,6 @@ def test_idempotent_lambda_in_progress(
     stubber.deactivate()
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_in_progress_with_cache(
     idempotency_config: IdempotencyConfig,
@@ -1691,7 +1689,6 @@ def test_invalid_dynamodb_persistence_layer():
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_dataclasses():
     # Scenario _prepare_data should convert a python dataclasses to a dict
     dataclasses = get_dataclasses_lib()
@@ -1725,7 +1722,6 @@ def test_idempotent_function_other(data):
     assert _prepare_data(data) == data
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_dataclass_with_jmespath():
     # GIVEN
     dataclasses = get_dataclasses_lib()
@@ -1751,7 +1747,6 @@ def test_idempotent_function_dataclass_with_jmespath():
     assert result == payment.transaction_id
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_pydantic_with_jmespath():
     # GIVEN
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)

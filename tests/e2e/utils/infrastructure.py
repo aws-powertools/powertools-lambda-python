@@ -251,9 +251,7 @@ class BaseInfrastructure(InfrastructureProvider):
     def _determine_runtime_version(self) -> Runtime:
         """Determine Python runtime version based on the current Python interpreter"""
         version = sys.version_info
-        if version.major == 3 and version.minor == 7:
-            return Runtime.PYTHON_3_7
-        elif version.major == 3 and version.minor == 8:
+        if version.major == 3 and version.minor == 8:
             return Runtime.PYTHON_3_8
         elif version.major == 3 and version.minor == 9:
             return Runtime.PYTHON_3_9
