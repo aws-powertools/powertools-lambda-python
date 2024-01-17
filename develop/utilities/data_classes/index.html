@@ -1180,6 +1180,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#s3-batch-operations" class="md-nav__link">
+    S3 Batch Operations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#s3-object-lambda" class="md-nav__link">
     S3 Object Lambda
   </a>
@@ -1956,6 +1963,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#s3-batch-operations" class="md-nav__link">
+    S3 Batch Operations
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#s3-object-lambda" class="md-nav__link">
     S3 Object Lambda
   </a>
@@ -2237,6 +2251,10 @@ by using the <code>event_source</code> decorator.</p>
 <tr>
 <td><a href="#s3">S3</a></td>
 <td><code>S3Event</code></td>
+</tr>
+<tr>
+<td><a href="#s3-batch-operations">S3 Batch Operations</a></td>
+<td><code>S3BatchOperationEvent</code></td>
 </tr>
 <tr>
 <td><a href="#s3-object-lambda">S3 Object Lambda</a></td>
@@ -4194,9 +4212,91 @@ for more details.</p>
 </div>
 </div>
 </div>
+<h3 id="s3-batch-operations">S3 Batch Operations<a class="headerlink" href="#s3-batch-operations" title="Permanent link">&para;</a></h3>
+<p>This example is based on the AWS S3 Batch Operations documentation <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html" target="_blank">Example Lambda function for S3 Batch Operations</a>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:1"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">app.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">boto3</span>
+<span class="kn">from</span> <span class="nn">botocore.exceptions</span> <span class="kn">import</span> <span class="n">ClientError</span>
+
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes</span> <span class="kn">import</span> <span class="n">S3BatchOperationEvent</span><span class="p">,</span> <span class="n">S3BatchOperationResponse</span><span class="p">,</span> <span class="n">event_source</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+
+<span class="hll"><span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">S3BatchOperationEvent</span><span class="p">)</span>
+</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">S3BatchOperationEvent</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+<span class="hll">    <span class="n">response</span> <span class="o">=</span> <span class="n">S3BatchOperationResponse</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">invocation_schema_version</span><span class="p">,</span> <span class="n">event</span><span class="o">.</span><span class="n">invocation_id</span><span class="p">,</span> <span class="s2">&quot;PermanentFailure&quot;</span><span class="p">)</span>
+</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">task</span>
+    <span class="n">src_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">s3_key</span>
+    <span class="n">src_bucket</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">s3_bucket</span>
+
+    <span class="n">s3</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">client</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">,</span> <span class="n">region_name</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">dest_bucket</span><span class="p">,</span> <span class="n">dest_key</span> <span class="o">=</span> <span class="n">do_some_work</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">src_bucket</span><span class="p">,</span> <span class="n">src_key</span><span class="p">)</span>
+<span class="hll">        <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">build_task_batch_response</span><span class="p">(</span><span class="s2">&quot;Succeeded&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;s3://</span><span class="si">{</span><span class="n">dest_bucket</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">dest_key</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">error_code</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">]</span>
+        <span class="n">error_message</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Message&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">error_code</span> <span class="o">==</span> <span class="s2">&quot;RequestTimeout&quot;</span><span class="p">:</span>
+<span class="hll">            <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">build_task_batch_response</span><span class="p">(</span><span class="s2">&quot;TemporaryFailure&quot;</span><span class="p">,</span> <span class="s2">&quot;Retry request to Amazon S3 due to timeout.&quot;</span><span class="p">)</span>
+</span>        <span class="k">else</span><span class="p">:</span>
+<span class="hll">            <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">build_task_batch_response</span><span class="p">(</span><span class="s2">&quot;PermanentFailure&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">error_code</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span>    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+<span class="hll">        <span class="n">result</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">build_task_batch_response</span><span class="p">(</span><span class="s2">&quot;PermanentFailure&quot;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+</span>    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">add_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+<span class="hll">    <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">asdict</span><span class="p">()</span>
+</span>
+
+<span class="k">def</span> <span class="nf">do_some_work</span><span class="p">(</span><span class="n">s3_client</span><span class="p">,</span> <span class="n">src_bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">src_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="o">...</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="s3-object-lambda">S3 Object Lambda<a class="headerlink" href="#s3-object-lambda" title="Permanent link">&para;</a></h3>
 <p>This example is based on the AWS Blog post <a href="https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/" target="_blank">Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:1"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:1"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4259,7 +4359,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="s3-eventbridge-notification">S3 EventBridge Notification<a class="headerlink" href="#s3-eventbridge-notification" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:1"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:1"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4279,7 +4379,7 @@ for more details.</p>
 </div>
 <h3 id="secrets-manager">Secrets Manager<a class="headerlink" href="#secrets-manager" title="Permanent link">&para;</a></h3>
 <p>AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. <a href="https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html" target="_blank">Click here</a> for more information about rotating AWS Secrets Manager secrets.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:2"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">app.py</label><label for="__tabbed_34_2">Secrets Manager Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:2"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">app.py</label><label for="__tabbed_35_2">Secrets Manager Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4330,7 +4430,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="ses">SES<a class="headerlink" href="#ses" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:1"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4357,7 +4457,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="sns">SNS<a class="headerlink" href="#sns" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4384,7 +4484,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="sqs">SQS<a class="headerlink" href="#sqs" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:1"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4407,7 +4507,7 @@ for more details.</p>
 <h3 id="vpc-lattice-v2">VPC Lattice V2<a class="headerlink" href="#vpc-lattice-v2" title="Permanent link">&para;</a></h3>
 <p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html#vpc-lattice-receiving-events" target="_blank">Payload V2</a>.</p>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:2"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><input id="__tabbed_38_2" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">app.py</label><label for="__tabbed_38_2">Lattice Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:2"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">app.py</label><label for="__tabbed_39_2">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4516,7 +4616,7 @@ for more details.</p>
 <h3 id="vpc-lattice-v1">VPC Lattice V1<a class="headerlink" href="#vpc-lattice-v1" title="Permanent link">&para;</a></h3>
 <p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.</p>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:2"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">app.py</label><label for="__tabbed_39_2">Lattice Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:2"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">app.py</label><label for="__tabbed_40_2">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4599,7 +4699,7 @@ for more details.</p>
 <div class="admonition warning">
 <p class="admonition-title">If we fail to deserialize a field value (e.g., JSON), they will appear as <code>[Cannot be deserialized]</code></p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:3"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><input id="__tabbed_40_3" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">debugging.py</label><label for="__tabbed_40_2">debugging_event.json</label><label for="__tabbed_40_3">debugging_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">debugging.py</label><label for="__tabbed_41_2">debugging_event.json</label><label for="__tabbed_41_3">debugging_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4802,7 +4902,7 @@ for more details.</p>
   <small>
     
       Last update:
-      2023-11-02
+      2024-01-17
     
   </small>
 </div>
