@@ -949,9 +949,9 @@ During the first execution with a payload, Lambda performs a `PutItem` followed 
 
 ![Tracer showcase](../media/idempotency_first_execution.png)
 
-#### Second execution
+#### Subsequent executions
 
-In the second execution with the same payload, Lambda optimistically attempts to save the record to DynamoDB. If the record already exists, DynamoDB returns the item.
+On subsequent executions with the same payload, Lambda optimistically tries to save the record in DynamoDB. If the record already exists, DynamoDB returns the item.
 
 Explore how to handle conditional write errors in high-concurrency scenarios with DynamoDB in this [blog post](https://aws.amazon.com/pt/blogs/database/handle-conditional-write-errors-in-high-concurrency-scenarios-with-amazon-dynamodb/){target="_blank"}.
 
