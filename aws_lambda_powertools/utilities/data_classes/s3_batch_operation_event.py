@@ -51,11 +51,11 @@ class S3BatchOperationResponse:
         The identifier of the invocation request. This must be copied from the event.
 
     treat_missing_keys_as : Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
-        undocumented parameter, defaults to "PermanentFailure"
+        Undocumented parameter, defaults to "Succeeded"
 
     results : List[S3BatchOperationResult]
-        results of each S3 Batch Operations task,
-        optional parameter at start. can be added later using `add_result` function.
+        Results of each S3 Batch Operations task,
+        optional parameter at start. Can be added later using `add_result` function.
 
     Examples
     --------
@@ -77,7 +77,11 @@ class S3BatchOperationResponse:
 
         @event_source(data_class=S3BatchOperationEvent)
         def lambda_handler(event: S3BatchOperationEvent, context: LambdaContext):
-            response = S3BatchOperationResponse(event.invocation_schema_version, event.invocation_id, "PermanentFailure")
+            response = S3BatchOperationResponse(
+                event.invocation_schema_version,
+                event.invocation_id,
+                "PermanentFailure"
+                )
 
             result = None
             task = event.task
@@ -93,7 +97,7 @@ class S3BatchOperationResponse:
                 error_code = e.response['Error']['Code']
                 error_message = e.response['Error']['Message']
                 if error_code == 'RequestTimeout':
-                    result = task.build_task_batch_response("TemporaryFailure", "Retry request to Amazon S3 due to timeout.")
+                    result = task.build_task_batch_response("TemporaryFailure", "Timeout - trying again")
                 else:
                     result = task.build_task_batch_response("PermanentFailure", f"{error_code}: {error_message}")
             except Exception as e:
@@ -102,9 +106,8 @@ class S3BatchOperationResponse:
                 response.add_result(result)
 
             return response.asdict()
-
     ```
-    """  # noqa: E501
+    """
 
     invocation_schema_version: str
     invocation_id: str
@@ -184,7 +187,7 @@ class S3BatchOperationTask(DictWrapper):
         result_code: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "Succeeded",
         result_string: str = "",
     ) -> S3BatchOperationResponseRecord:
-        """Create a S3BatchOperationResponseRecord directly using the record_id and given values
+        """Create a S3BatchOperationResponseRecord directly using the task_id and given values
 
         Parameters
         ----------
@@ -215,7 +218,7 @@ class S3BatchOperationEvent(DictWrapper):
 
     @property
     def invocation_schema_version(self) -> Literal["1.0", "2.0"]:
-        """ "
+        """
         Get the schema version for the payload that Batch Operations sends when invoking an
         AWS Lambda function. Either '1.0' or '2.0'.
         """
@@ -223,6 +226,7 @@ class S3BatchOperationEvent(DictWrapper):
 
     @property
     def tasks(self) -> Iterator[S3BatchOperationTask]:
+        """Get s3 batch operation tasks"""
         for task in self["tasks"]:
             yield S3BatchOperationTask(task)
 
