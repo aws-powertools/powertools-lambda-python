@@ -22,7 +22,7 @@ class S3BatchOperationResponseRecord:
             warnings.warn(
                 stacklevel=2,
                 message=f"The resultCode {self.result_code} is not valid. "
-                "Choose from 'Succeeded', 'TemporaryFailure', 'PermanentFailure'",
+                f"Choose from {', '.join(map(repr, VALID_RESULT_CODES))}.",
             )
 
         return {
@@ -120,7 +120,7 @@ class S3BatchOperationResponse:
             warnings.warn(
                 stacklevel=2,
                 message=f"The value {self.treat_missing_keys_as} is not valid for treat_missing_keys_as, "
-                "Choose from 'Succeeded', 'TemporaryFailure', 'PermanentFailure'",
+                f"Choose from {', '.join(map(repr, VALID_RESULT_CODES))}.",
             )
 
     def add_result(self, result: S3BatchOperationResponseRecord):
