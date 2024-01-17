@@ -191,6 +191,7 @@ Parser comes with the following built-in models:
 | **KinesisFirehoseModel**                    | Lambda Event Source payload for Amazon Kinesis Firehose                               |
 | **KinesisFirehoseSqsModel**                 | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
 | **LambdaFunctionUrlModel**                  | Lambda Event Source payload for Lambda Function URL payload                           |
+| **S3BatchOperationModel**                   | Lambda Event Source payload for Amazon S3 Batch Operation                             |
 | **S3EventNotificationEventBridgeModel**     | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
 | **S3Model**                                 | Lambda Event Source payload for Amazon S3                                             |
 | **S3ObjectLambdaEvent**                     | Lambda Event Source payload for Amazon S3 Object Lambda                               |
