@@ -7,21 +7,22 @@ from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 # list of valid result code. Used both in S3BatchOperationResponse and S3BatchOperationResponseRecord
-VALID_RESULT_CODE_TYPES: Tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
+VALID_RESULT_CODES: Tuple[str, str, str] = ("Succeeded", "TemporaryFailure", "PermanentFailure")
+RESULT_CODE_TYPE = Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
 
 
 @dataclass(repr=False, order=False)
 class S3BatchOperationResponseRecord:
     task_id: str
-    result_code: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"]
+    result_code: RESULT_CODE_TYPE
     result_string: Optional[str] = None
 
     def asdict(self) -> Dict[str, Any]:
-        if self.result_code not in VALID_RESULT_CODE_TYPES:
+        if self.result_code not in VALID_RESULT_CODES:
             warnings.warn(
                 stacklevel=2,
                 message=f"The resultCode {self.result_code} is not valid. "
-                "Choose from 'Ok', 'Dropped' or 'ProcessingFailed '",
+                "Choose from 'Succeeded', 'TemporaryFailure', 'PermanentFailure'",
             )
 
         return {
@@ -111,11 +112,11 @@ class S3BatchOperationResponse:
 
     invocation_schema_version: str
     invocation_id: str
-    treat_missing_keys_as: Literal["Succeeded", "TemporaryFailure", "PermanentFailure"] = "Succeeded"
+    treat_missing_keys_as: RESULT_CODE_TYPE = "Succeeded"
     results: List[S3BatchOperationResponseRecord] = field(default_factory=list)
 
     def __post_init__(self):
-        if self.treat_missing_keys_as not in VALID_RESULT_CODE_TYPES:
+        if self.treat_missing_keys_as not in VALID_RESULT_CODES:
             warnings.warn(
                 stacklevel=2,
                 message=f"The value {self.treat_missing_keys_as} is not valid for treat_missing_keys_as, "
