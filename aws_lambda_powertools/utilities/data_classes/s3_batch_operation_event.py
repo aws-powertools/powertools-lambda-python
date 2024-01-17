@@ -174,7 +174,7 @@ class S3BatchOperationTask(DictWrapper):
 
     @property
     def s3_bucket(self) -> str:
-        """ "
+        """
         Get the s3 bucket, either from 's3Bucket' property (invocationSchemaVersion '2.0')
         or from 's3BucketArn' (invocationSchemaVersion '1.0')
         """
