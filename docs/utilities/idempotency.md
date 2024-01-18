@@ -102,15 +102,16 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
     Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
 
+<!-- markdownlint-disable MD013 -->
 ???+ info "Info: DynamoDB"
 
     During the first invocation with a payload, the Lambda function executes both a `PutItem` and an `UpdateItem` operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.
 
     On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
 
-    <!-- markdownlint-disable-next-line MD013 -->
     **Note:** While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than `1.26.194`, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate the cost.
 
+<!-- markdownlint-enable MD013 -->
 ### Idempotent decorator
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
