@@ -66,6 +66,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
     @tracer.capture_lambda_handler
     def lambda_handler(event, context):
         return app.resolve(event, context)
+    ```
+
     """
 
     current_event: BedrockAgentEvent
