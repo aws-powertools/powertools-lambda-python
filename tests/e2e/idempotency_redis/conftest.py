@@ -11,13 +11,5 @@ def infrastructure():
         CloudFormation Outputs from deployed infrastructure
     """
 
+    # MAINTENANCE: Add the Stack constructor when Python 3.7 is dropped
     return None
-
-    # MAINTENANCE: Uncomment the code below to enable Redis e2e tests when dropping Python 3.7
-    """
-    stack = IdempotencyRedisServerlessStack()
-    try:
-        yield stack.deploy()
-    finally:
-        stack.delete()
-    """
