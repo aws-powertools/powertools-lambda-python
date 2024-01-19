@@ -14,8 +14,10 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    STATUS_CONSTANTS,
     BasePersistenceLayer,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
+    STATUS_CONSTANTS,
     DataRecord,
 )
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
@@ -118,12 +120,17 @@ class IdempotencyHandler:
                 data=self.data,
                 remaining_time_in_millis=self._get_remaining_time_in_millis(),
             )
-        except IdempotencyKeyError:
+        except (IdempotencyKeyError, IdempotencyValidationError):
             raise
-        except IdempotencyItemAlreadyExistsError:
-            # Now we know the item already exists, we can retrieve it
-            record = self._get_idempotency_record()
-            if record is not None:
+        except IdempotencyItemAlreadyExistsError as exc:
+            # Attempt to retrieve the existing record, either from the exception ReturnValuesOnConditionCheckFailure
+            # or perform a GET operation if the information is not available.
+            # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
+            # way of retrieving the existing record after a failed conditional write operation.
+            record = exc.old_data_record or self._get_idempotency_record()
+
+            # If a record is found, handle it for status
+            if record:
                 return self._handle_for_status(record)
         except Exception as exc:
             raise IdempotencyPersistenceLayerError(
