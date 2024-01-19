@@ -117,7 +117,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
 
         # Use DynamoDB's ReturnValuesOnConditionCheckFailure to optimize put and get operations and optimize costs.
         # This feature is supported in boto3 versions 1.26.164 and later.
-        self.support_return_on_check_failure = (
+        self.return_value_on_condition = (
             {"ReturnValuesOnConditionCheckFailure": "ALL_OLD"}
             if self.boto3_supports_condition_check_failure(boto3.__version__)
             else {}
@@ -246,7 +246,7 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                     ":now_in_millis": {"N": str(int(now.timestamp() * 1000))},
                     ":inprogress": {"S": STATUS_CONSTANTS["INPROGRESS"]},
                 },
-                **self.support_return_on_check_failure,  # type: ignore
+                **self.return_value_on_condition,  # type: ignore
             )
         except ClientError as exc:
             error_code = exc.response.get("Error", {}).get("Code")
