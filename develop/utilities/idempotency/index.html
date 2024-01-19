@@ -1300,6 +1300,33 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#tracer" class="md-nav__link">
+    Tracer
+  </a>
+  
+    <nav class="md-nav" aria-label="Tracer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first-execution" class="md-nav__link">
+    First execution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsequent-executions" class="md-nav__link">
+    Subsequent executions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2089,6 +2116,33 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#tracer" class="md-nav__link">
+    Tracer
+  </a>
+  
+    <nav class="md-nav" aria-label="Tracer">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#first-execution" class="md-nav__link">
+    First execution
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#subsequent-executions" class="md-nav__link">
+    Subsequent executions
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2525,13 +2579,14 @@
 <p>When using this utility with DynamoDB, your function's responses must be <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items" target="_blank">smaller than 400KB</a>.</p>
 <p>Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.</p>
 </details>
+<!-- markdownlint-disable MD013 -->
 <details class="info" open="open">
 <summary>Info: DynamoDB</summary>
-<p>Each function invocation will generally make 2 requests to DynamoDB. If the
-result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-see 1WCU and 1RCU. Review the <a href="https://aws.amazon.com/dynamodb/pricing/" target="_blank">DynamoDB pricing documentation</a> to
-estimate the cost.</p>
+<p>During the first invocation with a payload, the Lambda function executes both a <code>PutItem</code> and an <code>UpdateItem</code> operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.</p>
+<p>On subsequent invocations with the same payload, you can expect just 1 <code>PutItem</code> request to DynamoDB.</p>
+<p><strong>Note:</strong> While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than <code>1.26.194</code>, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the <a href="https://aws.amazon.com/dynamodb/pricing/" target="_blank">DynamoDB pricing documentation</a> to estimate the cost.</p>
 </details>
+<!-- markdownlint-enable MD013 -->
 <h3 id="idempotent-decorator">Idempotent decorator<a class="headerlink" href="#idempotent-decorator" title="Permanent link">&para;</a></h3>
 <p>You can quickly start by initializing the <code>DynamoDBPersistenceLayer</code> class and using it with the <code>idempotent</code> decorator on your lambda handler.</p>
 <details class="note" open="open">
@@ -5715,6 +5770,15 @@ event - not the "raw" event Lambda was invoked with.</p>
 <summary>Tip: JMESPath Powertools for AWS Lambda (Python) functions are also available</summary>
 <p>Built-in functions known in the validation utility like <code>powertools_json</code>, <code>powertools_base64</code>, <code>powertools_base64_gzip</code> are also available to use in this utility.</p>
 </details>
+<h3 id="tracer">Tracer<a class="headerlink" href="#tracer" title="Permanent link">&para;</a></h3>
+<p>The idempotency utility can be used with the <code>tracer</code> decorator. Ensure that idempotency is the innermost decorator.</p>
+<h4 id="first-execution">First execution<a class="headerlink" href="#first-execution" title="Permanent link">&para;</a></h4>
+<p>During the first execution with a payload, Lambda performs a <code>PutItem</code> followed by an <code>UpdateItem</code> operation to persist the record in DynamoDB.</p>
+<p><img alt="Tracer showcase" src="../../media/idempotency_first_execution.png" /></p>
+<h4 id="subsequent-executions">Subsequent executions<a class="headerlink" href="#subsequent-executions" title="Permanent link">&para;</a></h4>
+<p>On subsequent executions with the same payload, Lambda optimistically tries to save the record in DynamoDB. If the record already exists, DynamoDB returns the item.</p>
+<p>Explore how to handle conditional write errors in high-concurrency scenarios with DynamoDB in this <a href="https://aws.amazon.com/pt/blogs/database/handle-conditional-write-errors-in-high-concurrency-scenarios-with-amazon-dynamodb/" target="_blank">blog post</a>.</p>
+<p><img alt="Tracer showcase" src="../../media/idempotency_second_execution.png" /></p>
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>The idempotency utility provides several routes to test your code.</p>
 <h3 id="disabling-the-idempotency-utility">Disabling the idempotency utility<a class="headerlink" href="#disabling-the-idempotency-utility" title="Permanent link">&para;</a></h3>
@@ -6352,7 +6416,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
   <small>
     
       Last update:
-      2024-01-10
+      2024-01-19
     
   </small>
 </div>
