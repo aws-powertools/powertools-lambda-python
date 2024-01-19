@@ -1,7 +1,5 @@
 import pytest
 
-from tests.e2e.idempotency_redis.infrastructure import IdempotencyRedisServerlessStack
-
 
 @pytest.fixture(autouse=True, scope="package")
 def infrastructure():
@@ -12,8 +10,6 @@ def infrastructure():
     Dict[str, str]
         CloudFormation Outputs from deployed infrastructure
     """
-    stack = IdempotencyRedisServerlessStack()
-    try:
-        yield stack.deploy()
-    finally:
-        stack.delete()
+
+    # MAINTENANCE: Add the Stack constructor when Python 3.7 is dropped
+    return None
