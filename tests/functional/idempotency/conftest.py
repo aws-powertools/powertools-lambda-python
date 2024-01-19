@@ -131,6 +131,7 @@ def expected_params_put_item(hashed_idempotency_key):
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -159,6 +160,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
