@@ -4,16 +4,54 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
 
 <a name="v2.32.0"></a>
 ## [v2.32.0] - 2024-01-19
+## Bug Fixes
+
+* **event_handler:** escape OpenAPI schema on Swagger UI ([#3606](https://github.com/aws-powertools/powertools-lambda-python/issues/3606))
+
+## Code Refactoring
+
+* **event-handler:** Inject CSS and JS files into SwaggerUI route when no custom CDN is used. ([#3562](https://github.com/aws-powertools/powertools-lambda-python/issues/3562))
+* **event_handler:** fix BedrockAgentResolver docstring ([#3645](https://github.com/aws-powertools/powertools-lambda-python/issues/3645))
+
+## Documentation
+
+* **homepage:** add banner about Python 3.7 deprecation ([#3618](https://github.com/aws-powertools/powertools-lambda-python/issues/3618))
+* **i-made-this:** added new article on how to create a serverless API with CDK and Powertools ([#3605](https://github.com/aws-powertools/powertools-lambda-python/issues/3605))
+
 ## Features
 
+* **event_handler:** add support for additional response models ([#3591](https://github.com/aws-powertools/powertools-lambda-python/issues/3591))
+* **event_handler:** add support to download OpenAPI spec file ([#3571](https://github.com/aws-powertools/powertools-lambda-python/issues/3571))
+* **event_source:** Add support for S3 batch operations ([#3572](https://github.com/aws-powertools/powertools-lambda-python/issues/3572))
+* **event_source:** Add support for policyLevel field in CloudWatch Logs event and parser ([#3624](https://github.com/aws-powertools/powertools-lambda-python/issues/3624))
 * **idempotency:** leverage new DynamoDB Failed conditional writes behavior with ReturnValuesOnConditionCheckFailure ([#3446](https://github.com/aws-powertools/powertools-lambda-python/issues/3446))
+* **idempotency:** adding redis as idempotency backend ([#2567](https://github.com/aws-powertools/powertools-lambda-python/issues/2567))
 
 ## Maintenance
 
 * version bump
+* **ci:** Disable Redis e2e until we drop Python 3.7 ([#3652](https://github.com/aws-powertools/powertools-lambda-python/issues/3652))
+* **ci:** update boto3 library version to 1.26.164+ ([#3632](https://github.com/aws-powertools/powertools-lambda-python/issues/3632))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3649](https://github.com/aws-powertools/powertools-lambda-python/issues/3649))
+* **deps:** bump jinja2 from 3.1.2 to 3.1.3 in /docs ([#3620](https://github.com/aws-powertools/powertools-lambda-python/issues/3620))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3639](https://github.com/aws-powertools/powertools-lambda-python/issues/3639))
+* **deps:** bump gitpython from 3.1.37 to 3.1.41 in /docs ([#3610](https://github.com/aws-powertools/powertools-lambda-python/issues/3610))
+* **deps:** bump squidfunk/mkdocs-material from `2f29d71` to `58eef6c` in /docs ([#3633](https://github.com/aws-powertools/powertools-lambda-python/issues/3633))
+* **deps:** bump redis from 4.6.0 to 5.0.1 ([#3613](https://github.com/aws-powertools/powertools-lambda-python/issues/3613))
+* **deps-dev:** bump gitpython from 3.1.40 to 3.1.41 ([#3611](https://github.com/aws-powertools/powertools-lambda-python/issues/3611))
+* **deps-dev:** bump sentry-sdk from 1.39.1 to 1.39.2 ([#3614](https://github.com/aws-powertools/powertools-lambda-python/issues/3614))
+* **deps-dev:** bump aws-cdk from 2.120.0 to 2.121.1 ([#3634](https://github.com/aws-powertools/powertools-lambda-python/issues/3634))
+* **deps-dev:** bump jinja2 from 3.1.2 to 3.1.3 ([#3619](https://github.com/aws-powertools/powertools-lambda-python/issues/3619))
+* **deps-dev:** bump cfn-lint from 0.83.7 to 0.83.8 ([#3603](https://github.com/aws-powertools/powertools-lambda-python/issues/3603))
+* **deps-dev:** bump aws-cdk from 2.121.1 to 2.122.0 ([#3648](https://github.com/aws-powertools/powertools-lambda-python/issues/3648))
+* **deps-dev:** bump ruff from 0.1.11 to 0.1.13 ([#3625](https://github.com/aws-powertools/powertools-lambda-python/issues/3625))
+* **deps-dev:** bump aws-cdk from 2.118.0 to 2.120.0 ([#3627](https://github.com/aws-powertools/powertools-lambda-python/issues/3627))
 
 
 <a name="v2.31.0"></a>
