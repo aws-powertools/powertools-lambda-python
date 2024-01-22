@@ -6,6 +6,8 @@
 
 ## Maintenance
 
+* **deps:** bump pydantic from 1.10.13 to 1.10.14 ([#3655](https://github.com/aws-powertools/powertools-lambda-python/issues/3655))
+* **deps-dev:** bump ruff from 0.1.13 to 0.1.14 ([#3656](https://github.com/aws-powertools/powertools-lambda-python/issues/3656))
 
 
 <a name="v2.32.0"></a>
