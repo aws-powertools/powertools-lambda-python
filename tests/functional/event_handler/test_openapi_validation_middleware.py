@@ -6,12 +6,23 @@ from typing import List, Tuple
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response
-from aws_lambda_powertools.event_handler.openapi.params import Body
+from aws_lambda_powertools.event_handler import (
+    ALBResolver,
+    APIGatewayHttpResolver,
+    APIGatewayRestResolver,
+    LambdaFunctionUrlResolver,
+    Response,
+    VPCLatticeV2Resolver,
+)
+from aws_lambda_powertools.event_handler.openapi.params import Body, Query
 from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
+LOAD_GW_EVENT_HTTP = load_event("apiGatewayProxyV2Event.json")
+LOAD_GW_EVENT_ALB = load_event("albMultiValueQueryStringEvent.json")
+LOAD_GW_EVENT_LAMBDA_URL = load_event("lambdaFunctionUrlEventWithHeaders.json")
+LOAD_GW_EVENT_VPC_LATTICE = load_event("vpcLatticeV2EventWithHeaders.json")
 
 
 def test_validate_scalars():
@@ -378,3 +389,178 @@ def test_validate_response_invalid_return():
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
     assert "missing" in result["body"]
+
+
+def test_validate_rest_api_resolver_with_multi_query_values():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT["httpMethod"] = "GET"
+    LOAD_GW_EVENT["path"] = "/users"
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_rest_api_resolver_with_multi_query_values_fail():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT["httpMethod"] = "GET"
+    LOAD_GW_EVENT["path"] = "/users"
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 422
+    assert any(text in result["body"] for text in ["type_error.integer"])
+
+
+def test_validate_http_resolver_with_multi_query_values():
+    # GIVEN an APIGatewayHttpResolver with validation enabled
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_HTTP, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_http_resolver_with_multi_query_values_fail():
+    # GIVEN an APIGatewayHttpResolver with validation enabled
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT_HTTP, {})
+    assert result["statusCode"] == 422
+    assert any(text in result["body"] for text in ["type_error.integer"])
+
+
+def test_validate_alb_resolver_with_multi_query_values():
+    # GIVEN an ALBResolver with validation enabled
+    app = ALBResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_ALB["path"] = "/users"
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_ALB, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_alb_resolver_with_multi_query_values_fail():
+    # GIVEN an ALBResolver with validation enabled
+    app = ALBResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_ALB["path"] = "/users"
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT_ALB, {})
+    assert result["statusCode"] == 422
+    assert any(text in result["body"] for text in ["type_error.integer"])
+
+
+def test_validate_lambda_url_resolver_with_multi_query_values():
+    # GIVEN an LambdaFunctionUrlResolver with validation enabled
+    app = LambdaFunctionUrlResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate__lambda_url_resolver_with_multi_query_values_fail():
+    # GIVEN an LambdaFunctionUrlResolver with validation enabled
+    app = LambdaFunctionUrlResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    assert result["statusCode"] == 422
+    assert any(text in result["body"] for text in ["type_error.integer"])
+
+
+def test_validate_vpc_lattice_resolver_with_multi_query_values():
+    # GIVEN an VPCLatticeV2Resolver with validation enabled
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_vpc_lattice_resolver_with_multi_query_values_fail():
+    # GIVEN an VPCLatticeV2Resolver with validation enabled
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    assert result["statusCode"] == 422
+    assert any(text in result["body"] for text in ["type_error.integer"])

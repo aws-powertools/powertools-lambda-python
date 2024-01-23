@@ -119,17 +119,15 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         --------
         - The initial query is obtained from app.current_event.query_string_parameters.
 
-        - In the case of using ALBResolver, we attempt to retrieve multi_value_query_string_parameters; otherwise,
-          we retain the original query.
-
         - In the case of using LambdaFunctionUrlResolver or APIGatewayHttpResolver, multi-query strings consistently
           reside in the same field, separated by commas. Consequently, we split these strings into lists.
 
         - When using a VPCLatticeV2Resolver, the Payload consistently sends query strings as arrays. To enhance
           compatibility, we attempt to identify scalar types within the arrays and convert them to single elements.
 
-        - In the case of using APIGatewayRestResolver, the payload includes both query string and multi-query string
-          fields. We apply a similar logic as used in VPCLatticeV2Resolver to handle these query strings effectively.
+        - In the case of using APIGatewayRestResolver or ALBResolver, the payload may includes both query string and
+          multi-query string fields. We apply a similar logic as used in VPCLatticeV2Resolver
+          to handle these query strings effectively.
 
         - VPCLatticeResolver (v1) and BedrockAgentResolver doesn't support multi-query strings
           and we retain original query
@@ -137,16 +135,16 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
 
         query = app.current_event.query_string_parameters or {}
 
-        if isinstance(app, ALBResolver):
-            query = app.current_event.multi_value_query_string_parameters or query
-
         if isinstance(app, (LambdaFunctionUrlResolver, APIGatewayHttpResolver)):
             query = {key: value.split(",") if "," in value else value for key, value in query.items()}
 
         if isinstance(app, VPCLatticeV2Resolver):
             query = self._extract_multi_query_string_with_param(query, params)
 
-        if isinstance(app, APIGatewayRestResolver) and app.current_event.multi_value_query_string_parameters:
+        if (
+            isinstance(app, (ALBResolver, APIGatewayRestResolver))
+            and app.current_event.multi_value_query_string_parameters
+        ):
             query = self._extract_multi_query_string_with_param(
                 app.current_event.multi_value_query_string_parameters,
                 params,
