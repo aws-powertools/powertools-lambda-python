@@ -109,7 +109,8 @@ class BaseProxyEvent(DictWrapper):
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
 
-        This is necessary because different resolvers use different formats to encode multi query string parameters.
+        This is necessary because different resolvers use different formats to encode
+        multi query string parameters.
         """
         return self.query_string_parameters
 
