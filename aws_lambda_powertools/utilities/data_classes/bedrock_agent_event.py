@@ -111,8 +111,4 @@ class BedrockAgentEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        """
-        This property determines the appropriate query string parameter to be used
-        as a trusted source for validating OpenAPI.
-        """
         return self.query_string_parameters

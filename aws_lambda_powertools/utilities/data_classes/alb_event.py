@@ -37,10 +37,6 @@ class ALBEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
-        """
-        This property determines the appropriate query string parameter to be used
-        as a trusted source for validating OpenAPI.
-        """
         if self.multi_value_query_string_parameters:
             return self.multi_value_query_string_parameters
 

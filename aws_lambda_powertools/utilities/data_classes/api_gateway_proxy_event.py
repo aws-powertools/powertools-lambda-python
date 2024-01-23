@@ -120,10 +120,6 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
-        """
-        This property determines the appropriate query string parameter to be used
-        as a trusted source for validating OpenAPI.
-        """
         if self.multi_value_query_string_parameters:
             return self.multi_value_query_string_parameters
 
@@ -313,10 +309,6 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
-        """
-        This property determines the appropriate query string parameter to be used
-        as a trusted source for validating OpenAPI.
-        """
         if self.query_string_parameters is not None:
             query_string = {
                 key: value.split(",") if "," in value else value for key, value in self.query_string_parameters.items()

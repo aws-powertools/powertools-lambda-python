@@ -353,7 +353,7 @@ def _get_embed_body(
     return received_body, field_alias_omitted
 
 
-def _normalize_multi_query_string_with_param(query_string, params: Sequence[ModelField]):
+def _normalize_multi_query_string_with_param(query_string: Dict[str, Any], params: Sequence[ModelField]):
     """
     Extract and normalize resolved_query_string_parameters
 
@@ -367,30 +367,11 @@ def _normalize_multi_query_string_with_param(query_string, params: Sequence[Mode
     Returns
     -------
     A dictionary containing the processed multi_query_string_parameters.
-
-    Comments
-    --------
-    - These comments are to explain the decision to create this method
-
-    - In the case of using LambdaFunctionUrlResolver or APIGatewayHttpResolver, multi-query strings consistently
-      reside in the same field, separated by commas.
-
-    - When using a VPCLatticeV2Resolver, the Payload consistently sends query strings as arrays. To enhance
-      compatibility, we attempt to identify scalar types within the arrays and convert them to single elements.
-
-    - In the case of using APIGatewayRestResolver or ALBResolver, the payload may includes both query string and
-      multi-query string fields. We apply a similar logic as used in VPCLatticeV2Resolver
-      to handle these query strings effectively.
-
-    - VPCLatticeResolver (v1) and BedrockAgentResolver doesn't support multi-query strings
-      and we retain original query
     """
     for param in filter(is_scalar_field, params):
         try:
-            # If the field is a scalar, it implies it's not a multi-query string.
-            # And we keep the first value for this field
-
-            # We Attempt to retain only the first element if the parameter is a scalar field
+            # if the target parameter is a scalar, we keep the first value of the query string
+            # regardless if there are more in the payload
             query_string[param.name] = query_string[param.name][0]
         except KeyError:
             pass
