@@ -423,7 +423,7 @@ def test_validate_rest_api_resolver_with_multi_query_params_fail():
     # THEN the handler should be invoked and return 422
     result = app(LOAD_GW_EVENT, {})
     assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer"])
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_rest_api_resolver_without_query_params():
@@ -479,7 +479,7 @@ def test_validate_http_resolver_with_multi_query_values_fail():
     # THEN the handler should be invoked and return 422
     result = app(LOAD_GW_EVENT_HTTP, {})
     assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer"])
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_http_resolver_without_query_params():
@@ -531,7 +531,7 @@ def test_validate_alb_resolver_with_multi_query_values_fail():
     # THEN the handler should be invoked and return 422
     result = app(LOAD_GW_EVENT_ALB, {})
     assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer"])
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_alb_resolver_without_query_params():
@@ -585,7 +585,7 @@ def test_validate_lambda_url_resolver_with_multi_query_params_fail():
     # THEN the handler should be invoked and return 422
     result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
     assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer"])
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_lambda_url_resolver_without_query_params():
@@ -637,7 +637,7 @@ def test_validate_vpc_lattice_resolver_with_multi_query_params_fail():
     # THEN the handler should be invoked and return 422
     result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
     assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer"])
+    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
 
 def test_validate_vpc_lattice_resolver_without_query_params():
