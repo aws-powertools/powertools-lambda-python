@@ -184,6 +184,20 @@ def test_openapi_with_omitted_param():
     assert get.parameters is None
 
 
+def test_openapi_with_list_param():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler(page: Annotated[List[str], Query()]):
+        return page
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters[0].schema_.type == "array"
+
+
 def test_openapi_with_description():
     app = APIGatewayRestResolver()
 
