@@ -28,7 +28,7 @@ resource "aws_dynamodb_table" "IdempotencyTable" {
 resource "aws_lambda_function" "IdempotencyFunction" {
   function_name = "IdempotencyFunction"
   role          = aws_iam_role.IdempotencyFunctionRole.arn
-  runtime       = "python3.11"
+  runtime       = "python3.12"
   handler       = "app.lambda_handler"
   filename      = "lambda.zip"
 

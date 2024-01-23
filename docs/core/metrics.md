@@ -165,7 +165,7 @@ If you want to ensure at least one metric is always emitted, you can pass `raise
 ```
 
 ???+ tip "Suppressing warning messages on empty metrics"
-    If you expect your function to execute without publishing metrics every time, you can suppress the warning with **`warnings.filterwarnings("ignore", "No metrics to publish*")`**.
+    If you expect your function to execute without publishing metrics every time, you can suppress the warning with **`warnings.filterwarnings("ignore", "No application metrics to publish*")`**.
 
 ### Capturing cold start metric
 
