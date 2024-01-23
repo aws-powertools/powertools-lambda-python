@@ -75,7 +75,7 @@ Log Data Event for Troubleshooting
 ## Supported event sources
 
 | Event Source                                                              | Data_class                                         |
-| ------------------------------------------------------------------------- | -------------------------------------------------- |
+|---------------------------------------------------------------------------|----------------------------------------------------|
 | [Active MQ](#active-mq)                                                   | `ActiveMQEvent`                                    |
 | [API Gateway Authorizer](#api-gateway-authorizer)                         | `APIGatewayAuthorizerRequestEvent`                 |
 | [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                   | `APIGatewayAuthorizerEventV2`                      |
@@ -99,6 +99,7 @@ Log Data Event for Troubleshooting
 | [Lambda Function URL](#lambda-function-url)                               | `LambdaFunctionUrlEvent`                           |
 | [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
 | [S3](#s3)                                                                 | `S3Event`                                          |
+| [S3 Batch Operations](#s3-batch-operations)                               | `S3BatchOperationEvent`                            |
 | [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
 | [S3 EventBridge Notification](#s3-eventbridge-notification)               | `S3EventBridgeNotificationEvent`                   |
 | [SES](#ses)                                                               | `SESEvent`                                         |
@@ -1074,6 +1075,16 @@ for more details.
             object_key = unquote_plus(record.s3.get_object.key)
 
             do_something_with(f"{bucket_name}/{object_key}")
+    ```
+
+### S3 Batch Operations
+
+This example is based on the AWS S3 Batch Operations documentation [Example Lambda function for S3 Batch Operations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html){target="_blank"}.
+
+=== "app.py"
+
+    ```python hl_lines="4 8 10 20 25 27 29 33"
+    --8<-- "examples/event_sources/src/s3_batch_operation.py"
     ```
 
 ### S3 Object Lambda

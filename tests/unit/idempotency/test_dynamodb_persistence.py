@@ -19,3 +19,14 @@ def test_custom_sdk_client_injection():
     # THEN
     assert persistence_layer.table_name == table_name
     assert persistence_layer.client == fake_client
+
+
+def test_boto3_version_supports_condition_check_failure():
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("0.0.3") is False
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.25") is False
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.25") is False
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.26.163") is False
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.26.164") is True
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.26.165") is True
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("1.27.0") is True
+    assert DynamoDBPersistenceLayer.boto3_supports_condition_check_failure("2.0.0") is True

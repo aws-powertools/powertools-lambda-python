@@ -184,6 +184,20 @@ def test_openapi_with_omitted_param():
     assert get.parameters is None
 
 
+def test_openapi_with_list_param():
+    app = APIGatewayRestResolver()
+
+    @app.get("/")
+    def handler(page: Annotated[List[str], Query()]):
+        return page
+
+    schema = app.get_openapi_schema()
+    assert len(schema.paths.keys()) == 1
+
+    get = schema.paths["/"].get
+    assert get.parameters[0].schema_.type == "array"
+
+
 def test_openapi_with_description():
     app = APIGatewayRestResolver()
 
@@ -349,35 +363,28 @@ def test_openapi_with_embed_body_param():
     assert body_post_handler_schema.properties["user"].ref == "#/components/schemas/User"
 
 
-def test_openapi_with_tags():
+def test_openapi_with_body_description():
     app = APIGatewayRestResolver()
 
-    @app.get("/users")
-    def handler():
-        raise NotImplementedError()
+    class User(BaseModel):
+        name: str
 
-    schema = app.get_openapi_schema(tags=["Orders"])
-    assert len(schema.tags) == 1
-
-    tag = schema.tags[0]
-    assert tag.name == "Orders"
-
-
-def test_openapi_operation_with_tags():
-    app = APIGatewayRestResolver()
-
-    @app.get("/users", tags=["Users"])
-    def handler():
-        raise NotImplementedError()
+    @app.post("/users")
+    def handler(user: Annotated[User, Body(description="This is a user")]):
+        print(user)
 
     schema = app.get_openapi_schema()
     assert len(schema.paths.keys()) == 1
 
-    get = schema.paths["/users"].get
-    assert len(get.tags) == 1
+    post = schema.paths["/users"].post
+    assert post.parameters is None
+    assert post.requestBody is not None
 
-    tag = get.tags[0]
-    assert tag == "Users"
+    request_body = post.requestBody
+
+    # Description should appear in two places: on the request body and on the schema
+    assert request_body.description == "This is a user"
+    assert request_body.content[JSON_CONTENT_TYPE].schema_.description == "This is a user"
 
 
 def test_openapi_with_excluded_operations():

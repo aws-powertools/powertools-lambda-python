@@ -119,6 +119,13 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return self.get("multiValueQueryStringParameters")
 
     @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
+        if self.multi_value_query_string_parameters:
+            return self.multi_value_query_string_parameters
+
+        return self.query_string_parameters
+
+    @property
     def request_context(self) -> APIGatewayEventRequestContext:
         return APIGatewayEventRequestContext(self._data)
 
@@ -299,3 +306,13 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     def header_serializer(self):
         return HttpApiHeadersSerializer()
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
+        if self.query_string_parameters is not None:
+            query_string = {
+                key: value.split(",") if "," in value else value for key, value in self.query_string_parameters.items()
+            }
+            return query_string
+
+        return {}

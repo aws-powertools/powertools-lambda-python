@@ -23,6 +23,11 @@ from .kinesis_firehose_event import (
 )
 from .kinesis_stream_event import KinesisStreamEvent
 from .lambda_function_url_event import LambdaFunctionUrlEvent
+from .s3_batch_operation_event import (
+    S3BatchOperationEvent,
+    S3BatchOperationResponse,
+    S3BatchOperationResponseRecord,
+)
 from .s3_event import S3Event, S3EventBridgeNotificationEvent
 from .secrets_manager_event import SecretsManagerEvent
 from .ses_event import SESEvent
@@ -52,6 +57,9 @@ __all__ = [
     "LambdaFunctionUrlEvent",
     "S3Event",
     "S3EventBridgeNotificationEvent",
+    "S3BatchOperationEvent",
+    "S3BatchOperationResponse",
+    "S3BatchOperationResponseRecord",
     "SESEvent",
     "SNSEvent",
     "SQSEvent",
