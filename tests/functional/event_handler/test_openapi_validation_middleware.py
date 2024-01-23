@@ -391,7 +391,7 @@ def test_validate_response_invalid_return():
     assert "missing" in result["body"]
 
 
-def test_validate_rest_api_resolver_with_multi_query_values():
+def test_validate_rest_api_resolver_with_multi_query_params():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -408,7 +408,7 @@ def test_validate_rest_api_resolver_with_multi_query_values():
     assert result["statusCode"] == 200
 
 
-def test_validate_rest_api_resolver_with_multi_query_values_fail():
+def test_validate_rest_api_resolver_with_multi_query_params_fail():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
@@ -426,7 +426,26 @@ def test_validate_rest_api_resolver_with_multi_query_values_fail():
     assert any(text in result["body"] for text in ["type_error.integer"])
 
 
-def test_validate_http_resolver_with_multi_query_values():
+def test_validate_rest_api_resolver_without_query_params():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
+    @app.get("/users")
+    def handler():
+        return None
+
+    LOAD_GW_EVENT["httpMethod"] = "GET"
+    LOAD_GW_EVENT["path"] = "/users"
+    LOAD_GW_EVENT["queryStringParameters"] = None
+    LOAD_GW_EVENT["multiValueQueryStringParameters"] = None
+
+    # THEN the handler should be invoked and return 422
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_http_resolver_with_multi_query_params():
     # GIVEN an APIGatewayHttpResolver with validation enabled
     app = APIGatewayHttpResolver(enable_validation=True)
 
@@ -463,6 +482,25 @@ def test_validate_http_resolver_with_multi_query_values_fail():
     assert any(text in result["body"] for text in ["type_error.integer"])
 
 
+def test_validate_http_resolver_without_query_params():
+    # GIVEN an APIGatewayHttpResolver with validation enabled
+    app = APIGatewayHttpResolver(enable_validation=True)
+
+    # WHEN a handler is defined without any query params
+    @app.get("/users")
+    def handler():
+        return None
+
+    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+    LOAD_GW_EVENT_HTTP["queryStringParameters"] = None
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_HTTP, {})
+    assert result["statusCode"] == 200
+
+
 def test_validate_alb_resolver_with_multi_query_values():
     # GIVEN an ALBResolver with validation enabled
     app = ALBResolver(enable_validation=True)
@@ -496,7 +534,24 @@ def test_validate_alb_resolver_with_multi_query_values_fail():
     assert any(text in result["body"] for text in ["type_error.integer"])
 
 
-def test_validate_lambda_url_resolver_with_multi_query_values():
+def test_validate_alb_resolver_without_query_params():
+    # GIVEN an ALBResolver with validation enabled
+    app = ALBResolver(enable_validation=True)
+
+    # WHEN a handler is defined without any query params
+    @app.get("/users")
+    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
+        print(parameter2)
+
+    LOAD_GW_EVENT_ALB["path"] = "/users"
+    LOAD_GW_EVENT_HTTP["multiValueQueryStringParameters"] = None
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_ALB, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_lambda_url_resolver_with_multi_query_params():
     # GIVEN an LambdaFunctionUrlResolver with validation enabled
     app = LambdaFunctionUrlResolver(enable_validation=True)
 
@@ -514,7 +569,7 @@ def test_validate_lambda_url_resolver_with_multi_query_values():
     assert result["statusCode"] == 200
 
 
-def test_validate__lambda_url_resolver_with_multi_query_values_fail():
+def test_validate_lambda_url_resolver_with_multi_query_params_fail():
     # GIVEN an LambdaFunctionUrlResolver with validation enabled
     app = LambdaFunctionUrlResolver(enable_validation=True)
 
@@ -533,7 +588,26 @@ def test_validate__lambda_url_resolver_with_multi_query_values_fail():
     assert any(text in result["body"] for text in ["type_error.integer"])
 
 
-def test_validate_vpc_lattice_resolver_with_multi_query_values():
+def test_validate_lambda_url_resolver_without_query_params():
+    # GIVEN an LambdaFunctionUrlResolver with validation enabled
+    app = LambdaFunctionUrlResolver(enable_validation=True)
+
+    # WHEN a handler is defined  without any query params
+    @app.get("/users")
+    def handler():
+        return None
+
+    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    LOAD_GW_EVENT_LAMBDA_URL["queryStringParameters"] = None
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    assert result["statusCode"] == 200
+
+
+def test_validate_vpc_lattice_resolver_with_multi_params_values():
     # GIVEN an VPCLatticeV2Resolver with validation enabled
     app = VPCLatticeV2Resolver(enable_validation=True)
 
@@ -549,7 +623,7 @@ def test_validate_vpc_lattice_resolver_with_multi_query_values():
     assert result["statusCode"] == 200
 
 
-def test_validate_vpc_lattice_resolver_with_multi_query_values_fail():
+def test_validate_vpc_lattice_resolver_with_multi_query_params_fail():
     # GIVEN an VPCLatticeV2Resolver with validation enabled
     app = VPCLatticeV2Resolver(enable_validation=True)
 
@@ -564,3 +638,20 @@ def test_validate_vpc_lattice_resolver_with_multi_query_values_fail():
     result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
     assert result["statusCode"] == 422
     assert any(text in result["body"] for text in ["type_error.integer"])
+
+
+def test_validate_vpc_lattice_resolver_without_query_params():
+    # GIVEN an VPCLatticeV2Resolver with validation enabled
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    # WHEN a handler is defined without any query params
+    @app.get("/users")
+    def handler():
+        return None
+
+    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+    LOAD_GW_EVENT_VPC_LATTICE["queryStringParameters"] = None
+
+    # THEN the handler should be invoked and return 200
+    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    assert result["statusCode"] == 200

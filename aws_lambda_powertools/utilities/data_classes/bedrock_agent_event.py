@@ -108,3 +108,11 @@ class BedrockAgentEvent(BaseProxyEvent):
         # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
         # together with the other parameters. So we just return all parameters here.
         return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        """
+        This property determines the appropriate query string parameter to be used
+        as a trusted source for validating OpenAPI.
+        """
+        return self.query_string_parameters

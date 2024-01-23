@@ -6,14 +6,7 @@ from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler import (
-    ALBResolver,
-    APIGatewayHttpResolver,
-    APIGatewayRestResolver,
-    LambdaFunctionUrlResolver,
-    Response,
-    VPCLatticeV2Resolver,
-)
+from aws_lambda_powertools.event_handler import Response
 from aws_lambda_powertools.event_handler.api_gateway import Route
 from aws_lambda_powertools.event_handler.middlewares import BaseMiddlewareHandler, NextMiddleware
 from aws_lambda_powertools.event_handler.openapi.compat import (
@@ -62,96 +55,6 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
     ```
     """
 
-    def _extract_multi_query_string_with_param(self, query_string, params: Sequence[ModelField]):
-        """
-        Extract and process multi_query_string_parameters for VPCLatticeV2Resolver and APIGatewayRestResolver.
-
-        Parameters
-        ----------
-        query_string: Dict
-            A dictionary containing the initial query string parameters.
-        params: Sequence[ModelField]
-            A sequence of ModelField objects representing parameters.
-
-        Returns
-        -------
-        A dictionary containing the processed multi_query_string_parameters.
-
-        Comments
-        --------
-        - This method is specifically designed for VPCLatticeV2Resolver and APIGatewayRestResolver.
-        - It processes multi_query_string_parameters based on the given params.
-        """
-        for param in filter(is_scalar_field, params):
-            try:
-                # If the field is a scalar, it implies it's not a multi-query string.
-                # And we keep the first value for this field
-
-                # We Attempt to retain only the first element if the parameter is a scalar field
-                query_string[param.name] = query_string[param.name][0]
-            except KeyError:
-                pass
-        return query_string
-
-    def _extract_query_string(self, app: EventHandlerInstance, params: Sequence[ModelField]):
-        """
-        Extract and process query string parameters based on the resolver type.
-        Payloads are different and we need to identify when it is using multiValueQueryStringParameters.
-
-        References
-        https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.proxy-format
-        https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers
-        https://docs.aws.amazon.com/vpc-lattice/latest/ug/lambda-functions.html#multi-value-headers
-        https://docs.aws.amazon.com/lambda/latest/dg/urls-invocation.html#urls-payloads
-
-        Parameters
-        ----------
-        app: EventHandlerInstance.
-            Instance of a Resolver
-        params: Sequence[ModelField]
-            A sequence of ModelField objects representing parameters.
-
-        Returns
-        -------
-            A dictionary containing the processed query string parameters.
-
-        Comments
-        --------
-        - The initial query is obtained from app.current_event.query_string_parameters.
-
-        - In the case of using LambdaFunctionUrlResolver or APIGatewayHttpResolver, multi-query strings consistently
-          reside in the same field, separated by commas. Consequently, we split these strings into lists.
-
-        - When using a VPCLatticeV2Resolver, the Payload consistently sends query strings as arrays. To enhance
-          compatibility, we attempt to identify scalar types within the arrays and convert them to single elements.
-
-        - In the case of using APIGatewayRestResolver or ALBResolver, the payload may includes both query string and
-          multi-query string fields. We apply a similar logic as used in VPCLatticeV2Resolver
-          to handle these query strings effectively.
-
-        - VPCLatticeResolver (v1) and BedrockAgentResolver doesn't support multi-query strings
-          and we retain original query_string field
-        """
-
-        query_string = app.current_event.query_string_parameters or {}
-
-        if isinstance(app, (LambdaFunctionUrlResolver, APIGatewayHttpResolver)):
-            query_string = {key: value.split(",") if "," in value else value for key, value in query_string.items()}
-
-        if isinstance(app, VPCLatticeV2Resolver):
-            query_string = self._extract_multi_query_string_with_param(query_string, params)
-
-        if (
-            isinstance(app, (ALBResolver, APIGatewayRestResolver))
-            and app.current_event.multi_value_query_string_parameters
-        ):
-            query_string = self._extract_multi_query_string_with_param(
-                app.current_event.multi_value_query_string_parameters,
-                params,
-            )
-
-        return query_string
-
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         logger.debug("OpenAPIValidationMiddleware handler")
 
@@ -166,7 +69,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             app.context["_route_args"],
         )
 
-        query_string = self._extract_query_string(app, route.dependant.query_params)
+        # Normalize query values before validate this
+        query_string = _normalize_multi_query_string_with_param(
+            app.current_event.resolved_query_string_parameters,
+            route.dependant.query_params,
+        )
 
         # Process query values
         query_values, query_errors = _request_params_to_args(
@@ -444,3 +351,47 @@ def _get_embed_body(
         received_body = {field.alias: received_body}
 
     return received_body, field_alias_omitted
+
+
+def _normalize_multi_query_string_with_param(query_string, params: Sequence[ModelField]):
+    """
+    Extract and normalize resolved_query_string_parameters
+
+    Parameters
+    ----------
+    query_string: Dict
+        A dictionary containing the initial query string parameters.
+    params: Sequence[ModelField]
+        A sequence of ModelField objects representing parameters.
+
+    Returns
+    -------
+    A dictionary containing the processed multi_query_string_parameters.
+
+    Comments
+    --------
+    - These comments are to explain the decision to create this method
+
+    - In the case of using LambdaFunctionUrlResolver or APIGatewayHttpResolver, multi-query strings consistently
+      reside in the same field, separated by commas.
+
+    - When using a VPCLatticeV2Resolver, the Payload consistently sends query strings as arrays. To enhance
+      compatibility, we attempt to identify scalar types within the arrays and convert them to single elements.
+
+    - In the case of using APIGatewayRestResolver or ALBResolver, the payload may includes both query string and
+      multi-query string fields. We apply a similar logic as used in VPCLatticeV2Resolver
+      to handle these query strings effectively.
+
+    - VPCLatticeResolver (v1) and BedrockAgentResolver doesn't support multi-query strings
+      and we retain original query
+    """
+    for param in filter(is_scalar_field, params):
+        try:
+            # If the field is a scalar, it implies it's not a multi-query string.
+            # And we keep the first value for this field
+
+            # We Attempt to retain only the first element if the parameter is a scalar field
+            query_string[param.name] = query_string[param.name][0]
+        except KeyError:
+            pass
+    return query_string
