@@ -353,7 +353,7 @@ def _get_embed_body(
     return received_body, field_alias_omitted
 
 
-def _normalize_multi_query_string_with_param(query_string: Dict[str, Any], params: Sequence[ModelField]):
+def _normalize_multi_query_string_with_param(query_string: Optional[Dict[str, str]], params: Sequence[ModelField]):
     """
     Extract and normalize resolved_query_string_parameters
 
@@ -368,11 +368,12 @@ def _normalize_multi_query_string_with_param(query_string: Dict[str, Any], param
     -------
     A dictionary containing the processed multi_query_string_parameters.
     """
-    for param in filter(is_scalar_field, params):
-        try:
-            # if the target parameter is a scalar, we keep the first value of the query string
-            # regardless if there are more in the payload
-            query_string[param.name] = query_string[param.name][0]
-        except KeyError:
-            pass
+    if query_string:
+        for param in filter(is_scalar_field, params):
+            try:
+                # if the target parameter is a scalar, we keep the first value of the query string
+                # regardless if there are more in the payload
+                query_string[param.name] = query_string[param.name][0]
+            except KeyError:
+                pass
     return query_string
