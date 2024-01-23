@@ -130,27 +130,27 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
           to handle these query strings effectively.
 
         - VPCLatticeResolver (v1) and BedrockAgentResolver doesn't support multi-query strings
-          and we retain original query
+          and we retain original query_string field
         """
 
-        query = app.current_event.query_string_parameters or {}
+        query_string = app.current_event.query_string_parameters or {}
 
         if isinstance(app, (LambdaFunctionUrlResolver, APIGatewayHttpResolver)):
-            query = {key: value.split(",") if "," in value else value for key, value in query.items()}
+            query_string = {key: value.split(",") if "," in value else value for key, value in query_string.items()}
 
         if isinstance(app, VPCLatticeV2Resolver):
-            query = self._extract_multi_query_string_with_param(query, params)
+            query_string = self._extract_multi_query_string_with_param(query_string, params)
 
         if (
             isinstance(app, (ALBResolver, APIGatewayRestResolver))
             and app.current_event.multi_value_query_string_parameters
         ):
-            query = self._extract_multi_query_string_with_param(
+            query_string = self._extract_multi_query_string_with_param(
                 app.current_event.multi_value_query_string_parameters,
                 params,
             )
 
-        return query
+        return query_string
 
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         logger.debug("OpenAPIValidationMiddleware handler")
