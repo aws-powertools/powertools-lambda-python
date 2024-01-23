@@ -400,6 +400,16 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     1. `completed` is still the same query string as before, except we simply state it's an string. No `Query` or `Annotated` to validate it.
 
+=== "working_with_multi_query_values.py"
+
+    If you need to handle multi-value query parameters, you can create a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_multi_query_values.py"
+    ```
+
+    1. `example_multi_value_param` is a list containing values from the `ExampleEnum` enumeration.
+
 <!-- markdownlint-enable MD013 -->
 
 #### Validating path parameters

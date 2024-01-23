@@ -104,6 +104,17 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        """
+        This property determines the appropriate query string parameter to be used
+        as a trusted source for validating OpenAPI.
+
+        This is necessary because different resolvers use different formats to encode
+        multi query string parameters.
+        """
+        return self.query_string_parameters
+
+    @property
     def is_base64_encoded(self) -> Optional[bool]:
         return self.get("isBase64Encoded")
 

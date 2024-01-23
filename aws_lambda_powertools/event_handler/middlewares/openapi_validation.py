@@ -16,6 +16,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     _regenerate_error_with_loc,
     get_missing_field_error,
 )
+from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
 from aws_lambda_powertools.event_handler.openapi.params import Param
@@ -68,10 +69,16 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             app.context["_route_args"],
         )
 
+        # Normalize query values before validate this
+        query_string = _normalize_multi_query_string_with_param(
+            app.current_event.resolved_query_string_parameters,
+            route.dependant.query_params,
+        )
+
         # Process query values
         query_values, query_errors = _request_params_to_args(
             route.dependant.query_params,
-            app.current_event.query_string_parameters or {},
+            query_string,
         )
 
         values.update(path_values)
@@ -344,3 +351,29 @@ def _get_embed_body(
         received_body = {field.alias: received_body}
 
     return received_body, field_alias_omitted
+
+
+def _normalize_multi_query_string_with_param(query_string: Optional[Dict[str, str]], params: Sequence[ModelField]):
+    """
+    Extract and normalize resolved_query_string_parameters
+
+    Parameters
+    ----------
+    query_string: Dict
+        A dictionary containing the initial query string parameters.
+    params: Sequence[ModelField]
+        A sequence of ModelField objects representing parameters.
+
+    Returns
+    -------
+    A dictionary containing the processed multi_query_string_parameters.
+    """
+    if query_string:
+        for param in filter(is_scalar_field, params):
+            try:
+                # if the target parameter is a scalar, we keep the first value of the query string
+                # regardless if there are more in the payload
+                query_string[param.name] = query_string[param.name][0]
+            except KeyError:
+                pass
+    return query_string

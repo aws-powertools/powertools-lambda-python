@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -34,6 +34,13 @@ class ALBEvent(BaseProxyEvent):
     @property
     def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
         return self.get("multiValueQueryStringParameters")
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
+        if self.multi_value_query_string_parameters:
+            return self.multi_value_query_string_parameters
+
+        return self.query_string_parameters
 
     @property
     def multi_value_headers(self) -> Optional[Dict[str, List[str]]]:
