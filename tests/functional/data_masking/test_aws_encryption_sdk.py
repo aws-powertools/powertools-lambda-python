@@ -7,6 +7,8 @@ from typing import Any, Callable
 
 import pytest
 
+from aws_encryption_sdk.identifiers import Algorithm
+
 from aws_lambda_powertools.utilities.data_masking import DataMasking
 from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
 from aws_lambda_powertools.utilities.data_masking.provider import BaseProvider
@@ -456,6 +458,26 @@ def test_encrypt_with_complex_search(data_masker):
     # WHEN encrypting and then decrypting the encrypted data
     encrypted_data = data_masker.encrypt(data, fields=fields_operation)
     decrypted_data = data_masker.decrypt(encrypted_data, fields=["address[1:3]"])
+
+    # THEN the result is only the specified fields are masked
+    assert decrypted_data == json.loads(data)
+
+def test_encrypt_with_provider_options(data_masker):
+    # GIVEN the data type is a json representation of a dictionary with a list inside
+    data = json.dumps(
+        {
+            "payload": {
+                "first": ["value1", "value2"],
+                "second": (0, 1),
+            },
+        },
+    )
+
+    fields_operation = ["payload.first[0]", "payload.second[0]"]
+    provider_options = {"algorithm": Algorithm.AES_256_GCM_HKDF_SHA512_COMMIT_KEY}
+    # WHEN encrypting and then decrypting the encrypted data
+    encrypted_data = data_masker.encrypt(data, fields=fields_operation, provider_options=provider_options)
+    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == json.loads(data)

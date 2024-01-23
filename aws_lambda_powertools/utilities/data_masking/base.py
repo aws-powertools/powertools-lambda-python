@@ -194,8 +194,10 @@ class DataMasking:
                 value of the field as the first argument and any additional arguments that might be required
                 for the action. It performs an operation on the current value using the provided arguments and
                 returns the modified value.
-            **provider_options:
-                Additional keyword arguments to pass to the 'action' function.
+            provider_options : dict
+                Optional dictionary representing additional options for the action.
+            **encryption_context: str
+                Additional keyword arguments collected into a dictionary.
 
         Returns
         -------

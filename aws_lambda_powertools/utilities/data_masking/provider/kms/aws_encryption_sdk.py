@@ -146,8 +146,10 @@ class KMSKeyProvider:
         -------
             data : Union[bytes, str]
                 The data to be encrypted.
-            provider_options
+            provider_options : dict
                 Additional options for the aws_encryption_sdk.EncryptionSDKClient
+            **encryption_context : str
+                Additional keyword arguments collected into a dictionary.
 
         Returns
         -------
