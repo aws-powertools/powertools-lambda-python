@@ -1,7 +1,7 @@
 from typing import Dict, Iterator, Optional
 from urllib.parse import unquote_plus
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 from aws_lambda_powertools.utilities.data_classes.event_bridge_event import (
     EventBridgeEvent,
 )
@@ -151,7 +151,7 @@ class S3EventBridgeNotificationEvent(EventBridgeEvent):
         return S3EventBridgeNotificationDetail(self["detail"])
 
 
-class S3Bucket(DictWrapper):
+class S3Bucket(EventWrapper):
     @property
     def name(self) -> str:
         return self["s3"]["bucket"]["name"]
@@ -165,7 +165,7 @@ class S3Bucket(DictWrapper):
         return self["s3"]["bucket"]["arn"]
 
 
-class S3Object(DictWrapper):
+class S3Object(EventWrapper):
     @property
     def key(self) -> str:
         """Object key"""
@@ -194,7 +194,7 @@ class S3Object(DictWrapper):
         return self["s3"]["object"]["sequencer"]
 
 
-class S3Message(DictWrapper):
+class S3Message(EventWrapper):
     @property
     def s3_schema_version(self) -> str:
         return self["s3"]["s3SchemaVersion"]
@@ -237,7 +237,7 @@ class S3EventRecordGlacierEventData(DictWrapper):
         return S3EventRecordGlacierRestoreEventData(self._data)
 
 
-class S3EventRecord(DictWrapper):
+class S3EventRecord(EventWrapper):
     @property
     def event_version(self) -> str:
         """The eventVersion key value contains a major and minor version in the form <major>.<minor>."""
@@ -293,7 +293,7 @@ class S3EventRecord(DictWrapper):
         return None if item is None else S3EventRecordGlacierEventData(item)
 
 
-class S3Event(DictWrapper):
+class S3Event(EventWrapper):
     """S3 event notification
 
     Documentation:

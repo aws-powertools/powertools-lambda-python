@@ -1,7 +1,7 @@
 import base64
 import json
 from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterator, List, Optional, overload
+from typing import Any, Callable, Dict, Iterator, List, Optional, overload, Type, TypeVar
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -93,6 +93,28 @@ class DictWrapper(Mapping):
         """The original raw event dict"""
         return self._data
 
+class EventWrapper(DictWrapper):
+    NestedEvent = TypeVar("NestedEvent", bound=DictWrapper)
+    @property
+    def nested_event_contents(self):
+        for record in self["Records"]:
+            yield record["body"]
+
+    # @property
+    def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
+        if nested_event_content_deserializer is None:
+            nested_event_content_deserializer = self._json_deserializer
+
+        for content in self.nested_event_contents:
+            yield nested_event_class(nested_event_content_deserializer(content))
+
+    # @property
+    def decode_nested_event(self, nested_event_class, nested_event_content_deserializer = None):
+        if nested_event_content_deserializer is None:
+            nested_event_content_deserializer = self._json_deserializer
+
+        for content in self.nested_event_contents:
+            return nested_event_class(nested_event_content_deserializer(content))
 
 class BaseProxyEvent(DictWrapper):
     @property

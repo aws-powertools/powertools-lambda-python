@@ -1,6 +1,6 @@
 from typing import Dict, Iterator
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
 class SNSMessageAttribute(DictWrapper):
@@ -16,7 +16,7 @@ class SNSMessageAttribute(DictWrapper):
         return self["Value"]
 
 
-class SNSMessage(DictWrapper):
+class SNSMessage(EventWrapper):
     @property
     def signature_version(self) -> str:
         """Version of the Amazon SNS signature used."""
@@ -99,7 +99,7 @@ class SNSEventRecord(DictWrapper):
         return SNSMessage(self._data["Sns"])
 
 
-class SNSEvent(DictWrapper):
+class SNSEvent(EventWrapper):
     """SNS Event
 
     Documentation:
