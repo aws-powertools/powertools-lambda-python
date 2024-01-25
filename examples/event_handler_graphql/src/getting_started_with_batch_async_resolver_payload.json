@@ -1,0 +1,52 @@
+[
+    {
+       "arguments":{
+          "post_id":"1"
+       },
+       "identity":"None",
+       "source":"None",
+       "request":{
+          "headers":{
+             "x-forwarded-for":"18.68.31.36",
+             "sec-ch-ua-mobile":"?0"
+          }
+       },
+       "prev":"None",
+       "info":{
+          "fieldName":"relatedPosts",
+          "selectionSetList":[
+             "relatedPosts"
+          ],
+          "selectionSetGraphQL":"{\n  relatedPosts {\n    downs\n    content\n    relatedPosts {\n      ups\n      downs\n      relatedPosts {\n        content\n        downs\n      }\n    }\n  }\n}",
+          "parentTypeName":"Query",
+          "variables":{
+
+          }
+       }
+    },
+    {
+        "arguments":{
+           "post_id":"10"
+        },
+        "identity":"None",
+        "source":"None",
+        "request":{
+           "headers":{
+              "x-forwarded-for":"18.68.31.36",
+              "sec-ch-ua-mobile":"?0"
+           }
+        },
+        "prev":"None",
+        "info":{
+           "fieldName":"relatedPosts",
+           "selectionSetList":[
+              "relatedPosts"
+           ],
+           "selectionSetGraphQL":"{\n  relatedPosts {\n    downs\n    content\n    relatedPosts {\n      ups\n      downs\n      relatedPosts {\n        content\n        downs\n      }\n    }\n  }\n}",
+           "parentTypeName":"Query",
+           "variables":{
+
+           }
+        }
+     }
+ ]

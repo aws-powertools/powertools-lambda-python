@@ -1,8 +1,10 @@
 import asyncio
 import logging
+import warnings
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
+from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayload, ResolverNotFound
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -121,6 +123,25 @@ class BasePublic(ABC):
         field_name: Optional[str]
             The name of the field (default is None).
 
+        Examples
+        --------
+        ```
+            from typing import Optional
+
+            from aws_lambda_powertools.event_handler import AppSyncResolver
+            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+            from aws_lambda_powertools.utilities.typing import LambdaContext
+
+            app = AppSyncResolver()
+
+            @app.resolver(type_name="Query", field_name="getPost")
+            def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+                return {"success": "ok"}
+
+            def lambda_handler(event, context: LambdaContext) -> dict:
+                return app.resolve(event, context)
+        ```
+
         Returns
         -------
         Callable
@@ -139,6 +160,63 @@ class BasePublic(ABC):
             The name of the type.
         field_name: Optional[str]
             The name of the field (default is None).
+
+        Examples
+        --------
+        ```
+            from typing import Optional
+
+            from aws_lambda_powertools.event_handler import AppSyncResolver
+            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+            from aws_lambda_powertools.utilities.typing import LambdaContext
+
+            app = AppSyncResolver()
+
+            @app.batch_resolver(type_name="Query", field_name="getPost")
+            def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+                return {"post_id": id}
+
+            def lambda_handler(event, context: LambdaContext) -> dict:
+                return app.resolve(event, context)
+        ```
+
+        Returns
+        -------
+        Callable
+            The batch resolver function.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        """
+        Retrieve a batch resolver function for a specific type and field.
+
+        Parameters
+        -----------
+        type_name: str
+            The name of the type.
+        field_name: Optional[str]
+            The name of the field (default is None).
+
+        Examples
+        --------
+        ```
+            from typing import Optional
+
+            from aws_lambda_powertools.event_handler import AppSyncResolver
+            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+            from aws_lambda_powertools.utilities.typing import LambdaContext
+
+            app = AppSyncResolver()
+
+            @app.batch_async_resolver(type_name="Query", field_name="getPost")
+            async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+                return {"post_id": id}
+
+            def lambda_handler(event, context: LambdaContext) -> dict:
+                return app.resolve(event, context)
+        ```
 
         Returns
         -------
@@ -391,32 +469,45 @@ class AppSyncResolver(Router):
             Event
         data_model : Type[AppSyncResolverEvent]
             Data_model to decode AppSync event, by default it is of AppSyncResolverEvent type or subclass of it
+
+        Returns
+        -------
+        List[Any]
+            Results of the resolver execution.
+
+        Raises
+        ------
+        InconsistentPayload:
+            If all events in the batch do not have the same fieldName.
+
+        ResolverNotFound:
+            If no resolver is found for the specified type and field.
         """
 
-        # Check if all events have the same field name
-        if len({x["info"]["fieldName"] for x in event}) > 1:
-            raise ValueError("batch with different field names. It shouldn't happen!")
+        # All events in the batch must have the same fieldName
+        field_names = {field_name["info"]["fieldName"] for field_name in event}
+        if len(field_names) > 1:
+            raise InconsistentPayload(f"All events in the batch must have the same fieldName. Found: {field_names}")
 
         self.current_batch_event = [data_model(e) for e in event]
+        type_name, field_name = self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
 
-        # Check if we have synchronous or asynchronous resolver available
-        resolver = self._batch_resolver_registry.find_resolver(
-            self.current_batch_event[0].type_name,
-            self.current_batch_event[0].field_name,
-        )
-        async_resolver = self._batch_async_resolver_registry.find_resolver(
-            self.current_batch_event[0].type_name,
-            self.current_batch_event[0].field_name,
-        )
+        resolver = self._batch_resolver_registry.find_resolver(type_name, field_name)
+        async_resolver = self._batch_async_resolver_registry.find_resolver(type_name, field_name)
+
+        if resolver and async_resolver:
+            warnings.warn(
+                f"Both synchronous and asynchronous resolvers found for the same event and field."
+                f"The synchronous resolver takes precedence. Executing: {resolver.__name__}",
+                stacklevel=2,
+            )
+
         if resolver:
             return self._call_sync_batch_resolver(resolver)
         elif async_resolver:
             return asyncio.run(self._call_async_batch_resolver(async_resolver))
         else:
-            raise ValueError(
-                f"No resolver found for \
-                    '{self.current_batch_event[0].type_name}.{self.current_batch_event[0].field_name}'",
-            )
+            raise ResolverNotFound(f"No resolver found for '{type_name}.{field_name}'")
 
     def __call__(
         self,

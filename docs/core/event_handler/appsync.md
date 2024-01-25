@@ -261,22 +261,36 @@ You can use `append_context` when you want to share data between your App and Ro
 
 ### Batch processing
 
-We also support Appsync batching mechanism for Lambda Resolvers. In case you want to handle multiple events in a batch to avoid multiple lambda executions just configure your Appsync to group multiple events together and then annotate your function with `@batch_resolver` decorator. Batch resolver will execute your function with every event in the provided batch list.
+We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` decorator.
 
 ???+ info
     If you want to understand more how to configure batch processing for the appsynch, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}
 
-=== "batch_resolvers.py"
-  	```python hl_lines="79-81"
-    --8<-- "examples/event_handler_graphql/src/batch_resolvers.py"
+=== "getting_started_with_batch_resolver.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver.py"
+  	```
+
+=== "getting_started_with_batch_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 #### Async
 
-Alternatively, you can use async batch processor. Use it if you want to benefit from concurrency and keeping the order of execution is not required for you.
-=== "batch_async_resolvers.py"
-  	```python hl_lines="90-92"
-    --8<-- "examples/event_handler_graphql/src/batch_async_resolvers.py"
+Choose the asynchronous batch processor when your objective is to leverage concurrency capabilities without the necessity of preserving records in a specific order.
+
+???+ warning
+    Make sure that preserving the order of the response is not a requirement of your logic.
+
+=== "getting_started_with_batch_async_resolver.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver.py"
+  	```
+
+=== "getting_started_with_batch_async_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver_payload.json"
   	```
 
 ## Testing your code
