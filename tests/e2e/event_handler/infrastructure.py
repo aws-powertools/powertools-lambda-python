@@ -1,12 +1,10 @@
-from pathlib import Path
 from typing import Dict, Optional
 
-from aws_cdk import CfnOutput, Duration, Expiration
+from aws_cdk import CfnOutput
 from aws_cdk import aws_apigateway as apigwv1
 from aws_cdk import aws_apigatewayv2_alpha as apigwv2
 from aws_cdk import aws_apigatewayv2_authorizers_alpha as apigwv2authorizers
 from aws_cdk import aws_apigatewayv2_integrations_alpha as apigwv2integrations
-from aws_cdk import aws_appsync_alpha as appsync
 from aws_cdk import aws_ec2 as ec2
 from aws_cdk import aws_elasticloadbalancingv2 as elbv2
 from aws_cdk import aws_elasticloadbalancingv2_targets as targets
@@ -23,7 +21,6 @@ class EventHandlerStack(BaseInfrastructure):
         self._create_api_gateway_rest(function=functions["ApiGatewayRestHandler"])
         self._create_api_gateway_http(function=functions["ApiGatewayHttpHandler"])
         self._create_lambda_function_url(function=functions["LambdaFunctionUrlHandler"])
-        self._create_appsync_endpoint(function=functions["AppsyncResolverHandler"])
 
     def _create_alb(self, function: Function):
         vpc = ec2.Vpc.from_lookup(
@@ -94,50 +91,3 @@ class EventHandlerStack(BaseInfrastructure):
         # Maintenance: move auth to IAM when we create sigv4 builders
         function_url = function.add_function_url(auth_type=FunctionUrlAuthType.AWS_IAM)
         CfnOutput(self.stack, "LambdaFunctionUrl", value=function_url.url)
-
-    def _create_appsync_endpoint(self, function: Function):
-        api = appsync.GraphqlApi(
-            self.stack,
-            "Api",
-            name="e2e-tests",
-            schema=appsync.SchemaFile.from_asset(str(Path(self.feature_path, "files/schema.graphql"))),
-            authorization_config=appsync.AuthorizationConfig(
-                default_authorization=appsync.AuthorizationMode(
-                    authorization_type=appsync.AuthorizationType.API_KEY,
-                    api_key_config=appsync.ApiKeyConfig(
-                        description="public key for getting data",
-                        expires=Expiration.after(Duration.hours(25)),
-                        name="API Token",
-                    ),
-                ),
-            ),
-            xray_enabled=False,
-        )
-        lambda_datasource = api.add_lambda_data_source("DataSource", lambda_function=function)
-
-        lambda_datasource.create_resolver(
-            "QueryGetAllPostsResolver",
-            type_name="Query",
-            field_name="allPosts",
-        )
-        lambda_datasource.create_resolver(
-            "QueryGetPostResolver",
-            type_name="Query",
-            field_name="getPost",
-        )
-        lambda_datasource.create_resolver(
-            "QueryGetPostRelatedResolver",
-            type_name="Post",
-            field_name="relatedPosts",
-            max_batch_size=10,
-        )
-
-        lambda_datasource.create_resolver(
-            "QueryGetPostRelatedAsyncResolver",
-            type_name="Post",
-            field_name="relatedPostsAsync",
-            max_batch_size=10,
-        )
-
-        CfnOutput(self.stack, "GraphQLHTTPUrl", value=api.graphql_url)
-        CfnOutput(self.stack, "GraphQLAPIKey", value=api.api_key)
