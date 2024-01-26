@@ -360,6 +360,216 @@ def test_resolve_batch_processing():
     assert not app.current_event
 
 
+def test_resolve_batch_processing_with_raise_on_exception():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": [3, 4],
+            },
+        },
+    ]
+
+    app = AppSyncResolver(raise_error_on_failed_batch=True)
+
+    @app.batch_resolver(field_name="listLocations")
+    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        raise RuntimeError
+
+    # Call the implicit handler
+    with pytest.raises(RuntimeError):
+        app.resolve(event, LambdaContext())
+
+
+def test_async_resolve_batch_processing_with_raise_on_exception():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": [3, 4],
+            },
+        },
+    ]
+
+    app = AppSyncResolver(raise_error_on_failed_batch=True)
+
+    @app.batch_async_resolver(field_name="listLocations")
+    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        raise RuntimeError
+
+    # Call the implicit handler
+    with pytest.raises(RuntimeError):
+        app.resolve(event, LambdaContext())
+
+
+def test_resolve_batch_processing_without_exception():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": [3, 4],
+            },
+        },
+    ]
+
+    app = AppSyncResolver(raise_error_on_failed_batch=False)
+
+    @app.batch_resolver(field_name="listLocations")
+    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        raise RuntimeError
+
+    # Call the implicit handler
+    result = app.resolve(event, LambdaContext())
+    assert result == [None, None, None]
+
+    assert app.current_batch_event and len(app.current_batch_event) == len(event)
+    assert not app.current_event
+
+
+def test_resolve_async_batch_processing_without_exception():
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "2",
+            },
+        },
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": [3, 4],
+            },
+        },
+    ]
+
+    app = AppSyncResolver(raise_error_on_failed_batch=False)
+
+    @app.batch_async_resolver(field_name="listLocations")
+    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+        raise RuntimeError
+
+    # Call the implicit handler
+    result = app.resolve(event, LambdaContext())
+    assert result == [None, None, None]
+
+    assert app.current_batch_event and len(app.current_batch_event) == len(event)
+    assert not app.current_event
+
+
 def test_resolver_batch_resolver_many_fields_with_different_name():
     # GIVEN
     app = AppSyncResolver()

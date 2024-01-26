@@ -505,7 +505,7 @@ class AppSyncResolver(Router):
             The result of the resolver function or None if an error occurs and self.raise_error_on_failed_batch is False
         """
 
-        if self.raise_error_on_failed_batch:
+        if not self.raise_error_on_failed_batch:
             try:
                 return await async_resolver(event=appconfig_event, **kwargs)
             except Exception:
