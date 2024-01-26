@@ -337,11 +337,12 @@ class AppSyncResolver(Router):
             return str(uuid.uuid4())
     """
 
-    def __init__(self):
+    def __init__(self, raise_error_on_failed_batch: bool = False):
         super().__init__()
         self.current_batch_event: List[AppSyncResolverEvent] = []
         self.current_event: Optional[AppSyncResolverEvent] = None
         self.lambda_context: Optional[LambdaContext] = None
+        self.raise_error_on_failed_batch = raise_error_on_failed_batch
 
     def resolve(
         self,
@@ -448,17 +449,93 @@ class AppSyncResolver(Router):
         return resolver(**self.current_event.arguments)
 
     def _call_sync_batch_resolver(self, sync_resolver: Callable) -> List[Any]:
+        """
+        Calls a synchronous batch resolver function for each event in the current batch.
+
+        Parameters
+        ----------
+        sync_resolver: Callable
+            The callable function to resolve events.
+
+        Returns
+        -------
+        List[Any]
+            A list of results corresponding to the resolved events.
+        """
+        results: List = []
+
+        # Check if we should raise errors or continue and append None in failed records
+        if not self.raise_error_on_failed_batch:
+            for appconfig_event in self.current_batch_event:
+                try:
+                    results.append(sync_resolver(event=appconfig_event, **appconfig_event.arguments))
+                except Exception:
+                    # If an error occurs and raise_error_on_failed_batch is False,
+                    # append None to the results and continue with the next event.
+                    results.append(None)
+
+            return results
+
         return [
             sync_resolver(event=appconfig_event, **appconfig_event.arguments)
             for appconfig_event in self.current_batch_event
         ]
 
+    async def _async_process_batch_event(
+        self,
+        async_resolver: Callable,
+        appconfig_event: AppSyncResolverEvent,
+        **kwargs,
+    ):
+        """
+        Asynchronously process a batch event using the provided async_resolver.
+
+        Parameters
+        ----------
+        async_resolver: Callable
+            The asynchronous resolver function.
+        appconfig_event: AppSyncResolverEvent
+            The event to process.
+        **kwargs
+            Additional keyword arguments to pass to the resolver.
+
+        Returns
+        -------
+        Any
+            The result of the resolver function or None if an error occurs and self.raise_error_on_failed_batch is False
+        """
+
+        if self.raise_error_on_failed_batch:
+            try:
+                return await async_resolver(event=appconfig_event, **kwargs)
+            except Exception:
+                return None
+
+        # If raise_error_on_failed_batch is False, proceed without raising errors
+        return await async_resolver(event=appconfig_event, **kwargs)
+
     async def _call_async_batch_resolver(self, async_resolver: Callable) -> List[Any]:
-        tasks = [
-            asyncio.ensure_future(async_resolver(event=appconfig_event, **appconfig_event.arguments))
-            for appconfig_event in self.current_batch_event
-        ]
-        return await asyncio.gather(*tasks)
+        """
+        Asynchronously call a batch resolver for each event in the current batch.
+
+        Parameters
+        ----------
+        async_resolver: Callable
+            The asynchronous resolver function.
+
+        Returns
+        -------
+        List[Any]
+            A list of results corresponding to the resolved events.
+        """
+        return list(
+            await asyncio.gather(
+                *[
+                    self._async_process_batch_event(async_resolver, appconfig_event, **appconfig_event.arguments)
+                    for appconfig_event in self.current_batch_event
+                ],
+            ),
+        )
 
     def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
         """Call batch event resolver for sync and async methods
