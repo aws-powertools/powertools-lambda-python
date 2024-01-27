@@ -261,10 +261,10 @@ You can use `append_context` when you want to share data between your App and Ro
 
 ### Batch processing
 
-We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` decorator.
+We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` or `@batch_async_resolver` decorators.
 
 ???+ info
-    If you want to understand more how to configure batch processing for the appsynch, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}
+    If you want to understand more how to configure batch processing for the AppSync, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
 
 === "getting_started_with_batch_resolver.py"
   	```python hl_lines="3 7 17"
@@ -274,6 +274,25 @@ We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple
 === "getting_started_with_batch_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+  	```
+
+#### Handling exceptions
+
+By default, records that fail during Lambda execution return `None` to ensure the entire batch doesn't fail due to processing errors. However, you have the option to actively return exceptions for debugging or troubleshooting.
+
+???+ tip
+    For better error handling, you may need to configure response mapping templates and specify error keys. Explore more on returning individual errors [here](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}.
+
+=== "enable_exceptions_batch_resolver.py"
+  	```python hl_lines="3 7 21"
+    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver.py"
+  	```
+
+    1. You can enable the exceptions by setting `raise_error_on_failed_batch` to True.
+
+=== "enable_exceptions_batch_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver_payload.json"
   	```
 
 #### Async
