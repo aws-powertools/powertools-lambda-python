@@ -125,21 +125,21 @@ class BasePublic(ABC):
 
         Examples
         --------
-        ```
-            from typing import Optional
+        ```python
+        from typing import Optional
 
-            from aws_lambda_powertools.event_handler import AppSyncResolver
-            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-            from aws_lambda_powertools.utilities.typing import LambdaContext
+        from aws_lambda_powertools.event_handler import AppSyncResolver
+        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+        from aws_lambda_powertools.utilities.typing import LambdaContext
 
-            app = AppSyncResolver()
+        app = AppSyncResolver()
 
-            @app.resolver(type_name="Query", field_name="getPost")
-            def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
-                return {"success": "ok"}
+        @app.resolver(type_name="Query", field_name="getPost")
+        def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
+            return {"success": "ok"}
 
-            def lambda_handler(event, context: LambdaContext) -> dict:
-                return app.resolve(event, context)
+        def lambda_handler(event, context: LambdaContext) -> dict:
+            return app.resolve(event, context)
         ```
 
         Returns
@@ -163,21 +163,21 @@ class BasePublic(ABC):
 
         Examples
         --------
-        ```
-            from typing import Optional
+        ```python
+        from typing import Optional
 
-            from aws_lambda_powertools.event_handler import AppSyncResolver
-            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-            from aws_lambda_powertools.utilities.typing import LambdaContext
+        from aws_lambda_powertools.event_handler import AppSyncResolver
+        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+        from aws_lambda_powertools.utilities.typing import LambdaContext
 
-            app = AppSyncResolver()
+        app = AppSyncResolver()
 
-            @app.batch_resolver(type_name="Query", field_name="getPost")
-            def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
-                return {"post_id": id}
+        @app.batch_resolver(type_name="Query", field_name="getPost")
+        def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+            return {"post_id": id}
 
-            def lambda_handler(event, context: LambdaContext) -> dict:
-                return app.resolve(event, context)
+        def lambda_handler(event, context: LambdaContext) -> dict:
+            return app.resolve(event, context)
         ```
 
         Returns
@@ -201,21 +201,21 @@ class BasePublic(ABC):
 
         Examples
         --------
-        ```
-            from typing import Optional
+        ```python
+        from typing import Optional
 
-            from aws_lambda_powertools.event_handler import AppSyncResolver
-            from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-            from aws_lambda_powertools.utilities.typing import LambdaContext
+        from aws_lambda_powertools.event_handler import AppSyncResolver
+        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
+        from aws_lambda_powertools.utilities.typing import LambdaContext
 
-            app = AppSyncResolver()
+        app = AppSyncResolver()
 
-            @app.batch_async_resolver(type_name="Query", field_name="getPost")
-            async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
-                return {"post_id": id}
+        @app.batch_async_resolver(type_name="Query", field_name="getPost")
+        async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
+            return {"post_id": id}
 
-            def lambda_handler(event, context: LambdaContext) -> dict:
-                return app.resolve(event, context)
+        def lambda_handler(event, context: LambdaContext) -> dict:
+            return app.resolve(event, context)
         ```
 
         Returns
@@ -308,36 +308,44 @@ class Router(BasePublic):
 
 class AppSyncResolver(Router):
     """
-    AppSync resolver decorator
+    AppSync GraphQL API Resolver
 
     Example
     -------
+    ```python
+    from aws_lambda_powertools.event_handler import AppSyncResolver
 
-    **Sample usage**
+    app = AppSyncResolver()
 
-        from aws_lambda_powertools.event_handler import AppSyncResolver
+    @app.resolver(type_name="Query", field_name="listLocations")
+    def list_locations(page: int = 0, size: int = 10) -> list:
+        # Your logic to fetch locations with arguments passed in
+        return [{"id": 100, "name": "Smooth Grooves"}]
 
-        app = AppSyncResolver()
+    @app.resolver(type_name="Merchant", field_name="extraInfo")
+    def get_extra_info() -> dict:
+        # Can use "app.current_event.source" to filter within the parent context
+        account_type = app.current_event.source["accountType"]
+        method = "BTC" if account_type == "NEW" else "USD"
+        return {"preferredPaymentMethod": method}
 
-        @app.resolver(type_name="Query", field_name="listLocations")
-        def list_locations(page: int = 0, size: int = 10) -> list:
-            # Your logic to fetch locations with arguments passed in
-            return [{"id": 100, "name": "Smooth Grooves"}]
-
-        @app.resolver(type_name="Merchant", field_name="extraInfo")
-        def get_extra_info() -> dict:
-            # Can use "app.current_event.source" to filter within the parent context
-            account_type = app.current_event.source["accountType"]
-            method = "BTC" if account_type == "NEW" else "USD"
-            return {"preferredPaymentMethod": method}
-
-        @app.resolver(field_name="commonField")
-        def common_field() -> str:
-            # Would match all fieldNames matching 'commonField'
-            return str(uuid.uuid4())
+    @app.resolver(field_name="commonField")
+    def common_field() -> str:
+        # Would match all fieldNames matching 'commonField'
+        return str(uuid.uuid4())
+    ```
     """
 
     def __init__(self, raise_error_on_failed_batch: bool = False):
+        """
+        Initialize a new instance of the AppSyncResolver.
+
+        Parameters
+        ----------
+        raise_error_on_failed_batch: bool
+            A flag indicating whether to raise an error when processing batches
+            with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        """
         super().__init__()
         self.current_batch_event: List[AppSyncResolverEvent] = []
         self.current_event: Optional[AppSyncResolverEvent] = None
