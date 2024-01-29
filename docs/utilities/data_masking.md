@@ -5,7 +5,7 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The data masking utility can encrypt, decrypt, or irreversibly mask sensitive information to protect data confidentiality.
+The data masking utility can encrypt, decrypt, or irreversibly erase sensitive information to protect data confidentiality.
 
 ```mermaid
 stateDiagram-v2
@@ -14,18 +14,18 @@ stateDiagram-v2
     DataMasking: DataMasking
     Operation: Possible operations
     Input: Sensitive value
-    Mask: <strong>Mask</strong>
+    Erase: <strong>Erase</strong>
     Encrypt: <strong>Encrypt</strong>
     Decrypt: <strong>Decrypt</strong>
     Provider: AWS Encryption SDK provider
-    Result: Data transformed <i>(masked, encrypted, or decrypted)</i>
+    Result: Data transformed <i>(erased, encrypted, or decrypted)</i>
 
     LambdaFn --> DataMasking
     DataMasking --> Operation
 
     state Operation {
         [*] --> Input
-        Input --> Mask: Irreversible
+        Input --> Erase: Irreversible
         Input --> Encrypt
         Input --> Decrypt
         Encrypt --> Provider
@@ -37,13 +37,13 @@ stateDiagram-v2
 
 ## Key features
 
-* Encrypt, decrypt, or irreversibly mask data with ease
+* Encrypt, decrypt, or irreversibly erase data with ease
 * Remove sensitive information in one or more fields within nested data
 * Seamless integration with [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank"} for industry and AWS security best practices
 
 ## Terminology
 
-**Masking** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. It replaces data in-memory, hence why being irreversible.
+**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. It replaces data in-memory, hence why being irreversible.
 
 **Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it.
 
@@ -97,13 +97,13 @@ Before you start, you will need a KMS symmetric key to encrypt and decrypt your 
     1. [Key policy examples using IAM Roles](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators){target="_blank"}
     2. [SAM generated CloudFormation Resources](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role){target="_blank"}
 
-### Masking data
+### Erasing data
 
-Masking will erase the original data and replace with `*****`. This means you cannot recover masked data, and its type will change to `str`.
+Erasing will erase the original data and replace with `*****`. This means you cannot recover erased data, and its type will change to `str`.
 
-=== "getting_started_mask_data.py"
+=== "getting_started_erase_data.py"
     ```python hl_lines="4 8 17"
-    --8<-- "examples/data_masking/src/getting_started_mask_data.py"
+    --8<-- "examples/data_masking/src/getting_started_erase_data.py"
     ```
 
     1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
@@ -113,9 +113,9 @@ Masking will erase the original data and replace with `*****`. This means you ca
     --8<-- "examples/data_masking/src/generic_data_input.json"
     ```
 
-=== "getting_started_mask_data_output.json"
+=== "getting_started_erase_data_output.json"
     ```json hl_lines="5 7 12"
-    --8<-- "examples/data_masking/src/getting_started_mask_data_output.json"
+    --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
     ```
 
 ### Encrypting data
@@ -208,14 +208,14 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 !!! note "We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
 
-You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `mask`, `encrypt`, or `decrypt`. This is useful when you want to keep data structure intact except the confidential fields.
+You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `erase`, `encrypt`, or `decrypt`. This is useful when you want to keep data structure intact except the confidential fields.
 
-When `fields` is present, `mask` and `encrypt` behave differently:
+When `fields` is present, `erase` and `encrypt` behave differently:
 
 | Operation | Behavior                                                    | Example                 | Obfuscated                      |
 | --------- | ----------------------------------------------------------- | ----------------------- | ------------------------------- |
 | `encrypt` | Obfuscate entire data and replacing with ciphertext string. | `{"cards": ["a", "b"]}` | `{"cards": "ciphertext"}`       |
-| `mask`    | Replace data while keeping collections type intact.         | `{"cards": ["a", "b"]}` | `{"cards": ["*****", "*****"]}` |
+| `erase`    | Replace data while keeping collections type intact.         | `{"cards": ["a", "b"]}` | `{"cards": ["*****", "*****"]}` |
 
 Here are common scenarios to best visualize how to use `fields`.
 
@@ -439,9 +439,9 @@ The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY
 
 The following sequence diagrams explain how `DataMasking` behaves under different scenarios.
 
-#### Mask operation
+#### Erase operation
 
-Masking operations occur in-memory and we cannot recover the original value.
+Erasing operations occur in-memory and we cannot recover the original value.
 
 <center>
 ```mermaid
@@ -572,9 +572,9 @@ sequenceDiagram
 
 ## Testing your code
 
-### Testing mask operation
+### Testing erase operation
 
-Testing your code with a simple mask operation
+Testing your code with a simple erase operation
 
 === "test_lambda_mask.py"
     ```python hl_lines="22"

@@ -38,9 +38,9 @@ class DataMasking:
             "sensitive": "password"
         }
 
-        masked = masker.erase(data,fields=["sensitive"])
+        erased = masker.erase(data,fields=["sensitive"])
 
-        return masked
+        return erased
 
     ```
     """
@@ -180,7 +180,7 @@ class DataMasking:
     ) -> Union[dict, str]:
         """
         This method takes the input data, which can be either a dictionary or a JSON string,
-        and applies a mask, an encryption, or a decryption to the specified fields.
+        and erases, encrypts, or decrypts the specified fields.
 
         Parameters
         ----------
@@ -222,7 +222,6 @@ class DataMasking:
         new_dict = {'a': {'b': {'c': 'transformed_value'}}, 'x': {'y': 'transformed_value'}}
         ```
         """
-        logger.debug('IN APPLY ACTION TO FIELDS!!')
 
         data_parsed: dict = self._normalize_data_to_parse(fields, data)
 

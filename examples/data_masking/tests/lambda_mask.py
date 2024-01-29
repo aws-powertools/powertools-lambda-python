@@ -9,6 +9,6 @@ data_masker = DataMasking()
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data = event
 
-    masked = data_masker.erase(data, fields=["testkey"])
+    erased = data_masker.erase(data, fields=["testkey"])
 
-    return masked
+    return erased

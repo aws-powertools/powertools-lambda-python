@@ -46,67 +46,67 @@ def data_masker(monkeypatch) -> DataMasking:
     return DataMasking(provider=provider)
 
 
-def test_mask_int(data_masker):
+def test_erase_int(data_masker):
     # GIVEN an int data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase(42)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(42)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_float(data_masker):
+def test_erase_float(data_masker):
     # GIVEN a float data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase(4.2)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(4.2)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_bool(data_masker):
+def test_erase_bool(data_masker):
     # GIVEN a bool data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase(True)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(True)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_none(data_masker):
+def test_erase_none(data_masker):
     # GIVEN a None data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase(None)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(None)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_str(data_masker):
+def test_erase_str(data_masker):
     # GIVEN a str data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase("this is a string")
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase("this is a string")
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_list(data_masker):
+def test_erase_list(data_masker):
     # GIVEN a list data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase([1, 2, "string", 3])
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase([1, 2, "string", 3])
 
     # THEN the result is the data masked, while maintaining type list
-    assert masked_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
+    assert erased_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
 
 
-def test_mask_dict(data_masker):
+def test_erase_dict(data_masker):
     # GIVEN a dict data type
     data = {
         "a": {
@@ -115,14 +115,14 @@ def test_mask_dict(data_masker):
         },
     }
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.erase(data)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(data)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_dict_with_fields(data_masker):
+def test_erase_dict_with_fields(data_masker):
     # GIVEN a dict data type
     data = {
         "a": {
@@ -131,11 +131,11 @@ def test_mask_dict_with_fields(data_masker):
         },
     }
 
-    # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
+    # WHEN erase is called with a list of fields specified
+    erased_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
-    assert masked_string == {
+    assert erased_string == {
         "a": {
             "1": {"None": DATA_MASKING_STRING, "four": "world"},
             "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}},
@@ -143,7 +143,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
 
-def test_mask_json_dict_with_fields(data_masker):
+def test_erase_json_dict_with_fields(data_masker):
     # GIVEN the data type is a json representation of a dictionary
     data = json.dumps(
         {
@@ -154,7 +154,7 @@ def test_mask_json_dict_with_fields(data_masker):
         },
     )
 
-    # WHEN mask is called with a list of fields specified
+    # WHEN erase is called with a list of fields specified
     masked_json_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked

@@ -12,8 +12,8 @@ data_masker = DataMasking()
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data: dict = event.get("body", {})
 
-    logger.info("Masking fields email, address.street, and company_address")
+    logger.info("Erasing fields email, address.street, and company_address")
 
-    masked = data_masker.erase(data, fields=["email", "address.street", "company_address"])  # (1)!
+    erased = data_masker.erase(data, fields=["email", "address.street", "company_address"])  # (1)!
 
-    return masked
+    return erased

@@ -55,7 +55,7 @@ def test_data_masking_init(benchmark):
         pytest.fail(f"High level imports should be below {DATA_MASKING_INIT_SLA}s: {stat}")
 
 
-def mask_json_blob():
+def erase_json_blob():
     data_masker = DataMasking()
     data_masker.erase(json_blob, json_blob_fields)
 
@@ -63,7 +63,7 @@ def mask_json_blob():
 @pytest.mark.perf
 @pytest.mark.benchmark(group="core", disable_gc=True, warmup=False)
 def test_data_masking_encrypt_with_json_blob(benchmark):
-    benchmark.pedantic(mask_json_blob)
+    benchmark.pedantic(erase_json_blob)
     stat = benchmark.stats.stats.max
     if stat > DATA_MASKING_NESTED_ENCRYPT_SLA:
         pytest.fail(f"High level imports should be below {DATA_MASKING_NESTED_ENCRYPT_SLA}s: {stat}")

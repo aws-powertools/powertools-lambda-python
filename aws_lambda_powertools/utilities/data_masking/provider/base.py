@@ -68,7 +68,7 @@ class BaseProvider:
         This method irreversibly erases data.
 
         If the data to be erased is of type `str`, `dict`, or `bytes`,
-        this method will return a masked string, i.e. "*****".
+        this method will return an erased string, i.e. "*****".
 
         If the data to be erased is of an iterable type like `list`, `tuple`,
         or `set`, this method will return a new object of the same type as the
