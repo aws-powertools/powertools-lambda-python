@@ -101,7 +101,6 @@ def test_mask_dict_with_fields(data_masker):
     }
 
     # WHEN mask is called with a list of fields specified
-    # masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
     masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
