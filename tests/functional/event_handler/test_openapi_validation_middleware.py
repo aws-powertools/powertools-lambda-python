@@ -289,6 +289,32 @@ def test_validate_body_param():
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
 
+def test_validate_body_param_with_stripped_headers():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class Model(BaseModel):
+        name: str
+        age: int
+
+    # WHEN a handler is defined with a body parameter
+    # WHEN headers has spaces
+    @app.post("/")
+    def handler(user: Model) -> Model:
+        return user
+
+    LOAD_GW_EVENT["httpMethod"] = "POST"
+    LOAD_GW_EVENT["headers"] = {"Content-type": " application/json "}
+    LOAD_GW_EVENT["path"] = "/"
+    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+
+    # THEN the handler should be invoked and return 200
+    # THEN the body must be a JSON object
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+    assert json.loads(result["body"]) == {"name": "John", "age": 30}
+
+
 def test_validate_body_param_with_invalid_date():
     # GIVEN an APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
