@@ -222,6 +222,7 @@ class DataMasking:
         new_dict = {'a': {'b': {'c': 'transformed_value'}}, 'x': {'y': 'transformed_value'}}
         ```
         """
+        logger.debug('IN APPLY ACTION TO FIELDS!!')
 
         data_parsed: dict = self._normalize_data_to_parse(fields, data)
 
