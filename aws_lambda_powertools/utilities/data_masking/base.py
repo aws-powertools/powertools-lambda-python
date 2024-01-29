@@ -292,6 +292,7 @@ class DataMasking:
         - None: The method does not return any value, as it updates the fields in-place.
         """
         fields[field_name] = action(field_value, provider_options=provider_options, **encryption_context)
+        return fields[field_name]
 
     def _normalize_data_to_parse(self, fields: list, data: str | dict) -> dict:
         if not fields:
