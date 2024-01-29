@@ -1,4 +1,3 @@
-import base64
 import os
 import warnings
 from dataclasses import dataclass
