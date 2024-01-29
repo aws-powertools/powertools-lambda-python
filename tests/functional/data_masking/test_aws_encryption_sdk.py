@@ -6,7 +6,6 @@ import json
 from typing import Any, Callable
 
 import pytest
-
 from aws_encryption_sdk.identifiers import Algorithm
 
 from aws_lambda_powertools.utilities.data_masking import DataMasking
@@ -323,6 +322,7 @@ def test_encrypt_json_with_tuple_fields(data_masker):
     # THEN the result is only the specified fields are masked
     assert decrypted_data == data
 
+
 def test_encrypt_with_encryption_context(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
     data = json.dumps(
@@ -378,6 +378,7 @@ def test_encrypt_with_complex_dict(data_masker):
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == data
+
 
 def test_encrypt_with_slice(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
@@ -453,6 +454,7 @@ def test_encrypt_with_complex_search(data_masker):
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == data
+
 
 def test_encrypt_with_provider_options(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
