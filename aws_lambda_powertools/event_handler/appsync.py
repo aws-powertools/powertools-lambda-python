@@ -190,7 +190,7 @@ class BasePublic(ABC):
     @abstractmethod
     def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
         """
-        Retrieve a batch resolver function for a specific type and field.
+        Retrieve a batch resolver function for a specific type and field and runs async.
 
         Parameters
         -----------
@@ -358,7 +358,7 @@ class AppSyncResolver(Router):
         context: LambdaContext,
         data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
-        """Resolve field_name in single event or in a batch event
+        """Resolves the response based on the provide event and decorator routes
 
         Parameters
         ----------
