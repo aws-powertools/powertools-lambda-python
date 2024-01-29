@@ -225,7 +225,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["card_number"])`
+        > Expression: `data_masker.erase(data, fields=["card_number"])`
 
         ```json hl_lines="4"
         --8<-- "examples/data_masking/src/choosing_payload_top_keys.json"
@@ -243,7 +243,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["address.postcode"])`
+        > Expression: `data_masker.erase(data, fields=["address.postcode"])`
 
         ```json hl_lines="6"
         --8<-- "examples/data_masking/src/choosing_payload_nested_key.json"
@@ -261,7 +261,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["address.postcode", "address.street"])`
+        > Expression: `data_masker.erase(data, fields=["address.postcode", "address.street"])`
 
         ```json hl_lines="6-7"
         --8<-- "examples/data_masking/src/choosing_payload_multiple_keys.json"
@@ -279,7 +279,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["address"])`
+        > Expression: `data_masker.erase(data, fields=["address"])`
 
         ```json hl_lines="6-17"
         --8<-- "examples/data_masking/src/choosing_payload_all_nested_keys.json"
@@ -297,7 +297,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["category..name"])`
+        > Expression: `data_masker.erase(data, fields=["category..name"])`
 
         ```json hl_lines="6"
         --8<-- "examples/data_masking/src/choosing_payload_complex_nested_keys.json"
@@ -315,7 +315,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["address[*].street"])`
+        > Expression: `data_masker.erase(data, fields=["address[*].street"])`
 
         ```json hl_lines="8 12"
         --8<-- "examples/data_masking/src/choosing_payload_list_all_index.json"
@@ -333,7 +333,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["address[-1].street"])`
+        > Expression: `data_masker.erase(data, fields=["address[-1].street"])`
 
         ```json hl_lines="16"
         --8<-- "examples/data_masking/src/choosing_payload_list_slice.json"
@@ -351,7 +351,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.mask(data, fields=["$.address[?(@.postcode > 81846)]"])`
+        > Expression: `data_masker.erase(data, fields=["$.address[?(@.postcode > 81846)]"])`
 
         > `$`: Represents the root of the JSON structure.
 
@@ -378,7 +378,7 @@ Note that the return will be a deserialized JSON and your desired fields updated
 
 === "Data"
 
-    Expression: `data_masker.mask(data, fields=["card_number", "address.postcode"])`
+    Expression: `data_masker.erase(data, fields=["card_number", "address.postcode"])`
 
     ```json
     --8<-- "examples/data_masking/src/choosing_payload_simple_json.json"
@@ -451,7 +451,7 @@ sequenceDiagram
     participant Lambda
     participant DataMasking as Data Masking (in memory)
     Client->>Lambda: Invoke (event)
-    Lambda->>DataMasking: mask(data)
+    Lambda->>DataMasking: erase(data)
     DataMasking->>DataMasking: replaces data with *****
     Note over Lambda,DataMasking: No encryption providers involved.
     DataMasking->>Lambda: data masked

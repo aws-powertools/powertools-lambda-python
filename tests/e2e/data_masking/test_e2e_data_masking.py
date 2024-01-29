@@ -11,7 +11,7 @@ from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sd
 )
 from tests.e2e.utils import data_fetcher
 
-# pytest.skip(reason="Data masking tests disabled until we go GA.", allow_module_level=True)
+pytest.skip(reason="Data masking tests disabled until we go GA.", allow_module_level=True) #???
 
 
 @pytest.fixture

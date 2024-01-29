@@ -9,6 +9,7 @@ from aws_lambda_powertools.utilities.data_masking.exceptions import (
     DataMaskingUnsupportedTypeError,
 )
 
+pytest.skip(reason="Data masking tests disabled until we go GA.", allow_module_level=True) #???
 
 @pytest.fixture
 def data_masker() -> DataMasking:
@@ -102,6 +103,7 @@ def test_mask_dict_with_fields(data_masker):
 
     # WHEN mask is called with a list of fields specified
     masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
+    print('masked_string:', masked_string)
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {

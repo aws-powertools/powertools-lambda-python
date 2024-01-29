@@ -57,7 +57,7 @@ def test_data_masking_init(benchmark):
 
 def mask_json_blob():
     data_masker = DataMasking()
-    data_masker.mask(json_blob, json_blob_fields)
+    data_masker.erase(json_blob, json_blob_fields)
 
 
 @pytest.mark.perf
