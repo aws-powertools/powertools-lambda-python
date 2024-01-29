@@ -24,7 +24,7 @@ class BaseProvider:
         def decrypt(self, data) -> Any:
             # Implementation logic for data decryption
 
-        def mask(self, data) -> Union[str, Iterable]:
+        def erase(self, data) -> Union[str, Iterable]:
             # Implementation logic for data masking
             pass
 
@@ -63,14 +63,14 @@ class BaseProvider:
         """
         raise NotImplementedError("Subclasses must implement decrypt()")
 
-    def mask(self, data, **kwargs) -> Iterable[str]:
+    def erase(self, data, **kwargs) -> Iterable[str]:
         """
-        This method irreversibly masks data.
+        This method irreversibly erases data.
 
-        If the data to be masked is of type `str`, `dict`, or `bytes`,
+        If the data to be erased is of type `str`, `dict`, or `bytes`,
         this method will return a masked string, i.e. "*****".
 
-        If the data to be masked is of an iterable type like `list`, `tuple`,
+        If the data to be erased is of an iterable type like `list`, `tuple`,
         or `set`, this method will return a new object of the same type as the
         input data but with each element replaced by the string "*****".
         """

@@ -51,7 +51,7 @@ def test_mask_int(data_masker):
     # GIVEN an int data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(42)
+    masked_string = data_masker.erase(42)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -61,7 +61,7 @@ def test_mask_float(data_masker):
     # GIVEN a float data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(4.2)
+    masked_string = data_masker.erase(4.2)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -71,7 +71,7 @@ def test_mask_bool(data_masker):
     # GIVEN a bool data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(True)
+    masked_string = data_masker.erase(True)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -81,7 +81,7 @@ def test_mask_none(data_masker):
     # GIVEN a None data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(None)
+    masked_string = data_masker.erase(None)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -91,7 +91,7 @@ def test_mask_str(data_masker):
     # GIVEN a str data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask("this is a string")
+    masked_string = data_masker.erase("this is a string")
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -101,7 +101,7 @@ def test_mask_list(data_masker):
     # GIVEN a list data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask([1, 2, "string", 3])
+    masked_string = data_masker.erase([1, 2, "string", 3])
 
     # THEN the result is the data masked, while maintaining type list
     assert masked_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
@@ -117,7 +117,7 @@ def test_mask_dict(data_masker):
     }
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(data)
+    masked_string = data_masker.erase(data)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -133,7 +133,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
     # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
+    masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {
@@ -156,7 +156,7 @@ def test_mask_json_dict_with_fields(data_masker):
     )
 
     # WHEN mask is called with a list of fields specified
-    masked_json_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
+    masked_json_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_json_string == {
@@ -260,8 +260,8 @@ def test_encrypt_dict_with_fields(data_masker):
     }
 
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=["a.'1'.None", "a..'4'"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.'1'.None", "a..'4'"])
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
     assert decrypted_data == data
@@ -279,11 +279,11 @@ def test_encrypt_json_dict_with_fields(data_masker):
     )
 
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=["a.'1'.None", "a..'4'"])
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["a.'1'.None", "a..'4'"])
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data
 
 
 def test_encrypt_json_with_list_fields(data_masker):
@@ -297,13 +297,12 @@ def test_encrypt_json_with_list_fields(data_masker):
         },
     )
 
-    fields_operation = ["payload.first[0]", "payload.second[0].key1[0]"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data
 
 
 def test_encrypt_json_with_tuple_fields(data_masker):
@@ -317,14 +316,12 @@ def test_encrypt_json_with_tuple_fields(data_masker):
         },
     )
 
-    fields_operation = ["payload.first[0]", "payload.second[0]"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
-
+    assert decrypted_data == data
 
 def test_encrypt_with_encryption_context(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
@@ -337,13 +334,12 @@ def test_encrypt_with_encryption_context(data_masker):
         },
     )
 
-    fields_operation = ["payload.first[0]", "payload.second[0]"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation, data_classification="confidential")
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation, data_classification="confidential")
+    encrypted_data = data_masker.encrypt(data, data_classification="confidential")
+    decrypted_data = data_masker.decrypt(encrypted_data, data_classification="confidential")
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data
 
 
 def test_encrypt_with_complex_dict(data_masker):
@@ -376,14 +372,12 @@ def test_encrypt_with_complex_dict(data_masker):
         },
     )
 
-    fields_operation = ["address[*].postcode"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
-
+    assert decrypted_data == data
 
 def test_encrypt_with_slice(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
@@ -415,13 +409,12 @@ def test_encrypt_with_slice(data_masker):
         },
     )
 
-    fields_operation = ["address[-1]"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data
 
 
 def test_encrypt_with_complex_search(data_masker):
@@ -454,13 +447,12 @@ def test_encrypt_with_complex_search(data_masker):
         },
     )
 
-    fields_operation = ["$.address[?(@.postcode > 81847)]"]
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=["address[1:3]"])
+    encrypted_data = data_masker.encrypt(data)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data
 
 def test_encrypt_with_provider_options(data_masker):
     # GIVEN the data type is a json representation of a dictionary with a list inside
@@ -473,11 +465,10 @@ def test_encrypt_with_provider_options(data_masker):
         },
     )
 
-    fields_operation = ["payload.first[0]", "payload.second[0]"]
     provider_options = {"algorithm": Algorithm.AES_256_GCM_HKDF_SHA512_COMMIT_KEY}
     # WHEN encrypting and then decrypting the encrypted data
-    encrypted_data = data_masker.encrypt(data, fields=fields_operation, provider_options=provider_options)
-    decrypted_data = data_masker.decrypt(encrypted_data, fields=fields_operation)
+    encrypted_data = data_masker.encrypt(data, provider_options=provider_options)
+    decrypted_data = data_masker.decrypt(encrypted_data)
 
     # THEN the result is only the specified fields are masked
-    assert decrypted_data == json.loads(data)
+    assert decrypted_data == data

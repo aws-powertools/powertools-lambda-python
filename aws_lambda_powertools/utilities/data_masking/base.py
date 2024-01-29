@@ -38,7 +38,7 @@ class DataMasking:
             "sensitive": "password"
         }
 
-        masked = masker.mask(data,fields=["sensitive"])
+        masked = masker.erase(data,fields=["sensitive"])
 
         return masked
 
@@ -60,7 +60,7 @@ class DataMasking:
     def encrypt(
         self,
         data: dict,
-        fields: list[str],
+        fields: None = None,
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> dict:
@@ -107,23 +107,23 @@ class DataMasking:
         )
 
     @overload
-    def mask(self, data, fields: None) -> str:
+    def erase(self, data, fields: None) -> str:
         ...
 
     @overload
-    def mask(self, data: list, fields: list[str]) -> list[str]:
+    def erase(self, data: list, fields: list[str]) -> list[str]:
         ...
 
     @overload
-    def mask(self, data: tuple, fields: list[str]) -> tuple[str]:
+    def erase(self, data: tuple, fields: list[str]) -> tuple[str]:
         ...
 
     @overload
-    def mask(self, data: dict, fields: list[str]) -> dict:
+    def erase(self, data: dict, fields: list[str]) -> dict:
         ...
 
-    def mask(self, data: Sequence | Mapping, fields: list[str] | None = None) -> str | list[str] | tuple[str] | dict:
-        return self._apply_action(data=data, fields=fields, action=self.provider.mask)
+    def erase(self, data: Sequence | Mapping, fields: list[str] | None = None) -> str | list[str] | tuple[str] | dict:
+        return self._apply_action(data=data, fields=fields, action=self.provider.erase)
 
     def _apply_action(
         self,

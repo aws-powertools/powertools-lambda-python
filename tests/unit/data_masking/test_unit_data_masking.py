@@ -19,7 +19,7 @@ def test_mask_int(data_masker):
     # GIVEN an int data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(42)
+    masked_string = data_masker.erase(42)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -29,7 +29,7 @@ def test_mask_float(data_masker):
     # GIVEN a float data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(4.2)
+    masked_string = data_masker.erase(4.2)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -39,7 +39,7 @@ def test_mask_bool(data_masker):
     # GIVEN a bool data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(True)
+    masked_string = data_masker.erase(True)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -49,7 +49,7 @@ def test_mask_none(data_masker):
     # GIVEN a None data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(None)
+    masked_string = data_masker.erase(None)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -59,7 +59,7 @@ def test_mask_str(data_masker):
     # GIVEN a str data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask("this is a string")
+    masked_string = data_masker.erase("this is a string")
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -69,7 +69,7 @@ def test_mask_list(data_masker):
     # GIVEN a list data type
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask([1, 2, "string", 3])
+    masked_string = data_masker.erase([1, 2, "string", 3])
 
     # THEN the result is the data masked, while maintaining type list
     assert masked_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
@@ -85,7 +85,7 @@ def test_mask_dict(data_masker):
     }
 
     # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(data)
+    masked_string = data_masker.erase(data)
 
     # THEN the result is the data masked
     assert masked_string == DATA_MASKING_STRING
@@ -101,7 +101,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
     # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
+    masked_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_string == {
@@ -124,7 +124,7 @@ def test_mask_json_dict_with_fields(data_masker):
     )
 
     # WHEN mask is called with a list of fields specified
-    masked_json_string = data_masker.mask(data, fields=["a.'1'.None", "a..'4'"])
+    masked_json_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
     # THEN the result is only the specified fields are masked
     assert masked_json_string == {
@@ -159,7 +159,7 @@ def test_parsing_unsupported_data_type(data_masker):
     # WHEN attempting to pass in a list of fields with input data that is not a dict
     with pytest.raises(DataMaskingUnsupportedTypeError):
         # THEN the result is a TypeError
-        data_masker.mask(42, ["this.field"])
+        data_masker.erase(42, ["this.field"])
 
 
 def test_parsing_with_empty_field(data_masker):
@@ -168,7 +168,7 @@ def test_parsing_with_empty_field(data_masker):
     # WHEN attempting to pass in a list of fields with input data that is not a dict
     with pytest.raises(ValueError):
         # THEN the result is a TypeError
-        data_masker.mask(42, [])
+        data_masker.erase(42, [])
 
 
 def test_parsing_nonexistent_fields_with_raise_on_missing_field():
@@ -185,7 +185,7 @@ def test_parsing_nonexistent_fields_with_raise_on_missing_field():
     # WHEN attempting to pass in fields that do not exist in the input data
     with pytest.raises(DataMaskingFieldNotFoundError):
         # THEN the result is a KeyError
-        data_masker.mask(data, ["'3'..True"])
+        data_masker.erase(data, ["'3'..True"])
 
 
 def test_parsing_nonexistent_fields_warning_on_missing_field():
@@ -201,7 +201,7 @@ def test_parsing_nonexistent_fields_warning_on_missing_field():
 
     # WHEN mask is called with a non-existing field
     with pytest.warns(UserWarning, match="Field or expression*"):
-        masked_json_string = data_masker.mask(data, fields=["non-existing"])
+        masked_json_string = data_masker.erase(data, fields=["non-existing"])
 
     # THEN the "masked" payload is the same of the original
     assert masked_json_string == data
