@@ -21,6 +21,6 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data = event["body"]
 
     data_masker = DataMasking(provider=AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN]))
-    encrypted = data_masker.encrypt(data, fields=["address.street", "job_history.company.company_name"])
-    decrypted = data_masker.decrypt(encrypted, fields=["address.street", "job_history.company.company_name"])
+    encrypted = data_masker.encrypt(data)
+    decrypted = data_masker.decrypt(encrypted)
     return {"Decrypted_json": decrypted}

@@ -19,11 +19,10 @@ logger = Logger()
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data = event.get("body", {})
 
-    logger.info("Decrypting email field")
+    logger.info("Decrypting whole object")
 
     decrypted: dict = data_masker.decrypt(
         data,
-        fields=["email"],
         data_classification="confidential",  # (1)!
         data_type="customer-data",
         tenant_id="a06bf973-0734-4b53-9072-39d7ac5b2cba",

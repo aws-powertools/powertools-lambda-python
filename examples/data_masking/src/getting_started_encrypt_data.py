@@ -18,11 +18,11 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: dict, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     data: dict = event.get("body", {})
 
-    logger.info("Encrypting fields email, address.street, and company_address")
+    logger.info("Encrypting the whole object")
 
-    encrypted = data_masker.encrypt(data, fields=["email", "address.street", "company_address"])  # (2)!
+    encrypted = data_masker.encrypt(data)  # (2)!
 
     return encrypted

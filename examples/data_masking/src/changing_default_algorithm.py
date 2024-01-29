@@ -18,16 +18,15 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: dict, context: LambdaContext) -> dict:
+def lambda_handler(event: dict, context: LambdaContext) -> str:
     data: dict = event.get("body", {})
 
-    logger.info("Encrypting fields email, address.street, and company_address with a different algorithm")
+    logger.info("Encrypting whole object with a different algorithm")
 
     provider_options = {"algorithm": Algorithm.AES_256_GCM_HKDF_SHA512_COMMIT_KEY}
 
     decrypted = data_masker.encrypt(
         data,
-        fields=["email", "address.street", "company_address"],
         provider_options=provider_options,
     )
 

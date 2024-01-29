@@ -23,7 +23,7 @@ class DataMasking:
     Please DON'T USE THIS utility in production environments.
     Keep in mind that when we transition to General Availability (GA), there might be breaking changes introduced.
 
-    The DataMasking class orchestrates masking, encrypting, and decrypting
+    The DataMasking class orchestrates erasing, encrypting, and decrypting
     for the base provider.
 
     Example:
@@ -56,36 +56,15 @@ class DataMasking:
         self.json_deserializer = self.provider.json_deserializer
         self.raise_on_missing_field = raise_on_missing_field
 
-    @overload
     def encrypt(
         self,
-        data: dict,
-        fields: None = None,
-        provider_options: dict | None = None,
-        **encryption_context: str,
-    ) -> dict:
-        ...
-
-    @overload
-    def encrypt(
-        self,
-        data: Mapping | Sequence | Number,
-        fields: None = None,
+        data: dict | Mapping | Sequence | Number,
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> str:
-        ...
-
-    def encrypt(
-        self,
-        data: Mapping | Sequence | Number,
-        fields: list[str] | None = None,
-        provider_options: dict | None = None,
-        **encryption_context: str,
-    ) -> str | Mapping:
         return self._apply_action(
             data=data,
-            fields=fields,
+            fields=None,
             action=self.provider.encrypt,
             provider_options=provider_options or {},
             **encryption_context,
@@ -94,13 +73,12 @@ class DataMasking:
     def decrypt(
         self,
         data,
-        fields: list[str] | None = None,
         provider_options: dict | None = None,
         **encryption_context: str,
     ) -> Any:
         return self._apply_action(
             data=data,
-            fields=fields,
+            fields=None,
             action=self.provider.decrypt,
             provider_options=provider_options or {},
             **encryption_context,
@@ -289,7 +267,7 @@ class DataMasking:
         - **encryption_context: Additional keyword arguments collected into a dictionary.
 
         Returns:
-        - None: The method does not return any value, as it updates the fields in-place.
+        - fields[field_name]: Returns the processed field value
         """
         fields[field_name] = action(field_value, provider_options=provider_options, **encryption_context)
         return fields[field_name]
