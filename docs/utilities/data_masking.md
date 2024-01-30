@@ -206,6 +206,9 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 !!! note "We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
 
+???+ note "Current limitations"
+    1. The `fields` parameter is currently only available to use with the `erase` method, with the potential for it to be added to the `encrypt` and `decrypt` methods in the future.
+
 You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
 When `fields` is present, `erase` behaves differently:
@@ -392,8 +395,7 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ### Data serialization
 
 ???+ note "Current limitations"
-    1. The `fields` parameter is currently only available to use with the `erase` method, with the potential for it to be added to the `encrypt` and `decrypt` methods in the future.
-    2. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
+    1. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
 
 Before we traverse the data structure, we perform two important operations on input data:
 
