@@ -25,4 +25,4 @@ def lambda_handler(event: dict, context: LambdaContext) -> str:
 
     encrypted = data_masker.encrypt(data)  # (2)!
 
-    return encrypted
+    return {"body": encrypted}
