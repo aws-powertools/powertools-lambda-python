@@ -197,7 +197,7 @@ class DataMasking:
         >>> fields = ['a.b.c', 'a.x.y']
         # The function will transform the value at 'a.b.c' (1) and 'a.x.y' (2)
         # and store the result as:
-        new_dict = {'a': {'b': {'c': 'transformed_value'}}, 'x': {'y': 'transformed_value'}}
+        new_dict = {'a': {'b': {'c': '*****'}}, 'x': {'y': '*****'}}
         ```
         """
 

@@ -37,7 +37,7 @@ class BaseProvider:
             "sensitive": "password"
         }
 
-        encrypted = data_masker.encrypt(data, fields=["sensitive"])
+        encrypted = data_masker.encrypt(data)
 
         return encrypted
     ```

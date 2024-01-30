@@ -43,7 +43,7 @@ stateDiagram-v2
 
 ## Terminology
 
-**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. It replaces data in-memory, hence why being irreversible.
+**Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. This operation replaces data in-memory, making it a one-way action.
 
 **Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it.
 
@@ -99,7 +99,7 @@ Before you start, you will need a KMS symmetric key to encrypt and decrypt your 
 
 ### Erasing data
 
-Erasing will erase the original data and replace with `*****`. This means you cannot recover erased data, and its type will change to `str`.
+Erasing will remove the original data and replace it with a `*****`. This means you cannot recover erased data, and the data type will change to `str` for all data unless the data to be erased is of an Iterable type (`list`, `tuple`, `set`), in which case the method will return a new object of the same type as the input data but with each element replaced by the string `*****`.
 
 === "getting_started_erase_data.py"
     ```python hl_lines="4 8 17"
@@ -134,7 +134,6 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
     ```
 
     1. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
-    2. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be encrypted.
 
 === "generic_data_input.json"
     ```json hl_lines="7-9 14"
@@ -165,7 +164,6 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
     1. Note that KMS key alias or key ID won't work.
     2. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will call `Decrypt` API with all master keys when trying to decrypt the data key.
-    3. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter.
 
 === "encrypt_data_output.json"
 
@@ -208,13 +206,12 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 !!! note "We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
 
-You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `erase`, `encrypt`, or `decrypt`. This is useful when you want to keep data structure intact except the confidential fields.
+You can use the `fields` parameter with dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
-When `fields` is present, `erase` and `encrypt` behave differently:
+When `fields` is present, `erase` behaves differently:
 
 | Operation | Behavior                                                    | Example                 | Obfuscated                      |
 | --------- | ----------------------------------------------------------- | ----------------------- | ------------------------------- |
-| `encrypt` | Obfuscate entire data and replacing with ciphertext string. | `{"cards": ["a", "b"]}` | `{"cards": "ciphertext"}`       |
 | `erase`    | Replace data while keeping collections type intact.         | `{"cards": ["a", "b"]}` | `{"cards": ["*****", "*****"]}` |
 
 Here are common scenarios to best visualize how to use `fields`.
@@ -395,7 +392,8 @@ Note that the return will be a deserialized JSON and your desired fields updated
 ### Data serialization
 
 ???+ note "Current limitations"
-    1. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
+    1. The `fields` parameter is currently only available to use with the `erase` method, with the potential for it to be added to the `encrypt` and `decrypt` methods in the future.
+    2. Python classes, `Dataclasses`, and `Pydantic models` are not supported yet.
 
 Before we traverse the data structure, we perform two important operations on input data:
 
@@ -418,12 +416,12 @@ For compatibility or performance, you can optionally pass your own JSON serializ
 
 You can modify the following values when initializing the `AWSEncryptionSDKProvider` to best accommodate your security and performance thresholds.
 
-| Parameter                  | Required | Default               | Description                                                                                   |
-| -------------------------- | -------- | --------------------- | --------------------------------------------------------------------------------------------- |
-| **local_cache_capacity**   |          | `100`                 | The maximum number of entries that can be retained in the local cryptographic materials cache |
-| **max_cache_age_seconds**  |          | `300`                 | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
-| **max_messages_encrypted** |          | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
-| **max_bytes_encrypted**    |          | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
+| Parameter                  | Default               | Description                                                                                   |
+| -------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
+| **local_cache_capacity**   | `100`                 | The maximum number of entries that can be retained in the local cryptographic materials cache |
+| **max_cache_age_seconds**  | `300`                 | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
+| **max_messages_encrypted** | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
+| **max_bytes_encrypted**    | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
 **Changing the default algorithm**
 
