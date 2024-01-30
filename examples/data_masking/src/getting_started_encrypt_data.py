@@ -23,6 +23,6 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 
     logger.info("Encrypting the whole object")
 
-    encrypted = data_masker.encrypt(data)  # (2)!
+    encrypted = data_masker.encrypt(data)
 
     return {"body": encrypted}

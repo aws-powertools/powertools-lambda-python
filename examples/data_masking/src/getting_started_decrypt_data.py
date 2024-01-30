@@ -21,6 +21,6 @@ def lambda_handler(event: dict, context: LambdaContext) -> dict:
 
     logger.info("Decrypting whole object")
 
-    decrypted = data_masker.decrypt(data)  # (3)!
+    decrypted = data_masker.decrypt(data)
 
     return decrypted

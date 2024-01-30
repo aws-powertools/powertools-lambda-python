@@ -38,14 +38,14 @@ stateDiagram-v2
 ## Key features
 
 * Encrypt, decrypt, or irreversibly erase data with ease
-* Remove sensitive information in one or more fields within nested data
+* Erase sensitive information in one or more fields within nested data
 * Seamless integration with [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank"} for industry and AWS security best practices
 
 ## Terminology
 
 **Erasing** replaces sensitive information **irreversibly** with a non-sensitive placeholder _(`*****`)_. This operation replaces data in-memory, making it a one-way action.
 
-**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it.
+**Encrypting** transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it. Learn more about encryption [here](https://aws.amazon.com/blogs/security/importance-of-encryption-and-how-aws-can-help/){target="_blank"}.
 
 **Decrypting** transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.
 
@@ -179,16 +179,16 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
 ### Encryption context for integrity and authenticity
 
-For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data.
+For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data, and even help to prevent a [confused deputy](https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html) situation.
 
 ???+ danger "Important considerations you should know"
     1. **Exact match verification on decrypt**. Be careful using random data like `timestamps` as encryption context if you can't provide them on decrypt.
     2. **Only `string` values are supported**. We will raise `DataMaskingUnsupportedTypeError` for non-string values.
-    3. **Use non-sensitive data only**. When using KMS, encryption context is available as plaintext in AWS CloudTrail. Unless you [intentionally disabled KMS events](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
+    3. **Use non-sensitive data only**. When using KMS, encryption context is available as plaintext in AWS CloudTrail, unless you [intentionally disabled KMS events](https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events){target="_blank"}.
 
 === "getting_started_encryption_context.py"
 
-    ```python hl_lines="27-29"
+    ```python hl_lines="26-28"
     --8<-- "examples/data_masking/src/getting_started_encryption_context.py"
     ```
 
@@ -348,13 +348,13 @@ Here are common scenarios to best visualize how to use `fields`.
 
     === "Data"
 
-        > Expression: `data_masker.erase(data, fields=["$.address[?(@.postcode > 81846)]"])`
+        > Expression: `data_masker.erase(data, fields=["$.address[?(@.postcode > 12000)]"])`
 
         > `$`: Represents the root of the JSON structure.
 
         > `.address`: Selects the "address" property within the JSON structure.
 
-        > `(@.postcode > 81846)`: Specifies the condition that elements should meet. It selects elements where the value of the `postcode` property is `greater than 81846`.
+        > `(@.postcode > 12000)`: Specifies the condition that elements should meet. It selects elements where the value of the `postcode` property is `greater than 12000`.
 
         ```json hl_lines="8 12"
         --8<-- "examples/data_masking/src/choosing_payload_complex_search.json"
@@ -406,7 +406,7 @@ For compatibility or performance, you can optionally pass your own JSON serializ
 
 === "advanced_custom_serializer.py"
 
-    ```python hl_lines="16"
+    ```python hl_lines="17-18"
     --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
     ```
 
@@ -429,7 +429,7 @@ The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY
 
 === "changing_default_algorithm.py"
 
-    ```python hl_lines="5 29"
+    ```python hl_lines="5 26"
     --8<-- "examples/data_masking/src/changing_default_algorithm.py"
     ```
 
