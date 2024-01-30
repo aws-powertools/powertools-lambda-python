@@ -18,7 +18,7 @@ logger = Logger()
 
 
 @logger.inject_lambda_context
-def lambda_handler(event: dict, context: LambdaContext) -> str:
+def lambda_handler(event: dict, context: LambdaContext) -> dict:
     data: dict = event.get("body", {})
 
     logger.info("Encrypting the whole object")
