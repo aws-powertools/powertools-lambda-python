@@ -424,6 +424,38 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 1. `Path` is a special OpenAPI type that allows us to constrain todo_id to be less than 999.
 
+#### Validating headers
+
+We use the `Annotated` type to tell Event Handler that a particular parameter is a header that needs to be validated.
+
+In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+
+* `correlation_id` is a header that must be present in the request
+* `correlation_id`, when set, should have 16 characters
+* Doesn't match? Event Handler will return a validation error response
+
+<!-- markdownlint-disable MD013 -->
+
+=== "validating_headers.py"
+
+    ```python hl_lines="8 10 29"
+    --8<-- "examples/event_handler_rest/src/validating_headers.py"
+    ```
+
+    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    2. `Header` is a special OpenAPI type that can add constraints to a header well as document them
+    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+
+=== "working_with_headers_multi_value.py"
+
+    If you need to handle multi-value for specific headers, you can create a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_headers_multi_value.py"
+    ```
+
+    1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
