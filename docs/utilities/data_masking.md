@@ -213,7 +213,7 @@ You can use the `fields` parameter with the dot notation `.` to choose one or mo
 
 When `fields` is present, `erase` behaves differently:
 
-| Operation | Behavior                                                    | Example                 | Obfuscated                      |
+| Operation | Behavior                                                    | Example                 | Result                      |
 | --------- | ----------------------------------------------------------- | ----------------------- | ------------------------------- |
 | `erase`    | Replace data while keeping collections type intact.         | `{"cards": ["a", "b"]}` | `{"cards": ["*****", "*****"]}` |
 
