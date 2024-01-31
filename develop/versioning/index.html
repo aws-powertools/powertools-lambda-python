@@ -6,17 +6,17 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Guide to update between major Powertools for AWS Lambda (Python) versions">
+        <meta name="description" content="Versioning and maintenance policy for Powertools for AWS Lambda (Python)">
       
       
         <meta name="author" content="Amazon Web Services">
       
       
       
-        <link rel="prev" href="../changelog/">
+        <link rel="prev" href="../automation/">
       
       
-        <link rel="next" href="../we_made_this/">
+        <link rel="next" href="../roadmap/">
       
       
       <link rel="icon" href="../media/aws-logo-light.svg">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Upgrade guide - Powertools for AWS Lambda (Python)</title>
+        <title>Versioning and maintenance policy - Powertools for AWS Lambda (Python)</title>
       
     
     
@@ -81,7 +81,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#end-of-support-v1" class="md-skip">
+        <a href="#overview" class="md-skip">
           Skip to content
         </a>
       
@@ -141,7 +141,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Upgrade guide
+              Versioning and maintenance policy
             
           </span>
         </div>
@@ -243,12 +243,10 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href=".." class="md-tabs__link">
           
   
@@ -282,10 +280,12 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
+      <li class="md-tabs__item md-tabs__item--active">
         <a href="../security/" class="md-tabs__link">
           
   
@@ -347,8 +347,6 @@
       
   
   
-    
-  
   
     
     
@@ -371,13 +369,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
           
@@ -398,7 +396,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Homepage
@@ -451,27 +449,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Upgrade guide
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../upgrade/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -480,93 +460,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#end-of-support-v1" class="md-nav__link">
-    End of support v1
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#migrate-to-v2-from-v1" class="md-nav__link">
-    Migrate to v2 from v1
-  </a>
-  
-    <nav class="md-nav" aria-label="Migrate to v2 from v1">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#quick-summary" class="md-nav__link">
-    Quick summary
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#first-steps" class="md-nav__link">
-    First Steps
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#legacy-sqs-batch-processor" class="md-nav__link">
-    Legacy SQS Batch Processor
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#event-handler-headers-response-format" class="md-nav__link">
-    Event Handler headers response format
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dynamodbstreamevent-in-event-source-data-classes" class="md-nav__link">
-    DynamoDBStreamEvent in Event Source Data Classes
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#feature-flags-and-appconfig-parameter-utility" class="md-nav__link">
-    Feature Flags and AppConfig Parameter utility
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#idempotency-partition-key-format" class="md-nav__link">
-    Idempotency partition key format
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1190,6 +1083,8 @@
       
   
   
+    
+  
   
     
     
@@ -1208,13 +1103,13 @@
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
@@ -1227,7 +1122,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Processes
@@ -1278,9 +1173,27 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../versioning/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Versioning policy
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1289,6 +1202,66 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    Overview
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#versioning" class="md-nav__link">
+    Versioning
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#sdk-major-version-lifecycle" class="md-nav__link">
+    SDK major version lifecycle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#dependency-lifecycle" class="md-nav__link">
+    Dependency lifecycle
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#communication-methods" class="md-nav__link">
+    Communication methods
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-support-matrix" class="md-nav__link">
+    Version support matrix
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1478,70 +1451,43 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#end-of-support-v1" class="md-nav__link">
-    End of support v1
+  <a href="#overview" class="md-nav__link">
+    Overview
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#migrate-to-v2-from-v1" class="md-nav__link">
-    Migrate to v2 from v1
-  </a>
-  
-    <nav class="md-nav" aria-label="Migrate to v2 from v1">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#quick-summary" class="md-nav__link">
-    Quick summary
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#first-steps" class="md-nav__link">
-    First Steps
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#legacy-sqs-batch-processor" class="md-nav__link">
-    Legacy SQS Batch Processor
+  <a href="#versioning" class="md-nav__link">
+    Versioning
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#event-handler-headers-response-format" class="md-nav__link">
-    Event Handler headers response format
+  <a href="#sdk-major-version-lifecycle" class="md-nav__link">
+    SDK major version lifecycle
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#dynamodbstreamevent-in-event-source-data-classes" class="md-nav__link">
-    DynamoDBStreamEvent in Event Source Data Classes
+  <a href="#dependency-lifecycle" class="md-nav__link">
+    Dependency lifecycle
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#feature-flags-and-appconfig-parameter-utility" class="md-nav__link">
-    Feature Flags and AppConfig Parameter utility
+  <a href="#communication-methods" class="md-nav__link">
+    Communication methods
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#idempotency-partition-key-format" class="md-nav__link">
-    Idempotency partition key format
+  <a href="#version-support-matrix" class="md-nav__link">
+    Version support matrix
   </a>
   
 </li>
@@ -1564,334 +1510,86 @@
   
 
 
-  <h1>Upgrade guide</h1>
+  <h1>Versioning policy</h1>
 
-<!-- markdownlint-disable MD043 -->
+<!-- markdownlint-disable MD041 MD043 MD013 -->
 
-<h2 id="end-of-support-v1">End of support v1<a class="headerlink" href="#end-of-support-v1" title="Permanent link">&para;</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">On March 31st, 2023, Powertools for AWS Lambda (Python) v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version.</p>
+<h3 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h3>
+<p>This document outlines the maintenance policy for Powertools for AWS Lambda and their underlying dependencies. AWS regularly provides Powertools for AWS Lambda with updates that may contain new features, enhancements, bug fixes, security patches, or documentation updates. Updates may also address changes with dependencies, language runtimes, and operating systems. Powertools for AWS Lambda is published to package managers (e.g. PyPi, NPM, Maven, NuGet), and are available as source code on GitHub.</p>
+<p>We recommend users to stay up-to-date with Powertools for AWS Lambda releases to keep up with the latest features, security updates, and underlying dependencies. Continued use of an unsupported Powertools for AWS Lambda version is not recommended and is done at the user’s discretion.</p>
+<div class="admonition info">
+<p class="admonition-title">For brevity, we will interchangeably refer to Powertools for AWS Lambda as "SDK" <em>(Software Development Toolkit)</em>.</p>
 </div>
-<p>Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep <a href="https://pypi.org/project/aws-lambda-powertools/" target="_blank">Pypi</a> v1 releases and documentation 1.x versions to prevent any disruption.</p>
-<h2 id="migrate-to-v2-from-v1">Migrate to v2 from v1<a class="headerlink" href="#migrate-to-v2-from-v1" title="Permanent link">&para;</a></h2>
-<p>We've made minimal breaking changes to make your transition to v2 as smooth as possible.</p>
-<h3 id="quick-summary">Quick summary<a class="headerlink" href="#quick-summary" title="Permanent link">&para;</a></h3>
+<h3 id="versioning">Versioning<a class="headerlink" href="#versioning" title="Permanent link">&para;</a></h3>
+<p>Powertools for AWS Lambda release versions are in the form of X.Y.Z where X represents the major version. Increasing the major version of an SDK indicates that this SDK underwent significant and substantial changes to support new idioms and patterns in the language. Major versions are introduced when public interfaces <em>(e.g. classes, methods, types, etc.)</em>, behaviors, or semantics have changed. Applications need to be updated in order for them to work with the newest SDK version. It is important to update major versions carefully and in accordance with the upgrade guidelines provided by AWS.</p>
+<h3 id="sdk-major-version-lifecycle">SDK major version lifecycle<a class="headerlink" href="#sdk-major-version-lifecycle" title="Permanent link">&para;</a></h3>
+<p>The lifecycle for major Powertools for AWS Lambda versions consists of 5 phases, which are outlined below.</p>
+<ul>
+<li><strong>Developer Preview</strong> (Phase 0) - During this phase, SDKs are not supported, should not be used in production environments, and are meant for early access and feedback purposes only. It is possible for future releases to introduce breaking changes. Once AWS identifies a release to be a stable product, it may mark it as a Release Candidate. Release Candidates are ready for GA release unless significant bugs emerge, and will receive full AWS support.</li>
+<li><strong>General Availability (GA)</strong> (Phase 1) - During this phase, SDKs are fully supported. AWS will provide regular SDK releases that include support for new features, enhancements, as well as bug and security fixes. AWS will support the GA version of an SDK for <em>at least 24 months</em>, unless otherwise specified.</li>
+<li><strong>Maintenance Announcement</strong> (Phase 2) - AWS will make a public announcement at least 6 months before an SDK enters maintenance mode. During this period, the SDK will continue to be fully supported. Typically, maintenance mode is announced at the same time as the next major version is transitioned to GA.</li>
+<li><strong>Maintenance</strong> (Phase 3) - During the maintenance mode, AWS limits SDK releases to address critical bug fixes and security issues only. An SDK will not receive API updates for new or existing services, or be updated to support new regions. Maintenance mode has a <em>default duration of 6 months</em>, unless otherwise specified.</li>
+<li><strong>End-of-Support</strong> (Phase 4) - When an SDK reaches end-of support, it will no longer receive updates or releases. Previously published releases will continue to be available via public package managers and the code will remain on GitHub. The GitHub repository may be archived. Use of an SDK which has reached end-of-support is done at the user’s discretion. We recommend users upgrade to the new major version.</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Please note that the timelines shown below are illustrative and not binding</p>
+</div>
+<p><img alt="Maintenance policy timelines" src="https://docs.aws.amazon.com/images/sdkref/latest/guide/images/maint-policy.png" /></p>
+<h3 id="dependency-lifecycle">Dependency lifecycle<a class="headerlink" href="#dependency-lifecycle" title="Permanent link">&para;</a></h3>
+<p>Most AWS SDKs have underlying dependencies, such as language runtimes, AWS Lambda runtime, or third party libraries and frameworks. These dependencies are typically tied to the language community or the vendor who owns that particular component. Each community or vendor publishes their own end-of-support schedule for their product.</p>
+<p>The following terms are used to classify underlying third party dependencies:</p>
+<ul>
+<li><a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html"><strong>AWS Lambda Runtime</strong></a>: Examples include <code>nodejs20.x</code>, <code>python3.12</code>, etc.</li>
+<li><strong>Language Runtime</strong>: Examples include Python 3.12, NodeJS 20, Java 17, .NET Core, etc.</li>
+<li><strong>Third party Library</strong>: Examples include Pydantic, AWS X-Ray SDK, AWS Encryption SDK, Middy.js, etc.</li>
+</ul>
+<p>Powertools for AWS Lambda follows the <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy">AWS Lambda Runtime deprecation policy cycle</a>, when it comes to Language Runtime. This means we will stop supporting their respective deprecated Language Runtime <em>(e.g., <code>python37</code>)</em> without increasing the major SDK version.</p>
+<div class="admonition note">
+<p class="admonition-title">AWS reserves the right to stop support for an underlying dependency without increasing the major SDK version</p>
+</div>
+<h3 id="communication-methods">Communication methods<a class="headerlink" href="#communication-methods" title="Permanent link">&para;</a></h3>
+<p>Maintenance announcements are communicated in several ways:</p>
+<ul>
+<li>A pinned GitHub Request For Comments (RFC) issue indicating the campaign for the next major version. The RFC will outline the path to end-of-support, specify campaign timelines, and upgrade guidance.</li>
+<li>AWS SDK documentation, such as API reference documentation, user guides, SDK product marketing pages, and GitHub readme(s) are updated to indicate the campaign timeline and provide guidance on upgrading affected applications.</li>
+<li>Deprecation warnings are added to the SDKs, outlining the path to end-of-support and linking to the upgrade guide.</li>
+</ul>
+<p>To see the list of available major versions of Powertools for AWS Lambda and where they are in their maintenance lifecycle, see <a href="#version-support-matrix">version support matrix</a></p>
+<h3 id="version-support-matrix">Version support matrix<a class="headerlink" href="#version-support-matrix" title="Permanent link">&para;</a></h3>
 <table>
 <thead>
 <tr>
-<th>Area</th>
-<th>Change</th>
-<th>Code change required</th>
-<th>IAM Permissions change required</th>
+<th>SDK</th>
+<th>Major version</th>
+<th>Current Phase</th>
+<th>General Availability Date</th>
+<th>Notes</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Batch</strong></td>
-<td>Removed legacy <a href="#legacy-sqs-batch-processor">SQS batch processor</a> in favour of <strong><code>BatchProcessor</code></strong>.</td>
-<td>Yes</td>
-<td>-</td>
+<td>Powertools for AWS Lambda Python</td>
+<td>2.x</td>
+<td>General Availability</td>
+<td>10/24/2022</td>
+<td>See <a href="https://github.com/aws-powertools/powertools-lambda-python/releases/tag/v2.0.0">Release Notes</a></td>
 </tr>
 <tr>
-<td><strong>Environment variables</strong></td>
-<td>Removed legacy <strong><code>POWERTOOLS_EVENT_HANDLER_DEBUG</code></strong> in favour of <a href="../#optimizing-for-non-production-environments" target="_blank"><code>POWERTOOLS_DEV</code></a>.</td>
-<td>-</td>
-<td>-</td>
-</tr>
-<tr>
-<td><strong>Event Handler</strong></td>
-<td>Updated <a href="#event-handler-headers-response-format">headers response format</a> due to <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">multi-value headers and cookie support</a>.</td>
-<td>Tests only</td>
-<td>-</td>
-</tr>
-<tr>
-<td><strong>Event Source Data Classes</strong></td>
-<td>Replaced <a href="#dynamodbstreamevent-in-event-source-data-classes">DynamoDBStreamEvent</a> <code>AttributeValue</code> with native Python types.</td>
-<td>Yes</td>
-<td>-</td>
-</tr>
-<tr>
-<td><strong>Feature Flags</strong> / <strong>Parameters</strong></td>
-<td>Updated <a href="#feature-flags-and-appconfig-parameter-utility">AppConfig API calls</a> due to <strong><code>GetConfiguration</code></strong> API deprecation.</td>
-<td>-</td>
-<td>Yes</td>
-</tr>
-<tr>
-<td><strong>Idempotency</strong></td>
-<td>Updated <a href="#idempotency-partition-key-format">partition key</a> to include fully qualified function/method names.</td>
-<td>-</td>
-<td>-</td>
+<td>Powertools for AWS Lambda Python</td>
+<td>1.x</td>
+<td>End of Support</td>
+<td>06/18/2020</td>
+<td>See <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1459">RFC</a> and <a href="https://docs.powertools.aws.dev/lambda/python/latest/upgrade/">upgrade guide</a></td>
 </tr>
 </tbody>
 </table>
-<h3 id="first-steps">First Steps<a class="headerlink" href="#first-steps" title="Permanent link">&para;</a></h3>
-<div class="admonition note">
-<p class="admonition-title">All dependencies are optional now. <a href="../core/tracer/#install" target="_blank">Tracer</a>, <a href="../utilities/validation/#install" target="_blank">Validation</a>, and <a href="../utilities/parser/" target="_blank">Parser</a> now require additional dependencies.</p>
-</div>
-<p>Before you start, we suggest making a copy of your current working project or create a new branch with git.</p>
-<ol>
-<li><strong>Upgrade</strong> Python to at least v3.7</li>
-<li><strong>Ensure</strong> you have the latest version via <a href="../#install" target="_blank">Lambda Layer or PyPi</a>.</li>
-<li><strong>Review</strong> the following sections to confirm whether they affect your code</li>
-</ol>
-<h2 id="legacy-sqs-batch-processor">Legacy SQS Batch Processor<a class="headerlink" href="#legacy-sqs-batch-processor" title="Permanent link">&para;</a></h2>
-<p>We removed the deprecated <code>PartialSQSProcessor</code> class and <code>sqs_batch_processor</code> decorator.</p>
-<p>You can migrate to <code>BatchProcessor</code> with the following changes:</p>
-<ol>
-<li>If you use <strong><code>sqs_batch_decorator</code></strong>, change to <strong><code>batch_processor</code></strong> decorator</li>
-<li>If you use <strong><code>PartialSQSProcessor</code></strong>, change to <strong><code>BatchProcessor</code></strong></li>
-<li><a href="../utilities/batch/#required-resources" target="_blank">Enable <strong><code>ReportBatchItemFailures</code></strong> in your Lambda Event Source</a></li>
-<li>Change your Lambda Handler to return the new response format</li>
-</ol>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">[Before] Decorator</label><label for="__tabbed_1_2">[After] Decorator</label><label for="__tabbed_1_3">[Before] Context manager</label><label for="__tabbed_1_4">[After] Context manager</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">sqs_batch_processor</span>
-</span>
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-
-<span class="hll"><span class="nd">@sqs_batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;statusCode&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
-
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">BatchProcessor</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">batch_processor</span>
-</span>
-<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-</span>
-
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-
-<span class="hll"><span class="nd">@batch_processor</span><span class="p">(</span><span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">)</span>
-</span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">PartialSQSProcessor</span>
-</span><span class="hll"><span class="kn">from</span> <span class="nn">botocore.config</span> <span class="kn">import</span> <span class="n">Config</span>
-</span>
-<span class="hll"><span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">region_name</span><span class="o">=</span><span class="s2">&quot;us-east-1&quot;</span><span class="p">)</span>
-</span>
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="n">return_value</span> <span class="o">=</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">return_value</span>
-
-
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="n">records</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>
-
-<span class="hll">    <span class="n">processor</span> <span class="o">=</span> <span class="n">PartialSQSProcessor</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
-</span>
-    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">record_handler</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
-
-<span class="hll">    <span class="k">return</span> <span class="n">result</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="n">BatchProcessor</span><span class="p">,</span> <span class="n">EventType</span><span class="p">,</span> <span class="n">batch_processor</span>
-</span>
-
-<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">):</span>
-    <span class="n">return_value</span> <span class="o">=</span> <span class="n">do_something_with</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="s2">&quot;body&quot;</span><span class="p">])</span>
-    <span class="k">return</span> <span class="n">return_value</span>
-
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="n">records</span> <span class="o">=</span> <span class="n">event</span><span class="p">[</span><span class="s2">&quot;Records&quot;</span><span class="p">]</span>
-
-<span class="hll">    <span class="n">processor</span> <span class="o">=</span> <span class="n">BatchProcessor</span><span class="p">(</span><span class="n">event_type</span><span class="o">=</span><span class="n">EventType</span><span class="o">.</span><span class="n">SQS</span><span class="p">)</span>
-</span>
-    <span class="k">with</span> <span class="n">processor</span><span class="p">(</span><span class="n">records</span><span class="p">,</span> <span class="n">record_handler</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">processor</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
-
-<span class="hll">    <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
-</span></code></pre></div></td></tr></table></div>
-</div>
-</div>
-</div>
-<h2 id="event-handler-headers-response-format">Event Handler headers response format<a class="headerlink" href="#event-handler-headers-response-format" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">No code changes required</p>
-</div>
-<p>This only applies if you're using <code>APIGatewayRestResolver</code> and asserting custom header values in your tests.</p>
-<p>Previously, custom headers were available under <code>headers</code> key in the Event Handler response.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">V1 response headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
-<span class="hll">    <span class="s2">&quot;headers&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span>        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-<p>In V2, we add all headers under <code>multiValueHeaders</code> key. This enables seamless support for multi-value headers and cookies in <a href="../core/event_handler/api_gateway/#fine-grained-responses" target="_blank">fine grained responses</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">V2 response headers</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
-<span class="hll">    <span class="s2">&quot;multiValueHeaders&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span>        <span class="s2">&quot;Content-Type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json&quot;</span>
-    <span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></td></tr></table></div>
-<h2 id="dynamodbstreamevent-in-event-source-data-classes">DynamoDBStreamEvent in Event Source Data Classes<a class="headerlink" href="#dynamodbstreamevent-in-event-source-data-classes" title="Permanent link">&para;</a></h2>
-<div class="admonition info">
-<p class="admonition-title">This also applies if you're using <a href="https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb" target="_blank"><strong>DynamoDB BatchProcessor</strong></a>.</p>
-</div>
-<p>You will now receive native Python types when accessing DynamoDB records via <code>keys</code>, <code>new_image</code>, and <code>old_image</code> attributes in <code>DynamoDBStreamEvent</code>.</p>
-<p>Previously, you'd receive a <code>AttributeValue</code> instance and need to deserialize each item to the type you'd want for convenience, or to the type DynamoDB stored via <code>get_value</code> method.</p>
-<p>With this change, you can access data deserialized as stored in DynamoDB, and no longer need to recursively deserialize nested objects (Maps) if you had them.</p>
-<details class="note" open="open">
-<summary>Note</summary>
-<p>For a lossless conversion of DynamoDB <code>Number</code> type, we follow AWS Python SDK (boto3) approach and convert to <code>Decimal</code>.</p>
-</details>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DynamoDBStreamEvent</span><span class="p">,</span>
-    <span class="n">DynamoDBRecordEventName</span>
-<span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">send_to_sqs</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
-    <span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="o">...</span>
-
-<span class="nd">@event_source</span><span class="p">(</span><span class="n">data_class</span><span class="o">=</span><span class="n">DynamoDBStreamEvent</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="n">DynamoDBStreamEvent</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="o">.</span><span class="n">records</span><span class="p">:</span>
-
-        <span class="c1"># BEFORE</span>
-<span class="hll">        <span class="n">new_image</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">AttributeValue</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span>
-</span><span class="hll">        <span class="n">event_type</span><span class="p">:</span> <span class="n">AttributeValue</span> <span class="o">=</span> <span class="n">new_image</span><span class="p">[</span><span class="s2">&quot;eventType&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_value</span>
-</span><span class="hll">        <span class="k">if</span> <span class="n">event_type</span> <span class="o">==</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">:</span>
-</span><span class="hll">            <span class="c1"># deserialize attribute value into Python native type</span>
-</span><span class="hll">            <span class="c1"># NOTE: nested objects would need additional logic</span>
-</span><span class="hll">            <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">get_value</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">image</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span>            <span class="n">send_to_sqs</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-        <span class="c1"># AFTER</span>
-<span class="hll">        <span class="n">new_image</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">dynamodb</span><span class="o">.</span><span class="n">new_image</span>
-</span><span class="hll">        <span class="k">if</span> <span class="n">new_image</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;eventType&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;PENDING&quot;</span><span class="p">:</span>
-</span>            <span class="n">send_to_sqs</span><span class="p">(</span><span class="n">new_image</span><span class="p">)</span>  <span class="c1"># Here new_image is just a Python Dict type</span>
-</code></pre></div></td></tr></table></div>
-<h2 id="feature-flags-and-appconfig-parameter-utility">Feature Flags and AppConfig Parameter utility<a class="headerlink" href="#feature-flags-and-appconfig-parameter-utility" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">No code changes required</p>
-</div>
-<p>We replaced <code>GetConfiguration</code> API (<a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884" target="_blank">now deprecated</a>) with <code>GetLatestConfiguration</code> and <code>StartConfigurationSession</code>.</p>
-<p>As such, you must update your IAM Role permissions to allow the following IAM actions:</p>
-<ul>
-<li><code>appconfig:GetLatestConfiguration</code></li>
-<li><code>appconfig:StartConfigurationSession</code></li>
-</ul>
-<h2 id="idempotency-partition-key-format">Idempotency partition key format<a class="headerlink" href="#idempotency-partition-key-format" title="Permanent link">&para;</a></h2>
-<div class="admonition note">
-<p class="admonition-title">No code changes required</p>
-</div>
-<p>We replaced the DynamoDB partition key format to include fully qualified function/method names. This means that recent non-expired idempotent transactions will be ignored.</p>
-<p>Previously, we used the function/method name to generate the partition key value.</p>
-<blockquote>
-<p>e.g. <code>HelloWorldFunction.lambda_handler#99914b932bd37a50b983c5e7c90ae93b</code></p>
-</blockquote>
-<p><img alt="Idempotency Before" src="../media/upgrade_idempotency_before.png" /></p>
-<p>In V2, we now distinguish between distinct classes or modules that may have the same function/method name.</p>
-<p><a href="https://github.com/aws-powertools/powertools-lambda-python/issues/1330" target="_blank">For example</a>, an ABC or Protocol class may have multiple implementations of <code>process_payment</code> method and may have different results.</p>
-<!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
-
-<blockquote>
-<p>e.g. <code>HelloWorldFunction.app.lambda_handler#99914b932bd37a50b983c5e7c90ae93b</code></p>
-</blockquote>
-<p><img alt="Idempotency Before" src="../media/upgrade_idempotency_after.png" /></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      2023-08-02
+      2024-01-31
     
   </small>
 </div>
