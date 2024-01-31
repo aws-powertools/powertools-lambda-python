@@ -31,10 +31,6 @@ class VPCLatticeEventBase(BaseProxyEvent):
         return self["headers"]
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
-        return self.headers
-
-    @property
     def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
@@ -148,6 +144,14 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.headers is not None:
+            headers = {key: value.split(",") if "," in value else value for key, value in self.headers.items()}
+            return headers
+
+        return {}
 
 
 class vpcLatticeEventV2Identity(DictWrapper):
@@ -263,3 +267,7 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, str]]:
+        return self.headers
