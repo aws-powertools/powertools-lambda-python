@@ -1604,6 +1604,8 @@
       
         
       
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
@@ -1678,6 +1680,26 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../versioning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../roadmap/" class="md-nav__link">
         
   
@@ -1736,9 +1758,9 @@
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
-          <label class="md-nav__link" for="__nav_3_5" id="__nav_3_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1749,8 +1771,8 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_3_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
             <span class="md-nav__icon md-icon"></span>
             Contributing
           </label>
@@ -4354,7 +4376,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </ul>
 <!-- markdownlint-disable MD013 -->
 
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">validating_query_strings.py</label><label for="__tabbed_12_2">skip_validating_query_strings.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:3"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">validating_query_strings.py</label><label for="__tabbed_12_2">skip_validating_query_strings.py</label><label for="__tabbed_12_3">working_with_multi_query_values.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4532,6 +4554,80 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </code></pre></div></td></tr></table></div>
 <ol>
 <li><code>completed</code> is still the same query string as before, except we simply state it's an string. No <code>Query</code> or <code>Annotated</code> to validate it.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>If you need to handle multi-value query parameters, you can create a list of the desired type.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.openapi.params</span> <span class="kn">import</span> <span class="n">Query</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">(</span><span class="n">enable_validation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ExampleEnum</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Example of an Enum class.&quot;&quot;&quot;</span>
+
+    <span class="n">ONE</span> <span class="o">=</span> <span class="s2">&quot;value_one&quot;</span>
+    <span class="n">TWO</span> <span class="o">=</span> <span class="s2">&quot;value_two&quot;</span>
+    <span class="n">THREE</span> <span class="o">=</span> <span class="s2">&quot;value_three&quot;</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+    <span class="n">example_multi_value_param</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="hll">        <span class="n">List</span><span class="p">[</span><span class="n">ExampleEnum</span><span class="p">],</span>  <span class="c1"># (1)!</span>
+</span>        <span class="n">Query</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is multi value query parameter.&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return validated multi-value param values.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">example_multi_value_param</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li><code>example_multi_value_param</code> is a list containing values from the <code>ExampleEnum</code> enumeration.</li>
 </ol>
 </div>
 </div>
@@ -8906,7 +9002,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2024-01-16
+      2024-01-23
     
   </small>
 </div>
