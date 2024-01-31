@@ -81,7 +81,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             query_string,
         )
 
-        # Normalize query values before validate this
+        # Normalize header values before validate this
         headers = _normalize_multi_header_values_with_param(
             app.current_event.resolved_headers_field,
             route.dependant.header_params,
@@ -410,9 +410,10 @@ def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]],
     if headers:
         for param in filter(is_scalar_field, params):
             try:
-                # if the target parameter is a scalar, we keep the first value of the headers
-                # regardless if there are more in the payload
-                headers[param.name] = headers[param.name][0]
+                if len(headers[param.name]) == 1:
+                    # if the target parameter is a scalar and the list contains only 1 element
+                    # we keep the first value of the headers regardless if there are more in the payload
+                    headers[param.name] = headers[param.name][0]
             except KeyError:
                 pass
     return headers

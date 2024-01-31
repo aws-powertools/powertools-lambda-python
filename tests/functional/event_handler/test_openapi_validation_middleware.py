@@ -4,6 +4,7 @@ from enum import Enum
 from pathlib import PurePath
 from typing import List, Tuple
 
+import pytest
 from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import (
@@ -14,7 +15,8 @@ from aws_lambda_powertools.event_handler import (
     Response,
     VPCLatticeV2Resolver,
 )
-from aws_lambda_powertools.event_handler.openapi.params import Body, Query
+from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
+from aws_lambda_powertools.event_handler.vpc_lattice import VPCLatticeResolver
 from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
@@ -23,6 +25,7 @@ LOAD_GW_EVENT_HTTP = load_event("apiGatewayProxyV2Event.json")
 LOAD_GW_EVENT_ALB = load_event("albMultiValueQueryStringEvent.json")
 LOAD_GW_EVENT_LAMBDA_URL = load_event("lambdaFunctionUrlEventWithHeaders.json")
 LOAD_GW_EVENT_VPC_LATTICE = load_event("vpcLatticeV2EventWithHeaders.json")
+LOAD_GW_EVENT_VPC_LATTICE_V1 = load_event("vpcLatticeEvent.json")
 
 
 def test_validate_scalars():
@@ -391,267 +394,535 @@ def test_validate_response_invalid_return():
     assert "missing" in result["body"]
 
 
-def test_validate_rest_api_resolver_with_multi_query_params():
-    # GIVEN an APIGatewayRestResolver with validation enabled
+########### TEST WITH QUERY PARAMS
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_query_params", 200, None),
+    ],
+)
+def test_validation_query_string_with_api_rest_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
 
     LOAD_GW_EVENT["httpMethod"] = "GET"
     LOAD_GW_EVENT["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 200
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_query_params":
+        LOAD_GW_EVENT["queryStringParameters"] = None
+        LOAD_GW_EVENT["multiValueQueryStringParameters"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_rest_api_resolver_with_multi_query_params_fail():
-    # GIVEN an APIGatewayRestResolver with validation enabled
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
-        print(parameter2)
-
-    LOAD_GW_EVENT["httpMethod"] = "GET"
-    LOAD_GW_EVENT["path"] = "/users"
-
-    # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
-
-
-def test_validate_rest_api_resolver_without_query_params():
-    # GIVEN an APIGatewayRestResolver with validation enabled
-    app = APIGatewayRestResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler():
-        return None
-
-    LOAD_GW_EVENT["httpMethod"] = "GET"
-    LOAD_GW_EVENT["path"] = "/users"
-    LOAD_GW_EVENT["queryStringParameters"] = None
-    LOAD_GW_EVENT["multiValueQueryStringParameters"] = None
-
-    # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT, {})
-    assert result["statusCode"] == 200
-
-
-def test_validate_http_resolver_with_multi_query_params():
-    # GIVEN an APIGatewayHttpResolver with validation enabled
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_query_params", 200, None),
+    ],
+)
+def test_validation_query_string_with_api_http_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a APIGatewayHttpResolver with validation enabled
     app = APIGatewayHttpResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
 
     LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
     LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
     LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 200
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_query_params":
+        LOAD_GW_EVENT_HTTP["queryStringParameters"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT_HTTP, {})
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_http_resolver_with_multi_query_values_fail():
-    # GIVEN an APIGatewayHttpResolver with validation enabled
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_query_params", 200, None),
+    ],
+)
+def test_validation_query_string_with_alb_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a ALBResolver with validation enabled
+    app = ALBResolver(enable_validation=True)
+
+    LOAD_GW_EVENT_ALB["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
+
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_query_params":
+        LOAD_GW_EVENT_HTTP["multiValueQueryStringParameters"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(LOAD_GW_EVENT_ALB, {})
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
+
+
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_query_params", 200, None),
+    ],
+)
+def test_validation_query_string_with_lambda_url_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a LambdaFunctionUrlResolver with validation enabled
+    app = LambdaFunctionUrlResolver(enable_validation=True)
+
+    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
+    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
+
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_query_params":
+        LOAD_GW_EVENT_LAMBDA_URL["queryStringParameters"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
+
+
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_query_params", 200, None),
+    ],
+)
+def test_validation_query_string_with_vpc_lattice_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a VPCLatticeV2Resolver with validation enabled
+    app = VPCLatticeV2Resolver(enable_validation=True)
+
+    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+
+    # WHEN a handler is defined with various parameters and routes
+
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(parameter1: Annotated[List[str], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler2(parameter1: Annotated[List[int], Query()], parameter2: str):
+            print(parameter2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_query_params":
+        LOAD_GW_EVENT_VPC_LATTICE["queryStringParameters"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
+
+
+########### TEST WITH HEADER PARAMS
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_api_rest_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    LOAD_GW_EVENT["httpMethod"] = "GET"
+    LOAD_GW_EVENT["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
+
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT["headers"] = None
+        LOAD_GW_EVENT["multiValueHeaders"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
+
+
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_http_rest_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a APIGatewayHttpResolver with validation enabled
     app = APIGatewayHttpResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
-        print(parameter2)
 
     LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
     LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
     LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 422
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT_HTTP["headers"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT_HTTP, {})
-    assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_http_resolver_without_query_params():
-    # GIVEN an APIGatewayHttpResolver with validation enabled
-    app = APIGatewayHttpResolver(enable_validation=True)
-
-    # WHEN a handler is defined without any query params
-    @app.get("/users")
-    def handler():
-        return None
-
-    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
-    LOAD_GW_EVENT_HTTP["queryStringParameters"] = None
-
-    # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT_HTTP, {})
-    assert result["statusCode"] == 200
-
-
-def test_validate_alb_resolver_with_multi_query_values():
-    # GIVEN an ALBResolver with validation enabled
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_alb_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a ALBResolver with validation enabled
     app = ALBResolver(enable_validation=True)
 
-    # WHEN a handler is defined with a default scalar parameter and a list
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
-
     LOAD_GW_EVENT_ALB["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 200
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT_ALB["multiValueHeaders"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT_ALB, {})
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_alb_resolver_with_multi_query_values_fail():
-    # GIVEN an ALBResolver with validation enabled
-    app = ALBResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
-        print(parameter2)
-
-    LOAD_GW_EVENT_ALB["path"] = "/users"
-
-    # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT_ALB, {})
-    assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
-
-
-def test_validate_alb_resolver_without_query_params():
-    # GIVEN an ALBResolver with validation enabled
-    app = ALBResolver(enable_validation=True)
-
-    # WHEN a handler is defined without any query params
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
-
-    LOAD_GW_EVENT_ALB["path"] = "/users"
-    LOAD_GW_EVENT_HTTP["multiValueQueryStringParameters"] = None
-
-    # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT_ALB, {})
-    assert result["statusCode"] == 200
-
-
-def test_validate_lambda_url_resolver_with_multi_query_params():
-    # GIVEN an LambdaFunctionUrlResolver with validation enabled
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_lambda_url_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a LambdaFunctionUrlResolver with validation enabled
     app = LambdaFunctionUrlResolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
 
     LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
     LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
     LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 200
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT_LAMBDA_URL["headers"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_lambda_url_resolver_with_multi_query_params_fail():
-    # GIVEN an LambdaFunctionUrlResolver with validation enabled
-    app = LambdaFunctionUrlResolver(enable_validation=True)
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a VPCLatticeResolver with validation enabled
+    app = VPCLatticeResolver(enable_validation=True)
 
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
-        print(parameter2)
+    LOAD_GW_EVENT_VPC_LATTICE_V1["raw_path"] = "/users"
+    LOAD_GW_EVENT_VPC_LATTICE_V1["method"] = "GET"
+    # WHEN a handler is defined with various parameters and routes
 
-    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
 
-    # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
-    assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT_VPC_LATTICE_V1["headers"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
+    result = app(LOAD_GW_EVENT_VPC_LATTICE_V1, {})
+    assert result["statusCode"] == expected_status_code
+
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
 
 
-def test_validate_lambda_url_resolver_without_query_params():
-    # GIVEN an LambdaFunctionUrlResolver with validation enabled
-    app = LambdaFunctionUrlResolver(enable_validation=True)
-
-    # WHEN a handler is defined  without any query params
-    @app.get("/users")
-    def handler():
-        return None
-
-    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
-    LOAD_GW_EVENT_LAMBDA_URL["queryStringParameters"] = None
-
-    # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
-    assert result["statusCode"] == 200
-
-
-def test_validate_vpc_lattice_resolver_with_multi_params_values():
-    # GIVEN an VPCLatticeV2Resolver with validation enabled
+@pytest.mark.parametrize(
+    "handler_func, expected_status_code, expected_error_text",
+    [
+        ("handler1_with_correct_params", 200, None),
+        ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
+        ("handler3_without_header_params", 200, None),
+    ],
+)
+def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_status_code, expected_error_text):
+    # GIVEN a VPCLatticeV2Resolver with validation enabled
     app = VPCLatticeV2Resolver(enable_validation=True)
 
-    # WHEN a handler is defined with a default scalar parameter and a list
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[str], Query()], parameter2: str):
-        print(parameter2)
-
     LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+    LOAD_GW_EVENT_VPC_LATTICE["method"] = "GET"
+    # WHEN a handler is defined with various parameters and routes
 
-    # THEN the handler should be invoked and return 200
+    # Define handler1 with correct params
+    if handler_func == "handler1_with_correct_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler2 with wrong params
+    if handler_func == "handler2_with_wrong_params":
+
+        @app.get("/users")
+        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler3 without params
+    if handler_func == "handler3_without_header_params":
+        LOAD_GW_EVENT_VPC_LATTICE["headers"] = None
+
+        @app.get("/users")
+        def handler3():
+            return None
+
+    # THEN the handler should be invoked with the expected result
+    # AND the status code should match the expected_status_code
     result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
-    assert result["statusCode"] == 200
+    assert result["statusCode"] == expected_status_code
 
-
-def test_validate_vpc_lattice_resolver_with_multi_query_params_fail():
-    # GIVEN an VPCLatticeV2Resolver with validation enabled
-    app = VPCLatticeV2Resolver(enable_validation=True)
-
-    # WHEN a handler is defined with a default scalar parameter and a list with wrong type
-    @app.get("/users")
-    def handler(parameter1: Annotated[List[int], Query()], parameter2: str):
-        print(parameter2)
-
-    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
-
-    # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
-    assert result["statusCode"] == 422
-    assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
-
-
-def test_validate_vpc_lattice_resolver_without_query_params():
-    # GIVEN an VPCLatticeV2Resolver with validation enabled
-    app = VPCLatticeV2Resolver(enable_validation=True)
-
-    # WHEN a handler is defined without any query params
-    @app.get("/users")
-    def handler():
-        return None
-
-    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
-    LOAD_GW_EVENT_VPC_LATTICE["queryStringParameters"] = None
-
-    # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
-    assert result["statusCode"] == 200
+    # IF expected_error_text is provided, THEN check for its presence in the response body
+    if expected_error_text:
+        assert any(text in result["body"] for text in expected_error_text)
