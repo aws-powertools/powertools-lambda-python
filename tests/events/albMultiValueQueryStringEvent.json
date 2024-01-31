@@ -14,11 +14,11 @@
     "accept": [
       "*/*"
     ],
-    "Header2": [
+    "header2": [
       "value1",
       "value2"
     ],
-    "Header1": [
+    "header1": [
       "value1"
     ],
     "host": [

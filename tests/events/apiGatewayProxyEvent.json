@@ -4,15 +4,15 @@
   "path": "/my/path",
   "httpMethod": "GET",
   "headers": {
-    "Header1": "value1",
-    "Header2": "value2",
+    "header1": "value1",
+    "header2": "value2",
     "Origin": "https://aws.amazon.com"
   },
   "multiValueHeaders": {
-    "Header1": [
+    "header1": [
       "value1"
     ],
-    "Header2": [
+    "header2": [
       "value1",
       "value2"
     ]

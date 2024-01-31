@@ -13,10 +13,10 @@ from aws_lambda_powertools.event_handler import (
     APIGatewayRestResolver,
     LambdaFunctionUrlResolver,
     Response,
+    VPCLatticeResolver,
     VPCLatticeV2Resolver,
 )
 from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
-from aws_lambda_powertools.event_handler.vpc_lattice import VPCLatticeResolver
 from aws_lambda_powertools.shared.types import Annotated
 from tests.functional.utils import load_event
 
@@ -658,15 +658,15 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":
@@ -708,15 +708,15 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":
@@ -755,15 +755,15 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":
@@ -804,15 +804,15 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":
@@ -852,15 +852,15 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":
@@ -900,15 +900,15 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
     if handler_func == "handler1_with_correct_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[str], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler2 with wrong params
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(Header2: Annotated[List[int], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+            print(header2)
 
     # Define handler3 without params
     if handler_func == "handler3_without_header_params":

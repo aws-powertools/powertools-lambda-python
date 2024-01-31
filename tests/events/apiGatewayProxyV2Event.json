@@ -8,8 +8,8 @@
     "cookie2"
   ],
   "headers": {
-    "Header1": "value1",
-    "Header2": "value1,value2"
+    "header1": "value1",
+    "header2": "value1,value2"
   },
   "queryStringParameters": {
     "parameter1": "value1,value2",
