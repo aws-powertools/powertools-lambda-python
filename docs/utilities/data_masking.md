@@ -221,7 +221,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Top keys only"
 
-    You want to obfuscate data in the `card_number` field.
+    You want to erase data in the `card_number` field.
 
     === "Data"
 
@@ -239,7 +239,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Nested key"
 
-    You want to obfuscate data in the `postcode` field.
+    You want to erase data in the `postcode` field.
 
     === "Data"
 
@@ -257,7 +257,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Multiple keys"
 
-    You want to obfuscate data in both `postcode` and `street` fields.
+    You want to erase data in both `postcode` and `street` fields.
 
     === "Data"
 
@@ -275,7 +275,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "All key items"
 
-    You want to obfuscate data under `address` field.
+    You want to erase data under `address` field.
 
     === "Data"
 
@@ -293,7 +293,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Complex nested key"
 
-    You want to obfuscate data under `name` field.
+    You want to erase data under `name` field.
 
     === "Data"
 
@@ -311,7 +311,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "All fields in a list"
 
-    You want to obfuscate data under `street` field located at the any index of the address list.
+    You want to erase data under `street` field located at the any index of the address list.
 
     === "Data"
 
@@ -329,7 +329,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Slicing a list"
 
-    You want to obfuscate data by slicing a list.
+    You want to erase data by slicing a list.
 
     === "Data"
 
@@ -347,7 +347,7 @@ Here are common scenarios to best visualize how to use `fields`.
 
 === "Complex expressions"
 
-    You want to obfuscate data by finding for a field with conditional expression.
+    You want to erase data by finding for a field with conditional expression.
 
     === "Data"
 
@@ -368,6 +368,7 @@ Here are common scenarios to best visualize how to use `fields`.
         ```json hl_lines="8 12"
         --8<-- "examples/data_masking/src/choosing_payload_complex_search_output.json"
         ```
+
 For comprehensive guidance on using JSONPath syntax, please refer to the official documentation available at [jsonpath-ng](https://github.com/h2non/jsonpath-ng#jsonpath-syntax){target="_blank" rel="nofollow"}
 
 #### JSON
