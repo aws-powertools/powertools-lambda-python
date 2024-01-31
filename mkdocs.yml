@@ -38,6 +38,7 @@ nav:
   - Processes:
       - Security: security.md
       - Automation: automation.md
+      - Versioning policy: versioning.md
       - Roadmap: roadmap.md
       - Maintainers: maintainers.md
       - Contributing:
