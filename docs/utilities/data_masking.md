@@ -178,7 +178,7 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
 ### Encryption context for integrity and authenticity
 
-For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data, and even help to prevent a [confused deputy](https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html) situation.
+For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data, and even help to prevent a [confused deputy](https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html){target="_blank"} situation.
 
 ???+ danger "Important considerations you should know"
     1. **Exact match verification on decrypt**. Be careful using random data like `timestamps` as encryption context if you can't provide them on decrypt.
@@ -430,9 +430,11 @@ You can modify the following values when initializing the `AWSEncryptionSDKProvi
 | **max_messages_encrypted** | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
-**Changing the default algorithm**
+**Passing additional SDK arguments**
 
-The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384` algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.
+You can pass additional arguments to the `AWSEncryptionSDKProvider` via the `provider_options` parameter. To learn more about the different arguments you can give to the SDK, see the [EncryptionSDKClient's documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.html#aws_encryption_sdk.EncryptionSDKClient.encrypt){target="_blank"}.
+
+For example, the AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384` algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.
 
 === "changing_default_algorithm.py"
 
