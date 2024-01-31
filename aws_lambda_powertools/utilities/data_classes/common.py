@@ -115,6 +115,17 @@ class BaseProxyEvent(DictWrapper):
         return self.query_string_parameters
 
     @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        """
+        This property determines the appropriate header to be used
+        as a trusted source for validating OpenAPI.
+
+        This is necessary because different resolvers use different formats to encode
+        headers parameters.
+        """
+        return self.headers
+
+    @property
     def is_base64_encoded(self) -> Optional[bool]:
         return self.get("isBase64Encoded")
 

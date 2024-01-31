@@ -126,6 +126,13 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return self.query_string_parameters
 
     @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.multi_value_headers:
+            return self.multi_value_headers
+
+        return self.headers
+
+    @property
     def request_context(self) -> APIGatewayEventRequestContext:
         return APIGatewayEventRequestContext(self._data)
 
@@ -314,5 +321,13 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
                 key: value.split(",") if "," in value else value for key, value in self.query_string_parameters.items()
             }
             return query_string
+
+        return {}
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.headers is not None:
+            headers = {key: value.split(",") if "," in value else value for key, value in self.headers.items()}
+            return headers
 
         return {}

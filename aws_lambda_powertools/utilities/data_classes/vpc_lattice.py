@@ -31,6 +31,10 @@ class VPCLatticeEventBase(BaseProxyEvent):
         return self["headers"]
 
     @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        return self.headers
+
+    @property
     def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]

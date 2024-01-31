@@ -81,9 +81,22 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
             query_string,
         )
 
+        # Normalize query values before validate this
+        headers = _normalize_multi_header_values_with_param(
+            app.current_event.resolved_headers_field,
+            route.dependant.header_params,
+        )
+
+        # Process header values
+        header_values, header_errors = _request_params_to_args(
+            route.dependant.header_params,
+            headers,
+        )
+
         values.update(path_values)
         values.update(query_values)
-        errors += path_errors + query_errors
+        values.update(header_values)
+        errors += path_errors + query_errors + header_errors
 
         # Process the request body, if it exists
         if route.dependant.body_params:
@@ -377,3 +390,29 @@ def _normalize_multi_query_string_with_param(query_string: Optional[Dict[str, st
             except KeyError:
                 pass
     return query_string
+
+
+def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]], params: Sequence[ModelField]):
+    """
+    Extract and normalize resolved_headers_field
+
+    Parameters
+    ----------
+    headers: Dict
+        A dictionary containing the initial header parameters.
+    params: Sequence[ModelField]
+        A sequence of ModelField objects representing parameters.
+
+    Returns
+    -------
+    A dictionary containing the processed headers.
+    """
+    if headers:
+        for param in filter(is_scalar_field, params):
+            try:
+                # if the target parameter is a scalar, we keep the first value of the headers
+                # regardless if there are more in the payload
+                headers[param.name] = headers[param.name][0]
+            except KeyError:
+                pass
+    return headers
