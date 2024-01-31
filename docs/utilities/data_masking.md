@@ -109,14 +109,14 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
 
 === "generic_data_input.json"
-    ```json hl_lines="7 9 14"
-    --8<-- "examples/data_masking/src/generic_data_input.json"
-    ```
+```json hl_lines="7 9 14"
+--8<-- "examples/data_masking/src/generic_data_input.json"
+```
 
 === "getting_started_erase_data_output.json"
-    ```json hl_lines="5 7 12"
-    --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
-    ```
+```json hl_lines="5 7 12"
+--8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
+```
 
 ### Encrypting data
 
@@ -128,7 +128,6 @@ To encrypt, you will need an [encryption provider](#providers). Here, we will us
 Under the hood, we delegate a [number of operations](#encrypt-operation-with-encryption-sdk-kms) to AWS Encryption SDK to authenticate, create a portable encryption message, and actual data encryption.
 
 === "getting_started_encrypt_data.py"
-
     ```python hl_lines="6-8 14-15 26"
     --8<-- "examples/data_masking/src/getting_started_encrypt_data.py"
     ```
@@ -136,14 +135,14 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
     1. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
 
 === "generic_data_input.json"
-    ```json hl_lines="7-9 14"
-    --8<-- "examples/data_masking/src/generic_data_input.json"
-    ```
+```json hl_lines="7-9 14"
+--8<-- "examples/data_masking/src/generic_data_input.json"
+```
 
 === "encrypt_data_output.json"
-    ```json hl_lines="5-7 12"
-    --8<-- "examples/data_masking/src/encrypt_data_output.json"
-    ```
+```json hl_lines="5-7 12"
+--8<-- "examples/data_masking/src/encrypt_data_output.json"
+```
 
 ### Decrypting data
 
@@ -167,15 +166,15 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
 
 === "encrypt_data_output.json"
 
-    ```json hl_lines="5-7 12"
-    --8<-- "examples/data_masking/src/encrypt_data_output.json"
-    ```
+```json hl_lines="5-7 12"
+--8<-- "examples/data_masking/src/encrypt_data_output.json"
+```
 
 === "getting_started_decrypt_data_output.json"
 
-    ```json hl_lines="5-7 12-17"
-    --8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
-    ```
+```json hl_lines="5-7 12-17"
+--8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
+```
 
 ### Encryption context for integrity and authenticity
 
@@ -204,10 +203,9 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 ### Choosing parts of your data
 
-!!! note "We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
-
 ???+ note "Current limitations"
-    1. The `fields` parameter is currently only available to use with the `erase` method, with the potential for it to be added to the `encrypt` and `decrypt` methods in the future.
+    1. The `fields` parameter is currently exclusive to the `erase` method, with potential future inclusion into `encrypt` and `decrypt`.
+    2. We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
 
 You can use the `fields` parameter with the dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
@@ -409,15 +407,21 @@ For compatibility or performance, you can optionally pass your own JSON serializ
 
 === "advanced_custom_serializer.py"
 
-    ```python hl_lines="17-18"
-    --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
-    ```
+```python hl_lines="17-18"
+--8<-- "examples/data_masking/src/advanced_custom_serializer.py"
+```
 
 ### Providers
 
 #### AWS Encryption SDK
 
 You can modify the following values when initializing the `AWSEncryptionSDKProvider` to best accommodate your security and performance thresholds.
+
+=== "aws_encryption_provider_example.py"
+
+```python hl_lines="14-19"
+--8<-- "examples/data_masking/src/aws_encryption_provider_example.py"
+```
 
 | Parameter                  | Default               | Description                                                                                   |
 | -------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
@@ -432,9 +436,9 @@ The AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY
 
 === "changing_default_algorithm.py"
 
-    ```python hl_lines="5 26"
-    --8<-- "examples/data_masking/src/changing_default_algorithm.py"
-    ```
+```python hl_lines="5 26"
+--8<-- "examples/data_masking/src/changing_default_algorithm.py"
+```
 
 ### Data masking request flow
 
@@ -578,11 +582,11 @@ sequenceDiagram
 Testing your code with a simple erase operation
 
 === "test_lambda_mask.py"
-    ```python hl_lines="22"
-    --8<-- "examples/data_masking/tests/test_lambda_mask.py"
-    ```
+```python hl_lines="22"
+--8<-- "examples/data_masking/tests/test_lambda_mask.py"
+```
 
 === "lambda_mask.py"
-    ```python hl_lines="3 12"
-    --8<-- "examples/data_masking/tests/lambda_mask.py"
-    ```
+```python hl_lines="3 12"
+--8<-- "examples/data_masking/tests/lambda_mask.py"
+```
