@@ -20,6 +20,7 @@ def validator(
     outbound_formats: Optional[Dict] = None,
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
+    **kwargs: Any,
 ) -> Any:
     """Lambda handler decorator to validate incoming/outbound data using a JSON Schema
 
@@ -87,7 +88,7 @@ def validator(
         def handler(event, context):
             return event
 
-    **Unwrap, decode base64 and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
+    **Unwrap, decode base64 and deserialize JSON string event before validating against actual payload - using built-in functions**
 
         from aws_lambda_powertools.utilities.validation import validator
 
@@ -95,7 +96,7 @@ def validator(
         def handler(event, context):
             return event
 
-    **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
+    **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions**
 
         from aws_lambda_powertools.utilities.validation import validator
 
@@ -116,17 +117,19 @@ def validator(
         When JSON schema provided is invalid
     InvalidEnvelopeExpressionError
         When JMESPath expression to unwrap event is invalid
-    """
+    """  # noqa: E501
     if envelope:
         event = jmespath_utils.extract_data_from_envelope(
-            data=event, envelope=envelope, jmespath_options=jmespath_options
+            data=event,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
         )
 
     if inbound_schema:
         logger.debug("Validating inbound event")
         validate_data_against_schema(data=event, schema=inbound_schema, formats=inbound_formats)
 
-    response = handler(event, context)
+    response = handler(event, context, **kwargs)
 
     if outbound_schema:
         logger.debug("Validating outbound event")
@@ -202,7 +205,7 @@ def validate(
             validate(event=event, schema=json_schema_dict, envelope="Records[*].kinesis.powertools_json(powertools_base64(data))")
             return event
 
-    **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions** # noqa: E501
+    **Unwrap, decompress ZIP archive and deserialize JSON string event before validating against actual payload - using built-in functions**
 
         from aws_lambda_powertools.utilities.validation import validate
 
@@ -218,10 +221,12 @@ def validate(
         When JSON schema provided is invalid
     InvalidEnvelopeExpressionError
         When JMESPath expression to unwrap event is invalid
-    """
+    """  # noqa: E501
     if envelope:
         event = jmespath_utils.extract_data_from_envelope(
-            data=event, envelope=envelope, jmespath_options=jmespath_options
+            data=event,
+            envelope=envelope,
+            jmespath_options=jmespath_options,
         )
 
     validate_data_against_schema(data=event, schema=schema, formats=formats)

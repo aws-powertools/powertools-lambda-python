@@ -2,7 +2,7 @@ from typing import Any, Dict, List, Optional
 
 
 def build_trace_default_query(function_name: str) -> str:
-    return f'service("{function_name}")'
+    return f'service(id(name: "{function_name}"))'
 
 
 def build_put_annotations_input(**annotations: str) -> List[Dict]:

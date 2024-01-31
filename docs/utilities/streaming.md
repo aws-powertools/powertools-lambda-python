@@ -5,7 +5,7 @@ description: Utility
 
 The streaming utility handles datasets larger than the available memory as streaming data.
 
-## Key Features
+## Key features
 
 * Stream Amazon S3 objects with a file-like interface with minimal memory consumption
 * Built-in popular data transformations to decompress and deserialize (gzip, CSV, and ZIP)
@@ -85,17 +85,17 @@ That said, you can still open a specific file as a stream, reading only the nece
 
 We provide popular built-in transformations that you can apply against your streaming data.
 
-| Name     | Description                                                                                      | Class name    |
-| -------- | ------------------------------------------------------------------------------------------------ | ------------- |
-| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html) | GzipTransform |
-| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html)         | ZipTransform  |
-| **CSV**  | Parses each CSV line as a CSV object, returning dictionary objects                               | CsvTransform  |
+| Name     | Description                                                                                                       | Class name    |
+| -------- | ----------------------------------------------------------------------------------------------------------------- | ------------- |
+| **Gzip** | Gunzips the stream of data using the [gzip library](https://docs.python.org/3/library/gzip.html){target="_blank" rel="nofollow"} | GzipTransform |
+| **Zip**  | Exposes the stream as a [ZipFile object](https://docs.python.org/3/library/zipfile.html){target="_blank" rel="nofollow"}         | ZipTransform  |
+| **CSV**  | Parses each CSV line as a CSV object, returning dictionary objects                                                | CsvTransform  |
 
 ## Advanced
 
 ### Skipping or reading backwards
 
-`S3Object` implements [Python I/O interface](https://docs.python.org/3/tutorial/inputoutput.html){target="_blank"}. This means you can use `seek` to start reading contents of your file from any particular position, saving you processing time.
+`S3Object` implements [Python I/O interface](https://docs.python.org/3/tutorial/inputoutput.html){target="_blank" rel="nofollow"}. This means you can use `seek` to start reading contents of your file from any particular position, saving you processing time.
 
 #### Reading backwards
 
@@ -131,11 +131,11 @@ You found out that each row has 8 bytes, the header line has 21 bytes, and every
 
 We will propagate additional options to the underlying implementation for each transform class.
 
-| Name              | Available options                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------- |
-| **GzipTransform** | [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile)     |
-| **ZipTransform**  | [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile) |
-| **CsvTransform**  | [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader)   |
+| Name              | Available options                                                                                      |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| **GzipTransform** | [GzipFile constructor](https://docs.python.org/3/library/gzip.html#gzip.GzipFile){target="_blank" rel="nofollow"}     |
+| **ZipTransform**  | [ZipFile constructor](https://docs.python.org/3/library/zipfile.html#zipfile.ZipFile){target="_blank" rel="nofollow"} |
+| **CsvTransform**  | [DictReader constructor](https://docs.python.org/3/library/csv.html#csv.DictReader){target="_blank" rel="nofollow"}   |
 
 For instance, take `ZipTransform`. You can use the `compression` parameter if you want to unzip an S3 object compressed with `LZMA`.
 
@@ -185,6 +185,6 @@ Create an input payload using `io.BytesIO` and assert the response of the transf
 
 ### AWS X-Ray segment size limit
 
-We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with [Tracer](./../core/tracer.md), you can easily hit [AWS X-Ray 64K segment size](https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray) when processing large files.
+We make multiple API calls to S3 as you read chunks from your S3 object. If your function is decorated with [Tracer](./../core/tracer.md){target="_blank"}, you can easily hit [AWS X-Ray 64K segment size](https://docs.aws.amazon.com/general/latest/gr/xray.html#limits_xray){target="_blank"} when processing large files.
 
 !!! tip "Use tracer decorators in parts where you don't read your `S3Object` instead."

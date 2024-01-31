@@ -8,7 +8,7 @@ body:
       value: |
         Thank you for submitting a bug report. Please add as much information as possible to help us reproduce, and remove any potential sensitive data.
 
-        Please become familiar with [our definition of bug](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md#is-that-a-bug).
+        Please become familiar with [our definition of bug](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md#is-that-a-bug).
   - type: textarea
     id: expected_behaviour
     attributes:
@@ -48,7 +48,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: AWS Lambda Powertools for Python version
+      label: Powertools for AWS Lambda (Python) version
       placeholder: "latest, 1.25.6"
       value: latest
     validations:
@@ -62,6 +62,8 @@ body:
         - "3.8"
         - "3.9"
         - "3.10"
+        - "3.11"
+        - "3.12"
     validations:
       required: true
   - type: dropdown
@@ -79,7 +81,7 @@ body:
     id: logs
     attributes:
       label: Debugging logs
-      description: If available, please share [debugging logs](https://awslabs.github.io/aws-lambda-powertools-python/#debug-mode)
+      description: If available, please share [debugging logs](https://docs.powertools.aws.dev/lambda/python/#debug-mode)
       render: python
     validations:
       required: false

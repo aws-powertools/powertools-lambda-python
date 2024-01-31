@@ -16,6 +16,7 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     RULE_MATCH_VALUE,
     RULES_KEY,
     ConditionsValidator,
+    ModuloRangeValues,
     RuleAction,
     RulesValidator,
     SchemaValidator,
@@ -84,7 +85,7 @@ def test_invalid_rule():
                 "a",
                 "b",
             ],
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -97,9 +98,9 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: "False",
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -112,9 +113,9 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -127,7 +128,7 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: []},
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -140,7 +141,7 @@ def test_invalid_rule():
             RULES_KEY: {
                 "tenant id equals 345345435": {RULE_MATCH_VALUE: False, CONDITIONS_KEY: {}},
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -156,9 +157,9 @@ def test_invalid_condition():
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: "stuff", CONDITION_KEY: "a", CONDITION_VALUE: "a"},
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -172,9 +173,9 @@ def test_invalid_condition():
                 "tenant id equals 345345435": {
                     RULE_MATCH_VALUE: False,
                     CONDITIONS_KEY: {CONDITION_ACTION: RuleAction.EQUALS.value},
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -192,9 +193,9 @@ def test_invalid_condition():
                         CONDITION_KEY: 5,
                         CONDITION_VALUE: "a",
                     },
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     with pytest.raises(SchemaValidationError):
@@ -255,9 +256,9 @@ def test_valid_condition_all_actions():
                             CONDITION_VALUE: "GUEST",
                         },
                     ],
-                }
+                },
             },
-        }
+        },
     }
     validator = SchemaValidator(schema)
     validator.validate()
@@ -888,6 +889,145 @@ def test_validate_time_condition_between_days_range_valid_timezone():
             TimeValues.TIMEZONE.value: "Europe/Copenhagen",
         },
         CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK.value,
+    }
+    # WHEN calling validate_condition
+    # THEN nothing is raised
+    ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
+
+
+def test_validate_modulo_range_condition_invalid_value():
+    # GIVEN a condition with a MODULO_RANGE action and invalid value
+    condition = {CONDITION_ACTION: RuleAction.MODULO_RANGE.value, CONDITION_VALUE: "invalid", CONDITION_KEY: "a"}
+    rule_name = "dummy"
+    match_str = f"condition with a 'MODULO_RANGE' action must have a condition value type dictionary with 'BASE', 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_missing_parameter():
+    # GIVEN a condition with a MODULO_RANGE action and missing required parameter
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: 100,
+            ModuloRangeValues.START.value: 0,
+        },
+        CONDITION_KEY: "a",
+    }
+    rule_name = "dummy"
+    match_str = f"condition with a 'MODULO_RANGE' action must have a condition value type dictionary with 'BASE', 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_non_integer_parameters():
+    # GIVEN a condition with a MODULO_RANGE action and non integer parameters
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: "100",
+            ModuloRangeValues.START.value: "0",
+            ModuloRangeValues.END.value: "49",
+        },
+        CONDITION_KEY: "a",
+    }
+    rule_name = "dummy"
+    match_str = f"'BASE', 'START' and 'END' must be integers, rule={rule_name}"
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_start_greater_than_end():
+    # GIVEN a condition with a MODULO_RANGE action and invalid parameters
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: 100,
+            ModuloRangeValues.START.value: 50,
+            ModuloRangeValues.END.value: 49,
+        },
+        CONDITION_KEY: "a",
+    }
+    rule_name = "dummy"
+    match_str = f"condition with 'MODULO_RANGE' action must satisfy 0 <= START <= END <= BASE-1, rule={rule_name}"
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_start_less_than_zero():
+    # GIVEN a condition with a MODULO_RANGE action and invalid parameters
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: 100,
+            ModuloRangeValues.START.value: -10,
+            ModuloRangeValues.END.value: 49,
+        },
+        CONDITION_KEY: "a",
+    }
+    rule_name = "dummy"
+    match_str = f"condition with 'MODULO_RANGE' action must satisfy 0 <= START <= END <= BASE-1, rule={rule_name}"
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_end_greater_than_equal_to_base():
+    # GIVEN a condition with a MODULO_RANGE action and invalid parameters
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: 100,
+            ModuloRangeValues.START.value: 0,
+            ModuloRangeValues.END.value: 100,
+        },
+        CONDITION_KEY: "a",
+    }
+    rule_name = "dummy"
+    match_str = f"condition with 'MODULO_RANGE' action must satisfy 0 <= START <= END <= BASE-1, rule={rule_name}"
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(
+        SchemaValidationError,
+        match=match_str,
+    ):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_modulo_range_condition_valid():
+    # GIVEN a condition with a MODULO_RANGE action and valid parameters
+    condition = {
+        CONDITION_ACTION: RuleAction.MODULO_RANGE.value,
+        CONDITION_VALUE: {
+            ModuloRangeValues.BASE.value: 100,
+            ModuloRangeValues.START.value: 0,
+            ModuloRangeValues.END.value: 19,
+        },
+        CONDITION_KEY: "a",
     }
     # WHEN calling validate_condition
     # THEN nothing is raised

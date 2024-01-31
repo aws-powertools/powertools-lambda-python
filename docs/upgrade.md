@@ -1,15 +1,15 @@
 ---
 title: Upgrade guide
-description: Guide to update between major Powertools versions
+description: Guide to update between major Powertools for AWS Lambda (Python) versions
 ---
 
 <!-- markdownlint-disable MD043 -->
 
 ## End of support v1
 
-!!! warning "On March 31st, 2023, AWS Lambda Powertools for Python v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version."
+!!! warning "On March 31st, 2023, Powertools for AWS Lambda (Python) v1 reached end of support and will no longer receive updates or releases. If you are still using v1, we strongly recommend you to read our upgrade guide and update to the latest version."
 
-Given our commitment to all of our customers using AWS Lambda Powertools for Python, we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/) v1 releases and documentation 1.x versions to prevent any disruption.
+Given our commitment to all of our customers using Powertools for AWS Lambda (Python), we will keep [Pypi](https://pypi.org/project/aws-lambda-powertools/){target="_blank"} v1 releases and documentation 1.x versions to prevent any disruption.
 
 ## Migrate to v2 from v1
 
@@ -24,7 +24,7 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 | **Event Handler**                  | Updated [headers response format](#event-handler-headers-response-format) due to [multi-value headers and cookie support](./core/event_handler/api_gateway.md#fine-grained-responses){target="_blank"}. | Tests only           | -                               |
 | **Event Source Data Classes**      | Replaced [DynamoDBStreamEvent](#dynamodbstreamevent-in-event-source-data-classes) `AttributeValue` with native Python types.                                                                            | Yes                  | -                               |
 | **Feature Flags** / **Parameters** | Updated [AppConfig API calls](#feature-flags-and-appconfig-parameter-utility) due to **`GetConfiguration`** API deprecation.                                                                            | -                    | Yes                             |
-| **Idempotency**                    | Updated [partition key](#idempotency-key-format) to include fully qualified function/method names.                                                                                                      | -                    | -                               |
+| **Idempotency**                    | Updated [partition key](#idempotency-partition-key-format) to include fully qualified function/method names.                                                                                            | -                    | -                               |
 
 ### First Steps
 
@@ -44,7 +44,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](./utilities/batch.md#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
 === "[Before] Decorator"
@@ -151,7 +151,7 @@ In V2, we add all headers under `multiValueHeaders` key. This enables seamless s
 
 ## DynamoDBStreamEvent in Event Source Data Classes
 
-!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://awslabs.github.io/aws-lambda-powertools-python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
+!!! info "This also applies if you're using [**DynamoDB BatchProcessor**](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/#processing-messages-from-dynamodb){target="_blank"}."
 
 You will now receive native Python types when accessing DynamoDB records via `keys`, `new_image`, and `old_image` attributes in `DynamoDBStreamEvent`.
 
@@ -196,7 +196,7 @@ def lambda_handler(event: DynamoDBStreamEvent, context):
 
 !!! note "No code changes required"
 
-We replaced `GetConfiguration` API ([now deprecated](https://github.com/awslabs/aws-lambda-powertools-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
+We replaced `GetConfiguration` API ([now deprecated](https://github.com/aws-powertools/powertools-lambda-python/issues/1506#issuecomment-1266645884){target="_blank"}) with `GetLatestConfiguration` and `StartConfigurationSession`.
 
 As such, you must update your IAM Role permissions to allow the following IAM actions:
 
@@ -217,7 +217,7 @@ Previously, we used the function/method name to generate the partition key value
 
 In V2, we now distinguish between distinct classes or modules that may have the same function/method name.
 
-[For example](https://github.com/awslabs/aws-lambda-powertools-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
+[For example](https://github.com/aws-powertools/powertools-lambda-python/issues/1330){target="_blank"}, an ABC or Protocol class may have multiple implementations of `process_payment` method and may have different results.
 
 <!-- After this change, the key is generated using the `module name` + `qualified function name` + `idempotency key`  -->
 

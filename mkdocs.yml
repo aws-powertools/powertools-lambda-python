@@ -1,37 +1,64 @@
-site_name: AWS Lambda Powertools for Python
-site_description: AWS Lambda Powertools for Python
+site_name: Powertools for AWS Lambda (Python)
+site_description: Powertools for AWS Lambda (Python)
 site_author: Amazon Web Services
-repo_url: https://github.com/awslabs/aws-lambda-powertools-python
+repo_url: https://github.com/aws-powertools/powertools-lambda-python
 edit_uri: edit/develop/docs
 
 nav:
-  - Homepage: index.md
-  - Changelog: changelog.md
+  - Homepage:
+      - index.md
+      - Changelog: changelog.md
+      - API reference: api/" target="_blank
+      - Upgrade guide: upgrade.md
+      - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
+      - Features:
+          - core/tracer.md
+          - core/logger.md
+          - Metrics:
+              - core/metrics/index.md
+              - Amazon CloudWatch EMF: core/metrics.md
+              - Datadog: core/metrics/datadog.md
+          - Event Handler:
+              - core/event_handler/api_gateway.md
+              - core/event_handler/appsync.md
+          - utilities/parameters.md
+          - utilities/batch.md
+          - utilities/typing.md
+          - utilities/validation.md
+          - utilities/data_classes.md
+          - utilities/parser.md
+          - utilities/idempotency.md
+          - utilities/feature_flags.md
+          - utilities/streaming.md
+          - utilities/middleware_factory.md
+          - utilities/jmespath_functions.md
+          - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
   - Tutorial: tutorial/index.md
-  - Roadmap: roadmap.md
-  - API reference: api/" target="_blank
-  - Upgrade guide: upgrade.md
-  - We Made This (Community): we_made_this.md
-  - Core utilities:
-      - core/tracer.md
-      - core/logger.md
-      - core/metrics.md
-      - Event Handler:
-          - core/event_handler/api_gateway.md
-          - core/event_handler/appsync.md
-  - Utilities:
-      - utilities/parameters.md
-      - utilities/batch.md
-      - utilities/typing.md
-      - utilities/validation.md
-      - utilities/data_classes.md
-      - utilities/parser.md
-      - utilities/idempotency.md
-      - utilities/feature_flags.md
-      - utilities/streaming.md
-      - utilities/middleware_factory.md
-      - utilities/jmespath_functions.md
-      - CloudFormation Custom Resources: https://github.com/aws-cloudformation/custom-resource-helper" target="_blank
+  - Processes:
+      - Security: security.md
+      - Automation: automation.md
+      - Versioning policy: versioning.md
+      - Roadmap: roadmap.md
+      - Maintainers: maintainers.md
+      - Contributing:
+          # - contributing/index.md
+          - Development environment: contributing/setup.md
+          - Your first contribution: contributing/getting_started.md
+          - Conventions: contributing/conventions.md
+          # - Testing:
+          #     - Unit tests: contributing/testing/unit_tests.md
+          #     - Functional tests: contributing/testing/functional_tests.md
+          #     - End-to-end tests: contributing/testing/e2e_tests.md
+          # - Documentation:
+          #     - User guide: contributing/documentation/user_guide.md
+          #     - API guide: contributing/documentation/api_guide.md
+          #     - Tutorials: contributing/documentation/tutorials.md
+          #     - Request For Comments (RFC): contributing/documentation/rfc.md
+          # - Tracks:
+          #     - Overview: contributing/tracks/overview.md
+          #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
+          #     - Customer to advocate: contributing/tracks/customer_advocate.md
 
 theme:
   name: material
@@ -41,22 +68,22 @@ theme:
     - scheme: default
       primary: deep purple
       toggle:
-        icon: material/toggle-switch-off-outline
+        icon: material/lightbulb
         name: Switch to dark mode
     - scheme: slate
       primary: indigo
       accent: teal
       toggle:
-        icon: material/toggle-switch
+        icon: material/lightbulb-outline
         name: Switch to light mode
   features:
     - header.autohide
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.instant
     - navigation.indexes
     - navigation.tracking
+    - navigation.tabs
     - content.code.annotate
     - content.code.copy
   icon:
@@ -67,6 +94,7 @@ theme:
 
 markdown_extensions:
   - admonition
+  - abbr
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight:
@@ -76,6 +104,8 @@ markdown_extensions:
       base_path: "."
       check_paths: true
       restrict_base_path: false
+      auto_append:
+        - includes/abbreviations.md
   - meta
   - toc:
       permalink: true
@@ -90,8 +120,10 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
 
-copyright: Copyright &copy; 2022 Amazon Web Services
+copyright: Copyright &copy; 2023 Amazon Web Services
 
 plugins:
   - git-revision-date

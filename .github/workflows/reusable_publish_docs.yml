@@ -1,7 +1,9 @@
 name: Reusable publish documentation
 
+# see .github/workflows/on_push_docs.yml for docs
+
 env:
-  ORIGIN: awslabs/aws-lambda-powertools-python
+  ORIGIN: aws-powertools/powertools-lambda-python
 
 on:
   workflow_call:
@@ -26,29 +28,32 @@ on:
         default: develop
 
 permissions:
-  id-token: write
-  contents: write
-  pages: write
+  contents: read
 
 jobs:
   publish_docs:
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     # Force Github action to run only a single job at a time (based on the group name)
     # This is to prevent "race-condition" in publishing a new version of doc to `gh-pages`
     concurrency:
       group: on-docs-rebuild
     runs-on: ubuntu-latest
-    environment: Docs
+    environment: "Docs"
+    permissions:
+      contents: write  # push to gh-pages
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+      pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
-      - uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
         with:
           fetch-depth: 0
           ref: ${{ inputs.git_ref }}
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: "poetry"
       - name: Install dependencies
         run: make dev
@@ -73,25 +78,8 @@ jobs:
           make release-docs VERSION="$VERSION" ALIAS="$ALIAS"
           poetry run mike set-default --push latest
 
-      - name: Release API docs
-        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
-        env:
-          VERSION: ${{ inputs.version }}
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./api
-          keep_files: true
-          destination_dir: ${{ env.VERSION }}/api
-      - name: Release API docs to latest
-        if: ${{ inputs.alias == 'latest' }}
-        uses: peaceiris/actions-gh-pages@373f7f263a76c20808c831209c920827a82a2847 # v3.9.3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./api
-          keep_files: true
-          destination_dir: latest/api
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355
         with:
           aws-region: us-east-1
           role-to-assume: ${{ secrets.AWS_DOCS_ROLE_ARN }}
@@ -114,3 +102,28 @@ jobs:
           aws s3 sync \
             site/ \
             s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/${{ env.ALIAS }}/
+      - name: Deploy Docs (Version JSON)
+        env:
+          VERSION: ${{ inputs.version }}
+          ALIAS: ${{ inputs.alias }}
+        # We originally used "mike" from PyPi to manage versions for us, but since we moved to S3, we can't use it to manage versions any more.
+        # Instead, we're using some shell script that manages the versions.
+        #
+        # Operations:
+        #   1. Download the versions.json file from S3
+        #   2. Find any reference to the alias and delete it from the versions file
+        #   3. This is voodoo (don't use JQ):
+        #      - we assign the input as $o and the new version/alias as $n,
+        #      - we check if the version number exists in the file already (for republishing docs)
+        #      - if it's an alias (stage/latest/*) or old version, we do nothing and output $o (original input)
+        #      - if it's a new version number, we add it at position 0 in the array.
+        #   4. Once done, we'll upload it back to S3.
+        run: |
+          aws s3 cp \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json \
+            versions_old.json
+          jq 'del(.[].aliases[] | select(. == "${{ env.ALIAS }}"))' < versions_old.json > versions_proc.json
+          jq '. as $o | [{"title": "${{ env.VERSION }}", "version": "${{ env.VERSION }}", "aliases": ["${{ env.ALIAS }}"] }] as $n | $n | if .[0].title | test("[a-z]+") or any($o[].title == $n[0].title;.) then [($o | .[] | select(.title == $n[0].title).aliases += $n[0].aliases | . )] else $n + $o end' < versions_proc.json > versions.json
+          aws s3 cp \
+            versions.json \
+            s3://${{ secrets.AWS_DOCS_BUCKET }}/lambda-python/versions.json

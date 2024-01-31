@@ -153,7 +153,11 @@ class Tracer:
         provider: Optional[BaseProvider] = None,
     ):
         self.__build_config(
-            service=service, disabled=disabled, auto_patch=auto_patch, patch_modules=patch_modules, provider=provider
+            service=service,
+            disabled=disabled,
+            auto_patch=auto_patch,
+            patch_modules=patch_modules,
+            provider=provider,
         )
         self.provider: BaseProvider = self._config["provider"]
         self.disabled = self._config["disabled"]
@@ -287,15 +291,19 @@ class Tracer:
         if lambda_handler is None:
             logger.debug("Decorator called with parameters")
             return functools.partial(
-                self.capture_lambda_handler, capture_response=capture_response, capture_error=capture_error
+                self.capture_lambda_handler,
+                capture_response=capture_response,
+                capture_error=capture_error,
             )
 
         lambda_handler_name = lambda_handler.__name__
         capture_response = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
+            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"),
+            choice=capture_response,
         )
         capture_error = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"), choice=capture_error
+            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"),
+            choice=capture_error,
         )
 
         @functools.wraps(lambda_handler)
@@ -314,7 +322,10 @@ class Tracer:
                 except Exception as err:
                     logger.exception(f"Exception received from {lambda_handler_name}")
                     self._add_full_exception_as_metadata(
-                        method_name=lambda_handler_name, error=err, subsegment=subsegment, capture_error=capture_error
+                        method_name=lambda_handler_name,
+                        error=err,
+                        subsegment=subsegment,
+                        capture_error=capture_error,
                     )
 
                     raise
@@ -511,32 +522,46 @@ class Tracer:
                 functools.partial(self.capture_method, capture_response=capture_response, capture_error=capture_error),
             )
 
-        # Example: app.ClassA.get_all  # noqa E800
+        # Example: app.ClassA.get_all  # noqa ERA001
         method_name = f"{method.__module__}.{method.__qualname__}"
 
         capture_response = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"), choice=capture_response
+            env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"),
+            choice=capture_response,
         )
         capture_error = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"), choice=capture_error
+            env=os.getenv(constants.TRACER_CAPTURE_ERROR_ENV, "true"),
+            choice=capture_error,
         )
 
         # Maintenance: Need a factory/builder here to simplify this now
         if inspect.iscoroutinefunction(method):
             return self._decorate_async_function(
-                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
+                method=method,
+                capture_response=capture_response,
+                capture_error=capture_error,
+                method_name=method_name,
             )
         elif inspect.isgeneratorfunction(method):
             return self._decorate_generator_function(
-                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
+                method=method,
+                capture_response=capture_response,
+                capture_error=capture_error,
+                method_name=method_name,
             )
         elif hasattr(method, "__wrapped__") and inspect.isgeneratorfunction(method.__wrapped__):
             return self._decorate_generator_function_with_context_manager(
-                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
+                method=method,
+                capture_response=capture_response,
+                capture_error=capture_error,
+                method_name=method_name,
             )
         else:
             return self._decorate_sync_function(
-                method=method, capture_response=capture_response, capture_error=capture_error, method_name=method_name
+                method=method,
+                capture_response=capture_response,
+                capture_error=capture_error,
+                method_name=method_name,
             )
 
     def _decorate_async_function(
@@ -553,12 +578,18 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     response = await method(*args, **kwargs)
                     self._add_response_as_metadata(
-                        method_name=method_name, data=response, subsegment=subsegment, capture_response=capture_response
+                        method_name=method_name,
+                        data=response,
+                        subsegment=subsegment,
+                        capture_response=capture_response,
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
                     self._add_full_exception_as_metadata(
-                        method_name=method_name, error=err, subsegment=subsegment, capture_error=capture_error
+                        method_name=method_name,
+                        error=err,
+                        subsegment=subsegment,
+                        capture_error=capture_error,
                     )
                     raise
 
@@ -580,12 +611,18 @@ class Tracer:
                     logger.debug(f"Calling method: {method_name}")
                     result = yield from method(*args, **kwargs)
                     self._add_response_as_metadata(
-                        method_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
+                        method_name=method_name,
+                        data=result,
+                        subsegment=subsegment,
+                        capture_response=capture_response,
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
                     self._add_full_exception_as_metadata(
-                        method_name=method_name, error=err, subsegment=subsegment, capture_error=capture_error
+                        method_name=method_name,
+                        error=err,
+                        subsegment=subsegment,
+                        capture_error=capture_error,
                     )
                     raise
 
@@ -610,12 +647,18 @@ class Tracer:
                         result = return_val
                         yield result
                     self._add_response_as_metadata(
-                        method_name=method_name, data=result, subsegment=subsegment, capture_response=capture_response
+                        method_name=method_name,
+                        data=result,
+                        subsegment=subsegment,
+                        capture_response=capture_response,
                     )
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
                     self._add_full_exception_as_metadata(
-                        method_name=method_name, error=err, subsegment=subsegment, capture_error=capture_error
+                        method_name=method_name,
+                        error=err,
+                        subsegment=subsegment,
+                        capture_error=capture_error,
                     )
                     raise
 
@@ -643,7 +686,10 @@ class Tracer:
                 except Exception as err:
                     logger.exception(f"Exception received from '{method_name}' method")
                     self._add_full_exception_as_metadata(
-                        method_name=method_name, error=err, subsegment=subsegment, capture_error=capture_error
+                        method_name=method_name,
+                        error=err,
+                        subsegment=subsegment,
+                        capture_error=capture_error,
                     )
                     raise
 
@@ -772,7 +818,7 @@ class Tracer:
 
     def _disable_xray_trace_batching(self):
         """Configure X-Ray SDK to send subsegment individually over batching
-        Known issue: https://github.com/awslabs/aws-lambda-powertools-python/issues/283
+        Known issue: https://github.com/aws-powertools/powertools-lambda-python/issues/283
         """
         if self.disabled:
             logger.debug("Tracing has been disabled, aborting streaming override")

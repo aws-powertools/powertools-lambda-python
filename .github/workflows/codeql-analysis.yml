@@ -1,39 +1,38 @@
 name: "CodeQL"
 
+# PROCESS
+#
+# 1. Static code analysis with CodeQL
+
+# USAGE
+#
+# NOTE: This is our slowest workflow hence it only runs on code merged.
+#
+# Always triggered on PR merge when source code changes.
+
 on:
   push:
-    paths:
-      - "aws_lambda_powertools/**"
-    branches:
-      - develop
+    branches: [develop]
+
+permissions:
+  contents: read
 
 jobs:
   analyze:
     name: Analyze
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        # Override automatic language detection by changing the below list
-        # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        language: ["python"]
-        # Learn more...
-        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
+    permissions:
+      security-events: write
+      actions: read
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@f31a31c052207cc13b328d6295c5b728bb49568c # v2.13.1
-        with:
-          languages: ${{ matrix.language }}
-          # If you wish to specify custom queries, you can do so here or in a config file.
-          # By default, queries listed here will override any specified in a config file.
-          # Prefix the list here with "+" to use these queries and those in the config file.
-          # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@f31a31c052207cc13b328d6295c5b728bb49568c # v2.13.1

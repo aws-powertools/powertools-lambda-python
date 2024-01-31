@@ -6,20 +6,22 @@ target:
 
 dev:
 	pip install --upgrade pip pre-commit poetry
-	poetry install --extras "all"
+	poetry config --local virtualenvs.in-project true
+	@$(MAKE) dev-version-plugin
+	poetry install --extras "all datamasking-aws-sdk redis"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
-	poetry install --extras "all"
+	@$(MAKE) dev-version-plugin
+	poetry install --extras "all datamasking-aws-sdk redis"
 	pre-commit install
 
 format:
-	poetry run isort aws_lambda_powertools tests examples
 	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run flake8 aws_lambda_powertools tests examples
+	poetry run ruff aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
@@ -31,11 +33,14 @@ test:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+test-pydanticv2:
+	poetry run pytest -m "not perf" --ignore tests/e2e
+
 unit-test:
 	poetry run pytest tests/unit
 
 e2e-test:
-	python parallel_run_e2e.py
+	poetry run pytest tests/e2e
 
 coverage-html:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=html
@@ -79,7 +84,7 @@ complexity-baseline:
 	$(info Maintenability index)
 	poetry run radon mi aws_lambda_powertools
 	$(info Cyclomatic complexity index)
-	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools
+	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
@@ -106,3 +111,7 @@ changelog:
 
 mypy:
 	poetry run mypy --pretty aws_lambda_powertools examples
+
+
+dev-version-plugin:
+	poetry self add git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4

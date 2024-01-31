@@ -89,7 +89,7 @@ function create_temporary_branch_with_changes() {
 function create_pr() {
     start_span "Creating PR against ${TEMP_BRANCH} branch"
     # TODO: create label
-    NEW_PR_URL=$(gh pr create --title "${PR_TITLE}" --body "${PR_BODY}: ${WORKFLOW_URL}" --base "${BASE_BRANCH}" --label "${SKIP_LABEL}" || error "Failed to create PR") # e.g, https://github.com/awslabs/aws-lambda-powertools/pull/13
+    NEW_PR_URL=$(gh pr create --title "${PR_TITLE}" --body "${PR_BODY}: ${WORKFLOW_URL}" --base "${BASE_BRANCH}" --label "${SKIP_LABEL}" || error "Failed to create PR") # e.g, https://github.com/aws-powertools/powertools-lambda-python/pull/13
 
     # greedy remove any string until the last URL path, including the last '/'. https://opensource.com/article/17/6/bash-parameter-expansion
     debug "Extracing PR Number from PR URL: "${NEW_PR_URL}""

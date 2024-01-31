@@ -19,8 +19,8 @@ class KafkaRecordModel(BaseModel):
     value: Union[str, Type[BaseModel]]
     headers: List[Dict[str, bytes]]
 
-    # validators
-    _decode_key = validator("key", allow_reuse=True)(base64_decode)
+    # Added type ignore to keep compatibility between Pydantic v1 and v2
+    _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var, unused-ignore]
 
     @validator("value", pre=True, allow_reuse=True)
     def data_base64_decode(cls, value):

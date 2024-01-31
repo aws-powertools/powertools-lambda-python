@@ -11,4 +11,10 @@ from aws_lambda_powertools.utilities.idempotency.persistence.dynamodb import (
 
 from .idempotency import IdempotencyConfig, idempotent, idempotent_function
 
-__all__ = ("DynamoDBPersistenceLayer", "BasePersistenceLayer", "idempotent", "idempotent_function", "IdempotencyConfig")
+__all__ = (
+    "DynamoDBPersistenceLayer",
+    "BasePersistenceLayer",
+    "idempotent",
+    "idempotent_function",
+    "IdempotencyConfig",
+)

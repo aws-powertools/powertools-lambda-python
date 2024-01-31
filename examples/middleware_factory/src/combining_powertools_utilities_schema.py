@@ -18,8 +18,8 @@ INPUT = {
                     "default": "",
                     "examples": ["1"],
                     "pattern": "^.*$",
-                }
+                },
             },
-        }
+        },
     },
 }

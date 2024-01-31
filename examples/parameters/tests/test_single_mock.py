@@ -1,4 +1,4 @@
-import src.single_mock as single_mock
+from src import single_mock
 
 
 def test_handler(monkeypatch):

@@ -1,18 +1,33 @@
 name: Closed Issue Message
+
+# PROCESS
+#
+# 1. Comment on recently closed issues to warn future responses may not be looked after
+
+# USAGE
+#
+# Always triggered upon issue closure
+#
+
 on:
-    issues:
-        types: [closed]
+  issues:
+      types: [closed]
+permissions:
+  contents: read
+
 jobs:
-    auto_comment:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: aws-actions/closed-issue-message@8b6324312193476beecf11f8e8539d73a3553bf4
-              with:
-                  repo-token: "${{ secrets.GITHUB_TOKEN }}"
-                  message: |
-                      ### ⚠️COMMENT VISIBILITY WARNING⚠️
-                      This issue is now closed. Please be mindful that future comments are hard for our team to see.
+  auto_comment:
+      runs-on: ubuntu-latest
+      permissions:
+          issues: write  # comment on issues
+      steps:
+          - uses: aws-actions/closed-issue-message@8b6324312193476beecf11f8e8539d73a3553bf4
+            with:
+                repo-token: "${{ secrets.GITHUB_TOKEN }}"
+                message: |
+                    ### ⚠️COMMENT VISIBILITY WARNING⚠️
+                    This issue is now closed. Please be mindful that future comments are hard for our team to see.
 
-                      If you need more assistance, please either tag a [team member](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/MAINTAINERS.md#current-maintainers) or open a new issue that references this one.
+                    If you need more assistance, please either tag a [team member](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/MAINTAINERS.md#current-maintainers) or open a new issue that references this one.
 
-                      If you wish to keep having a conversation with other community members under this issue feel free to do so.
+                    If you wish to keep having a conversation with other community members under this issue feel free to do so.

@@ -45,10 +45,10 @@ class S3Bucket(BaseModel):
 
 class S3Object(BaseModel):
     key: str
-    size: Optional[NonNegativeFloat]
-    eTag: Optional[str]
+    size: Optional[NonNegativeFloat] = None
+    eTag: Optional[str] = None
     sequencer: str
-    versionId: Optional[str]
+    versionId: Optional[str] = None
 
 
 class S3Message(BaseModel):
@@ -60,10 +60,10 @@ class S3Message(BaseModel):
 
 class S3EventNotificationObjectModel(BaseModel):
     key: str
-    size: Optional[NonNegativeFloat]
+    size: Optional[NonNegativeFloat] = None
     etag: str
     version_id: str = Field(None, alias="version-id")
-    sequencer: Optional[str]
+    sequencer: Optional[str] = None
 
 
 class S3EventNotificationEventBridgeBucketModel(BaseModel):
@@ -77,7 +77,7 @@ class S3EventNotificationEventBridgeDetailModel(BaseModel):
     request_id: str = Field(None, alias="request-id")
     requester: str
     source_ip_address: str = Field(None, alias="source-ip-address")
-    reason: Optional[str]
+    reason: Optional[str] = None
     deletion_type: Optional[str] = Field(None, alias="deletion-type")
     restore_expiry_time: Optional[str] = Field(None, alias="restore-expiry-time")
     source_storage_class: Optional[str] = Field(None, alias="source-storage-class")
@@ -99,9 +99,9 @@ class S3RecordModel(BaseModel):
     requestParameters: S3RequestParameters
     responseElements: S3ResponseElements
     s3: S3Message
-    glacierEventData: Optional[S3EventRecordGlacierEventData]
+    glacierEventData: Optional[S3EventRecordGlacierEventData] = None
 
-    @root_validator
+    @root_validator(allow_reuse=True, skip_on_failure=True)
     def validate_s3_object(cls, values):
         event_name = values.get("eventName")
         s3_object = values.get("s3").object

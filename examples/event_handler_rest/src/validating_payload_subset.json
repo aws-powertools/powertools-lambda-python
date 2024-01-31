@@ -1,0 +1,36 @@
+{
+  "version": "1.0",
+  "body": "{ \"todo\": {\"title\": \"foo\", \"userId\": \"1\", \"completed\": false } }",
+  "resource": "/todos",
+  "path": "/todos",
+  "httpMethod": "POST",
+  "headers": {
+    "Origin": "https://aws.amazon.com"
+  },
+  "multiValueHeaders": {},
+  "queryStringParameters": {},
+  "multiValueQueryStringParameters": {},
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "id",
+    "authorizer": {
+      "claims": null,
+      "scopes": null
+    },
+    "domainName": "id.execute-api.us-east-1.amazonaws.com",
+    "domainPrefix": "id",
+    "extendedRequestId": "request-id",
+    "httpMethod": "POST",
+    "path": "/todos",
+    "protocol": "HTTP/1.1",
+    "requestId": "id=",
+    "requestTime": "04/Mar/2020:19:15:17 +0000",
+    "requestTimeEpoch": 1583349317135,
+    "resourceId": null,
+    "resourcePath": "/todos",
+    "stage": "$default"
+  },
+  "pathParameters": null,
+  "stageVariables": null,
+  "isBase64Encoded": false
+}

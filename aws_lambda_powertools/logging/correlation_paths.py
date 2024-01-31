@@ -8,3 +8,4 @@ APPLICATION_LOAD_BALANCER = 'headers."x-amzn-trace-id"'
 EVENT_BRIDGE = "id"
 LAMBDA_FUNCTION_URL = API_GATEWAY_REST
 S3_OBJECT_LAMBDA = "xAmzRequestId"
+VPC_LATTICE = 'headers."x-amzn-trace-id"'

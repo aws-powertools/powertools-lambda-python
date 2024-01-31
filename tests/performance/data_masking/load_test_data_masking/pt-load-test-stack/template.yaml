@@ -1,0 +1,147 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  pt-load-test-stack
+
+  Powertools for AWS Lambda (Python) example
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+  Function:
+    Timeout: 5
+    Runtime: python3.12
+
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Resources:
+  MyKMSKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Enabled: true
+      KeyPolicy:
+        Version: 2012-10-17
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: "*"
+          Principal:
+            AWS: !Join [ "", [ "arn:aws:iam::", !Ref "AWS::AccountId", ":root" ] ]
+  Function128:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: function_128
+      Description: function 128 MB
+      MemorySize: 128
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /function128
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          POWERTOOLS_LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+  Function1024:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: function_1024
+      Description: function 1024 MB
+      MemorySize: 1024
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /function1024
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          POWERTOOLS_LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+  Function1769:
+    Type: AWS::Serverless::Function     # More info about Function Resource: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Properties:
+      Handler: app.lambda_handler
+      CodeUri: function_1769
+      Description: function 1769 MB
+      MemorySize: 1769
+      Architectures:
+      - x86_64
+      Policies:
+        Statement:
+        - Effect: Allow
+          Action: kms:*
+          Resource: !GetAtt MyKMSKey.Arn
+      Tracing: Active
+      Events:
+        HelloPath:
+          Type: Api           # More info about API Event Source: https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-property-function-api.html
+          Properties:
+            Path: /function1769
+            Method: GET
+             # Powertools for AWS Lambda (Python) env vars: https://awslabs.github.io/aws-lambda-powertools-python/#environment-variables
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+          POWERTOOLS_METRICS_NAMESPACE: Powertools
+          POWERTOOLS_LOG_LEVEL: INFO
+          KMS_KEY_ARN: !GetAtt MyKMSKey.Arn
+      Tags:
+        LambdaPowertools: python
+
+Outputs:
+  KMSKeyArn:
+    Description: ARN of the KMS Key
+    Value: !GetAtt MyKMSKey.Arn
+
+  128FunctionApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 128 MB
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/function128"
+
+  1024FunctionApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 1024 MB
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/function1024"
+
+  1769FunctionApi:
+    Description: API Gateway endpoint URL for Prod environment for Function 1769 MB
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/function1769"
+
+  Function128:
+    Description: Lambda Function 128 MB ARN
+    Value: !GetAtt Function128.Arn
+
+  Function1024:
+    Description: Lambda Function 1024 MB ARN
+    Value: !GetAtt Function1024.Arn
+
+  Function1769:
+    Description: Lambda Function 1769 MB ARN
+    Value: !GetAtt Function1769.Arn

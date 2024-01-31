@@ -62,7 +62,7 @@ def schema_array():
                             "examples": ["lessa"],
                         },
                     },
-                }
+                },
             ],
         },
     }
@@ -202,8 +202,8 @@ def sns_event():
                         "TestBinary": {"Type": "Binary", "Value": "TestBinary"},
                     },
                 },
-            }
-        ]
+            },
+        ],
     }
 
 
@@ -226,8 +226,8 @@ def kinesis_event():
                 "eventName": "aws:kinesis:record",
                 "eventSourceARN": "arn:aws:kinesis:EXAMPLE",
                 "awsRegion": "us-east-1",
-            }
-        ]
+            },
+        ],
     }
 
 
@@ -339,7 +339,7 @@ def sqs_event():
                 "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
                 "awsRegion": "us-east-1",
             },
-        ]
+        ],
     }
 
 
@@ -347,8 +347,8 @@ def sqs_event():
 def cloudwatch_logs_event():
     return {
         "awslogs": {
-            "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA=="  # noqa: E501
-        }
+            "data": "H4sIACZAXl8C/52PzUrEMBhFX2UILpX8tPbHXWHqIOiq3Q1F0ubrWEiakqTWofTdTYYB0YWL2d5zvnuTFellBIOedoiyKH5M0iwnlKH7HZL6dDB6ngLDfLFYctUKjie9gHFaS/sAX1xNEq525QxwFXRGGMEkx4Th491rUZdV3YiIZ6Ljfd+lfSyAtZloacQgAkqSJCGhxM6t7cwwuUGPz4N0YKyvO6I9WDeMPMSo8Z4Ca/kJ6vMEYW5f1MX7W1lVxaG8vqX8hNFdjlc0iCBBSF4ERT/3Pl7RbMGMXF2KZMh/C+gDpNS7RRsp0OaRGzx0/t8e0jgmcczyLCWEePhni/23JWalzjdu0a3ZvgEaNLXeugEAAA==",  # noqa: E501
+        },
     }
 
 
@@ -372,7 +372,7 @@ def cloudwatch_logs_schema():
                     "message": {"username": "dummy", "message": "hello world"},
                     "timestamp": 1440442987001,
                 },
-            ]
+            ],
         ],
         "additionalItems": True,
         "items": {
@@ -426,7 +426,7 @@ def cloudwatch_logs_schema():
                             "examples": [1440442987000],
                         },
                     },
-                }
+                },
             ],
         },
     }

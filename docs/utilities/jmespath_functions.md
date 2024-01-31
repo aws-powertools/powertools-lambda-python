@@ -6,9 +6,9 @@ description: Utility
 <!-- markdownlint-disable MD043 -->
 
 ???+ tip
-    JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and AWS Lambda Powertools for Python.
+    JMESPath is a query language for JSON used by AWS CLI, AWS Python SDK, and Powertools for AWS Lambda (Python).
 
-Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily deserialize common encoded JSON payloads in Lambda functions.
+Built-in [JMESPath](https://jmespath.org/){target="_blank" rel="nofollow"} Functions to easily deserialize common encoded JSON payloads in Lambda functions.
 
 ## Key features
 
@@ -19,18 +19,18 @@ Built-in [JMESPath](https://jmespath.org/){target="_blank"} Functions to easily 
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 You might have events that contains encoded JSON payloads as string, base64, or even in compressed format. It is a common use case to decode and extract them partially or fully as part of your Lambda function invocation.
 
-Powertools also have utilities like [validation](validation.md), [idempotency](idempotency.md), or [feature flags](feature_flags.md) where you might need to extract a portion of your data before using them.
+Powertools for AWS Lambda (Python) also have utilities like [validation](validation.md){target="_blank"}, [idempotency](idempotency.md){target="_blank"}, or [feature flags](feature_flags.md){target="_blank"} where you might need to extract a portion of your data before using them.
 
 ???+ info "Terminology"
     **Envelope** is the terminology we use for the **JMESPath expression** to extract your JSON object from your data input. We might use those two terms interchangeably.
 
 ### Extracting data
 
-You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank"}.
+You can use the `extract_data_from_envelope` function with any [JMESPath expression](https://jmespath.org/tutorial.html){target="_blank" rel="nofollow"}.
 
 ???+ tip
 	Another common use case is to fetch deeply nested data, filter, flatten, and more.
@@ -81,7 +81,7 @@ These are all built-in envelopes you can use along with their expression as a re
 | **`SQS`**                         | `Records[*].powertools_json(body)`                                                        |
 
 ???+ tip "Using SNS?"
-    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html){target="_blank"}. It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
+    If you don't require SNS metadata, enable [raw message delivery](https://docs.aws.amazon.com/sns/latest/dg/sns-large-payload-raw-message-delivery.html). It will reduce multiple payload layers and size, when using SNS in combination with other services (_e.g., SQS, S3, etc_).
 
 ## Advanced
 
@@ -90,7 +90,7 @@ These are all built-in envelopes you can use along with their expression as a re
 You can use our built-in JMESPath functions within your envelope expression. They handle deserialization for common data formats found in AWS Lambda event sources such as JSON strings, base64, and uncompress gzip data.
 
 ???+ info
-    We use these everywhere in Powertools to easily decode and unwrap events from Amazon API Gateway, Amazon Kinesis, AWS CloudWatch Logs, etc.
+    We use these everywhere in Powertools for AWS Lambda (Python) to easily decode and unwrap events from Amazon API Gateway, Amazon Kinesis, AWS CloudWatch Logs, etc.
 
 #### powertools_json function
 
@@ -187,9 +187,9 @@ This sample will decompress and decode base64 data from Cloudwatch Logs, then us
 ???+ warning
     This should only be used for advanced use cases where you have special formats not covered by the built-in functions.
 
-For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} and any additional option via `jmespath_options` param. To keep Powertools built-in functions, you can subclass from `PowertoolsFunctions`.
+For special binary formats that you want to decode before applying JSON Schema validation, you can bring your own [JMESPath function](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} and any additional option via `jmespath_options` param. To keep Powertools for AWS Lambda (Python) built-in functions, you can subclass from `PowertoolsFunctions`.
 
-Here is an example of how to decompress messages using [snappy](https://github.com/andrix/python-snappy){target="_blank"}:
+Here is an example of how to decompress messages using [zlib](https://docs.python.org/3/library/zlib.html){target="_blank" rel="nofollow"}:
 
 === "powertools_custom_jmespath_function.py"
 

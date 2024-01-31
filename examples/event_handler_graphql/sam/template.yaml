@@ -9,8 +9,8 @@ Globals:
     Tracing: Active
     Environment:
       Variables:
-        # Powertools env vars: https://awslabs.github.io/aws-lambda-powertools-python/latest/#environment-variables
-        LOG_LEVEL: INFO
+        # Powertools for AWS Lambda (Python) env vars: https://docs.powertools.aws.dev/lambda/python/latest/#environment-variables
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: example
@@ -75,7 +75,7 @@ Resources:
       cfn-lint:
         config:
           ignore_checks:
-            - W3002  # allow relative path in DefinitionS3Location
+            - W3002 # allow relative path in DefinitionS3Location
 
   # Lambda Direct Data Source and Resolver
 

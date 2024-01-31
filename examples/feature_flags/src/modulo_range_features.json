@@ -1,0 +1,26 @@
+{
+  "sale_experiment": {
+    "default": false,
+    "rules": {
+      "experiment 1 segment - 20% users": {
+        "when_match": true,
+        "conditions": [
+          {
+            "action": "EQUALS",
+            "key": "tier",
+            "value": "standard"
+          },
+          {
+            "action": "MODULO_RANGE",
+            "key": "user_id",
+            "value": {
+              "BASE": 100,
+              "START": 0,
+              "END": 19
+            }
+          }
+        ]
+      }
+    }
+  }
+}

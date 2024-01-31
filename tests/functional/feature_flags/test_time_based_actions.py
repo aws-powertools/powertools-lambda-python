@@ -36,9 +36,16 @@ def evaluate_mocked_schema(
 
     # Mock the current time
     year, month, day, hour, minute, second, timezone = mocked_time
-    time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.time_conditions._get_now_from_timezone")
+    time = mocker.patch("aws_lambda_powertools.utilities.feature_flags.comparators._get_now_from_timezone")
     time.return_value = datetime.datetime(
-        year=year, month=month, day=day, hour=hour, minute=minute, second=second, microsecond=0, tzinfo=timezone
+        year=year,
+        month=month,
+        day=day,
+        hour=hour,
+        minute=minute,
+        second=second,
+        microsecond=0,
+        tzinfo=timezone,
     )
 
     # Mock the returned data from AppConfig
@@ -47,7 +54,7 @@ def evaluate_mocked_schema(
         "my_feature": {
             FEATURE_DEFAULT_VAL_KEY: False,
             RULES_KEY: rules,
-        }
+        },
     }
 
     # Create a dummy AppConfigStore that returns our mocked FeatureFlag
@@ -82,7 +89,7 @@ def test_time_based_utc_in_between_time_range_rule_match(mocker):
                         CONDITION_VALUE: {TimeValues.START.value: "11:11", TimeValues.END.value: "23:59"},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 11, 12, 0, datetime.timezone.utc),
     )
@@ -101,7 +108,7 @@ def test_time_based_utc_in_between_time_range_no_rule_match(mocker):
                         CONDITION_VALUE: {TimeValues.START.value: "11:11", TimeValues.END.value: "23:59"},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 7, 12, 0, datetime.timezone.utc),  # no rule match 7:12 am
     )
@@ -120,7 +127,7 @@ def test_time_based_utc_in_between_time_range_full_hour_rule_match(mocker):
                         CONDITION_VALUE: {TimeValues.START.value: "20:00", TimeValues.END.value: "23:00"},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 21, 12, 0, datetime.timezone.utc),  # rule match 21:12
     )
@@ -139,7 +146,7 @@ def test_time_based_utc_in_between_time_range_between_days_rule_match(mocker):
                         CONDITION_VALUE: {TimeValues.START.value: "23:00", TimeValues.END.value: "04:00"},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 2, 3, 0, datetime.timezone.utc),  # rule match 2:03 am
     )
@@ -158,7 +165,7 @@ def test_time_based_utc_in_between_time_range_between_days_rule_no_match(mocker)
                         CONDITION_VALUE: {TimeValues.START.value: "23:00", TimeValues.END.value: "04:00"},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 5, 0, 0, datetime.timezone.utc),  # rule no match 5:00 am
     )
@@ -183,7 +190,7 @@ def test_time_based_between_time_range_rule_timezone_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 11, 11, 0, gettz(timezone_name)),  # rule match 11:11 am, Europe/Copenhagen
     )
@@ -208,7 +215,7 @@ def test_time_based_between_time_range_rule_timezone_no_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 2, 15, 10, 11, 0, gettz(timezone_name)),  # no rule match 10:11 am, Europe/Copenhagen
     )
@@ -230,7 +237,7 @@ def test_time_based_utc_in_between_full_time_range_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 10, 7, 10, 0, 0, datetime.timezone.utc),  # will match rule
     )
@@ -255,7 +262,7 @@ def test_time_based_utc_in_between_full_time_range_no_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 9, 7, 10, 0, 0, gettz(timezone_name)),  # will not rule match
     )
@@ -278,7 +285,7 @@ def test_time_based_utc_in_between_full_time_range_timezone_no_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 10, 10, 12, 15, 0, gettz("America/New_York")),  # will not rule match, it's too late
     )
@@ -302,7 +309,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_rule_match(moc
                         CONDITION_VALUE: "ran",
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 10, 7, 10, 0, 0, datetime.timezone.utc),  # will rule match
         context={"username": "ran"},
@@ -327,7 +334,7 @@ def test_time_based_multiple_conditions_utc_in_between_time_range_no_rule_match(
                         CONDITION_VALUE: "ran",
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 10, 7, 7, 0, 0, datetime.timezone.utc),  # will cause no rule match, 7:00
         context={"username": "ran"},
@@ -355,7 +362,7 @@ def test_time_based_utc_days_range_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 18, 10, 0, 0, datetime.timezone.utc),  # friday
     )
@@ -382,7 +389,7 @@ def test_time_based_utc_days_range_no_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 20, 10, 0, 0, datetime.timezone.utc),  # sunday, no match
     )
@@ -403,7 +410,7 @@ def test_time_based_utc_only_weekend_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 19, 10, 0, 0, datetime.timezone.utc),  # saturday
     )
@@ -427,7 +434,7 @@ def test_time_based_utc_only_weekend_with_timezone_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 19, 10, 0, 0, gettz(timezone_name)),  # saturday
     )
@@ -451,7 +458,7 @@ def test_time_based_utc_only_weekend_with_timezone_rule_no_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 21, 0, 0, 0, gettz("Europe/Copenhagen")),  # monday, 00:00
     )
@@ -472,7 +479,7 @@ def test_time_based_utc_only_weekend_no_rule_match(mocker):
                         },
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 18, 10, 0, 0, datetime.timezone.utc),  # friday, no match
     )
@@ -496,7 +503,7 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_rule_ma
                         CONDITION_VALUE: {TimeValues.DAYS.value: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value]},
                     },
                 ],
-            }
+            },
         },
         mocked_time=(2022, 11, 17, 16, 0, 0, datetime.timezone.utc),  # thursday 16:00
     )
@@ -519,11 +526,11 @@ def test_time_based_multiple_conditions_utc_days_range_and_certain_hours_no_rule
                             CONDITION_ACTION: RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value,
                             CONDITION_KEY: TimeKeys.CURRENT_DAY_OF_WEEK.value,
                             CONDITION_VALUE: {
-                                TimeValues.DAYS.value: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value]
+                                TimeValues.DAYS.value: [TimeValues.MONDAY.value, TimeValues.THURSDAY.value],
                             },
                         },
                     ],
-                }
+                },
             },
             mocked_time=mocked_time,
         )

@@ -17,7 +17,7 @@ def copy_config_to_registered_loggers(
     Parameters
     ----------
     source_logger : Logger
-        Powertools Logger to copy configuration from
+        Powertools for AWS Lambda (Python) Logger to copy configuration from
     log_level : Union[int, str], optional
         Logging level to set to registered loggers, by default uses source_logger logging level
     include : Optional[Set[str]], optional
@@ -25,7 +25,7 @@ def copy_config_to_registered_loggers(
     exclude : Optional[Set[str]], optional
         List of logger names to exclude, by default None
     """
-    level = log_level or source_logger.level
+    level = log_level or source_logger.log_level
 
     # Assumptions: Only take parent loggers not children (dot notation rule)
     # Steps:
@@ -34,7 +34,7 @@ def copy_config_to_registered_loggers(
     # 3. Include and exclude set? Add Logger if it’s in include and not in exclude
     # 4. Only exclude set? Ignore Logger in the excluding list
 
-    # Exclude source and powertools package logger by default
+    # Exclude source and Powertools for AWS Lambda (Python) package logger by default
     # If source logger is a child ensure we exclude parent logger to not break child logger
     # from receiving/pushing updates to keys being added/removed
     source_logger_name = source_logger.name.split(".")[0]
@@ -68,7 +68,9 @@ def _exclude_registered_loggers_filter(loggers: Set[str]) -> List[logging.Logger
 
 
 def _find_registered_loggers(
-    source_logger: Logger, loggers: Set[str], filter_func: Callable[[Set[str]], List[logging.Logger]]
+    source_logger: Logger,
+    loggers: Set[str],
+    filter_func: Callable[[Set[str]], List[logging.Logger]],
 ) -> List[logging.Logger]:
     """Filter root loggers based on provided parameters."""
     root_loggers = filter_func(loggers)

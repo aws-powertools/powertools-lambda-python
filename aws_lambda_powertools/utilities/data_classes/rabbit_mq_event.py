@@ -1,8 +1,7 @@
-import base64
-import json
 from typing import Any, Dict, List
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
 
 
 class BasicProperties(DictWrapper):
@@ -83,13 +82,13 @@ class RabbitMessage(DictWrapper):
     @property
     def decoded_data(self) -> str:
         """Decodes the data as a str"""
-        return base64.b64decode(self.data.encode()).decode()
+        return base64_decode(self.data)
 
     @property
     def json_data(self) -> Any:
         """Parses the data as json"""
         if self._json_data is None:
-            self._json_data = json.loads(self.decoded_data)
+            self._json_data = self._json_deserializer(self.decoded_data)
         return self._json_data
 
 

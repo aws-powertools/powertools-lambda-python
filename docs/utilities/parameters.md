@@ -16,7 +16,7 @@ The parameters utility provides high-level functions to retrieve one or multiple
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 By default, we fetch parameters from System Manager Parameter Store, secrets from Secrets Manager, and application configuration from AppConfig.
 
@@ -33,7 +33,7 @@ This utility requires additional permissions to work as expected.
 | SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
 | SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
 | SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
-| Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                 |
+| Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                  |
 | DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
 | DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
 | AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |
@@ -53,26 +53,34 @@ For multiple parameters, you can use either:
 * `get_parameters_by_name` to fetch distinct parameters by their full name. It also accepts custom caching, transform, decrypt per parameter.
 
 === "getting_started_recursive_ssm_parameter.py"
-    ```python hl_lines="3 10 13"
+    This is useful when you want to fetch all parameters from a given path, say `/dev`, e.g., `/dev/config`, `/dev/webhook/config`
+
+    To ease readability in deeply nested paths, we strip the path name. For example:
+
+    * `/dev/config` -> `config`
+    * `/dev/webhook/config` -> `webhook/config`
+
+    ```python hl_lines="3 11 18"
     --8<-- "examples/parameters/src/getting_started_recursive_ssm_parameter.py"
     ```
 
 === "getting_started_parameter_by_name.py"
-    ```python hl_lines="3 14"
+    ```python hl_lines="3 15"
     --8<-- "examples/parameters/src/getting_started_parameter_by_name.py"
     ```
 
-???+ tip "`get_parameters_by_name` supports graceful error handling"
-	By default, we will raise `GetParameterError` when any parameter fails to be fetched. You can override it by setting `raise_on_error=False`.
-
-	When disabled, we take the following actions:
-
-	* Add failed parameter name in the `_errors` key, _e.g._, `{_errors: ["/param1", "/param2"]}`
-	* Keep only successful parameter names and their values in the response
-	* Raise `GetParameterError` if any of your parameters is named `_errors`
-
 === "get_parameter_by_name_error_handling.py"
-    ```python hl_lines="3 5 12-13 15"
+    !!! tip "Failing gracefully if one or more parameters cannot be fetched or decrypted."
+
+  	By default, we will raise `GetParameterError` when any parameter fails to be fetched.
+
+    You can override it by setting `raise_on_error=False`. When disabled, we take the following actions:
+
+  	* Add failed parameter name in the `_errors` key, _e.g._, `{_errors: ["/param1", "/param2"]}`
+  	* Keep only successful parameter names and their values in the response
+  	* Raise `GetParameterError` if any of your parameters is named `_errors`
+
+    ```python hl_lines="3 5 13-17"
     --8<-- "examples/parameters/src/get_parameter_by_name_error_handling.py"
     ```
 
@@ -91,10 +99,24 @@ You can fetch application configurations in AWS AppConfig using `get_app_config`
 
 The following will retrieve the latest version and store it in the cache.
 
+???+ warning
+	We make two API calls to fetch each unique configuration name during the first time. This is by design in AppConfig. Please consider adjusting `max_age` parameter to enhance performance.
+
 === "getting_started_appconfig.py"
     ```python hl_lines="5 12"
     --8<-- "examples/parameters/src/getting_started_appconfig.py"
     ```
+
+### Environment variables
+
+The following environment variables are available to configure the parameter utility at a global scope:
+
+| Setting               | Description                                                                    | Environment variable                | Default |
+|-----------------------|--------------------------------------------------------------------------------|-------------------------------------|---------|
+| **Max Age**           | Adjusts for how long values are kept in cache (in seconds).                    | `POWERTOOLS_PARAMETERS_MAX_AGE`     | `5`     |
+| **Debug Sample Rate** | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store. | `POWERTOOLS_PARAMETERS_SSM_DECRYPT` | `false` |
+
+You can also use [`POWERTOOLS_PARAMETERS_MAX_AGE`](#adjusting-cache-ttl) through the `max_age` parameter and [`POWERTOOLS_PARAMETERS_SSM_DECRYPT`](#ssmprovider) through the `decrypt` parameter to override the environment variable values.
 
 ## Advanced
 
@@ -293,7 +315,7 @@ You can create your own custom parameter store provider by inheriting the `BaseP
 
 All transformation and caching logic is handled by the `get()` and `get_multiple()` methods from the base provider class.
 
-Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/), a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls), a popular object storage.
+Here are two examples of implementing a custom parameter store. One using an external service like [Hashicorp Vault](https://www.vaultproject.io/){target="_blank" rel="nofollow"}, a widely popular key-value and secret storage and the other one using [Amazon S3](https://aws.amazon.com/s3/?nc1=h_ls){target="_blank"}, a popular object storage.
 
 === "working_with_own_provider_vault.py"
     ```python hl_lines="5 13 20 24"
@@ -386,17 +408,17 @@ You can use arbitrary keyword arguments to pass it directly to the underlying SD
 
 Here is the mapping between this utility's functions and methods and the underlying SDK:
 
-| Provider            | Function/Method                 | Client name      | Function name                                                                                                                                                                                                                                                                                                                                             |
-| ------------------- | ------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                                                                                                                                                                                                                             |
-| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)                                                                                                                                                                                                           |
-| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter)                                                                                                                                                                                                                             |
-| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path)                                                                                                                                                                                                           |
-| Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
-| Secrets Manager     | `SecretsProvider.get`            | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value)                                                                                                                                                                                                 |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table))                                                                                                                                                                                                                                        | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
-| App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session) and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration) |
+| Provider            | Function/Method                 | Client name      | Function name                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------- | ------------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SSM Parameter Store | `get_parameter`                 | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter){target="_blank"}                                                                                                                                                                                                                                              |
+| SSM Parameter Store | `get_parameters`                | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path){target="_blank"}                                                                                                                                                                                                                            |
+| SSM Parameter Store | `SSMProvider.get`               | `ssm`            | [get_parameter](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameter){target="_blank"}                                                                                                                                                                                                                                              |
+| SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path){target="_blank"}                                                                                                                                                                                                                            |
+| Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
+| Secrets Manager     | `SecretsProvider.get`           | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})                                                                                                                                                                                                                                                         | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})                                                                                                                                                                                                                                                         | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
+| App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session){target="_blank"} and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration){target="_blank"} |
 
 ### Bring your own boto client
 
@@ -421,7 +443,7 @@ Bringing them together in a single code snippet would look like this:
 
 ### Customizing boto configuration
 
-The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html) , [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html), or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html) when constructing any of the built-in provider classes.
+The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enable you to pass in a custom [botocore config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}, [boto3 session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html){target="_blank"}, or  a [boto3 client](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/boto3.html){target="_blank"} when constructing any of the built-in provider classes.
 
 ???+ tip
 	You can use a custom session for retrieving parameters cross-account/region and for snapshot testing.
@@ -447,7 +469,7 @@ The **`config`** , **`boto3_session`**, and **`boto3_client`**  parameters enabl
 
 ### Mocking parameter values
 
-For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the [pytest monkeypatch fixture](https://docs.pytest.org/en/latest/how-to/monkeypatch.html) to patch the `parameters.get_parameter` method:
+For unit testing your applications, you can mock the calls to the parameters utility to avoid calling AWS APIs. This can be achieved in a number of ways - in this example, we use the [pytest monkeypatch fixture](https://docs.pytest.org/en/latest/how-to/monkeypatch.html){target="_blank" rel="nofollow"} to patch the `parameters.get_parameter` method:
 
 === "test_single_mock.py"
     ```python hl_lines="4 8"
@@ -467,8 +489,8 @@ If we need to use this pattern across multiple tests, we can avoid repetition by
     ```
 
 Alternatively, if we need more fully featured mocking (for example checking the arguments passed to `get_parameter`), we
-can use [unittest.mock](https://docs.python.org/3/library/unittest.mock.html) from the python stdlib instead of pytest's `monkeypatch` fixture. In this example, we use the
-[patch](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch) decorator to replace the `aws_lambda_powertools.utilities.parameters.get_parameter` function with a [MagicMock](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.MagicMock)
+can use [unittest.mock](https://docs.python.org/3/library/unittest.mock.html){target="_blank" rel="nofollow"} from the python stdlib instead of pytest's `monkeypatch` fixture. In this example, we use the
+[patch](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.patch){target="_blank" rel="nofollow"} decorator to replace the `aws_lambda_powertools.utilities.parameters.get_parameter` function with a [MagicMock](https://docs.python.org/3/library/unittest.mock.html#unittest.mock.MagicMock){target="_blank" rel="nofollow"}
 object named `get_parameter_mock`.
 
 === "test_with_monkeypatch.py"

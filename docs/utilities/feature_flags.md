@@ -8,6 +8,14 @@ The feature flags utility provides a simple rule engine to define when one or mu
 ???+ info
     When using `AppConfigStore`, we currently only support AppConfig using [freeform configuration profile](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html#appconfig-creating-configuration-and-profile-free-form-configurations){target="_blank"}  .
 
+## Key features
+
+* Define simple feature flags to dynamically decide when to enable a feature
+* Fetch one or all feature flags enabled for a given application context
+* Support for static feature flags to simply turn on/off a feature without rules
+* Support for time based feature flags
+* Bring your own Feature Flags Store Provider
+
 ## Terminology
 
 Feature flags are used to modify behaviour without changing the application's code. These flags can be **static** or **dynamic**.
@@ -17,27 +25,19 @@ Feature flags are used to modify behaviour without changing the application's co
 **Dynamic flags**. Indicates something can have varying states, for example enable a list of premium features for customer X not Y.
 
 ???+ tip
-    You can use [Parameters utility](parameters.md) for static flags while this utility can do both static and dynamic feature flags.
+    You can use [Parameters utility](parameters.md){target="_blank"} for static flags while this utility can do both static and dynamic feature flags.
 
 ???+ warning
     Be mindful that feature flags can increase the complexity of your application over time; use them sparingly.
 
 If you want to learn more about feature flags, their variations and trade-offs, check these articles:
 
-* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html){target="_blank"}
-* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233){target="_blank"}
-* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank"}
+* [Feature Toggles (aka Feature Flags) - Pete Hodgson](https://martinfowler.com/articles/feature-toggles.html){target="_blank" rel="nofollow"}
+* [AWS Lambda Feature Toggles Made Simple - Ran Isenberg](https://isenberg-ran.medium.com/aws-lambda-feature-toggles-made-simple-580b0c444233){target="_blank" rel="nofollow"}
+* [Feature Flags Getting Started - CloudBees](https://www.cloudbees.com/blog/ultimate-feature-flag-guide){target="_blank" rel="nofollow"}
 
 ???+ note
     AWS AppConfig requires two API calls to fetch configuration for the first time. You can improve latency by consolidating your feature settings in a single [Configuration](https://docs.aws.amazon.com/appconfig/latest/userguide/appconfig-creating-configuration-and-profile.html){target="_blank"}.
-
-## Key features
-
-* Define simple feature flags to dynamically decide when to enable a feature
-* Fetch one or all feature flags enabled for a given application context
-* Support for static feature flags to simply turn on/off a feature without rules
-* Support for time based feature flags
-* Bring your own Feature Flags Store Provider
 
 ## Getting started
 
@@ -255,12 +255,60 @@ You can also have features enabled only at specific days, for example: enable ch
     ```
 
 ???+ info "How should I use timezones?"
-    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank"} (as originally specified
-    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank"}) as part of your rules definition.
-    Powertools takes care of converting and calculate the correct timestamps for you.
+    You can use any [IANA time zone](https://www.iana.org/time-zones){target="_blank" rel="nofollow"} (as originally specified
+    in [PEP 615](https://peps.python.org/pep-0615/){target="_blank" rel="nofollow"}) as part of your rules definition.
+    Powertools for AWS Lambda (Python) takes care of converting and calculate the correct timestamps for you.
 
     When using `SCHEDULE_BETWEEN_DATETIME_RANGE`, use timestamps without timezone information, and
     specify the timezone manually. This way, you'll avoid hitting problems with day light savings.
+
+### Modulo Range Segmented Experimentation
+
+Feature flags can also be used to run experiments on a segment of users based on modulo range conditions on context variables.
+This allows you to have features that are only enabled for a certain segment of users, comparing across multiple variants
+of the same experiment.
+
+Use cases:
+
+* Enable an experiment for a percentage of users
+* Scale up an experiment incrementally in production - canary release
+* Run multiple experiments or variants simultaneously by assigning a spectrum segment to each experiment variant.
+
+The modulo range condition takes three values - `BASE`, `START` and `END`.
+
+The condition evaluates `START <= CONTEXT_VALUE % BASE <= END`.
+
+=== "modulo_range_feature.py"
+
+    ```python hl_lines="1 6 38"
+    --8<-- "examples/feature_flags/src/modulo_range_feature.py"
+    ```
+
+=== "modulo_range_feature_event.json"
+
+    ```json hl_lines="2"
+    --8<-- "examples/feature_flags/src/modulo_range_feature_event.json"
+    ```
+
+=== "modulo_range_features.json"
+
+    ```json hl_lines="13-21"
+    --8<-- "examples/feature_flags/src/modulo_range_features.json"
+    ```
+
+You can run multiple experiments on your users with the spectrum of your choice.
+
+=== "modulo_range_multiple_feature.py"
+
+    ```python hl_lines="1 6 67"
+    --8<-- "examples/feature_flags/src/modulo_range_multiple_feature.py"
+    ```
+
+=== "modulo_range_multiple_features.json"
+
+    ```json hl_lines="9-16 23-31 37-45"
+    --8<-- "examples/feature_flags/src/modulo_range_multiple_features.json"
+    ```
 
 ### Beyond boolean feature flags
 
@@ -385,9 +433,10 @@ The `action` configuration can have the following values, where the expressions 
 | **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`                                |
 | **VALUE_IN_KEY**                    | `lambda a, b: b in a`                                    |
 | **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`                                |
-| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: time(a).start <= b <= time(a).end`         |
-| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: datetime(a).start <= b <= datetime(b).end` |
+| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: b.start <= time(a) <= b.end`        |
+| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: b.start <= datetime(a) <= b.end` |
 | **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
+| **MODULO_RANGE**                    | `lambda a, b: b.start <= a % b.base <= b.end`            |
 
 ???+ info
     The `key` and `value` will be compared to the input from the `context` parameter.
@@ -399,7 +448,7 @@ The `action` configuration can have the following values, where the expressions 
     | Key                 | Meaning                                                                                   |
     | ------------------- | ----------------------------------------------------------------------------------------- |
     | CURRENT_TIME        | The current time, 24 hour format (HH:mm)                                                  |
-    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601){target="_blank"}) |
+    | CURRENT_DATETIME    | The current datetime ([ISO8601](https://en.wikipedia.org/wiki/ISO_8601){target="_blank" rel="nofollow"}) |
     | CURRENT_DAY_OF_WEEK | The current day of the week (Monday-Sunday)                                               |
 
     If not specified, the timezone used for calculations will be UTC.
@@ -452,8 +501,8 @@ These are the available options for further customization.
 | **envelope**         | `None`           | JMESPath expression to use to extract feature flags configuration from AWS AppConfig configuration                                                     |
 | **max_age**          | `5`              | Number of seconds to cache feature flags configuration fetched from AWS AppConfig                                                                      |
 | **sdk_config**       | `None`           | [Botocore Config object](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html){target="_blank"}                            |
-| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank"} |
-| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools Logger.                                                                  |
+| **jmespath_options** | `None`           | For advanced use cases when you want to bring your own [JMESPath functions](https://github.com/jmespath/jmespath.py#custom-functions){target="_blank" rel="nofollow"} |
+| **logger**           | `logging.Logger` | Logger to use for debug.  You can optionally supply an instance of Powertools for AWS Lambda (Python) Logger.                                          |
 
 === "appconfig_provider_options.py"
 
@@ -529,5 +578,5 @@ You can unit test your feature flags locally and independently without setting u
 | Method                                                                                                                | When to use                                                                                                             | Requires new deployment on changes | Supported services                                    |
 | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------------------------- |
 | **[Environment variables](https://docs.aws.amazon.com/lambda/latest/dg/configuration-envvars.html){target="_blank"}** | Simple configuration that will rarely if ever change, because changing it requires a Lambda function deployment.        | Yes                                | Lambda                                                |
-| **[Parameters utility](parameters.md)**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
+| **[Parameters utility](parameters.md){target="_blank"}**                                                                               | Access to secrets, or fetch parameters in different formats from AWS System Manager Parameter Store or Amazon DynamoDB. | No                                 | Parameter Store, DynamoDB, Secrets Manager, AppConfig |
 | **Feature flags utility**                                                                                             | Rule engine to define when one or multiple features should be enabled depending on the input.                           | No                                 | AppConfig                                             |

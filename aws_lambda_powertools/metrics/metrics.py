@@ -1,10 +1,16 @@
-from typing import Any, Dict, Optional
+# NOTE: keeps for compatibility
+from __future__ import annotations
 
-from .base import MetricManager
+from typing import Any, Dict
+
+from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.cloudwatch import AmazonCloudWatchEMFProvider
+from aws_lambda_powertools.metrics.provider.cloudwatch_emf.types import CloudWatchEMFOutput
+from aws_lambda_powertools.shared.types import AnyCallableT
 
 
-class Metrics(MetricManager):
-    """Metrics create an EMF object with up to 100 metrics
+class Metrics:
+    """Metrics create an CloudWatch EMF object with up to 100 metrics
 
     Use Metrics when you need to create multiple metrics that have
     dimensions in common (e.g. service_name="payment").
@@ -46,6 +52,8 @@ class Metrics(MetricManager):
         service name to be used as metric dimension, by default "service_undefined"
     namespace : str, optional
         Namespace for metrics
+    provider: AmazonCloudWatchEMFProvider, optional
+        Pre-configured AmazonCloudWatchEMFProvider provider
 
     Raises
     ------
@@ -69,22 +77,75 @@ class Metrics(MetricManager):
     _metadata: Dict[str, Any] = {}
     _default_dimensions: Dict[str, Any] = {}
 
-    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
+    def __init__(
+        self,
+        service: str | None = None,
+        namespace: str | None = None,
+        provider: AmazonCloudWatchEMFProvider | None = None,
+    ):
         self.metric_set = self._metrics
         self.metadata_set = self._metadata
         self.default_dimensions = self._default_dimensions
         self.dimension_set = self._dimensions
 
         self.dimension_set.update(**self._default_dimensions)
-        return super().__init__(
-            namespace=namespace,
-            service=service,
-            metric_set=self.metric_set,
-            dimension_set=self.dimension_set,
-            metadata_set=self.metadata_set,
+
+        if provider is None:
+            self.provider = AmazonCloudWatchEMFProvider(
+                namespace=namespace,
+                service=service,
+                metric_set=self.metric_set,
+                dimension_set=self.dimension_set,
+                metadata_set=self.metadata_set,
+                default_dimensions=self._default_dimensions,
+            )
+        else:
+            self.provider = provider
+
+    def add_metric(
+        self,
+        name: str,
+        unit: MetricUnit | str,
+        value: float,
+        resolution: MetricResolution | int = 60,
+    ) -> None:
+        self.provider.add_metric(name=name, unit=unit, value=value, resolution=resolution)
+
+    def add_dimension(self, name: str, value: str) -> None:
+        self.provider.add_dimension(name=name, value=value)
+
+    def serialize_metric_set(
+        self,
+        metrics: Dict | None = None,
+        dimensions: Dict | None = None,
+        metadata: Dict | None = None,
+    ) -> CloudWatchEMFOutput:
+        return self.provider.serialize_metric_set(metrics=metrics, dimensions=dimensions, metadata=metadata)
+
+    def add_metadata(self, key: str, value: Any) -> None:
+        self.provider.add_metadata(key=key, value=value)
+
+    def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
+        self.provider.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
+
+    def log_metrics(
+        self,
+        lambda_handler: AnyCallableT | None = None,
+        capture_cold_start_metric: bool = False,
+        raise_on_empty_metrics: bool = False,
+        default_dimensions: Dict[str, str] | None = None,
+        **kwargs,
+    ):
+        return self.provider.log_metrics(
+            lambda_handler=lambda_handler,
+            capture_cold_start_metric=capture_cold_start_metric,
+            raise_on_empty_metrics=raise_on_empty_metrics,
+            default_dimensions=default_dimensions,
+            **kwargs,
         )
 
     def set_default_dimensions(self, **dimensions) -> None:
+        self.provider.set_default_dimensions(**dimensions)
         """Persist dimensions across Lambda invocations
 
         Parameters
@@ -111,22 +172,36 @@ class Metrics(MetricManager):
         self.default_dimensions.update(**dimensions)
 
     def clear_default_dimensions(self) -> None:
+        self.provider.default_dimensions.clear()
         self.default_dimensions.clear()
 
     def clear_metrics(self) -> None:
-        super().clear_metrics()
-        # re-add default dimensions
-        self.set_default_dimensions(**self.default_dimensions)
+        self.provider.clear_metrics()
+
+    # We now allow customers to bring their own instance
+    # of the AmazonCloudWatchEMFProvider provider
+    # So we need to define getter/setter for namespace and service properties
+    # To access these attributes on the provider instance.
+    @property
+    def namespace(self):
+        return self.provider.namespace
+
+    @namespace.setter
+    def namespace(self, namespace):
+        self.provider.namespace = namespace
+
+    @property
+    def service(self):
+        return self.provider.service
+
+    @service.setter
+    def service(self, service):
+        self.provider.service = service
 
 
-class EphemeralMetrics(MetricManager):
-    """Non-singleton version of Metrics to not persist metrics across instances
+# Maintenance: until v3, we can't afford to break customers.
+# AmazonCloudWatchEMFProvider has the exact same functionality (non-singleton)
+# so we simply alias. If a customer subclassed `EphemeralMetrics` and somehow relied on __name__
+# we can quickly revert and duplicate code while using self.provider
 
-    NOTE: This is useful when you want to:
-
-    - Create metrics for distinct namespaces
-    - Create the same metrics with different dimensions more than once
-    """
-
-    def __init__(self, service: Optional[str] = None, namespace: Optional[str] = None):
-        super().__init__(namespace=namespace, service=service)
+EphemeralMetrics = AmazonCloudWatchEMFProvider

@@ -36,9 +36,9 @@ class SesMailHeaders(BaseModel):
 class SesMailCommonHeaders(BaseModel):
     header_from: List[str] = Field(None, alias="from")
     to: List[str]
-    cc: Optional[List[str]]
-    bcc: Optional[List[str]]
-    sender: Optional[List[str]]
+    cc: Optional[List[str]] = None
+    bcc: Optional[List[str]] = None
+    sender: Optional[List[str]] = None
     reply_to: Optional[List[str]] = Field(None, alias="reply-to")
     returnPath: str
     messageId: str

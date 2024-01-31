@@ -1,5 +1,5 @@
 import pytest
-import src.single_mock as single_mock
+from src import single_mock
 
 
 @pytest.fixture

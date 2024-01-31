@@ -97,7 +97,7 @@ labelPRBasedOnFilePath:
 firstPRWelcomeComment: >
   Thanks a lot for your first contribution! Please check out our contributing guidelines and don't hesitate to ask whatever you need.
 
-  In the meantime, check out the #python channel on our AWS Lambda Powertools Discord: [Invite link](https://discord.gg/B8zZKbbyET)
+  In the meantime, check out the #python channel on our Powertools for AWS Lambda Discord: [Invite link](https://discord.gg/B8zZKbbyET)
 
 # Comment to be posted to congratulate user on their first merged PR
 firstPRMergeComment: >
@@ -107,7 +107,7 @@ firstPRMergeComment: >
 firstIssueWelcomeComment: >
   Thanks for opening your first issue here! We'll come back to you as soon as we can.
 
-  In the meantime, check out the #python channel on our AWS Lambda Powertools Discord: [Invite link](https://discord.gg/B8zZKbbyET)
+  In the meantime, check out the #python channel on our Powertools for AWS Lambda Discord: [Invite link](https://discord.gg/B8zZKbbyET)
 
 ###### IssueLink Adder #################################################################################################
 # Insert Issue (Jira/Github etc) link in PR description based on the Issue ID in PR title.

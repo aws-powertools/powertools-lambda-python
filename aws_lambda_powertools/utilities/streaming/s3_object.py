@@ -15,8 +15,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Literal
-
+from aws_lambda_powertools.shared.types import Literal
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
 from aws_lambda_powertools.utilities.streaming.transformations import (
     CsvTransform,
@@ -87,7 +86,11 @@ class S3Object(IO[bytes]):
 
         # The underlying seekable IO, where all the magic happens
         self.raw_stream = _S3SeekableIO(
-            bucket=bucket, key=key, version_id=version_id, boto3_client=boto3_client, **sdk_options
+            bucket=bucket,
+            key=key,
+            version_id=version_id,
+            boto3_client=boto3_client,
+            **sdk_options,
         )
 
         # Stores the list of data transformations
@@ -136,7 +139,9 @@ class S3Object(IO[bytes]):
 
     @overload
     def transform(
-        self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]], in_place: Literal[False]
+        self,
+        transformations: BaseTransform[T] | Sequence[BaseTransform[T]],
+        in_place: Literal[False],
     ) -> None:
         pass
 
@@ -145,7 +150,9 @@ class S3Object(IO[bytes]):
         pass
 
     def transform(
-        self, transformations: BaseTransform[T] | Sequence[BaseTransform[T]], in_place: Optional[bool] = False
+        self,
+        transformations: BaseTransform[T] | Sequence[BaseTransform[T]],
+        in_place: Optional[bool] = False,
     ) -> Optional[T]:
         """
         Applies one or more data transformations to the stream.

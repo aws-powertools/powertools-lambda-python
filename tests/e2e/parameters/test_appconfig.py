@@ -49,13 +49,14 @@ def test_get_parameter_appconfig_freeform(
             "name": parameter_appconfig_freeform_profile,
             "environment": parameter_appconfig_freeform_environment,
             "application": parameter_appconfig_freeform_application,
-        }
+        },
     )
     expected_return = parameter_appconfig_freeform_value
 
     # WHEN
     parameter_execution, _ = data_fetcher.get_lambda_response(
-        lambda_arn=parameter_appconfig_freeform_handler_fn_arn, payload=payload
+        lambda_arn=parameter_appconfig_freeform_handler_fn_arn,
+        payload=payload,
     )
     parameter_value = parameter_execution["Payload"].read().decode("utf-8")
 

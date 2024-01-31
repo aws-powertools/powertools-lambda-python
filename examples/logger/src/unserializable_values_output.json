@@ -5,6 +5,6 @@
         "ingestion_time": "2022-06-24T10:12:09.526365",
         "serialize_me": "<non-serializable: Unserializable>"
     },
-    "timestamp": "2022-06-24 12:12:09,526+0200",
+    "timestamp": "2022-06-24 12:12:09,526+0000",
     "service": "payment"
 }

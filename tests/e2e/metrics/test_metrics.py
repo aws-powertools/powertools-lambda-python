@@ -41,7 +41,10 @@ def test_basic_lambda_metric_is_visible(basic_handler_fn: str, basic_handler_fn_
     _, execution_time = data_fetcher.get_lambda_response(lambda_arn=basic_handler_fn_arn, payload=event)
 
     metric_values = data_fetcher.get_metrics(
-        namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
+        namespace=METRIC_NAMESPACE,
+        start_date=execution_time,
+        metric_name=metric_name,
+        dimensions=dimensions,
     )
 
     # THEN
@@ -62,7 +65,10 @@ def test_cold_start_metric(cold_start_fn_arn: str, cold_start_fn: str):
     data_fetcher.get_lambda_response(lambda_arn=cold_start_fn_arn, payload=event)
 
     metric_values = data_fetcher.get_metrics(
-        namespace=METRIC_NAMESPACE, start_date=execution_time, metric_name=metric_name, dimensions=dimensions
+        namespace=METRIC_NAMESPACE,
+        start_date=execution_time,
+        metric_name=metric_name,
+        dimensions=dimensions,
     )
 
     # THEN

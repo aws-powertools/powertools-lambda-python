@@ -139,7 +139,8 @@ def test_dynamodb_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.DynamoDBProvider(table_name, config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.table.meta.client)
@@ -282,7 +283,7 @@ def test_dynamodb_provider_get_multiple(mock_name, mock_value, config):
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
     stubber.add_response("query", response, expected_params)
@@ -319,7 +320,7 @@ def test_dynamodb_provider_get_multiple_auto(mock_name, mock_value, config):
     response = {
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": value}} for (name, value) in mock_params.items()
-        ]
+        ],
     }
     expected_params = {"TableName": table_name, "KeyConditionExpression": Key("id").eq(mock_name)}
     stubber.add_response("query", response, expected_params)
@@ -373,7 +374,7 @@ def test_dynamodb_provider_get_multiple_next_token(mock_name, mock_value, config
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names[1:]
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -413,7 +414,7 @@ def test_dynamodb_provider_get_multiple_sdk_options(mock_name, mock_value, confi
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -453,7 +454,7 @@ def test_dynamodb_provider_get_multiple_sdk_options_overwrite(mock_name, mock_va
         "Items": [
             {"id": {"S": mock_name}, "sk": {"S": name}, "value": {"S": f"{mock_value}/{name}"}}
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {
         "TableName": table_name,
@@ -495,7 +496,7 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -532,7 +533,7 @@ def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -570,7 +571,7 @@ def test_ssm_provider_get_with_decrypt_environment_variable(monkeypatch, mock_na
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": True}
     stubber.add_response("get_parameter", response, expected_params)
@@ -607,7 +608,7 @@ def test_ssm_provider_get_default_config(monkeypatch, mock_name, mock_value, moc
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -631,7 +632,8 @@ def test_ssm_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SSMProvider(config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -764,7 +766,9 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_with_decryp
 
 
 def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decrypt_combined(
-    mock_value, mock_version, config
+    mock_value,
+    mock_version,
+    config,
 ):
     # GIVEN three parameters are requested
     # one requires decryption, two can be batched
@@ -776,7 +780,8 @@ def test_ssm_provider_get_parameters_by_name_do_not_raise_on_failure_batch_decry
 
     expected_stub_params = {"Names": [success, fail]}
     expected_stub_response = build_get_parameters_stub(
-        params={fail: mock_value, success: mock_value}, invalid_parameters=[fail]
+        params={fail: mock_value, success: mock_value},
+        invalid_parameters=[fail],
     )
 
     provider = parameters.SSMProvider(config=config)
@@ -905,7 +910,7 @@ def test_ssm_provider_get_expired(mock_name, mock_value, mock_version, config):
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -940,7 +945,7 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
             "SourceResult": "string",
             "LastModifiedDate": datetime(2015, 1, 1),
             "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}",
-        }
+        },
     }
     expected_params = {"Name": mock_name, "WithDecryption": False}
     stubber.add_response("get_parameter", response, expected_params)
@@ -951,6 +956,59 @@ def test_ssm_provider_get_sdk_options_overwrite(mock_name, mock_value, mock_vers
 
         assert value == mock_value
         stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_get_multiple_with_decrypt_environment_variable(
+    monkeypatch,
+    mock_name,
+    mock_value,
+    mock_version,
+    config,
+):
+    """
+    Test SSMProvider.get_multiple() with decrypt value replaced by environment variable
+    """
+
+    # Setting environment variable to override the default value
+    monkeypatch.setenv("POWERTOOLS_PARAMETERS_SSM_DECRYPT", "true")
+
+    mock_param_names = ["A", "B", "C"]
+
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {
+        "Parameters": [
+            {
+                "Name": f"{mock_name}/{name}",
+                "Type": "String",
+                "Value": f"{mock_value}/{name}",
+                "Version": mock_version,
+                "Selector": f"{mock_name}/{name}:{mock_version}",
+                "SourceResult": "string",
+                "LastModifiedDate": datetime(2015, 1, 1),
+                "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
+            }
+            for name in mock_param_names
+        ],
+    }
+    expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": True}
+    stubber.add_response("get_parameters_by_path", response, expected_params)
+    stubber.activate()
+
+    try:
+        values = provider.get_multiple(mock_name)
+
+        stubber.assert_no_pending_responses()
+
+        assert len(values) == len(mock_param_names)
+        for name in mock_param_names:
+            assert name in values
+            assert values[name] == f"{mock_value}/{name}"
     finally:
         stubber.deactivate()
 
@@ -980,7 +1038,7 @@ def test_ssm_provider_get_multiple(mock_name, mock_value, mock_version, config):
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1024,7 +1082,7 @@ def test_ssm_provider_get_multiple_different_path(mock_name, mock_value, mock_ve
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1090,7 +1148,7 @@ def test_ssm_provider_get_multiple_next_token(mock_name, mock_value, mock_versio
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names[1:]
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "NextToken": "next_token"}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1134,7 +1192,7 @@ def test_ssm_provider_get_multiple_sdk_options(mock_name, mock_value, mock_versi
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False, "MaxResults": 10}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1178,7 +1236,7 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
                 "ARN": f"arn:aws:ssm:us-east-2:111122223333:parameter/{mock_name}/{name}",
             }
             for name in mock_param_names
-        ]
+        ],
     }
     expected_params = {"Path": mock_name, "Recursive": False, "WithDecryption": False}
     stubber.add_response("get_parameters_by_path", response, expected_params)
@@ -1186,7 +1244,10 @@ def test_ssm_provider_get_multiple_sdk_options_overwrite(mock_name, mock_value, 
 
     try:
         values = provider.get_multiple(
-            mock_name, Path="THIS_SHOULD_BE_OVERWRITTEN", Recursive=False, WithDecryption=True
+            mock_name,
+            Path="THIS_SHOULD_BE_OVERWRITTEN",
+            Recursive=False,
+            WithDecryption=True,
         )
 
         stubber.assert_no_pending_responses()
@@ -1326,7 +1387,8 @@ def test_secrets_provider_get_cached(mock_name, mock_value, config):
     provider = parameters.SecretsProvider(config=config)
 
     # Inject value in the internal store
-    provider.store[(mock_name, None)] = ExpirableValue(mock_value, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name)
+    provider.add_to_cache(key=cache_key, value=mock_value, max_age=60)
 
     # Stub the boto3 client
     stubber = stub.Stubber(provider.client)
@@ -1728,7 +1790,8 @@ def test_base_provider_get_multiple_cached(mock_name, mock_value):
 
     provider = TestProvider()
 
-    provider.store[(mock_name, None)] = ExpirableValue({"A": mock_value}, datetime.now() + timedelta(seconds=60))
+    cache_key = provider._build_cache_key(name=mock_name, is_nested=True)
+    provider.add_to_cache(key=cache_key, value={"A": mock_value}, max_age=60)
 
     value = provider.get_multiple(mock_name)
 
@@ -1843,7 +1906,10 @@ def test_get_parameters_by_name_with_override_and_explicit_global(monkeypatch, m
         # as that's right before we call SSM, and when options have been merged
         # def _get_parameters_by_name(self, parameters: Dict[str, Dict], raise_on_error: bool = True) -> Dict[str, Any]:
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+            self,
+            parameters: Dict[str, Dict],
+            raise_on_error: bool = True,
+            decrypt: bool = False,
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN max_age should use no_cache_param override
             assert parameters[mock_name]["max_age"] == 0
@@ -1866,7 +1932,10 @@ def test_get_parameters_by_name_with_max_batch(monkeypatch, config):
             super().__init__(config, **kwargs)
 
         def _get_parameters_by_name(
-            self, parameters: Dict[str, Dict], raise_on_error: bool = True, decrypt: bool = False
+            self,
+            parameters: Dict[str, Dict],
+            raise_on_error: bool = True,
+            decrypt: bool = False,
         ) -> Tuple[Dict[str, Any], List[str]]:
             # THEN we should always split to respect GetParameters max
             assert len(parameters) == self._MAX_GET_PARAMETERS_ITEM
@@ -2096,7 +2165,10 @@ def test_appconf_provider_get_configuration_json_content_type(mock_name, config)
 
     try:
         value = provider.get(
-            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+            mock_name,
+            transform="json",
+            ApplicationIdentifier=application,
+            EnvironmentIdentifier=environment,
         )
 
         assert value == mock_body_json
@@ -2135,7 +2207,10 @@ def test_appconf_provider_get_configuration_json_content_type_with_custom_client
 
     try:
         value = provider.get(
-            mock_name, transform="json", ApplicationIdentifier=application, EnvironmentIdentifier=environment
+            mock_name,
+            transform="json",
+            ApplicationIdentifier=application,
+            EnvironmentIdentifier=environment,
         )
 
         assert value == mock_body_json
@@ -2171,10 +2246,64 @@ def test_appconf_provider_get_configuration_no_transform(mock_name, config):
     stubber.activate()
 
     try:
-        value: str = provider.get(mock_name)
+        value: bytes = provider.get(mock_name)
         str_value = value.decode("utf-8")
         assert str_value == json.dumps(mock_body_json)
         stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_appconf_provider_multiple_unique_config_names(mock_name, config):
+    """
+    Test appconfig_provider.get with multiple config names
+    """
+
+    # GIVEN a provider instance, we should be able to retrieve multiple appconfig profiles.
+    environment = "dev"
+    application = "myapp"
+    provider = parameters.AppConfigProvider(environment=environment, application=application, config=config)
+
+    mock_body_json_first_call = {"myenvvar1": "Black Panther", "myenvvar2": 3}
+    encoded_message_first_call = json.dumps(mock_body_json_first_call).encode("utf-8")
+    mock_value_first_call = StreamingBody(BytesIO(encoded_message_first_call), len(encoded_message_first_call))
+
+    mock_body_json_second_call = {"myenvvar1": "Thor", "myenvvar2": 5}
+    encoded_message_second_call = json.dumps(mock_body_json_second_call).encode("utf-8")
+    mock_value_second_call = StreamingBody(BytesIO(encoded_message_second_call), len(encoded_message_second_call))
+
+    # WHEN making two API calls using the same provider instance.
+    stubber = stub.Stubber(provider.client)
+
+    response_get_latest_config_first_call = {
+        "Configuration": mock_value_first_call,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
+    stubber.add_response("get_latest_configuration", response_get_latest_config_first_call)
+
+    response_get_latest_config_second_call = {
+        "Configuration": mock_value_second_call,
+        "NextPollConfigurationToken": "initial_token",
+        "ContentType": "application/json",
+    }
+    response_start_config_session = {"InitialConfigurationToken": "initial_token"}
+    stubber.add_response("start_configuration_session", response_start_config_session)
+    stubber.add_response("get_latest_configuration", response_get_latest_config_second_call)
+
+    stubber.activate()
+
+    try:
+        # THEN we should expect different return values.
+        value_first_call: bytes = provider.get(mock_name)
+        value_second_call: bytes = provider.get(f"{mock_name}_ second_config")
+
+        assert value_first_call != value_second_call
+        stubber.assert_no_pending_responses()
+
     finally:
         stubber.deactivate()
 
@@ -2428,3 +2557,25 @@ def test_cache_ignores_max_age_zero_or_negative(mock_value, config):
     # THEN they should not be added to the cache
     assert len(provider.store) == 0
     assert provider.has_not_expired_in_cache(cache_key) is False
+
+
+def test_base_provider_single_and_nested_parameters_cached(mock_name, mock_value):
+    # GIVEN a custom provider
+    class TestProvider(BaseProvider):
+        def _get(self, name: str, **kwargs) -> str:
+            raise ValueError("This parameter doesn't exist")
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            return {"A": mock_value}
+
+    provider = TestProvider()
+
+    # WHEN get_multiple is followed by get with the same name
+    # (path vs single parameter name)
+    provider.get_multiple(mock_name)
+
+    # THEN get should raise GetParameterError
+    # since a path will likely not be a valid parameter
+    # see #2438
+    with pytest.raises(parameters.exceptions.GetParameterError):
+        provider.get(mock_name)

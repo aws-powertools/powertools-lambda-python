@@ -1,0 +1,93 @@
+name: "Seal and hash source code"
+description: "Seal and export source code as a tarball artifact along with its integrity hash"
+
+# PROCESS
+#
+# 1. Exports artifact name using Prefix + GitHub Run ID (unique for each release trigger)
+# 2. Compress entire source code as tarball OR given files
+# 3. Create and export integrity hash for tarball
+# 4. Upload artifact
+# 5. Remove archive
+
+# USAGE
+#
+# - name: Seal and upload
+#   id: seal_source_code
+#   uses: ./.github/actions/seal
+#   with:
+#     artifact_name_prefix: "source"
+
+inputs:
+  files:
+    description: "Files to seal separated by space"
+    required: false
+  artifact_name_prefix:
+    description: "Prefix to use when exporting artifact"
+    required: true
+
+outputs:
+  integrity_hash:
+    description: "Source code integrity hash"
+    value: ${{ steps.integrity_hash.outputs.integrity_hash }}
+  artifact_name:
+    description: "Artifact name containTemporary branch created with staged changed"
+    value: ${{ steps.export_artifact_name.outputs.artifact_name }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: adjust-path
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+
+    - id: export_artifact_name
+      name: Export final artifact name
+      run: echo "artifact_name=${ARTIFACT_PREFIX}-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+      env:
+        GITHUB_RUN_ID: ${{ github.run_id }}
+        ARTIFACT_PREFIX: ${{ inputs.artifact_name_prefix }}
+      shell: bash
+
+    # By default, create a tarball of the current directory minus .git
+    # otherwise it breaks GH Actions when restoring it
+    - id: compress_all
+      if: ${{ !inputs.files }}
+      name: Create tarball for entire source
+      run: tar --exclude-vcs -cvf "${ARTIFACT_NAME}".tar *
+      env:
+        ARTIFACT_NAME: ${{ steps.export_artifact_name.outputs.artifact_name }}
+      shell: bash
+
+    # If a list of files are given, then create a tarball for those only
+    - id: compress_selected_files
+      if: ${{ inputs.files }}
+      name: Create tarball for selected files
+      run: tar --exclude-vcs -cvf "${ARTIFACT_NAME}".tar "${FILES}"
+      env:
+        FILES: ${{ inputs.files }}
+        ARTIFACT_NAME: ${{ steps.export_artifact_name.outputs.artifact_name }}
+      shell: bash
+
+    - id: integrity_hash
+      name: Create and export integrity hash for tarball
+      run: |
+        HASH=$(sha256sum "${ARTIFACT_NAME}.tar" | awk '{print $1}')
+
+        echo "integrity_hash=${HASH}" >> "$GITHUB_OUTPUT"
+      env:
+        ARTIFACT_NAME: ${{ steps.export_artifact_name.outputs.artifact_name }}
+      shell: bash
+
+    - name: Upload artifacts
+      uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+      with:
+        if-no-files-found: error
+        name: ${{ steps.export_artifact_name.outputs.artifact_name }}
+        path: ${{ steps.export_artifact_name.outputs.artifact_name }}.tar
+        retention-days: 1
+
+    - name: Remove archive
+      run: rm -f "${ARTEFACT_NAME}.tar"
+      env:
+        ARTIFACT_NAME: ${{ steps.export_artifact_name.outputs.artifact_name }}
+      shell: bash

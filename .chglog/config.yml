@@ -2,7 +2,7 @@ style: github
 template: CHANGELOG.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/awslabs/aws-lambda-powertools-python
+  repository_url: https://github.com/aws-powertools/powertools-lambda-python
 options:
   commits:
     filters:

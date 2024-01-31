@@ -10,7 +10,7 @@ INPUT = {
             "logGroup": "/aws/lambda/powertools-example",
             "logStream": "2022/08/07/[$LATEST]d3a8dcaffc7f4de2b8db132e3e106660",
             "logEvents": {},
-        }
+        },
     ],
     "required": ["owner", "logGroup", "logStream", "logEvents"],
     "properties": {

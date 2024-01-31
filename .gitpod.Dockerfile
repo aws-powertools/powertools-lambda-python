@@ -7,4 +7,5 @@ ADD . /app
 
 # Installing pre-commit as system package and not user package. Git needs this to execute pre-commit hooks.
 RUN export PIP_USER=no
-RUN python3 -m pip install pre-commit
+# v3.3.3
+RUN python3 -m pip install --require-hashes -r .gitpod_requirements.txt

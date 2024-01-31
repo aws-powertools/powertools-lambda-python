@@ -80,7 +80,10 @@ class AppSyncResolver(BaseRouter):
         self.context = {}  # early init as customers might add context before event resolution
 
     def resolve(
-        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self,
+        event: dict,
+        context: LambdaContext,
+        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Resolve field_name
 
@@ -183,7 +186,10 @@ class AppSyncResolver(BaseRouter):
         return resolver["func"]
 
     def __call__(
-        self, event: dict, context: LambdaContext, data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent
+        self,
+        event: dict,
+        context: LambdaContext,
+        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
     ) -> Any:
         """Implicit lambda handler which internally calls `resolve`"""
         return self.resolve(event, context, data_model)

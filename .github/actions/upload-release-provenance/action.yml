@@ -1,0 +1,67 @@
+name: "Upload provenance attestation to release"
+description: "Download and upload newly generated provenance attestation to latest release."
+
+# PROCESS
+#
+# 1. Downloads provenance attestation artifact generated earlier in the release pipeline
+# 2. Updates latest GitHub draft release pointing to newly git release tag
+# 3. Uploads provenance attestation file to latest GitHub draft release
+
+# USAGE
+#
+# - name: Upload provenance
+#   id: upload-provenance
+#   uses: ./.github/actions/upload-release-provenance
+#   with:
+#     release_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+#     provenance_name: ${{needs.provenance.outputs.provenance-name}}
+#     github_token: ${{ secrets.GITHUB_TOKEN }}
+
+# NOTES
+#
+# There are no outputs.
+#
+
+inputs:
+  provenance_name:
+    description: "Provenance artifact name to download"
+    required: true
+  release_version:
+    description: "Release version (e.g., 2.20.0)"
+    required: true
+  github_token:
+    description: "GitHub token for GitHub CLI"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: adjust-path
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+
+    - id: download-provenance
+      name: Download newly generated provenance
+      uses: actions/download-artifact@9782bd6a9848b53b110e712e20e42d89988822b7 # v3.0.1
+      with:
+        name: ${{ inputs.provenance_name }}
+
+    - id: sync-release-tag
+      name: Update draft release tag to release commit tag
+      run: |
+        CURRENT_DRAFT_RELEASE=$(gh release list | awk '{ if ($2 == "Draft") print $1}')
+        gh release edit "${CURRENT_DRAFT_RELEASE}" --tag v"${RELEASE_VERSION}"
+      env:
+        RELEASE_VERSION: ${{ inputs.release_version }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      shell: bash
+
+    - id: upload-provenance
+      name: Upload provenance to release tag
+      # clobber flag means overwrite release asset if available (eventual consistency, retried failed steps)
+      run: gh release upload --clobber v"${RELEASE_VERSION}" "${PROVENANCE_FILE}"
+      env:
+        RELEASE_VERSION: ${{ inputs.release_version }}
+        PROVENANCE_FILE: ${{ inputs.provenance_name }}
+        GH_TOKEN: ${{ inputs.github_token }}
+      shell: bash

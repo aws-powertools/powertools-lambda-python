@@ -3,7 +3,7 @@ description: "Create a PR and a temporary branch, close duplicates"
 
 # PROCESS
 #
-# 1. Setup git client using Powertools bot username
+# 1. Setup git client using Powertools for AWS Lambda (Python) bot username
 # 2. Pushes staged files to a temporary branch
 # 3. Creates a PR from temporary branch against a target branch (typically trunk: develop, main, etc.)
 # 4. Searches for duplicate PRs with the same title
@@ -63,7 +63,7 @@ runs:
     - id: setup-git
       name: Git client setup and refresh tip
       run: |
-        git config user.name "Powertools bot"
+        git config user.name "Powertools for AWS Lambda (Python) bot"
         git config user.email "aws-lambda-powertools-feedback@amazon.com"
         git config pull.rebase true
         git config remote.origin.url >&-

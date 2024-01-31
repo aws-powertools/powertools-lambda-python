@@ -1,5 +1,15 @@
 name: Docs
 
+# PROCESS
+#
+# 1. Build User Guide and API docs
+# 2. Publish to GitHub Pages
+# 3. Publish to S3 (new home)
+
+# USAGE
+#
+# Always triggered on PR merge when changes in documentation changes occur.
+
 on:
   push:
     branches:
@@ -11,14 +21,15 @@ on:
       - "CHANGELOG.md"
 
 permissions:
-  id-token: write
+  contents: read
 
 jobs:
   release-docs:
     permissions:
-      contents: write
-      pages: write
-      id-token: write
+      contents: write  # push to gh-pages
+      pages: write     # deploy gh-pages website
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: develop

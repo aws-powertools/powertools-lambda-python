@@ -1,6 +1,8 @@
 import logging
+import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
+from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
 from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, Model
 
 from ...middleware_factory import lambda_handler_decorator
@@ -13,11 +15,12 @@ logger = logging.getLogger(__name__)
 
 @lambda_handler_decorator
 def event_parser(
-    handler: Callable[[Any, LambdaContext], EventParserReturnType],
+    handler: Callable[..., EventParserReturnType],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: Type[Model],
+    model: Optional[Type[Model]] = None,
     envelope: Optional[Type[Envelope]] = None,
+    **kwargs: Any,
 ) -> EventParserReturnType:
     """Lambda handler decorator to parse & validate events using Pydantic models
 
@@ -75,13 +78,29 @@ def event_parser(
     ValidationError
         When input event does not conform with model provided
     InvalidModelTypeError
-        When model given does not implement BaseModel
+        When model given does not implement BaseModel or is not provided
     InvalidEnvelopeError
         When envelope given does not implement BaseEnvelope
     """
-    parsed_event = parse(event=event, model=model, envelope=envelope) if envelope else parse(event=event, model=model)
+
+    # The first parameter of a Lambda function is always the event
+    # This line get the model informed in the event_parser function
+    # or the first parameter of the function by using typing.get_type_hints
+    type_hints = typing.get_type_hints(handler)
+    model = model or (list(type_hints.values())[0] if type_hints else None)
+    if model is None:
+        raise InvalidModelTypeError(
+            "The model must be provided either as the `model` argument to `event_parser`"
+            "or as the type hint of `event` in the handler that it wraps",
+        )
+
+    if envelope:
+        parsed_event = parse(event=event, model=model, envelope=envelope)
+    else:
+        parsed_event = parse(event=event, model=model)
+
     logger.debug(f"Calling handler {handler.__name__}")
-    return handler(parsed_event, context)
+    return handler(parsed_event, context, **kwargs)
 
 
 @overload
@@ -90,7 +109,7 @@ def parse(event: Dict[str, Any], model: Type[Model]) -> Model:
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]):
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> Model:
     ...  # pragma: no cover
 
 
@@ -152,14 +171,23 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
         try:
             logger.debug(f"Parsing and validating event model with envelope={envelope}")
             return envelope().parse(data=event, model=model)
-        except AttributeError:
-            raise InvalidEnvelopeError(f"Envelope must implement BaseEnvelope, envelope={envelope}")
+        except AttributeError as exc:
+            raise InvalidEnvelopeError(
+                f"Error: {str(exc)}. Please ensure that both the Input model and the Envelope inherits from BaseModel,\n"  # noqa E501
+                "and your payload adheres to the specified Input model structure.\n"
+                f"Envelope={envelope}\nModel={model}",
+            )
 
     try:
+        disable_pydantic_v2_warning()
         logger.debug("Parsing and validating event model; no envelope used")
         if isinstance(event, str):
             return model.parse_raw(event)
 
         return model.parse_obj(event)
-    except AttributeError:
-        raise InvalidModelTypeError(f"Input model must implement BaseModel, model={model}")
+    except AttributeError as exc:
+        raise InvalidModelTypeError(
+            f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
+            "and your payload adheres to the specified Input model structure.\n"
+            f"Model={model}",
+        )

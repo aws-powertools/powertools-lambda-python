@@ -91,13 +91,15 @@ def expected_params_update_item(serialized_lambda_response, hashed_idempotency_k
         },
         "Key": {"id": {"S": hashed_idempotency_key}},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, #expiry = :expiry, #status = :status",
     }
 
 
 @pytest.fixture
 def expected_params_update_item_with_validation(
-    serialized_lambda_response, hashed_idempotency_key, hashed_validation_key
+    serialized_lambda_response,
+    hashed_idempotency_key,
+    hashed_validation_key,
 ):
     return {
         "ExpressionAttributeNames": {
@@ -129,6 +131,7 @@ def expected_params_put_item(hashed_idempotency_key):
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -157,6 +160,7 @@ def expected_params_put_item_with_validation(hashed_idempotency_key, hashed_vali
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -192,7 +196,9 @@ def hashed_idempotency_key(request, lambda_apigw_event, default_jmespath, lambda
 @pytest.fixture
 def hashed_idempotency_key_with_envelope(request, lambda_apigw_event):
     event = extract_data_from_envelope(
-        data=lambda_apigw_event, envelope=envelopes.API_GATEWAY_HTTP, jmespath_options={}
+        data=lambda_apigw_event,
+        envelope=envelopes.API_GATEWAY_HTTP,
+        jmespath_options={},
     )
     return (
         f"test-func.{request.function.__module__}.{request.function.__qualname__}.<locals>.lambda_handler#"
@@ -218,7 +224,11 @@ def persistence_store_compound(config):
 @pytest.fixture
 def persistence_store_compound_static_pk_value(config, static_pk_value):
     return DynamoDBPersistenceLayer(
-        table_name=TABLE_NAME, boto_config=config, key_attr="id", sort_key_attr="sk", static_pk_value=static_pk_value
+        table_name=TABLE_NAME,
+        boto_config=config,
+        key_attr="id",
+        sort_key_attr="sk",
+        static_pk_value=static_pk_value,
     )
 
 
@@ -262,7 +272,9 @@ def static_pk_value():
 
 @pytest.fixture
 def expected_params_update_item_compound_key_static_pk_value(
-    expected_params_update_item, hashed_idempotency_key, static_pk_value
+    expected_params_update_item,
+    hashed_idempotency_key,
+    static_pk_value,
 ):
     return {
         # same as in any update_item transaction except the `Key` due to composite key value
@@ -273,7 +285,9 @@ def expected_params_update_item_compound_key_static_pk_value(
 
 @pytest.fixture
 def expected_params_put_item_compound_key_static_pk_value(
-    expected_params_put_item, hashed_idempotency_key, static_pk_value
+    expected_params_put_item,
+    hashed_idempotency_key,
+    static_pk_value,
 ):
     return {
         # same as in any put_item transaction except the `Item` due to composite key value

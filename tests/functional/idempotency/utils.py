@@ -26,6 +26,7 @@ def build_idempotency_put_item_stub(
             "attribute_not_exists(#id) OR #expiry < :now OR "
             "(#status = :inprogress AND attribute_exists(#in_progress_expiry) AND #in_progress_expiry < :now_in_millis)"
         ),
+        "ReturnValuesOnConditionCheckFailure": "ALL_OLD",
         "ExpressionAttributeNames": {
             "#id": "id",
             "#expiry": "expiration",
@@ -72,5 +73,5 @@ def build_idempotency_update_item_stub(
         },
         "Key": {"id": {"S": idempotency_key_hash}},
         "TableName": "TEST_TABLE",
-        "UpdateExpression": "SET #response_data = :response_data, " "#expiry = :expiry, #status = :status",
+        "UpdateExpression": "SET #response_data = :response_data, #expiry = :expiry, #status = :status",
     }

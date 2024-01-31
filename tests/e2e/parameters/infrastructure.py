@@ -17,7 +17,7 @@ class ParametersStack(BaseInfrastructure):
 
         env_vars = {"parameters": json.dumps(parameters)}
         functions = self.create_lambda_functions(
-            function_props={"environment": env_vars, "timeout": Duration.seconds(30)}
+            function_props={"environment": env_vars, "timeout": Duration.seconds(30)},
         )
 
         self._create_app_config(function=functions["ParameterAppconfigFreeformHandler"])
@@ -30,7 +30,7 @@ class ParametersStack(BaseInfrastructure):
                     "ssm:GetParameters",
                 ],
                 resources=[f"arn:aws:ssm:{self.region}:{self.account_id}:parameter/powertools/e2e/parameters/*"],
-            )
+            ),
         )
 
     def _create_app_config(self, function: Function):
@@ -40,7 +40,7 @@ class ParametersStack(BaseInfrastructure):
             self.stack,
             id="appconfig-app",
             name=f"powertools-e2e-{service_name}",
-            description="Lambda Powertools End-to-End testing for AppConfig",
+            description="Powertools for AWS Lambda (Python) End-to-End testing for AppConfig",
         )
         CfnOutput(self.stack, "AppConfigApplication", value=cfn_application.name)
 
@@ -49,7 +49,7 @@ class ParametersStack(BaseInfrastructure):
             "appconfig-env",
             application_id=cfn_application.ref,
             name=f"powertools-e2e{service_name}",
-            description="Lambda Powertools End-to-End testing environment",
+            description="Powertools for AWS Lambda (Python) End-to-End testing environment",
         )
         CfnOutput(self.stack, "AppConfigEnvironment", value=cfn_environment.name)
 
@@ -122,7 +122,7 @@ class ParametersStack(BaseInfrastructure):
                     "appconfig:StartConfigurationSession",
                 ],
                 resources=["*"],
-            )
+            ),
         )
 
     def _create_ssm_parameters(self) -> List[str]:

@@ -85,17 +85,22 @@ class AppConfigProvider(BaseProvider):
         super().__init__()
 
         self.client: "AppConfigDataClient" = self._build_boto3_client(
-            service_name="appconfigdata", client=boto3_client, session=boto3_session, config=config
+            service_name="appconfigdata",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
         )
 
         self.application = resolve_env_var_choice(
-            choice=application, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+            choice=application,
+            env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
         )
         self.environment = environment
         self.current_version = ""
 
-        self._next_token = ""  # nosec - token for get_latest_configuration executions
-        self.last_returned_value = ""
+        self._next_token: Dict[str, str] = {}  # nosec - token for get_latest_configuration executions
+        # Dict to store the recently retrieved value for a specific configuration.
+        self.last_returned_value: Dict[str, str] = {}
 
     def _get(self, name: str, **sdk_options) -> str:
         """
@@ -108,24 +113,28 @@ class AppConfigProvider(BaseProvider):
         sdk_options: dict, optional
             SDK options to propagate to `start_configuration_session` API call
         """
-        if not self._next_token:
+        if name not in self._next_token:
             sdk_options["ConfigurationProfileIdentifier"] = name
             sdk_options["ApplicationIdentifier"] = self.application
             sdk_options["EnvironmentIdentifier"] = self.environment
             response_configuration = self.client.start_configuration_session(**sdk_options)
-            self._next_token = response_configuration["InitialConfigurationToken"]
+            self._next_token[name] = response_configuration["InitialConfigurationToken"]
 
         # The new AppConfig APIs require two API calls to return the configuration
         # First we start the session and after that we retrieve the configuration
         # We need to store the token to use in the next execution
-        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token)
+        response = self.client.get_latest_configuration(ConfigurationToken=self._next_token[name])
         return_value = response["Configuration"].read()
-        self._next_token = response["NextPollConfigurationToken"]
+        self._next_token[name] = response["NextPollConfigurationToken"]
 
+        # The return of get_latest_configuration can be null because this value is supposed to be cached
+        # on the customer side.
+        # We created a dictionary that stores the most recently retrieved value for a specific configuration.
+        # See https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata/client/get_latest_configuration.html
         if return_value:
-            self.last_returned_value = return_value
+            self.last_returned_value[name] = return_value
 
-        return self.last_returned_value
+        return self.last_returned_value[name]
 
     def _get_multiple(self, path: str, **sdk_options) -> Dict[str, str]:
         """
@@ -141,7 +150,7 @@ def get_app_config(
     transform: TransformOptions = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
-    **sdk_options
+    **sdk_options,
 ) -> Union[str, list, dict, bytes]:
     """
     Retrieve a configuration value from AWS App Config.
@@ -199,5 +208,9 @@ def get_app_config(
         DEFAULT_PROVIDERS["appconfig"] = AppConfigProvider(environment=environment, application=application)
 
     return DEFAULT_PROVIDERS["appconfig"].get(
-        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+        name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
     )

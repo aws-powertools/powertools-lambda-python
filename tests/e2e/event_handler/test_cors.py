@@ -80,7 +80,7 @@ def test_api_gateway_http_cors_with_correct_origin(apigw_http_endpoint):
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="execute-api"),
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -101,7 +101,7 @@ def test_api_gateway_http_cors_with_correct_alternative_origin(apigw_http_endpoi
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="execute-api"),
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -122,7 +122,7 @@ def test_api_gateway_http_cors_with_unknown_origin(apigw_http_endpoint):
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="execute-api"),
-        )
+        ),
     )
 
     # THEN response does NOT have CORS headers
@@ -142,7 +142,7 @@ def test_api_gateway_rest_cors_with_correct_origin(apigw_rest_endpoint):
             url=url,
             headers=headers,
             json={},
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -162,7 +162,7 @@ def test_api_gateway_rest_cors_with_correct_alternative_origin(apigw_rest_endpoi
             url=url,
             headers=headers,
             json={},
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -182,7 +182,7 @@ def test_api_gateway_rest_cors_with_unknown_origin(apigw_rest_endpoint):
             url=url,
             headers=headers,
             json={},
-        )
+        ),
     )
 
     # THEN response does NOT have CORS headers
@@ -203,7 +203,7 @@ def test_lambda_function_url_cors_with_correct_origin(lambda_function_url_endpoi
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="lambda"),
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -224,7 +224,7 @@ def test_lambda_function_url_cors_with_correct_alternative_origin(lambda_functio
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="lambda"),
-        )
+        ),
     )
 
     # THEN response has CORS headers
@@ -245,7 +245,7 @@ def test_lambda_function_url_cors_with_unknown_origin(lambda_function_url_endpoi
             headers=headers,
             json={},
             auth=build_iam_auth(url=url, aws_service="lambda"),
-        )
+        ),
     )
 
     # THEN response does NOT have CORS headers

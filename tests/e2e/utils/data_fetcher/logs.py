@@ -31,7 +31,7 @@ class LogFetcher:
         filter_expression: Optional[str] = None,
         minimum_log_entries: int = 1,
     ):
-        """Fetch and expose Powertools Logger logs from CloudWatch Logs
+        """Fetch and expose Powertools for AWS Lambda (Python) Logger logs from CloudWatch Logs
 
         Parameters
         ----------
@@ -118,7 +118,7 @@ class LogFetcher:
 
         if len(filtered_logs) < self.minimum_log_entries:
             raise ValueError(
-                f"Number of log entries found doesn't meet minimum required ({self.minimum_log_entries}). Repeating..."
+                f"Number of log entries found doesn't meet minimum required ({self.minimum_log_entries}). Repeating...",
             )
 
         return filtered_logs

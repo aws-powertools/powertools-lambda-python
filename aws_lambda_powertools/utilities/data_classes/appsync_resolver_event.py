@@ -1,7 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
 
-from aws_lambda_powertools.utilities.data_classes.common import (
-    DictWrapper,
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
 )
 
@@ -215,7 +215,10 @@ class AppSyncResolverEvent(DictWrapper):
         return self.get("stash")
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 

@@ -1,6 +1,6 @@
 from unittest.mock import patch
 
-import src.single_mock as single_mock
+from src import single_mock
 
 
 # Replaces "aws_lambda_powertools.utilities.parameters.get_parameter" with a Mock object

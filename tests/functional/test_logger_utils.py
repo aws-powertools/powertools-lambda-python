@@ -50,13 +50,13 @@ def service_name():
 
 
 def test_copy_config_to_ext_loggers(stdout, logger, log_level):
-    # GIVEN two external loggers and powertools logger initialized
+    # GIVEN two external loggers and Powertools for AWS Lambda (Python) logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL external loggers
     # AND external loggers used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
     msg = "test message1"
@@ -64,7 +64,7 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
     logger_2.info(msg)
     logs = capture_multiple_logging_statements_output(stdout)
 
-    # THEN all external loggers used Powertools handler, formatter and log level
+    # THEN all external loggers used Powertools for AWS Lambda (Python) handler, formatter and log level
     for index, logger in enumerate([logger_1, logger_2]):
         assert len(logger.handlers) == 1
         assert isinstance(logger.handlers[0], logging.StreamHandler)
@@ -75,18 +75,18 @@ def test_copy_config_to_ext_loggers(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to INCLUDED external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to INCLUDED external loggers
     # AND our external logger used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name})
     msg = "test message2"
     logger.info(msg)
     log = capture_logging_output(stdout)
 
-    # THEN included external loggers used Powertools handler, formatter and log level.
+    # THEN included external loggers used Powertools for AWS Lambda (Python) handler, formatter and log level.
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.StreamHandler)
     assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
@@ -96,11 +96,12 @@ def test_copy_config_to_ext_loggers_include(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) for AWS Lambda (Python) logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to INCLUDED NON EXISTING external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) for AWS Lambda (Python) logger
+    # to INCLUDED NON EXISTING external loggers
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={"non-existing-logger"})
 
     # THEN existing external logger is not modified
@@ -108,11 +109,11 @@ def test_copy_config_to_ext_loggers_wrong_include(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL BUT external logger
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL BUT external logger
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, exclude={logger.name})
 
     # THEN external logger is not modified
@@ -120,22 +121,25 @@ def test_copy_config_to_ext_loggers_exclude(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
-    # GIVEN two external loggers and powertools logger initialized
+    # GIVEN two external loggers and Powertools for AWS Lambda (Python) logger initialized
     logger_1 = logger()
     logger_2 = logger()
 
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to INCLUDED external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to INCLUDED external loggers
     # AND external logger_1 is also in EXCLUDE list
     utils.copy_config_to_registered_loggers(
-        source_logger=powertools_logger, include={logger_1.name, logger_2.name}, exclude={logger_1.name}
+        source_logger=powertools_logger,
+        include={logger_1.name, logger_2.name},
+        exclude={logger_1.name},
     )
     msg = "test message3"
     logger_2.info(msg)
     log = capture_logging_output(stdout)
 
-    # THEN logger_1 is not modified and Logger_2 used Powertools handler, formatter and log level
+    # THEN logger_1 is not modified and Logger_2 used Powertools for AWS Lambda (Python) handler, formatter and log
+    # level
     assert not logger_1.handlers
     assert len(logger_2.handlers) == 1
     assert isinstance(logger_2.handlers[0], logging.StreamHandler)
@@ -146,16 +150,16 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
 
 
 def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level):
-    # GIVEN an external logger with handler and powertools logger initialized
+    # GIVEN an external logger with handler and Powertools for AWS Lambda (Python) logger initialized
     logger = logger()
     handler = logging.NullHandler()
     logger.addHandler(handler)
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL external loggers
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
 
-    # THEN old logger's handler removed and Powertools configuration used instead
+    # THEN old logger's handler removed and Powertools for AWS Lambda (Python) configuration used instead
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.StreamHandler)
     assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
@@ -163,20 +167,22 @@ def test_copy_config_to_ext_loggers_clean_old_handlers(stdout, logger, log_level
 
 @pytest.mark.parametrize("level_to_set", ["WARNING", 30])
 def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, level_to_set):
-    # GIVEN an external logger and powertools logger initialized
+    # GIVEN an external logger and Powertools for AWS Lambda (Python) logger initialized
     logger = logger()
     powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to INCLUDED external logger
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to INCLUDED external logger
     # AND external logger used with custom log_level
     utils.copy_config_to_registered_loggers(
-        source_logger=powertools_logger, include={logger.name}, log_level=level_to_set
+        source_logger=powertools_logger,
+        include={logger.name},
+        log_level=level_to_set,
     )
     msg = "test message4"
     logger.warning(msg)
     log = capture_logging_output(stdout)
 
-    # THEN external logger used Powertools handler, formatter and CUSTOM log level.
+    # THEN external logger used Powertools for AWS Lambda (Python) handler, formatter and CUSTOM log level.
     assert len(logger.handlers) == 1
     assert isinstance(logger.handlers[0], logging.StreamHandler)
     assert isinstance(logger.handlers[0].formatter, formatter.LambdaPowertoolsFormatter)
@@ -187,10 +193,10 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, 
 
 
 def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_level):
-    # GIVEN powertools logger initialized
+    # GIVEN Powertools for AWS Lambda (Python) logger initialized
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL external loggers
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger)
 
     # THEN append_keys should not raise an exception
@@ -198,8 +204,8 @@ def test_copy_config_to_ext_loggers_should_not_break_append_keys(stdout, log_lev
 
 
 def test_copy_config_to_parent_loggers_only(stdout):
-    # GIVEN Powertools Logger and Child Logger are initialized
-    # and Powertools Logger config is copied over
+    # GIVEN Powertools for AWS Lambda (Python) Logger and Child Logger are initialized
+    # and Powertools for AWS Lambda (Python) Logger config is copied over
     service = service_name()
     child = Logger(stream=stdout, service=service, child=True)
     parent = Logger(stream=stdout, service=service)
@@ -220,8 +226,8 @@ def test_copy_config_to_parent_loggers_only(stdout):
 
 
 def test_copy_config_to_parent_loggers_only_with_exclude(stdout):
-    # GIVEN Powertools Logger and Child Logger are initialized
-    # and Powertools Logger config is copied over with exclude set
+    # GIVEN Powertools for AWS Lambda (Python) Logger and Child Logger are initialized
+    # and Powertools for AWS Lambda (Python) Logger config is copied over with exclude set
     service = service_name()
     child = Logger(stream=stdout, service=service, child=True)
     parent = Logger(stream=stdout, service=service)
@@ -242,7 +248,7 @@ def test_copy_config_to_parent_loggers_only_with_exclude(stdout):
 
 
 def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level):
-    # GIVEN an root logger, external logger and powertools logger initialized
+    # GIVEN an root logger, external logger and Powertools for AWS Lambda (Python) logger initialized
 
     root_logger = logging.getLogger()
     handler = logging.StreamHandler(stdout)
@@ -255,7 +261,7 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
     powertools_logger = Logger(service=service_name(), level=log_level.CRITICAL.value, stream=stdout)
     level = log_level.WARNING.name
 
-    # WHEN configuration copied from powertools logger
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger
     # AND external logger used with custom log_level
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
     msg = "test message4"
@@ -268,14 +274,14 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
 
 
 def test_logger_name_is_included_during_copy(stdout, logger, log_level):
-    # GIVEN two external loggers and powertools logger initialized
+    # GIVEN two external loggers and Powertools for AWS Lambda (Python) logger initialized
     logger_1: logging.Logger = logger()
     logger_2: logging.Logger = logger()
     msg = "test message1"
 
     powertools_logger = Logger(service=service_name(), level=log_level.INFO.value, stream=stdout)
 
-    # WHEN configuration copied from powertools logger to ALL external loggers
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL external loggers
     # AND external loggers used
     utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger_1.name, logger_2.name})
     logger_1.info(msg)

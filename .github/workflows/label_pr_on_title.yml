@@ -1,13 +1,39 @@
 name: Label PR based on title
 
+# PROCESS
+#
+# 1. Fetch PR details previously saved from untrusted location
+# 2. Parse details for safety
+# 3. Label PR based on semantic title (e.g., area, change type)
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/record_pr.yml
+#
+# Security Note:
+#
+#   This workflow depends on "Record PR" workflow that runs in an untrusted location (forks) instead of `pull_request_target`.
+#   This enforces zero trust where "Record PR" workflow always runs on fork with zero permissions on GH_TOKEN.
+#   When "Record PR" completes, this workflow runs in our repository with the appropriate permissions and sanitize inputs.
+#
+#   Coupled with "Approve GitHub Action to run on forks", we have confidence no privilege can be escalated,
+#   since any malicious change would need to be approved, and upon social engineering, it'll have zero permissions.
+
+
 on:
   workflow_run:
     workflows: ["Record PR details"]
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   get_pr_details:
+    permissions:
+      actions: read  # download PR artifact
+      contents: read # checkout code
     # Guardrails to only ever run if PR recording workflow was indeed
     # run in a PR event and ran successfully
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -20,11 +46,13 @@ jobs:
   label_pr:
     needs: get_pr_details
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # label respective PR
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
       - name: "Label PR based on title"
-        uses: actions/github-script@d7906e4ad0b1822421a7e6a35d5ca353c962f410 # v6.4.1
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         env:
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
           PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}

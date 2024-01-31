@@ -1,10 +1,24 @@
 name: Run end-to-end tests
 
+# PROCESS
+#
+# 1. Install all dependencies and spin off containers for all supported Python versions
+# 2. Install pinned CDK version
+# 3. Trade JWT token for AWS credentials to Test account
+# 4. Run E2E in parallel for each feature
+
+# USAGE
+#
+# see MAINTAINERS.md#internals for full details on mechanics.
+#
+# Always triggered on new PR merge.
+
 on:
   workflow_dispatch:
 
   push:
-    branches: [develop, v2]
+    branches:
+      - develop
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
@@ -21,40 +35,43 @@ env:
 
 concurrency: e2e
 
+permissions:
+  contents: read
+
 jobs:
   run:
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     permissions:
       id-token: write # needed to request JWT with GitHub's OIDC Token endpoint. docs: https://bit.ly/3MNgQO9
-      contents: read
+      contents: read  # checkout code
     strategy:
       fail-fast: false # needed so if a version fails, the others will still be able to complete and cleanup
       matrix:
-        version: ["3.7", "3.8", "3.9", "3.10"]
-    if: ${{ github.actor != 'dependabot[bot]' }}
+        version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+    if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"
           cache: "poetry"
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
-          node-version: "16.12"
+          node-version: "20.10.0"
       - name: Install CDK CLI
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: Install dependencies
         run: make dev
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
           role-to-assume: ${{ secrets.AWS_TEST_ROLE_ARN }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}

@@ -7,8 +7,7 @@ import boto3
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.batch import (
-    BasePartialBatchProcessor,
-    EventType,
+    BasePartialProcessor,
     process_partial_response,
 )
 
@@ -17,7 +16,7 @@ table_name = os.getenv("TABLE_NAME", "table_not_found")
 logger = Logger()
 
 
-class MyPartialProcessor(BasePartialBatchProcessor):
+class MyPartialProcessor(BasePartialProcessor):
     """
     Process a record and stores successful results at a Amazon DynamoDB Table
 
@@ -29,8 +28,7 @@ class MyPartialProcessor(BasePartialBatchProcessor):
 
     def __init__(self, table_name: str):
         self.table_name = table_name
-
-        super().__init__(event_type=EventType.SQS)
+        super().__init__()
 
     def _prepare(self):
         # It's called once, *before* processing

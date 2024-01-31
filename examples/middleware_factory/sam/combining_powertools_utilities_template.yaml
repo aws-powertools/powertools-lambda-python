@@ -5,13 +5,13 @@ Description: Middleware-powertools-utilities example
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.12
     Tracing: Active
     Architectures:
       - x86_64
     Environment:
       Variables:
-        LOG_LEVEL: DEBUG
+        POWERTOOLS_LOG_LEVEL: DEBUG
         POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: middleware

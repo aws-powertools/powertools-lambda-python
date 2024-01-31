@@ -1,0 +1,17 @@
+[
+    (
+        "fail", # (1)!
+        "<class 'pydantic.error_wrappers.ValidationError'>:1 validation error for OrderSqs\nbody\n  JSON object must be str, bytes or bytearray (type=type_error.json)",
+        <aws_lambda_powertools.utilities.data_classes.sqs_event.SQSRecord object at 0x103c590a0>
+    ),
+    (
+        "success",
+        "success",
+        {'messageId': '88891c36-32eb-4a25-9905-654a32916893', 'receiptHandle': 'AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a', 'body': 'success', 'attributes': {'ApproximateReceiveCount': '1', 'SentTimestamp': '1545082649183', 'SenderId': 'AIDAIENQZJOLO23YVJ4VO', 'ApproximateFirstReceiveTimestamp': '1545082649185'}, 'messageAttributes': {}, 'md5OfBody': 'e4e68fb7bd0e697a0ae8f1bb342846b3', 'eventSource': 'aws:sqs', 'eventSourceARN': 'arn:aws:sqs:us-east-2:123456789012:my-queue', 'awsRegion': 'us-east-1'}
+    ),
+    (
+        "fail",  # (2)!
+        "<class 'Exception'>:Failed to process record.",
+        OrderSqs(messageId='9d0bfba5-d213-4b64-89bd-f4fbd7e58358', receiptHandle='AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a', body=Order(item={'type': 'fail'}), attributes=SqsAttributesModel(ApproximateReceiveCount='1', ApproximateFirstReceiveTimestamp=datetime.datetime(2018, 12, 17, 21, 37, 29, 185000, tzinfo=datetime.timezone.utc), MessageDeduplicationId=None, MessageGroupId=None, SenderId='AIDAIENQZJOLO23YVJ4VO', SentTimestamp=datetime.datetime(2018, 12, 17, 21, 37, 29, 183000, tzinfo=datetime.timezone.utc), SequenceNumber=None, AWSTraceHeader=None), messageAttributes={}, md5OfBody='e4e68fb7bd0e697a0ae8f1bb342846b3', md5OfMessageAttributes=None, eventSource='aws:sqs', eventSourceARN='arn:aws:sqs:us-east-2:123456789012:my-queue', awsRegion='us-east-1')
+    )
+]

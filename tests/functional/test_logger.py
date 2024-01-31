@@ -5,6 +5,7 @@ import json
 import logging
 import random
 import re
+import secrets
 import string
 import sys
 import warnings
@@ -145,7 +146,11 @@ def test_inject_lambda_context_log_event_request(lambda_context, stdout, lambda_
 
 
 def test_inject_lambda_context_log_event_request_env_var(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     monkeypatch.setenv("POWERTOOLS_LOGGER_LOG_EVENT", "true")
@@ -165,7 +170,11 @@ def test_inject_lambda_context_log_event_request_env_var(
 
 
 def test_inject_lambda_context_log_no_request_by_default(
-    monkeypatch, lambda_context, stdout, lambda_event, service_name
+    monkeypatch,
+    lambda_context,
+    stdout,
+    lambda_event,
+    service_name,
 ):
     # GIVEN Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -370,13 +379,41 @@ def test_logger_level_as_int(service_name):
 
 def test_logger_level_env_var_as_int(monkeypatch, service_name):
     # GIVEN Logger is initialized
-    # WHEN log level is explicitly defined via LOG_LEVEL env as int
+    # WHEN log level is explicitly defined via POWERTOOLS_LOG_LEVEL env as int
     # THEN Logger should propagate ValueError
     # since env vars can only be string
     # and '50' is not a correct log level
-    monkeypatch.setenv("LOG_LEVEL", 50)
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_ENV, 50)
     with pytest.raises(ValueError, match="Unknown level: '50'"):
         Logger(service=service_name)
+
+
+def test_logger_level_env_var_legacy_as_int(monkeypatch, service_name):
+    # GIVEN Logger is initialized
+    # WHEN log level is explicitly defined via legacy env LOG_LEVEL env as int
+    # THEN Logger should propagate ValueError
+    # since env vars can only be string
+    # and '50' is not a correct log level
+    monkeypatch.setenv(constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV, 50)
+    with pytest.raises(ValueError, match="Unknown level: '50'"):
+        Logger(service=service_name)
+
+
+def test_logger_switch_between_levels(stdout, service_name):
+    # GIVEN a Loggers is initialized with INFO level
+    logger = Logger(service=service_name, level="INFO", stream=stdout)
+    logger.info("message info")
+
+    # WHEN we switch to DEBUG level
+    logger.setLevel(level="DEBUG")
+    logger.debug("message debug")
+
+    # THEN we must have different levels and messages in stdout
+    log_output = capture_multiple_logging_statements_output(stdout)
+    assert log_output[0]["level"] == "INFO"
+    assert log_output[0]["message"] == "message info"
+    assert log_output[1]["level"] == "DEBUG"
+    assert log_output[1]["message"] == "message debug"
 
 
 def test_logger_record_caller_location(stdout, service_name):
@@ -532,6 +569,24 @@ def test_logger_set_correlation_id_path(lambda_context, stdout, service_name):
     assert request_id == log["correlation_id"]
 
 
+def test_logger_set_correlation_id_path_custom_functions(lambda_context, stdout, service_name):
+    # GIVEN an initialized Logger
+    # AND a Lambda handler decorated with a JMESPath expression using Powertools custom functions
+    logger = Logger(service=service_name, stream=stdout)
+
+    @logger.inject_lambda_context(correlation_id_path="Records[*].powertools_json(body).id")
+    def handler(event, context):
+        ...
+
+    # WHEN handler is called
+    request_id = "xxx-111-222"
+    mock_event = {"Records": [{"body": json.dumps({"id": request_id})}]}
+    handler(mock_event, lambda_context)
+
+    # THEN there should be no exception and correlation ID should match
+    assert logger.get_correlation_id() == [request_id]
+
+
 def test_logger_append_remove_keys(stdout, service_name):
     # GIVEN a Logger is initialized
     logger = Logger(service=service_name, stream=stdout)
@@ -573,7 +628,7 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
                     "timestamp": self.formatTime(record),
                     "my_default_key": "test",
                     **self.custom_format,
-                }
+                },
             )
 
     custom_formatter = CustomFormatter()
@@ -825,7 +880,8 @@ def test_use_datetime(stdout, service_name, utc):
 
     expected_tz = datetime.now().astimezone(timezone.utc if utc else None).strftime("%z")
     assert re.fullmatch(
-        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}", log["timestamp"]
+        f"custom timestamp: milliseconds=[0-9]+ microseconds=[0-9]+ timezone={re.escape(expected_tz)}",
+        log["timestamp"],
     )
 
 
@@ -885,7 +941,7 @@ def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkey
     logger = logging.getLogger("aws_lambda_powertools")
 
     # WHEN set_package_logger is used at initialization
-    # and any Powertools operation is used (e.g., Tracer)
+    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Tracer)
     set_package_logger_handler(stream=stdout)
     Tracer(disabled=True)
 
@@ -919,3 +975,168 @@ def test_logger_log_uncaught_exceptions(service_name, stdout):
     # THEN it should contain our custom exception hook with a copy of our logger
     assert isinstance(exception_hook, functools.partial)
     assert exception_hook.keywords.get("logger") == logger
+
+
+def test_stream_defaults_to_stdout(service_name, capsys):
+    # GIVEN Logger is initialized without any explicit stream
+    logger = Logger(service=service_name)
+    msg = "testing stdout"
+
+    # WHEN logging statements are issued
+    logger.info(msg)
+
+    # THEN we should default to standard output, not standard error.
+    # NOTE: we can't assert on capsys.readouterr().err due to a known bug: https://github.com/pytest-dev/pytest/issues/5997
+    log = json.loads(capsys.readouterr().out.strip())
+    assert log["message"] == msg
+
+
+def test_logger_logs_stack_trace_with_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace default value = True
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "stack_trace" in log
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "stack_trace" in log
+
+
+def test_logger_logs_stack_trace_with_non_default_value(service_name, stdout):
+    # GIVEN a Logger instance with serialize_stacktrace = False
+    logger = Logger(service=service_name, stream=stdout, serialize_stacktrace=False)
+
+    # WHEN invoking a Lambda
+    def handler(event, context):
+        try:
+            raise ValueError("something went wrong")
+        except Exception:
+            logger.exception("Received an exception")
+
+    # THEN we expect a "stack_trace" not in log
+    handler({}, lambda_context)
+    log = capture_logging_output(stdout)
+    assert "stack_trace" not in log
+
+
+def test_define_log_level_via_advanced_logging_controls(
+    monkeypatch,
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized with log level set to None
+    # GIVEN AWS Lambda Advanced Logging Controls is set to DEBUG
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "DEBUG")
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN logging statements are issued
+    logger.debug("Hello")
+
+    # THEN Lambda log level must be DEBUG
+    log = capture_logging_output(stdout)
+    assert log["level"] == "DEBUG"
+
+
+def test_log_level_advanced_logging_controler_preference_over_powertools_log_level(
+    monkeypatch,
+    stdout,
+    service_name,
+):
+    # GIVEN Logger is initialized with log level set to INFO
+    # GIVEN AWS Lambda Advanced Logging Controls is set to DEBUG
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "DEBUG")
+    logger = Logger(service=service_name, stream=stdout, level="INFO")
+
+    # WHEN logging statements are issued
+    logger.debug("Hello")
+
+    # THEN Lambda log level must be DEBUG because it takes precedence over POWERTOOLS_LOG_LEVEL
+    log = capture_logging_output(stdout)
+    assert log["level"] == "DEBUG"
+
+
+def test_log_level_advanced_logging_controler_warning_different_log_levels_using_constructor(
+    monkeypatch,
+    service_name,
+    stdout,
+):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+
+    # WHEN Logger is initialized with log level set to DEBUG
+    # THEN Logger should propagate a warning
+    with pytest.warns(UserWarning):
+        logger = Logger(service=service_name, stream=stdout, level="DEBUG")
+
+    # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
+    assert logger.log_level == logging.INFO
+
+
+def test_log_level_advanced_logging_controler_warning_different_log_levels_using_set_level(
+    monkeypatch,
+    service_name,
+    stdout,
+):
+    # GIVEN AWS Lambda Advanced Logging Controls is set to INFO
+    # GIVEN Logger is initialized with log level set to None
+    monkeypatch.setenv(constants.LAMBDA_LOG_LEVEL_ENV, "INFO")
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN Logger setLevel is set to DEBUG
+    # THEN Logger should propagate a warning
+    with pytest.warns(UserWarning):
+        logger.setLevel(level="DEBUG")
+
+    # THEN Logger must be INFO because it takes precedence over POWERTOOLS_LOG_LEVEL
+    assert logger.log_level == logging.INFO
+
+
+def test_logger_add_remove_filter(stdout, service_name):
+    # GIVEN a Logger with a custom logging filter
+    class ApiKeyFilter(logging.Filter):  # NOSONAR  # need filter to test actual impl.
+        def filter(self, record):
+            if getattr(record, "api_key", None):
+                record.api_key = "REDACTED"
+
+            return True
+
+    redact_api_key_filter = ApiKeyFilter()
+    logger = Logger(service=service_name, stream=stdout)
+    logger.addFilter(redact_api_key_filter)
+
+    # WHEN a new log statement is issued
+    # AND another log statement is issued after filter is removed
+    logger.info("filtered", api_key=secrets.token_urlsafe())
+    logger.removeFilter(redact_api_key_filter)
+    logger.info("unfiltered", api_key=secrets.token_urlsafe())
+
+    # THEN logging filter should be called and mutate the log record accordingly
+    log = capture_multiple_logging_statements_output(stdout)
+    assert log[0]["api_key"] == "REDACTED"
+    assert log[1]["api_key"] != "REDACTED"
+
+
+def test_logger_json_unicode(stdout, service_name):
+    # GIVEN Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+
+    # WHEN all non-ascii chars are logged as messages
+    # AND non-ascii is also used as ephemeral fields
+    # latest: https://www.unicode.org/versions/Unicode15.1.0/#Summary
+    non_ascii_chars = [chr(i) for i in range(128, 111_411_1)]
+    japanese_field = "47業レルし化"
+    japanese_string = "スコビルデモ２"
+
+    logger.info(non_ascii_chars, **{japanese_field: japanese_string})
+
+    # THEN JSON logs should not try to escape them
+    log = capture_logging_output(stdout)
+
+    assert log["message"] == non_ascii_chars
+    assert log[japanese_field] == japanese_string

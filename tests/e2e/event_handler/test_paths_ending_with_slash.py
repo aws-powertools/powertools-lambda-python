@@ -47,7 +47,7 @@ def test_api_gateway_rest_trailing_slash(apigw_rest_endpoint):
             url=url,
             json={"body": body},
             auth=build_iam_auth(url=url, aws_service="lambda"),
-        )
+        ),
     )
 
     # THEN expect a HTTP 200 response
@@ -68,7 +68,7 @@ def test_api_gateway_http_trailing_slash(apigw_http_endpoint):
                 url=url,
                 json={"body": body},
                 auth=build_iam_auth(url=url, aws_service="lambda"),
-            )
+            ),
         )
 
 
@@ -86,7 +86,7 @@ def test_lambda_function_url_trailing_slash(lambda_function_url_endpoint):
                 url=url,
                 json={"body": body},
                 auth=build_iam_auth(url=url, aws_service="lambda"),
-            )
+            ),
         )
 
 
@@ -104,5 +104,5 @@ def test_alb_url_trailing_slash(alb_multi_value_header_listener_endpoint):
                 url=url,
                 json={"body": body},
                 auth=build_iam_auth(url=url, aws_service="lambda"),
-            )
+            ),
         )

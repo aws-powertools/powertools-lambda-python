@@ -26,14 +26,15 @@ def record_handler(record: SQSRecord):
 @logger.inject_lambda_context
 @tracer.capture_lambda_handler
 def lambda_handler(event, context: LambdaContext):
-    batch = event["Records"]
+    batch = event["Records"]  # (1)!
     with processor(records=batch, handler=record_handler):
         processed_messages: List[Tuple] = processor.process()
 
     for message in processed_messages:
-        status: Literal["success"] | Literal["fail"] = message[0]
+        status: Literal["success", "fail"] = message[0]
+        cause: str = message[1]  # (2)!
         record: SQSRecord = message[2]
 
-        logger.info(status, record=record)
+        logger.info(status, record=record, cause=cause)
 
     return processor.response()

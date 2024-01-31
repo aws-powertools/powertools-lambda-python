@@ -1,5 +1,32 @@
 name: Deploy CDK Layer v2 stack
 
+# PROCESS
+#
+# 1. Split what AWS regions support ARM vs regions that Lambda support ARM
+# 2. Deploy previously built layer for each AWS commercial region
+# 3. Export all published Layers as JSON
+# 4. Deploy Canaries to every deployed region to test whether Powertools can be imported etc.
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/publish_v2_layer.yml
+#
+# beta:
+#   needs: build-layer
+#   # lower privilege propagated from parent workflow (release.yml)
+#   permissions:
+#     id-token: write
+#     contents: read
+#     pages: write             # docs will be updated with latest Layer ARNs
+#     pull-requests: write     # creation-action will create a PR with Layer ARN updates
+#   uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
+#   secrets: inherit
+#   with:
+#     stage: "BETA"
+#     artefact-name: "cdk-layer-artefact"
+#     environment: "layer-beta"
+#     latest_published_version: ${{ inputs.latest_published_version }}
+
 on:
   workflow_call:
     inputs:
@@ -19,6 +46,20 @@ on:
         description: "Latest version that is published"
         required: true
         type: string
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  RELEASE_COMMIT: ${{ github.sha }}  # it gets propagated from the caller for security reasons
 
 jobs:
   deploy-cdk-stack:
@@ -52,7 +93,7 @@ jobs:
           - region: "ap-south-1"
             has_arm64_support: "true"
           - region: "ap-south-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "ap-southeast-1"
             has_arm64_support: "true"
           - region: "ap-southeast-2"
@@ -60,27 +101,31 @@ jobs:
           - region: "ap-southeast-3"
             has_arm64_support: "true"
           - region: "ap-southeast-4"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "ca-central-1"
             has_arm64_support: "true"
+          - region: "ca-west-1"
+            has_arm64_support: "false"
           - region: "eu-central-1"
             has_arm64_support: "true"
           - region: "eu-central-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "eu-north-1"
             has_arm64_support: "true"
           - region: "eu-south-1"
             has_arm64_support: "true"
           - region: "eu-south-2"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "eu-west-1"
             has_arm64_support: "true"
           - region: "eu-west-2"
             has_arm64_support: "true"
           - region: "eu-west-3"
             has_arm64_support: "true"
+          - region: "il-central-1"
+            has_arm64_support: "true"
           - region: "me-central-1"
-            has_arm64_support: "false"
+            has_arm64_support: "true"
           - region: "me-south-1"
             has_arm64_support: "true"
           - region: "sa-east-1"
@@ -95,33 +140,42 @@ jobs:
             has_arm64_support: "true"
     steps:
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: aws credentials
-        uses: aws-actions/configure-aws-credentials@e1e17a757e536f70e52b5a12b2e8d1d1c60e04ef # v2.0.0
+        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
         with:
           aws-region: ${{ matrix.region }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
       - name: install cdk and deps
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
       - name: install deps
         run: poetry install
@@ -143,7 +197,7 @@ jobs:
           cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: cdk-layer-stack
           path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.

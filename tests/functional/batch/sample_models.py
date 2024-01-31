@@ -35,12 +35,15 @@ class OrderDynamoDB(BaseModel):
     # so Pydantic can auto-initialize nested Order model
     @validator("Message", pre=True)
     def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
-        return json.loads(value["S"])
+        try:
+            return json.loads(value["S"])
+        except TypeError:
+            raise ValueError
 
 
 class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
-    NewImage: Optional[OrderDynamoDB]
-    OldImage: Optional[OrderDynamoDB]
+    NewImage: Optional[OrderDynamoDB] = None
+    OldImage: Optional[OrderDynamoDB] = None
 
 
 class OrderDynamoDBRecord(DynamoDBStreamRecordModel):

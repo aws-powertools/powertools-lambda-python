@@ -1,9 +1,13 @@
 import base64
 import json
 from collections.abc import Mapping
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+    get_query_string_value,
+)
 
 
 class DictWrapper(Mapping):
@@ -16,7 +20,7 @@ class DictWrapper(Mapping):
         data : Dict[str, Any]
             Lambda Event Source Event payload
         json_deserializer : Callable, optional
-            function to deserialize `str`, `bytes`, bytearray` containing a JSON document to a Python `obj`,
+            function to deserialize `str`, `bytes`, `bytearray` containing a JSON document to a Python `obj`,
             by default json.loads
         """
         self._data = data
@@ -26,7 +30,7 @@ class DictWrapper(Mapping):
     def __getitem__(self, key: str) -> Any:
         return self._data[key]
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, DictWrapper):
             return False
 
@@ -90,26 +94,6 @@ class DictWrapper(Mapping):
         return self._data
 
 
-def get_header_value(
-    headers: Dict[str, str], name: str, default_value: Optional[str], case_sensitive: Optional[bool]
-) -> Optional[str]:
-    """Get header value by name"""
-    # If headers is NoneType, return default value
-    if not headers:
-        return default_value
-
-    if case_sensitive:
-        return headers.get(name, default_value)
-    name_lower = name.lower()
-
-    return next(
-        # Iterate over the dict and do a case-insensitive key comparison
-        (value for key, value in headers.items() if key.lower() == name_lower),
-        # Default value is returned if no matches was found
-        default_value,
-    )
-
-
 class BaseProxyEvent(DictWrapper):
     @property
     def headers(self) -> Dict[str, str]:
@@ -118,6 +102,17 @@ class BaseProxyEvent(DictWrapper):
     @property
     def query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.get("queryStringParameters")
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        """
+        This property determines the appropriate query string parameter to be used
+        as a trusted source for validating OpenAPI.
+
+        This is necessary because different resolvers use different formats to encode
+        multi query string parameters.
+        """
+        return self.query_string_parameters
 
     @property
     def is_base64_encoded(self) -> Optional[bool]:
@@ -166,11 +161,35 @@ class BaseProxyEvent(DictWrapper):
         str, optional
             Query string parameter value
         """
-        params = self.query_string_parameters
-        return default_value if params is None else params.get(name, default_value)
+        return get_query_string_value(
+            query_string_parameters=self.query_string_parameters,
+            name=name,
+            default_value=default_value,
+        )
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: Optional[bool] = False,
+    ) -> str:
+        ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
+    ) -> Optional[str]:
+        ...
 
     def get_header_value(
-        self, name: str, default_value: Optional[str] = None, case_sensitive: Optional[bool] = False
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
     ) -> Optional[str]:
         """Get header value by name
 
@@ -181,13 +200,18 @@ class BaseProxyEvent(DictWrapper):
         default_value: str, optional
             Default value if no value was found by name
         case_sensitive: bool
-            Whether to use a case-sensitive look up
+            Whether to use a case-sensitive look up. By default we make a case-insensitive lookup.
         Returns
         -------
         str, optional
             Header value
         """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return get_header_value(
+            headers=self.headers,
+            name=name,
+            default_value=default_value,
+            case_sensitive=case_sensitive,
+        )
 
     def header_serializer(self) -> BaseHeadersSerializer:
         raise NotImplementedError()

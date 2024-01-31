@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import functools
 import inspect
-import io
 import logging
 import os
 import random
 import sys
-import traceback
+import warnings
 from typing import (
     IO,
     TYPE_CHECKING,
@@ -23,14 +22,15 @@ from typing import (
     overload,
 )
 
-import jmespath
-
-from ..shared import constants
-from ..shared.functions import (
+from aws_lambda_powertools.logging import compat
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
     resolve_env_var_choice,
     resolve_truthy_env_var_choice,
 )
+from aws_lambda_powertools.utilities import jmespath_utils
+
 from ..shared.types import AnyCallableT
 from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
@@ -66,12 +66,7 @@ def _is_cold_start() -> bool:
     return cold_start
 
 
-# PyCharm does not support autocomplete via getattr
-# so we need to return to subclassing removed in #97
-# All methods/properties continue to be proxied to inner logger
-# https://github.com/awslabs/aws-lambda-powertools-python/issues/107
-# noinspection PyRedeclaration
-class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
+class Logger:
     """Creates and setups a logger to format statements in JSON.
 
     Includes service name and any additional key=value into logs
@@ -81,7 +76,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     ---------------------
     POWERTOOLS_SERVICE_NAME : str
         service name
-    LOG_LEVEL: str
+    POWERTOOLS_LOG_LEVEL: str
         logging level (e.g. INFO, DEBUG)
     POWERTOOLS_LOGGER_SAMPLE_RATE: float
         sampling rate ranging from 0 to 1, 1 being 100% sampling
@@ -91,7 +86,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     service : str, optional
         service name to be appended in logs, by default "service_undefined"
     level : str, int optional
-        logging.level, by default "INFO"
+        The level to set. Can be a string representing the level name: 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+        or an integer representing the level value: 10 for 'DEBUG', 20 for 'INFO', 30 for 'WARNING', 40 for 'ERROR', 50 for 'CRITICAL'.
+        by default "INFO"
     child: bool, optional
         create a child Logger named <service>.<caller_file_name>, False by default
     sample_rate: float, optional
@@ -111,7 +108,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     Parameters propagated to LambdaPowertoolsFormatter
     --------------------------------------------------
     datefmt: str, optional
-        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200. # noqa: E501
+        String directives (strftime) to format log timestamp using `time`, by default it uses 2021-05-03 11:47:12,494+0200.
     use_datetime_directive: bool, optional
         Interpret `datefmt` as a format string for `datetime.datetime.strftime`, rather than
         `time.strftime`.
@@ -203,7 +200,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
     ------
     InvalidLoggerSamplingRateError
         When sampling rate provided is not a float
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -223,22 +220,25 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         log_record_order: Optional[List[str]] = None,
         utc: bool = False,
         use_rfc3339: bool = False,
+        serialize_stacktrace: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         self.service = resolve_env_var_choice(
-            choice=service, env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined")
+            choice=service,
+            env=os.getenv(constants.SERVICE_NAME_ENV, "service_undefined"),
         )
         self.sampling_rate = resolve_env_var_choice(
-            choice=sampling_rate, env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE)
+            choice=sampling_rate,
+            env=os.getenv(constants.LOGGER_LOG_SAMPLING_RATE),
         )
         self.child = child
         self.logger_formatter = logger_formatter
-        self.logger_handler = logger_handler or logging.StreamHandler(stream)
+        self._stream = stream or sys.stdout
+        self.logger_handler = logger_handler or logging.StreamHandler(self._stream)
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
-        self.log_level = self._get_log_level(level)
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false")
+            env=os.getenv(constants.LOGGER_LOG_DEDUPLICATION_ENV, "false"),
         )
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
@@ -254,32 +254,38 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             "log_record_order": log_record_order,
             "utc": utc,
             "use_rfc3339": use_rfc3339,
+            "serialize_stacktrace": serialize_stacktrace,
         }
 
-        self._init_logger(formatter_options=formatter_options, **kwargs)
+        self._init_logger(formatter_options=formatter_options, log_level=level, **kwargs)
 
         if self.log_uncaught_exceptions:
             logger.debug("Replacing exception hook")
             sys.excepthook = functools.partial(log_uncaught_exception_hook, logger=self)
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
-    # https://github.com/awslabs/aws-lambda-powertools-python/issues/1660
+    # https://github.com/aws-powertools/powertools-lambda-python/issues/1660
     if not TYPE_CHECKING:
 
         def __getattr__(self, name):
             # Proxy attributes not found to actual logger to support backward compatibility
-            # https://github.com/awslabs/aws-lambda-powertools-python/issues/97
+            # https://github.com/aws-powertools/powertools-lambda-python/issues/97
             return getattr(self._logger, name)
 
-    def _get_logger(self):
+    def _get_logger(self) -> logging.Logger:
         """Returns a Logger named {self.service}, or {self.service.filename} for child loggers"""
         logger_name = self.service
         if self.child:
-            logger_name = f"{self.service}.{self._get_caller_filename()}"
+            logger_name = f"{self.service}.{_get_caller_filename()}"
 
         return logging.getLogger(logger_name)
 
-    def _init_logger(self, formatter_options: Optional[Dict] = None, **kwargs):
+    def _init_logger(
+        self,
+        formatter_options: Optional[Dict] = None,
+        log_level: Union[str, int, None] = None,
+        **kwargs,
+    ) -> None:
         """Configures new logger"""
 
         # Skip configuration if it's a child logger or a pre-configured logger
@@ -291,13 +297,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if self.child or is_logger_preconfigured:
             return
 
+        self.setLevel(log_level)
         self._configure_sampling()
-        self._logger.setLevel(self.log_level)
-        self._logger.addHandler(self.logger_handler)
+        self.addHandler(self.logger_handler)
         self.structure_logs(formatter_options=formatter_options, **kwargs)
 
         # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        self._logger.findCaller = self.findCaller
+        self._logger.findCaller = compat.findCaller  # type: ignore[method-assign]
 
         # Pytest Live Log feature duplicates log records for colored output
         # but we explicitly add a filter for log deduplication.
@@ -314,9 +320,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         # therefore we set a custom attribute in the Logger that will be returned
         # std logging will return the same Logger with our attribute if name is reused
         logger.debug(f"Marking logger {self.service} as preconfigured")
-        self._logger.init = True
+        self._logger.init = True  # type: ignore[attr-defined]
 
-    def _configure_sampling(self):
+    def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
 
         Raises
@@ -327,11 +333,13 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         try:
             if self.sampling_rate and random.random() <= float(self.sampling_rate):
                 logger.debug("Setting log level to Debug due to sampling rate")
-                self.log_level = logging.DEBUG
+                self._logger.setLevel(logging.DEBUG)
         except ValueError:
             raise InvalidLoggerSamplingRateError(
-                f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
-                f"Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+                (
+                    f"Expected a float value ranging 0 to 1, but received {self.sampling_rate} instead."
+                    "Please review POWERTOOLS_LOGGER_SAMPLE_RATE environment variable."
+                ),
             )
 
     @overload
@@ -419,7 +427,8 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             )
 
         log_event = resolve_truthy_env_var_choice(
-            env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false"), choice=log_event
+            env=os.getenv(constants.LOGGER_LOG_EVENT_ENV, "false"),
+            choice=log_event,
         )
 
         @functools.wraps(lambda_handler)
@@ -433,7 +442,9 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
                 self.append_keys(cold_start=cold_start, **lambda_context.__dict__)
 
             if correlation_id_path:
-                self.set_correlation_id(jmespath.search(correlation_id_path, event))
+                self.set_correlation_id(
+                    jmespath_utils.extract_data_from_envelope(envelope=correlation_id_path, data=event),
+                )
 
             if log_event:
                 logger.debug("Event received")
@@ -452,7 +463,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -460,7 +471,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.info(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def error(
@@ -472,7 +488,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -480,19 +496,24 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.error(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def exception(
         self,
         msg: object,
         *args,
-        exc_info=True,
+        exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -500,7 +521,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.exception(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def critical(
@@ -512,7 +538,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -520,7 +546,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.critical(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def warning(
@@ -532,7 +563,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -540,7 +571,12 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.warning(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
     def debug(
@@ -552,7 +588,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
         **kwargs,
-    ):
+    ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
@@ -560,27 +596,21 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         if sys.version_info < (3, 8):  # pragma: no cover
             return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.debug(
-            msg, *args, exc_info=exc_info, stack_info=stack_info, stacklevel=stacklevel, extra=extra
+            msg,
+            *args,
+            exc_info=exc_info,
+            stack_info=stack_info,
+            stacklevel=stacklevel,
+            extra=extra,
         )
 
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
 
-    @property
-    def registered_handler(self) -> logging.Handler:
-        """Convenience property to access logger handler"""
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers
-        return handlers[0]
-
-    @property
-    def registered_formatter(self) -> BasePowertoolsFormatter:
-        """Convenience property to access logger formatter"""
-        return self.registered_handler.formatter  # type: ignore
-
-    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys):
+    def structure_logs(self, append: bool = False, formatter_options: Optional[Dict] = None, **keys) -> None:
         """Sets logging formatting to JSON.
 
         Optionally, it can append keyword arguments
@@ -598,7 +628,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         formatter_options = formatter_options or {}
 
         # There are 3 operational modes for this method
-        ## 1. Register a Powertools Formatter for the first time
+        ## 1. Register a Powertools for AWS Lambda (Python) Formatter for the first time
         ## 2. Append new keys to the current logger formatter; deprecated in favour of append_keys
         ## 3. Add new keys and discard existing to the registered formatter
 
@@ -606,14 +636,14 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         log_keys = {**self._default_log_keys, **keys}
         is_logger_preconfigured = getattr(self._logger, "init", False)
         if not is_logger_preconfigured:
-            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)  # type: ignore # noqa: E501
+            formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)
             self.registered_handler.setFormatter(formatter)
 
-            # when using a custom Lambda Powertools Formatter
-            # standard and custom keys that are not Powertools Formatter parameters should be appended
-            # and custom keys that might happen to be Powertools Formatter parameters should be discarded
-            # this prevents adding them as custom keys, for example, `json_default=<callable>`
-            # see https://github.com/awslabs/aws-lambda-powertools-python/issues/1263
+            # when using a custom Powertools for AWS Lambda (Python) Formatter
+            # standard and custom keys that are not Powertools for AWS Lambda (Python) Formatter parameters
+            # should be appended and custom keys that might happen to be Powertools for AWS Lambda (Python)
+            # Formatter parameters should be discarded this prevents adding them as custom keys, for example,
+            # `json_default=<callable>` see https://github.com/aws-powertools/powertools-lambda-python/issues/1263
             custom_keys = {k: v for k, v in log_keys.items() if k not in RESERVED_FORMATTER_CUSTOM_KEYS}
             return self.registered_formatter.append_keys(**custom_keys)
 
@@ -626,7 +656,7 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
         self.registered_formatter.clear_state()
         self.registered_formatter.append_keys(**log_keys)
 
-    def set_correlation_id(self, value: Optional[str]):
+    def set_correlation_id(self, value: Optional[str]) -> None:
         """Sets the correlation_id in the logging json
 
         Parameters
@@ -648,69 +678,139 @@ class Logger(logging.Logger):  # lgtm [py/missing-call-to-init]
             return self.registered_formatter.log_format.get("correlation_id")
         return None
 
-    @staticmethod
-    def _get_log_level(level: Union[str, int, None]) -> Union[str, int]:
-        """Returns preferred log level set by the customer in upper case"""
-        if isinstance(level, int):
-            return level
+    def setLevel(self, level: Union[str, int, None]) -> None:
+        return self._logger.setLevel(self._determine_log_level(level))
 
-        log_level: Optional[str] = level or os.getenv("LOG_LEVEL")
-        if log_level is None:
+    def addHandler(self, handler: logging.Handler) -> None:
+        return self._logger.addHandler(handler)
+
+    def addFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.addFilter(filter)
+
+    def removeFilter(self, filter: logging._FilterType) -> None:  # noqa: A002 # filter built-in usage
+        return self._logger.removeFilter(filter)
+
+    @property
+    def registered_handler(self) -> logging.Handler:
+        """Convenience property to access the first logger handler"""
+        # We ignore mypy here because self.child encodes whether or not self._logger.parent is
+        # None, mypy can't see this from context but we can
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers  # type: ignore[union-attr]
+        return handlers[0]
+
+    @property
+    def registered_formatter(self) -> BasePowertoolsFormatter:
+        """Convenience property to access the first logger formatter"""
+        return self.registered_handler.formatter  # type: ignore[return-value]
+
+    @property
+    def log_level(self) -> int:
+        return self._logger.level
+
+    @property
+    def name(self) -> str:
+        return self._logger.name
+
+    @property
+    def handlers(self) -> List[logging.Handler]:
+        """List of registered logging handlers
+
+        Notes
+        -----
+
+        Looking for the first configured handler? Use registered_handler property instead.
+        """
+        return self._logger.handlers
+
+    def _get_aws_lambda_log_level(self) -> Optional[str]:
+        """
+        Retrieve the log level for AWS Lambda from the Advanced Logging Controls feature.
+        Returns:
+            Optional[str]: The corresponding logging level.
+        """
+
+        return constants.LAMBDA_ADVANCED_LOGGING_LEVELS.get(os.getenv(constants.LAMBDA_LOG_LEVEL_ENV))
+
+    def _get_powertools_log_level(self, level: Union[str, int, None]) -> Optional[str]:
+        """Retrieve the log level for Powertools from the environment variable or level parameter.
+        If log level is an integer, we convert to its respective string level `logging.getLevelName()`.
+        If no log level is provided, we check env vars for the log level: POWERTOOLS_LOG_LEVEL_ENV and POWERTOOLS_LOG_LEVEL_LEGACY_ENV.
+        Parameters:
+        -----------
+        level : Union[str, int, None]
+            The specified log level as a string, integer, or None.
+        Environment variables
+        ---------------------
+        POWERTOOLS_LOG_LEVEL : str
+            log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
+        LOG_LEVEL (Legacy) : str
+            log level (e.g: INFO, DEBUG, WARNING, ERROR, CRITICAL)
+        Returns:
+        --------
+        Optional[str]:
+            The corresponding logging level. Returns None if the log level is not explicitly specified.
+        """  # noqa E501
+
+        # Extract log level from Powertools Logger env vars
+        log_level_env = os.getenv(constants.POWERTOOLS_LOG_LEVEL_ENV) or os.getenv(
+            constants.POWERTOOLS_LOG_LEVEL_LEGACY_ENV,
+        )
+        # If level is an int (logging.INFO), return its respective string ("INFO")
+        if isinstance(level, int):
+            return logging.getLevelName(level)
+
+        return level or log_level_env
+
+    def _determine_log_level(self, level: Union[str, int, None]) -> Union[str, int]:
+        """Determine the effective log level considering Lambda and Powertools preferences.
+        It emits an UserWarning if Lambda ALC log level is lower than Logger log level.
+        Parameters:
+        -----------
+        level: Union[str, int, None]
+            The specified log level as a string, integer, or None.
+        Returns:
+        ----------
+            Union[str, int]: The effective logging level.
+        """
+
+        # This function consider the following order of precedence:
+        # 1 - If a log level is set using AWS Lambda Advanced Logging Controls, it sets it.
+        # 2 - If a log level is passed to the constructor, it sets it
+        # 3 - If a log level is set via setLevel, it sets it.
+        # 4 - If a log level is set via Powertools env variables, it sets it.
+        # 5 - If none of the above is true, the default log level applies INFO.
+
+        lambda_log_level = self._get_aws_lambda_log_level()
+        powertools_log_level = self._get_powertools_log_level(level)
+
+        if powertools_log_level and lambda_log_level:
+            # If Powertools log level is set and higher than AWS Lambda Advanced Logging Controls, emit a warning
+            if logging.getLevelName(lambda_log_level) > logging.getLevelName(powertools_log_level):
+                warnings.warn(
+                    f"Current log level ({powertools_log_level}) does not match AWS Lambda Advanced Logging Controls "
+                    f"minimum log level ({lambda_log_level}). This can lead to data loss, consider adjusting them.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+
+        # AWS Lambda Advanced Logging Controls takes precedence over Powertools log level and we use this
+        if lambda_log_level:
+            return lambda_log_level
+
+        # Check if Powertools log level is None, which means it's not set
+        # We assume INFO as the default log level
+        if powertools_log_level is None:
             return logging.INFO
 
-        return log_level.upper()
-
-    @staticmethod
-    def _get_caller_filename():
-        """Return caller filename by finding the caller frame"""
-        # Current frame         => _get_logger()
-        # Previous frame        => logger.py
-        # Before previous frame => Caller
-        frame = inspect.currentframe()
-        caller_frame = frame.f_back.f_back.f_back
-        return caller_frame.f_globals["__name__"]
-
-    # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-    def findCaller(self, stack_info=False, stacklevel=2):  # pragma: no cover
-        """
-        Find the stack frame of the caller so that we can note the source
-        file name, line number and function name.
-        """
-        f = logging.currentframe()  # noqa: VNE001
-        # On some versions of IronPython, currentframe() returns None if
-        # IronPython isn't run with -X:Frames.
-        if f is None:
-            return "(unknown file)", 0, "(unknown function)", None
-        while stacklevel > 0:
-            next_f = f.f_back
-            if next_f is None:
-                ## We've got options here.
-                ## If we want to use the last (deepest) frame:
-                break
-                ## If we want to mimic the warnings module:
-                # return ("sys", 1, "(unknown function)", None) # noqa: E800
-                ## If we want to be pedantic:  # noqa: E800
-                # raise ValueError("call stack is not deep enough") # noqa: E800
-            f = next_f  # noqa: VNE001
-            if not _is_internal_frame(f):
-                stacklevel -= 1
-        co = f.f_code
-        sinfo = None
-        if stack_info:
-            with io.StringIO() as sio:
-                sio.write("Stack (most recent call last):\n")
-                traceback.print_stack(f, file=sio)
-                sinfo = sio.getvalue()
-                if sinfo[-1] == "\n":
-                    sinfo = sinfo[:-1]
-        return co.co_filename, f.f_lineno, co.co_name, sinfo
+        # Powertools log level is set, we use this
+        return powertools_log_level.upper()
 
 
 def set_package_logger(
     level: Union[str, int] = logging.DEBUG,
     stream: Optional[IO[str]] = None,
     formatter: Optional[logging.Formatter] = None,
-):
+) -> None:
     """Set an additional stream handler, formatter, and log level for aws_lambda_powertools package logger.
 
     **Package log by default is suppressed (NullHandler), this should only used for debugging.
@@ -718,7 +818,7 @@ def set_package_logger(
 
     Example
     -------
-    **Enables debug logging for AWS Lambda Powertools package**
+    **Enables debug logging for Powertools for AWS Lambda (Python) package**
 
         >>> aws_lambda_powertools.logging.logger import set_package_logger
         >>> set_package_logger()
@@ -745,16 +845,18 @@ def set_package_logger(
     logger.addHandler(handler)
 
 
-# Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-# The following is based on warnings._is_internal_frame. It makes sure that
-# frames of the import mechanism are skipped when logging at module level and
-# using a stacklevel value greater than one.
-def _is_internal_frame(frame):  # pragma: no cover
-    """Signal whether the frame is a CPython or logging module internal."""
-    filename = os.path.normcase(frame.f_code.co_filename)
-    return filename == logging._srcfile or ("importlib" in filename and "_bootstrap" in filename)
-
-
-def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger):
+def log_uncaught_exception_hook(exc_type, exc_value, exc_traceback, logger: Logger) -> None:
     """Callback function for sys.excepthook to use Logger to log uncaught exceptions"""
     logger.exception(exc_value, exc_info=(exc_type, exc_value, exc_traceback))  # pragma: no cover
+
+
+def _get_caller_filename() -> str:
+    """Return caller filename by finding the caller frame"""
+    # Current frame         => _get_logger()
+    # Previous frame        => logger.py
+    # Before previous frame => Caller
+    # We ignore mypy here because *we* know that there will always be at least
+    # 3 frames (above) so repeatedly calling f_back is safe here
+    frame = inspect.currentframe()
+    caller_frame = frame.f_back.f_back.f_back  # type: ignore[union-attr]
+    return caller_frame.f_globals["__name__"]  # type: ignore[union-attr]

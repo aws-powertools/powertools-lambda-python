@@ -22,5 +22,8 @@ async def async_record_handler(record: SQSRecord):
 
 def lambda_handler(event, context: LambdaContext):
     return async_process_partial_response(
-        event=event, record_handler=async_record_handler, processor=processor, context=context
+        event=event,
+        record_handler=async_record_handler,
+        processor=processor,
+        context=context,
     )

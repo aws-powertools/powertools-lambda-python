@@ -1,20 +1,20 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: AWS Lambda Powertools Tracer doc examples
+Description: Powertools for AWS Lambda (Python) version
 
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.10
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: payment
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
     Layers:
       # Find the latest Layer version in the official documentation
-      # https://awslabs.github.io/aws-lambda-powertools-python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:32
+      # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:60
 
 Resources:
   LoggerLambdaHandlerExample:

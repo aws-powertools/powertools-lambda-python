@@ -31,6 +31,7 @@ def test_s3_eventbridge_notification_detail_parsed(raw_event: Dict):
     assert parsed_event.detail.object.sequencer == raw_event["detail"]["object"]["sequencer"]
     assert parsed_event.detail.object.size == raw_event["detail"]["object"]["size"]
     assert parsed_event.detail.reason == raw_event["detail"].get("reason")
+    assert parsed_event.detail.version == raw_event["detail"].get("version")
     assert parsed_event.detail.request_id == raw_event["detail"]["request-id"]
     assert parsed_event.detail.requester == raw_event["detail"]["requester"]
     assert parsed_event.detail.restore_expiry_time == raw_event["detail"].get("restore-expiry-time")

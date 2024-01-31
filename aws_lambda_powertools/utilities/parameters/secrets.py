@@ -82,7 +82,10 @@ class SecretsProvider(BaseProvider):
         super().__init__()
 
         self.client: "SecretsManagerClient" = self._build_boto3_client(
-            service_name="secretsmanager", client=boto3_client, session=boto3_session, config=config
+            service_name="secretsmanager",
+            client=boto3_client,
+            session=boto3_session,
+            config=config,
         )
 
     def _get(self, name: str, **sdk_options) -> str:
@@ -115,7 +118,11 @@ class SecretsProvider(BaseProvider):
 
 
 def get_secret(
-    name: str, transform: Optional[str] = None, force_fetch: bool = False, max_age: Optional[int] = None, **sdk_options
+    name: str,
+    transform: Optional[str] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
 ) -> Union[str, dict, bytes]:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -170,5 +177,9 @@ def get_secret(
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
     return DEFAULT_PROVIDERS["secrets"].get(
-        name, max_age=max_age, transform=transform, force_fetch=force_fetch, **sdk_options
+        name,
+        max_age=max_age,
+        transform=transform,
+        force_fetch=force_fetch,
+        **sdk_options,
     )

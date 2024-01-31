@@ -2,6 +2,9 @@ import base64
 from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.shared_functions import (
+    get_header_value,
+)
 
 
 class KafkaEventRecord(DictWrapper):
@@ -68,18 +71,17 @@ class KafkaEventRecord(DictWrapper):
         return {k: bytes(v) for chunk in self.headers for k, v in chunk.items()}
 
     def get_header_value(
-        self, name: str, default_value: Optional[Any] = None, case_sensitive: bool = True
-    ) -> Optional[bytes]:
+        self,
+        name: str,
+        default_value: Optional[Any] = None,
+        case_sensitive: bool = True,
+    ) -> Optional[str]:
         """Get a decoded header value by name."""
-        if case_sensitive:
-            return self.decoded_headers.get(name, default_value)
-        name_lower = name.lower()
-
-        return next(
-            # Iterate over the dict and do a case-insensitive key comparison
-            (value for key, value in self.decoded_headers.items() if key.lower() == name_lower),
-            # Default value is returned if no matches was found
-            default_value,
+        return get_header_value(
+            headers=self.decoded_headers,
+            name=name,
+            default_value=default_value,
+            case_sensitive=case_sensitive,
         )
 
 
@@ -90,6 +92,10 @@ class KafkaEvent(DictWrapper):
     - https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html
     - https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html
     """
+
+    def __init__(self, data: Dict[str, Any]):
+        super().__init__(data)
+        self._records: Optional[Iterator[KafkaEventRecord]] = None
 
     @property
     def event_source(self) -> str:
@@ -120,5 +126,20 @@ class KafkaEvent(DictWrapper):
 
     @property
     def record(self) -> KafkaEventRecord:
-        """The next Kafka record."""
-        return next(self.records)
+        """
+        Returns the next Kafka record using an iterator.
+
+        Returns
+        -------
+        KafkaEventRecord
+            The next Kafka record.
+
+        Raises
+        ------
+        StopIteration
+            If there are no more records available.
+
+        """
+        if self._records is None:
+            self._records = self.records
+        return next(self._records)

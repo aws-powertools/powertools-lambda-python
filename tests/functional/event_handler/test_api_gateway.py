@@ -1,5 +1,6 @@
 import base64
 import json
+import re
 import zlib
 from copy import deepcopy
 from decimal import Decimal
@@ -9,6 +10,7 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
+from pydantic import BaseModel
 
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.api_gateway import (
@@ -29,6 +31,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
     ServiceError,
     UnauthorizedError,
 )
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -39,12 +42,6 @@ from aws_lambda_powertools.utilities.data_classes import (
     event_source,
 )
 from tests.functional.utils import load_event
-
-
-@pytest.fixture
-def json_dump():
-    # our serializers reduce length to save on costs; fixture to replicate separators
-    return lambda obj: json.dumps(obj, separators=(",", ":"))
 
 
 def read_media(file_name: str) -> bytes:
@@ -298,7 +295,7 @@ def test_no_matches():
         return app.resolve(event, context)
 
     # Also check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -364,6 +361,81 @@ def test_cors_preflight_body_is_empty_not_null():
 
     # THEN there body should be empty strings
     assert result["body"] == ""
+
+
+def test_override_route_compress_parameter():
+    # GIVEN a function that has compress=True
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=False
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request", compress=True)
+    def with_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=False)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN the response is not compressed
+    assert result["isBase64Encoded"] is False
+    assert result["body"] == expected_value
+    assert result["multiValueHeaders"].get("Content-Encoding") is None
+
+
+def test_response_with_compress_enabled():
+    # GIVEN a function
+    # AND an event with a "Accept-Encoding" that include gzip
+    # AND the Response object with compress=True
+    app = ApiGatewayResolver()
+    mock_event = {"path": "/my/request", "httpMethod": "GET", "headers": {"Accept-Encoding": "deflate, gzip"}}
+    expected_value = '{"test": "value"}'
+
+    @app.get("/my/request")
+    def route_without_compression() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, expected_value, compress=True)
+
+    def handler(event, context):
+        return app.resolve(event, context)
+
+    # WHEN calling the event handler
+    result = handler(mock_event, None)
+
+    # THEN then gzip the response and base64 encode as a string
+    assert result["isBase64Encoded"] is True
+    body = result["body"]
+    assert isinstance(body, str)
+    decompress = zlib.decompress(base64.b64decode(body), wbits=zlib.MAX_WBITS | 16).decode("UTF-8")
+    assert decompress == expected_value
+    headers = result["multiValueHeaders"]
+    assert headers["Content-Encoding"] == ["gzip"]
+
+
+def test_response_is_json_without_content_type():
+    response = Response(200, None, "")
+
+    assert response.is_json() is False
+
+
+def test_response_is_json_with_json_content_type():
+    response = Response(200, content_types.APPLICATION_JSON, "")
+    assert response.is_json() is True
+
+
+def test_response_is_json_with_multiple_json_content_types():
+    response = Response(
+        200,
+        None,
+        "",
+        {
+            "Content-Type": [content_types.APPLICATION_JSON, content_types.APPLICATION_JSON],
+        },
+    )
+    assert response.is_json() is True
 
 
 def test_compress():
@@ -862,7 +934,8 @@ def test_debug_print_event(capsys):
     # THEN print the event
     out, err = capsys.readouterr()
     assert "\n" in out
-    assert json.loads(out) == event
+    output: str = out.split("\n")[0]
+    assert json.loads(output) == event
 
 
 def test_similar_dynamic_routes():
@@ -871,17 +944,17 @@ def test_similar_dynamic_routes():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested_account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested_account"
@@ -907,17 +980,17 @@ def test_similar_dynamic_routes_with_whitespaces():
     event = deepcopy(LOAD_GW_EVENT)
 
     # WHEN
-    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>")
     def get_account(account_id: str):
         assert account_id == "single account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks")
     def get_account_networks(account_id: str):
         assert account_id == "nested account"
 
-    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: E800
+    # r'^/accounts/(?P<account_id>\\w+\\b)/source_networks/(?P<network_id>\\w+\\b)$' # noqa: ERA001
     @app.get("/accounts/<account_id>/source_networks/<network_id>")
     def get_network_account(account_id: str, network_id: str):
         assert account_id == "nested account"
@@ -942,7 +1015,7 @@ def test_similar_dynamic_routes_with_whitespaces():
     [
         pytest.param(123456789, id="num"),
         pytest.param("user@example.com", id="email"),
-        pytest.param("-._~'!*:@,;()=", id="safe-rfc3986"),
+        pytest.param("-._~'!*:@,;()=+&$", id="safe-rfc3986"),
         pytest.param("%<>[]{}|^", id="unsafe-rfc3986"),
     ],
 )
@@ -1032,6 +1105,38 @@ def test_remove_prefix(path: str):
 
 
 @pytest.mark.parametrize(
+    "path",
+    [
+        pytest.param("/stg/foo", id="path matched pay prefix"),
+        pytest.param("/dev/foo", id="path matched pay prefix with multiple numbers"),
+        pytest.param("/foo", id="path does not start with any of the prefixes"),
+    ],
+)
+def test_remove_prefix_by_regex(path: str):
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/foo")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": path}, None)
+
+    assert response["statusCode"] == 200
+
+
+def test_empty_path_when_using_regexes():
+    app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
+
+    @app.get("/")
+    def foo():
+        ...
+
+    response = app({"httpMethod": "GET", "path": "/dev"}, None)
+
+    assert response["statusCode"] == 200
+
+
+@pytest.mark.parametrize(
     "prefix",
     [
         pytest.param("/foo", id="String are not supported"),
@@ -1092,6 +1197,25 @@ def test_api_gateway_request_path_equals_strip_prefix():
     # THEN process event correctly
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+
+
+def test_api_gateway_app_with_strip_prefix_and_route_prefix():
+    # GIVEN all routes are stripped from its version e.g., /v1
+    app = ApiGatewayResolver(strip_prefixes=["/v1"])
+    router = Router()
+
+    event = {"httpMethod": "GET", "path": "/v1/users/leandro", "resource": "/users"}
+
+    @router.get("<user_id>")
+    def base(user_id: str):
+        return {"user": user_id}
+
+    # WHEN a router is included prefixing all routes with "/users/"
+    app.include_router(router, prefix="/users/")
+    result = app(event, {})
+
+    # THEN route correctly to the registered route after stripping each prefix (global + router)
+    assert result["statusCode"] == 200
 
 
 def test_api_gateway_app_router():
@@ -1205,7 +1329,7 @@ def test_api_gateway_app_router_with_different_methods():
     app.include_router(router)
 
     # Also check check the route configurations
-    routes = app._routes
+    routes = app._static_routes
     assert len(routes) == 5
     for route in routes:
         if route.func == get_func:
@@ -1334,6 +1458,78 @@ def test_exception_handler():
     assert result["statusCode"] == 418
     assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
     assert result["body"] == "Foo!"
+
+
+def test_exception_handler_with_data_validation():
+    # GIVEN a resolver with an exception handler defined for RequestValidationError
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.exception_handler(RequestValidationError)
+    def handle_validation_error(ex: RequestValidationError):
+        return Response(
+            status_code=422,
+            content_type=content_types.TEXT_PLAIN,
+            body=f"Invalid data. Number of errors: {len(ex.errors())}",
+        )
+
+    @app.get("/my/path")
+    def get_lambda(param: int):
+        ...
+
+    # WHEN calling the event handler
+    # AND a RequestValidationError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 422
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_PLAIN]
+    assert result["body"] == "Invalid data. Number of errors: 1"
+
+
+def test_exception_handler_with_data_validation_pydantic_response():
+    # GIVEN a resolver with an exception handler defined for RequestValidationError
+    app = ApiGatewayResolver(enable_validation=True)
+
+    class Err(BaseModel):
+        msg: str
+
+    @app.exception_handler(RequestValidationError)
+    def handle_validation_error(ex: RequestValidationError):
+        return Response(
+            status_code=422,
+            content_type=content_types.APPLICATION_JSON,
+            body=Err(msg=f"Invalid data. Number of errors: {len(ex.errors())}"),
+        )
+
+    @app.get("/my/path")
+    def get_lambda(param: int):
+        ...
+
+    # WHEN calling the event handler
+    # AND a RequestValidationError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN exception handler's pydantic response should be serialized correctly
+    assert result["statusCode"] == 422
+    assert result["body"] == '{"msg":"Invalid data. Number of errors: 1"}'
+
+
+def test_data_validation_error():
+    # GIVEN a resolver without an exception handler
+    app = ApiGatewayResolver(enable_validation=True)
+
+    @app.get("/my/path")
+    def get_lambda(param: int):
+        ...
+
+    # WHEN calling the event handler
+    # AND a RequestValidationError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler
+    assert result["statusCode"] == 422
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
+    assert "missing" in result["body"]
 
 
 def test_exception_handler_service_error():
@@ -1647,3 +1843,26 @@ def test_dict_response_with_status_code():
     assert response["multiValueHeaders"]["Content-Type"] == [content_types.APPLICATION_JSON]
     response_body = json.loads(response["body"])
     assert response_body["message"] == "success"
+
+
+def test_route_match_prioritize_full_match():
+    # GIVEN a Http API V1, with a function registered with two routes
+    app = APIGatewayRestResolver()
+    router = Router()
+
+    @router.get("/my/{path}")
+    def dynamic_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "dynamic"}))
+
+    @router.get("/my/path")
+    def static_handler() -> Response:
+        return Response(200, content_types.APPLICATION_JSON, json.dumps({"hello": "static"}))
+
+    app.include_router(router)
+
+    # WHEN calling the event handler with /foo/dynamic
+    response = app(LOAD_GW_EVENT, {})
+
+    # THEN the static_handler should have been called, because it fully matches the path directly
+    response_body = json.loads(response["body"])
+    assert response_body["hello"] == "static"

@@ -1,10 +1,46 @@
 name: Deploy v2 layer to all regions
 
+# PROCESS
+#
+# 1. Compile Layer using cdk-aws-lambda-powertools-layer CDK construct for x86 and ARM (uses custom runner as it's CPU heavy)
+# 2. Kick off pipeline for beta, prod, and canary releases
+# 3. Create PR to update trunk so staged docs also point to the latest Layer ARN, when merged
+# 4. Builds and publishes docs with latest Layer ARN using given version (generally coming from release)
+
+
+# USAGE
+#
+# NOTE: meant to be used with ./.github/workflows/release.yml
+#
+# publish_layer:
+#   needs: [seal, release, create_tag]
+#   secrets: inherit
+#   permissions:
+#     id-token: write
+#     contents: write
+#     pages: write
+#     pull-requests: write
+#   uses: ./.github/workflows/publish_v2_layer.yml
+#   with:
+#     latest_published_version: ${{ needs.seal.outputs.RELEASE_VERSION }}
+#     pre_release: ${{ inputs.pre_release }}
+#     source_code_artifact_name: ${{ needs.seal.outputs.artifact_name }}
+#     source_code_integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+
+
 on:
   workflow_dispatch:
     inputs:
       latest_published_version:
         description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0, 2.0.0a1 (pre-release)"
+        required: true
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
         required: true
       pre_release:
         description: "Publishes documentation using a pre-release tag (2.0.0a1)."
@@ -22,6 +58,21 @@ on:
         default: false
         type: boolean
         required: false
+      source_code_artifact_name:
+        description: "Artifact name to restore sealed source code"
+        type: string
+        required: true
+      source_code_integrity_hash:
+        description: "Sealed source code integrity hash"
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+
+env:
+  RELEASE_COMMIT: ${{ github.sha }}
 
 jobs:
   build-layer:
@@ -31,55 +82,71 @@ jobs:
       id-token: write
       pages: none
       pull-requests: none
-    runs-on: aws-lambda-powertools_ubuntu-latest_8-core
+    runs-on: aws-powertools_ubuntu-latest_8-core
     defaults:
       run:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
         with:
-          fetch-depth: 0
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
       - name: Install poetry
-        run: pipx install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
       - name: Setup Node.js
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+        uses: actions/setup-node@b39b52d1213e96004bfcb1c61a8a6fa8ab84f3e8 # v4.0.1
         with:
           node-version: "16.12"
       - name: Setup python
-        uses: actions/setup-python@57ded4d7d5e986d7296eab16560982c6dd7c923b # v4.6.0
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
         with:
-          python-version: "3.10"
+          python-version: "3.12"
           cache: "pip"
       - name: Resolve and install project dependencies
         # CDK spawns system python when compiling stack
         # therefore it ignores both activated virtual env and cached interpreter by GH
         run: |
           poetry export --format requirements.txt --output requirements.txt
-          pip install -r requirements.txt
+          pip install --require-hashes -r requirements.txt
+
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@e81a89b1732b9c48d79cd809d8d81d79c4647a18 # v2.0.0
+        uses: docker/setup-qemu-action@68827325e0b33c7199eb31dd4e31fbe9023e06e3 # v2.0.0
         with:
           platforms: arm64
         # NOTE: we need QEMU to build Layer against a different architecture (e.g., ARM)
+
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@4b4e9c3e2d4531116a6f8ba8e71fc6e2cb6e6c8c # v2.5.0
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
         with:
           install: true
           driver: docker
           platforms: linux/amd64,linux/arm64
-      - name: install cdk and deps
+
+      - name: Install CDK
         working-directory: ./
         run: |
-          npm install
+          npm ci
           npx cdk --version
+
+      # Baking time for PyPi eventual consistency; 60s seemed more than enough
+      # https://github.com/aws-powertools/powertools-lambda-python/issues/2491
+      - name: Baking time (PyPi)
+        run: sleep 60
+
       - name: CDK build
         run: npx cdk synth --verbose --context version="${{ inputs.latest_published_version }}" -o cdk.out
       - name: zip output
         run: zip -r cdk.out.zip cdk.out
       - name: Archive CDK artifacts
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce # v3.1.2
+        uses: actions/upload-artifact@a8a3f3ad30e3422c9c7b888a15615d19a852ae32 # v3.1.3
         with:
           name: cdk-layer-artefact
           path: layer/cdk.out.zip
@@ -91,7 +158,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -99,6 +166,8 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
       latest_published_version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   prod:
     needs: beta
@@ -107,7 +176,7 @@ jobs:
       id-token: write
       contents: read
       pages: write             # docs will be updated with latest Layer ARNs
-      pull-requests: write # creation-action will create a PR with Layer ARN updates
+      pull-requests: write     # creation-action will create a PR with Layer ARN updates
     uses: ./.github/workflows/reusable_deploy_v2_layer_stack.yml
     secrets: inherit
     with:
@@ -115,9 +184,11 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
       latest_published_version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
 
   sar-beta:
-    needs: build-layer
+    needs: beta  # canaries run on Layer Beta env
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write
@@ -131,9 +202,12 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-beta"
       package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+
 
   sar-prod:
-    needs: [build-layer, sar-beta]
+    needs: sar-beta
     permissions:
       # lower privilege propagated from parent workflow (release.yml)
       id-token: write
@@ -147,6 +221,9 @@ jobs:
       artefact-name: "cdk-layer-artefact"
       environment: "layer-prod"
       package-version: ${{ inputs.latest_published_version }}
+      source_code_artifact_name: ${{ inputs.source_code_artifact_name }}
+      source_code_integrity_hash: ${{ inputs.source_code_integrity_hash }}
+
 
   # Updating the documentation with the latest Layer ARNs is a two-phase process
   #
@@ -170,9 +247,16 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab  # v3.5.2
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
         with:
-          fetch-depth: 0
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ inputs.source_code_integrity_hash }}
+          artifact_name: ${{ inputs.source_code_artifact_name }}
+
       - name: Download CDK layer artifact
         uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
         with:
@@ -224,6 +308,7 @@ jobs:
       pages: write
       pull-requests: none
       id-token: write
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}

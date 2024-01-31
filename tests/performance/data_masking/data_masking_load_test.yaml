@@ -1,0 +1,32 @@
+config:
+  target: https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function128
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 5
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 10
+      name: Ramp up load
+    - duration: 30
+      arrivalRate: 10
+      rampTo: 30
+      name: Spike phase
+  # Load & configure a couple of useful plugins
+  # https://docs.art/reference/extensions
+  plugins:
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 500
+scenarios:
+  - flow:
+      - loop:
+        - get:
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function128"
+        - get:
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function1024"
+        - get:
+            url: "https://sebwc2y7gh.execute-api.us-west-2.amazonaws.com/Prod/function1769"
+        count: 100

@@ -38,7 +38,8 @@ def get_object_version(bucket, key) -> str:
 
 def get_lambda_result_payload(s3_object_handler_fn_arn: str, payload: dict) -> dict:
     handler_result, _ = data_fetcher.get_lambda_response(
-        lambda_arn=s3_object_handler_fn_arn, payload=json.dumps(payload)
+        lambda_arn=s3_object_handler_fn_arn,
+        payload=json.dumps(payload),
     )
 
     return json.loads(handler_result["Payload"].read())

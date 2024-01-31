@@ -18,8 +18,9 @@
 
 # Contributing Guidelines
 
-Thank you for your interest in contributing to our project. Whether it's a bug report, new feature, correction, or additional
-documentation, we greatly value feedback and contributions from our community.
+<!-- markdownlint-disable MD013 -->
+Thank you for your interest in contributing to our project. Whether it's a [bug report](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=bug%2Ctriage&projects=&template=bug_report.yml&title=Bug%3A+TITLE), [new feature](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE), [correction](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), or [additional documentation](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE), we greatly value feedback and contributions from our community.
+<!-- markdownlint-enable MD013 -->
 
 Please read through this document before submitting any issues or pull requests to ensure we have all the necessary
 information to effectively respond to your bug report or contribution.
@@ -28,8 +29,9 @@ information to effectively respond to your bug report or contribution.
 
 We welcome you to use the GitHub issue tracker to report bugs, suggest features, or documentation improvements.
 
-When filing an issue, please check existing open, or recently closed, issues to make sure somebody else hasn't already
-reported the issue. Please try to include as much information as you can.
+<!-- markdownlint-disable MD013 -->
+[When filing an issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose), please check [existing open](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc), or [recently closed](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+sort%3Aupdated-desc+is%3Aclosed), issues to make sure somebody else hasn't already reported the issue. Please try to include as much information as you can.
+<!-- markdownlint-enable MD013 -->
 
 ## Contributing via Pull Requests
 
@@ -37,13 +39,63 @@ Contributions via pull requests are much appreciated. Before sending us a pull r
 
 1. You are working against the latest source on the **develop** branch.
 2. You check existing open, and recently merged pull requests to make sure someone else hasn't addressed the problem already.
-3. You open an [issue](https://github.com/awslabs/aws-lambda-powertools-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+3. You open an [issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new/choose) before you begin any implementation. We value your time and bandwidth. As such, any pull requests created on non-triaged issues might not be successful.
+
+At a high level, these are the steps to get code merged in the repository - don't worry, nearly all of them are automated.
+
+```mermaid
+timeline
+    title Code integration journey (CI)
+    Project setup <br> (make dev)   : Code checkout
+                                    : Virtual environment
+                                    : Dependencies
+                                    : Git pre-commit hooks
+                                    : Local branch
+                                    : Local changes
+                                    : Local tests
+
+    Pre-commit checks <br> (git commit)     : Merge conflict check
+                                            : Trailing whitespaces
+                                            : TOML checks
+                                            : Code linting (standards)
+                                            : Markdown linting
+                                            : CloudFormation linting
+                                            : GitHub Actions linting
+                                            : Terraform linting
+                                            : Secrets linting
+
+    Pre-Pull Request <br> (make pr)     : Code linting
+                                        : Docs linting
+                                        : Static typing analysis
+                                        : Tests (unit|functional|perf)
+                                        : Security baseline
+                                        : Complexity baseline
+                                        : +pre-commit checks
+
+    Pull Request <br> (CI checks)   : Semantic PR title check
+                                    : Related issue check
+                                    : Acknowledgment check
+                                    : Code coverage diff
+                                    : Contribution size check
+                                    : Contribution category check
+                                    : Dependency vulnerability check
+                                    : GitHub Actions security check
+                                    : +pre-pull request checks
+
+    After merge <br> (CI checks)    : End-to-end tests
+                                    : Longer SAST check
+                                    : Security posture check (scorecard)
+                                    : GitHub Actions security check
+                                    : Rebuild Changelog
+                                    : Deploy staging docs
+                                    : Update draft release
+```
 
 ### Dev setup
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
 
-Firstly, [fork the repository](https://github.com/awslabs/aws-lambda-powertools-python/fork).
+Firstly, [fork the repository](https://github.com/aws-powertools/powertools-lambda-python/fork).
 
 To setup your development environment, we recommend using our pre-configured Cloud environment: <https://gitpod.io/#https://github.com/YOUR_USERNAME/aws-lambda-powertools-python>. Replace YOUR_USERNAME with your GitHub username or organization so the Cloud environment can target your fork accordingly.
 
@@ -55,7 +107,7 @@ To send us a pull request, please follow these steps:
 2. Run all tests, and code baseline checks: `make pr`
     - Git hooks will run linting and formatting while `make pr` run deep checks that also run in the CI process
 3. Commit to your fork using clear commit messages.
-4. Send us a pull request with a [conventional semantic title](https://github.com/awslabs/aws-lambda-powertools-python/pull/67), and answering any default questions in the pull request interface.
+4. Send us a pull request with a [conventional semantic title](https://github.com/aws-powertools/powertools-lambda-python/pull/67), and answering any default questions in the pull request interface.
 5. Pay attention to any automated CI failures reported in the pull request, and stay involved in the conversation.
 
 GitHub provides additional document on [forking a repository](https://help.github.com/articles/fork-a-repo/) and
@@ -76,9 +128,9 @@ You might find useful to run both the documentation website and the API referenc
 | Category              | Convention                                                                                                                                                                                                                                                                  |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Docstring**         | We use a slight variation of Numpy convention with markdown to help generate more readable API references.                                                                                                                                                                  |
-| **Style guide**       | We use black as well as flake8 extensions to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                                                |
+| **Style guide**       | We use black as well as [Ruff](https://beta.ruff.rs/docs/) to enforce beyond good practices [PEP8](https://pep8.org/). We use type annotations and enforce static type checking at CI (mypy).                                                                               |
 | **Core utilities**    | Core utilities use a Class, always accept `service` as a constructor parameter, can work in isolation, and are also available in other languages implementation.                                                                                                            |
-| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://awslabs.github.io/aws-lambda-powertools-python/#tenets).                                                                               |
+| **Utilities**         | Utilities are not as strict as core and focus on solving a developer experience problem while following the project [Tenets](https://docs.powertools.aws.dev/lambda/python/#tenets).                                                                                        |
 | **Exceptions**        | Specific exceptions live within utilities themselves and use `Error` suffix e.g. `MetricUnitError`.                                                                                                                                                                         |
 | **Git commits**       | We follow [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/). We do not enforce conventional commits on contributors to lower the entry bar. Instead, we enforce a conventional PR title so our label automation and changelog are generated correctly. |
 | **API documentation** | API reference docs are generated from docstrings which should have Examples section to allow developers to have what they need within their own IDE. Documentation website covers the wider usage, tips, and strive to be concise.                                          |
@@ -100,13 +152,13 @@ We group tests in different categories
 
 ## Finding contributions to work on
 
-Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), looking at any 'help wanted' issues is a great place to start.
+Looking at the existing issues is a great way to find something to contribute on. As our projects, by default, use the default GitHub issue labels (enhancement/bug/help wanted/invalid/question/documentation), [looking at any 'help wanted' issues is a great place to start](https://github.com/orgs/aws-powertools/projects/3/views/5?query=is%3Aopen+sort%3Aupdated-desc).
 
 ## Code of Conduct
 
 This project has adopted the [Amazon Open Source Code of Conduct](https://aws.github.io/code-of-conduct).
 For more information see the [Code of Conduct FAQ](https://aws.github.io/code-of-conduct-faq) or contact
-opensource-codeofconduct@amazon.com with any additional questions or comments.
+<opensource-codeofconduct@amazon.com> with any additional questions or comments.
 
 ## Security issue notifications
 

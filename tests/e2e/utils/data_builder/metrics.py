@@ -43,7 +43,7 @@ def build_metric_query_data(
                 "Stat": stat,
             },
             "ReturnData": True,
-        }
+        },
     ]
 
     if dimensions:
@@ -73,7 +73,10 @@ def build_add_metric_input(metric_name: str, value: float, unit: str = MetricUni
 
 
 def build_multiple_add_metric_input(
-    metric_name: str, value: float, unit: str = MetricUnit.Count.value, quantity: int = 1
+    metric_name: str,
+    value: float,
+    unit: str = MetricUnit.Count.value,
+    quantity: int = 1,
 ) -> List[Dict]:
     """Create list of metrics input to be used with Metrics.add_metric()
 

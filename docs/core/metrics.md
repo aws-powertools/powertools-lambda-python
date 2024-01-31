@@ -1,11 +1,11 @@
 ---
-title: Metrics
+title: Amazon CloudWatch EMF Metrics
 description: Core utility
 ---
 
-Metrics creates custom metrics asynchronously by logging metrics to standard output following [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html).
+Metrics creates custom metrics asynchronously by logging metrics to standard output following [Amazon CloudWatch Embedded Metric Format (EMF)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format.html){target="_blank"}.
 
-These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/).
+These metrics can be visualized through [Amazon CloudWatch Console](https://console.aws.amazon.com/cloudwatch/){target="_blank"}.
 
 ## Key features
 
@@ -16,13 +16,13 @@ These metrics can be visualized through [Amazon CloudWatch Console](https://cons
 
 ## Terminologies
 
-If you're new to Amazon CloudWatch, there are two terminologies you must be aware of before using this utility:
+If you're new to Amazon CloudWatch, there are five terminologies you must be aware of before using this utility:
 
 * **Namespace**. It's the highest level container that will group multiple metrics from multiple services for a given application, for example `ServerlessEcommerce`.
 * **Dimensions**. Metrics metadata in key-value format. They help you slice and dice metrics visualization, for example `ColdStart` metric by Payment `service`.
 * **Metric**. It's the name of the metric, for example: `SuccessfulBooking` or `UpdatedBooking`.
 * **Unit**. It's a value representing the unit of measure for the corresponding metric, for example: `Count` or `Seconds`.
-* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics).
+* **Resolution**. It's a value representing the storage resolution for the corresponding metric. Metrics can be either Standard or High resolution. Read more [here](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/publishingMetrics.html#high-resolution-metrics){target="_blank"}.
 
 <figure>
   <img src="../../media/metrics_terminology.png" />
@@ -32,7 +32,7 @@ If you're new to Amazon CloudWatch, there are two terminologies you must be awar
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/awslabs/aws-lambda-powertools-python/tree/develop/examples){target="_blank"}.
+    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
 
 Metric has two global settings that will be used across all metrics emitted:
 
@@ -83,7 +83,7 @@ You can create metrics using `add_metric`, and you can create dimensions for all
 
 ### Adding high-resolution metrics
 
-You can create [high-resolution metrics](https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/) passing `resolution` parameter to `add_metric`.
+You can create [high-resolution metrics](https://aws.amazon.com/about-aws/whats-new/2023/02/amazon-cloudwatch-high-resolution-metric-extraction-structured-logs/){target="_blank"} passing `resolution` parameter to `add_metric`.
 
 ???+ tip "When is it useful?"
     High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.
@@ -154,7 +154,7 @@ This decorator also **validates**, **serializes**, and **flushes** all your metr
 
     * Maximum of 29 user-defined dimensions
     * Namespace is set, and no more than one
-    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html)
+    * Metric units must be [supported by CloudWatch](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"}
 
 #### Raising SchemaValidationError on empty metrics
 
@@ -165,7 +165,7 @@ If you want to ensure at least one metric is always emitted, you can pass `raise
 ```
 
 ???+ tip "Suppressing warning messages on empty metrics"
-    If you expect your function to execute without publishing metrics every time, you can suppress the warning with **`warnings.filterwarnings("ignore", "No metrics to publish*")`**.
+    If you expect your function to execute without publishing metrics every time, you can suppress the warning with **`warnings.filterwarnings("ignore", "No application metrics to publish*")`**.
 
 ### Capturing cold start metric
 
@@ -191,7 +191,17 @@ If it's a cold start invocation, this feature will:
 This has the advantage of keeping cold start metric separate from your application metrics, where you might have unrelated dimensions.
 
 ???+ info
-    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/awslabs/aws-lambda-powertools-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=) if you'd prefer a flag to override it.
+    We do not emit 0 as a value for ColdStart metric for cost reasons. [Let us know](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2C+triage&template=feature_request.md&title=){target="_blank"} if you'd prefer a flag to override it.
+
+### Environment variables
+
+The following environment variable is available to configure Metrics at a global scope:
+
+| Setting            | Description                      | Environment variable           | Default |
+| ------------------ | -------------------------------- | ------------------------------ | ------- |
+| **Namespace Name** | Sets namespace used for metrics. | `POWERTOOLS_METRICS_NAMESPACE` | `None`  |
+
+`POWERTOOLS_METRICS_NAMESPACE` is also available on a per-instance basis with the `namespace` parameter, which will consequently override the environment variable value.
 
 ## Advanced
 
@@ -219,7 +229,7 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
 CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
 
 ???+ info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing). Keep the following formula in mind:
+    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}. Keep the following formula in mind:
 
     **unique metric = (metric_name + dimension_name + dimension_value)**
 
@@ -251,7 +261,7 @@ By default it will skip all previously defined dimensions including default dime
 
 ### Flushing metrics manually
 
-If you are using the AWS Lambda Web Adapter project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
+If you are using the [AWS Lambda Web Adapter](https://github.com/awslabs/aws-lambda-web-adapter){target="_blank"} project, or a middleware with custom metric logic, you can use `flush_metrics()`. This method will serialize, print metrics available to standard output, and clear in-memory metrics data.
 
 ???+ warning
     This does not capture Cold Start metrics, and metric data validation still applies.
@@ -274,17 +284,17 @@ You can use `EphemeralMetrics` class when looking to isolate multiple instances 
 
 **Differences between `EphemeralMetrics` and `Metrics`**
 
-`EphemeralMetrics` has only two differences while keeping nearly the exact same set of features:
+`EphemeralMetrics` has only one difference while keeping nearly the exact same set of features:
 
-| Feature                                                                                                     | Metrics | EphemeralMetrics |
-| ----------------------------------------------------------------------------------------------------------- | ------- | ---------------- |
-| **Share data across instances** (metrics, dimensions, metadata, etc.)                                       | Yes     | -                |
-| **[Default dimensions](#adding-default-dimensions) that persists across Lambda invocations** (metric flush) | Yes     | -                |
+| Feature                                                               | Metrics | EphemeralMetrics |
+| --------------------------------------------------------------------- | ------- | ---------------- |
+| **Share data across instances** (metrics, dimensions, metadata, etc.) | Yes     | -                |
 
 !!! question "Why not changing the default `Metrics` behaviour to not share data across instances?"
 
 This is an intentional design to prevent accidental data deduplication or data loss issues due to [CloudWatch EMF](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} metric dimension constraint.
 
+<!-- markdownlint-disable-next-line MD013 -->
 In CloudWatch, there are two metric ingestion mechanisms: [EMF (async)](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html){target="_blank"} and [`PutMetricData` API (sync)](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cloudwatch.html#CloudWatch.Client.put_metric_data){target="_blank"}.
 
 The former creates metrics asynchronously via CloudWatch Logs, and the latter uses a synchronous and more flexible ingestion API.
@@ -292,7 +302,7 @@ The former creates metrics asynchronously via CloudWatch Logs, and the latter us
 !!! important "Key concept"
     CloudWatch [considers a metric unique](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#Metric){target="_blank"} by a combination of metric **name**, metric **namespace**, and zero or more metric **dimensions**.
 
-With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html) defining one or more metrics with distinct dimensions.
+With EMF, metric dimensions are shared with any metrics you define. With `PutMetricData` API, you can set a [list](https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_MetricDatum.html){target="_blank"} defining one or more metrics with distinct dimensions.
 
 This is a subtle yet important distinction. Imagine you had the following metrics to emit:
 
@@ -317,9 +327,23 @@ These issues are exacerbated when you create **(A)** metric dimensions condition
 
 That is why `Metrics` shares data across instances by default, as that covers 80% of use cases and different personas using Powertools. This allows them to instantiate `Metrics` in multiple places throughout their code - be a separate file, a middleware, or an abstraction that sets default dimensions.
 
+### Observability providers
+
+> An observability provider is an [AWS Lambda Partner](https://docs.aws.amazon.com/lambda/latest/dg/extensions-api-partners.html){target="_blank" rel="nofollow"} offering a platform for logging, metrics, traces, etc.
+
+We provide a thin-wrapper on top of the most requested observability providers. We strive to keep a similar UX as close as possible while keeping our value add features.
+
+!!! tip "Missing your preferred provider? Please create a [feature request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=feature-request%2Ctriage&projects=&template=feature_request.yml&title=Feature+request%3A+TITLE){target="_blank"}."
+
+Current providers:
+
+| Provider                              | Notes                                                    |
+| ------------------------------------- | -------------------------------------------------------- |
+| [Datadog](./datadog){target="_blank"} | Uses Datadog SDK and Datadog Lambda Extension by default |
+
 ## Testing your code
 
-### Environment variables
+### Setting environment variables
 
 ???+ tip
 	Ignore this section, if:
@@ -329,7 +353,7 @@ That is why `Metrics` shares data across instances by default, as that covers 80
 
 	For example, `Metrics(namespace="ServerlessAirline", service="booking")`
 
-Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/).
+Make sure to set `POWERTOOLS_METRICS_NAMESPACE` and `POWERTOOLS_SERVICE_NAME` before running your tests to prevent failing on `SchemaValidation` exception. You can set it before you run tests or via pytest plugins like [dotenv](https://pypi.org/project/pytest-dotenv/){target="_blank" rel="nofollow"}.
 
 ```bash title="Injecting dummy Metric Namespace before running tests"
 --8<-- "examples/metrics/src/run_tests_env_var.sh"
@@ -374,4 +398,4 @@ You can read standard output and assert whether metrics have been flushed. Here'
     ```
 
 ???+ tip
-    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/awslabs/aws-lambda-powertools-python/blob/develop/tests/functional/test_metrics.py)
+    For more elaborate assertions and comparisons, check out [our functional testing for Metrics utility.](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/tests/functional/metrics/test_metrics_cloudwatch_emf.py){target="_blank"}

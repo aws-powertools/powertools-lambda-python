@@ -5,7 +5,7 @@
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.4.0
+    rev: "f71fa2c1f9cf5cb705f73dffe4b21f7c61470ba9" # v4.4.0
     hooks:
       - id: check-merge-conflict
       - id: trailing-whitespace
@@ -17,22 +17,15 @@ repos:
         entry: poetry run black
         language: system
         types: [python]
-      - id: isort
-        name: formatting::isort
-        entry: poetry run isort
-        language: system
-        types: [python]
-  - repo: local
-    hooks:
-      - id: flake8
-        name: linting::flake8
-        entry: poetry run flake8
+      - id: ruff
+        name: linting-format::ruff
+        entry: poetry run ruff
         language: system
         types: [python]
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: "11c08644ce6df850480d98f628596446a526cbc6" # frozen: v0.31.1
+    rev: "ce0d77ac47dc921b62429804fe763d4d35f66a76" # v0.34.0
     hooks:
-      - id: markdownlint
+      - id: markdownlint-docker
         args: ["--fix"]
   - repo: local
     hooks:
@@ -43,7 +36,17 @@ repos:
         types: [yaml]
         files: examples/.*
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.23
+    rev: "fd7ba3c382e13dcc0248e425b4cbc3f1185fa3ee" # v1.6.24
     hooks:
       - id: actionlint-docker
         args: [-pyflakes=]
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: 3420134c37197c21edffc7e6093b14ffae8402f2 # v1.81.0
+    hooks:
+      - id: terraform_fmt
+        args:
+          - --args=-recursive
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: "7804d652c0460f0b61ea9bb2c1f202bfcdbbf144" # v8.16.3
+    hooks:
+      - id: gitleaks

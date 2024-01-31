@@ -1,7 +1,16 @@
 name: Rebuild latest docs
 
+# PROCESS
 #
-# === Documentation hotfix ===
+# 1. Build User Guide and API docs
+# 2. Publish to GitHub Pages
+# 3. Publish to S3 (new home)
+
+# USAGE
+#
+# Only used for deploying a documentation hotfix to /latest and its associated version w/o a full release.
+#
+# Steps:
 #
 # 1. Trigger "Rebuild latest docs" workflow manually: https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
 # 2. Use the latest version released under Releases e.g. 2.0.0
@@ -10,19 +19,20 @@ on:
   workflow_dispatch:
     inputs:
       latest_published_version:
-        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.0.0"
-        default: "2.0.0"
+        description: "Latest PyPi published version to rebuild latest docs for, e.g. 2.16.3"
+        default: "2.16.3"
         required: true
 
 permissions:
-  id-token: write
+  contents: read
 
 jobs:
   release-docs:
     permissions:
-      contents: write
-      pages: write
-      id-token: write
+      contents: write  # push to gh-pages
+      pages: write     # deploy gh-pages website
+      id-token: write  # trade JWT token for AWS credentials in AWS Docs account
+    secrets: inherit
     uses: ./.github/workflows/reusable_publish_docs.yml
     with:
       version: ${{ inputs.latest_published_version }}

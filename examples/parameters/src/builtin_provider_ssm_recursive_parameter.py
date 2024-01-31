@@ -10,7 +10,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 # see: https://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html
 sts_client = boto3.client("sts")
 assumed_role_object = sts_client.assume_role(
-    RoleArn="arn:aws:iam::account-of-role-to-assume:role/name-of-role", RoleSessionName="RoleAssume1"
+    RoleArn="arn:aws:iam::account-of-role-to-assume:role/name-of-role",
+    RoleSessionName="RoleAssume1",
 )
 credentials = assumed_role_object["Credentials"]
 
@@ -32,7 +33,6 @@ def lambda_handler(event: dict, context: LambdaContext):
         endpoint_comments = "https://jsonplaceholder.typicode.com/noexists/"
 
         for parameter, value in all_parameters.items():
-
             if parameter == "endpoint_comments":
                 endpoint_comments = value
 

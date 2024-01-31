@@ -23,7 +23,8 @@ def test_s3_object_with_upper_transform():
     s3_client = boto3.client("s3")
     s3_stub = stub.Stubber(s3_client)
     s3_stub.add_response(
-        "get_object", {"Body": PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))}
+        "get_object",
+        {"Body": PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))},
     )
     s3_stub.activate()
 

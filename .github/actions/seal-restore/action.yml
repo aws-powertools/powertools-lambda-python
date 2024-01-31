@@ -1,0 +1,82 @@
+name: "Restore sealed source code"
+description: "Restore sealed source code and confirm integrity hash"
+
+# PROCESS
+#
+# 1. Exports artifact name using Prefix + GitHub Run ID (unique for each release trigger)
+# 2. Compress entire source code as tarball OR given files
+# 3. Create and export integrity hash for tarball
+# 4. Upload artifact
+# 5. Remove archive
+
+# USAGE
+#
+# - name: Seal and upload
+#   id: seal_source_code
+#   uses: ./.github/actions/seal
+#   with:
+#     artifact_name_prefix: "source"
+#
+# - name: Restore sealed source code
+#   uses: ./.github/actions/seal-restore
+#   with:
+#     integrity_hash: ${{ needs.seal_source_code.outputs.integrity_hash }}
+#     artifact_name: ${{ needs.seal_source_code.outputs.artifact_name }}
+
+# NOTES
+#
+# To be used together with .github/actions/seal
+
+inputs:
+  integrity_hash:
+    description: "Integrity hash to verify"
+    required: true
+  artifact_name:
+    description: "Sealed artifact name to restore"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: adjust-path
+      run: echo "${{ github.action_path }}" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Download artifacts
+      uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # v3.0.2
+      with:
+        name: ${{ inputs.artifact_name }}
+        path: .
+
+    - id: integrity_hash
+      name: Create integrity hash for downloaded artifact
+      run: |
+        HASH=$(sha256sum "${ARTIFACT_NAME}.tar" | awk '{print $1}')
+
+        echo "current_hash=${HASH}" >> "$GITHUB_OUTPUT"
+      env:
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+      shell: bash
+
+    - id: verify_hash
+      name: Verify sealed artifact integrity hash
+      run: test "${CURRENT_HASH}" = "${PROVIDED_HASH}" || exit 1
+      env:
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+        PROVIDED_HASH: ${{ inputs.integrity_hash }}
+        CURRENT_HASH: ${{ steps.integrity_hash.outputs.current_hash }}
+      shell: bash
+
+    # Restore and overwrite tarball in current directory
+    - id: overwrite
+      name: Extract tarball
+      run: tar -xvf "${ARTIFACT_NAME}".tar
+      env:
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+      shell: bash
+
+    - name: Remove archive
+      run: rm -f "${ARTIFACT_NAME}.tar"
+      env:
+        ARTIFACT_NAME: ${{ inputs.artifact_name }}
+      shell: bash

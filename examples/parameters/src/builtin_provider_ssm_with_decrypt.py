@@ -20,7 +20,11 @@ def lambda_handler(event: dict, context: LambdaContext):
         ec2.import_key_pair(KeyName=name_key_pair, PublicKeyMaterial=ec2_pem)
 
         ec2.create_instances(
-            ImageId="ami-026b57f3c383c2eec", InstanceType="t2.micro", MinCount=1, MaxCount=1, KeyName=name_key_pair
+            ImageId="ami-026b57f3c383c2eec",
+            InstanceType="t2.micro",
+            MinCount=1,
+            MaxCount=1,
+            KeyName=name_key_pair,
         )
 
         return {"message": "EC2 created", "success": True}
