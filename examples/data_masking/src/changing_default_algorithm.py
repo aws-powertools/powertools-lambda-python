@@ -25,9 +25,9 @@ def lambda_handler(event: dict, context: LambdaContext) -> str:
 
     provider_options = {"algorithm": Algorithm.AES_256_GCM_HKDF_SHA512_COMMIT_KEY}
 
-    decrypted = data_masker.encrypt(
+    encrypted = data_masker.encrypt(
         data,
         provider_options=provider_options,
     )
 
-    return decrypted
+    return encrypted

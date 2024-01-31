@@ -417,18 +417,18 @@ For compatibility or performance, you can optionally pass your own JSON serializ
 
 You can modify the following values when initializing the `AWSEncryptionSDKProvider` to best accommodate your security and performance thresholds.
 
-=== "aws_encryption_provider_example.py"
-
-```python hl_lines="14-19"
---8<-- "examples/data_masking/src/aws_encryption_provider_example.py"
-```
-
 | Parameter                  | Default               | Description                                                                                   |
 | -------------------------- | --------------------- | --------------------------------------------------------------------------------------------- |
 | **local_cache_capacity**   | `100`                 | The maximum number of entries that can be retained in the local cryptographic materials cache |
 | **max_cache_age_seconds**  | `300`                 | The maximum time (in seconds) that a cache entry may be kept in the cache                     |
 | **max_messages_encrypted** | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
+
+=== "aws_encryption_provider_example.py"
+
+```python hl_lines="14-19"
+--8<-- "examples/data_masking/src/aws_encryption_provider_example.py"
+```
 
 **Passing additional SDK arguments**
 
@@ -438,8 +438,18 @@ For example, the AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA5
 
 === "changing_default_algorithm.py"
 
-```python hl_lines="5 26"
+```python hl_lines="5 26 30"
 --8<-- "examples/data_masking/src/changing_default_algorithm.py"
+```
+
+**Using multiple keys**
+
+The `AWSEncryptionSDKProvider` allows you to instantiate it with several KMS keys by passing them all in a `list` to the `keys` parameter. This could be beneficial if you own keys in different regions, enabling you to perform cross-regional encryption and decryption.
+
+=== "using_multiple_keys.py"
+
+```python hl_lines="15"
+--8<-- "examples/data_masking/src/using_multiple_keys.py"
 ```
 
 ### Data masking request flow
