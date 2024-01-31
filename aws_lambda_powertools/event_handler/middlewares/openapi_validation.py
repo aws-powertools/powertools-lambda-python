@@ -225,7 +225,7 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
         """
 
         content_type_value = app.current_event.get_header_value("content-type")
-        if not content_type_value or content_type_value.startswith("application/json"):
+        if not content_type_value or content_type_value.strip().startswith("application/json"):
             try:
                 return app.current_event.json_body
             except json.JSONDecodeError as e:
