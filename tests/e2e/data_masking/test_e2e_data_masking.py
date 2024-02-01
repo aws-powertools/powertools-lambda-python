@@ -4,14 +4,12 @@ from uuid import uuid4
 import pytest
 from aws_encryption_sdk.exceptions import DecryptKeyError
 
-from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import (
-    AwsEncryptionSdkProvider,
-    ContextMismatchError,
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities.data_masking.exceptions import DataMaskingContextMismatchError
+from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import (
+    AWSEncryptionSDKProvider,
 )
 from tests.e2e.utils import data_fetcher
-
-pytest.skip(reason="Data masking tests disabled until we go GA.", allow_module_level=True)
 
 
 @pytest.fixture
@@ -36,7 +34,7 @@ def kms_key2_arn(infrastructure: dict) -> str:
 
 @pytest.fixture
 def data_masker(kms_key1_arn) -> DataMasking:
-    return DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key1_arn]))
+    return DataMasking(provider=AWSEncryptionSDKProvider(keys=[kms_key1_arn]))
 
 
 @pytest.mark.xdist_group(name="data_masking")
@@ -79,7 +77,7 @@ def test_encryption_context_mismatch(data_masker):
     encrypted_data = data_masker.encrypt(value, encryption_context={"this": "is_secure"})
 
     # THEN decrypting with a different encryption_context should raise a ContextMismatchError
-    with pytest.raises(ContextMismatchError):
+    with pytest.raises(DataMaskingContextMismatchError):
         data_masker.decrypt(encrypted_data, encryption_context={"not": "same_context"})
 
 
@@ -93,7 +91,7 @@ def test_encryption_no_context_fail(data_masker):
     encrypted_data = data_masker.encrypt(value)
 
     # THEN decrypting with an encryption_context should raise a ContextMismatchError
-    with pytest.raises(ContextMismatchError):
+    with pytest.raises(DataMaskingContextMismatchError):
         data_masker.decrypt(encrypted_data, encryption_context={"this": "is_secure"})
 
 
@@ -106,7 +104,7 @@ def test_encryption_decryption_key_mismatch(data_masker, kms_key2_arn):
     encrypted_data = data_masker.encrypt(value)
 
     # THEN when decrypting with a different key it should fail
-    data_masker_key2 = DataMasking(provider=AwsEncryptionSdkProvider(keys=[kms_key2_arn]))
+    data_masker_key2 = DataMasking(provider=AWSEncryptionSDKProvider(keys=[kms_key2_arn]))
 
     with pytest.raises(DecryptKeyError):
         data_masker_key2.decrypt(encrypted_data)

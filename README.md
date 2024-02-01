@@ -30,6 +30,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 * **[Event source data classes](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_classes/)** - Data classes describing the schema of common Lambda event triggers
 * **[Parser](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parser/)** - Data parsing and deep validation using Pydantic
 * **[Idempotency](https://docs.powertools.aws.dev/lambda/python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
+* **[Data Masking](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_masking/)** -  Protect confidential data with easy removal or encryption
 * **[Feature Flags](https://docs.powertools.aws.dev/lambda/python/latest/utilities/feature_flags/)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 * **[Streaming](https://docs.powertools.aws.dev/lambda/python/latest/utilities/streaming/)** - Streams datasets larger than the available memory as streaming data.
 

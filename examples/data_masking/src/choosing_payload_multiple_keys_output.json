@@ -1,0 +1,9 @@
+{
+    "name": "Carlos",
+    "operation": "non sensitive",
+    "card_number": "1111 2222 3333 4444",
+    "address": {
+        "postcode": "*****",
+        "street": "*****"
+    }
+}

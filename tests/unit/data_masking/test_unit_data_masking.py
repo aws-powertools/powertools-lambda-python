@@ -2,8 +2,12 @@ import json
 
 import pytest
 
-from aws_lambda_powertools.utilities._data_masking.base import DataMasking
-from aws_lambda_powertools.utilities._data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking.constants import DATA_MASKING_STRING
+from aws_lambda_powertools.utilities.data_masking.exceptions import (
+    DataMaskingFieldNotFoundError,
+    DataMaskingUnsupportedTypeError,
+)
 
 
 @pytest.fixture
@@ -11,67 +15,67 @@ def data_masker() -> DataMasking:
     return DataMasking()
 
 
-def test_mask_int(data_masker):
+def test_erase_int(data_masker):
     # GIVEN an int data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(42)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(42)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_float(data_masker):
+def test_erase_float(data_masker):
     # GIVEN a float data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(4.2)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(4.2)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_bool(data_masker):
+def test_erase_bool(data_masker):
     # GIVEN a bool data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(True)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(True)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_none(data_masker):
+def test_erase_none(data_masker):
     # GIVEN a None data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(None)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(None)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_str(data_masker):
+def test_erase_str(data_masker):
     # GIVEN a str data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask("this is a string")
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase("this is a string")
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_list(data_masker):
+def test_erase_list(data_masker):
     # GIVEN a list data type
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask([1, 2, "string", 3])
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase([1, 2, "string", 3])
 
     # THEN the result is the data masked, while maintaining type list
-    assert masked_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
+    assert erased_string == [DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING, DATA_MASKING_STRING]
 
 
-def test_mask_dict(data_masker):
+def test_erase_dict(data_masker):
     # GIVEN a dict data type
     data = {
         "a": {
@@ -80,14 +84,14 @@ def test_mask_dict(data_masker):
         },
     }
 
-    # WHEN mask is called with no fields argument
-    masked_string = data_masker.mask(data)
+    # WHEN erase is called with no fields argument
+    erased_string = data_masker.erase(data)
 
     # THEN the result is the data masked
-    assert masked_string == DATA_MASKING_STRING
+    assert erased_string == DATA_MASKING_STRING
 
 
-def test_mask_dict_with_fields(data_masker):
+def test_erase_dict_with_fields(data_masker):
     # GIVEN a dict data type
     data = {
         "a": {
@@ -96,11 +100,11 @@ def test_mask_dict_with_fields(data_masker):
         },
     }
 
-    # WHEN mask is called with a list of fields specified
-    masked_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    # WHEN erase is called with a list of fields specified
+    erased_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
-    # THEN the result is only the specified fields are masked
-    assert masked_string == {
+    # THEN the result is only the specified fields are erased
+    assert erased_string == {
         "a": {
             "1": {"None": DATA_MASKING_STRING, "four": "world"},
             "b": {"3": {"4": DATA_MASKING_STRING, "e": "world"}},
@@ -108,7 +112,7 @@ def test_mask_dict_with_fields(data_masker):
     }
 
 
-def test_mask_json_dict_with_fields(data_masker):
+def test_erase_json_dict_with_fields(data_masker):
     # GIVEN the data type is a json representation of a dictionary
     data = json.dumps(
         {
@@ -119,10 +123,10 @@ def test_mask_json_dict_with_fields(data_masker):
         },
     )
 
-    # WHEN mask is called with a list of fields specified
-    masked_json_string = data_masker.mask(data, fields=["a.1.None", "a.b.3.4"])
+    # WHEN erase is called with a list of fields specified
+    masked_json_string = data_masker.erase(data, fields=["a.'1'.None", "a..'4'"])
 
-    # THEN the result is only the specified fields are masked
+    # THEN the result is only the specified fields are erased
     assert masked_json_string == {
         "a": {
             "1": {"None": DATA_MASKING_STRING, "four": "world"},
@@ -153,13 +157,24 @@ def test_parsing_unsupported_data_type(data_masker):
     # GIVEN an initialization of the DataMasking class
 
     # WHEN attempting to pass in a list of fields with input data that is not a dict
-    with pytest.raises(TypeError):
+    with pytest.raises(DataMaskingUnsupportedTypeError):
         # THEN the result is a TypeError
-        data_masker.mask(42, ["this.field"])
+        data_masker.erase(42, ["this.field"])
 
 
-def test_parsing_nonexistent_fields(data_masker):
+def test_parsing_with_empty_field(data_masker):
+    # GIVEN an initialization of the DataMasking class
+
+    # WHEN attempting to pass in a list of fields with input data that is not a dict
+    with pytest.raises(ValueError):
+        # THEN the result is a TypeError
+        data_masker.erase(42, [])
+
+
+def test_parsing_nonexistent_fields_with_raise_on_missing_field():
     # GIVEN a dict data type
+
+    data_masker = DataMasking(raise_on_missing_field=True)
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -168,13 +183,15 @@ def test_parsing_nonexistent_fields(data_masker):
     }
 
     # WHEN attempting to pass in fields that do not exist in the input data
-    with pytest.raises(KeyError):
+    with pytest.raises(DataMaskingFieldNotFoundError):
         # THEN the result is a KeyError
-        data_masker.mask(data, ["3.1.True"])
+        data_masker.erase(data, ["'3'..True"])
 
 
-def test_parsing_nonstring_fields(data_masker):
+def test_parsing_nonexistent_fields_warning_on_missing_field():
     # GIVEN a dict data type
+
+    data_masker = DataMasking(raise_on_missing_field=False)
     data = {
         "3": {
             "1": {"None": "hello", "four": "world"},
@@ -182,24 +199,9 @@ def test_parsing_nonstring_fields(data_masker):
         },
     }
 
-    # WHEN attempting to pass in a list of fields that are not strings
-    masked = data_masker.mask(data, fields=[3.4])
+    # WHEN erase is called with a non-existing field
+    with pytest.warns(UserWarning, match="Field or expression*"):
+        masked_json_string = data_masker.erase(data, fields=["non-existing"])
 
-    # THEN the result is the value of the nested field should be masked as normal
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
-
-
-def test_parsing_nonstring_keys_and_fields(data_masker):
-    # GIVEN a dict data type with integer keys
-    data = {
-        3: {
-            "1": {"None": "hello", "four": "world"},
-            4: {"33": {"5": "goodbye", "e": "world"}},
-        },
-    }
-
-    # WHEN masked with a list of fields that are integer keys
-    masked = data_masker.mask(data, fields=[3.4])
-
-    # THEN the result is the value of the nested field should be masked
-    assert masked == {"3": {"1": {"None": "hello", "four": "world"}, "4": DATA_MASKING_STRING}}
+    # THEN the "erased" payload is the same of the original
+    assert masked_json_string == data
