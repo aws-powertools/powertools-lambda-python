@@ -424,15 +424,17 @@ You can modify the following values when initializing the `AWSEncryptionSDKProvi
 | **max_messages_encrypted** | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
-If required, you have the option to customize the default values when initializing the `AWSEncryptionSDKProvider` class.
+If required, you can customize the default values when initializing the `AWSEncryptionSDKProvider` class.
 
 ```python hl_lines="14-19" title="aws_encryption_provider_example.py"
 --8<-- "examples/data_masking/src/aws_encryption_provider_example.py"
 ```
 
-**Passing additional SDK arguments**
+##### Passing additional SDK arguments
 
-You can pass additional arguments to the `AWSEncryptionSDKProvider` via the `provider_options` parameter. To learn more about the different arguments you can give to the SDK, see the [EncryptionSDKClient's documentation](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.html#aws_encryption_sdk.EncryptionSDKClient.encrypt){target="_blank"}.
+!!! note "See the [AWS Encryption SDK docs for more details](https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.html#aws_encryption_sdk.EncryptionSDKClient.encrypt){target="_blank"}"
+
+As an escape hatch mechanism, you can pass additional arguments to the `AWSEncryptionSDKProvider` via the `provider_options` parameter.
 
 For example, the AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384` algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.
 
