@@ -14,6 +14,13 @@
     "accept": [
       "*/*"
     ],
+    "header2": [
+      "value1",
+      "value2"
+    ],
+    "header1": [
+      "value1"
+    ],
     "host": [
       "alb-c-LoadB-14POFKYCLBNSF-1815800096.eu-central-1.elb.amazonaws.com"
     ],

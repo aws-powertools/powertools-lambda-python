@@ -13,11 +13,11 @@ from aws_lambda_powertools.event_handler.openapi.models import (
 )
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
+    Header,
     Param,
     ParamTypes,
     Query,
     _create_model_field,
-    _Header,
 )
 from aws_lambda_powertools.shared.types import Annotated
 
@@ -431,7 +431,7 @@ def test_openapi_with_router_tags():
 
 
 def test_create_header():
-    header = _Header(convert_underscores=True)
+    header = Header(convert_underscores=True)
     assert header.convert_underscores is True
 
 
@@ -456,7 +456,7 @@ def test_create_model_field_with_empty_in():
 
 # Tests that when we try to create a model field with convert_underscore, we convert the field name
 def test_create_model_field_convert_underscore():
-    field_info = _Header(alias=None, convert_underscores=True)
+    field_info = Header(alias=None, convert_underscores=True)
 
     result = _create_model_field(field_info, int, "user_id", False)
     assert result.alias == "user-id"
