@@ -699,8 +699,11 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
@@ -757,8 +760,11 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
@@ -812,8 +818,11 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
@@ -869,8 +878,11 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
@@ -925,8 +937,11 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
@@ -981,8 +996,11 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
     if handler_func == "handler3_with_uppercase_params":
 
         @app.get("/users")
-        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
-            print(Header2)
+        def handler3(
+            header2: Annotated[List[str], Header(name="Header2")],
+            header1: Annotated[str, Header(name="Header1")],
+        ):
+            print(header2)
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":

@@ -589,11 +589,13 @@ class Header(Param):
             Extra values to include in the generated OpenAPI schema
         """
         self.convert_underscores = convert_underscores
+        self._alias = alias
+
         super().__init__(
             default=default,
             default_factory=default_factory,
             annotation=annotation,
-            alias=alias,
+            alias=self._alias,
             alias_priority=alias_priority,
             validation_alias=validation_alias,
             serialization_alias=serialization_alias,
@@ -618,6 +620,20 @@ class Header(Param):
             json_schema_extra=json_schema_extra,
             **extra,
         )
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @alias.setter
+    def alias(self, value: Optional[str] = None):
+        if value is not None:
+            # Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the parameter name
+            # This ensures that customers can access headers with any casing, as per the RFC guidelines.
+            # Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
+            self._alias = value.lower()
+        else:
+            self._alias = None
 
 
 class Body(FieldInfo):

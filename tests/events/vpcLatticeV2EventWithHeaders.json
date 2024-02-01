@@ -19,10 +19,10 @@
       "host":[
          "lattice-svc-027b423199122da5f.7d67968.vpc-lattice-svcs.us-east-1.on.aws"
       ],
-      "header1": [
+      "Header1": [
         "value1"
       ],
-      "header2": [
+      "Header2": [
         "value1",
         "value2"
       ]

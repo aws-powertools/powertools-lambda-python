@@ -19,7 +19,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Param, ParamTypes
+from aws_lambda_powertools.event_handler.openapi.params import Param
 from aws_lambda_powertools.event_handler.openapi.types import IncEx
 from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
@@ -262,17 +262,9 @@ def _request_params_to_args(
         if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
-        field_alias = field.alias
+        value = received_params.get(field.alias)
 
-        if field_info.in_ == ParamTypes.header and field_alias:
-            # Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the parameter name
-            # This ensures that customers can access headers with any casing, as per the RFC guidelines.
-            # Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
-            field_alias = field.alias.lower()
-
-        value = received_params.get(field_alias)
-
-        loc = (field_info.in_.value, field_alias)
+        loc = (field_info.in_.value, field.alias)
 
         # If we don't have a value, see if it's required or has a default
         if value is None:
@@ -419,12 +411,11 @@ def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]],
     """
     if headers:
         for param in filter(is_scalar_field, params):
-            param_name = param.name.lower()
             try:
-                if len(headers[param_name]) == 1:
+                if len(headers[param.alias]) == 1:
                     # if the target parameter is a scalar and the list contains only 1 element
                     # we keep the first value of the headers regardless if there are more in the payload
-                    headers[param_name] = headers[param_name][0]
+                    headers[param.alias] = headers[param.alias][0]
             except KeyError:
                 pass
     return headers
