@@ -632,8 +632,6 @@ class Header(Param):
             # This ensures that customers can access headers with any casing, as per the RFC guidelines.
             # Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
             self._alias = value.lower()
-        else:
-            self._alias = None
 
 
 class Body(FieldInfo):
