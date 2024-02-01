@@ -62,4 +62,6 @@ Resources:
             Action:
               - kms:Decrypt # to decrypt encrypted data key
               - kms:GenerateDataKey # to create an unique and random data key for encryption
+              # Encrypt permission is required only when using multiple keys
+              - kms:Encrypt  # (3)!
             Resource: "*"

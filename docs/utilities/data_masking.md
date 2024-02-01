@@ -96,6 +96,7 @@ Before you start, you will need a KMS symmetric key to encrypt and decrypt your 
 
     1. [Key policy examples using IAM Roles](https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators){target="_blank"}
     2. [SAM generated CloudFormation Resources](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role){target="_blank"}
+    3. Required only when using [multiple keys](#using-multiple-keys)
 
 ### Erasing data
 
@@ -411,6 +412,14 @@ For compatibility or performance, you can optionally pass your own JSON serializ
 --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
 ```
 
+### Using multiple keys
+
+You can use multiple KMS keys from more than one AWS account for higher availability, when instantiating `AWSEncryptionSDKProvider`.
+
+```python hl_lines="15" title="using_multiple_keys.py"
+--8<-- "examples/data_masking/src/using_multiple_keys.py"
+```
+
 ### Providers
 
 #### AWS Encryption SDK
@@ -440,14 +449,6 @@ For example, the AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA5
 
 ```python hl_lines="5 26 30" title="changing_default_algorithm.py"
 --8<-- "examples/data_masking/src/changing_default_algorithm.py"
-```
-
-##### Using multiple keys
-
-You can use multiple KMS keys from more than one AWS account for higher availability, when instantiating `AWSEncryptionSDKProvider`.
-
-```python hl_lines="15" title="using_multiple_keys.py"
---8<-- "examples/data_masking/src/using_multiple_keys.py"
 ```
 
 ### Data masking request flow
@@ -508,7 +509,7 @@ sequenceDiagram
 
 #### Encrypt operation with multiple KMS Keys
 
-When encrypting data with multiple KMS keys, the `aws_encryption_sdk` executes additional encryption calls to encrypt the data with each of the specified keys.
+When encrypting data with multiple KMS keys, the `aws_encryption_sdk` makes additional API calls to encrypt the data with each of the specified keys.
 
 <center>
 ```mermaid
@@ -520,19 +521,19 @@ sequenceDiagram
     participant EncryptionProvider as Encryption Provider
     Client->>Lambda: Invoke (event)
     Lambda->>DataMasking: Init Encryption Provider with master key
-    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KEY_1, KEY_2])
     Lambda->>DataMasking: encrypt(data)
     DataMasking->>EncryptionProvider: Create unique data key
-    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API - KEY_1
     DataMasking->>DataMasking: Cache new unique data key
     DataMasking->>DataMasking: DATA_KEY.encrypt(data)
-    DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
-    DataMasking->>DataMasking: Create encrypted message
-    alt Using another KMS key?
-        DataMasking->>EncryptionProvider: Encrypt data
-        Note over DataMasking,EncryptionProvider: KMS Encrypt API
+    DataMasking->>DataMasking: KEY_1.encrypt(DATA_KEY)
+    loop For every additional KMS Key
+        DataMasking->>EncryptionProvider: Encrypt DATA_KEY
+        Note over DataMasking,EncryptionProvider: KMS Encrypt API - KEY_2
     end
-    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking->>DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, all data keys encrypted, algorithm, and more.
     DataMasking->>Lambda: Ciphertext from encrypted message
     Lambda-->>Client: Return response
 ```
