@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
@@ -112,3 +112,7 @@ class BedrockAgentEvent(BaseProxyEvent):
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        return {}
