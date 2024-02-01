@@ -692,7 +692,7 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
     # Define handler3 with uppercase parameters
@@ -726,7 +726,8 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
     [
         ("handler1_with_correct_params", 200, None),
         ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
-        ("handler3_without_header_params", 200, None),
+        ("handler3_with_uppercase_params", 200, None),
+        ("handler4_without_header_params", 200, None),
     ],
 )
 def test_validation_header_with_http_rest_resolver(handler_func, expected_status_code, expected_error_text):
@@ -749,15 +750,22 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
-    # Define handler3 without params
-    if handler_func == "handler3_without_header_params":
+    # Define handler3 with uppercase parameters
+    if handler_func == "handler3_with_uppercase_params":
+
+        @app.get("/users")
+        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler4 without params
+    if handler_func == "handler4_without_header_params":
         LOAD_GW_EVENT_HTTP["headers"] = None
 
         @app.get("/users")
-        def handler3():
+        def handler4():
             return None
 
     # THEN the handler should be invoked with the expected result
@@ -775,7 +783,8 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
     [
         ("handler1_with_correct_params", 200, None),
         ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
-        ("handler3_without_header_params", 200, None),
+        ("handler3_with_uppercase_params", 200, None),
+        ("handler4_without_header_params", 200, None),
     ],
 )
 def test_validation_header_with_alb_resolver(handler_func, expected_status_code, expected_error_text):
@@ -796,15 +805,22 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
-    # Define handler3 without params
-    if handler_func == "handler3_without_header_params":
+    # Define handler3 with uppercase parameters
+    if handler_func == "handler3_with_uppercase_params":
+
+        @app.get("/users")
+        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler4 without params
+    if handler_func == "handler4_without_header_params":
         LOAD_GW_EVENT_ALB["multiValueHeaders"] = None
 
         @app.get("/users")
-        def handler3():
+        def handler4():
             return None
 
     # THEN the handler should be invoked with the expected result
@@ -822,7 +838,8 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
     [
         ("handler1_with_correct_params", 200, None),
         ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
-        ("handler3_without_header_params", 200, None),
+        ("handler3_with_uppercase_params", 200, None),
+        ("handler4_without_header_params", 200, None),
     ],
 )
 def test_validation_header_with_lambda_url_resolver(handler_func, expected_status_code, expected_error_text):
@@ -845,15 +862,22 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
-    # Define handler3 without params
-    if handler_func == "handler3_without_header_params":
+    # Define handler3 with uppercase parameters
+    if handler_func == "handler3_with_uppercase_params":
+
+        @app.get("/users")
+        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler4 without params
+    if handler_func == "handler4_without_header_params":
         LOAD_GW_EVENT_LAMBDA_URL["headers"] = None
 
         @app.get("/users")
-        def handler3():
+        def handler4():
             return None
 
     # THEN the handler should be invoked with the expected result
@@ -871,7 +895,8 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
     [
         ("handler1_with_correct_params", 200, None),
         ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
-        ("handler3_without_header_params", 200, None),
+        ("handler3_with_uppercase_params", 200, None),
+        ("handler4_without_header_params", 200, None),
     ],
 )
 def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_status_code, expected_error_text):
@@ -893,15 +918,22 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
     if handler_func == "handler2_with_wrong_params":
 
         @app.get("/users")
-        def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
+        def handler2(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
-    # Define handler3 without params
-    if handler_func == "handler3_without_header_params":
+    # Define handler3 with uppercase parameters
+    if handler_func == "handler3_with_uppercase_params":
+
+        @app.get("/users")
+        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler4 without params
+    if handler_func == "handler4_without_header_params":
         LOAD_GW_EVENT_VPC_LATTICE_V1["headers"] = None
 
         @app.get("/users")
-        def handler3():
+        def handler4():
             return None
 
     # THEN the handler should be invoked with the expected result
@@ -919,7 +951,8 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
     [
         ("handler1_with_correct_params", 200, None),
         ("handler2_with_wrong_params", 422, "['type_error.integer', 'int_parsing']"),
-        ("handler3_without_header_params", 200, None),
+        ("handler3_with_uppercase_params", 200, None),
+        ("handler4_without_header_params", 200, None),
     ],
 )
 def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_status_code, expected_error_text):
@@ -944,8 +977,15 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
         def handler1(header2: Annotated[List[int], Header()], header1: Annotated[str, Header()]):
             print(header2)
 
-    # Define handler3 without params
-    if handler_func == "handler3_without_header_params":
+    # Define handler3 with uppercase parameters
+    if handler_func == "handler3_with_uppercase_params":
+
+        @app.get("/users")
+        def handler3(Header2: Annotated[List[str], Header()], Header1: Annotated[str, Header()]):
+            print(Header2)
+
+    # Define handler4 without params
+    if handler_func == "handler4_without_header_params":
         LOAD_GW_EVENT_VPC_LATTICE["headers"] = None
 
         @app.get("/users")

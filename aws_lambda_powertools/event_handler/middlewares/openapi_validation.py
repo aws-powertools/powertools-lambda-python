@@ -419,11 +419,12 @@ def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]],
     """
     if headers:
         for param in filter(is_scalar_field, params):
+            param_name = param.name.lower()
             try:
-                if len(headers[param.name]) == 1:
+                if len(headers[param_name]) == 1:
                     # if the target parameter is a scalar and the list contains only 1 element
                     # we keep the first value of the headers regardless if there are more in the payload
-                    headers[param.name] = headers[param.name][0]
+                    headers[param_name] = headers[param_name][0]
             except KeyError:
                 pass
     return headers
