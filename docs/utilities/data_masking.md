@@ -504,6 +504,39 @@ sequenceDiagram
 <i>Encrypting operation using envelope encryption.</i>
 </center>
 
+#### Encrypt operation with multiple KMS Keys
+
+When encrypting data with multiple KMS keys, the `aws_encryption_sdk` executes additional encryption calls to encrypt the data with each of the specified keys.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client->>Lambda: Invoke (event)
+    Lambda->>DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
+    Lambda->>DataMasking: encrypt(data)
+    DataMasking->>EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking->>DataMasking: Cache new unique data key
+    DataMasking->>DataMasking: DATA_KEY.encrypt(data)
+    DataMasking->>DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking->>DataMasking: Create encrypted message
+    alt Using another KMS key?
+        DataMasking->>EncryptionProvider: Encrypt data
+        Note over DataMasking,EncryptionProvider: KMS Encrypt API
+    end
+    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking->>Lambda: Ciphertext from encrypted message
+    Lambda-->>Client: Return response
+```
+<i>Encrypting operation using envelope encryption.</i>
+</center>
+
 #### Decrypt operation with Encryption SDK (KMS)
 
 We call KMS to decrypt the encrypted data key available in the encrypted message. If successful, we run authentication _(context)_ and integrity checks (_algorithm, data key length, etc_) to confirm its proceedings.
