@@ -109,14 +109,14 @@ Erasing will remove the original data and replace it with a `*****`. This means 
     1. See [working with nested data](#working-with-nested-data) to learn more about the `fields` parameter. </br></br>If we omit `fields` parameter, the entire dictionary will be erased with `*****`.
 
 === "generic_data_input.json"
-```json hl_lines="7 9 14"
---8<-- "examples/data_masking/src/generic_data_input.json"
-```
+    ```json hl_lines="7 9 14"
+    --8<-- "examples/data_masking/src/generic_data_input.json"
+    ```
 
 === "getting_started_erase_data_output.json"
-```json hl_lines="5 7 12"
---8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
-```
+    ```json hl_lines="5 7 12"
+    --8<-- "examples/data_masking/src/getting_started_erase_data_output.json"
+    ```
 
 ### Encrypting data
 
@@ -135,14 +135,14 @@ Under the hood, we delegate a [number of operations](#encrypt-operation-with-enc
     1. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.
 
 === "generic_data_input.json"
-```json hl_lines="7-9 14"
---8<-- "examples/data_masking/src/generic_data_input.json"
-```
+    ```json
+    --8<-- "examples/data_masking/src/generic_data_input.json"
+    ```
 
 === "encrypt_data_output.json"
-```json hl_lines="5-7 12"
---8<-- "examples/data_masking/src/encrypt_data_output.json"
-```
+    ```json
+    --8<-- "examples/data_masking/src/encrypt_data_output.json"
+    ```
 
 ### Decrypting data
 
@@ -164,21 +164,23 @@ Under the hood, we delegate a [number of operations](#decrypt-operation-with-enc
     1. Note that KMS key alias or key ID won't work.
     2. You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will call `Decrypt` API with all master keys when trying to decrypt the data key.
 
-=== "encrypt_data_output.json"
+=== "getting_started_decrypt_data_input.json"
 
-```json hl_lines="5-7 12"
---8<-- "examples/data_masking/src/encrypt_data_output.json"
-```
+    ```json
+    --8<-- "examples/data_masking/src/getting_started_decrypt_data_input.json"
+    ```
 
 === "getting_started_decrypt_data_output.json"
 
-```json hl_lines="5-7 12-17"
---8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
-```
+    ```json
+    --8<-- "examples/data_masking/src/getting_started_decrypt_data_output.json"
+    ```
 
 ### Encryption context for integrity and authenticity
 
+<!-- markdownlint-disable MD013 -->
 For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data, and even help to prevent a [confused deputy](https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html){target="_blank"} situation.
+<!-- markdownlint-enable MD013 -->
 
 ???+ danger "Important considerations you should know"
     1. **Exact match verification on decrypt**. Be careful using random data like `timestamps` as encryption context if you can't provide them on decrypt.
@@ -205,7 +207,7 @@ For a stronger security posture, you can add metadata to each encryption operati
 
 ???+ note "Current limitations"
     1. The `fields` parameter is currently exclusive to the `erase` method, with potential future inclusion into `encrypt` and `decrypt`.
-    2. We support `JSON` data types only - see [data serialization for more details](#data-serialization-and-preservation)."
+    2. We support `JSON` data types only - see [data serialization for more details](#data-serialization)."
 
 You can use the `fields` parameter with the dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
@@ -424,6 +426,8 @@ You can modify the following values when initializing the `AWSEncryptionSDKProvi
 | **max_messages_encrypted** | `4294967296`          | The maximum number of messages that may be encrypted under a cache entry                      |
 | **max_bytes_encrypted**    | `9223372036854775807` | The maximum number of bytes that may be encrypted under a cache entry                         |
 
+If required, you have the option to customize the default values when initializing the `AWSEncryptionSDKProvider` class.
+
 === "aws_encryption_provider_example.py"
 
 ```python hl_lines="14-19"
@@ -594,11 +598,13 @@ sequenceDiagram
 Testing your code with a simple erase operation
 
 === "test_lambda_mask.py"
+
 ```python hl_lines="22"
 --8<-- "examples/data_masking/tests/test_lambda_mask.py"
 ```
 
 === "lambda_mask.py"
+
 ```python hl_lines="3 12"
 --8<-- "examples/data_masking/tests/lambda_mask.py"
 ```
