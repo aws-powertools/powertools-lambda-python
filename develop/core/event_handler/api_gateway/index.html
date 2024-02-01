@@ -952,6 +952,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#validating-headers" class="md-nav__link">
+    Validating headers
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -2035,6 +2042,13 @@
           <li class="md-nav__item">
   <a href="#validating-path-parameters" class="md-nav__link">
     Validating path parameters
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-headers" class="md-nav__link">
+    Validating headers
   </a>
   
 </li>
@@ -4389,12 +4403,12 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <div class="admonition info">
 <p class="admonition-title">We will automatically validate and inject incoming query strings via type annotation.</p>
 </div>
-<p>We use the <code>Annotated</code> type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.</p>
+<p>We use the <code>Annotated</code> type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.</p>
 <p>In the following example, we use a new <code>Query</code> OpenAPI type to add <a href="#customizing-openapi-parameters">one out of many possible constraints</a>, which should read as:</p>
 <ul>
 <li><code>completed</code> is a query string with a <code>None</code> as its default value</li>
 <li><code>completed</code>, when set, should have at minimum 4 characters</li>
-<li>Doesn't match? Event Handler will return a validation error response</li>
+<li>No match? Event Handler will return a validation error response</li>
 </ul>
 <!-- markdownlint-disable MD013 -->
 
@@ -4488,7 +4502,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <ol>
 <li>If you're not using Python 3.9 or higher, you can install and use <a href="https://pypi.org/project/typing-extensions/" rel="nofollow" target="_blank"><code>typing_extensions</code></a> to the same effect</li>
 <li><code>Query</code> is a special OpenAPI type that can add constraints to a query string as well as document them</li>
-<li><strong>First time seeing the <code>Annotated</code>?</strong> <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.</li>
+<li><strong>First time seeing <code>Annotated</code>?</strong> <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.</li>
 </ol>
 </div>
 <div class="tabbed-block">
@@ -4736,6 +4750,182 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <ol>
 <li><code>Path</code> is a special OpenAPI type that allows us to constrain todo_id to be less than 999.</li>
 </ol>
+<h4 id="validating-headers">Validating headers<a class="headerlink" href="#validating-headers" title="Permanent link">&para;</a></h4>
+<p>We use the <code>Annotated</code> type to tell the Event Handler that a particular parameter is a header that needs to be validated.</p>
+<div class="admonition info">
+<p class="admonition-title">We adhere to <a href="https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2" rel="nofollow" target="_blank">HTTP RFC standards</a>, which means we treat HTTP headers as case-insensitive.</p>
+</div>
+<p>In the following example, we use a new <code>Header</code> OpenAPI type to add <a href="#customizing-openapi-parameters">one out of many possible constraints</a>, which should read as:</p>
+<ul>
+<li><code>correlation_id</code> is a header that must be present in the request</li>
+<li><code>correlation_id</code> should have 16 characters</li>
+<li>No match? Event Handler will return a validation error response</li>
+</ul>
+<!-- markdownlint-disable MD013 -->
+
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">validating_headers.py</label><label for="__tabbed_13_2">working_with_headers_multi_value.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.openapi.params</span> <span class="kn">import</span> <span class="n">Header</span>  <span class="c1"># (2)!</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">Annotated</span>  <span class="c1"># (1)!</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">(</span><span class="n">enable_validation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Todo</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="n">userId</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">id_</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="n">alias</span><span class="o">=</span><span class="s2">&quot;id&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="nb">bool</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/todos&quot;</span><span class="p">)</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
+<span class="hll"><span class="k">def</span> <span class="nf">get_todos</span><span class="p">(</span><span class="n">correlation_id</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Header</span><span class="p">(</span><span class="n">min_length</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="mi">16</span><span class="p">)])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Todo</span><span class="p">]:</span>  <span class="c1"># (3)!</span>
+</span>    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span>
+
+    <span class="n">todo</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;correlation_id&quot;</span><span class="p">:</span> <span class="n">correlation_id</span><span class="p">})</span>
+    <span class="n">todo</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">todo</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span><span class="p">(</span><span class="n">correlation_id_path</span><span class="o">=</span><span class="n">correlation_paths</span><span class="o">.</span><span class="n">API_GATEWAY_HTTP</span><span class="p">)</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>If you're not using Python 3.9 or higher, you can install and use <a href="https://pypi.org/project/typing-extensions/" rel="nofollow" target="_blank"><code>typing_extensions</code></a> to the same effect</li>
+<li><code>Header</code> is a special OpenAPI type that can add constraints and documentation to a header</li>
+<li><strong>First time seeing <code>Annotated</code>?</strong> <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>You can handle multi-value headers by declaring it as a list of the desired type.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">APIGatewayRestResolver</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.openapi.params</span> <span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">APIGatewayRestResolver</span><span class="p">(</span><span class="n">enable_validation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CountriesAllowed</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Example of an Enum class.&quot;&quot;&quot;</span>
+
+    <span class="n">US</span> <span class="o">=</span> <span class="s2">&quot;US&quot;</span>
+    <span class="n">PT</span> <span class="o">=</span> <span class="s2">&quot;PT&quot;</span>
+    <span class="n">BR</span> <span class="o">=</span> <span class="s2">&quot;BR&quot;</span>
+
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;/hello&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
+    <span class="n">cloudfront_viewer_country</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="hll">        <span class="n">List</span><span class="p">[</span><span class="n">CountriesAllowed</span><span class="p">],</span>  <span class="c1"># (1)!</span>
+</span>        <span class="n">Header</span><span class="p">(</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;This is multi value header parameter.&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return validated multi-value header values.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">cloudfront_viewer_country</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">app</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li><code>cloudfront_viewer_country</code> is a list that must contain values from the <code>CountriesAllowed</code> enumeration.</li>
+</ol>
+</div>
+</div>
+</div>
 <h3 id="accessing-request-details">Accessing request details<a class="headerlink" href="#accessing-request-details" title="Permanent link">&para;</a></h3>
 <p>Event Handler integrates with <a href="../../../utilities/data_classes/" target="_blank">Event Source Data Classes utilities</a>, and it exposes their respective resolver request details and convenient methods under <code>app.current_event</code>.</p>
 <p>That is why you see <code>app.resolve(event, context)</code> in every example. This allows Event Handler to resolve requests, and expose data like <code>app.lambda_context</code> and  <code>app.current_event</code>.</p>
@@ -5306,7 +5496,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <p><strong>Scenario</strong>: You have a custom domain <code>api.mydomain.dev</code>. Then you set <code>/payment</code> API Mapping to forward any payment requests to your Payments API.</p>
 <p><strong>Challenge</strong>: This means your <code>path</code> value for any API requests will always contain <code>/payment/&lt;actual_request&gt;</code>, leading to HTTP 404 as Event Handler is trying to match what's after <code>payment/</code>. This gets further complicated with an <a href="https://github.com/aws-powertools/powertools-lambda/issues/34" target="_blank">arbitrary level of nesting</a>.</p>
 <p>To address this API Gateway behavior, we use <code>strip_prefixes</code> parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">custom_api_mapping.py</label><label for="__tabbed_13_2">custom_api_mapping.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">custom_api_mapping.py</label><label for="__tabbed_14_2">custom_api_mapping.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5370,7 +5560,7 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <p>For example, when using <code>strip_prefixes</code> value of <code>/pay</code>, there is no difference between a request path of <code>/pay</code> and <code>/pay/</code>; and the path argument would be defined as <code>/</code>.</p>
 </details>
 <p>For added flexibility, you can use regexes to strip a prefix. This is helpful when you have many options due to different combinations of prefixes (e.g: multiple environments, multiple versions).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">strip_route_prefix_regex.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">strip_route_prefix_regex.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5427,7 +5617,7 @@ matches one of the allowed values.</p>
 <summary>Tip</summary>
 <p>Optionally disable CORS on a per path basis with <code>cors=False</code> parameter.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:4"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><input id="__tabbed_15_4" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">setting_cors.py</label><label for="__tabbed_15_2">setting_cors_output.json</label><label for="__tabbed_15_3">setting_cors_extra_origins.py</label><label for="__tabbed_15_4">setting_cors_extra_origins_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:4"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><input id="__tabbed_16_4" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">setting_cors.py</label><label for="__tabbed_16_2">setting_cors_output.json</label><label for="__tabbed_16_3">setting_cors_extra_origins.py</label><label for="__tabbed_16_4">setting_cors_extra_origins_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5743,7 +5933,7 @@ matches one of the allowed values.</p>
 <li><strong>next_middleware</strong>. A function to get the next middleware or route's response.</li>
 </ol>
 <p>Here's a sample middleware that extracts and injects correlation ID, using <code>APIGatewayRestResolver</code> (works for any <a href="#event-resolvers">Resolver</a>):</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">middleware_getting_started.py</label><label for="__tabbed_16_2">middleware_getting_started_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">middleware_getting_started.py</label><label for="__tabbed_17_2">middleware_getting_started_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Your first middleware to extract and inject correlation ID</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5874,7 +6064,7 @@ matches one of the allowed values.</p>
 </center></p>
 <p>You can use <code>app.use</code> to register middlewares that should always run regardless of the route, also known as global middlewares.</p>
 <p>Event Handler <strong>calls global middlewares first</strong>, then middlewares defined at the route level. Here's an example with both middlewares:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">middleware_global_middlewares.py</label><label for="__tabbed_17_2">middleware_global_middlewares_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">middleware_global_middlewares.py</label><label for="__tabbed_18_2">middleware_global_middlewares_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -6037,7 +6227,7 @@ matches one of the allowed values.</p>
 <p>Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.</p>
 <p>In these scenarios, you short-circuit the middleware processing logic by returning a <a href="#fine-grained-responses">Response object</a>, or raising a <a href="#raising-http-errors">HTTP Error</a>. This signals to Event Handler to stop and run each <code>After</code> logic left in the chain all the way back.</p>
 <p>Here's an example where we prevent any request that doesn't include a correlation ID header:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:3"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">middleware_early_return.py</label><label for="__tabbed_18_2">middleware_global_middlewares_module.py</label><label for="__tabbed_18_3">middleware_early_return_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">middleware_early_return.py</label><label for="__tabbed_19_2">middleware_global_middlewares_module.py</label><label for="__tabbed_19_3">middleware_early_return_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6210,7 +6400,7 @@ matches one of the allowed values.</p>
 </div>
 <p>By default, any unhandled exception in the middleware chain is eventually propagated as a HTTP 500 back to the client.</p>
 <p>While there isn't anything special on how to use <a href="https://docs.python.org/3/tutorial/errors.html#handling-exceptions" rel="nofollow" target="_blank"><code>try/catch</code></a> for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Unhandled exception from route handler</label><label for="__tabbed_19_2">Route handler exception caught by a middleware</label><label for="__tabbed_19_3">Middleware short-circuit by raising exception</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Unhandled exception from route handler</label><label for="__tabbed_20_2">Route handler exception caught by a middleware</label><label for="__tabbed_20_3">Middleware short-circuit by raising exception</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>An exception wasn't caught by any middleware during <code>next_middleware()</code> block, therefore it propagates all the way back to the client as HTTP 500.</p>
@@ -6382,7 +6572,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Using multiple values for HTTP headers in ALB?</summary>
 <p>Make sure you <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers" target="_blank">enable the multi value headers feature</a> to serialize response headers correctly.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:2"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">fine_grained_responses.py</label><label for="__tabbed_20_2">fine_grained_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:2"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">fine_grained_responses.py</label><label for="__tabbed_21_2">fine_grained_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6504,7 +6694,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Warning</summary>
 <p>The client must send the <code>Accept-Encoding</code> header, otherwise a normal response will be sent.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:4"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><input id="__tabbed_21_4" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">compressing_responses_using_route.py</label><label for="__tabbed_21_2">compressing_responses_using_response.py</label><label for="__tabbed_21_3">compressing_responses.json</label><label for="__tabbed_21_4">compressing_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">compressing_responses_using_route.py</label><label for="__tabbed_22_2">compressing_responses_using_response.py</label><label for="__tabbed_22_3">compressing_responses.json</label><label for="__tabbed_22_4">compressing_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6702,7 +6892,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <div class="admonition note">
 <p class="admonition-title">Lambda Function URLs handle binary media types automatically.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:4"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><input id="__tabbed_22_3" name="__tabbed_22" type="radio" /><input id="__tabbed_22_4" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">binary_responses.py</label><label for="__tabbed_22_2">binary_responses_logo.svg</label><label for="__tabbed_22_3">binary_responses.json</label><label for="__tabbed_22_4">binary_responses_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:4"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><input id="__tabbed_23_3" name="__tabbed_23" type="radio" /><input id="__tabbed_23_4" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">binary_responses.py</label><label for="__tabbed_23_2">binary_responses_logo.svg</label><label for="__tabbed_23_3">binary_responses.json</label><label for="__tabbed_23_4">binary_responses_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -7135,7 +7325,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </details>
 <p>The Swagger UI appears by default at the <code>/swagger</code> path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.</p>
 <p>Below is an example configuration for serving Swagger UI from a custom path or CDN, with assets like CSS and JavaScript loading from a chosen CDN base URL.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:2"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><input id="__tabbed_23_2" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">customizing_swagger.py</label><label for="__tabbed_23_2">customizing_swagger_middlewares.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">customizing_swagger.py</label><label for="__tabbed_24_2">customizing_swagger_middlewares.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -7345,7 +7535,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 </tbody>
 </table>
 <p>Include extra parameters when exporting your OpenAPI specification to apply these customizations:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:1"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">customizing_api_metadata.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:1"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">customizing_api_metadata.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -7540,7 +7730,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <p>Let's assume you have <code>split_route.py</code> as your Lambda function entrypoint and routes in <code>split_route_module.py</code>. This is how you'd use the <code>Router</code> feature.</p>
 <!-- markdownlint-disable MD013 -->
 
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">split_route_module.py</label><label for="__tabbed_25_2">split_route.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">split_route_module.py</label><label for="__tabbed_26_2">split_route.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>We import <strong>Router</strong> instead of <strong>APIGatewayRestResolver</strong>; syntax wise is exactly the same.</p>
@@ -7675,7 +7865,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <h4 id="route-prefix">Route prefix<a class="headerlink" href="#route-prefix" title="Permanent link">&para;</a></h4>
 <p>In the previous example, <code>split_route_module.py</code> routes had a <code>/todos</code> prefix. This might grow over time and become repetitive.</p>
 <p>When necessary, you can set a prefix when including a router object. This means you could remove <code>/todos</code> prefix altogether.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">split_route_prefix.py</label><label for="__tabbed_26_2">split_route_prefix_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">split_route_prefix.py</label><label for="__tabbed_27_2">split_route_prefix_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -7880,7 +8070,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>We always clear data available in <code>context</code> after each invocation.</summary>
 <p>This can be useful for middlewares injecting contextual information before a request is processed.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">split_route_append_context.py</label><label for="__tabbed_27_2">split_route_append_context_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">split_route_append_context.py</label><label for="__tabbed_28_2">split_route_append_context_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8081,7 +8271,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 <li><code>/users/&lt;id&gt;</code> - an endpoint that looks up a single users details by ID on <code>GET</code> requests</li>
 </ul>
 <p>Each endpoint will be it's own Lambda function that is configured as a <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html" target="_blank">Lambda integration</a>. This allows you to set different configurations for each lambda (memory size, layers, etc.).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1"><code>/users</code> Endpoint</label><label for="__tabbed_28_2"><code>/users/&lt;id&gt;</code> Endpoint</label><label for="__tabbed_28_3">Micro Function Example SAM Template</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:3"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1"><code>/users</code> Endpoint</label><label for="__tabbed_29_2"><code>/users/&lt;id&gt;</code> Endpoint</label><label for="__tabbed_29_3">Micro Function Example SAM Template</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8490,10 +8680,10 @@ your development, building, deployment tooling need to accommodate the distinct 
 
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <p>You can test your routes by passing a proxy event request with required params.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:4"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><input id="__tabbed_29_3" name="__tabbed_29" type="radio" /><input id="__tabbed_29_4" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">API Gateway REST API</label><label for="__tabbed_29_2">API Gateway HTTP API</label><label for="__tabbed_29_3">Application Load Balancer</label><label for="__tabbed_29_4">Lambda Function URL</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:4"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><input id="__tabbed_30_3" name="__tabbed_30" type="radio" /><input id="__tabbed_30_4" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">API Gateway REST API</label><label for="__tabbed_30_2">API Gateway HTTP API</label><label for="__tabbed_30_3">Application Load Balancer</label><label for="__tabbed_30_4">Lambda Function URL</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="30:2"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><input id="__tabbed_30_2" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_30_2">assert_rest_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:2"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">assert_rest_api_resolver_response.py</label><label for="__tabbed_31_2">assert_rest_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8615,7 +8805,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="31:2"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><input id="__tabbed_31_2" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">assert_http_api_resolver_response.py</label><label for="__tabbed_31_2">assert_http_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:2"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">assert_http_api_resolver_response.py</label><label for="__tabbed_32_2">assert_http_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8749,7 +8939,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="32:2"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><input id="__tabbed_32_2" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_32_2">assert_alb_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:2"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">assert_alb_api_resolver_response.py</label><label for="__tabbed_33_2">assert_alb_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8873,7 +9063,7 @@ your development, building, deployment tooling need to accommodate the distinct 
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="33:2"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><input id="__tabbed_33_2" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_33_2">assert_function_url_api_response_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:2"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><input id="__tabbed_34_2" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">assert_function_url_api_resolver_response.py</label><label for="__tabbed_34_2">assert_function_url_api_response_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9024,7 +9214,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
   <small>
     
       Last update:
-      2024-01-23
+      2024-02-01
     
   </small>
 </div>
