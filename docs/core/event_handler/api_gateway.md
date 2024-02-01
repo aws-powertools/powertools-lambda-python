@@ -428,6 +428,8 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 We use the `Annotated` type to tell Event Handler that a particular parameter is a header that needs to be validated.
 
+!!! info "We adhere to HTTP RFC standards, which means we treat HTTP headers as case-insensitive."
+
 In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
 * `correlation_id` is a header that must be present in the request
