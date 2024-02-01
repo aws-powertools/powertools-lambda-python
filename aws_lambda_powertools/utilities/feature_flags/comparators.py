@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional
 from dateutil.tz import gettz
 
 from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
+from .exceptions import SchemaValidationError
 
 
 def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
@@ -82,3 +83,43 @@ def compare_modulo_range(context_value: int, condition_value: Dict) -> bool:
     end = condition_value.get(ModuloRangeValues.END.value, 1)
 
     return start <= context_value % base <= end
+
+
+def compare_any_in_list(key_list, value_list):
+    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+        raise SchemaValidationError()
+    
+    results = False
+    for key in key_list:
+        if key in value_list:
+            results = True
+            break
+        
+    return results
+
+
+def compare_all_in_list(key_list, value_list):
+    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+        raise SchemaValidationError()
+
+    results = True
+    for key in key_list:
+        if key not in value_list:
+            results = False
+            break
+
+    return results
+
+
+def compare_none_in_list(key_list, value_list):
+    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+        raise SchemaValidationError()
+
+    results = True
+    for key in key_list:
+        if key in value_list:
+            results = False
+            break
+
+    return results
+
