@@ -148,7 +148,7 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
         if self.headers is not None:
-            headers = {key: value.split(",") if "," in value else value for key, value in self.headers.items()}
+            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
             return headers
 
         return {}
@@ -270,4 +270,7 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, str]]:
-        return self.headers
+        if self.headers is not None:
+            return {key.lower(): value for key, value in self.headers.items()}
+
+        return {}

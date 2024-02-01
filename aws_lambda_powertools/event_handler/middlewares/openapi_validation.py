@@ -19,7 +19,7 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.dependant import is_scalar_field
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
-from aws_lambda_powertools.event_handler.openapi.params import Param
+from aws_lambda_powertools.event_handler.openapi.params import Param, ParamTypes
 from aws_lambda_powertools.event_handler.openapi.types import IncEx
 from aws_lambda_powertools.event_handler.types import EventHandlerInstance
 
@@ -256,13 +256,23 @@ def _request_params_to_args(
     errors = []
 
     for field in required_params:
-        value = received_params.get(field.alias)
-
         field_info = field.field_info
+
+        # To ensure early failure, we check if it's not an instance of Param.
         if not isinstance(field_info, Param):
             raise AssertionError(f"Expected Param field_info, got {field_info}")
 
-        loc = (field_info.in_.value, field.alias)
+        field_alias = field.alias
+
+        if field_info.in_ == ParamTypes.header and field_alias:
+            # Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the parameter name
+            # This ensures that customers can access headers with any casing, as per the RFC guidelines.
+            # Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
+            field_alias = field.alias.lower()
+
+        value = received_params.get(field_alias)
+
+        loc = (field_info.in_.value, field_alias)
 
         # If we don't have a value, see if it's required or has a default
         if value is None:

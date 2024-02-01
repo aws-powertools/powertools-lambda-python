@@ -127,10 +127,14 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
-        if self.multi_value_headers:
-            return self.multi_value_headers
+        headers: Dict[str, Any] = {}
 
-        return self.headers
+        if self.multi_value_headers:
+            headers = self.multi_value_headers
+        else:
+            headers = self.headers
+
+        return {key.lower(): value for key, value in headers.items()}
 
     @property
     def request_context(self) -> APIGatewayEventRequestContext:
@@ -327,7 +331,7 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
         if self.headers is not None:
-            headers = {key: value.split(",") if "," in value else value for key, value in self.headers.items()}
+            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
             return headers
 
         return {}

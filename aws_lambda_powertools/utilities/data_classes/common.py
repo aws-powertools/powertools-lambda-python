@@ -122,6 +122,10 @@ class BaseProxyEvent(DictWrapper):
 
         This is necessary because different resolvers use different formats to encode
         headers parameters.
+
+        Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the header name
+        This ensures that customers can access headers with any casing, as per the RFC guidelines.
+        Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
         """
         return self.headers
 
