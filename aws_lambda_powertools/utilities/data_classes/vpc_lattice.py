@@ -145,6 +145,14 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.query_string_parameters
 
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.headers is not None:
+            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
+            return headers
+
+        return {}
+
 
 class vpcLatticeEventV2Identity(DictWrapper):
     @property
@@ -259,3 +267,10 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     @property
     def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
         return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, str]]:
+        if self.headers is not None:
+            return {key.lower(): value for key, value in self.headers.items()}
+
+        return {}

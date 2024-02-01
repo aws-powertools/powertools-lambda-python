@@ -137,6 +137,21 @@ class BaseProxyEvent(DictWrapper):
         return self.query_string_parameters
 
     @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        """
+        This property determines the appropriate header to be used
+        as a trusted source for validating OpenAPI.
+
+        This is necessary because different resolvers use different formats to encode
+        headers parameters.
+
+        Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the header name
+        This ensures that customers can access headers with any casing, as per the RFC guidelines.
+        Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
+        """
+        return self.headers
+
+    @property
     def is_base64_encoded(self) -> Optional[bool]:
         return self.get("isBase64Encoded")
 
