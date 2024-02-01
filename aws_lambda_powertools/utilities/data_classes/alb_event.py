@@ -43,6 +43,17 @@ class ALBEvent(BaseProxyEvent):
         return self.query_string_parameters
 
     @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        headers: Dict[str, Any] = {}
+
+        if self.multi_value_headers:
+            headers = self.multi_value_headers
+        else:
+            headers = self.headers
+
+        return {key.lower(): value for key, value in headers.items()}
+
+    @property
     def multi_value_headers(self) -> Optional[Dict[str, List[str]]]:
         return self.get("multiValueHeaders")
 
