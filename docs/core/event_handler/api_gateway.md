@@ -368,13 +368,13 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 !!! info "We will automatically validate and inject incoming query strings via type annotation."
 
-We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
+We use the `Annotated` type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
 In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
 * `completed` is a query string with a `None` as its default value
 * `completed`, when set, should have at minimum 4 characters
-* Doesn't match? Event Handler will return a validation error response
+* No match? Event Handler will return a validation error response
 
 <!-- markdownlint-disable MD013 -->
 
@@ -386,7 +386,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
     2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
-    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 
 === "skip_validating_query_strings.py"
 
@@ -426,31 +426,31 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 #### Validating headers
 
-We use the `Annotated` type to tell Event Handler that a particular parameter is a header that needs to be validated.
+We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated.
 
-!!! info "We adhere to HTTP RFC standards, which means we treat HTTP headers as case-insensitive."
+!!! info "We adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive."
 
 In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
 * `correlation_id` is a header that must be present in the request
-* `correlation_id`, when set, should have 16 characters
-* Doesn't match? Event Handler will return a validation error response
+* `correlation_id` should have 16 characters
+* No match? Event Handler will return a validation error response
 
 <!-- markdownlint-disable MD013 -->
 
 === "validating_headers.py"
 
-    ```python hl_lines="8 10 29"
+    ```python hl_lines="8 10 27"
     --8<-- "examples/event_handler_rest/src/validating_headers.py"
     ```
 
     1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
-    2. `Header` is a special OpenAPI type that can add constraints to a header well as document them
-    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+    2. `Header` is a special OpenAPI type that can add constraints and documentation to a header
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 
 === "working_with_headers_multi_value.py"
 
-    If you need to handle multi-value for specific headers, you can create a list of the desired type.
+    You can handle multi-value headers by declaring it as a list of the desired type.
 
     ```python hl_lines="23"
     --8<-- "examples/event_handler_rest/src/working_with_headers_multi_value.py"

@@ -17,9 +17,9 @@ class CountriesAllowed(Enum):
     BR = "BR"
 
 
-@app.get("/todos")
+@app.get("/hello")
 def get(
-    example_headers_multi_value: Annotated[
+    cloudfront_viewer_country: Annotated[
         List[CountriesAllowed],  # (1)!
         Header(
             description="This is multi value header parameter.",
@@ -27,7 +27,7 @@ def get(
     ],
 ):
     """Return validated multi-value header values."""
-    return example_headers_multi_value
+    return cloudfront_viewer_country
 
 
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
