@@ -206,8 +206,8 @@ For a stronger security posture, you can add metadata to each encryption operati
 ### Choosing parts of your data
 
 ???+ note "Current limitations"
-    1. The `fields` parameter is currently exclusive to the `erase` method, with potential future inclusion into `encrypt` and `decrypt`.
-    2. We support `JSON` data types only - see [data serialization for more details](#data-serialization)."
+    1. The `fields` parameter is not yet supported in `encrypt` and `decrypt` operations.
+    2. We support `JSON` data types only - see [data serialization for more details](#data-serialization).
 
 You can use the `fields` parameter with the dot notation `.` to choose one or more parts of your data to `erase`. This is useful when you want to keep data structure intact except the confidential fields.
 
@@ -407,9 +407,7 @@ When decrypting, we revert the operation to restore the original data structure.
 
 For compatibility or performance, you can optionally pass your own JSON serializer and deserializer to replace `json.dumps` and `json.loads` respectively:
 
-=== "advanced_custom_serializer.py"
-
-```python hl_lines="17-18"
+```python hl_lines="17-18" title="advanced_custom_serializer.py"
 --8<-- "examples/data_masking/src/advanced_custom_serializer.py"
 ```
 
@@ -428,9 +426,7 @@ You can modify the following values when initializing the `AWSEncryptionSDKProvi
 
 If required, you have the option to customize the default values when initializing the `AWSEncryptionSDKProvider` class.
 
-=== "aws_encryption_provider_example.py"
-
-```python hl_lines="14-19"
+```python hl_lines="14-19" title="aws_encryption_provider_example.py"
 --8<-- "examples/data_masking/src/aws_encryption_provider_example.py"
 ```
 
@@ -440,19 +436,15 @@ You can pass additional arguments to the `AWSEncryptionSDKProvider` via the `pro
 
 For example, the AWS Encryption SDK defaults to using the `AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384` algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.
 
-=== "changing_default_algorithm.py"
-
-```python hl_lines="5 26 30"
+```python hl_lines="5 26 30" title="changing_default_algorithm.py"
 --8<-- "examples/data_masking/src/changing_default_algorithm.py"
 ```
 
-**Using multiple keys**
+##### Using multiple keys
 
-The `AWSEncryptionSDKProvider` allows you to instantiate it with several KMS keys by passing them all in a `list` to the `keys` parameter. This could be beneficial if you own keys in different regions, enabling you to perform cross-regional encryption and decryption.
+You can use multiple KMS keys from more than one AWS account for higher availability, when instantiating `AWSEncryptionSDKProvider`.
 
-=== "using_multiple_keys.py"
-
-```python hl_lines="15"
+```python hl_lines="15" title="using_multiple_keys.py"
 --8<-- "examples/data_masking/src/using_multiple_keys.py"
 ```
 
