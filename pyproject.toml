@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.32.0"
+version = "2.33.0"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -48,6 +48,7 @@ redis = {version = ">=4.4,<6.0", optional = true}
 typing-extensions = "^4.6.2"
 datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
+jsonpath-ng = { version = "^1.6.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 coverage = {extras = ["toml"], version = "^7.2"}
@@ -97,11 +98,11 @@ parser = ["pydantic"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
 redis = ["redis"]
-all = ["pydantic", "aws-xray-sdk", "fastjsonschema"]
+all = ["pydantic", "aws-xray-sdk", "fastjsonschema", "aws-encryption-sdk", "jsonpath-ng"]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
 datadog = ["datadog-lambda"]
-datamasking-aws-sdk = ["aws-encryption-sdk"]
+datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
 
 [tool.poetry.group.dev.dependencies]
 cfn-lint = "0.83.8"

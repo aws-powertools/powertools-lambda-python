@@ -14,12 +14,12 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
 from aws_lambda_powertools.event_handler.openapi.params import (
     Body,
     Dependant,
+    Header,
     Param,
     ParamTypes,
     Query,
     _File,
     _Form,
-    _Header,
     analyze_param,
     create_response_field,
     get_flat_dependant,
@@ -59,16 +59,21 @@ def add_param_to_fields(
 
     """
     field_info = cast(Param, field.field_info)
-    if field_info.in_ == ParamTypes.path:
-        dependant.path_params.append(field)
-    elif field_info.in_ == ParamTypes.query:
-        dependant.query_params.append(field)
-    elif field_info.in_ == ParamTypes.header:
-        dependant.header_params.append(field)
+
+    # Dictionary to map ParamTypes to their corresponding lists in dependant
+    param_type_map = {
+        ParamTypes.path: dependant.path_params,
+        ParamTypes.query: dependant.query_params,
+        ParamTypes.header: dependant.header_params,
+        ParamTypes.cookie: dependant.cookie_params,
+    }
+
+    # Check if field_info.in_ is a valid key in param_type_map and append the field to the corresponding list
+    # or raise an exception if it's not a valid key.
+    if field_info.in_ in param_type_map:
+        param_type_map[field_info.in_].append(field)
     else:
-        if field_info.in_ != ParamTypes.cookie:
-            raise AssertionError(f"Unsupported param type: {field_info.in_}")
-        dependant.cookie_params.append(field)
+        raise AssertionError(f"Unsupported param type: {field_info.in_}")
 
 
 def get_typed_annotation(annotation: Any, globalns: Dict[str, Any]) -> Any:
@@ -265,7 +270,7 @@ def is_body_param(*, param_field: ModelField, is_path_param: bool) -> bool:
         return False
     elif is_scalar_field(field=param_field):
         return False
-    elif isinstance(param_field.field_info, (Query, _Header)) and is_scalar_sequence_field(param_field):
+    elif isinstance(param_field.field_info, (Query, Header)) and is_scalar_sequence_field(param_field):
         return False
     else:
         if not isinstance(param_field.field_info, Body):

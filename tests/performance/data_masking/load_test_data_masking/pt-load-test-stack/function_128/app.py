@@ -3,8 +3,8 @@ import os
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.utilities._data_masking import DataMasking
-from aws_lambda_powertools.utilities._data_masking.provider.kms.aws_encryption_sdk import AwsEncryptionSdkProvider
+from aws_lambda_powertools.utilities.data_masking import DataMasking
+from aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk import AWSEncryptionSDKProvider
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 KMS_KEY_ARN = os.environ["KMS_KEY_ARN"]
@@ -48,7 +48,7 @@ logger = Logger()
 @tracer.capture_method
 def function128():
     logger.info("Hello world function128 - HTTP 200")
-    data_masker = DataMasking(provider=AwsEncryptionSdkProvider(keys=[KMS_KEY_ARN]))
+    data_masker = DataMasking(provider=AWSEncryptionSDKProvider(keys=[KMS_KEY_ARN]))
     encrypted = data_masker.encrypt(json_blob, fields=["address.street", "job_history.company.company_name"])
     decrypted = data_masker.decrypt(encrypted, fields=["address.street", "job_history.company.company_name"])
     return {"Decrypted_json_blob_function_128": decrypted}
