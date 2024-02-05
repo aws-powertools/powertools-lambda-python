@@ -1912,14 +1912,13 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled/><span class="task-list-indicator"></span></label> Update CDK Layer construct to include regions</li>
 </ul>
 <h3 id="v3">V3<a class="headerlink" href="#v3" title="Permanent link">&para;</a></h3>
-<p>With Python 3.7 reaching <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html">end-of-life in AWS Lambda by the end of the year</a>, we want to plan some breaking changes. As always, we plan on having ample notice, a detailed upgrade guide, and keep breaking changes to a minimum to ease transition (e.g., it took ~7 months from v2 to surpass v1 downloads).</p>
+<p>We are in the process of planning the roadmap for v3. As always, our approach includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).</p>
 <p>For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.</p>
 <ul>
 <li><strong>Parser</strong>: Drop Pydantic v1</li>
 <li><strong>Parser</strong>: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)</li>
 <li><strong>Parameters</strong>: Increase default <code>max_age</code> for <code>get_secret</code></li>
 <li><strong>Event Source Data Classes</strong>: Return sane defaults for any property that has <code>Optional[&lt;type&gt;]</code> returns</li>
-<li><strong>Python 3.7 EOL</strong>: Update PyPi and Layers to only support 3.8</li>
 <li><strong>Upgrade tool</strong>: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like <code>pyupgrade</code> and <code>django-upgrade</code></li>
 <li><strong>Batch</strong>: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., <code>stop_on_failure=True</code>)</li>
 </ul>
@@ -1991,7 +1990,7 @@
   <small>
     
       Last update:
-      2023-10-06
+      2024-02-05
     
   </small>
 </div>

@@ -2076,20 +2076,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">57</span>
 <span class="normal">58</span>
 <span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span>
-<span class="normal">62</span>
-<span class="normal">63</span>
-<span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
@@ -2097,6 +2084,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -2604,24 +2592,12 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
@@ -2733,27 +2709,15 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
 
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
-<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
-</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.tracing</span> <span class="kn">import</span> <span class="n">aiohttp_trace_config</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -2879,24 +2843,12 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">34</span>
 <span class="normal">35</span>
 <span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -2918,10 +2870,10 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 </span>    <span class="k">return</span> <span class="p">[{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">(),</span> <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Smooth Grooves&quot;</span><span class="p">}]</span>
 
 
-<span class="hll"><span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;commonField&quot;</span><span class="p">)</span>
-</span><span class="hll"><span class="k">def</span> <span class="nf">common_field</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span>    <span class="c1"># Would match all fieldNames matching &#39;commonField&#39;</span>
-    <span class="k">return</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">()</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">resolver</span><span class="p">(</span><span class="n">field_name</span><span class="o">=</span><span class="s2">&quot;commonField&quot;</span><span class="p">)</span>
+<span class="hll"><span class="k">def</span> <span class="nf">common_field</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span class="hll">    <span class="c1"># Would match all fieldNames matching &#39;commonField&#39;</span>
+</span>    <span class="k">return</span> <span class="n">scalar_types_utils</span><span class="o">.</span><span class="n">make_id</span><span class="p">()</span>
 
 
 <span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
@@ -2973,24 +2925,12 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -3204,29 +3144,17 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">43</span>
 <span class="normal">44</span>
 <span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 </span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync</span> <span class="kn">import</span> <span class="n">scalar_types_utils</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.appsync_resolver_event</span> <span class="kn">import</span> <span class="p">(</span>
-</span>    <span class="n">AppSyncResolverEvent</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+</span><span class="hll">    <span class="n">AppSyncResolverEvent</span><span class="p">,</span>
+</span><span class="hll"><span class="p">)</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
@@ -3389,24 +3317,12 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">20</span>
 <span class="normal">21</span>
 <span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.appsync</span> <span class="kn">import</span> <span class="n">Router</span>
-</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 <span class="hll"><span class="n">router</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
@@ -3539,23 +3455,11 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler.appsync</span> <span class="kn">import</span> <span class="n">Router</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
@@ -3621,10 +3525,10 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="hll">
-</span><span class="kn">import</span> <span class="nn">pytest</span>
-<span class="kn">from</span> <span class="nn">assert_graphql_response_module</span> <span class="kn">import</span> <span class="n">Location</span><span class="p">,</span> <span class="n">app</span>  <span class="c1"># instance of AppSyncResolver</span>
 
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">assert_graphql_response_module</span> <span class="kn">import</span> <span class="n">Location</span><span class="p">,</span> <span class="n">app</span>  <span class="c1"># instance of AppSyncResolver</span>
+</span>
 
 <span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
 <span class="k">def</span> <span class="nf">lambda_context</span><span class="p">():</span>
@@ -3641,13 +3545,13 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="k">def</span> <span class="nf">test_direct_resolver</span><span class="p">(</span><span class="n">lambda_context</span><span class="p">):</span>
     <span class="c1"># GIVEN</span>
     <span class="n">fake_event</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;assert_graphql_response.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="hll">
-</span>    <span class="c1"># WHEN</span>
-    <span class="n">result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="p">(</span><span class="n">fake_event</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">)</span>
-<span class="hll">
-</span>    <span class="c1"># THEN</span>
-    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Perkins-Reed&quot;</span>
-</code></pre></div></td></tr></table></div>
+
+    <span class="c1"># WHEN</span>
+<span class="hll">    <span class="n">result</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Location</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="p">(</span><span class="n">fake_event</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">)</span>
+</span>
+    <span class="c1"># THEN</span>
+<span class="hll">    <span class="k">assert</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;Perkins-Reed&quot;</span>
+</span></code></pre></div></td></tr></table></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3680,24 +3584,12 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
 <span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
@@ -3942,20 +3834,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="normal">35</span>
 <span class="normal">36</span>
 <span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">sys</span>
-
-<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">TypedDict</span>
-
-<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
 
 <span class="kn">import</span> <span class="nn">aiohttp</span>
@@ -3963,6 +3842,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.event_handler</span> <span class="kn">import</span> <span class="n">AppSyncResolver</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.logging</span> <span class="kn">import</span> <span class="n">correlation_paths</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.shared.types</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.tracing</span> <span class="kn">import</span> <span class="n">aiohttp_trace_config</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
@@ -4090,7 +3970,7 @@ call <code>get_todo</code> as <code>get_todo(id="todo_id_value")</code>.</p>
   <small>
     
       Last update:
-      2023-07-28
+      2024-02-05
     
   </small>
 </div>
