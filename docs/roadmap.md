@@ -120,7 +120,7 @@ We want to investigate security and scaling requirements for these special regio
 
 ### V3
 
-With Python 3.7 reaching [end-of-life in AWS Lambda by the end of the year](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html), we want to plan some breaking changes. As always, we plan on having ample notice, a detailed upgrade guide, and keep breaking changes to a minimum to ease transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
+We are in the process of planning the roadmap for v3. As always, our approach includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
 
 For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
 
@@ -128,7 +128,6 @@ For example, these are on our mind but not settled yet until we have a public tr
 - **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
 - **Parameters**: Increase default `max_age` for `get_secret`
 - **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
-- **Python 3.7 EOL**: Update PyPi and Layers to only support 3.8
 - **Upgrade tool**: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like `pyupgrade` and `django-upgrade`
 - **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
 

@@ -1,10 +1,3 @@
-import sys
-
-if sys.version_info >= (3, 8):
-    from typing import TypedDict
-else:
-    from typing_extensions import TypedDict
-
 import asyncio
 from typing import List
 
@@ -13,6 +6,7 @@ import aiohttp
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.logging import correlation_paths
+from aws_lambda_powertools.shared.types import TypedDict
 from aws_lambda_powertools.tracing import aiohttp_trace_config
 from aws_lambda_powertools.utilities.typing import LambdaContext
 

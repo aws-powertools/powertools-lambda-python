@@ -1,6 +1,7 @@
 import base64
 import json
 from collections.abc import Mapping
+from functools import cached_property
 from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
@@ -24,7 +25,6 @@ class DictWrapper(Mapping):
             by default json.loads
         """
         self._data = data
-        self._json_data: Optional[Any] = None
         self._json_deserializer = json_deserializer or json.loads
 
     def __getitem__(self, key: str) -> Any:
@@ -138,14 +138,12 @@ class BaseProxyEvent(DictWrapper):
         """Submitted body of the request as a string"""
         return self.get("body")
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_body)
-        return self._json_data
+        return self._json_deserializer(self.decoded_body)
 
-    @property
+    @cached_property
     def decoded_body(self) -> str:
         """Dynamically base64 decode body as a str"""
         body: str = self["body"]
