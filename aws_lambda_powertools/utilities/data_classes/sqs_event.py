@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, Iterator, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
@@ -107,7 +108,7 @@ class SQSRecord(DictWrapper):
         """The message's contents (not URL-encoded)."""
         return self["body"]
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Deserializes JSON string available in 'body' property
 
@@ -132,9 +133,7 @@ class SQSRecord(DictWrapper):
         data: list = record.json_body  # ["telemetry_values"]
         ```
         """
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self["body"])
-        return self._json_data
+        return self._json_deserializer(self["body"])
 
     @property
     def attributes(self) -> SQSRecordAttributes:
