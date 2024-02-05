@@ -203,5 +203,6 @@ jobs:
           path: ./layer/cdk-layer-stack/* # NOTE: upload-artifact does not inherit working-directory setting.
           if-no-files-found: error
           retention-days: 1
+          overwrite: true
       - name: CDK Deploy Canary
         run: npx cdk deploy --app cdk.out --context region=${{ matrix.region }} --parameters DeployStage="${{ inputs.stage }}" --parameters HasARM64Support=${{ matrix.has_arm64_support }} 'CanaryV2Stack' --require-approval never --verbose

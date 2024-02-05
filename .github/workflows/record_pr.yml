@@ -58,3 +58,4 @@ jobs:
           name: pr
           path: pr.txt
           retention-days: 1
+          overwrite: true
