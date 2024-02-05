@@ -14,9 +14,9 @@ from typing import (
 )
 
 import boto3
-from botocore.response import StreamingBody
 
 from aws_lambda_powertools.shared import user_agent
+from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 if TYPE_CHECKING:
     from mmap import mmap
@@ -68,7 +68,7 @@ class _S3SeekableIO(IO[bytes]):
         self._size: Optional[int] = None
 
         self._s3_client: Optional["Client"] = boto3_client
-        self._raw_stream: Optional[StreamingBody] = None
+        self._raw_stream: Optional[PowertoolsStreamingBody] = None
 
         self._sdk_options = sdk_options
         self._sdk_options["Bucket"] = bucket
@@ -100,7 +100,7 @@ class _S3SeekableIO(IO[bytes]):
         return self._size
 
     @property
-    def raw_stream(self) -> StreamingBody:
+    def raw_stream(self) -> PowertoolsStreamingBody:
         """
         Returns the boto3 StreamingBody, starting the stream from the seeked position.
         """
@@ -110,7 +110,7 @@ class _S3SeekableIO(IO[bytes]):
             self._raw_stream = self.s3_client.get_object(Range=range_header, **self._sdk_options).get("Body")
             self._closed = False
 
-        return cast(StreamingBody, self._raw_stream)
+        return cast(PowertoolsStreamingBody, self._raw_stream)
 
     def seek(self, offset: int, whence: int = io.SEEK_SET) -> int:
         """

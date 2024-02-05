@@ -3,9 +3,9 @@ import io
 import boto3
 import pytest
 from botocore import stub
-from botocore.response import StreamingBody
 
 from aws_lambda_powertools.utilities.streaming._s3_seekable_io import _S3SeekableIO
+from aws_lambda_powertools.utilities.streaming.compat import PowertoolsStreamingBody
 
 
 @pytest.fixture
@@ -89,7 +89,7 @@ def test_raw_stream_fetches_with_range_header_after_seek(s3_seekable_obj, s3_cli
 
 def test_read(s3_seekable_obj, s3_client_stub):
     payload = b"hello world"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
@@ -105,7 +105,7 @@ def test_read(s3_seekable_obj, s3_client_stub):
 
 def test_readline(s3_seekable_obj, s3_client_stub):
     payload = b"hello world\nworld hello"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
@@ -120,7 +120,7 @@ def test_readline(s3_seekable_obj, s3_client_stub):
 
 def test_readlines(s3_seekable_obj, s3_client_stub):
     payload = b"hello world\nworld hello"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
@@ -134,7 +134,7 @@ def test_readlines(s3_seekable_obj, s3_client_stub):
 
 def test_closed(s3_seekable_obj, s3_client_stub):
     payload = b"test"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
@@ -148,7 +148,7 @@ def test_closed(s3_seekable_obj, s3_client_stub):
 
 def test_next(s3_seekable_obj, s3_client_stub):
     payload = b"test"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
@@ -163,7 +163,7 @@ def test_next(s3_seekable_obj, s3_client_stub):
 
 def test_context_manager(s3_seekable_obj, s3_client_stub):
     payload = b"test"
-    streaming_body = StreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
+    streaming_body = PowertoolsStreamingBody(raw_stream=io.BytesIO(payload), content_length=len(payload))
 
     s3_client_stub.add_response(
         "get_object",
