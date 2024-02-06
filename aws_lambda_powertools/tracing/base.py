@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from typing import Any, Generator, List, Optional, Sequence, Union
 
 
-## TO: Discuss how to refactor this one. X-ray exclusive as well?
+## TO-Discuss how to refactor this one. Segment seems X-ray exclusive concept
 class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
