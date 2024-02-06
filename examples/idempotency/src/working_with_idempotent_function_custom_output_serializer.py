@@ -30,7 +30,7 @@ class OrderOutput:
 
 
 def order_to_dict(x: Type[OrderOutput]) -> Dict:  # (1)!
-    return x.__dict__
+    return dict(x.__dict__)
 
 
 def dict_to_order(x: Dict) -> OrderOutput:  # (2)!
