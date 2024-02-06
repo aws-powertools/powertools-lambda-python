@@ -1,5 +1,6 @@
 import tempfile
 import zipfile
+from functools import cached_property
 from typing import Any, Dict, List, Optional
 from urllib.parse import unquote_plus
 
@@ -17,12 +18,13 @@ class CodePipelineConfiguration(DictWrapper):
         """User parameters"""
         return self.get("UserParameters", None)
 
-    @property
+    @cached_property
     def decoded_user_parameters(self) -> Optional[Dict[str, Any]]:
         """Json Decoded user parameters"""
-        if self._json_data is None and self.user_parameters is not None:
-            self._json_data = self._json_deserializer(self.user_parameters)
-        return self._json_data
+        if self.user_parameters is not None:
+            return self._json_deserializer(self.user_parameters)
+
+        return None
 
 
 class CodePipelineActionConfiguration(DictWrapper):

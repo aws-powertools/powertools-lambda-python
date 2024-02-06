@@ -1,5 +1,4 @@
 import asyncio
-import sys
 from typing import Optional
 
 import pytest
@@ -123,7 +122,6 @@ def test_resolver_multiple_mappings():
     assert result2 == "value2description"
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="only for python versions that support asyncio.run")
 def test_resolver_async():
     # GIVEN
     app = AppSyncResolver()

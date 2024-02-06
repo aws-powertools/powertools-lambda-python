@@ -241,8 +241,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                 ],
             },
             # NOTE: Mypy doesn't recognize splats '** syntax' in TypedDict
-            **dimensions,  # type: ignore[misc] # "service": "test_service"
-            **metadata,  # "username": "test"
+            **dimensions,  # "service": "test_service"
+            **metadata,  # type: ignore[typeddict-item] # "username": "test"
             **metric_names_and_values,  # "single_metric": 1.0
         }
 
