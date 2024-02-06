@@ -3405,7 +3405,7 @@
 
 
 <span class="hll"><span class="k">def</span> <span class="nf">order_to_dict</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OrderOutput</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>  <span class="c1"># (1)!</span>
-</span>    <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span>
+</span>    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
 
 
 <span class="hll"><span class="k">def</span> <span class="nf">dict_to_order</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OrderOutput</span><span class="p">:</span>  <span class="c1"># (2)!</span>
