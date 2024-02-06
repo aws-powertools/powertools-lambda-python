@@ -150,7 +150,6 @@ jobs:
         with:
           name: cdk-layer-artefact
           path: layer/cdk.out.zip
-          overwrite: true
 
   beta:
     needs: build-layer
