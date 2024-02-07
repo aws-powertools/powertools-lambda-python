@@ -288,7 +288,7 @@ By default, records that fail during Lambda execution return `None` to ensure th
     --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver.py"
   	```
 
-    1. You can enable the exceptions by setting `raise_error_on_failed_batch` to True.
+    1. You can enable the exceptions by setting `raise_on_error` to True.
 
 === "enable_exceptions_batch_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"

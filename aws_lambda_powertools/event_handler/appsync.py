@@ -1,10 +1,10 @@
 import asyncio
 import logging
 import warnings
-from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayload, ResolverNotFound
+from aws_lambda_powertools.event_handler.graphql_appsync.base import BasePublic, BaseResolverRegistry
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
@@ -30,214 +30,6 @@ class RouterContext:
         self._context.clear()
 
 
-class BaseResolverRegistry(ABC):
-    """
-    Abstract base class for a resolver registry.
-
-    This class defines the interface for managing and retrieving resolvers
-    for various type and field combinations.
-    """
-
-    @property
-    @abstractmethod
-    def resolvers(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Get the dictionary of resolvers.
-
-        Returns
-        -------
-        dict
-            A dictionary containing resolver information.
-        """
-        raise NotImplementedError
-
-    @resolvers.setter
-    @abstractmethod
-    def resolvers(self, resolvers: dict) -> None:
-        """
-        Set the dictionary of resolvers.
-
-        Parameters
-        ----------
-        resolvers: dict
-            A dictionary containing resolver information.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        """
-        Retrieve a resolver function for a specific type and field.
-
-        Parameters
-        -----------
-        type_name: str
-            The name of the type.
-        field_name: Optional[str]
-            The name of the field (default is None).
-
-        Returns
-        -------
-        Callable
-            The resolver function.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def find_resolver(self, type_name: str, field_name: str) -> Optional[Callable]:
-        """
-        Find a resolver function for a specific type and field.
-
-        Parameters
-        -----------
-        type_name: str
-            The name of the type.
-        field_name: str
-            The name of the field.
-
-        Returns
-        -------
-        Optional[Callable]
-            The resolver function. None if not found.
-        """
-        raise NotImplementedError
-
-
-class BasePublic(ABC):
-    """
-    Abstract base class for public interface methods for resolver.
-
-    This class outlines the methods that must be implemented by subclasses to manage resolvers and
-    context information.
-    """
-
-    @abstractmethod
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        """
-        Retrieve a resolver function for a specific type and field.
-
-        Parameters
-        -----------
-        type_name: str
-            The name of the type.
-        field_name: Optional[str]
-            The name of the field (default is None).
-
-        Examples
-        --------
-        ```python
-        from typing import Optional
-
-        from aws_lambda_powertools.event_handler import AppSyncResolver
-        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-        from aws_lambda_powertools.utilities.typing import LambdaContext
-
-        app = AppSyncResolver()
-
-        @app.resolver(type_name="Query", field_name="getPost")
-        def related_posts(event: AppSyncResolverEvent) -> Optional[list]:
-            return {"success": "ok"}
-
-        def lambda_handler(event, context: LambdaContext) -> dict:
-            return app.resolve(event, context)
-        ```
-
-        Returns
-        -------
-        Callable
-            The resolver function.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        """
-        Retrieve a batch resolver function for a specific type and field.
-
-        Parameters
-        -----------
-        type_name: str
-            The name of the type.
-        field_name: Optional[str]
-            The name of the field (default is None).
-
-        Examples
-        --------
-        ```python
-        from typing import Optional
-
-        from aws_lambda_powertools.event_handler import AppSyncResolver
-        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-        from aws_lambda_powertools.utilities.typing import LambdaContext
-
-        app = AppSyncResolver()
-
-        @app.batch_resolver(type_name="Query", field_name="getPost")
-        def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
-            return {"post_id": id}
-
-        def lambda_handler(event, context: LambdaContext) -> dict:
-            return app.resolve(event, context)
-        ```
-
-        Returns
-        -------
-        Callable
-            The batch resolver function.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        """
-        Retrieve a batch resolver function for a specific type and field and runs async.
-
-        Parameters
-        -----------
-        type_name: str
-            The name of the type.
-        field_name: Optional[str]
-            The name of the field (default is None).
-
-        Examples
-        --------
-        ```python
-        from typing import Optional
-
-        from aws_lambda_powertools.event_handler import AppSyncResolver
-        from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
-        from aws_lambda_powertools.utilities.typing import LambdaContext
-
-        app = AppSyncResolver()
-
-        @app.batch_async_resolver(type_name="Query", field_name="getPost")
-        async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
-            return {"post_id": id}
-
-        def lambda_handler(event, context: LambdaContext) -> dict:
-            return app.resolve(event, context)
-        ```
-
-        Returns
-        -------
-        Callable
-            The batch resolver function.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def append_context(self, **additional_context) -> None:
-        """
-        Append additional context information.
-
-        Parameters
-        -----------
-        **additional_context: dict
-            Additional context key-value pairs to append.
-        """
-        raise NotImplementedError
-
-
 class ResolverRegistry(BaseResolverRegistry):
     def __init__(self):
         self._resolvers: Dict[str, Dict[str, Any]] = {}
@@ -250,7 +42,7 @@ class ResolverRegistry(BaseResolverRegistry):
     def resolvers(self, resolvers: dict) -> None:
         self._resolvers.update(resolvers)
 
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None):
+    def resolver(self, type_name: str = "*", field_name: Optional[str] = None, raise_on_error: bool = False):
         """Registers the resolver for field_name
 
         Parameters
@@ -259,16 +51,24 @@ class ResolverRegistry(BaseResolverRegistry):
             Type name
         field_name : str
             Field name
+        raise_on_error: bool
+            A flag indicating whether to raise an error when processing batches
+            with failed items. Defaults to False, which means errors are handled without raising exceptions.
+
+        Return
+        ----------
+        Dict
+            A dictionary with the resolver and if raise exception on error
         """
 
         def register(func):
             logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
-            self._resolvers[f"{type_name}.{field_name}"] = {"func": func}
+            self._resolvers[f"{type_name}.{field_name}"] = {"func": func, "raise_on_error": raise_on_error}
             return func
 
         return register
 
-    def find_resolver(self, type_name: str, field_name: str) -> Optional[Callable]:
+    def find_resolver(self, type_name: str, field_name: str) -> Optional[Dict]:
         """Find resolver based on type_name and field_name
 
         Parameters
@@ -277,12 +77,16 @@ class ResolverRegistry(BaseResolverRegistry):
             Type name
         field_name : str
             Field name
+        Return
+        ----------
+        Optional[Dict]
+            A dictionary with the resolver and if raise exception on error
         """
 
         resolver = self._resolvers.get(f"{type_name}.{field_name}", self._resolvers.get(f"*.{field_name}"))
         if not resolver:
             return None
-        return resolver["func"]
+        return resolver
 
 
 class Router(BasePublic):
@@ -296,11 +100,29 @@ class Router(BasePublic):
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
         return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
 
-    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+    def batch_resolver(
+        self,
+        type_name: str = "*",
+        field_name: Optional[str] = None,
+        raise_on_error: bool = False,
+    ) -> Callable:
+        return self._batch_resolver_registry.resolver(
+            field_name=field_name,
+            type_name=type_name,
+            raise_on_error=raise_on_error,
+        )
 
-    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._batch_async_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+    def batch_async_resolver(
+        self,
+        type_name: str = "*",
+        field_name: Optional[str] = None,
+        raise_on_error: bool = False,
+    ) -> Callable:
+        return self._batch_async_resolver_registry.resolver(
+            field_name=field_name,
+            type_name=type_name,
+            raise_on_error=raise_on_error,
+        )
 
     def append_context(self, **additional_context) -> None:
         self._router_context.context = additional_context
@@ -336,21 +158,23 @@ class AppSyncResolver(Router):
     ```
     """
 
-    def __init__(self, raise_error_on_failed_batch: bool = False):
+    def __init__(self):
         """
         Initialize a new instance of the AppSyncResolver.
-
-        Parameters
-        ----------
-        raise_error_on_failed_batch: bool
-            A flag indicating whether to raise an error when processing batches
-            with failed items. Defaults to False, which means errors are handled without raising exceptions.
         """
         super().__init__()
         self.current_batch_event: List[AppSyncResolverEvent] = []
         self.current_event: Optional[AppSyncResolverEvent] = None
         self.lambda_context: Optional[LambdaContext] = None
-        self.raise_error_on_failed_batch = raise_error_on_failed_batch
+
+    def __call__(
+        self,
+        event: dict,
+        context: LambdaContext,
+        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
+    ) -> Any:
+        """Implicit lambda handler which internally calls `resolve`"""
+        return self.resolve(event, context, data_model)
 
     def resolve(
         self,
@@ -454,9 +278,9 @@ class AppSyncResolver(Router):
         resolver = self._resolver_registry.find_resolver(self.current_event.type_name, self.current_event.field_name)
         if not resolver:
             raise ValueError(f"No resolver found for '{self.current_event.type_name}.{self.current_event.field_name}'")
-        return resolver(**self.current_event.arguments)
+        return resolver["func"](**self.current_event.arguments)
 
-    def _call_sync_batch_resolver(self, sync_resolver: Callable) -> List[Any]:
+    def _call_sync_batch_resolver(self, sync_resolver: Callable, raise_on_error: bool = False) -> List[Any]:
         """
         Calls a synchronous batch resolver function for each event in the current batch.
 
@@ -464,16 +288,19 @@ class AppSyncResolver(Router):
         ----------
         sync_resolver: Callable
             The callable function to resolve events.
+        raise_on_error: bool
+            A flag indicating whether to raise an error when processing batches
+            with failed items. Defaults to False, which means errors are handled without raising exceptions.
 
         Returns
         -------
         List[Any]
             A list of results corresponding to the resolved events.
         """
-        results: List = []
 
         # Check if we should raise errors or continue and append None in failed records
-        if not self.raise_error_on_failed_batch:
+        if not raise_on_error:
+            results: List = []
             for appconfig_event in self.current_batch_event:
                 try:
                     results.append(sync_resolver(event=appconfig_event, **appconfig_event.arguments))
@@ -489,10 +316,42 @@ class AppSyncResolver(Router):
             for appconfig_event in self.current_batch_event
         ]
 
+    async def _call_async_batch_resolver(self, async_resolver: Callable, raise_on_error: bool = False) -> List[Any]:
+        """
+        Asynchronously call a batch resolver for each event in the current batch.
+
+        Parameters
+        ----------
+        async_resolver: Callable
+            The asynchronous resolver function.
+        raise_on_error: bool
+            A flag indicating whether to raise an error when processing batches
+            with failed items. Defaults to False, which means errors are handled without raising exceptions.
+
+        Returns
+        -------
+        List[Any]
+            A list of results corresponding to the resolved events.
+        """
+        return list(
+            await asyncio.gather(
+                *[
+                    self._async_process_batch_event(
+                        async_resolver,
+                        appconfig_event,
+                        **appconfig_event.arguments,
+                        raise_on_error=raise_on_error,
+                    )
+                    for appconfig_event in self.current_batch_event
+                ],
+            ),
+        )
+
     async def _async_process_batch_event(
         self,
         async_resolver: Callable,
         appconfig_event: AppSyncResolverEvent,
+        raise_on_error: bool = False,
         **kwargs,
     ):
         """
@@ -504,6 +363,9 @@ class AppSyncResolver(Router):
             The asynchronous resolver function.
         appconfig_event: AppSyncResolverEvent
             The event to process.
+        raise_on_error: bool
+            A flag indicating whether to raise an error when processing batches
+            with failed items. Defaults to False, which means errors are handled without raising exceptions.
         **kwargs
             Additional keyword arguments to pass to the resolver.
 
@@ -513,7 +375,7 @@ class AppSyncResolver(Router):
             The result of the resolver function or None if an error occurs and self.raise_error_on_failed_batch is False
         """
 
-        if not self.raise_error_on_failed_batch:
+        if not raise_on_error:
             try:
                 return await async_resolver(event=appconfig_event, **kwargs)
             except Exception:
@@ -521,29 +383,6 @@ class AppSyncResolver(Router):
 
         # If raise_error_on_failed_batch is False, proceed without raising errors
         return await async_resolver(event=appconfig_event, **kwargs)
-
-    async def _call_async_batch_resolver(self, async_resolver: Callable) -> List[Any]:
-        """
-        Asynchronously call a batch resolver for each event in the current batch.
-
-        Parameters
-        ----------
-        async_resolver: Callable
-            The asynchronous resolver function.
-
-        Returns
-        -------
-        List[Any]
-            A list of results corresponding to the resolved events.
-        """
-        return list(
-            await asyncio.gather(
-                *[
-                    self._async_process_batch_event(async_resolver, appconfig_event, **appconfig_event.arguments)
-                    for appconfig_event in self.current_batch_event
-                ],
-            ),
-        )
 
     def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
         """Call batch event resolver for sync and async methods
@@ -583,25 +422,18 @@ class AppSyncResolver(Router):
         if resolver and async_resolver:
             warnings.warn(
                 f"Both synchronous and asynchronous resolvers found for the same event and field."
-                f"The synchronous resolver takes precedence. Executing: {resolver.__name__}",
+                f"The synchronous resolver takes precedence. Executing: {resolver['func'].__name__}",
                 stacklevel=2,
             )
 
         if resolver:
-            return self._call_sync_batch_resolver(resolver)
+            return self._call_sync_batch_resolver(resolver["func"], resolver["raise_on_error"])
         elif async_resolver:
-            return asyncio.run(self._call_async_batch_resolver(async_resolver))
+            return asyncio.run(
+                self._call_async_batch_resolver(async_resolver["func"], async_resolver["raise_on_error"]),
+            )
         else:
             raise ResolverNotFound(f"No resolver found for '{type_name}.{field_name}'")
-
-    def __call__(
-        self,
-        event: dict,
-        context: LambdaContext,
-        data_model: Type[AppSyncResolverEvent] = AppSyncResolverEvent,
-    ) -> Any:
-        """Implicit lambda handler which internally calls `resolve`"""
-        return self.resolve(event, context, data_model)
 
     def include_router(self, router: "Router") -> None:
         """Adds all resolvers defined in a router
@@ -625,11 +457,29 @@ class AppSyncResolver(Router):
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
         return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
 
-    def batch_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._batch_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+    def batch_resolver(
+        self,
+        type_name: str = "*",
+        field_name: Optional[str] = None,
+        raise_on_error: bool = False,
+    ) -> Callable:
+        return self._batch_resolver_registry.resolver(
+            field_name=field_name,
+            type_name=type_name,
+            raise_on_error=raise_on_error,
+        )
 
-    def batch_async_resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._batch_async_resolver_registry.resolver(field_name=field_name, type_name=type_name)
+    def batch_async_resolver(
+        self,
+        type_name: str = "*",
+        field_name: Optional[str] = None,
+        raise_on_error: bool = False,
+    ) -> Callable:
+        return self._batch_async_resolver_registry.resolver(
+            field_name=field_name,
+            type_name=type_name,
+            raise_on_error=raise_on_error,
+        )
 
     def append_context(self, **additional_context) -> None:
         self._router_context.context = additional_context

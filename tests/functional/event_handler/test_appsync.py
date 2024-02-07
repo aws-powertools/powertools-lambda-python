@@ -398,9 +398,9 @@ def test_resolve_batch_processing_with_raise_on_exception():
         },
     ]
 
-    app = AppSyncResolver(raise_error_on_failed_batch=True)
+    app = AppSyncResolver()
 
-    @app.batch_resolver(field_name="listLocations")
+    @app.batch_resolver(field_name="listLocations", raise_on_error=True)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
@@ -449,9 +449,9 @@ def test_async_resolve_batch_processing_with_raise_on_exception():
         },
     ]
 
-    app = AppSyncResolver(raise_error_on_failed_batch=True)
+    app = AppSyncResolver()
 
-    @app.batch_async_resolver(field_name="listLocations")
+    @app.batch_async_resolver(field_name="listLocations", raise_on_error=True)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
@@ -500,9 +500,9 @@ def test_resolve_batch_processing_without_exception():
         },
     ]
 
-    app = AppSyncResolver(raise_error_on_failed_batch=False)
+    app = AppSyncResolver()
 
-    @app.batch_resolver(field_name="listLocations")
+    @app.batch_resolver(field_name="listLocations", raise_on_error=False)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
@@ -554,9 +554,9 @@ def test_resolve_async_batch_processing_without_exception():
         },
     ]
 
-    app = AppSyncResolver(raise_error_on_failed_batch=False)
+    app = AppSyncResolver()
 
-    @app.batch_async_resolver(field_name="listLocations")
+    @app.batch_async_resolver(field_name="listLocations", raise_on_error=False)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
