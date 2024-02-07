@@ -4,7 +4,7 @@ from aws_lambda_powertools.event_handler import AppSyncResolver
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-app = AppSyncResolver(raise_error_on_failed_batch=True)  # (1)!
+app = AppSyncResolver()
 
 
 posts_related = {
@@ -18,7 +18,7 @@ class PostRelatedNotFound(Exception):
     ...
 
 
-@app.batch_resolver(type_name="Query", field_name="relatedPosts")
+@app.batch_resolver(type_name="Query", field_name="relatedPosts", raise_on_error=True)  # (1)!
 def related_posts(event: AppSyncResolverEvent, post_id: str) -> Optional[Dict]:
     post_found = posts_related.get(post_id, None)
 
