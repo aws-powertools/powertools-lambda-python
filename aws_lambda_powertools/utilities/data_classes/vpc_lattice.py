@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import (
@@ -18,12 +19,10 @@ class VPCLatticeEventBase(BaseProxyEvent):
         """The VPC Lattice body."""
         return self["body"]
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_body)
-        return self._json_data
+        return self._json_deserializer(self.decoded_body)
 
     @property
     def headers(self) -> Dict[str, str]:
