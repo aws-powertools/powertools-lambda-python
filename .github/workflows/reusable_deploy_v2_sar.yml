@@ -91,7 +91,7 @@ jobs:
 
 
       - name: AWS credentials
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_LAYERS_ROLE_ARN }}
@@ -101,7 +101,7 @@ jobs:
       # we then jump to our specific SAR Account with the correctly scoped IAM Role
       # this allows us to have a single trail when a release occurs for a given layer (beta+prod+SAR beta+SAR prod)
       - name: AWS credentials SAR role
-        uses: aws-actions/configure-aws-credentials@5fd3084fc36e372ff1fff382a39b10d03659f355 # v2.2.0
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         id: aws-credentials-sar-role
         with:
           aws-access-key-id: ${{ env.AWS_ACCESS_KEY_ID }}
