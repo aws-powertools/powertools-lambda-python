@@ -21,5 +21,5 @@ def lambda_handler(event: dict, context: LambdaContext):
     return app.resolve(event, context)
 
 
-if __name__ == "__main__":
-    print(app.get_openapi_json_schema())
+if __name__ == "__main__":  # (1)!
+    print(app.get_openapi_json_schema())  # (2)!

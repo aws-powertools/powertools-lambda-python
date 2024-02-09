@@ -476,7 +476,15 @@ We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 4
 
 !!! note "This feature requires [data validation](#data-validation) feature to be enabled."
 
---8<-- "docs/core/event_handler/_swagger_ui.md"
+Behind the scenes, the [data validation](api_gateway.md#data-validation) feature auto-generates an OpenAPI specification from your routes and type annotations. You can use [Swagger UI](https://swagger.io/tools/swagger-ui/){target="_blank" rel="nofollow"} to visualize and interact with your newly auto-documented API.
+
+There are some important **caveats** that you should know before enabling it:
+
+| Caveat                                           | Description                                                                                                                                                                                            |
+| ------------------------------------------------ |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Swagger UI is **publicly accessible by default** | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](api_gateway.md#customizing-swagger-ui) using your preferred authorization mechanism. |
+| **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                   |
+| You need to expose **new routes**                | You'll need to expose the following paths to Lambda: `/swagger`, `/swagger.css`, `/swagger.js`; ignore if you're routing all paths already.                                                            |
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
@@ -927,7 +935,10 @@ To implement these customizations, include extra parameters when defining your r
 
 #### Customizing Swagger UI
 
---8<-- "docs/core/event_handler/_openapi_customization_swagger.md"
+???+note "Customizing the Swagger metadata"
+    The `enable_swagger` method accepts the same metadata as described at [Customizing OpenAPI metadata](api_gateway.md#customizing-openapi-metadata).
+
+The Swagger UI appears by default at the `/swagger` path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.
 
 Below is an example configuration for serving Swagger UI from a custom path or CDN, with assets like CSS and JavaScript loading from a chosen CDN base URL.
 

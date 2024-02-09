@@ -18,4 +18,4 @@ def current_time() -> int:
 @logger.inject_lambda_context
 @tracer.capture_lambda_handler
 def lambda_handler(event: dict, context: LambdaContext):
-    return app.resolve(event, context)
+    return app.resolve(event, context)  # (2)!
