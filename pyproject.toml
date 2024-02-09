@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aws_lambda_powertools"
-version = "2.33.0"
+version = "2.33.1"
 description = "Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity."
 authors = ["Amazon Web Services"]
 include = ["aws_lambda_powertools/py.typed", "THIRD-PARTY-LICENSES"]
@@ -88,7 +88,7 @@ checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.34.24"
 ijson = "^3.2.2"
 typed-ast = { version = "^1.5.5", python = "< 3.8" }
-hvac = "^1.2.1"
+hvac = "^2.1.0"
 aws-requests-auth = "^0.4.3"
 datadog-lambda = "^5.85.0"
 

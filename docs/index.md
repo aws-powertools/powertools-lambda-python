@@ -85,7 +85,7 @@ You can include Powertools for AWS Lambda (Python) Lambda Layer using [AWS Lambd
         | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
         | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
         | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
+        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
         | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
         | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
         | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
@@ -119,7 +119,7 @@ You can include Powertools for AWS Lambda (Python) Lambda Layer using [AWS Lambd
         | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
         | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
         | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
+        | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
         | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
         | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
         | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |

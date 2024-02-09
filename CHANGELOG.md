@@ -4,27 +4,12 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.33.1"></a>
+## [v2.33.1] - 2024-02-09
 ## Maintenance
 
-* **ci:** drop support for Python 3.7 ([#3638](https://github.com/aws-powertools/powertools-lambda-python/issues/3638))
-* **ci:** enable Redis e2e tests ([#3718](https://github.com/aws-powertools/powertools-lambda-python/issues/3718))
-* **deps:** bump squidfunk/mkdocs-material from `a4a2029` to `e0d6c67` in /docs ([#3708](https://github.com/aws-powertools/powertools-lambda-python/issues/3708))
-* **deps:** bump actions/upload-artifact from 3.1.3 to 4.3.1 ([#3714](https://github.com/aws-powertools/powertools-lambda-python/issues/3714))
-* **deps:** bump actions/download-artifact from 4.1.1 to 4.1.2 ([#3725](https://github.com/aws-powertools/powertools-lambda-python/issues/3725))
-* **deps:** bump release-drafter/release-drafter from 5.25.0 to 6.0.0 ([#3699](https://github.com/aws-powertools/powertools-lambda-python/issues/3699))
-* **deps:** bump actions/download-artifact from 3.0.2 to 4.1.1 ([#3612](https://github.com/aws-powertools/powertools-lambda-python/issues/3612))
-* **deps:** bump actions/dependency-review-action from 3.1.5 to 4.0.0 ([#3646](https://github.com/aws-powertools/powertools-lambda-python/issues/3646))
-* **deps:** bump codecov/codecov-action from 3.1.6 to 4.0.1 ([#3700](https://github.com/aws-powertools/powertools-lambda-python/issues/3700))
-* **deps-dev:** bump the boto-typing group with 7 updates ([#3709](https://github.com/aws-powertools/powertools-lambda-python/issues/3709))
-* **deps-dev:** bump coverage from 7.2.7 to 7.4.1 ([#3713](https://github.com/aws-powertools/powertools-lambda-python/issues/3713))
-* **deps-dev:** bump httpx from 0.24.1 to 0.26.0 ([#3712](https://github.com/aws-powertools/powertools-lambda-python/issues/3712))
-* **deps-dev:** bump mypy from 1.4.1 to 1.8.0 ([#3710](https://github.com/aws-powertools/powertools-lambda-python/issues/3710))
-* **deps-dev:** bump pytest from 7.4.4 to 8.0.0 ([#3711](https://github.com/aws-powertools/powertools-lambda-python/issues/3711))
-* **deps-dev:** bump types-python-dateutil from 2.8.19.14 to 2.8.19.20240106 ([#3720](https://github.com/aws-powertools/powertools-lambda-python/issues/3720))
-* **deps-dev:** bump ruff from 0.1.15 to 0.2.0 ([#3702](https://github.com/aws-powertools/powertools-lambda-python/issues/3702))
-* **deps-dev:** bump aws-cdk from 2.125.0 to 2.126.0 ([#3701](https://github.com/aws-powertools/powertools-lambda-python/issues/3701))
-* **deps-dev:** bump cfn-lint from 0.83.8 to 0.85.0 ([#3724](https://github.com/aws-powertools/powertools-lambda-python/issues/3724))
-* **deps-dev:** bump isort from 5.11.5 to 5.13.2 ([#3723](https://github.com/aws-powertools/powertools-lambda-python/issues/3723))
+* version bump
 
 
 <a name="v2.33.0"></a>
@@ -4333,7 +4318,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.1...HEAD
+[v2.33.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.0...v2.33.1
 [v2.33.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.32.0...v2.33.0
 [v2.32.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.31.0...v2.32.0
 [v2.31.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.30.2...v2.31.0
