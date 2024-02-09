@@ -37,28 +37,27 @@ stateDiagram-v2
 
 ## Key Features
 
-* Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
-* Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
-* Support async Python 3.8+ functions, and generators
+* Automatically parse API arguments to function arguments
+* Integrates with [Event Source Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
+* Support async Python 3.8+ functions and generators
 
 ## Terminology
 
 **[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
 
-**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language _(SDL)_, _e.g., `@function`_. Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
 
 ## Getting started
 
+???+ tip "Tip: Designing GraphQL Schemas for the first time?"
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} to understand how to define types, nesting, and pagination.
+
 ### Required resources
 
-You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.
+You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use Event Handler as routing requires no dependency (_standard library_).
 
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
-
-???+ tip "Tip: Designing GraphQL Schemas for the first time?"
-    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
 === "getting_started_schema.graphql"
 
@@ -66,7 +65,7 @@ This is the sample infrastructure we are using for the initial examples with a A
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "template.yml"
+=== "template.yaml"
 
     ```yaml hl_lines="59-60 71-72 94-95 104-105 112-113"
     --8<-- "examples/event_handler_graphql/sam/template.yaml"
