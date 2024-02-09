@@ -3,7 +3,37 @@ title: GraphQL API
 description: Core utility
 ---
 
-Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.
+Event Handler for AWS AppSync and Amplify GraphQL Transformer.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    EventSource: AWS Lambda Event Sources
+    EventHandlerResolvers: AWS AppSync Direct invocation<br/><br/> AWS AppSync Batch invocation
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Adapts response to Event Source contract
+    LambdaResponse: Lambda response
+
+    state EventSource {
+        EventHandlerResolvers
+    }
+
+    EventHandlerResolvers --> LambdaInit
+
+    LambdaInit --> EventHandler
+    EventHandler --> EventHandlerResolver
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+    }
+
+    EventHandler --> LambdaResponse
+```
 
 ## Key Features
 
