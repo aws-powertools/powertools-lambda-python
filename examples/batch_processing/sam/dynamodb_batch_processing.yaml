@@ -6,11 +6,11 @@ Globals:
   Function:
     Timeout: 5
     MemorySize: 256
-    Runtime: python3.10
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_SERVICE_NAME: hello
 
 Resources:

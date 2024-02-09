@@ -20,11 +20,11 @@ Let's clone our sample project before we add one feature at a time.
     Bootstrap directly via SAM CLI:
 
     ```shell
-    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.11 --no-tracing
+    sam init --app-template hello-world-powertools-python --name sam-app --package-type Zip --runtime python3.12 --no-tracing
     ```
 
 ```bash title="Use SAM CLI to initialize the sample project"
-sam init --runtime python3.11 --dependency-manager pip --app-template hello-world --name powertools-quickstart
+sam init --runtime python3.12 --dependency-manager pip --app-template hello-world --name powertools-quickstart
 ```
 
 ### Project structure
@@ -226,7 +226,7 @@ For this to work, we could create a new Lambda function to handle incoming reque
 We could group similar routes and intents, separate read and write operations resulting in fewer functions. It doesn't address the boilerplate routing code, but maybe it will be easier to add additional URLs.
 
 ???+ info "Info: You might be already asking yourself about mono vs micro-functions"
-    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway/#considerations){target="_blank"} later.
+    If you want a more detailed explanation of these two approaches, head over to the [trade-offs on each approach](../core/event_handler/api_gateway.md#considerations){target="_blank"} later.
 
 A first attempt at the routing logic might look similar to the following code snippet.
 
@@ -392,7 +392,7 @@ The first option could be to use the standard Python Logger, and use a specializ
     formatter = jsonlogger.JsonFormatter(fmt="%(asctime)s %(levelname)s %(name)s %(message)s")
     logHandler.setFormatter(formatter)
     logger.addHandler(logHandler)
-    logger.setLevel(os.getenv("LOG_LEVEL", "INFO"))
+    logger.setLevel(os.getenv("POWERTOOLS_LOG_LEVEL", "INFO"))
 
     app = APIGatewayRestResolver()
 
@@ -424,7 +424,7 @@ With just a few lines our logs will now output to `JSON` format. We've taken the
 
 * **L7**: Creates an application logger named `APP`.
 * **L8-11**: Configures handler and formatter.
-* **L12**: Sets the logging level set in the `LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
+* **L12**: Sets the logging level set in the `POWERTOOLS_LOG_LEVEL` environment variable, or `INFO` as a sentinel value.
 
 After that, we use this logger in our application code to record the required information. We see logs structured as follows:
 
@@ -485,7 +485,7 @@ def lambda_handler(event, context):
 
 Let's break this down:
 
-* **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `LOG_LEVEL` env var isn't set.
+* **L5**: We add Powertools for AWS Lambda (Python) Logger; the boilerplate is now done for you. By default, we set `INFO` as the logging level if `POWERTOOLS_LOG_LEVEL` env var isn't set.
 * **L22**: We use `logger.inject_lambda_context` decorator to inject key information from Lambda context into every log.
 * **L22**: We also instruct Logger to use the incoming API Gateway Request ID as a [correlation id](../core/logger.md##set_correlation_id-method){target="_blank"} automatically.
 * **L22**: Since we're in dev, we also use `log_event=True` to automatically log each incoming request for debugging. This can be also set via [environment variables](./index.md#environment-variables){target="_blank"}.
@@ -773,7 +773,7 @@ Another subtle difference is that you can now run your Lambda functions and unit
 Powertools for AWS Lambda (Python) optimizes for Lambda compute environment. As such, we add these and other common approaches to accelerate your development, so you don't worry about implementing every cross-cutting concern.
 
 ???+ tip
-    You can [opt-out some of these behaviours](../core/tracer/#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
+    You can [opt-out some of these behaviours](../core/tracer.md#advanced){target="_blank"} like disabling response capturing,  explicitly patching only X modules, etc.
 
 Repeat the process of building, deploying, and invoking your application via the API endpoint. Within the [AWS X-Ray Console](https://console.aws.amazon.com/xray/home#/traces/){target="_blank"}, you should see a similar view:
 

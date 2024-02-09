@@ -11,10 +11,14 @@ nav:
       - API reference: api/" target="_blank
       - Upgrade guide: upgrade.md
       - We Made This (Community): we_made_this.md
+      - Roadmap: roadmap.md
       - Features:
           - core/tracer.md
           - core/logger.md
-          - core/metrics.md
+          - Metrics:
+              - core/metrics/index.md
+              - Amazon CloudWatch EMF: core/metrics.md
+              - Datadog: core/metrics/datadog.md
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md
@@ -25,6 +29,7 @@ nav:
           - utilities/data_classes.md
           - utilities/parser.md
           - utilities/idempotency.md
+          - utilities/data_masking.md
           - utilities/feature_flags.md
           - utilities/streaming.md
           - utilities/middleware_factory.md
@@ -34,8 +39,27 @@ nav:
   - Processes:
       - Security: security.md
       - Automation: automation.md
+      - Versioning policy: versioning.md
       - Roadmap: roadmap.md
       - Maintainers: maintainers.md
+      - Contributing:
+          # - contributing/index.md
+          - Development environment: contributing/setup.md
+          - Your first contribution: contributing/getting_started.md
+          - Conventions: contributing/conventions.md
+          # - Testing:
+          #     - Unit tests: contributing/testing/unit_tests.md
+          #     - Functional tests: contributing/testing/functional_tests.md
+          #     - End-to-end tests: contributing/testing/e2e_tests.md
+          # - Documentation:
+          #     - User guide: contributing/documentation/user_guide.md
+          #     - API guide: contributing/documentation/api_guide.md
+          #     - Tutorials: contributing/documentation/tutorials.md
+          #     - Request For Comments (RFC): contributing/documentation/rfc.md
+          # - Tracks:
+          #     - Overview: contributing/tracks/overview.md
+          #     - Casual to regular contributor: contributing/tracks/casual_regular_contributor.md
+          #     - Customer to advocate: contributing/tracks/customer_advocate.md
 
 theme:
   name: material
@@ -56,7 +80,6 @@ theme:
   features:
     - header.autohide
     - navigation.sections
-    - navigation.expand
     - navigation.top
     - navigation.instant
     - navigation.indexes
@@ -72,6 +95,7 @@ theme:
 
 markdown_extensions:
   - admonition
+  - abbr
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.highlight:
@@ -81,6 +105,8 @@ markdown_extensions:
       base_path: "."
       check_paths: true
       restrict_base_path: false
+      auto_append:
+        - includes/abbreviations.md
   - meta
   - toc:
       permalink: true
@@ -95,6 +121,8 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tasklist:
+      custom_checkbox: true
 
 copyright: Copyright &copy; 2023 Amazon Web Services
 

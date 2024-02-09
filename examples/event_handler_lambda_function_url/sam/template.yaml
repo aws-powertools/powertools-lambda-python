@@ -5,11 +5,11 @@ Description: Hello world event handler Lambda Function URL
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.9
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: example
@@ -28,4 +28,4 @@ Resources:
       CodeUri: ../src
       Description: API handler function
       FunctionUrlConfig:
-        AuthType: NONE  # AWS_IAM for added security beyond sample documentation
+        AuthType: NONE # AWS_IAM for added security beyond sample documentation

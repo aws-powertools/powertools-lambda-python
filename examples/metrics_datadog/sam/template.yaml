@@ -1,0 +1,39 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Powertools for AWS Lambda (Python) version
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.12
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_METRICS_NAMESPACE: ServerlessAirline
+        # [Production setup]
+        # DATADOG_API_KEY_SECRET_ARN: "<AWS Secrets Manager Secret ARN containing Datadog API key>"
+        # [Development only]
+        DD_API_KEY: "<YOUR DATADOG API KEY>"
+        # Configuration details: https://docs.datadoghq.com/serverless/installation/python/?tab=datadogcli
+        DD_SITE: datadoghq.com
+
+    Layers:
+      # Find the latest Layer version in the official documentation
+      # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40
+      # Find the latest Layer version in the Datadog official documentation
+
+      # Datadog SDK
+      # Latest versions: https://github.com/DataDog/datadog-lambda-python/releases
+      - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Python310:78
+
+      # Datadog Lambda Extension
+      # Latest versions: https://github.com/DataDog/datadog-lambda-extension/releases
+      - !Sub arn:aws:lambda:${AWS::Region}:464622532012:layer:Datadog-Extension:45
+
+Resources:
+  CaptureLambdaHandlerExample:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ../src
+      Handler: capture_lambda_handler.handler

@@ -107,6 +107,17 @@ The following will retrieve the latest version and store it in the cache.
     --8<-- "examples/parameters/src/getting_started_appconfig.py"
     ```
 
+### Environment variables
+
+The following environment variables are available to configure the parameter utility at a global scope:
+
+| Setting               | Description                                                                    | Environment variable                | Default |
+|-----------------------|--------------------------------------------------------------------------------|-------------------------------------|---------|
+| **Max Age**           | Adjusts for how long values are kept in cache (in seconds).                    | `POWERTOOLS_PARAMETERS_MAX_AGE`     | `5`     |
+| **Debug Sample Rate** | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store. | `POWERTOOLS_PARAMETERS_SSM_DECRYPT` | `false` |
+
+You can also use [`POWERTOOLS_PARAMETERS_MAX_AGE`](#adjusting-cache-ttl) through the `max_age` parameter and [`POWERTOOLS_PARAMETERS_SSM_DECRYPT`](#ssmprovider) through the `decrypt` parameter to override the environment variable values.
+
 ## Advanced
 
 ### Adjusting cache TTL

@@ -3,9 +3,11 @@ import json
 import logging
 import zlib
 from datetime import datetime
-from typing import List, Type, Union
+from typing import Optional, Type, Union
 
 from pydantic import BaseModel, Field, validator
+
+from aws_lambda_powertools.shared.types import List
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +25,7 @@ class CloudWatchLogsDecode(BaseModel):
     logStream: str
     subscriptionFilters: List[str]
     logEvents: List[CloudWatchLogsLogEvent]
+    policyLevel: Optional[str] = None
 
 
 class CloudWatchLogsData(BaseModel):

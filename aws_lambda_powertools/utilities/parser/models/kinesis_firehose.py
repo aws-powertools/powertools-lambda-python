@@ -10,7 +10,7 @@ class KinesisFirehoseRecordMetadata(BaseModel):
     partitionKey: str
     approximateArrivalTimestamp: PositiveInt
     sequenceNumber: str
-    subsequenceNumber: str
+    subsequenceNumber: int
 
 
 class KinesisFirehoseRecord(BaseModel):

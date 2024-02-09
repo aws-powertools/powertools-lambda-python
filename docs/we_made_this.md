@@ -82,7 +82,7 @@ This article walks through how CyberArk uses Powertools to implement Feature Fla
 
 ### Designing for Idempotency
 
-> **Author: [Valentin Dreismann](linkedin.com/in/valentin-dreismann-69694b16a){target="_blank" rel="nofollow"}** :material-linkedin:
+> **Author: [Valentin Dreismann](https://linkedin.com/in/valentin-dreismann-69694b16a){target="_blank" rel="nofollow"}** :material-linkedin:
 
 This article outlines the importance of idempotency, key considerations and trade-offs when implementing in your systems.
 
@@ -96,6 +96,22 @@ This blog post focuses on the importance of idempotency in distributed services 
 
 * [Implementing Idempotency in Serverless Architectures](https://medium.com/@nuatmochoi/implementing-idempotency-in-serverless-architectures-f9079ef1c7da){target="_blank" rel="nofollow"}
 
+### Creating a serverless API using Powertools for AWS Lambda and AWS CDK
+
+This blog post showcases how to use AWS CDK and Powertools for AWS Lambda, along with Amazon API Gateway and AWS Lambda, to effortlessly deploy scalable infrastructure with just a few lines of code.
+
+> **Author: [Thomas Taylor](https://www.linkedin.com/in/iamthomastaylor/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Creating a serverless API using Powertools for AWS Lambda and CDK](https://how.wtf/creating-a-serverless-api-using-aws-lambda-powertools-and-cdk.html){target="_blank" rel="nofollow"}
+
+### Boost App Engagement with AWS CloudWatch Metrics & Powertools for AWS
+
+This article will guide you through personalizing observability by integrating CloudWatch metrics with Powertools for AWS Lambda into mobile push notifications, a strategy that significantly enhances mobile app engagement
+
+> **Author: [Nathan Hanks](https://www.linkedin.com/in/nathan-hanks-25151815/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Creating a serverless API using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/boost-app-engagement-with-aws-cloudwatch-metrics-powertools-for-aws){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
@@ -106,7 +122,7 @@ When building applications with AWS Lambda it is critical to verify the data str
 
 In this session you will learn how to increase code quality, extensibility and testability, boost you productivity and ship rock solid apps to production.
 
-<iframe src="https://player.twitch.tv/?video=1034744364&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://player.twitch.tv/?video=1034744364&parent=docs.powertools.aws.dev&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 #### Talk DEV to me | Feature Flags with AWS Lambda Powertools
 
@@ -114,7 +130,7 @@ In this session you will learn how to increase code quality, extensibility and t
 
 A deep dive in the [Feature Flags](./utilities/feature_flags.md){target="_blank" rel="nofollow"} feature along with tips and tricks.
 
-<iframe src="https://player.twitch.tv/?video=1174133534&parent=awslabs.github.io&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
+<iframe src="https://player.twitch.tv/?video=1174133534&parent=docs.powertools.aws.dev&autoplay=false" frameborder="0" allowfullscreen="true" scrolling="no" height="378" width="620"></iframe>
 
 #### Level Up Your CI/CD With Smart AWS Feature Flags
 

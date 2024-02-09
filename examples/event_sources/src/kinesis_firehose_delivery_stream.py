@@ -1,28 +1,28 @@
-import base64
-import json
-
 from aws_lambda_powertools.utilities.data_classes import (
+    KinesisFirehoseDataTransformationResponse,
     KinesisFirehoseEvent,
     event_source,
 )
+from aws_lambda_powertools.utilities.serialization import base64_from_json
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
 @event_source(data_class=KinesisFirehoseEvent)
 def lambda_handler(event: KinesisFirehoseEvent, context: LambdaContext):
-    result = []
+    result = KinesisFirehoseDataTransformationResponse()
 
     for record in event.records:
-        # if data was delivered as json; caches loaded value
-        data = record.data_as_json
+        # get original data using data_as_text property
+        data = record.data_as_text  # (1)!
 
-        processed_record = {
-            "recordId": record.record_id,
-            "data": base64.b64encode(json.dumps(data).encode("utf-8")),
-            "result": "Ok",
-        }
+        ## generate data to return
+        transformed_data = {"new_data": "transformed data using Powertools", "original_payload": data}
 
-        result.append(processed_record)
+        processed_record = record.build_data_transformation_response(
+            data=base64_from_json(transformed_data),  # (2)!
+        )
+
+        result.add_record(processed_record)
 
     # return transformed records
-    return {"records": result}
+    return result.asdict()

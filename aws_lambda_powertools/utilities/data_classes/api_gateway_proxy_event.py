@@ -33,6 +33,25 @@ class APIGatewayEventAuthorizer(DictWrapper):
         """The authorizer latency in ms."""
         return self.get("integrationLatency")
 
+    def get_context(self) -> Dict[str, Any]:
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+        Example
+        --------
+
+        ```python
+        ctx: dict = request_context.authorizer.get_context()
+
+        tenant_id = ctx.get("tenant_id")
+        ```
+
+        Returns:
+        --------
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
+        """
+        return self._data
+
 
 class APIGatewayEventRequestContext(BaseRequestContext):
     @property
@@ -98,6 +117,24 @@ class APIGatewayProxyEvent(BaseProxyEvent):
     @property
     def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
         return self.get("multiValueQueryStringParameters")
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
+        if self.multi_value_query_string_parameters:
+            return self.multi_value_query_string_parameters
+
+        return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        headers: Dict[str, Any] = {}
+
+        if self.multi_value_headers:
+            headers = self.multi_value_headers
+        else:
+            headers = self.headers
+
+        return {key.lower(): value for key, value in headers.items()}
 
     @property
     def request_context(self) -> APIGatewayEventRequestContext:
@@ -184,6 +221,25 @@ class RequestContextV2Authorizer(DictWrapper):
         """Lambda authorization context details"""
         return self.get("lambda")
 
+    def get_context(self) -> Dict[str, Any]:
+        """Retrieve the authorization context details injected by a Lambda Authorizer.
+
+        Example
+        --------
+
+        ```python
+        ctx: dict = request_context.authorizer.get_context()
+
+        tenant_id = ctx.get("tenant_id")
+        ```
+
+        Returns:
+        --------
+        Dict[str, Any]
+            A dictionary containing Lambda authorization context details.
+        """
+        return self.get("lambda", {}) or {}
+
     @property
     def iam(self) -> Optional[RequestContextV2AuthorizerIam]:
         """IAM authorization details used for making the request."""
@@ -261,3 +317,21 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
 
     def header_serializer(self):
         return HttpApiHeadersSerializer()
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, Any]]:
+        if self.query_string_parameters is not None:
+            query_string = {
+                key: value.split(",") if "," in value else value for key, value in self.query_string_parameters.items()
+            }
+            return query_string
+
+        return {}
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.headers is not None:
+            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
+            return headers
+
+        return {}

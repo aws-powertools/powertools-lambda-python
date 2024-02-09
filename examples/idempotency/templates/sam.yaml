@@ -17,7 +17,7 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Runtime: python3.10
+      Runtime: python3.12
       Handler: app.py
       Policies:
         - Statement:

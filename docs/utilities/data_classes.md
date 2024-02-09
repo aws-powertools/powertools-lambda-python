@@ -75,7 +75,7 @@ Log Data Event for Troubleshooting
 ## Supported event sources
 
 | Event Source                                                              | Data_class                                         |
-| ------------------------------------------------------------------------- | -------------------------------------------------- |
+|---------------------------------------------------------------------------|----------------------------------------------------|
 | [Active MQ](#active-mq)                                                   | `ActiveMQEvent`                                    |
 | [API Gateway Authorizer](#api-gateway-authorizer)                         | `APIGatewayAuthorizerRequestEvent`                 |
 | [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                   | `APIGatewayAuthorizerEventV2`                      |
@@ -85,6 +85,7 @@ Log Data Event for Troubleshooting
 | [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
+| [Bedrock Agent](#bedrock-agent)                                           | `BedrockAgent`                                     |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -98,12 +99,14 @@ Log Data Event for Troubleshooting
 | [Lambda Function URL](#lambda-function-url)                               | `LambdaFunctionUrlEvent`                           |
 | [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
 | [S3](#s3)                                                                 | `S3Event`                                          |
+| [S3 Batch Operations](#s3-batch-operations)                               | `S3BatchOperationEvent`                            |
 | [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
 | [S3 EventBridge Notification](#s3-eventbridge-notification)               | `S3EventBridgeNotificationEvent`                   |
 | [SES](#ses)                                                               | `SESEvent`                                         |
 | [SNS](#sns)                                                               | `SNSEvent`                                         |
 | [SQS](#sqs)                                                               | `SQSEvent`                                         |
-| [VPC Lattice](#vpc-lattice)                                               | `VPCLatticeEvent`                                  |
+| [VPC Lattice V2](#vpc-lattice-v2)                                         | `VPCLatticeV2Event`                                |
+| [VPC Lattice V1](#vpc-lattice-v1)                                         | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
@@ -197,7 +200,7 @@ Use **`APIGatewayAuthorizerRequestEvent`** for type `REQUEST` and **`APIGatewayA
         if user.get("isAdmin", False):
             policy.allow_all_routes()
         else:
-            policy.allow_route(HttpVerb.GET, "/user-profile")
+            policy.allow_route(HttpVerb.GET.value, "/user-profile")
 
         return policy.asdict()
     ```
@@ -481,6 +484,14 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 === "Event - ScheduledNotification"
     ```json
     --8<-- "examples/event_sources/src/aws_config_rule_scheduled.json"
+    ```
+
+### Bedrock Agent
+
+=== "app.py"
+
+    ```python hl_lines="2 8 10"
+    --8<-- "examples/event_sources/src/bedrock_agent_event.py"
     ```
 
 ### CloudWatch Dashboard Custom Widget
@@ -975,17 +986,38 @@ or plain text, depending on the original payload.
 
 ### Kinesis Firehose delivery stream
 
-Kinesis Firehose Data Transformation can use a Lambda Function to modify the records
-inline, and re-emit them back to the Delivery Stream.
+When using Kinesis Firehose, you can use a Lambda function to [perform data transformation](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html){target="_blank"}. For each transformed record, you can choose to either:
 
-Similar to Kinesis Data Streams, the events contain base64 encoded data. You can use the helper
-function to access the data either as json or plain text, depending on the original payload.
+* **A)** Put them back to the delivery stream (default)
+* **B)** Drop them so consumers don't receive them (e.g., data validation)
+* **C)** Indicate a record failed data transformation and should be retried
 
-=== "app.py"
+To do that, you can use `KinesisFirehoseDataTransformationResponse` class along with helper functions to make it easier to decode and encode base64 data in the stream.
 
-    ```python
+=== "Transforming streaming records"
+
+    ```python hl_lines="2-3 12 28"
     --8<-- "examples/event_sources/src/kinesis_firehose_delivery_stream.py"
     ```
+
+    1. **Ingesting JSON payloads?** <br><br> Use `record.data_as_json` to easily deserialize them.
+    2. For your convenience, `base64_from_json` serializes a dict to JSON, then encode as base64 data.
+
+=== "Dropping invalid records"
+
+    ```python hl_lines="5-6 16 34"
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_drop.py"
+    ```
+
+    1. This exception would be generated from `record.data_as_json` if invalid payload.
+
+=== "Indicating a processing failure"
+
+    ```python hl_lines="2-3 33"
+    --8<-- "examples/event_sources/src/kinesis_firehose_response_exception.py"
+    ```
+
+    1. This record will now be sent to your [S3 bucket in the `processing-failed` folder](https://docs.aws.amazon.com/firehose/latest/dev/data-transformation.html#data-transformation-failure-handling){target="_blank"}.
 
 ### Lambda Function URL
 
@@ -1045,6 +1077,16 @@ for more details.
             do_something_with(f"{bucket_name}/{object_key}")
     ```
 
+### S3 Batch Operations
+
+This example is based on the AWS S3 Batch Operations documentation [Example Lambda function for S3 Batch Operations](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html){target="_blank"}.
+
+=== "app.py"
+
+    ```python hl_lines="4 8 10 20 25 27 29 33"
+    --8<-- "examples/event_sources/src/s3_batch_operation.py"
+    ```
+
 ### S3 Object Lambda
 
 This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3](https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/){target="_blank"}.
@@ -1095,6 +1137,22 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
         file_key = event.detail.object.key
     ```
 
+### Secrets Manager
+
+AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. [Click here](https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html){target="_blank"} for more information about rotating AWS Secrets Manager secrets.
+
+=== "app.py"
+
+    ```python hl_lines="2 7 11"
+    --8<-- "examples/event_sources/src/secrets_manager.py"
+    ```
+
+=== "Secrets Manager Example Event"
+
+    ```json
+    --8<-- "tests/events/secretsManagerEvent.json"
+    ```
+
 ### SES
 
 === "app.py"
@@ -1143,7 +1201,25 @@ This example is based on the AWS Blog post [Introducing Amazon S3 Object Lambda 
             do_something_with(record.body)
     ```
 
-### VPC Lattice
+### VPC Lattice V2
+
+You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service using [Payload V2](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html#vpc-lattice-receiving-events){target="_blank"}.
+
+[Click here](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"} for more information about using AWS Lambda with Amazon VPC Lattice.
+
+=== "app.py"
+
+    ```python hl_lines="2 8"
+    --8<-- "examples/event_sources/src/vpc_lattice_v2.py"
+    ```
+
+=== "Lattice Example Event"
+
+    ```json
+    --8<-- "examples/event_sources/src/vpc_lattice_v2_payload.json"
+    ```
+
+### VPC Lattice V1
 
 You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.
 

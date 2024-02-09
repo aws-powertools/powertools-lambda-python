@@ -5,12 +5,13 @@ import json
 import logging
 import os
 import time
+import traceback
 from abc import ABCMeta, abstractmethod
 from datetime import datetime, timezone
 from functools import partial
 from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, Union
 
-from aws_lambda_powertools.logging.types import LogRecord
+from aws_lambda_powertools.logging.types import LogRecord, LogStackTrace
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
@@ -44,14 +45,14 @@ RESERVED_LOG_ATTRS = (
 
 class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     @abstractmethod
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
 
     @abstractmethod
-    def clear_state(self):
+    def clear_state(self) -> None:
         """Removes any previously added logging keys"""
         raise NotImplementedError()
 
@@ -77,8 +78,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         log_record_order: List[str] | None = None,
         utc: bool = False,
         use_rfc3339: bool = False,
+        serialize_stacktrace: bool = True,
         **kwargs,
-    ):
+    ) -> None:
         """Return a LambdaPowertoolsFormatter instance.
 
         The `log_record_order` kwarg is used to specify the order of the keys used in
@@ -131,6 +133,7 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
             default=self.json_default,
             separators=(",", ":"),
             indent=self.json_indent,
+            ensure_ascii=False,  # see #3474
         )
 
         self.datefmt = datefmt
@@ -144,9 +147,13 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
         if self.utc:
             self.converter = time.gmtime
+        else:
+            self.converter = time.localtime
 
         self.keys_combined = {**self._build_default_keys(), **kwargs}
         self.log_format.update(**self.keys_combined)
+
+        self.serialize_stacktrace = serialize_stacktrace
 
         super().__init__(datefmt=self.datefmt)
 
@@ -158,11 +165,15 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         """Format logging record as structured JSON str"""
         formatted_log = self._extract_log_keys(log_record=record)
         formatted_log["message"] = self._extract_log_message(log_record=record)
+
         # exception and exception_name fields can be added as extra key
         # in any log level, we try to extract and use them first
         extracted_exception, extracted_exception_name = self._extract_log_exception(log_record=record)
         formatted_log["exception"] = formatted_log.get("exception", extracted_exception)
         formatted_log["exception_name"] = formatted_log.get("exception_name", extracted_exception_name)
+        if self.serialize_stacktrace:
+            # Generate the traceback from the traceback library
+            formatted_log["stack_trace"] = self._serialize_stacktrace(log_record=record)
         formatted_log["xray_trace_id"] = self._get_latest_trace_id()
         formatted_log = self._strip_none_records(records=formatted_log)
 
@@ -217,26 +228,26 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
         custom_fmt = self.default_time_format.replace(self.custom_ms_time_directive, msecs)
         return time.strftime(custom_fmt, record_ts)
 
-    def append_keys(self, **additional_keys):
+    def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
 
-    def remove_keys(self, keys: Iterable[str]):
+    def remove_keys(self, keys: Iterable[str]) -> None:
         for key in keys:
             self.log_format.pop(key, None)
 
-    def clear_state(self):
+    def clear_state(self) -> None:
         self.log_format = dict.fromkeys(self.log_record_order)
         self.log_format.update(**self.keys_combined)
 
     @staticmethod
-    def _build_default_keys():
+    def _build_default_keys() -> Dict[str, str]:
         return {
             "level": "%(levelname)s",
             "location": "%(funcName)s:%(lineno)d",
             "timestamp": "%(asctime)s",
         }
 
-    def _get_latest_trace_id(self):
+    def _get_latest_trace_id(self) -> Optional[str]:
         xray_trace_id_key = self.log_format.get("xray_trace_id", "")
         if xray_trace_id_key is None:
             # key is explicitly disabled; ignore it. e.g., Logger(xray_trace_id=None)
@@ -272,6 +283,24 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
                 pass
 
         return message
+
+    def _serialize_stacktrace(self, log_record: logging.LogRecord) -> LogStackTrace | None:
+        if log_record.exc_info:
+            exception_info: LogStackTrace = {
+                "type": log_record.exc_info[0].__name__,  # type: ignore
+                "value": log_record.exc_info[1],  # type: ignore
+                "module": log_record.exc_info[1].__class__.__module__,
+                "frames": [],
+            }
+
+            exception_info["frames"] = [
+                {"file": fs.filename, "line": fs.lineno, "function": fs.name, "statement": fs.line}
+                for fs in traceback.extract_tb(log_record.exc_info[2])
+            ]
+
+            return exception_info
+
+        return None
 
     def _extract_log_exception(self, log_record: logging.LogRecord) -> Union[Tuple[str, str], Tuple[None, None]]:
         """Format traceback information, if available

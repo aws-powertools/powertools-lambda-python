@@ -31,7 +31,7 @@ def lambda_handler(event, context: LambdaContext):
         processed_messages: List[Tuple] = processor.process()
 
     for message in processed_messages:
-        status: Literal["success"] | Literal["fail"] = message[0]
+        status: Literal["success", "fail"] = message[0]
         cause: str = message[1]  # (2)!
         record: SQSRecord = message[2]
 

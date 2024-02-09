@@ -5,16 +5,16 @@ Description: Powertools for AWS Lambda (Python) version
 Globals:
   Function:
     Timeout: 5
-    Runtime: python3.10
+    Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
         POWERTOOLS_SERVICE_NAME: payment
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
     Layers:
       # Find the latest Layer version in the official documentation
       # https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer
-      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:40
+      - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61
 
 Resources:
   LoggerLambdaHandlerExample:

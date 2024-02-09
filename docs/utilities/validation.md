@@ -112,8 +112,9 @@ Here is a sample custom EventBridge event, where we only validate what's inside 
     ```json
     --8<-- "examples/validation/src/getting_started_validator_unwrapping_payload.json"
     ```
-<!-- markdownlint-disable-next-line MD013 -->
+<!-- markdownlint-disable MD013 -->
 This is quite powerful because you can use JMESPath Query language to extract records from [arrays](https://jmespath.org/tutorial.html#list-and-slice-projections){target="_blank" rel="nofollow"}, combine [pipe](https://jmespath.org/tutorial.html#pipe-expressions){target="_blank" rel="nofollow"} and [function expressions](https://jmespath.org/tutorial.html#functions){target="_blank" rel="nofollow"}.
+<!-- markdownlint-enable MD013 -->
 
 When combined, these features allow you to extract what you need before validating the actual payload.
 
@@ -141,16 +142,16 @@ We provide built-in envelopes to easily extract the payload from popular event s
 
 Here is a handy table with built-in envelopes along with their JMESPath expressions in case you want to build your own.
 
-| Envelope                          | JMESPath expression                                                      |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                                  |
-| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                                  |
-| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                                 |
-| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data) | powertools_json(@).logEvents[*]` |
-| **`EVENTBRIDGE`**                 | `detail`                                                                 |
-| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))`            |
-| **`SNS`**                         | `Records[0].Sns.Message | powertools_json(@)`                            |
-| **`SQS`**                         | `Records[*].powertools_json(body)`                                       |
+| Envelope                          | JMESPath expression                                           |
+| --------------------------------- | ------------------------------------------------------------- |
+| **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                       |
+| **`API_GATEWAY_REST`**            | `powertools_json(body)`                                       |
+| **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                      |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]` |
+| **`EVENTBRIDGE`**                 | `detail`                                                      |
+| **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))` |
+| **`SNS`**                         | `Records[0].Sns.Message                                       | powertools_json(@)`              |
+| **`SQS`**                         | `Records[*].powertools_json(body)`                            |
 
 ## Advanced
 

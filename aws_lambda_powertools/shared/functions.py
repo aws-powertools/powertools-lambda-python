@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import base64
-import dataclasses
 import itertools
 import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
+from pathlib import Path
 from typing import Any, Dict, Generator, Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
@@ -96,10 +96,18 @@ def resolve_env_var_choice(
 
 def base64_decode(value: str) -> bytes:
     try:
-        logger.debug("Decoding base64 record item before parsing")
+        logger.debug("Decoding base64 item to bytes")
         return base64.b64decode(value)
     except (BinAsciiError, TypeError):
-        raise ValueError("base64 decode failed")
+        raise ValueError("base64 decode failed - is this base64 encoded string?")
+
+
+def bytes_to_base64_string(value: bytes) -> str:
+    try:
+        logger.debug("Encoding bytes to base64 string")
+        return base64.b64encode(value).decode()
+    except TypeError:
+        raise ValueError(f"base64 encoding failed - is this bytes data? type: {type(value)}")
 
 
 def bytes_to_string(value: bytes) -> str:
@@ -168,8 +176,115 @@ def extract_event_from_common_models(data: Any) -> Dict | Any:
         return data.raw_event
 
     # Is it a Pydantic Model?
-    if callable(getattr(data, "dict", None)):
-        return data.dict()
+    if is_pydantic(data):
+        return pydantic_to_dict(data)
 
-    # Is it a Dataclass? If not return as is
-    return dataclasses.asdict(data) if dataclasses.is_dataclass(data) else data
+    # Is it a Dataclass?
+    if is_dataclass(data):
+        return dataclass_to_dict(data)
+
+    # Return as is
+    return data
+
+
+def is_pydantic(data) -> bool:
+    """Whether data is a Pydantic model by checking common field available in v1/v2
+
+    Parameters
+    ----------
+    data: BaseModel
+        Pydantic model
+
+    Returns
+    -------
+    bool
+        Whether it's a Pydantic model
+    """
+    return getattr(data, "json", False)
+
+
+def is_dataclass(data) -> bool:
+    """Whether data is a dataclass
+
+    Parameters
+    ----------
+    data: dataclass
+        Dataclass obj
+
+    Returns
+    -------
+    bool
+        Whether it's a Dataclass
+    """
+    return getattr(data, "__dataclass_fields__", False)
+
+
+def pydantic_to_dict(data) -> dict:
+    """Dump Pydantic model v1 and v2 as dict.
+
+    Note we use lazy import since Pydantic is an optional dependency.
+
+    Parameters
+    ----------
+    data: BaseModel
+        Pydantic model
+
+    Returns
+    -------
+
+    dict:
+        Pydantic model serialized to dict
+    """
+    from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
+
+    return _model_dump(data)
+
+
+def dataclass_to_dict(data) -> dict:
+    """Dump standard dataclass as dict.
+
+    Note we use lazy import to prevent bloating other code parts.
+
+    Parameters
+    ----------
+    data: dataclass
+        Dataclass
+
+    Returns
+    -------
+
+    dict:
+        Pydantic model serialized to dict
+    """
+    import dataclasses
+
+    return dataclasses.asdict(data)
+
+
+def abs_lambda_path(relative_path: str = "") -> str:
+    """Return the absolute path from the given relative path to lambda handler.
+
+    Parameters
+    ----------
+    relative_path : str, optional
+        The relative path to the lambda handler, by default an empty string.
+
+    Returns
+    -------
+    str
+        The absolute path generated from the given relative path.
+        If the environment variable LAMBDA_TASK_ROOT is set, it will use that value.
+        Otherwise, it will use the current working directory.
+        If the path is empty, it will return the current working directory.
+    """
+    # Retrieve the LAMBDA_TASK_ROOT environment variable or default to an empty string
+    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
+
+    # If LAMBDA_TASK_ROOT is not set, use the current working directory
+    if not current_working_directory:
+        current_working_directory = str(Path.cwd())
+
+    # Combine the current working directory and the relative path to get the absolute path
+    absolute_path = str(Path(current_working_directory, relative_path))
+
+    return absolute_path

@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Resources:
+  RedisServerlessIdempotency:
+    Type: AWS::ElastiCache::ServerlessCache
+    Properties:
+      Engine: redis
+      ServerlessCacheName: redis-cache
+      SecurityGroupIds: # (1)!
+          - security-{your_sg_id}
+      SubnetIds:
+          - subnet-{your_subnet_id_1}
+          - subnet-{your_subnet_id_2}

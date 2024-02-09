@@ -251,7 +251,7 @@ These are some questions to keep in mind when drafting your first or future rele
 
 - Can customers understand at a high level what changed in this release?
 - Is there a link to the documentation where they can read more about each main change?
-- Are there any graphics or [code snippets](carbon.now.sh/) that can enhance readability?
+- Are there any graphics or [code snippets](https://carbon.now.sh/) that can enhance readability?
 - Are we calling out any key contributor(s) to this release?
     - All contributors are automatically credited, use this as an exceptional case to feature them
 
@@ -288,8 +288,10 @@ Ensure the repo highlights features that should be elevated to the project roadm
 Add integration checks that validate pull requests and pushes to ease the burden on Pull Request reviewers. Continuously revisit areas of improvement to reduce operational burden in all parties involved.
 
 ### Negative Impact on the Project
-<!-- markdownlint-disable-next-line MD013 -->
+
+<!-- markdownlint-disable MD013 -->
 Actions that negatively impact the project will be handled by the admins, in coordination with other maintainers, in balance with the urgency of the issue. Examples would be [Code of Conduct](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/CODE_OF_CONDUCT.md){target="_blank"} violations, deliberate harmful or malicious actions, spam, monopolization, and security risks.
+<!-- markdownlint-enable MD013 -->
 
 ### Becoming a maintainer
 

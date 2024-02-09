@@ -32,7 +32,7 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
-1. **Upgrade** Python to at least v3.7
+1. **Upgrade** Python to at least v3.8
 2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}.
 3. **Review** the following sections to confirm whether they affect your code
 
@@ -44,7 +44,7 @@ You can migrate to `BatchProcessor` with the following changes:
 
 1. If you use **`sqs_batch_decorator`**, change to **`batch_processor`** decorator
 2. If you use **`PartialSQSProcessor`**, change to **`BatchProcessor`**
-3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](../utilities/batch#required-resources){target="_blank"}
+3. [Enable **`ReportBatchItemFailures`** in your Lambda Event Source](./utilities/batch.md#required-resources){target="_blank"}
 4. Change your Lambda Handler to return the new response format
 
 === "[Before] Decorator"

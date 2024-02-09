@@ -118,6 +118,12 @@ handler(event=payload, context=LambdaContext())
 handler(event=json.dumps(payload), context=LambdaContext()) # also works if event is a JSON string
 ```
 
+Alternatively, you can automatically extract the model from the `event` without the need to include the model parameter in the `event_parser` function.
+
+```python hl_lines="23 24"
+    --8<-- "examples/parser/src/using_the_model_from_event.py"
+```
+
 #### parse function
 
 Use this standalone function when you want more control over the data validation process, for example returning a 400 error for malformed payloads.
@@ -172,6 +178,7 @@ Parser comes with the following built-in models:
 | **AlbModel**                                | Lambda Event Source payload for Amazon Application Load Balancer                      |
 | **APIGatewayProxyEventModel**               | Lambda Event Source payload for Amazon API Gateway                                    |
 | **APIGatewayProxyEventV2Model**             | Lambda Event Source payload for Amazon API Gateway v2 payload                         |
+| **BedrockAgentEventModel**                  | Lambda Event Source payload for Bedrock Agents                                        |
 | **CloudFormationCustomResourceCreateModel** | Lambda Event Source payload for AWS CloudFormation `CREATE` operation                 |
 | **CloudFormationCustomResourceUpdateModel** | Lambda Event Source payload for AWS CloudFormation `UPDATE` operation                 |
 | **CloudFormationCustomResourceDeleteModel** | Lambda Event Source payload for AWS CloudFormation `DELETE` operation                 |
@@ -184,6 +191,7 @@ Parser comes with the following built-in models:
 | **KinesisFirehoseModel**                    | Lambda Event Source payload for Amazon Kinesis Firehose                               |
 | **KinesisFirehoseSqsModel**                 | Lambda Event Source payload for SQS messages wrapped in Kinesis Firehose records      |
 | **LambdaFunctionUrlModel**                  | Lambda Event Source payload for Lambda Function URL payload                           |
+| **S3BatchOperationModel**                   | Lambda Event Source payload for Amazon S3 Batch Operation                             |
 | **S3EventNotificationEventBridgeModel**     | Lambda Event Source payload for Amazon S3 Event Notification to EventBridge.          |
 | **S3Model**                                 | Lambda Event Source payload for Amazon S3                                             |
 | **S3ObjectLambdaEvent**                     | Lambda Event Source payload for Amazon S3 Object Lambda                               |
@@ -192,6 +200,7 @@ Parser comes with the following built-in models:
 | **SnsModel**                                | Lambda Event Source payload for Amazon Simple Notification Service                    |
 | **SqsModel**                                | Lambda Event Source payload for Amazon SQS                                            |
 | **VpcLatticeModel**                         | Lambda Event Source payload for Amazon VPC Lattice                                    |
+| **VpcLatticeV2Model**                       | Lambda Event Source payload for Amazon VPC Lattice v2 payload                         |
 
 #### Extending built-in models
 
@@ -349,6 +358,7 @@ Parser comes with the following built-in envelopes, where `Model` in the return 
 | **LambdaFunctionUrlEnvelope** | 1. Parses data using `LambdaFunctionUrlModel`. <br/> 2. Parses `body` key using your model and returns it.                                                                                                  | `Model`                            |
 | **KafkaEnvelope**             | 1. Parses data using `KafkaRecordModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
 | **VpcLatticeEnvelope**        | 1. Parses data using `VpcLatticeModel`. <br/> 2. Parses `value` key using your model and returns it.                                                                                                       | `Model`                            |
+| **BedrockAgentEnvelope**      | 1. Parses data using `BedrockAgentEventModel`. <br/> 2. Parses `inputText` key using your model and returns it.                                                                                                       | `Model`                            |
 
 #### Bringing your own envelope
 

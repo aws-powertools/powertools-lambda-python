@@ -14,9 +14,17 @@ from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    STATUS_CONSTANTS,
     BasePersistenceLayer,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
+    STATUS_CONSTANTS,
     DataRecord,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.base import (
+    BaseIdempotencySerializer,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.no_op import (
+    NoOpSerializer,
 )
 
 MAX_RETRIES = 2
@@ -51,6 +59,7 @@ class IdempotencyHandler:
         function_payload: Any,
         config: IdempotencyConfig,
         persistence_store: BasePersistenceLayer,
+        output_serializer: Optional[BaseIdempotencySerializer] = None,
         function_args: Optional[Tuple] = None,
         function_kwargs: Optional[Dict] = None,
     ):
@@ -65,12 +74,16 @@ class IdempotencyHandler:
             Idempotency Configuration
         persistence_store : BasePersistenceLayer
             Instance of persistence layer to store idempotency records
+        output_serializer: Optional[BaseIdempotencySerializer]
+            Serializer to transform the data to and from a dictionary.
+            If not supplied, no serialization is done via the NoOpSerializer
         function_args: Optional[Tuple]
             Function arguments
         function_kwargs: Optional[Dict]
             Function keyword arguments
         """
         self.function = function
+        self.output_serializer = output_serializer or NoOpSerializer()
         self.data = deepcopy(_prepare_data(function_payload))
         self.fn_args = function_args
         self.fn_kwargs = function_kwargs
@@ -107,12 +120,17 @@ class IdempotencyHandler:
                 data=self.data,
                 remaining_time_in_millis=self._get_remaining_time_in_millis(),
             )
-        except IdempotencyKeyError:
+        except (IdempotencyKeyError, IdempotencyValidationError):
             raise
-        except IdempotencyItemAlreadyExistsError:
-            # Now we know the item already exists, we can retrieve it
-            record = self._get_idempotency_record()
-            if record is not None:
+        except IdempotencyItemAlreadyExistsError as exc:
+            # Attempt to retrieve the existing record, either from the exception ReturnValuesOnConditionCheckFailure
+            # or perform a GET operation if the information is not available.
+            # We give preference to ReturnValuesOnConditionCheckFailure because it is a faster and more cost-effective
+            # way of retrieving the existing record after a failed conditional write operation.
+            record = exc.old_data_record or self._get_idempotency_record()
+
+            # If a record is found, handle it for status
+            if record:
                 return self._handle_for_status(record)
         except Exception as exc:
             raise IdempotencyPersistenceLayerError(
@@ -170,7 +188,7 @@ class IdempotencyHandler:
 
         return data_record
 
-    def _handle_for_status(self, data_record: DataRecord) -> Optional[Dict[Any, Any]]:
+    def _handle_for_status(self, data_record: DataRecord) -> Optional[Any]:
         """
         Take appropriate action based on data_record's status
 
@@ -180,8 +198,9 @@ class IdempotencyHandler:
 
         Returns
         -------
-        Optional[Dict[Any, Any]
+        Optional[Any]
             Function's response previously used for this idempotency key, if it has successfully executed already.
+            In case an output serializer is configured, the response is deserialized.
 
         Raises
         ------
@@ -206,8 +225,10 @@ class IdempotencyHandler:
                 f"Execution already in progress with idempotency key: "
                 f"{self.persistence_store.event_key_jmespath}={data_record.idempotency_key}",
             )
-
-        return data_record.response_json_as_dict()
+        response_dict: Optional[dict] = data_record.response_json_as_dict()
+        if response_dict is not None:
+            return self.output_serializer.from_dict(response_dict)
+        return None
 
     def _get_function_response(self):
         try:
@@ -226,7 +247,8 @@ class IdempotencyHandler:
 
         else:
             try:
-                self.persistence_store.save_success(data=self.data, result=response)
+                serialized_response: dict = self.output_serializer.to_dict(response) if response else None
+                self.persistence_store.save_success(data=self.data, result=serialized_response)
             except Exception as save_exception:
                 raise IdempotencyPersistenceLayerError(
                     "Failed to update record state to success in idempotency store",

@@ -8,7 +8,6 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overl
 
 import boto3
 from botocore.config import Config
-from typing_extensions import Literal
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
@@ -16,6 +15,7 @@ from aws_lambda_powertools.shared.functions import (
     resolve_truthy_env_var_choice,
     slice_dictionary,
 )
+from aws_lambda_powertools.shared.types import Literal
 
 from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
 from .exceptions import GetParameterError
@@ -188,7 +188,13 @@ class SSMProvider(BaseProvider):
 
         return self.client.get_parameter(**sdk_options)["Parameter"]["Value"]
 
-    def _get_multiple(self, path: str, decrypt: bool = False, recursive: bool = False, **sdk_options) -> Dict[str, str]:
+    def _get_multiple(
+        self,
+        path: str,
+        decrypt: Optional[bool] = None,
+        recursive: bool = False,
+        **sdk_options,
+    ) -> Dict[str, str]:
         """
         Retrieve multiple parameter values from AWS Systems Manager Parameter Store
 
@@ -203,6 +209,12 @@ class SSMProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Parameter Store get_parameters_by_path API call
         """
+
+        # If decrypt is not set, resolve it from the environment variable, defaulting to False
+        decrypt = resolve_truthy_env_var_choice(
+            env=os.getenv(constants.PARAMETERS_SSM_DECRYPT_ENV, "false"),
+            choice=decrypt,
+        )
 
         # Explicit arguments will take precedence over keyword arguments
         sdk_options["Path"] = path
@@ -533,9 +545,57 @@ class SSMProvider(BaseProvider):
             )
 
 
+@overload
 def get_parameter(
     name: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> str:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["json"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> dict:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["binary"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> Union[str, dict, bytes]:
+    ...
+
+
+@overload
+def get_parameter(
+    name: str,
+    transform: Literal["auto"],
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> bytes:
+    ...
+
+
+def get_parameter(
+    name: str,
+    transform: TransformOptions = None,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
@@ -613,9 +673,65 @@ def get_parameter(
     )
 
 
+@overload
 def get_parameters(
     path: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, str]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["json"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, dict]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["binary"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Dict[str, bytes]:
+    ...
+
+
+@overload
+def get_parameters(
+    path: str,
+    transform: Literal["auto"],
+    recursive: bool = True,
+    decrypt: Optional[bool] = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    raise_on_transform_error: bool = False,
+    **sdk_options,
+) -> Union[Dict[str, bytes], Dict[str, dict], Dict[str, str]]:
+    ...
+
+
+def get_parameters(
+    path: str,
+    transform: TransformOptions = None,
     recursive: bool = True,
     decrypt: Optional[bool] = None,
     force_fetch: bool = False,

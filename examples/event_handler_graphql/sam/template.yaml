@@ -10,7 +10,7 @@ Globals:
     Environment:
       Variables:
         # Powertools for AWS Lambda (Python) env vars: https://docs.powertools.aws.dev/lambda/python/latest/#environment-variables
-        LOG_LEVEL: INFO
+        POWERTOOLS_LOG_LEVEL: INFO
         POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
         POWERTOOLS_LOGGER_LOG_EVENT: true
         POWERTOOLS_SERVICE_NAME: example

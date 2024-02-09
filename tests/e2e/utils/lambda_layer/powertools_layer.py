@@ -1,6 +1,6 @@
-import logging
 import subprocess
 from pathlib import Path
+from typing import List
 
 from aws_cdk.aws_lambda import Architecture
 from checksumdir import dirhash
@@ -9,18 +9,20 @@ from aws_lambda_powertools import PACKAGE_PATH
 from tests.e2e.utils.constants import CDK_OUT_PATH, SOURCE_CODE_ROOT_PATH
 from tests.e2e.utils.lambda_layer.base import BaseLocalLambdaLayer
 
-logger = logging.getLogger(__name__)
-
 
 class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
     IGNORE_EXTENSIONS = ["pyc"]
+    ARCHITECTURE_PLATFORM_MAPPING = {
+        Architecture.X86_64.name: ("manylinux_2_17_x86_64", "manylinux_2_28_x86_64"),
+        Architecture.ARM_64.name: ("manylinux_2_17_aarch64", "manylinux_2_28_aarch64"),
+    }
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
-        self.package = f"{SOURCE_CODE_ROOT_PATH}[all]"
+        self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis]"
 
-        platform_name = self._resolve_platform(architecture)
-        self.build_args = f"--platform {platform_name} --only-binary=:all: --upgrade"
+        self.platform_args = self._resolve_platform(architecture)
+        self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"
         self.build_command = f"python -m pip install {self.package} {self.build_args} --target {self.target_dir}"
         self.cleanup_command = (
             f"rm -rf {self.target_dir}/boto* {self.target_dir}/s3transfer* && "
@@ -36,14 +38,14 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         self.before_build()
 
         if self._has_source_changed():
-            subprocess.run(self.build_command, shell=True)
+            subprocess.run(self.build_command, shell=True, check=True)
 
         self.after_build()
 
         return str(self.output_dir)
 
     def after_build(self):
-        subprocess.run(self.cleanup_command, shell=True)
+        subprocess.run(self.cleanup_command, shell=True, check=True)
 
     def _has_source_changed(self) -> bool:
         """Hashes source code and
@@ -62,16 +64,20 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
         return False
 
     def _resolve_platform(self, architecture: Architecture) -> str:
-        """Returns the correct plaform name for the manylinux project (see PEP 599)
+        """Returns the correct pip platform tag argument for the manylinux project (see PEP 599)
 
         Returns
         -------
-        platform_name : str
-            The platform tag
+        str
+            pip's platform argument, e.g., --platform manylinux_2_17_x86_64 --platform manylinux_2_28_x86_64
         """
-        if architecture.name == Architecture.X86_64.name:
-            return "manylinux1_x86_64"
-        elif architecture.name == Architecture.ARM_64.name:
-            return "manylinux2014_aarch64"
-        else:
-            raise ValueError(f"unknown architecture {architecture.name}")
+        platforms = self.ARCHITECTURE_PLATFORM_MAPPING.get(architecture.name)
+        if not platforms:
+            raise ValueError(
+                f"unknown architecture {architecture.name}. Supported: {self.ARCHITECTURE_PLATFORM_MAPPING.keys()}",
+            )
+
+        return self._build_platform_args(platforms)
+
+    def _build_platform_args(self, platforms: List[str]):
+        return " ".join([f"--platform {platform}" for platform in platforms])
