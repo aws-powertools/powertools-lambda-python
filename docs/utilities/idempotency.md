@@ -14,6 +14,7 @@ The idempotency utility provides a simple solution to convert your Lambda functi
 * Select a subset of the event as the idempotency key using JMESPath expressions
 * Set a time window in which records with the same payload should be considered duplicates
 * Expires in-progress executions if the Lambda function times out halfway through
+* Support Amazon DynamoDB and Redis as persistence layers
 
 ## Terminology
 
@@ -51,6 +52,9 @@ classDiagram
 
 ## Getting started
 
+???+ note
+    This section uses DynamoDB as the default idempotent persistence storage layer. If you are interested in using Redis as the persistence storage layer, check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
+
 ### IAM Permissions
 
 Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
@@ -62,7 +66,7 @@ Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, 
 
 Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
 
-As of now, Amazon DynamoDB is the only supported persistent storage layer, so you'll need to create a table first.
+We currently support Amazon DynamoDB and Redis as a storage layer. The following example demonstrates how to create a table in DynamoDB. If you prefer to use Redis, refer go to the section [RedisPersistenceLayer](#redispersistencelayer) section.
 
 **Default table configuration**
 
@@ -96,14 +100,18 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 ???+ warning "Warning: Large responses with DynamoDB persistence layer"
     When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
 
-    Larger items cannot be written to DynamoDB and will cause exceptions.
+    Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
 
+<!-- markdownlint-disable MD013 -->
 ???+ info "Info: DynamoDB"
-    Each function invocation will generally make 2 requests to DynamoDB. If the
-    result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
-    estimate the cost.
 
+    During the first invocation with a payload, the Lambda function executes both a `PutItem` and an `UpdateItem` operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.
+
+    On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
+
+    **Note:** While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than `1.26.194`, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate the cost.
+
+<!-- markdownlint-enable MD013 -->
 ### Idempotent decorator
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
@@ -135,7 +143,7 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -333,6 +341,51 @@ If an Exception is raised _outside_ the scope of the decorated function and afte
 
     As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
+### Persistence layers
+
+#### DynamoDBPersistenceLayer
+
+This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
+
+=== "Customizing DynamoDBPersistenceLayer to suit your table structure"
+
+    ```python hl_lines="7-15"
+    --8<-- "examples/idempotency/src/customize_persistence_layer.py"
+    ```
+
+When using DynamoDB as the persistence layer, you can customize the attribute names by passing the following parameters during the initialization of the persistence layer:
+
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **table_name**              | :heavy_check_mark: |                                      | Table name to store state                                                                                |
+| **key_attr**                |                    | `id`                                 | Partition key of the table. Hashed representation of the payload (unless **sort_key_attr** is specified) |
+| **expiry_attr**             |                    | `expiration`                         | Unix timestamp of when record expires                                                                    |
+| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
+| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
+| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
+| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
+| **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
+| **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
+
+#### RedisPersistenceLayer
+
+This persistence layer is built-in, allowing you to use an existing Redis service. For optimal performance and compatibility, it is strongly recommended to use a Redis service version 7 or higher.
+
+=== "Customizing RedisPersistenceLayer to suit your data structure"
+
+    ```python hl_lines="9-16"
+    --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+    ```
+
+When using Redis as the persistence layer, you can customize the attribute names by providing the following parameters upon initialization of the persistence layer:
+
+| Parameter                   | Required           | Default                              | Description                                                                                              |
+| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
+| **status_attr**             |                    | `status`                             | Stores status of the Lambda execution during and after invocation                                        |
+| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
+| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation |
+
 ### Idempotency request flow
 
 The following sequence diagrams explain how the Idempotency feature behaves under different scenarios.
@@ -527,33 +580,120 @@ sequenceDiagram
 <i>Optional idempotency key</i>
 </center>
 
-## Advanced
+#### Race condition with Redis
 
-### Persistence layers
+<center>
+```mermaid
+graph TD;
+    A(Existing orphan record in redis)-->A1;
+    A1[Two Lambda invoke at same time]-->B1[Lambda handler1];
+    B1-->B2[Fetch from Redis];
+    B2-->B3[Handler1 got orphan record];
+    B3-->B4[Handler1 acquired lock];
+    B4-->B5[Handler1 overwrite orphan record]
+    B5-->B6[Handler1 continue to execution];
+    A1-->C1[Lambda handler2];
+    C1-->C2[Fetch from Redis];
+    C2-->C3[Handler2 got orphan record];
+    C3-->C4[Handler2 failed to acquire lock];
+    C4-->C5[Handler2 wait and fetch from Redis];
+    C5-->C6[Handler2 return without executing];
+    B6-->D(Lambda handler executed only once);
+    C6-->D;
+```
+<i>Race condition with Redis</i>
+</center>
 
-#### DynamoDBPersistenceLayer
+## Redis as persistent storage layer provider
 
-This persistence layer is built-in, and you can either use an existing DynamoDB table or create a new one dedicated for idempotency state (recommended).
+### Redis resources
 
-=== "Customizing DynamoDBPersistenceLayer to suit your table structure"
+Before setting up Redis as the persistent storage layer provider, you must have an existing Redis service. We recommend you to use Redis compatible services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as your persistent storage layer provider.
 
-    ```python hl_lines="7-15"
-    --8<-- "examples/idempotency/src/customize_persistence_layer.py"
+???+ tip "No existing Redis service?"
+    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as the persistent storage layer provider.
+
+=== "AWS CloudFormation example"
+
+    ```yaml hl_lines="5"
+    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
     ```
 
-When using DynamoDB as a persistence layer, you can alter the attribute names by passing these parameters when initializing the persistence layer:
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
 
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **table_name**              | :heavy_check_mark: |                                      | Table name to store state                                                                                |
-| **key_attr**                |                    | `id`                                 | Partition key of the table. Hashed representation of the payload (unless **sort_key_attr** is specified) |
-| **expiry_attr**             |                    | `expiration`                         | Unix timestamp of when record expires                                                                    |
-| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
-| **status_attr**             |                    | `status`                             | Stores status of the lambda execution during and after invocation                                        |
-| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
-| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation                                      |
-| **sort_key_attr**           |                    |                                      | Sort key of the table (if table is configured with a sort key).                                          |
-| **static_pk_value**         |                    | `idempotency#{LAMBDA_FUNCTION_NAME}` | Static value to use as the partition key. Only used when **sort_key_attr** is set.                       |
+### VPC Access
+
+Your Lambda Function must have network access to the Redis endpoint before using it as the idempotency persistent storage layer. In most cases, you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
+
+???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
+    If you plan to use Amazon ElastiCache for Redis as the idempotency persistent storage layer, you may find [this AWS tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"} helpful.
+    For those using Amazon MemoryDB for Redis, refer to [this AWS tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} specifically for the VPC setup guidance.
+
+After completing the VPC setup, you can use the templates provided below to set up Lambda functions with access to VPC internal subnets.
+
+=== "AWS Serverless Application Model (SAM) example"
+
+    ```yaml hl_lines="9"
+    --8<-- "examples/idempotency/templates/sam_redis_vpc.yaml"
+    ```
+
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
+
+### Configuring Redis persistence layer
+
+You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
+
+???+ info
+    We enforce security best practices by using SSL connections in the `RedisCachePersistenceLayer`; to disable it, set `ssl=False`
+
+=== "Use Persistence Layer with Redis config variables"
+    ```python hl_lines="7-9 12 26"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
+    ```
+
+=== "Use established Redis Client"
+    ```python hl_lines="4 9-11 14 22 36"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
+
+### Custom advanced settings
+
+For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.
+
+=== "Advanced configuration using AWS Secrets"
+    ```python hl_lines="7-9 11 13 23"
+    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
+    ```
+
+    1. JSON stored:
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+
+=== "Advanced configuration with local certificates"
+    ```python hl_lines="12 23-25"
+    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
+    ```
+
+    1. JSON stored:
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    2. redis_user.crt file stored in the "certs" directory of your Lambda function
+    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
+    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
+
+## Advanced
 
 ### Customizing the default behavior
 
@@ -783,7 +923,7 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
     If you use an envelope with the validator, the event received by the idempotency utility will be the unwrapped
     event - not the "raw" event Lambda was invoked with.
 
-	Make sure to account for this behaviour, if you set the `event_key_jmespath`.
+	Make sure to account for this behavior, if you set the `event_key_jmespath`.
 
 === "Using Idempotency with JSONSchema Validation utility"
 
@@ -799,6 +939,24 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 ???+ tip "Tip: JMESPath Powertools for AWS Lambda (Python) functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
+
+### Tracer
+
+The idempotency utility can be used with the `tracer` decorator. Ensure that idempotency is the innermost decorator.
+
+#### First execution
+
+During the first execution with a payload, Lambda performs a `PutItem` followed by an `UpdateItem` operation to persist the record in DynamoDB.
+
+![Tracer showcase](../media/idempotency_first_execution.png)
+
+#### Subsequent executions
+
+On subsequent executions with the same payload, Lambda optimistically tries to save the record in DynamoDB. If the record already exists, DynamoDB returns the item.
+
+Explore how to handle conditional write errors in high-concurrency scenarios with DynamoDB in this [blog post](https://aws.amazon.com/pt/blogs/database/handle-conditional-write-errors-in-high-concurrency-scenarios-with-amazon-dynamodb/){target="_blank"}.
+
+![Tracer showcase](../media/idempotency_second_execution.png)
 
 ## Testing your code
 
@@ -853,6 +1011,40 @@ This means it is possible to pass a mocked Table resource, or stub various metho
     ```python hl_lines="10"
     --8<-- "examples/idempotency/tests/app_test_io_operations.py"
     ```
+
+### Testing with Redis
+
+To test locally, you can either utilize [fakeredis-py](https://github.com/cunla/fakeredis-py) for a simulated Redis environment or refer to the [MockRedis](https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66) class used in our tests to mock Redis operations.
+
+=== "test_with_mock_redis.py"
+
+    ```python hl_lines="2 3 29 31"
+    --8<-- "examples/idempotency/tests/test_with_mock_redis.py"
+    ```
+
+=== "mock_redis.py"
+
+    ```python
+    --8<-- "examples/idempotency/tests/mock_redis.py"
+    ```
+
+If you want to set up a real Redis client for integration testing, you can reference the code provided below.
+
+=== "test_with_real_redis.py"
+
+    ```python hl_lines="3 4 29 38"
+    --8<-- "examples/idempotency/tests/test_with_real_redis.py"
+    ```
+
+=== "Makefile"
+
+    ```bash
+    test-idempotency-redis: # (1)!
+    	docker run --name test-idempotency-redis -d -p 63005:6379 redis
+    	pytest test_with_real_redis.py;docker stop test-idempotency-redis;docker rm test-idempotency-redis
+    ```
+
+    1. Use this script to setup a temp Redis docker and auto remove it upon completion
 
 ## Extra resources
 

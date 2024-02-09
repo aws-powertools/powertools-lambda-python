@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, List
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -84,12 +85,10 @@ class RabbitMessage(DictWrapper):
         """Decodes the data as a str"""
         return base64_decode(self.data)
 
-    @property
+    @cached_property
     def json_data(self) -> Any:
         """Parses the data as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_data)
-        return self._json_data
+        return self._json_deserializer(self.decoded_data)
 
 
 class RabbitMQEvent(DictWrapper):

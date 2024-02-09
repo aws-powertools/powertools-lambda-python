@@ -6,6 +6,7 @@ import logging
 import os
 import warnings
 from binascii import Error as BinAsciiError
+from pathlib import Path
 from typing import Any, Dict, Generator, Optional, Union, overload
 
 from aws_lambda_powertools.shared import constants
@@ -95,10 +96,18 @@ def resolve_env_var_choice(
 
 def base64_decode(value: str) -> bytes:
     try:
-        logger.debug("Decoding base64 record item before parsing")
+        logger.debug("Decoding base64 item to bytes")
         return base64.b64decode(value)
     except (BinAsciiError, TypeError):
-        raise ValueError("base64 decode failed")
+        raise ValueError("base64 decode failed - is this base64 encoded string?")
+
+
+def bytes_to_base64_string(value: bytes) -> str:
+    try:
+        logger.debug("Encoding bytes to base64 string")
+        return base64.b64encode(value).decode()
+    except TypeError:
+        raise ValueError(f"base64 encoding failed - is this bytes data? type: {type(value)}")
 
 
 def bytes_to_string(value: bytes) -> str:
@@ -250,3 +259,32 @@ def dataclass_to_dict(data) -> dict:
     import dataclasses
 
     return dataclasses.asdict(data)
+
+
+def abs_lambda_path(relative_path: str = "") -> str:
+    """Return the absolute path from the given relative path to lambda handler.
+
+    Parameters
+    ----------
+    relative_path : str, optional
+        The relative path to the lambda handler, by default an empty string.
+
+    Returns
+    -------
+    str
+        The absolute path generated from the given relative path.
+        If the environment variable LAMBDA_TASK_ROOT is set, it will use that value.
+        Otherwise, it will use the current working directory.
+        If the path is empty, it will return the current working directory.
+    """
+    # Retrieve the LAMBDA_TASK_ROOT environment variable or default to an empty string
+    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
+
+    # If LAMBDA_TASK_ROOT is not set, use the current working directory
+    if not current_working_directory:
+        current_working_directory = str(Path.cwd())
+
+    # Combine the current working directory and the relative path to get the absolute path
+    absolute_path = str(Path(current_working_directory, relative_path))
+
+    return absolute_path

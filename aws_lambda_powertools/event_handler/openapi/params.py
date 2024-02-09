@@ -49,6 +49,7 @@ class Dependant:
         cookie_params: Optional[List[ModelField]] = None,
         body_params: Optional[List[ModelField]] = None,
         return_param: Optional[ModelField] = None,
+        response_extra_models: Optional[List[ModelField]] = None,
         name: Optional[str] = None,
         call: Optional[Callable[..., Any]] = None,
         request_param_name: Optional[str] = None,
@@ -64,6 +65,7 @@ class Dependant:
         self.cookie_params = cookie_params or []
         self.body_params = body_params or []
         self.return_param = return_param or None
+        self.response_extra_models = response_extra_models or []
         self.request_param_name = request_param_name
         self.websocket_param_name = websocket_param_name
         self.http_connection_param_name = http_connection_param_name
@@ -484,7 +486,7 @@ class Query(Param):
         )
 
 
-class _Header(Param):
+class Header(Param):
     """
     A class used internally to represent a header parameter in a path operation.
     """
@@ -525,12 +527,75 @@ class _Header(Param):
         json_schema_extra: Union[Dict[str, Any], None] = None,
         **extra: Any,
     ):
+        """
+        Constructs a new Query param.
+
+        Parameters
+        ----------
+        default: Any
+            The default value of the parameter
+        default_factory: Callable[[], Any], optional
+            Callable that will be called when a default value is needed for this field
+        annotation: Any, optional
+            The type annotation of the parameter
+        alias: str, optional
+            The public name of the field
+        alias_priority: int, optional
+            Priority of the alias. This affects whether an alias generator is used
+        validation_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for validation only
+        serialization_alias: str | AliasPath | AliasChoices | None, optional
+            Alias to be used for serialization only
+        convert_underscores: bool
+            If true convert "_" to "-"
+            See RFC: https://www.rfc-editor.org/rfc/rfc9110.html#name-field-name-registry
+        title: str, optional
+            The title of the parameter
+        description: str, optional
+            The description of the parameter
+        gt: float, optional
+            Only applies to numbers, required the field to be "greater than"
+        ge: float, optional
+            Only applies to numbers, required the field to be "greater than or equal"
+        lt: float, optional
+            Only applies to numbers, required the field to be "less than"
+        le: float, optional
+            Only applies to numbers, required the field to be "less than or equal"
+        min_length: int, optional
+            Only applies to strings, required the field to have a minimum length
+        max_length: int, optional
+            Only applies to strings, required the field to have a maximum length
+        pattern: str, optional
+            Only applies to strings, requires the field match against a regular expression pattern string
+        discriminator: str, optional
+            Parameter field name for discriminating the type in a tagged union
+        strict: bool, optional
+            Enables Pydantic's strict mode for the field
+        multiple_of: float, optional
+            Only applies to numbers, requires the field to be a multiple of the given value
+        allow_inf_nan: bool, optional
+            Only applies to numbers, requires the field to allow infinity and NaN values
+        max_digits: int, optional
+            Only applies to Decimals, requires the field to have a maxmium number of digits within the decimal.
+        decimal_places: int, optional
+            Only applies to Decimals, requires the field to have at most a number of decimal places
+        examples: List[Any], optional
+            A list of examples for the parameter
+        deprecated: bool, optional
+            If `True`, the parameter will be marked as deprecated
+        include_in_schema: bool, optional
+            If `False`, the parameter will be excluded from the generated OpenAPI schema
+        json_schema_extra: Dict[str, Any], optional
+            Extra values to include in the generated OpenAPI schema
+        """
         self.convert_underscores = convert_underscores
+        self._alias = alias
+
         super().__init__(
             default=default,
             default_factory=default_factory,
             annotation=annotation,
-            alias=alias,
+            alias=self._alias,
             alias_priority=alias_priority,
             validation_alias=validation_alias,
             serialization_alias=serialization_alias,
@@ -555,6 +620,18 @@ class _Header(Param):
             json_schema_extra=json_schema_extra,
             **extra,
         )
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @alias.setter
+    def alias(self, value: Optional[str] = None):
+        if value is not None:
+            # Headers are case-insensitive according to RFC 7540 (HTTP/2), so we lower the parameter name
+            # This ensures that customers can access headers with any casing, as per the RFC guidelines.
+            # Reference: https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2
+            self._alias = value.lower()
 
 
 class Body(FieldInfo):

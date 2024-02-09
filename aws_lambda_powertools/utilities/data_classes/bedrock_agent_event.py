@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
 
@@ -108,3 +108,11 @@ class BedrockAgentEvent(BaseProxyEvent):
         # In Bedrock Agent events, query string parameters are passed as undifferentiated parameters,
         # together with the other parameters. So we just return all parameters here.
         return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        return {}

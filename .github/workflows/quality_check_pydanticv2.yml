@@ -43,7 +43,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
@@ -58,7 +58,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
       - name: Replacing Pydantic v1 with v2 > 2.0.3
-        run: poetry add "pydantic=^2.0.3"
+        run: |
+          rm -rf poetry.lock
+          poetry add "pydantic=^2.0.3"
       - name: Install dependencies
         run: make dev
       - name: Test with pytest

@@ -3,7 +3,7 @@
 
 [![Build](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/quality_check.yml/badge.svg)](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/python_build.yml)
 [![codecov.io](https://codecov.io/github/aws-powertools/powertools-lambda-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/aws-powertools/powertools-lambda-python)
-![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9|%203.10|%203.11|%203.12&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
+![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.8|%203.9|%203.10|%203.11|%203.12&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/#features).
 
@@ -30,6 +30,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 * **[Event source data classes](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_classes/)** - Data classes describing the schema of common Lambda event triggers
 * **[Parser](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parser/)** - Data parsing and deep validation using Pydantic
 * **[Idempotency](https://docs.powertools.aws.dev/lambda/python/latest/utilities/idempotency/)** - Convert your Lambda functions into idempotent operations which are safe to retry
+* **[Data Masking](https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_masking/)** -  Protect confidential data with easy removal or encryption
 * **[Feature Flags](https://docs.powertools.aws.dev/lambda/python/latest/utilities/feature_flags/)** - A simple rule engine to evaluate when one or multiple features should be enabled depending on the input
 * **[Streaming](https://docs.powertools.aws.dev/lambda/python/latest/utilities/streaming/)** - Streams datasets larger than the available memory as streaming data.
 

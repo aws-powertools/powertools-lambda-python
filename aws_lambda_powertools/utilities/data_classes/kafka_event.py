@@ -1,4 +1,5 @@
 import base64
+from functools import cached_property
 from typing import Any, Dict, Iterator, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -53,12 +54,10 @@ class KafkaEventRecord(DictWrapper):
         """Decodes the base64 encoded value as bytes."""
         return base64.b64decode(self.value)
 
-    @property
+    @cached_property
     def json_value(self) -> Any:
         """Decodes the text encoded data as JSON."""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_value.decode("utf-8"))
-        return self._json_data
+        return self._json_deserializer(self.decoded_value.decode("utf-8"))
 
     @property
     def headers(self) -> List[Dict[str, List[int]]]:

@@ -1,34 +1,27 @@
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from aws_lambda_powertools.event_handler.openapi.models import OpenAPI
-
-
-def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
+def generate_swagger_html(spec: str, path: str, swagger_js: str, swagger_css: str, swagger_base_url: str) -> str:
     """
     Generate Swagger UI HTML page
 
     Parameters
     ----------
-    spec: OpenAPI
+    spec: str
         The OpenAPI spec
+    path: str
+        The path to the Swagger documentation
     js_url: str
         The URL to the Swagger UI JavaScript file
     css_url: str
         The URL to the Swagger UI CSS file
     """
 
-    from aws_lambda_powertools.event_handler.openapi.compat import model_json
-
-    # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
-    # </script> or similar tags. Escaping the forward slash in </ as <\/ ensures that the JSON does not inadvertently
-    # close the script tag, and the JSON remains a valid string within the JavaScript code.
-    escaped_spec = model_json(
-        spec,
-        by_alias=True,
-        exclude_none=True,
-        indent=2,
-    ).replace("</", "<\\/")
+    # If Swagger base URL is present, generate HTML content with linked CSS and JavaScript files
+    # If no Swagger base URL is provided, include CSS and JavaScript directly in the HTML
+    if swagger_base_url:
+        swagger_css_content = f"<link rel='stylesheet' type='text/css' href='{swagger_css}'>"
+        swagger_js_content = f"<script src='{swagger_js}'></script>"
+    else:
+        swagger_css_content = f"<style>{swagger_css}</style>"
+        swagger_js_content = f"<script>{swagger_js}</script>"
 
     return f"""
 <!DOCTYPE html>
@@ -40,7 +33,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
       http-equiv="Cache-control"
       content="no-cache, no-store, must-revalidate"
     />
-    <link rel="stylesheet" type="text/css" href="{css_url}">
+    {swagger_css_content}
 </head>
 
 <body>
@@ -49,7 +42,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
     </div>
 </body>
 
-<script src="{js_url}"></script>
+{swagger_js_content}
 
 <script>
   var swaggerUIOptions = {{
@@ -60,7 +53,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
     layout: "BaseLayout",
     showExtensions: true,
     showCommonExtensions: true,
-    spec: {escaped_spec},
+    spec: {spec},
     presets: [
       SwaggerUIBundle.presets.apis,
       SwaggerUIBundle.SwaggerUIStandalonePreset
@@ -71,6 +64,7 @@ def generate_swagger_html(spec: "OpenAPI", js_url: str, css_url: str) -> str:
   }}
 
   var ui = SwaggerUIBundle(swaggerUIOptions)
+  ui.specActions.updateUrl('{path}?format=json');
 </script>
 </html>
             """.strip()

@@ -7,20 +7,20 @@ Event handler for Amazon API Gateway REST and HTTP APIs, Application Loader Bala
 
 ## Key Features
 
-* Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
-* Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
-* Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"} for self-documented event schema
-* Works with micro function (one or a few routes) and monolithic functions (all routes)
-* Support for OpenAPI and data validation for requests/responses
+- Lightweight routing to reduce boilerplate for API Gateway REST/HTTP API, ALB and Lambda Function URLs.
+- Support for CORS, binary and Gzip compression, Decimals JSON encoding and bring your own JSON serializer
+- Built-in integration with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="\_blank"} for self-documented event schema
+- Works with micro function (one or a few routes) and monolithic functions (all routes)
+- Support for OpenAPI and data validation for requests/responses
 
 ## Getting started
 
 ???+ tip
-    All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
+All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="\_blank"}.
 
 ### Install
 
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
+!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="\_blank"}."
 
 **When using the data validation feature**, you need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
 
@@ -29,9 +29,10 @@ As of now, both Pydantic V1 and V2 are supported. For a future major version, we
 ### Required resources
 
 <!-- markdownlint-disable-next-line MD013 -->
-If you're using any API Gateway integration, you must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="_blank"} configured to invoke your Lambda function.
 
-In case of using [VPC Lattice](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you must have a service network configured to invoke your Lambda function.
+If you're using any API Gateway integration, you must have an existing [API Gateway Proxy integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html){target="\_blank"} or [ALB](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html){target="\_blank"} configured to invoke your Lambda function.
+
+In case of using [VPC Lattice](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="\_blank"}, you must have a service network configured to invoke your Lambda function.
 
 This is the sample infrastructure for API Gateway and Lambda Function URLs we are using for the examples in this documentation.
 
@@ -58,8 +59,8 @@ A resolver will handle request resolution, including [one or more routers](#spli
 For resolvers, we provide: `APIGatewayRestResolver`, `APIGatewayHttpResolver`, `ALBResolver`, `LambdaFunctionUrlResolver`, and `VPCLatticeResolver`. From here on, we will default to `APIGatewayRestResolver` across examples.
 
 ???+ info "Auto-serialization"
-    We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
-    return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
+We serialize `Dict` responses as JSON, trim whitespace for compact responses, set content-type to `application/json`, and
+return a 200 OK HTTP status. You can optionally set a different HTTP status code as the second argument of the tuple:
 
     ```python hl_lines="15 16"
     --8<-- "examples/event_handler_rest/src/getting_started_return_tuple.py"
@@ -72,7 +73,7 @@ When using Amazon API Gateway REST API to front your Lambda functions, you can u
 Here's an example on how we can handle the `/todos` path.
 
 ???+ info "Trailing slash in routes"
-    For `APIGatewayRestResolver`, we seamless handle routes with a trailing slash (`/todos/`).
+For `APIGatewayRestResolver`, we seamless handle routes with a trailing slash (`/todos/`).
 
 === "getting_started_rest_api_resolver.py"
 
@@ -99,7 +100,7 @@ Here's an example on how we can handle the `/todos` path.
 When using Amazon API Gateway HTTP API to front your Lambda functions, you can use `APIGatewayHttpResolver`.
 
 ???+ note
-    Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
+Using HTTP API v1 payload? Use `APIGatewayRestResolver` instead. `APIGatewayHttpResolver` defaults to v2 payload.
 
 ```python hl_lines="5 11" title="Using HTTP API resolver"
 --8<-- "examples/event_handler_rest/src/getting_started_http_api_resolver.py"
@@ -115,7 +116,7 @@ When using Amazon Application Load Balancer (ALB) to front your Lambda functions
 
 #### Lambda Function URL
 
-When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html){target="_blank"}, you can use `LambdaFunctionUrlResolver`.
+When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/dg/urls-configuration.html){target="\_blank"}, you can use `LambdaFunctionUrlResolver`.
 
 === "getting_started_lambda_function_url_resolver.py"
 
@@ -131,7 +132,7 @@ When using [AWS Lambda Function URL](https://docs.aws.amazon.com/lambda/latest/d
 
 #### VPC Lattice
 
-When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="_blank"}, you can use `VPCLatticeV2Resolver`.
+When using [VPC Lattice with AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html){target="\_blank"}, you can use `VPCLatticeV2Resolver`.
 
 === "Payload v2 (Recommended)"
 
@@ -164,7 +165,7 @@ You can use `/todos/<todo_id>` to configure dynamic URL paths, where `<todo_id>`
 Each dynamic route you set must be part of your function signature. This allows us to call your function using keyword arguments when matching your dynamic route.
 
 ???+ note
-    For brevity, we will only include the necessary keys for each sample request for the example to work.
+For brevity, we will only include the necessary keys for each sample request for the example to work.
 
 === "dynamic_routes.py"
 
@@ -179,19 +180,19 @@ Each dynamic route you set must be part of your function signature. This allows 
     ```
 
 ???+ tip
-    You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
+You can also nest dynamic paths, for example `/todos/<todo_id>/<todo_status>`.
 
 #### Catch-all routes
 
 ???+ note
-    We recommend having explicit routes whenever possible; use catch-all routes sparingly.
+We recommend having explicit routes whenever possible; use catch-all routes sparingly.
 
-You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="_blank" rel="nofollow"} string to handle an arbitrary number of paths within a request, for example `.+`.
+You can use a [regex](https://docs.python.org/3/library/re.html#regular-expression-syntax){target="\_blank" rel="nofollow"} string to handle an arbitrary number of paths within a request, for example `.+`.
 
 You can also combine nested paths with greedy regex to catch in between routes.
 
 ???+ warning
-    We choose the most explicit registered route that matches an incoming event.
+We choose the most explicit registered route that matches an incoming event.
 
 === "dynamic_routes_catch_all.py"
 
@@ -228,12 +229,12 @@ If you need to accept multiple HTTP methods in a single function, you can use th
 ```
 
 ???+ note
-    It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
+It is generally better to have separate functions for each HTTP method, as the functionality tends to differ depending on which method is used.
 
 ### Data validation
 
 !!! note "This changes the authoring experience by relying on Python's type annotations"
-    It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction. We support both Pydantic models and Python's dataclass.
+It's inspired by [FastAPI framework](https://fastapi.tiangolo.com/){target="\_blank" rel="nofollow"} for ergonomics and to ease migrations in either direction. We support both Pydantic models and Python's dataclass.
 
     For brevity, we'll focus on Pydantic only.
 
@@ -337,7 +338,7 @@ Even better, we can also let Event Handler validate and convert our response acc
 
 ##### Validating payload subset
 
-With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
+With the addition of the [`Annotated` type starting in Python 3.9](https://docs.python.org/3/library/typing.html#typing.Annotated){target="\_blank" rel="nofollow"}, types can contain additional metadata, allowing us to represent anything we want.
 
 We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that our payload is located in a particular JSON key.
 
@@ -368,13 +369,13 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 !!! info "We will automatically validate and inject incoming query strings via type annotation."
 
-We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
+We use the `Annotated` type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
 In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
-* `completed` is a query string with a `None` as its default value
-* `completed`, when set, should have at minimum 4 characters
-* Doesn't match? Event Handler will return a validation error response
+- `completed` is a query string with a `None` as its default value
+- `completed`, when set, should have at minimum 4 characters
+- No match? Event Handler will return a validation error response
 
 <!-- markdownlint-disable MD013 -->
 
@@ -386,7 +387,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
     2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
-    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 
 === "skip_validating_query_strings.py"
 
@@ -399,6 +400,16 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
     ```
 
     1. `completed` is still the same query string as before, except we simply state it's an string. No `Query` or `Annotated` to validate it.
+
+=== "working_with_multi_query_values.py"
+
+    If you need to handle multi-value query parameters, you can create a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_multi_query_values.py"
+    ```
+
+    1. `example_multi_value_param` is a list containing values from the `ExampleEnum` enumeration.
 
 <!-- markdownlint-enable MD013 -->
 
@@ -414,15 +425,49 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 
 1. `Path` is a special OpenAPI type that allows us to constrain todo_id to be less than 999.
 
+#### Validating headers
+
+We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated.
+
+!!! info "We adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="\_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive."
+
+In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+
+- `correlation_id` is a header that must be present in the request
+- `correlation_id` should have 16 characters
+- No match? Event Handler will return a validation error response
+
+<!-- markdownlint-disable MD013 -->
+
+=== "validating_headers.py"
+
+    ```python hl_lines="8 10 27"
+    --8<-- "examples/event_handler_rest/src/validating_headers.py"
+    ```
+
+    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    2. `Header` is a special OpenAPI type that can add constraints and documentation to a header
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
+
+=== "working_with_headers_multi_value.py"
+
+    You can handle multi-value headers by declaring it as a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_headers_multi_value.py"
+    ```
+
+    1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
+
 ### Accessing request details
 
-Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
+Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="\_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
 
-That is why you see `app.resolve(event, context)` in every example. This allows Event Handler to resolve requests, and expose data like `app.lambda_context` and  `app.current_event`.
+That is why you see `app.resolve(event, context)` in every example. This allows Event Handler to resolve requests, and expose data like `app.lambda_context` and `app.current_event`.
 
 #### Query strings and payload
 
-Within `app.current_event` property, you can access all available query strings as a dictionary via `query_string_parameters`, or a specific one via  `get_query_string_value` method.
+Within `app.current_event` property, you can access all available query strings as a dictionary via `query_string_parameters`, or a specific one via `get_query_string_value` method.
 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property - like the earlier example in the [HTTP Methods](#http-methods) section.
 
@@ -457,14 +502,14 @@ You can use **`exception_handler`** decorator with any Python exception. This al
 ```
 
 ???+ info
-    The `exception_handler` also supports passing a list of exception types you wish to handle with one handler.
+The `exception_handler` also supports passing a list of exception types you wish to handle with one handler.
 
 ### Raising HTTP errors
 
 You can easily raise any HTTP Error back to the client using `ServiceError` exception. This ensures your Lambda function doesn't fail but return the correct HTTP response signalling the error.
 
 ???+ info
-    If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
+If you need to send custom headers, use [Response](#fine-grained-responses) class instead.
 
 We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 404, 500.
 
@@ -476,21 +521,21 @@ We provide pre-defined errors for the most popular ones such as HTTP 400, 401, 4
 
 !!! note "This feature requires [data validation](#data-validation) feature to be enabled."
 
-Behind the scenes, the [data validation](api_gateway.md#data-validation) feature auto-generates an OpenAPI specification from your routes and type annotations. You can use [Swagger UI](https://swagger.io/tools/swagger-ui/){target="_blank" rel="nofollow"} to visualize and interact with your newly auto-documented API.
+Behind the scenes, the [data validation](api_gateway.md#data-validation) feature auto-generates an OpenAPI specification from your routes and type annotations. You can use [Swagger UI](https://swagger.io/tools/swagger-ui/){target="\_blank" rel="nofollow"} to visualize and interact with your newly auto-documented API.
 
 There are some important **caveats** that you should know before enabling it:
 
-| Caveat                                           | Description                                                                                                                                                                                            |
-| ------------------------------------------------ |--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Swagger UI is **publicly accessible by default** | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](api_gateway.md#customizing-swagger-ui) using your preferred authorization mechanism. |
-| **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                   |
-| You need to expose **new routes**                | You'll need to expose the following paths to Lambda: `/swagger`, `/swagger.css`, `/swagger.js`; ignore if you're routing all paths already.                                                            |
+| Caveat                                           | Description                                                                                                                                                                              |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Swagger UI is **publicly accessible by default** | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism. |
+| **No micro-functions support** yet               | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                     |
+| You need to expose a **new route**               | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                                                                              |
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
 ```
 
-1. `enable_swagger` creates a route to serve Swagger UI and allows quick customizations. <br><br> You can also include  middlewares to protect or enhance the overall experience.
+1. `enable_swagger` creates a route to serve Swagger UI and allows quick customizations. <br><br> You can also include middlewares to protect or enhance the overall experience.
 
 Here's an example of what it looks like by default:
 
@@ -498,11 +543,11 @@ Here's an example of what it looks like by default:
 
 ### Custom Domain API Mappings
 
-When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-mappings.html){target="_blank"}, you must use **`strip_prefixes`** param in the `APIGatewayRestResolver` constructor.
+When using [Custom Domain API Mappings feature](https://docs.aws.amazon.com/apigateway/latest/developerguide/rest-api-mappings.html){target="\_blank"}, you must use **`strip_prefixes`** param in the `APIGatewayRestResolver` constructor.
 
 **Scenario**: You have a custom domain `api.mydomain.dev`. Then you set `/payment` API Mapping to forward any payment requests to your Payments API.
 
-**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda/issues/34){target="_blank"}.
+**Challenge**: This means your `path` value for any API requests will always contain `/payment/<actual_request>`, leading to HTTP 404 as Event Handler is trying to match what's after `payment/`. This gets further complicated with an [arbitrary level of nesting](https://github.com/aws-powertools/powertools-lambda/issues/34){target="\_blank"}.
 
 To address this API Gateway behavior, we use `strip_prefixes` parameter to account for these prefixes that are now injected into the path regardless of which type of API Gateway you're using.
 
@@ -519,9 +564,9 @@ To address this API Gateway behavior, we use `strip_prefixes` parameter to accou
     ```
 
 ???+ note
-    After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`.
+After removing a path prefix with `strip_prefixes`, the new root path will automatically be mapped to the path argument of `/`.
 
-	For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
+    For example, when using `strip_prefixes` value of `/pay`, there is no difference between a request path of `/pay` and `/pay/`; and the path argument would be defined as `/`.
 
 For added flexibility, you can use regexes to strip a prefix. This is helpful when you have many options due to different combinations of prefixes (e.g: multiple environments, multiple versions).
 
@@ -541,7 +586,7 @@ This will ensure that CORS headers are returned as part of the response when you
 matches one of the allowed values.
 
 ???+ tip
-    Optionally disable CORS on a per path basis with `cors=False` parameter.
+Optionally disable CORS on a per path basis with `cors=False` parameter.
 
 === "setting_cors.py"
 
@@ -578,19 +623,19 @@ For convenience, we automatically handle that for you as long as you [setup CORS
 For convenience, these are the default values when using `CORSConfig` to enable CORS:
 
 ???+ warning
-    Always configure `allow_origin` when using in production.
+Always configure `allow_origin` when using in production.
 
 ???+ tip "Multiple origins?"
-    If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
+If you need to allow multiple origins, pass the additional origins using the `extra_origins` key.
 
-| Key                                                                                                                                                         | Value                                                                        | Note                                                                                                                                                                                     |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                                            |
-| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                                     |
-| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                                             |
-| **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="_blank" rel="nofollow"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="_blank" rel="nofollow"}. |
-| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                                     |
-| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                                        |
+| Key                                                                                                                                                          | Value                                                                        | Note                                                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **[allow_origin](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="\_blank" rel="nofollow"}**: `str`            | `*`                                                                          | Only use the default value for development. **Never use `*` for production** unless your use case requires it                                                                             |
+| **[extra_origins](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Origin){target="\_blank" rel="nofollow"}**: `List[str]`     | `[]`                                                                         | Additional origins to be allowed, in addition to the one specified in `allow_origin`                                                                                                      |
+| **[allow_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Headers){target="\_blank" rel="nofollow"}**: `List[str]`    | `[Authorization, Content-Type, X-Amz-Date, X-Api-Key, X-Amz-Security-Token]` | Additional headers will be appended to the default list for your convenience                                                                                                              |
+| **[expose_headers](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Expose-Headers){target="\_blank" rel="nofollow"}**: `List[str]`  | `[]`                                                                         | Any additional header beyond the [safe listed by CORS specification](https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_response_header){target="\_blank" rel="nofollow"}. |
+| **[max_age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age){target="\_blank" rel="nofollow"}**: `int`                      | ``                                                                           | Only for pre-flight requests if you choose to have your function to handle it instead of API Gateway                                                                                      |
+| **[allow_credentials](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Allow-Credentials){target="\_blank" rel="nofollow"}**: `bool` | `False`                                                                      | Only necessary when you need to expose cookies, authorization headers or TLS client certificates.                                                                                         |
 
 ### Middleware
 
@@ -655,6 +700,7 @@ Here's a sample middleware that extracts and injects correlation ID, using `APIG
 ![Combining middlewares](../../media/middlewares_normal_processing-dark.svg#only-dark)
 
 _Request flowing through multiple registered middlewares_
+
 </center>
 
 You can use `app.use` to register middlewares that should always run regardless of the route, also known as global middlewares.
@@ -696,6 +742,7 @@ Event Handler **calls global middlewares first**, then middlewares defined at th
 ![Short-circuiting middleware chain](../../media/middlewares_early_return-dark.svg#only-dark)
 
 _Interrupting request flow by returning early_
+
 </center>
 
 Imagine you want to stop processing a request if something is missing, or return immediately if you've seen this request before.
@@ -733,7 +780,7 @@ Here's an example where we prevent any request that doesn't include a correlatio
 
 By default, any unhandled exception in the middleware chain is eventually propagated as a HTTP 500 back to the client.
 
-While there isn't anything special on how to use [`try/catch`](https://docs.python.org/3/tutorial/errors.html#handling-exceptions){target="_blank" rel="nofollow"} for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:
+While there isn't anything special on how to use [`try/catch`](https://docs.python.org/3/tutorial/errors.html#handling-exceptions){target="\_blank" rel="nofollow"} for middlewares, it is important to visualize how Event Handler deals with them under the following scenarios:
 
 === "Unhandled exception from route handler"
 
@@ -784,15 +831,15 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 4. Register an instance of `CorrelationIdMiddleware`.
 
 !!! note "Class-based **vs** function-based middlewares"
-    When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
+When registering a middleware, we expect a callable in both cases. For class-based middlewares, `BaseMiddlewareHandler` is doing the work of calling your `handler` method with the correct parameters, hence why we expect an instance of it.
 
 #### Native middlewares
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                                                | Purpose                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
+| Middleware                                                                                                                 | Purpose                                                                                                                                  |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="\_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="\_blank"} |
 
 #### Being a good citizen
 
@@ -811,11 +858,11 @@ Keep the following in mind when authoring middlewares for Event Handler:
 You can use the `Response` class to have full control over the response. For example, you might want to add additional headers, cookies, or set a custom Content-type.
 
 ???+ info
-    Powertools for AWS Lambda (Python) serializes headers and cookies according to the type of input event.
-    Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
+Powertools for AWS Lambda (Python) serializes headers and cookies according to the type of input event.
+Some event sources require headers and cookies to be encoded as `multiValueHeaders`.
 
 ???+ warning "Using multiple values for HTTP headers in ALB?"
-    Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers){target="_blank"} to serialize response headers correctly.
+Make sure you [enable the multi value headers feature](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/lambda-functions.html#multi-value-headers){target="\_blank"} to serialize response headers correctly.
 
 === "fine_grained_responses.py"
 
@@ -834,10 +881,10 @@ You can use the `Response` class to have full control over the response. For exa
 You can compress with gzip and base64 encode your responses via `compress` parameter. You have the option to pass the `compress` parameter when working with a specific route or using the Response object.
 
 ???+ info
-    The `compress` parameter used in the Response object takes precedence over the one used in the route.
+The `compress` parameter used in the Response object takes precedence over the one used in the route.
 
 ???+ warning
-    The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
+The client must send the `Accept-Encoding` header, otherwise a normal response will be sent.
 
 === "compressing_responses_using_route.py"
 
@@ -866,7 +913,7 @@ You can compress with gzip and base64 encode your responses via `compress` param
 ### Binary responses
 
 ???+ warning "Amazon API Gateway does not support `*/*` binary media type [when CORS is also configured](https://github.com/aws-powertools/powertools-lambda-python/issues/3373#issuecomment-1821144779){target='blank'}."
-    This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
+This feature requires API Gateway to configure binary media types, see [our sample infrastructure](#required-resources) for reference.
 
 For convenience, we automatically base64 encode binary responses. You can also use in combination with `compress` parameter if your client supports gzip.
 
@@ -900,12 +947,12 @@ Like `compress` feature, the client must send the `Accept` header with the corre
 
 ### Debug mode
 
-You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="_blank"}.
+You can enable debug mode via `debug` param, or via `POWERTOOLS_DEV` [environment variable](../../index.md#environment-variables){target="\_blank"}.
 
 This will enable full tracebacks errors in the response, print request and responses, and set CORS in development mode.
 
 ???+ danger
-    This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
+This might reveal sensitive information in your logs and relax CORS restrictions, use it sparingly.
 
     It's best to use for local development only!
 
@@ -915,7 +962,7 @@ This will enable full tracebacks errors in the response, print request and respo
 
 ### OpenAPI
 
-When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your API's parameters.
+When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="\_blank"} type annotations to add constraints to your API's parameters.
 
 --8<-- "docs/core/event_handler/_openapi_customization_intro.md"
 
@@ -936,7 +983,7 @@ To implement these customizations, include extra parameters when defining your r
 #### Customizing Swagger UI
 
 ???+note "Customizing the Swagger metadata"
-    The `enable_swagger` method accepts the same metadata as described at [Customizing OpenAPI metadata](api_gateway.md#customizing-openapi-metadata).
+The `enable_swagger` method accepts the same metadata as described at [Customizing OpenAPI metadata](api_gateway.md#customizing-openapi-metadata).
 
 The Swagger UI appears by default at the `/swagger` path, but you can customize this to serve the documentation from another path and specify the source for Swagger UI assets.
 
@@ -950,11 +997,11 @@ Below is an example configuration for serving Swagger UI from a custom path or C
 
 === "customizing_swagger_middlewares.py"
 
-   A Middleware can handle tasks such as adding security headers, user authentication, or other request processing for serving the Swagger UI.
+A Middleware can handle tasks such as adding security headers, user authentication, or other request processing for serving the Swagger UI.
 
-   ```python hl_lines="7 13-18 21"
-   --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
-   ```
+```python hl_lines="7 13-18 21"
+--8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
+```
 
 #### Customizing OpenAPI metadata
 
@@ -986,7 +1033,7 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
 
 === "split_route_module.py"
 
-	We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
+    We import **Router** instead of **APIGatewayRestResolver**; syntax wise is exactly the same.
 
     !!! info
         This means all methods, including [middleware](#middleware) will work as usual.
@@ -997,18 +1044,19 @@ Let's assume you have `split_route.py` as your Lambda function entrypoint and ro
 
 === "split_route.py"
 
-	We use `include_router` method and include all user routers registered in the `router` global object.
+    We use `include_router` method and include all user routers registered in the `router` global object.
 
     !!! note
           This method merges routes, [context](#sharing-contextual-data) and [middleware](#middleware) from `Router` into the main resolver instance (`APIGatewayRestResolver()`).
 
-	```python hl_lines="11"
+    ```python hl_lines="11"
     --8<-- "examples/event_handler_rest/src/split_route.py"
-	```
+    ```
 
     1. When using [middleware](#middleware) in both `Router` and main resolver, you can make `Router` middlewares to take precedence by using `include_router` before `app.use()`.
 
 <!-- markdownlint-enable MD013 -->
+
 #### Route prefix
 
 In the previous example, `split_route_module.py` routes had a `/todos` prefix. This might grow over time and become repetitive.
@@ -1017,9 +1065,9 @@ When necessary, you can set a prefix when including a router object. This means 
 
 === "split_route_prefix.py"
 
-	```python hl_lines="12"
+    ```python hl_lines="12"
     --8<-- "examples/event_handler_rest/src/split_route_prefix.py"
-	```
+    ```
 
 === "split_route_prefix_module.py"
 
@@ -1047,19 +1095,19 @@ You can use specialized router classes according to the type of event that you a
 You can use `append_context` when you want to share data between your App and Router instances. Any data you share will be available via the `context` dictionary available in your App or Router context.
 
 ???+ info "We always clear data available in `context` after each invocation."
-    This can be useful for middlewares injecting contextual information before a request is processed.
+This can be useful for middlewares injecting contextual information before a request is processed.
 
 === "split_route_append_context.py"
 
-	```python hl_lines="18"
+    ```python hl_lines="18"
     --8<-- "examples/event_handler_rest/src/split_route_append_context.py"
-	```
+    ```
 
 === "split_route_append_context_module.py"
 
-	```python hl_lines="16"
+    ```python hl_lines="16"
     --8<-- "examples/event_handler_rest/src/split_route_append_context_module.py"
-	```
+    ```
 
 #### Sample layout
 
@@ -1101,7 +1149,7 @@ Event Handler naturally leads to a single Lambda function handling multiple rout
 Both single (monolithic) and multiple functions (micro) offer different set of trade-offs worth knowing.
 
 ???+ tip
-    TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary.
+TL;DR. Start with a monolithic function, add additional functions with new handlers, and possibly break into micro functions if necessary.
 
 #### Monolithic function
 
@@ -1111,16 +1159,16 @@ A monolithic function means that your final code artifact will be deployed to a 
 
 _**Benefits**_
 
-* **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
-* **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
-* **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
+- **Code reuse**. It's easier to reason about your service, modularize it and reuse code as it grows. Eventually, it can be turned into a standalone library.
+- **No custom tooling**. Monolithic functions are treated just like normal Python packages; no upfront investment in tooling.
+- **Faster deployment and debugging**. Whether you use all-at-once, linear, or canary deployments, a monolithic function is a single deployable unit. IDEs like PyCharm and VSCode have tooling to quickly profile, visualize, and step through debug any Python package.
 
 _**Downsides**_
 
-* **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
-* **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
-    * Regardless, least privilege can be applied to either approaches.
-* **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
+- **Cold starts**. Frequent deployments and/or high load can diminish the benefit of monolithic functions depending on your latency requirements, due to [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="\_blank"}. Always load test to pragmatically balance between your customer experience and development cognitive load.
+- **Granular security permissions**. The micro function approach enables you to use fine-grained permissions & access controls, separate external dependencies & code signing at the function level. Conversely, you could have multiple functions while duplicating the final code artifact in a monolithic approach.
+    - Regardless, least privilege can be applied to either approaches.
+- **Higher risk per deployment**. A misconfiguration or invalid import can cause disruption if not caught earlier in automated testing. Multiple functions can mitigate misconfigurations but they would still share the same code artifact. You can further minimize risks with multiple environments in your CI/CD pipeline.
 
 #### Micro function
 
@@ -1130,46 +1178,48 @@ A micro function means that your final code artifact will be different to each f
 
 **Benefits**
 
-* **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
-* **Discoverability**. Micro functions are easier to visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
-* **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="_blank"} to optimize builds for external dependencies.
+- **Granular scaling**. A micro function can benefit from the [Lambda scaling model](https://docs.aws.amazon.com/lambda/latest/dg/invocation-scaling.html){target="\_blank"} to scale differently depending on each part of your application. Concurrency controls and provisioned concurrency can also be used at a granular level for capacity management.
+- **Discoverability**. Micro functions are easier to visualize when using distributed tracing. Their high-level architectures can be self-explanatory, and complexity is highly visible — assuming each function is named to the business purpose it serves.
+- **Package size**. An independent function can be significant smaller (KB vs MB) depending on external dependencies it require to perform its purpose. Conversely, a monolithic approach can benefit from [Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/invocation-layers.html){target="\_blank"} to optimize builds for external dependencies.
 
 **Downsides**
 
-* **Upfront investment**. You need custom build tooling to bundle assets, including [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
-    * Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
-* **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
-your development, building, deployment tooling need to accommodate the distinct layout.
-* **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
-    * Automated testing, operational and security reviews are essential to stability in either approaches.
+- **Upfront investment**. You need custom build tooling to bundle assets, including [C bindings for runtime compatibility](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html){target="\_blank"}. Operations become more elaborate — you need to standardize tracing labels/annotations, structured logging, and metrics to pinpoint root causes.
+    - Engineering discipline is necessary for both approaches. Micro-function approach however requires further attention in consistency as the number of functions grow, just like any distributed system.
+- **Harder to share code**. Shared code must be carefully evaluated to avoid unnecessary deployments when that changes. Equally, if shared code isn't a library,
+  your development, building, deployment tooling need to accommodate the distinct layout.
+- **Slower safe deployments**. Safely deploying multiple functions require coordination — AWS CodeDeploy deploys and verifies each function sequentially. This increases lead time substantially (minutes to hours) depending on the deployment strategy you choose. You can mitigate it by selectively enabling it in prod-like environments only, and where the risk profile is applicable.
+    - Automated testing, operational and security reviews are essential to stability in either approaches.
 
 **Example**
 
 Consider a simplified micro function structured REST API that has two routes:
 
-* `/users` - an endpoint that will return all users of the application on `GET` requests
-* `/users/<id>` - an endpoint that looks up a single users details by ID on `GET` requests
+- `/users` - an endpoint that will return all users of the application on `GET` requests
+- `/users/<id>` - an endpoint that looks up a single users details by ID on `GET` requests
 
-Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.).
+Each endpoint will be it's own Lambda function that is configured as a [Lambda integration](https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html){target="\_blank"}. This allows you to set different configurations for each lambda (memory size, layers, etc.).
 
 === "`/users` Endpoint"
-    ```python
+`python
     --8<-- "examples/event_handler_rest/src/micro_function_all_users_route.py"
-    ```
+    `
 
 === "`/users/<id>` Endpoint"
-    ```python
+`python
     --8<-- "examples/event_handler_rest/src/micro_function_user_by_id_route.py"
-    ```
+    `
 
 === "Micro Function Example SAM Template"
-    ```yaml
+`yaml
     --8<-- "examples/event_handler_rest/sam/micro_function_template.yaml"
-    ```
+    `
 
 <!-- markdownlint-disable MD013 -->
+
 ???+ note
-    You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="_blank"} or [Pants](https://www.pantsbuild.org/docs/awslambda-python){target="_blank" rel="nofollow"}.
+You can see some of the downsides in this example such as some code reuse. If set up with proper build tooling, the `User` class could be shared across functions. This could be accomplished by packaging shared code as a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/chapter-layers.html){target="\_blank"} or [Pants](https://www.pantsbuild.org/docs/awslambda-python){target="\_blank" rel="nofollow"}.
+
 <!-- markdownlint-enable MD013 -->
 
 ## Testing your code
@@ -1238,7 +1288,7 @@ You can test your routes by passing a proxy event request with required params.
 
 Chalice is a full featured microframework that manages application and infrastructure. This utility, however, is largely focused on routing to reduce boilerplate and expects you to setup and manage infrastructure with your framework of choice.
 
-That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="_blank" rel="nofollow"} if you're looking for a more opinionated and web framework feature set.
+That said, [Chalice has native integration with Lambda Powertools](https://aws.github.io/chalice/topics/middleware.html){target="\_blank" rel="nofollow"} if you're looking for a more opinionated and web framework feature set.
 
 **What happened to `ApiGatewayResolver`?**
 

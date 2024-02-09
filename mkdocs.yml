@@ -30,6 +30,7 @@ nav:
           - utilities/data_classes.md
           - utilities/parser.md
           - utilities/idempotency.md
+          - utilities/data_masking.md
           - utilities/feature_flags.md
           - utilities/streaming.md
           - utilities/middleware_factory.md
@@ -39,6 +40,7 @@ nav:
   - Processes:
       - Security: security.md
       - Automation: automation.md
+      - Versioning policy: versioning.md
       - Roadmap: roadmap.md
       - Maintainers: maintainers.md
       - Contributing:
