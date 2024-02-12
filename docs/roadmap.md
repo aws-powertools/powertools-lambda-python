@@ -23,6 +23,15 @@ Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#
 * [ ] Video to walkthrough use cases for anyone new to LLM Agents
 * [ ] Launch amplifier (_e.g., What's New, Blog post_)
 
+### Setting Parameters and Secrets
+
+As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
+
+**Major updates**
+
+* [x] [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/3040)
+* [ ] [MVP](https://github.com/aws-powertools/powertools-lambda-python/pull/2858)
+
 ### Observability providers
 
 We want to extend Tracer, Metrics, and Logger to support any [AWS Lambda certified observability partner](https://go.aws/3HtU6CZ){target="_blank"}, along with OpenTelemetry.
