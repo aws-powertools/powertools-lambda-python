@@ -87,6 +87,7 @@ theme:
     - navigation.tabs
     - content.code.annotate
     - content.code.copy
+    - content.tabs.link
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -98,6 +99,9 @@ markdown_extensions:
   - abbr
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.highlight:
       linenums: true
   - pymdownx.details
@@ -112,6 +116,7 @@ markdown_extensions:
       permalink: true
       toc_depth: 4
   - attr_list
+  - md_in_html
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
