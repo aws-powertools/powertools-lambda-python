@@ -273,7 +273,7 @@ jobs:
         name: Git client setup and refresh tip
         run: |
           git config user.name "Powertools for AWS Lambda (Python) bot"
-          git config user.email "aws-lambda-powertools-feedback@amazon.com"
+          git config user.email "aws-powertools-maintainers@amazon.com"
           git config remote.origin.url >&-
 
       - name: Create Git Tag

@@ -87,7 +87,7 @@ We want to make this easier by extending certain utilities to accept a `metrics`
 
 We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
 
-!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-lambda-powertools-feedback@amazon.com)."
+!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-powertools-maintainers@amazon.com)."
 
 **Major updates**
 

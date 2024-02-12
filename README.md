@@ -83,7 +83,7 @@ This helps us understand who uses Powertools for AWS Lambda (Python) in a non-in
 ## Connect
 
 * **Powertools for AWS Lambda on Discord**: `#python` - **[Invite link](https://discord.gg/B8zZKbbyET)**
-* **Email**: <aws-lambda-powertools-feedback@amazon.com>
+* **Email**: <aws-powertools-maintainers@amazon.com>
 
 ## Security disclosures
 
