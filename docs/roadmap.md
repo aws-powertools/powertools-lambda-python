@@ -51,7 +51,11 @@ Timezones being tricky, we plan to experiment with an afternoon slot in Central 
 
 **Major updates**
 
-- [ ] Decide whether to use Amazon Chime or Zoom (we had audio setup issues on Discord)
+- [x] Decide whether to use Amazon Chime or Zoom (we had audio setup issues on Discord)
+- [ ] Experiment running monthly roadmap review as an open call
+    - [ ] Settle on monthly roadmap review agenda
+    - [ ] Invite Discord community
+    - [ ] Update roadmap page with Discord event
 
 ### Authentication (SigV4)
 
