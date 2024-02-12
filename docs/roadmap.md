@@ -227,7 +227,7 @@ AWS Lambda will officially block updates to Lambda functions using Python 3.7 su
 
 ### Lambda Layer in release notes
 
-> **Update**: We are looking at more accessible alternatives based on customer feedback (e.g., AWS System Manager public parameters)
+> **Reason**: We are looking at more accessible alternatives based on customer feedback (e.g., AWS System Manager public parameters)
 
 We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
 
