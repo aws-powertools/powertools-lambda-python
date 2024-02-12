@@ -213,6 +213,16 @@ Data Masking will be a new utility to mask/unmask sensitive data using encryptio
 * [x] User-guide documentation and include when not to use it (e.g., when to use SNS data policy, CloudWatch Logs data policy)
 * [x] Decide whether to use Encryption SDK to bring their own provider or a simply a contract (e.g., `ItsDangerous`)
 
+### Deprecate Python 3.7 support
+
+AWS Lambda will officially block updates to Lambda functions using Python 3.7 support. We will drop support as soon as [that is official](https://docs.aws.amazon.com/lambda/latest/dg/lambda-runtimes.html#runtime-support-policy){target="_blank"}.
+
+**Major updates**
+
+* [x] [Drop Python 3.7 support](https://github.com/aws-powertools/powertools-lambda-python/pull/3638)
+* [x] [Add documentation banner](https://github.com/aws-powertools/powertools-lambda-python/pull/3618)
+* [x] [Publish versioning policy docs](https://github.com/aws-powertools/powertools-lambda-python/pull/3682)
+
 ## Dropped
 
 ### Lambda Layer in release notes
