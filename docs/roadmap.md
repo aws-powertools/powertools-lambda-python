@@ -100,7 +100,7 @@ We want to investigate security and scaling requirements for these special regio
 
 ### V3
 
-We are in the process of planning the roadmap for v3. As always, our approach includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
+We are in the process of planning the roadmap for v3. As always, [our approach](./versioning.md){target="_blank"} includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
 
 For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
 
