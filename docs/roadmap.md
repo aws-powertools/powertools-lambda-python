@@ -93,7 +93,9 @@ We want to investigate security and scaling requirements for these special regio
 
 - [x] Gather agencies and customers name to prioritize it
 - [x] Investigate security requirements for special regions
-- [ ] Create additional infrastructure for special regions
+- [x] Create additional infrastructure for special regions
+- [ ] AppSec review
+- [ ] Distribution sign-off
 - [ ] Update CDK Layer construct to include regions
 
 ### V3
