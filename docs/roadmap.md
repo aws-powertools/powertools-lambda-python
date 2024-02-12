@@ -29,7 +29,9 @@ At launch, we will support Datadog since it's [most requested observability prov
 
 Event Handler provides lightweight routing for both [**REST**: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL](./core/event_handler/api_gateway.md), and [**GraphQL**: AWS AppSync](./core/event_handler/appsync.md).
 
-Based on customers feedback, we want to provide middleware authoring support for cross-cutting concerns. For REST APIs, we are also looking into auto-generate OpenAPI Schemas and a SwaggerUI route. For GraphQL, we are working on supporting batch invocations (N+1 problem) along with partial failure support.
+<!-- markdownlint-disable MD013 -->
+Based on customers feedback, we want to provide [middleware authoring support](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#middleware) for cross-cutting concerns. For REST APIs, we are also looking into auto-generate [OpenAPI Schemas](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#data-validation) and a [SwaggerUI route](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#enabling-swaggerui). For GraphQL, we are working on supporting batch invocations (N+1 problem) along with partial failure support.
+<!-- markdownlint-enable MD013 -->
 
 **Major updates**
 
