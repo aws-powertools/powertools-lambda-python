@@ -2,17 +2,13 @@
 
 ## Overview
 
-Our public roadmap outlines the high level direction we are working towards, namely [Themes](#themes). We update this document when our priorities change: security and stability is our top priority.
+Our public roadmap outlines the high level direction we are working towards. We update this document when our priorities change: security and stability are our top priority.
 
-!!! info "For most up-to-date information, see our [board of activities](https://github.com/orgs/aws-powertools/projects/3/views/2?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}."
+!!! info "See our [current iteration cycle](https://github.com/orgs/aws-powertools/projects/3/views/14?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"} for the most up-to-date information."
 
-## Themes
+## Key areas
 
-Operational Excellence is priority number 1. This means bug fixing, stability, security, customer's support, and governance will take precedence above all else.
-
-**What are themes?**
-
-They are key activities maintainers are focusing on. These are updated periodically and you can find the latest [under Themes in our public board](https://github.com/orgs/aws-powertools/projects/3/views/11?query=is%3Aopen+sort%3Aupdated-desc){target="_blank"}.
+Security and operational excellence take precedence above all else. This means bug fixing, stability, customer's support, and internal compliance may delay one or more key areas below.
 
 ### Observability providers
 
@@ -29,17 +25,6 @@ At launch, we will support Datadog since it's [most requested observability prov
 - [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
 - [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
-### Sensitive Data Masking
-
-Data Masking will be a new utility to mask/unmask sensitive data using encryption providers. It's the second most voted feature request (behind [Observability Providers](#observability-providers)).
-
-**Major updates**
-
-- [x] [RFC to agree on design and MVP](https://github.com/aws-powertools/powertools-lambda-python/issues/1858)
-- [x] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
-- [ ] User-guide documentation and include when not to use it (e.g., when to use SNS data policy, CloudWatch Logs data policy)
-- [ ] Decide whether to use Encryption SDK to bring their own provider or a simply a contract (e.g., `ItsDangerous`)
-
 ### Revamp Event Handler
 
 Event Handler provides lightweight routing for both [**REST**: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL](./core/event_handler/api_gateway.md), and [**GraphQL**: AWS AppSync](./core/event_handler/appsync.md).
@@ -51,21 +36,8 @@ Based on customers feedback, we want to provide middleware authoring support for
 - [x] [Agree on experience for middleware support](https://github.com/aws-powertools/powertools-lambda-python/issues/953#issuecomment-1450223155)
 - [x] [RFC to outline initial thoughts on OpenAPI integration](https://github.com/aws-powertools/powertools-lambda-python/issues/2421)
 - [x] [MVP for REST middleware](./core/event_handler/api_gateway.md#middleware)
-- [ ] [MVP for OpenAPI and SwaggerUI](https://github.com/aws-powertools/powertools-lambda-python/pull/3109)
+- [x] [MVP for OpenAPI and SwaggerUI](https://github.com/aws-powertools/powertools-lambda-python/pull/3109)
 - [ ] [MVP for AppSync Batch invoke and partial failure support](https://github.com/aws-powertools/powertools-lambda-python/pull/1998)
-
-### Lambda Layer in release notes
-
-We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
-
-As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to X86 and ARM64 compilation for smaller binaries and extra speed.
-
-This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
-
-**Major updates**
-
-- [x] Create secure mechanism to upload signed assets to GitHub Release Notes
-- [ ] Create feature request to agree on JSON structure and asset name
 
 ### Office hours
 
@@ -204,3 +176,35 @@ A: Because job zero is security and operational stability, we can't provide spec
 **Q: How can I provide feedback or ask for more information?**
 
 A: For existing features, you can directly comment on issues. For anything else, please open an issue.
+
+## Launched
+
+### Sensitive Data Masking
+
+> [Docs](./utilities/data_masking.md)
+
+Data Masking will be a new utility to mask/unmask sensitive data using encryption providers. It's the second most voted feature request (behind [Observability Providers](#observability-providers)).
+
+**Major updates**
+
+- [x] [RFC to agree on design and MVP](https://github.com/aws-powertools/powertools-lambda-python/issues/1858)
+- [x] [POC with AWS KMS as the default provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2197)
+- [x] User-guide documentation and include when not to use it (e.g., when to use SNS data policy, CloudWatch Logs data policy)
+- [x] Decide whether to use Encryption SDK to bring their own provider or a simply a contract (e.g., `ItsDangerous`)
+
+## Dropped
+
+### Lambda Layer in release notes
+
+> **Update**: We are looking at more accessible alternatives based on customer feedback (e.g., AWS System Manager public parameters)
+
+We want to publish a JSON with a map of region and Lambda Layer ARN as a GitHub Release Note asset.
+
+As of V2, we prioritize Lambda Layers being available before release notes are out. This is due to X86 and ARM64 compilation for smaller binaries and extra speed.
+
+This means we have room to include a JSON map for Lambda Layers and facilitate automation for customers wanting the latest version as soon as it's available.
+
+**Major updates**
+
+- [x] Create secure mechanism to upload signed assets to GitHub Release Notes
+- [ ] Create feature request to agree on JSON structure and asset name
