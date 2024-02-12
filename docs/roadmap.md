@@ -66,7 +66,7 @@ Since JWT is a close second, this new utility would cover higher level functions
 **Major updates**
 
 - [ ] RFC to outline challenges, alternative solutions and desired experience
-- [ ] MVP based off RFC
+- [ ] [MVP for AWS SigV4](https://github.com/aws-powertools/powertools-lambda-python/pull/2435)
 
 ### Enhanced operational metrics
 
