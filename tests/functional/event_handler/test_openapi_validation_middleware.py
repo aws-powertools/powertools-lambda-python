@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 from pydantic import BaseModel
@@ -15,9 +15,11 @@ from aws_lambda_powertools.event_handler import (
     Response,
     VPCLatticeResolver,
     VPCLatticeV2Resolver,
+    content_types,
 )
 from aws_lambda_powertools.event_handler.openapi.params import Body, Header, Query
 from aws_lambda_powertools.shared.types import Annotated
+from aws_lambda_powertools.utilities.data_classes import APIGatewayProxyEvent
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -1018,3 +1020,22 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
     # IF expected_error_text is provided, THEN check for its presence in the response body
     if expected_error_text:
         assert any(text in result["body"] for text in expected_error_text)
+
+
+def test_validation_with_alias():
+    # GIVEN a Http API V2 proxy type event
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    class FunkyTown(BaseModel):
+        parameter: str
+
+    @app.get("/my/path")
+    def my_path(
+        parameter: Annotated[Optional[str], Query(alias="parameter1")] = None,
+    ) -> Response[FunkyTown]:
+        assert isinstance(app.current_event, APIGatewayProxyEvent)
+        assert parameter == "value1"
+        return Response(200, content_types.APPLICATION_JSON, FunkyTown(parameter=parameter))
+
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
