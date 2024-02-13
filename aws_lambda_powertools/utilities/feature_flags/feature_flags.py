@@ -10,6 +10,9 @@ from .comparators import (
     compare_days_of_week,
     compare_modulo_range,
     compare_time_range,
+    compare_all_in_list,
+    compare_any_in_list,
+    compare_none_in_list
 )
 from .exceptions import ConfigurationStoreError
 
@@ -63,6 +66,9 @@ class FeatureFlags:
             schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
             schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
             schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
+            schema.RuleAction.ALL_IN_VALUE.value: lambda a, b: compare_all_in_list(a, b),
+            schema.RuleAction.ANY_IN_VALUE.value: lambda a, b: compare_any_in_list(a, b),
+            schema.RuleAction.NONE_IN_VALUE.value: lambda a, b: compare_none_in_list(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
             schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
