@@ -1,22 +1,23 @@
 ---
-title: Bedrock Agents
+title: Agents for Amazon Bedrock
 description: Core utility
 ---
 
-Event handler for Amazon Bedrock Agents, including auto generation of OpenAPI schemas.
+Event handler for [Amazon Bedrock Agents](https://aws.amazon.com/bedrock/agents/), including auto generation of OpenAPI schemas.
 
 ## Key features
 
 * Same declarative syntax as the [other Powertools event handlers](api_gateway.md)
 * Drastically reduce the boilerplate to build Agents for Amazon Bedrock
-* Automatic generation of OpenAPI schemas from your business logic code
-* Built-in data validation for requests/responses
+* Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
+* Built-in data validation for requests and responses
 
 ## Getting started
 
 ```mermaid
 flowchart LR
-	Bedrock <--> Agent
+	Bedrock[Bedrock FM] <-- calls --> Agent
+	You --> Agent
 	Agent -- invokes --> Lambda[Lambda function]
 	Agent -- consults --> OpenAPI{{OpenAPI schema}}
 	OpenAPI -. generated from .-> Lambda
@@ -30,6 +31,8 @@ To build Bedrock Agents, you need:
 
 Powertools makes it easier to author the Lambda function and the creation of the OpenAPI schema.
 
+### Install
+
 !!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
 You need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
@@ -39,11 +42,7 @@ At this time, we support both Pydantic V1 and V2. For a future major version, we
 ### Your first Agent
 
 To create a Bedrock Agent, use the `BedrockAgentResolver` to annotate your actions.
-This is similar to the way [all the other Powertools](api_gateway.md) resolvers work.
-
-???+ note
-	It's important to include a description for each API endpoint.
-	This provides Bedrock Agents with an understanding of your API action.
+This is similar to the way [all the other Event Handler](api_gateway.md) resolvers work.
 
 === "Lambda handler"
 
@@ -51,8 +50,8 @@ This is similar to the way [all the other Powertools](api_gateway.md) resolvers 
     --8<-- "examples/event_handler_bedrock_agents/src/getting_started.py"
     ```
 
-	1. `description` is a required field in order for Bedrock Agents to work.
-	2. Powertools take care of parsing, validate, routing and responding to the request.
+	1. `description` is a recommended field that should contain a human readable descriptin of your action
+	2. We take care of **parsing**, **validating**, **routing** and **responding** to the request.
 
 === "Input payload"
 
@@ -66,7 +65,9 @@ This is similar to the way [all the other Powertools](api_gateway.md) resolvers 
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
 
-The resolvers used by Bedrock Agents are compatible with the full suite of Powertools utilities.
+!!! note "It's important to include a `description` for each API endpoint because reasons"
+
+The resolvers used by Bedrock Agents are compatible with the full suite of Powertools for AWS Lambda utilities.
 This includes [Logger](../logger.md), [Metrics](../metrics.md) and [Tracer](../tracer.md).
 
 ### Generating OpenAPI schemas
