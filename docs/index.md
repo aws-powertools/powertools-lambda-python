@@ -7,33 +7,55 @@ description: Powertools for AWS Lambda (Python)
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless best practices and increase developer velocity.
 
-???+ tip
-    Powertools for AWS Lambda (Python) is also available for [Java](https://docs.powertools.aws.dev/lambda/java/){target="_blank"}, [TypeScript](https://docs.powertools.aws.dev/lambda/typescript/latest/){target="_blank" }, and [.NET](https://docs.powertools.aws.dev/lambda/dotnet/){target="_blank"}
+<!-- markdownlint-disable MD050 -->
+<div class="grid cards" markdown>
 
-??? hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
+- :material-download-outline:{ .lg .middle } __Installation__
 
-    You can choose to support us in three ways:
+    ---
 
-    1) [**Become a reference customer**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
+    Install with `pip`, or our pre-packaged AWS Lambda Layer.
 
-    2) [**Share your work**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
+    :octicons-arrow-right-24: [Pip](#install), [Lambda Layer](#lambda-layer)
 
-    3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
+- :material-battery-charging:{ .lg .middle } __Features__
 
-    When using Layers, you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.
+    ---
+
+    Start with one, many, or all industry practices.
+
+    [:octicons-arrow-right-24: All features](#features)
+
+- :heart:{ .lg .middle } __Support this project__
+
+    ---
+
+    Become a public reference customer, share your work, or use Lambda Layers.
+
+    [:octicons-arrow-right-24: Support](#how-to-support-powertools-for-aws-lambda-python)
+
+- :material-file-code:{ .lg .middle } __Available languages__
+
+    ---
+
+    Powertools for AWS Lambda is also available in other languages
+
+    :octicons-arrow-right-24: [Java](https://docs.powertools.aws.dev/lambda/java/){target="_blank"}, [TypeScript](https://docs.powertools.aws.dev/lambda/typescript/latest/){target="_blank" }, and [.NET](https://docs.powertools.aws.dev/lambda/dotnet/){target="_blank"}
+
+</div>
 
 ## Install
 
 You can install Powertools for AWS Lambda (Python) using one of the following options:
 
-* **Lambda Layer (x86_64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61**](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-* **Lambda Layer (arm64)**: [**arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61**](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-* **Pip**: **[`pip install "aws-lambda-powertools"`](#){: .copyMe}:clipboard:**
+- __Lambda Layer (x86_64)__: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+- __Lambda Layer (arm64)__: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+- __Pip__: **[`pip install "aws-lambda-powertools"`](#){: .copyMe}:clipboard:**
 
 !!! question "Looking for Pip signed releases? [Learn more about verifying signed builds](./security.md#verifying-signed-builds)"
 
 ??? question "Using Pip? You might need to install additional dependencies."
-    [**Tracer**](./core/tracer.md){target="_blank"}, [**Validation**](./utilities/validation.md){target="_blank"} and [**Parser**](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use [**`pip install "aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard:.
+    [__Tracer__](./core/tracer.md){target="_blank"}, [__Validation__](./utilities/validation.md){target="_blank"} and [__Parser__](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use [**`pip install "aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard:.
 
     For example:
 
@@ -48,21 +70,21 @@ You can install Powertools for AWS Lambda (Python) using one of the following op
 
 Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency (not as a production dependency):
 
-* **Pip**: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
-* **Poetry**: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
-* **Pipenv**: [**`pipenv install --dev "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+- __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+- __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
+- __Pipenv__: [**`pipenv install --dev "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
 
 ??? question "Why is that necessary?"
       Powertools for AWS Lambda (Python) relies on the AWS SDK being available to use in the target runtime (AWS Lambda).
 
       As a result, it affects your favorite IDE in terms of code auto-completion, or running your tests suite locally with no Lambda emulation such as [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html){target="_blank"}.
 
-**A word about dependency resolution**
+__A word about dependency resolution__
 
 In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependency resolution, it'll either install:
 
-* **(A)** the SDK version available in [Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}
-* **(B)** a more up-to-date version if another package you use also depends on `boto3`, for example [Powertools for AWS Lambda (Python) Tracer](core/tracer.md){target="_blank"}
+- __(A)__ the SDK version available in [Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}
+- __(B)__ a more up-to-date version if another package you use also depends on `boto3`, for example [Powertools for AWS Lambda (Python) Tracer](core/tracer.md){target="_blank"}
 
 ### Lambda Layer
 
@@ -688,22 +710,22 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 
 | Utility                                                                                                                                             | Description                                                                                                                                               |
 | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [**Tracing**](./core/tracer.md){target="_blank"}                                                                                                    | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
-| [**Logger**](./core/logger.md){target="_blank"}                                                                                                     | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
-| [**Metrics**](./core/metrics.md){target="_blank"}                                                                                                   | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
-| [**Event handler: AppSync**](./core/event_handler/appsync.md){target="_blank"}                                                                      | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
-| [**Event handler: API Gateway, ALB and Lambda Function URL**](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL                      |
-| [**Middleware factory**](./utilities/middleware_factory.md){target="_blank"}                                                                        | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
-| [**Parameters**](./utilities/parameters.md){target="_blank"}                                                                                        | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
-| [**Batch processing**](./utilities/batch.md){target="_blank"}                                                                                       | Handle partial failures for AWS SQS batch processing                                                                                                      |
-| [**Typing**](./utilities/typing.md){target="_blank"}                                                                                                | Static typing classes to speedup development in your IDE                                                                                                  |
-| [**Validation**](./utilities/validation.md){target="_blank"}                                                                                        | JSON Schema validator for inbound events and responses                                                                                                    |
-| [**Event source data classes**](./utilities/data_classes.md){target="_blank"}                                                                       | Data classes describing the schema of common Lambda event triggers                                                                                        |
-| [**Parser**](./utilities/parser.md){target="_blank"}                                                                                                | Data parsing and deep validation using Pydantic                                                                                                           |
-| [**Idempotency**](./utilities/idempotency.md){target="_blank"}                                                                                      | Idempotent Lambda handler                                                                                                                                 |
-| [**Data Masking**](./utilities/data_masking.md){target="_blank"}                                                                                      | Protect confidential data with easy removal or encryption                                                                                                                                 |
-| [**Feature Flags**](./utilities/feature_flags.md){target="_blank"}                                                                                  | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
-| [**Streaming**](./utilities/streaming.md){target="_blank"}                                                                                          | Streams datasets larger than the available memory as streaming data.                                                                                      |
+| [__Tracing__](./core/tracer.md){target="_blank"}                                                                                                    | Decorators and utilities to trace Lambda function handlers, and both synchronous and asynchronous functions                                               |
+| [__Logger__](./core/logger.md){target="_blank"}                                                                                                     | Structured logging made easier, and decorator to enrich structured logging with key Lambda context details                                                |
+| [__Metrics__](./core/metrics.md){target="_blank"}                                                                                                   | Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)                                                                         |
+| [__Event handler: AppSync__](./core/event_handler/appsync.md){target="_blank"}                                                                      | AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function                                                                 |
+| [__Event handler: API Gateway, ALB and Lambda Function URL__](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/) | Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration, and Lambda Function URL                      |
+| [__Middleware factory__](./utilities/middleware_factory.md){target="_blank"}                                                                        | Decorator factory to create your own middleware to run logic before, and after each Lambda invocation                                                     |
+| [__Parameters__](./utilities/parameters.md){target="_blank"}                                                                                        | Retrieve parameter values from AWS Systems Manager Parameter Store, AWS Secrets Manager, or Amazon DynamoDB, and cache them for a specific amount of time |
+| [__Batch processing__](./utilities/batch.md){target="_blank"}                                                                                       | Handle partial failures for AWS SQS batch processing                                                                                                      |
+| [__Typing__](./utilities/typing.md){target="_blank"}                                                                                                | Static typing classes to speedup development in your IDE                                                                                                  |
+| [__Validation__](./utilities/validation.md){target="_blank"}                                                                                        | JSON Schema validator for inbound events and responses                                                                                                    |
+| [__Event source data classes__](./utilities/data_classes.md){target="_blank"}                                                                       | Data classes describing the schema of common Lambda event triggers                                                                                        |
+| [__Parser__](./utilities/parser.md){target="_blank"}                                                                                                | Data parsing and deep validation using Pydantic                                                                                                           |
+| [__Idempotency__](./utilities/idempotency.md){target="_blank"}                                                                                      | Idempotent Lambda handler                                                                                                                                 |
+| [__Data Masking__](./utilities/data_masking.md){target="_blank"}                                                                                    | Protect confidential data with easy removal or encryption                                                                                                 |
+| [__Feature Flags__](./utilities/feature_flags.md){target="_blank"}                                                                                  | A simple rule engine to evaluate when one or multiple features should be enabled depending on the input                                                   |
+| [__Streaming__](./utilities/streaming.md){target="_blank"}                                                                                          | Streams datasets larger than the available memory as streaming data.                                                                                      |
 
 ## Environment variables
 
@@ -712,19 +734,19 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 
 | Environment variable                      | Description                                                                            | Utility                                                                                  | Default               |
 | ----------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- | --------------------- |
-| **POWERTOOLS_SERVICE_NAME**               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                                                      | `"service_undefined"` |
-| **POWERTOOLS_METRICS_NAMESPACE**          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics.md){target="_blank"}                                            | `None`                |
-| **POWERTOOLS_TRACE_DISABLED**             | Explicitly disables tracing                                                            | [Tracing](./core/tracer.md){target="_blank"}                                             | `false`               |
-| **POWERTOOLS_TRACER_CAPTURE_RESPONSE**    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer.md){target="_blank"}                                             | `true`                |
-| **POWERTOOLS_TRACER_CAPTURE_ERROR**       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer.md){target="_blank"}                                             | `true`                |
-| **POWERTOOLS_TRACE_MIDDLEWARES**          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory.md){target="_blank"}                 | `false`               |
-| **POWERTOOLS_LOGGER_LOG_EVENT**           | Logs incoming event                                                                    | [Logging](./core/logger.md){target="_blank"}                                             | `false`               |
-| **POWERTOOLS_LOGGER_SAMPLE_RATE**         | Debug log sampling                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `0`                   |
-| **POWERTOOLS_LOG_DEDUPLICATION_DISABLED** | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger.md){target="_blank"}                                             | `false`               |
-| **POWERTOOLS_PARAMETERS_MAX_AGE**         | Adjust how long values are kept in cache (in seconds)                                  | [Parameters](./utilities/parameters.md#adjusting-cache-ttl){target="_blank"}             | `5`                   |
-| **POWERTOOLS_PARAMETERS_SSM_DECRYPT**     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters.md#ssmprovider){target="_blank"}                     | `false`               |
-| **POWERTOOLS_DEV**                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#optimizing-for-non-production-environments) | `false`               |
-| **POWERTOOLS_LOG_LEVEL**                  | Sets logging level                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `INFO`                |
+| __POWERTOOLS_SERVICE_NAME__               | Sets service name used for tracing namespace, metrics dimension and structured logging | All                                                                                      | `"service_undefined"` |
+| __POWERTOOLS_METRICS_NAMESPACE__          | Sets namespace used for metrics                                                        | [Metrics](./core/metrics.md){target="_blank"}                                            | `None`                |
+| __POWERTOOLS_TRACE_DISABLED__             | Explicitly disables tracing                                                            | [Tracing](./core/tracer.md){target="_blank"}                                             | `false`               |
+| __POWERTOOLS_TRACER_CAPTURE_RESPONSE__    | Captures Lambda or method return as metadata.                                          | [Tracing](./core/tracer.md){target="_blank"}                                             | `true`                |
+| __POWERTOOLS_TRACER_CAPTURE_ERROR__       | Captures Lambda or method exception as metadata.                                       | [Tracing](./core/tracer.md){target="_blank"}                                             | `true`                |
+| __POWERTOOLS_TRACE_MIDDLEWARES__          | Creates sub-segment for each custom middleware                                         | [Middleware factory](./utilities/middleware_factory.md){target="_blank"}                 | `false`               |
+| __POWERTOOLS_LOGGER_LOG_EVENT__           | Logs incoming event                                                                    | [Logging](./core/logger.md){target="_blank"}                                             | `false`               |
+| __POWERTOOLS_LOGGER_SAMPLE_RATE__         | Debug log sampling                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `0`                   |
+| __POWERTOOLS_LOG_DEDUPLICATION_DISABLED__ | Disables log deduplication filter protection to use Pytest Live Log feature            | [Logging](./core/logger.md){target="_blank"}                                             | `false`               |
+| __POWERTOOLS_PARAMETERS_MAX_AGE__         | Adjust how long values are kept in cache (in seconds)                                  | [Parameters](./utilities/parameters.md#adjusting-cache-ttl){target="_blank"}             | `5`                   |
+| __POWERTOOLS_PARAMETERS_SSM_DECRYPT__     | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store          | [Parameters](./utilities/parameters.md#ssmprovider){target="_blank"}                     | `false`               |
+| __POWERTOOLS_DEV__                        | Increases verbosity across utilities                                                   | Multiple; see [POWERTOOLS_DEV effect below](#optimizing-for-non-production-environments) | `false`               |
+| __POWERTOOLS_LOG_LEVEL__                  | Sets logging level                                                                     | [Logging](./core/logger.md){target="_blank"}                                             | `INFO`                |
 
 ### Optimizing for non-production environments
 
@@ -737,9 +759,9 @@ When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the fol
 
 | Utility           | Effect                                                                                                                                                       |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Logger**        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests |
-| **Event Handler** | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                          |
-| **Tracer**        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                     |
+| __Logger__        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests |
+| __Event Handler__ | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                          |
+| __Tracer__        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                     |
 
 ## Debug mode
 
@@ -749,24 +771,36 @@ When necessary, you can use `POWERTOOLS_DEBUG` environment variable to enable de
 
 ## How to support Powertools for AWS Lambda (Python)?
 
+??? hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
+
+    You can choose to support us in three ways:
+
+    1) [**Become a reference customer**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
+
+    2) [**Share your work**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
+
+    3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
+
+    When using Layers, you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.
+
 ### Becoming a reference customer
 
 Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"} issue.
 
 The following companies, among others, use Powertools:
 
-* [Capital One](https://www.capitalone.com/){target="_blank" rel="nofollow"}
-* [CPQi (Exadel Financial Services)](https://cpqi.com/){target="_blank" rel="nofollow"}
-* [CloudZero](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
-* [CyberArk](https://www.cyberark.com/){target="_blank" rel="nofollow"}
-* [globaldatanet](https://globaldatanet.com/){target="_blank" rel="nofollow"}
-* [IMS](https://ims.tech/){target="_blank" rel="nofollow"}
-* [Jit Security](https://www.jit.io/){target="_blank" rel="nofollow"}
-* [Propellor.ai](https://www.propellor.ai/){target="_blank" rel="nofollow"}
-* [TopSport](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
-* [Transformity](https://transformity.tech/){target="_blank" rel="nofollow"}
-* [Trek10](https://www.trek10.com/){target="_blank" rel="nofollow"}
-* [Vertex Pharmaceuticals](https://www.vrtx.com/){target="_blank" rel="nofollow"}
+- [Capital One](https://www.capitalone.com/){target="_blank" rel="nofollow"}
+- [CPQi (Exadel Financial Services)](https://cpqi.com/){target="_blank" rel="nofollow"}
+- [CloudZero](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
+- [CyberArk](https://www.cyberark.com/){target="_blank" rel="nofollow"}
+- [globaldatanet](https://globaldatanet.com/){target="_blank" rel="nofollow"}
+- [IMS](https://ims.tech/){target="_blank" rel="nofollow"}
+- [Jit Security](https://www.jit.io/){target="_blank" rel="nofollow"}
+- [Propellor.ai](https://www.propellor.ai/){target="_blank" rel="nofollow"}
+- [TopSport](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
+- [Transformity](https://transformity.tech/){target="_blank" rel="nofollow"}
+- [Trek10](https://www.trek10.com/){target="_blank" rel="nofollow"}
+- [Vertex Pharmaceuticals](https://www.vrtx.com/){target="_blank" rel="nofollow"}
 
 ### Sharing your work
 
@@ -780,9 +814,9 @@ This helps us understand who uses Powertools for AWS Lambda (Python) in a non-in
 
 These are our core principles to guide our decision making.
 
-* **AWS Lambda only**. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
-* **Eases the adoption of best practices**. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
-* **Keep it lean**. Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
-* **We strive for backwards compatibility**. New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
-* **We work backwards from the community**. We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
-* **Progressive**. Utilities are designed to be incrementally adoptable for customers at any stage of their Serverless journey. They follow language idioms and their community’s common practices.
+- __AWS Lambda only__. We optimise for AWS Lambda function environments and supported runtimes only. Utilities might work with web frameworks and non-Lambda environments, though they are not officially supported.
+- __Eases the adoption of best practices__. The main priority of the utilities is to facilitate best practices adoption, as defined in the AWS Well-Architected Serverless Lens; all other functionality is optional.
+- __Keep it lean__. Additional dependencies are carefully considered for security and ease of maintenance, and prevent negatively impacting startup time.
+- __We strive for backwards compatibility__. New features and changes should keep backwards compatibility. If a breaking change cannot be avoided, the deprecation and migration process should be clearly defined.
+- __We work backwards from the community__. We aim to strike a balance of what would work best for 80% of customers. Emerging practices are considered and discussed via Requests for Comment (RFCs)
+- __Progressive__. Utilities are designed to be incrementally adoptable for customers at any stage of their Serverless journey. They follow language idioms and their community’s common practices.
