@@ -44,7 +44,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
@@ -71,7 +71,7 @@ jobs:
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # 3.1.6
+        uses: codecov/codecov-action@e0b68c6749509c5f83f984dd99a76a1c1a231044 # 4.0.1
         with:
           file: ./coverage.xml
           env_vars: PYTHON

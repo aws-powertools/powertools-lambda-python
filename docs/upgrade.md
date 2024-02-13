@@ -32,7 +32,7 @@ We've made minimal breaking changes to make your transition to v2 as smooth as p
 
 Before you start, we suggest making a copy of your current working project or create a new branch with git.
 
-1. **Upgrade** Python to at least v3.7
+1. **Upgrade** Python to at least v3.8
 2. **Ensure** you have the latest version via [Lambda Layer or PyPi](index.md#install){target="_blank"}.
 3. **Review** the following sections to confirm whether they affect your code
 

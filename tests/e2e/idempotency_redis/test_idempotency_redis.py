@@ -6,8 +6,6 @@ import pytest
 from tests.e2e.utils import data_fetcher
 from tests.e2e.utils.data_fetcher.common import GetLambdaResponseOptions, get_lambda_response_in_parallel
 
-pytest.skip(reason="Redis tests disabled until we deprecate Python 3.7.", allow_module_level=True)
-
 
 @pytest.fixture
 def ttl_cache_expiration_handler_fn_arn(infrastructure: dict) -> str:

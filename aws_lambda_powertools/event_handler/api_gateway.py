@@ -17,6 +17,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Mapping,
     Match,
     Optional,
     Pattern,
@@ -200,7 +201,7 @@ class CORSConfig:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers
-        headers: Dict[str, str] = {
+        headers = {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
@@ -222,7 +223,7 @@ class Response(Generic[ResponseT]):
         status_code: int,
         content_type: Optional[str] = None,
         body: Optional[ResponseT] = None,
-        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        headers: Optional[Mapping[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
     ):
@@ -237,7 +238,7 @@ class Response(Generic[ResponseT]):
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict[str, Union[str, List[str]]]
+        headers: Mapping[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[Cookie]
             Optionally set cookies.
@@ -245,7 +246,7 @@ class Response(Generic[ResponseT]):
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.headers: Dict[str, Union[str, List[str]]] = dict(headers) if headers else {}
         self.cookies = cookies or []
         self.compress = compress
         self.content_type = content_type
@@ -1940,7 +1941,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers: Dict[str, Union[str, List[str]]] = {}
+        headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
