@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -2609,7 +2607,7 @@
 <summary>Tip: You can share a single state table for all functions</summary>
 <p>You can reuse the same DynamoDB table to store idempotency state. We add <code>module_name</code> and <a href="https://peps.python.org/pep-3155/" rel="nofollow" target="_blank">qualified name for classes and functions</a> in addition to the idempotency key as a hash key.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">AWS Serverless Application Model (SAM) example</label><label for="__tabbed_1_2">AWS Cloud Development Kit (CDK)</label><label for="__tabbed_1_3">Terraform</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="aws-serverless-application-model-sam-example" name="__tabbed_1" type="radio" /><input id="aws-cloud-development-kit-cdk" name="__tabbed_1" type="radio" /><input id="terraform" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="aws-serverless-application-model-sam-example">AWS Serverless Application Model (SAM) example</label><label for="aws-cloud-development-kit-cdk">AWS Cloud Development Kit (CDK)</label><label for="terraform">Terraform</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2911,7 +2909,7 @@
 <div class="admonition tip">
 <p class="admonition-title">See <a href="#choosing-a-payload-subset-for-idempotency">Choosing a payload subset for idempotency</a> for more elaborate use cases.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Idempotent decorator</label><label for="__tabbed_2_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="idempotent-decorator_1" name="__tabbed_2" type="radio" /><input id="sample-event" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="idempotent-decorator_1">Idempotent decorator</label><label for="sample-event">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3017,7 +3015,7 @@
 <summary>Limitation</summary>
 <p>Make sure to call your decorated function using keyword arguments.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Using Dataclasses</label><label for="__tabbed_3_2">Using Pydantic</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="using-dataclasses" name="__tabbed_3" type="radio" /><input id="using-pydantic" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="using-dataclasses">Using Dataclasses</label><label for="using-pydantic">Using Pydantic</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3173,11 +3171,11 @@
 <div class="admonition info">
 <p class="admonition-title">When using the <code>output_serializer</code> parameter, the data will continue to be stored in DynamoDB as a JSON object.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Pydantic</label><label for="__tabbed_4_2">Dataclasses</label><label for="__tabbed_4_3">Any type</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="pydantic" name="__tabbed_4" type="radio" /><input id="dataclasses" name="__tabbed_4" type="radio" /><input id="any-type" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="pydantic">Pydantic</label><label for="dataclasses">Dataclasses</label><label for="any-type">Any type</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You can use <code>PydanticSerializer</code> to automatically serialize what's retrieved from the persistent storage based on the return type annotated.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Inferring via the return type</label><label for="__tabbed_5_2">Explicit model type</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="inferring-via-the-return-type" name="__tabbed_5" type="radio" /><input id="explicit-model-type" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="inferring-via-the-return-type">Inferring via the return type</label><label for="explicit-model-type">Explicit model type</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3370,7 +3368,7 @@
 </div>
 <div class="tabbed-block">
 <p>You can use <code>DataclassSerializer</code> to automatically serialize what's retrieved from the persistent storage based on the return type annotated.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Inferring via the return type</label><label for="__tabbed_6_2">Explicit model type</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="inferring-via-the-return-type_1" name="__tabbed_6" type="radio" /><input id="explicit-model-type_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="inferring-via-the-return-type_1">Inferring via the return type</label><label for="explicit-model-type_1">Explicit model type</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3722,7 +3720,7 @@
 <p>In this example, we choose <code>messageId</code> as our idempotency key since we know it'll be unique.</p>
 <p>Depending on your use case, it might be more accurate <a href="#choosing-a-payload-subset-for-idempotency">to choose another field</a> your producer intentionally set to define uniqueness.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Integration with Batch Processor</label><label for="__tabbed_7_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="integration-with-batch-processor" name="__tabbed_7" type="radio" /><input id="sample-event_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="integration-with-batch-processor">Integration with Batch Processor</label><label for="sample-event_1">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3875,7 +3873,7 @@ If we were to treat the entire request as our idempotency key, a simple HTTP hea
 This means there could be differences in whitespace even when the JSON payload itself is identical.</p>
 <p>To alter this behaviour, we can use the <a href="../jmespath_functions/#powertools_json-function" target="_blank">JMESPath built-in function</a> <code>powertools_json()</code> to treat the payload as a JSON object (dict) rather than a string.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Payment function</label><label for="__tabbed_8_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="payment-function" name="__tabbed_8" type="radio" /><input id="sample-event_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="payment-function">Payment function</label><label for="sample-event_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4051,7 +4049,7 @@ Powertools for AWS Lambda (Python) calculates and includes the remaining invocat
 you must use <code>register_lambda_context</code> available in the <a href="#customizing-the-default-behavior">idempotency config object</a> to benefit from this protection.</p>
 </details>
 <p>Here is an example on how you register the Lambda context in your handler:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Registering the Lambda context</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="registering-the-lambda-context" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="registering-the-lambda-context">Registering the Lambda context</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4121,7 +4119,7 @@ This means that new invocations will execute your code again despite having the 
 </center></p>
 <p>If you are using <code>idempotent_function</code>, any unhandled exceptions that are raised <em>inside</em> the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.</p>
 <p>If an Exception is raised <em>outside</em> the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Handling exceptions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="handling-exceptions_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="handling-exceptions_1">Handling exceptions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4209,7 +4207,7 @@ This means that new invocations will execute your code again despite having the 
 <h3 id="persistence-layers">Persistence layers<a class="headerlink" href="#persistence-layers" title="Permanent link">&para;</a></h3>
 <h4 id="dynamodbpersistencelayer">DynamoDBPersistenceLayer<a class="headerlink" href="#dynamodbpersistencelayer" title="Permanent link">&para;</a></h4>
 <p>This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:1"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Customizing DynamoDBPersistenceLayer to suit your table structure</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:1"><input checked="checked" id="customizing-dynamodbpersistencelayer-to-suit-your-table-structure" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="customizing-dynamodbpersistencelayer-to-suit-your-table-structure">Customizing DynamoDBPersistenceLayer to suit your table structure</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4324,7 +4322,7 @@ This means that new invocations will execute your code again despite having the 
 </table>
 <h4 id="redispersistencelayer">RedisPersistenceLayer<a class="headerlink" href="#redispersistencelayer" title="Permanent link">&para;</a></h4>
 <p>This persistence layer is built-in, allowing you to use an existing Redis service. For optimal performance and compatibility, it is strongly recommended to use a Redis service version 7 or higher.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Customizing RedisPersistenceLayer to suit your data structure</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="customizing-redispersistencelayer-to-suit-your-data-structure" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="customizing-redispersistencelayer-to-suit-your-data-structure">Customizing RedisPersistenceLayer to suit your data structure</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4605,7 +4603,7 @@ This means that new invocations will execute your code again despite having the 
 <summary>No existing Redis service?</summary>
 <p>If you don't have an existing Redis service, we recommend using <a href="#dynamodbpersistencelayer">DynamoDB</a> as the persistent storage layer provider.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">AWS CloudFormation example</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="aws-cloudformation-example" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="aws-cloudformation-example">AWS CloudFormation example</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4648,7 +4646,7 @@ This means that new invocations will execute your code again despite having the 
 For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/" target="_blank">this AWS tutorial</a> specifically for the VPC setup guidance.</p>
 </details>
 <p>After completing the VPC setup, you can use the templates provided below to set up Lambda functions with access to VPC internal subnets.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">AWS Serverless Application Model (SAM) example</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="aws-serverless-application-model-sam-example_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="aws-serverless-application-model-sam-example_1">AWS Serverless Application Model (SAM) example</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4691,7 +4689,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <summary>Info</summary>
 <p>We enforce security best practices by using SSL connections in the <code>RedisCachePersistenceLayer</code>; to disable it, set <code>ssl=False</code></p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><input id="__tabbed_15_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Use Persistence Layer with Redis config variables</label><label for="__tabbed_15_2">Use established Redis Client</label><label for="__tabbed_15_3">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:3"><input checked="checked" id="use-persistence-layer-with-redis-config-variables" name="__tabbed_15" type="radio" /><input id="use-established-redis-client" name="__tabbed_15" type="radio" /><input id="sample-event_3" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="use-persistence-layer-with-redis-config-variables">Use Persistence Layer with Redis config variables</label><label for="use-established-redis-client">Use established Redis Client</label><label for="sample-event_3">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4891,7 +4889,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 </div>
 <h3 id="custom-advanced-settings">Custom advanced settings<a class="headerlink" href="#custom-advanced-settings" title="Permanent link">&para;</a></h3>
 <p>For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">Advanced configuration using AWS Secrets</label><label for="__tabbed_16_2">Advanced configuration with local certificates</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:2"><input checked="checked" id="advanced-configuration-using-aws-secrets" name="__tabbed_16" type="radio" /><input id="advanced-configuration-with-local-certificates" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="advanced-configuration-using-aws-secrets">Advanced configuration using AWS Secrets</label><label for="advanced-configuration-with-local-certificates">Advanced configuration with local certificates</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5115,7 +5113,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <p>This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.</p>
 </details>
 <p>You can enable in-memory caching with the <strong><code>use_local_cache</code></strong> parameter:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">Caching idempotent transactions in-memory to prevent multiple calls to storage</label><label for="__tabbed_17_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:2"><input checked="checked" id="caching-idempotent-transactions-in-memory-to-prevent-multiple-calls-to-storage" name="__tabbed_17" type="radio" /><input id="sample-event_4" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="caching-idempotent-transactions-in-memory-to-prevent-multiple-calls-to-storage">Caching idempotent transactions in-memory to prevent multiple calls to storage</label><label for="sample-event_4">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5170,7 +5168,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 </div>
 <p>In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.</p>
 <p>You can change this window with the <strong><code>expires_after_seconds</code></strong> parameter:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">Adjusting idempotency record expiration</label><label for="__tabbed_18_2">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="adjusting-idempotency-record-expiration" name="__tabbed_18" type="radio" /><input id="sample-event_5" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="adjusting-idempotency-record-expiration">Adjusting idempotency record expiration</label><label for="sample-event_5">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5234,7 +5232,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 </details>
 <p>By default, we will return the same result as it returned before, however in this instance it may be misleading; we provide a fail fast payload validation to address this edge case.</p>
 <p>With <strong><code>payload_validation_jmespath</code></strong>, you can provide an additional JMESPath expression to specify which part of the event body should be validated against previous idempotent invocations</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><input id="__tabbed_19_2" name="__tabbed_19" type="radio" /><input id="__tabbed_19_3" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Payload validation</label><label for="__tabbed_19_2">Sample event 1</label><label for="__tabbed_19_3">Sample event 2</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:3"><input checked="checked" id="payload-validation_1" name="__tabbed_19" type="radio" /><input id="sample-event-1" name="__tabbed_19" type="radio" /><input id="sample-event-2" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="payload-validation_1">Payload validation</label><label for="sample-event-1">Sample event 1</label><label for="sample-event-2">Sample event 2</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5366,7 +5364,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <summary>Warning</summary>
 <p>To prevent errors, transactions will not be treated as idempotent if <strong><code>raise_on_no_idempotency_key</code></strong> is set to <code>False</code> and the evaluation of <strong><code>event_key_jmespath</code></strong> is <code>None</code>. Therefore, no data will be fetched, stored, or deleted in the idempotency storage layer.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">Idempotency key required</label><label for="__tabbed_20_2">Success Event</label><label for="__tabbed_20_3">Failure Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:3"><input checked="checked" id="idempotency-key-required" name="__tabbed_20" type="radio" /><input id="success-event" name="__tabbed_20" type="radio" /><input id="failure-event" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="idempotency-key-required">Idempotency key required</label><label for="success-event">Success Event</label><label for="failure-event">Failure Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5441,7 +5439,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <h3 id="customizing-boto-configuration">Customizing boto configuration<a class="headerlink" href="#customizing-boto-configuration" title="Permanent link">&para;</a></h3>
 <!-- markdownlint-disable-next-line MD013 -->
 <p>The <strong><code>boto_config</code></strong> and <strong><code>boto3_session</code></strong> parameters enable you to pass in a custom <a href="https://botocore.amazonaws.com/v1/documentation/api/latest/reference/config.html" target="_blank">botocore config object</a> or a custom <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/core/session.html" target="_blank">boto3 session</a> when constructing the persistence store.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><input id="__tabbed_21_2" name="__tabbed_21" type="radio" /><input id="__tabbed_21_3" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">Custom session</label><label for="__tabbed_21_2">Custom config</label><label for="__tabbed_21_3">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:3"><input checked="checked" id="custom-session" name="__tabbed_21" type="radio" /><input id="custom-config" name="__tabbed_21" type="radio" /><input id="sample-event_6" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="custom-session">Custom session</label><label for="custom-config">Custom config</label><label for="sample-event_6">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5541,7 +5539,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <p>When using a composite primary key table (hash+range key), use <code>sort_key_attr</code> parameter when initializing your persistence layer.</p>
 <p>With this setting, we will save the idempotency key in the sort key instead of the primary key. By default, the primary key will now be set to <code>idempotency#{LAMBDA_FUNCTION_NAME}</code>.</p>
 <p>You can optionally set a static value for the partition key using the <code>static_pk_value</code> parameter.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><input id="__tabbed_22_2" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">Reusing a DynamoDB table that uses a composite primary key</label><label for="__tabbed_22_2">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:2"><input checked="checked" id="reusing-a-dynamodb-table-that-uses-a-composite-primary-key" name="__tabbed_22" type="radio" /><input id="sample-event_7" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="reusing-a-dynamodb-table-that-uses-a-composite-primary-key">Reusing a DynamoDB table that uses a composite primary key</label><label for="sample-event_7">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5625,7 +5623,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <li><strong><code>_update_record()</code></strong> – Updates an item in the persistence store.</li>
 <li><strong><code>_delete_record()</code></strong> – Removes an item from the persistence store.</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:1"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">Bring your own persistent store</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:1"><input checked="checked" id="bring-your-own-persistent-store_1" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="bring-your-own-persistent-store_1">Bring your own persistent store</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
@@ -5903,7 +5901,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 event - not the "raw" event Lambda was invoked with.</p>
 <p>Make sure to account for this behavior, if you set the <code>event_key_jmespath</code>.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">Using Idempotency with JSONSchema Validation utility</label><label for="__tabbed_24_2">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="using-idempotency-with-jsonschema-validation-utility" name="__tabbed_24" type="radio" /><input id="sample-event_8" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="using-idempotency-with-jsonschema-validation-utility">Using Idempotency with JSONSchema Validation utility</label><label for="sample-event_8">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6099,7 +6097,7 @@ event - not the "raw" event Lambda was invoked with.</p>
 <h3 id="disabling-the-idempotency-utility">Disabling the idempotency utility<a class="headerlink" href="#disabling-the-idempotency-utility" title="Permanent link">&para;</a></h3>
 <p>When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable <code>POWERTOOLS_IDEMPOTENCY_DISABLED</code>
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use <a href="https://docs.pytest.org/en/latest/monkeypatch.html" rel="nofollow" target="_blank">monkeypatch</a> fixture:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><input id="__tabbed_25_2" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">test_disabling_idempotency_utility.py</label><label for="__tabbed_25_2">app_test_disabling_idempotency_utility.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="test_disabling_idempotency_utilitypy" name="__tabbed_25" type="radio" /><input id="app_test_disabling_idempotency_utilitypy" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="test_disabling_idempotency_utilitypy">test_disabling_idempotency_utility.py</label><label for="app_test_disabling_idempotency_utilitypy">app_test_disabling_idempotency_utility.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6199,7 +6197,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 </div>
 <h3 id="testing-with-dynamodb-local">Testing with DynamoDB Local<a class="headerlink" href="#testing-with-dynamodb-local" title="Permanent link">&para;</a></h3>
 <p>To test with <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html" target="_blank">DynamoDB Local</a>, you can replace the <code>DynamoDB client</code> used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><input id="__tabbed_26_2" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">test_with_dynamodb_local.py</label><label for="__tabbed_26_2">app_test_dynamodb_local.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="test_with_dynamodb_localpy" name="__tabbed_26" type="radio" /><input id="app_test_dynamodb_localpy" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="test_with_dynamodb_localpy">test_with_dynamodb_local.py</label><label for="app_test_dynamodb_localpy">app_test_dynamodb_local.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6308,7 +6306,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 <h3 id="how-do-i-mock-all-dynamodb-io-operations">How do I mock all DynamoDB I/O operations<a class="headerlink" href="#how-do-i-mock-all-dynamodb-io-operations" title="Permanent link">&para;</a></h3>
 <p>The idempotency utility lazily creates the dynamodb <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" target="_blank">Table</a> which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><input id="__tabbed_27_2" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">test_with_io_operations.py</label><label for="__tabbed_27_2">app_test_io_operations.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="test_with_io_operationspy" name="__tabbed_27" type="radio" /><input id="app_test_io_operationspy" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="test_with_io_operationspy">test_with_io_operations.py</label><label for="app_test_io_operationspy">app_test_io_operations.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6408,7 +6406,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 </div>
 <h3 id="testing-with-redis">Testing with Redis<a class="headerlink" href="#testing-with-redis" title="Permanent link">&para;</a></h3>
 <p>To test locally, you can either utilize <a href="https://github.com/cunla/fakeredis-py">fakeredis-py</a> for a simulated Redis environment or refer to the <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66">MockRedis</a> class used in our tests to mock Redis operations.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">test_with_mock_redis.py</label><label for="__tabbed_28_2">mock_redis.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="test_with_mock_redispy" name="__tabbed_28" type="radio" /><input id="mock_redispy" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="test_with_mock_redispy">test_with_mock_redis.py</label><label for="mock_redispy">mock_redis.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6587,7 +6585,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 </div>
 </div>
 <p>If you want to set up a real Redis client for integration testing, you can reference the code provided below.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><input id="__tabbed_29_2" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">test_with_real_redis.py</label><label for="__tabbed_29_2">Makefile</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="test_with_real_redispy" name="__tabbed_29" type="radio" /><input id="makefile" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="test_with_real_redispy">test_with_real_redis.py</label><label for="makefile">Makefile</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6763,6 +6761,8 @@ This means it is possible to pass a mocked Table resource, or stub various metho
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -6802,7 +6802,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

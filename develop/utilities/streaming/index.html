@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -1915,7 +1913,7 @@
 <h3 id="streaming-from-a-s3-object">Streaming from a S3 object<a class="headerlink" href="#streaming-from-a-s3-object" title="Permanent link">&para;</a></h3>
 <p>With <code>S3Object</code>, you'll need the bucket, object key, and optionally a version ID to stream its content.</p>
 <p>We will fetch parts of your data from S3 as you process each line, consuming only the absolute minimal amount of memory.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Non-versioned bucket</label><label for="__tabbed_1_2">Versioned bucket</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="non-versioned-bucket" name="__tabbed_1" type="radio" /><input id="versioned-bucket" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="non-versioned-bucket">Non-versioned bucket</label><label for="versioned-bucket">Versioned bucket</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1969,7 +1967,7 @@
 </div>
 <p>As data is streamed, you can apply transformations to your data like decompressing gzip content and deserializing a CSV into a dictionary.</p>
 <p>For popular data transformations like CSV or Gzip, you can quickly enable it at the constructor level:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Decompressing and deserializing CSV</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="decompressing-and-deserializing-csv" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="decompressing-and-deserializing-csv">Decompressing and deserializing CSV</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2000,7 +1998,7 @@
 <summary>When is this useful?</summary>
 <p>In scenarios where you might have a reusable logic to apply common transformations. This might be a function or a class that receives an instance of <code>S3Object</code>.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Returning a new object</label><label for="__tabbed_3_2">Transform in-place</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="returning-a-new-object" name="__tabbed_3" type="radio" /><input id="transform-in-place" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="returning-a-new-object">Returning a new object</label><label for="transform-in-place">Transform in-place</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2290,7 +2288,7 @@
 </tbody>
 </table>
 <p>For instance, take <code>ZipTransform</code>. You can use the <code>compression</code> parameter if you want to unzip an S3 object compressed with <code>LZMA</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Unzipping LZMA data</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="unzipping-lzma-data" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="unzipping-lzma-data">Unzipping LZMA data</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2327,7 +2325,7 @@
 </div>
 </div>
 <p>Or, if you want to load a tab-separated file (TSV), you can use the <code>delimiter</code> parameter in the <code>CsvTransform</code>:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Deserializing tab-separated data values</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="deserializing-tab-separated-data-values" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="deserializing-tab-separated-data-values">Deserializing tab-separated data values</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2361,7 +2359,7 @@
 </div>
 <h3 id="building-your-own-data-transformation">Building your own data transformation<a class="headerlink" href="#building-your-own-data-transformation" title="Permanent link">&para;</a></h3>
 <p>You can build your own custom data transformation by extending the <code>BaseTransform</code> class. The <code>transform</code> method receives an <code>IO[bytes]</code> object, and you are responsible for returning an <code>IO[bytes]</code> object.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Custom JSON transform</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="custom-json-transform" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="custom-json-transform">Custom JSON transform</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2428,7 +2426,7 @@
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <h3 id="asserting-data-transformations">Asserting data transformations<a class="headerlink" href="#asserting-data-transformations" title="Permanent link">&para;</a></h3>
 <p>Create an input payload using <code>io.BytesIO</code> and assert the response of the transformation:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">assert_transformation.py</label><label for="__tabbed_7_2">assert_transformation_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="assert_transformationpy" name="__tabbed_7" type="radio" /><input id="assert_transformation_modulepy" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="assert_transformationpy">assert_transformation.py</label><label for="assert_transformation_modulepy">assert_transformation_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2590,6 +2588,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -2629,7 +2629,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
