@@ -22,9 +22,9 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 
     ---
 
-    Become a public reference customer, share your work, or use Lambda Layers.
+    Become a public reference customer, share your work, contribute, use Lambda Layers, etc.
 
-    [:octicons-arrow-right-24: Support](#how-to-support-powertools-for-aws-lambda-python)
+    [:octicons-arrow-right-24: Support](#support-powertools-for-aws-lambda-python)
 
 - :material-file-code:{ .lg .middle } __Available languages__
 
@@ -761,46 +761,90 @@ As a best practice for libraries, Powertools module logging statements are suppr
 
 When necessary, you can use `POWERTOOLS_DEBUG` environment variable to enable debugging. This will provide additional information on every internal operation.
 
-## How to support Powertools for AWS Lambda (Python)?
+## Support Powertools for AWS Lambda (Python)
 
-??? hint "Support this project by becoming a reference customer, sharing your work, or using Layers/SAR :heart:"
+There are many ways you can help us gain future investments to improve everyone's experience:
 
-    You can choose to support us in three ways:
+<div class="grid cards" markdown>
 
-    1) [**Become a reference customer**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}. This gives us permission to list your company in our documentation.
+- :heart:{ .lg .middle } __Become a public reference__
 
-    2) [**Share your work**](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}. Blog posts, video, sample projects you used Powertools!
+    ---
 
-    3) Use [**Lambda Layers**](#lambda-layer) or [**SAR**](#sar), if possible. This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages.
+    Add your company name and logo on our [landing page](https://powertools.aws.dev).
 
-    When using Layers, you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.
+    [:octicons-arrow-right-24: GitHub Issue template]((https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"})
+
+- :mega:{ .lg .middle } __Share your work__
+
+    ---
+
+    Blog posts, video, and sample projects about Powertools for AWS Lambda.
+
+    [:octicons-arrow-right-24: GitHub Issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=community-content&template=share_your_work.yml&title=%5BI+Made+This%5D%3A+%3CTITLE%3E){target="_blank"}
+
+- :partying_face:{ .lg .middle } __Join the community__
+
+    ---
+
+    Connect, ask questions, and share what features you use.
+
+    [:octicons-arrow-right-24: Discord invite](https://discord.gg/B8zZKbbyET){target="blank"}
+
+</div>
 
 ### Becoming a reference customer
 
-Knowing which companies are using this library is important to help prioritize the project internally. If your company is using Powertools for AWS Lambda (Python), you can request to have your name and logo added to the README file by raising a [Support Powertools for AWS Lambda (Python) (become a reference)](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"} issue.
+Knowing which companies are using this library is important to help prioritize the project internally. The following companies, among others, use Powertools:
 
-The following companies, among others, use Powertools:
+<div class="grid" style="text-align:center;" markdown>
 
-- [Capital One](https://www.capitalone.com/){target="_blank" rel="nofollow"}
-- [CPQi (Exadel Financial Services)](https://cpqi.com/){target="_blank" rel="nofollow"}
-- [CloudZero](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
-- [CyberArk](https://www.cyberark.com/){target="_blank" rel="nofollow"}
-- [globaldatanet](https://globaldatanet.com/){target="_blank" rel="nofollow"}
-- [IMS](https://ims.tech/){target="_blank" rel="nofollow"}
-- [Jit Security](https://www.jit.io/){target="_blank" rel="nofollow"}
-- [Propellor.ai](https://www.propellor.ai/){target="_blank" rel="nofollow"}
-- [TopSport](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
-- [Transformity](https://transformity.tech/){target="_blank" rel="nofollow"}
-- [Trek10](https://www.trek10.com/){target="_blank" rel="nofollow"}
-- [Vertex Pharmaceuticals](https://www.vrtx.com/){target="_blank" rel="nofollow"}
+[**Capital One**](https://www.capitalone.com/){target="_blank" rel="nofollow"}
+{ .card }
 
-### Sharing your work
+[**CPQi (Exadel Financial Services)**](https://cpqi.com/){target="_blank" rel="nofollow"}
+{ .card }
 
-Share what you did with Powertools for AWS Lambda (Python) 💞💞. Blog post, workshops, presentation, sample apps and others. Check out what the community has already shared about Powertools for AWS Lambda (Python) [here](https://docs.powertools.aws.dev/lambda/python/latest/we_made_this/){target="_blank"}.
+[**CloudZero**](https://www.cloudzero.com/){target="_blank" rel="nofollow"}
+{ .card }
 
-### Using Lambda Layer or SAR
+[**CyberArk**](https://www.cyberark.com/){target="_blank" rel="nofollow"}
+{ .card }
 
-This helps us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way, and helps us gain future investments for other Powertools for AWS Lambda languages. When [using Layers](https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency (or as part of your virtual env) to not impact the development process.
+[**globaldatanet**](https://globaldatanet.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**IMS**](https://ims.tech/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Jit Security**](https://www.jit.io/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Propellor.ai**](https://www.propellor.ai/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**TopSport**](https://www.topsport.com.au/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Transformity**](https://transformity.tech/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Trek10**](https://www.trek10.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Vertex Pharmaceuticals**](https://www.vrtx.com/){target="_blank" rel="nofollow"}
+{ .card }
+
+[**Alma Media**](https://www.almamedia.fi/en/){target="_blank" rel="nofollow}
+{ .card }
+
+</div>
+
+### Using Lambda Layers
+
+!!! note "Layers help us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way."
+
+When [using Layers](#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86 and ARM architecture.
 
 ## Tenets
 
