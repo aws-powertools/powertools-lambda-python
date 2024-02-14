@@ -38,23 +38,40 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 
 ## Install
 
-You can install Powertools for AWS Lambda (Python) using one of the following options:
+You can install Powertools for AWS Lambda (Python) using your favorite dependency management, or Lambda Layers:
 
-- __Lambda Layer (x86_64)__: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-- __Lambda Layer (arm64)__: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-- __Pip__: **[`pip install "aws-lambda-powertools"`](#){: .copyMe}:clipboard:**
+=== "Pip"
 
-!!! question "Looking for Pip signed releases? [Learn more about verifying signed builds](./security.md#verifying-signed-builds)"
+    You can install [all extra dependencies](#extra-dependencies) at once with the `[all]` extras.
 
-??? question "Using Pip? You might need to install additional dependencies."
-    [__Tracer__](./core/tracer.md){target="_blank"}, [__Validation__](./utilities/validation.md){target="_blank"} and [__Parser__](./utilities/parser.md){target="_blank"} require additional dependencies. If you prefer to install all of them, use [**`pip install "aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard:.
+    * **pip**: [**`pip install "aws-lambda-powertools[all]"`**](#){: .copyMe}
+    * **poetry**: [**`poetry add "aws-lambda-powertools[all]"`**](#){: .copyMe}
+    * **pdm**: [**`pdm add "aws-lambda-powertools[all]"`**](#){: .copyMe}
 
-    For example:
+    Alternatively, see [extra dependencies](#extra-dependencies) if you want to install only what you need.
 
-    * **Tracer**: **[`pip install "aws-lambda-powertools[tracer]"`](#){: .copyMe}:clipboard:**
-    * **Validation**: **[`pip install "aws-lambda-powertools[validation]"`](#){: .copyMe}:clipboard:**
-    * **Parser**: **[`pip install "aws-lambda-powertools[parser]"`](#){: .copyMe}:clipboard:**
-    * **Tracer** and **Parser**: **[`pip install "aws-lambda-powertools[tracer,parser]"`](#){: .copyMe}:clipboard:**
+=== "Lambda Layer"
+
+    Make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`.
+
+    * **x86 architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+    * **ARM architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+
+### Extra dependencies
+
+The vast majority of [features](#features) rely on standard library and AWS SDK _(boto3)_ only. The following features however require additional dependencies:
+
+| Feature             | Pip                                                                               | Dependency                          |
+| ------------------- | --------------------------------------------------------------------------------- | ----------------------------------- |
+| Tracer              | **[`pip install "aws-lambda-powertools[tracer]"`](#){: .copyMe}:clipboard:**      | `aws-xray-sdk`                      |
+| Validation          | **[`pip install "aws-lambda-powertools[validation]"`](#){: .copyMe}:clipboard:**  | `fastjsonschema`                    |
+| Parser              | **[`pip install "aws-lambda-powertools[parser]"`](#){: .copyMe}:clipboard:**      | `pydantic`                          |
+| Data Masking        | **[`pip install "aws-lambda-powertools[datamasking]"`](#){: .copyMe}:clipboard:** | `aws-encryption-sdk`, `jsonpath-ng` |
+| Idempotency (Redis) | **[`pip install "aws-lambda-powertools[redis]"`](#){: .copyMe}:clipboard:**       | `redis`                             |
+
+> New to pip?
+
+You can use `,` delimiter to install multiple at once: [**`pip install "aws-lambda-powertools[tracer,parser,datamasking"]`**](#){: .copyMe}:clipboard:
 
 ### Local development
 
@@ -64,7 +81,7 @@ Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda 
 
 - __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
 - __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
-- __Pipenv__: [**`pipenv install --dev "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+- __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
 
 ??? question "Why is that necessary?"
       Powertools for AWS Lambda (Python) relies on the AWS SDK being available to use in the target runtime (AWS Lambda).
