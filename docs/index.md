@@ -10,19 +10,11 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 <!-- markdownlint-disable MD050 -->
 <div class="grid cards" markdown>
 
-- :material-download-outline:{ .lg .middle } __Installation__
-
-    ---
-
-    Install with `pip`, or our pre-packaged AWS Lambda Layer.
-
-    :octicons-arrow-right-24: [Pip](#install), [Lambda Layer](#lambda-layer)
-
 - :material-battery-charging:{ .lg .middle } __Features__
 
     ---
 
-    Start with one, many, or all industry practices.
+    Adopt one, a few, or all industry practices. **Progressively**.
 
     [:octicons-arrow-right-24: All features](#features)
 
