@@ -3,33 +3,39 @@ title: Agents for Amazon Bedrock
 description: Core utility
 ---
 
-Event handler for [Amazon Bedrock Agents](https://aws.amazon.com/bedrock/agents/), including auto generation of OpenAPI schemas.
-
-## Key features
-
-* Same declarative syntax as the [other Powertools event handlers](api_gateway.md)
-* Drastically reduce the boilerplate to build Agents for Amazon Bedrock
-* Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
-* Built-in data validation for requests and responses
-
-## Getting started
+Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/) with an event handler and auto generation of OpenAPI schemas.
 
 ```mermaid
 flowchart LR
-	Bedrock[Bedrock FM] <-- calls --> Agent
-	You --> Agent
-	Agent -- invokes --> Lambda[Lambda function]
+	Bedrock[Foundational Model] <-- calls --> Agent
+	You[User input] --> Agent
+	Agent[Agents for Amazon Bedrock] -- invokes --> Lambda[AWS Lambda function]
 	Agent -- consults --> OpenAPI{{OpenAPI schema}}
 	OpenAPI -. generated from .-> Lambda
 ```
 
-To build Bedrock Agents, you need:
+## Key features
+
+* Same declarative syntax as the [other event handler resolvers](api_gateway.md)
+* Drastic reduction of the boilerplate to build Agents for Amazon Bedrock
+* Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
+* Built-in data validation for requests and responses
+
+## Terminology
+
+**Action group** is lorem ipsum
+
+**Another term** is another thing totally different
+
+## Getting started
+
+To build Agents for Amazon Bedrock, you need:
 
 * Create the Lambda function that defines the business logic for the action that your agent carries out.
 * Create an OpenAPI schema with the API description, structure, and parameters for the action group.
-* Ensure that Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
+* Ensure that Amazon Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
 
-Powertools makes it easier to author the Lambda function and the creation of the OpenAPI schema.
+Powertools for AWS Lambda makes it easier to author the Lambda function and the creation of the OpenAPI schema.
 
 ### Install
 
@@ -39,9 +45,17 @@ You need to add `pydantic` as a dependency in your preferred tool _e.g., require
 
 At this time, we support both Pydantic V1 and V2. For a future major version, we will only support Pydantic V2.
 
+### Required resources
+
+SAM example here otherwise it's not enough to say "create a Lambda function".
+
+#### IAM permissions
+
+A table explaining the required permissions, summarizing the official AWS docs
+
 ### Your first Agent
 
-To create a Bedrock Agent, use the `BedrockAgentResolver` to annotate your actions.
+To create an Agent for Amazon Bedrock, use the `BedrockAgentResolver` to annotate your actions.
 This is similar to the way [all the other Event Handler](api_gateway.md) resolvers work.
 
 === "Lambda handler"
@@ -67,12 +81,16 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 
 !!! note "It's important to include a `description` for each API endpoint because reasons"
 
-The resolvers used by Bedrock Agents are compatible with the full suite of Powertools for AWS Lambda utilities.
+The resolvers used by Agents for Amazon Bedrock are compatible with the full suite of Powertools for AWS Lambda utilities.
 This includes [Logger](../logger.md), [Metrics](../metrics.md) and [Tracer](../tracer.md).
+
+### Validating parameters
+
+Add an example for validating parameters like EmailStr from Pydantic.
 
 ### Generating OpenAPI schemas
 
-Use the `get_openapi_json_schema` function provided by the Bedrock Agent resolver.
+Use the `get_openapi_json_schema` function provided by the resolver.
 This function will produce a JSON-serialized string that represents your OpenAPI schema.
 You can print this string or save it to a file for future reference.
 
@@ -100,7 +118,7 @@ python app.py > schema.json
 
 ### Creating your Agent on the AWS Console
 
-To create an Agent for Bedrock, refer to the [official documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html) provided by AWS.
+To create an Agent for Amazon Bedrock, refer to the [official documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html) provided by AWS.
 
 The following video demonstrates the end-to-end process:
 
@@ -110,7 +128,7 @@ During the creation process, you can use the schema generated in the previous st
 
 ### Additional metadata
 
-To enrich the view that Agents for Bedrock has of your Lambda functions,
+To enrich the view that Agents for Amazon Bedrock has of your Lambda functions,
 use a combination of [Pydantic Models](https://docs.pydantic.dev/latest/concepts/models/){target="_blank"} and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your APIs parameters.
 
 --8<-- "docs/core/event_handler/_openapi_customization_intro.md"
@@ -143,18 +161,18 @@ Include extra parameters when exporting your OpenAPI specification to apply thes
 
 ### Data validation
 
-The Bedrock Agents Resolver allows for the clear definition of the expected format for incoming data and responses.
-By delegating data validation tasks to Powertools, you can significantly reduce the amount of repetitive code in your project.
+The Agents for Amazon Bedrock resolver allows for the clear definition of the expected format for incoming data and responses.
+By delegating data validation tasks to Powertools for AWS Lambda, you can significantly reduce the amount of repetitive code in your project.
 
 For detailed guidance on implementing this feature, see the [REST API validation documentation](api_gateway.md#data-validation).
 There, you'll find step-by-step instructions on how to apply data validation when using the resolver.
 
 ???+ note
-	When using the Bedrock Agent resolver, there's no need to add the `enable_validation` parameter, as it's enabled by default.
+	When using the Agent for Amazon Bedrock resolver, there's no need to add the `enable_validation` parameter, as it's enabled by default.
 
 ## Testing your code
 
-Test your routes by passing a Bedrock Agents proxy event request:
+Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-input) request:
 
 === "assert_bedrock_agent_response.py"
 
