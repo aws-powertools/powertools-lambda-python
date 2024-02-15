@@ -91,36 +91,18 @@ def compare_any_in_list(context_value: list, condition_value: list) -> bool:
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
-    results = False
-    for key in context_value:
-        if key in condition_value:
-            results = True
-            break
-
-    return results
+    return any(key in condition_value for key in context_value)
 
 
 def compare_all_in_list(context_value: list, condition_value: list) -> bool:
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
-    results = True
-    for key in context_value:
-        if key not in condition_value:
-            results = False
-            break
-
-    return results
+    return all(key in condition_value for key in context_value)
 
 
 def compare_none_in_list(context_value: list, condition_value: list) -> bool:
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
-    results = True
-    for key in context_value:
-        if key in condition_value:
-            results = False
-            break
-
-    return results
+    return all(key not in condition_value for key in context_value)
