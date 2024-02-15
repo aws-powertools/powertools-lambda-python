@@ -1,4 +1,3 @@
-import contextlib
 import dataclasses
 import json
 import logging
@@ -386,10 +385,12 @@ def _normalize_multi_query_string_with_param(query_string: Optional[Dict[str, st
     """
     if query_string:
         for param in filter(is_scalar_field, params):
-            with contextlib.suppress(KeyError):
+            try:
                 # if the target parameter is a scalar, we keep the first value of the query string
                 # regardless if there are more in the payload
                 query_string[param.alias] = query_string[param.alias][0]
+            except KeyError:
+                pass
     return query_string
 
 
