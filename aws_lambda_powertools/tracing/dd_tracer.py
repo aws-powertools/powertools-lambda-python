@@ -18,7 +18,9 @@ class DDSpan(BaseSegment):
 
     def close(self, end_time: int | None = None):
         print("close is called")
-        self.dd_span.finish(finish_time=float(end_time))
+        if end_time:
+            end_time = float(end_time)
+        self.dd_span.finish(finish_time=end_time)
 
     def add_subsegment(self, subsegment: Any):
         raise NotImplementedError
