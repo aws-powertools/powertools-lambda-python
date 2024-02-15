@@ -1441,6 +1441,35 @@ def test_flags_any_in_value_match(mocker, config):
     assert toggle == expected_value
 
 
+def test_flags_any_in_value_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Simon"]},
+        default=False,
+    )
+    assert toggle == expected_value
+
+
 def test_flags_all_in_value_match(mocker, config):
     expected_value = True
     mocked_app_config_schema = {
