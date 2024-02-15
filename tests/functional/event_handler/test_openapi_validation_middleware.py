@@ -1025,6 +1025,7 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
 def test_validation_with_alias():
     # GIVEN a Http API V2 proxy type event
     app = APIGatewayRestResolver(enable_validation=True)
+    event = load_event("apiGatewayProxyEvent.json")
 
     class FunkyTown(BaseModel):
         parameter: str
@@ -1037,5 +1038,5 @@ def test_validation_with_alias():
         assert parameter == "value1"
         return Response(200, content_types.APPLICATION_JSON, FunkyTown(parameter=parameter))
 
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
