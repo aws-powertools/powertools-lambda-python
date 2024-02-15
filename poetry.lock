@@ -1897,13 +1897,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.34.0"
-description = "Type annotations for boto3.CloudWatch 1.34.0 service generated with mypy-boto3-builder 7.21.0"
+version = "1.34.40"
+description = "Type annotations for boto3.CloudWatch 1.34.40 service generated with mypy-boto3-builder 7.23.1"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-cloudwatch-1.34.0.tar.gz", hash = "sha256:cc18aa2b1a89eb4898a6c213db594abf62fe9afca6e8c6bd9aa04b9996193635"},
-    {file = "mypy_boto3_cloudwatch-1.34.0-py3-none-any.whl", hash = "sha256:be4a8c90446595c6970898682a5f6eedb4a6b1d2d0b0cbe57ed021c818c48e14"},
+    {file = "mypy-boto3-cloudwatch-1.34.40.tar.gz", hash = "sha256:33f0b747389ee5d72fe9319597b8a52395a24f5b9816b0862feec581afb148bc"},
+    {file = "mypy_boto3_cloudwatch-1.34.40-py3-none-any.whl", hash = "sha256:9e66e0ab1006cb45ff36df1ab453bdef6ec700d6940466161049dc6efbd3e1b4"},
 ]
 
 [package.dependencies]
@@ -2924,13 +2924,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.40.3"
+version = "1.40.4"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.40.3.tar.gz", hash = "sha256:3c2b027979bb400cd65a47970e64f8cef8acda86b288a27f42a98692505086cd"},
-    {file = "sentry_sdk-1.40.3-py2.py3-none-any.whl", hash = "sha256:73383f28311ae55602bb6cc3b013830811135ba5521e41333a6e68f269413502"},
+    {file = "sentry-sdk-1.40.4.tar.gz", hash = "sha256:657abae98b0050a0316f0873d7149f951574ae6212f71d2e3a1c4c88f62d6456"},
+    {file = "sentry_sdk-1.40.4-py2.py3-none-any.whl", hash = "sha256:ac5cf56bb897ec47135d239ddeedf7c1c12d406fb031a4c0caa07399ed014d7e"},
 ]
 
 [package.dependencies]
@@ -2956,7 +2956,7 @@ huey = ["huey (>=2)"]
 loguru = ["loguru (>=0.5)"]
 opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
 opentelemetry-experimental = ["opentelemetry-distro (>=0.40b0,<1.0)", "opentelemetry-instrumentation-aiohttp-client (>=0.40b0,<1.0)", "opentelemetry-instrumentation-django (>=0.40b0,<1.0)", "opentelemetry-instrumentation-fastapi (>=0.40b0,<1.0)", "opentelemetry-instrumentation-flask (>=0.40b0,<1.0)", "opentelemetry-instrumentation-requests (>=0.40b0,<1.0)", "opentelemetry-instrumentation-sqlite3 (>=0.40b0,<1.0)", "opentelemetry-instrumentation-urllib (>=0.40b0,<1.0)"]
-pure-eval = ["asttokens", "executing", "pure-eval"]
+pure-eval = ["asttokens", "executing", "pure_eval"]
 pymongo = ["pymongo (>=3.1)"]
 pyspark = ["pyspark (>=2.4.4)"]
 quart = ["blinker (>=1.1)", "quart (>=0.16.1)"]
@@ -3402,4 +3402,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "87ee762b995de6889cebcf87cea2dfcc209fc36044ff933bdb3247caa814a93d"
+content-hash = "b2385e6d55e6f7916b5f9efd22c767b1a5db32c69f9660745677a5c1b7da62bc"
