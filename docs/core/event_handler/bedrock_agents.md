@@ -3,7 +3,7 @@ title: Agents for Amazon Bedrock
 description: Core utility
 ---
 
-Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/) with an event handler and auto generation of OpenAPI schemas.
+Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
 
 ```mermaid
 flowchart LR
@@ -23,16 +23,20 @@ flowchart LR
 
 ## Terminology
 
-**Action group** is lorem ipsum
+**Data validation** automatically validates the user input and the response of your Lambda function against a set of constraints defined by you
 
-**Another term** is another thing totally different
+**Event handler** is a Powertools for AWS feature that processes an event, runs data parsing and validation, routes the request to a specific function, and returns a response to the caller in the proper format
+
+**[OpenAPI schema](https://www.openapis.org/){target="_blank"}** is an industry standard JSON-serialized string that represents the structure and parameters of your API
+
+**Action group** is a collection of two resources where you define the actions that the agent should carry out: an OpenAPI schema to define the APIs that the agent can invoke to carry out its tasks, and a Lambda function to execute those actions
 
 ## Getting started
 
 To build Agents for Amazon Bedrock, you need:
 
-* Create the Lambda function that defines the business logic for the action that your agent carries out.
-* Create an OpenAPI schema with the API description, structure, and parameters for the action group.
+* [Create the Lambda function](#your-first-agent) that defines the business logic for the action that your agent carries out.
+* [Create an OpenAPI schema](#generating-openapi-schemas) with the API description, structure, and parameters for the action group.
 * Ensure that Amazon Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
 
 Powertools for AWS Lambda makes it easier to author the Lambda function and the creation of the OpenAPI schema.
@@ -47,11 +51,24 @@ At this time, we support both Pydantic V1 and V2. For a future major version, we
 
 ### Required resources
 
-SAM example here otherwise it's not enough to say "create a Lambda function".
+Before you start, you need to the following permissions:
 
-#### IAM permissions
+* A **service role**, which allows Amazon Bedrock to invoke foundation models
+* **Lambda permissions** allowing Amazon Bedrock to invoke it
 
-A table explaining the required permissions, summarizing the official AWS docs
+=== "Service Role Example using AWS CloudFormation"
+  	```yaml hl_lines="14-17 24-29 34"
+  	--8<-- "examples/event_handler_bedrock_agents/sam/bedrock_service_role.yaml"
+  	```
+
+	1. You need the role ARN when creating the Agent for Amazon Bedrock
+
+=== "Lambda permissions using AWS Serverless Application Model (SAM)"
+	```yaml hl_lines="27-33"
+	--8<-- "examples/event_handler_bedrock_agents/sam/template.yaml"
+	```
+
+	1. Amazon Bedrock needs permissions to invoke this Lambda function
 
 ### Your first Agent
 

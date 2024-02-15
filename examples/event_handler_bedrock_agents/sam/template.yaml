@@ -1,23 +1,33 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: Hello world event handler Bedrock Agents
+Description: >
+  Agents for Amazon Bedrock example with Powertools for AWS Lambda (Python)
 
-Globals:
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
     Timeout: 5
     Runtime: python3.12
     Tracing: Active
     Environment:
       Variables:
+        POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
         POWERTOOLS_LOG_LEVEL: INFO
-        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
-        POWERTOOLS_LOGGER_LOG_EVENT: true
-        POWERTOOLS_SERVICE_NAME: example
 
 Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
     Properties:
       Handler: getting_started.lambda_handler
+      Description: Agent for Amazon Bedrock handler function
       CodeUri: ../src
-      Description: Bedrock Agents handler function
+
+
+  BedrockPermission: # (1)!
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ApiFunction.Arn
+      Principal: bedrock.amazonaws.com
+      SourceAccount: !Sub ${AWS::AccountId}
