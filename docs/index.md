@@ -734,18 +734,17 @@ Core utilities such as Tracing, Logging, Metrics, and Event Handler will be avai
 
 ### Optimizing for non-production environments
 
-Whether you're prototyping locally or against a non-production environment, you can use `POWERTOOLS_DEV` to increase verbosity across multiple utilities.
+!!! info "We will emit a warning when this feature is used to help you detect misuse in production."
 
-???+ info
-    We will emit a warning when `POWERTOOLS_DEV` is enabled to help you detect misuse in production environments.
+Whether you're prototyping locally or against a non-production environment, you can use `POWERTOOLS_DEV` to increase verbosity across multiple utilities.
 
 When `POWERTOOLS_DEV` is set to a truthy value (`1`, `true`), it'll have the following effects:
 
-| Utility           | Effect                                                                                                                                                       |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| __Logger__        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests |
-| __Event Handler__ | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                          |
-| __Tracer__        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                     |
+| Utility           | Effect                                                                                                                                                                                                                                                                 |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| __Logger__        | Increase JSON indentation to 4. This will ease local debugging when running functions locally under emulators or direct calls while not affecting unit tests. <br><br> However, Amazon CloudWatch Logs view will degrade as each new line is treated as a new message. |
+| __Event Handler__ | Enable full traceback errors in the response, indent request/responses, and CORS in dev mode (`*`).                                                                                                                                                                    |
+| __Tracer__        | Future-proof safety to disables tracing operations in non-Lambda environments. This already happens automatically in the Tracer utility.                                                                                                                               |
 
 ## Debug mode
 
