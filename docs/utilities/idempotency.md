@@ -102,12 +102,16 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
     Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
 
+<!-- markdownlint-disable MD013 -->
 ???+ info "Info: DynamoDB"
-    Each function invocation will generally make 2 requests to DynamoDB. If the
-    result returned by your Lambda is less than 1kb, you can expect 2 WCUs per invocation. For retried invocations, you will
-    see 1WCU and 1RCU. Review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to
-    estimate the cost.
 
+    During the first invocation with a payload, the Lambda function executes both a `PutItem` and an `UpdateItem` operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.
+
+    On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
+
+    **Note:** While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than `1.26.194`, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate the cost.
+
+<!-- markdownlint-enable MD013 -->
 ### Idempotent decorator
 
 You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
@@ -139,7 +143,7 @@ Similar to [idempotent decorator](#idempotent-decorator), you can use `idempoten
 
 When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.7/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
+!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
 
 ???+ warning "Limitation"
     Make sure to call your decorated function using keyword arguments.
@@ -935,6 +939,24 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 ???+ tip "Tip: JMESPath Powertools for AWS Lambda (Python) functions are also available"
     Built-in functions known in the validation utility like `powertools_json`, `powertools_base64`, `powertools_base64_gzip` are also available to use in this utility.
+
+### Tracer
+
+The idempotency utility can be used with the `tracer` decorator. Ensure that idempotency is the innermost decorator.
+
+#### First execution
+
+During the first execution with a payload, Lambda performs a `PutItem` followed by an `UpdateItem` operation to persist the record in DynamoDB.
+
+![Tracer showcase](../media/idempotency_first_execution.png)
+
+#### Subsequent executions
+
+On subsequent executions with the same payload, Lambda optimistically tries to save the record in DynamoDB. If the record already exists, DynamoDB returns the item.
+
+Explore how to handle conditional write errors in high-concurrency scenarios with DynamoDB in this [blog post](https://aws.amazon.com/pt/blogs/database/handle-conditional-write-errors-in-high-concurrency-scenarios-with-amazon-dynamodb/){target="_blank"}.
+
+![Tracer showcase](../media/idempotency_second_execution.png)
 
 ## Testing your code
 

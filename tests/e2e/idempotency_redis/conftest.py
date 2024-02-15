@@ -12,6 +12,7 @@ def infrastructure():
     Dict[str, str]
         CloudFormation Outputs from deployed infrastructure
     """
+
     stack = IdempotencyRedisServerlessStack()
     try:
         yield stack.deploy()

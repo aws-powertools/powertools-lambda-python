@@ -368,13 +368,13 @@ We use the `Annotated` and OpenAPI `Body` type to instruct Event Handler that ou
 
 !!! info "We will automatically validate and inject incoming query strings via type annotation."
 
-We use the `Annotated` type to tell Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
+We use the `Annotated` type to tell the Event Handler that a particular parameter is not only an optional string, but also a query string with constraints.
 
 In the following example, we use a new `Query` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
 
 * `completed` is a query string with a `None` as its default value
 * `completed`, when set, should have at minimum 4 characters
-* Doesn't match? Event Handler will return a validation error response
+* No match? Event Handler will return a validation error response
 
 <!-- markdownlint-disable MD013 -->
 
@@ -386,7 +386,7 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
 
     1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
     2. `Query` is a special OpenAPI type that can add constraints to a query string as well as document them
-    3. **First time seeing the `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments are metadata. <br><br> At runtime, static checkers will also see the first argument, but anyone receiving them could inspect them to fetch their metadata.
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
 
 === "skip_validating_query_strings.py"
 
@@ -399,6 +399,16 @@ In the following example, we use a new `Query` OpenAPI type to add [one out of m
     ```
 
     1. `completed` is still the same query string as before, except we simply state it's an string. No `Query` or `Annotated` to validate it.
+
+=== "working_with_multi_query_values.py"
+
+    If you need to handle multi-value query parameters, you can create a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_multi_query_values.py"
+    ```
+
+    1. `example_multi_value_param` is a list containing values from the `ExampleEnum` enumeration.
 
 <!-- markdownlint-enable MD013 -->
 
@@ -413,6 +423,40 @@ For example, we could validate that `<todo_id>` dynamic path should be no greate
 ```
 
 1. `Path` is a special OpenAPI type that allows us to constrain todo_id to be less than 999.
+
+#### Validating headers
+
+We use the `Annotated` type to tell the Event Handler that a particular parameter is a header that needs to be validated.
+
+!!! info "We adhere to [HTTP RFC standards](https://www.rfc-editor.org/rfc/rfc7540#section-8.1.2){target="_blank" rel="nofollow"}, which means we treat HTTP headers as case-insensitive."
+
+In the following example, we use a new `Header` OpenAPI type to add [one out of many possible constraints](#customizing-openapi-parameters), which should read as:
+
+* `correlation_id` is a header that must be present in the request
+* `correlation_id` should have 16 characters
+* No match? Event Handler will return a validation error response
+
+<!-- markdownlint-disable MD013 -->
+
+=== "validating_headers.py"
+
+    ```python hl_lines="8 10 27"
+    --8<-- "examples/event_handler_rest/src/validating_headers.py"
+    ```
+
+    1. If you're not using Python 3.9 or higher, you can install and use [`typing_extensions`](https://pypi.org/project/typing-extensions/){target="_blank" rel="nofollow"} to the same effect
+    2. `Header` is a special OpenAPI type that can add constraints and documentation to a header
+    3. **First time seeing `Annotated`?** <br><br> This special type uses the first argument as the actual type, and subsequent arguments as metadata. <br><br> At runtime, static checkers will also see the first argument, but any receiver can inspect it to get the metadata.
+
+=== "working_with_headers_multi_value.py"
+
+    You can handle multi-value headers by declaring it as a list of the desired type.
+
+    ```python hl_lines="23"
+    --8<-- "examples/event_handler_rest/src/working_with_headers_multi_value.py"
+    ```
+
+    1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
 ### Accessing request details
 
@@ -955,15 +999,15 @@ Customize your API endpoints by adding metadata to endpoint definitions. This pr
 
 Here's a breakdown of various customizable fields:
 
-| Field Name             | Type                        | Description                                                                                                                                                                                                                                                                                                      |
-| ---------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `summary`              | `str`                       | A concise overview of the main functionality of the endpoint. This brief introduction is usually displayed in autogenerated API documentation and helps consumers quickly understand what the endpoint does.                                                                                                     |
-| `description`          | `str`                       | A more detailed explanation of the endpoint, which can include information about the operation's behavior, including side effects, error states, and other operational guidelines.                                                                                                                               |
-| `responses`            | `Dict[int, Dict[str, Any]]` | A dictionary that maps each HTTP status code to a Response Object as defined by the [OpenAPI Specification](https://swagger.io/specification/#response-object). This allows you to describe expected responses, including default or error messages, and their corresponding schemas for different status codes. |
-| `response_description` | `str`                       | Provides the default textual description of the response sent by the endpoint when the operation is successful. It is intended to give a human-readable understanding of the result.                                                                                                                             |
-| `tags`                 | `List[str]`                 | Tags are a way to categorize and group endpoints within the API documentation. They can help organize the operations by resources or other heuristic.                                                                                                                                                            |
-| `operation_id`         | `str`                       | A unique identifier for the operation, which can be used for referencing this operation in documentation or code. This ID must be unique across all operations described in the API.                                                                                                                             |
-| `include_in_schema`    | `bool`                      | A boolean value that determines whether or not this operation should be included in the OpenAPI schema. Setting it to `False` can hide the endpoint from generated documentation and schema exports, which might be useful for private or experimental endpoints.                                                |
+| Field Name             | Type                                    | Description                                                                                                                                                                                                                                                                                                                |
+| ---------------------- |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `summary`              | `str`                                   | A concise overview of the main functionality of the endpoint. This brief introduction is usually displayed in autogenerated API documentation and helps consumers quickly understand what the endpoint does.                                                                                                               |
+| `description`          | `str`                                   | A more detailed explanation of the endpoint, which can include information about the operation's behavior, including side effects, error states, and other operational guidelines.                                                                                                                                         |
+| `responses`            | `Dict[int, Dict[str, OpenAPIResponse]]` | A dictionary that maps each HTTP status code to a Response Object as defined by the [OpenAPI Specification](https://swagger.io/specification/#response-object). This allows you to describe expected responses, including default or error messages, and their corresponding schemas or models for different status codes. |
+| `response_description` | `str`                                   | Provides the default textual description of the response sent by the endpoint when the operation is successful. It is intended to give a human-readable understanding of the result.                                                                                                                                       |
+| `tags`                 | `List[str]`                             | Tags are a way to categorize and group endpoints within the API documentation. They can help organize the operations by resources or other heuristic.                                                                                                                                                                      |
+| `operation_id`         | `str`                                   | A unique identifier for the operation, which can be used for referencing this operation in documentation or code. This ID must be unique across all operations described in the API.                                                                                                                                       |
+| `include_in_schema`    | `bool`                                  | A boolean value that determines whether or not this operation should be included in the OpenAPI schema. Setting it to `False` can hide the endpoint from generated documentation and schema exports, which might be useful for private or experimental endpoints.                                                          |
 
 To implement these customizations, include extra parameters when defining your routes:
 

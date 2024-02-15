@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import (
@@ -18,12 +19,10 @@ class VPCLatticeEventBase(BaseProxyEvent):
         """The VPC Lattice body."""
         return self["body"]
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_body)
-        return self._json_data
+        return self._json_deserializer(self.decoded_body)
 
     @property
     def headers(self) -> Dict[str, str]:
@@ -141,6 +140,18 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         """The request query string parameters."""
         return self["query_string_parameters"]
 
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+        if self.headers is not None:
+            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
+            return headers
+
+        return {}
+
 
 class vpcLatticeEventV2Identity(DictWrapper):
     @property
@@ -251,3 +262,14 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
     def query_string_parameters(self) -> Optional[Dict[str, str]]:
         """The request query string parameters."""
         return self.get("queryStringParameters")
+
+    @property
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+        return self.query_string_parameters
+
+    @property
+    def resolved_headers_field(self) -> Optional[Dict[str, str]]:
+        if self.headers is not None:
+            return {key.lower(): value for key, value in self.headers.items()}
+
+        return {}

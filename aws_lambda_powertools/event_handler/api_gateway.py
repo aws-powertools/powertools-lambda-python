@@ -17,6 +17,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Mapping,
     Match,
     Optional,
     Pattern,
@@ -37,6 +38,9 @@ from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
+    OpenAPIResponse,
+    OpenAPIResponseContentModel,
+    OpenAPIResponseContentSchema,
     validation_error_definition,
     validation_error_response_definition,
 )
@@ -197,7 +201,7 @@ class CORSConfig:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers
-        headers: Dict[str, str] = {
+        headers = {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
@@ -219,7 +223,7 @@ class Response(Generic[ResponseT]):
         status_code: int,
         content_type: Optional[str] = None,
         body: Optional[ResponseT] = None,
-        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        headers: Optional[Mapping[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
     ):
@@ -234,7 +238,7 @@ class Response(Generic[ResponseT]):
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict[str, Union[str, List[str]]]
+        headers: Mapping[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[Cookie]
             Optionally set cookies.
@@ -242,7 +246,7 @@ class Response(Generic[ResponseT]):
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.headers: Dict[str, Union[str, List[str]]] = dict(headers) if headers else {}
         self.cookies = cookies or []
         self.compress = compress
         self.content_type = content_type
@@ -273,7 +277,7 @@ class Route:
         cache_control: Optional[str],
         summary: Optional[str],
         description: Optional[str],
-        responses: Optional[Dict[int, Dict[str, Any]]],
+        responses: Optional[Dict[int, OpenAPIResponse]],
         response_description: Optional[str],
         tags: Optional[List[str]],
         operation_id: Optional[str],
@@ -303,7 +307,7 @@ class Route:
             The OpenAPI summary for this route
         description: Optional[str]
             The OpenAPI description for this route
-        responses: Optional[Dict[int, Dict[str, Any]]]
+        responses: Optional[Dict[int, OpenAPIResponse]]
             The OpenAPI responses for this route
         response_description: Optional[str]
             The OpenAPI response description for this route
@@ -442,7 +446,7 @@ class Route:
         if self._dependant is None:
             from aws_lambda_powertools.event_handler.openapi.dependant import get_dependant
 
-            self._dependant = get_dependant(path=self.openapi_path, call=self.func)
+            self._dependant = get_dependant(path=self.openapi_path, call=self.func, responses=self.responses)
 
         return self._dependant
 
@@ -501,11 +505,54 @@ class Route:
 
         # Add the response to the OpenAPI operation
         if self.responses:
-            # If the user supplied responses, we use them and don't set a default 200 response
+            for status_code in list(self.responses):
+                response = self.responses[status_code]
+
+                # Case 1: there is not 'content' key
+                if "content" not in response:
+                    response["content"] = {
+                        "application/json": self._openapi_operation_return(
+                            param=dependant.return_param,
+                            model_name_map=model_name_map,
+                            field_mapping=field_mapping,
+                        ),
+                    }
+
+                # Case 2: there is a 'content' key
+                else:
+                    # Need to iterate to transform any 'model' into a 'schema'
+                    for content_type, payload in response["content"].items():
+                        new_payload: OpenAPIResponseContentSchema
+
+                        # Case 2.1: the 'content' has a model
+                        if "model" in payload:
+                            # Find the model in the dependant's extra models
+                            return_field = next(
+                                filter(
+                                    lambda model: model.type_ is cast(OpenAPIResponseContentModel, payload)["model"],
+                                    self.dependant.response_extra_models,
+                                ),
+                            )
+                            if not return_field:
+                                raise AssertionError("Model declared in custom responses was not found")
+
+                            new_payload = self._openapi_operation_return(
+                                param=return_field,
+                                model_name_map=model_name_map,
+                                field_mapping=field_mapping,
+                            )
+
+                        # Case 2.2: the 'content' has a schema
+                        else:
+                            # Do nothing! We already have what we need!
+                            new_payload = payload
+
+                        response["content"][content_type] = new_payload
+
             operation["responses"] = self.responses
         else:
             # Set the default 200 response
-            responses = operation.setdefault("responses", self.responses or {})
+            responses = operation.setdefault("responses", {})
             success_response = responses.setdefault(200, {})
             success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
             success_response["content"] = {"application/json": {"schema": {}}}
@@ -682,7 +729,7 @@ class Route:
             Tuple["ModelField", Literal["validation", "serialization"]],
             "JsonSchemaValue",
         ],
-    ) -> Dict[str, Any]:
+    ) -> OpenAPIResponseContentSchema:
         """
         Returns the OpenAPI operation return.
         """
@@ -832,7 +879,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -890,7 +937,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -943,7 +990,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -997,7 +1044,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -1051,7 +1098,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -1104,7 +1151,7 @@ class BaseRouter(ABC):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -1662,7 +1709,7 @@ class ApiGatewayResolver(BaseRouter):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -1894,7 +1941,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers: Dict[str, Union[str, List[str]]] = {}
+        headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
@@ -2110,6 +2157,9 @@ class ApiGatewayResolver(BaseRouter):
             if route.dependant.return_param:
                 responses_from_routes.append(route.dependant.return_param)
 
+            if route.dependant.response_extra_models:
+                responses_from_routes.extend(route.dependant.response_extra_models)
+
         flat_models = list(responses_from_routes + request_fields_from_routes + body_fields_from_routes)
         return flat_models
 
@@ -2132,7 +2182,7 @@ class Router(BaseRouter):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: Optional[str] = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
@@ -2221,7 +2271,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         cache_control: Optional[str] = None,
         summary: Optional[str] = None,
         description: Optional[str] = None,
-        responses: Optional[Dict[int, Dict[str, Any]]] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
         response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,

@@ -104,6 +104,14 @@ This blog post showcases how to use AWS CDK and Powertools for AWS Lambda, along
 
 [Creating a serverless API using Powertools for AWS Lambda and CDK](https://how.wtf/creating-a-serverless-api-using-aws-lambda-powertools-and-cdk.html){target="_blank" rel="nofollow"}
 
+### Boost App Engagement with AWS CloudWatch Metrics & Powertools for AWS
+
+This article will guide you through personalizing observability by integrating CloudWatch metrics with Powertools for AWS Lambda into mobile push notifications, a strategy that significantly enhances mobile app engagement
+
+> **Author: [Nathan Hanks](https://www.linkedin.com/in/nathan-hanks-25151815/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Creating a serverless API using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/boost-app-engagement-with-aws-cloudwatch-metrics-powertools-for-aws){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser

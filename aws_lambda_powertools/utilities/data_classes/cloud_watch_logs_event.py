@@ -59,6 +59,11 @@ class CloudWatchLogsDecodedData(DictWrapper):
         return self["messageType"]
 
     @property
+    def policy_level(self) -> Optional[str]:
+        """The level at which the policy was enforced."""
+        return self.get("policyLevel")
+
+    @property
     def log_events(self) -> List[CloudWatchLogsLogEvent]:
         """The actual log data, represented as an array of log event records.
 

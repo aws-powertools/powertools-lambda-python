@@ -4,7 +4,7 @@
     Keep in mind that when we transition to General Availability (GA), there might be breaking changes introduced.
 """
 
-from aws_lambda_powertools.utilities._data_masking.base import DataMasking
+from aws_lambda_powertools.utilities.data_masking.base import DataMasking
 
 __all__ = [
     "DataMasking",
