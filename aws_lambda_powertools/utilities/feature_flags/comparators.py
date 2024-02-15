@@ -88,6 +88,20 @@ def compare_modulo_range(context_value: int, condition_value: Dict) -> bool:
 
 
 def compare_any_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for ANY_IN_VALUE action
+
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
+
+    Returns
+    -------
+    bool
+        Whether any list item in context_value is available in condition_value
+    """
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
@@ -95,6 +109,20 @@ def compare_any_in_list(context_value: list, condition_value: list) -> bool:
 
 
 def compare_all_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for ALL_IN_VALUE action
+
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
+
+    Returns
+    -------
+    bool
+        Whether all list items in context_value are available in condition_value
+    """
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
@@ -102,6 +130,20 @@ def compare_all_in_list(context_value: list, condition_value: list) -> bool:
 
 
 def compare_none_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for NONE_IN_VALUE action
+
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
+
+    Returns
+    -------
+    bool
+        Whether list items in context_value are **not** available in condition_value
+    """
     if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
