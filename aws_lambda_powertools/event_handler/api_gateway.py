@@ -1734,7 +1734,7 @@ class ApiGatewayResolver(BaseRouter):
                     compress,
                     cache_control,
                     summary,
-                    description,
+                    description or getattr(func, "__name__", repr(func)),  # defaults description to the function name
                     responses,
                     response_description,
                     tags,

@@ -83,7 +83,7 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
     --8<-- "examples/event_handler_bedrock_agents/src/getting_started.py"
     ```
 
-	1. `description` is a recommended field that should contain a human readable descriptin of your action
+	1. `description` is a recommended field that should contain a human readable description of your action
 	2. We take care of **parsing**, **validating**, **routing** and **responding** to the request.
 
 === "Input payload"
@@ -98,7 +98,7 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
 
-!!! note "It's important to include a `description` for each API endpoint because reasons"
+!!! note "It's important to include a `description` for each API endpoint because it will improve the understanding Amazon Bedrock has of your actions"
 
 The resolvers used by Agents for Amazon Bedrock are compatible with the full suite of Powertools for AWS Lambda utilities.
 This includes [Logger](../logger.md), [Metrics](../metrics.md) and [Tracer](../tracer.md).
