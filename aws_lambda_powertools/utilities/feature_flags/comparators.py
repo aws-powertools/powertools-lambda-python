@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime, tzinfo
 from typing import Any, Dict, Optional
 
 from dateutil.tz import gettz
 
-from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
 from .exceptions import SchemaValidationError
+from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
 
 
 def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
@@ -85,41 +87,40 @@ def compare_modulo_range(context_value: int, condition_value: Dict) -> bool:
     return start <= context_value % base <= end
 
 
-def compare_any_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+def compare_any_in_list(context_value: list, condition_value: list) -> bool:
+    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
-    
+
     results = False
-    for key in key_list:
-        if key in value_list:
+    for key in context_value:
+        if key in condition_value:
             results = True
             break
-        
+
     return results
 
 
-def compare_all_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+def compare_all_in_list(context_value: list, condition_value: list) -> bool:
+    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
     results = True
-    for key in key_list:
-        if key not in value_list:
+    for key in context_value:
+        if key not in condition_value:
             results = False
             break
 
     return results
 
 
-def compare_none_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
+def compare_none_in_list(context_value: list, condition_value: list) -> bool:
+    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
         raise SchemaValidationError()
 
     results = True
-    for key in key_list:
-        if key in value_list:
+    for key in context_value:
+        if key in condition_value:
             results = False
             break
 
     return results
-
