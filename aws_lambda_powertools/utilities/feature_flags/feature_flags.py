@@ -6,15 +6,39 @@ from ...shared.types import JSONType
 from . import schema
 from .base import StoreProvider
 from .comparators import (
+    compare_all_in_list,
+    compare_any_in_list,
     compare_datetime_range,
     compare_days_of_week,
     compare_modulo_range,
+    compare_none_in_list,
     compare_time_range,
-    compare_all_in_list,
-    compare_any_in_list,
-    compare_none_in_list
 )
 from .exceptions import ConfigurationStoreError
+
+RULE_ACTION_MAPPING = {
+    schema.RuleAction.EQUALS.value: lambda a, b: a == b,
+    schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
+    schema.RuleAction.KEY_GREATER_THAN_VALUE.value: lambda a, b: a > b,
+    schema.RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value: lambda a, b: a >= b,
+    schema.RuleAction.KEY_LESS_THAN_VALUE.value: lambda a, b: a < b,
+    schema.RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value: lambda a, b: a <= b,
+    schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
+    schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
+    schema.RuleAction.IN.value: lambda a, b: a in b,
+    schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
+    schema.RuleAction.KEY_IN_VALUE.value: lambda a, b: a in b,
+    schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
+    schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
+    schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
+    schema.RuleAction.ALL_IN_VALUE.value: lambda a, b: compare_all_in_list(a, b),
+    schema.RuleAction.ANY_IN_VALUE.value: lambda a, b: compare_any_in_list(a, b),
+    schema.RuleAction.NONE_IN_VALUE.value: lambda a, b: compare_none_in_list(a, b),
+    schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
+    schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
+    schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
+    schema.RuleAction.MODULO_RANGE.value: lambda a, b: compare_modulo_range(a, b),
+}
 
 
 class FeatureFlags:
@@ -51,32 +75,8 @@ class FeatureFlags:
         self.logger = logger or logging.getLogger(__name__)
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
-        mapping_by_action = {
-            schema.RuleAction.EQUALS.value: lambda a, b: a == b,
-            schema.RuleAction.NOT_EQUALS.value: lambda a, b: a != b,
-            schema.RuleAction.KEY_GREATER_THAN_VALUE.value: lambda a, b: a > b,
-            schema.RuleAction.KEY_GREATER_THAN_OR_EQUAL_VALUE.value: lambda a, b: a >= b,
-            schema.RuleAction.KEY_LESS_THAN_VALUE.value: lambda a, b: a < b,
-            schema.RuleAction.KEY_LESS_THAN_OR_EQUAL_VALUE.value: lambda a, b: a <= b,
-            schema.RuleAction.STARTSWITH.value: lambda a, b: a.startswith(b),
-            schema.RuleAction.ENDSWITH.value: lambda a, b: a.endswith(b),
-            schema.RuleAction.IN.value: lambda a, b: a in b,
-            schema.RuleAction.NOT_IN.value: lambda a, b: a not in b,
-            schema.RuleAction.KEY_IN_VALUE.value: lambda a, b: a in b,
-            schema.RuleAction.KEY_NOT_IN_VALUE.value: lambda a, b: a not in b,
-            schema.RuleAction.VALUE_IN_KEY.value: lambda a, b: b in a,
-            schema.RuleAction.VALUE_NOT_IN_KEY.value: lambda a, b: b not in a,
-            schema.RuleAction.ALL_IN_VALUE.value: lambda a, b: compare_all_in_list(a, b),
-            schema.RuleAction.ANY_IN_VALUE.value: lambda a, b: compare_any_in_list(a, b),
-            schema.RuleAction.NONE_IN_VALUE.value: lambda a, b: compare_none_in_list(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value: lambda a, b: compare_time_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value: lambda a, b: compare_datetime_range(a, b),
-            schema.RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value: lambda a, b: compare_days_of_week(a, b),
-            schema.RuleAction.MODULO_RANGE.value: lambda a, b: compare_modulo_range(a, b),
-        }
-
         try:
-            func = mapping_by_action.get(action, lambda a, b: False)
+            func = RULE_ACTION_MAPPING.get(action, lambda a, b: False)
             return func(context_value, condition_value)
         except Exception as exc:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
