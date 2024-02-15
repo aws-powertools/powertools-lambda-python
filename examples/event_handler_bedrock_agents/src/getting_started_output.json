@@ -1,26 +1,14 @@
 {
-  "level": "INFO",
-  "location": "lambda_handler:54",
-  "message": {
-    "messageVersion": "1.0",
-    "response": {
-      "actionGroup": "CurrentTime",
-      "apiPath": "/current_time",
-      "httpMethod": "GET",
-      "httpStatusCode": 200,
-      "responseBody": {
-        "application/json": {
-          "body": "1704708165"
-        }
+  "messageVersion": "1.0",
+  "response": {
+    "actionGroup": "CurrentTime",
+    "apiPath": "/current_time",
+    "httpMethod": "GET",
+    "httpStatusCode": 200,
+    "responseBody": {
+      "application/json": {
+        "body": "1704708165"
       }
     }
-  },
-  "timestamp": "2024-01-08 10:01:38,082+0000",
-  "service": "bedrock",
-  "cold_start": true,
-  "function_name": "bedrock-agents-current-time-HelloWorldFunction-bx2uCCm3Vw9Y",
-  "function_memory_size": "256",
-  "function_arn": "arn:aws:lambda:us-east-1:123456789012:function:bedrock-agents-current-time-HelloWorldFunction-bx2uCCm3Vw9Y",
-  "function_request_id": "3c0d5437-7873-4a9c-86c9-a55c262f22d9",
-  "xray_trace_id": "1-659bc393-6d3332e24321ce6b333c398c"
+  }
 }

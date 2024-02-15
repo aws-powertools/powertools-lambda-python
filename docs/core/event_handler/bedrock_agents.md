@@ -5,6 +5,7 @@ description: Core utility
 
 Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
 
+<center>
 ```mermaid
 flowchart LR
 	Bedrock[Foundational Model] <-- calls --> Agent
@@ -13,6 +14,7 @@ flowchart LR
 	Agent -- consults --> OpenAPI{{OpenAPI schema}}
 	OpenAPI -. generated from .-> Lambda
 ```
+</center>
 
 ## Key features
 
@@ -86,13 +88,13 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 
 === "Input payload"
 
-	```json hl_lines="7 9 16"
+	```json hl_lines="4 6 13"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started.json"
 	```
 
 === "Output payload"
 
-	```json hl_lines="12-14"
+	```json hl_lines="10"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
 
