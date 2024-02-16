@@ -1029,3 +1029,48 @@ def test_validate_modulo_range_condition_valid():
     # WHEN calling validate_condition
     # THEN nothing is raised
     ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
+
+
+def test_validate_any_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.ANY_IN_VALUE.value,
+        CONDITION_VALUE: "Gerald",
+    }
+
+    rule_name = "non-list value for ANY_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="ANY_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_all_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.ALL_IN_VALUE.value,
+        CONDITION_VALUE: "Leandro",
+    }
+
+    rule_name = "non-list value for ALL_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="ALL_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_none_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.NONE_IN_VALUE.value,
+        CONDITION_VALUE: "Heitor",
+    }
+
+    rule_name = "non-list value for NONE_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="NONE_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)

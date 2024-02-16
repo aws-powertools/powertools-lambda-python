@@ -5,7 +5,6 @@ from typing import Any, Dict, Optional
 
 from dateutil.tz import gettz
 
-from .exceptions import SchemaValidationError
 from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
 
 
@@ -102,8 +101,8 @@ def compare_any_in_list(context_value: list, condition_value: list) -> bool:
     bool
         Whether any list item in context_value is available in condition_value
     """
-    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
-        raise SchemaValidationError()
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare ANY_IN_VALUE action.")
 
     return any(key in condition_value for key in context_value)
 
@@ -123,8 +122,8 @@ def compare_all_in_list(context_value: list, condition_value: list) -> bool:
     bool
         Whether all list items in context_value are available in condition_value
     """
-    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
-        raise SchemaValidationError()
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare ALL_IN_VALUE action.")
 
     return all(key in condition_value for key in context_value)
 
@@ -144,7 +143,7 @@ def compare_none_in_list(context_value: list, condition_value: list) -> bool:
     bool
         Whether list items in context_value are **not** available in condition_value
     """
-    if not (isinstance(context_value, list) and isinstance(condition_value, list)):
-        raise SchemaValidationError()
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare NONE_IN_VALUE action.")
 
     return all(key not in condition_value for key in context_value)

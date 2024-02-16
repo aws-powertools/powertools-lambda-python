@@ -465,6 +465,21 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
+    def _validate_all_in_value_value(value: list, rule_name: str):
+        if not (isinstance(value, list)):
+            raise SchemaValidationError(f"ALL_IN_VALUE action must have a list value, rule={rule_name}")
+
+    @staticmethod
+    def _validate_any_in_value_value(value: list, rule_name: str):
+        if not (isinstance(value, list)):
+            raise SchemaValidationError(f"ANY_IN_VALUE action must have a list value, rule={rule_name}")
+
+    @staticmethod
+    def _validate_none_in_value_value(value: list, rule_name: str):
+        if not (isinstance(value, list)):
+            raise SchemaValidationError(f"NONE_IN_VALUE action must have a list value, rule={rule_name}")
+
+    @staticmethod
     def _validate_datetime(datetime_str: str, rule_name: str):
         date = None
 
