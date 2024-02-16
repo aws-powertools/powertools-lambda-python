@@ -154,20 +154,52 @@ The following video demonstrates the end-to-end process:
 <iframe width="720" height="405" src="https://www.youtube-nocookie.com/embed/NWoC5FTSt7s?si=AG2qpLJbxCkyiLma&amp;controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </center>
 
-During the creation process, you can use the schema generated in the previous step when prompted for an OpenAPI specification.
+During the creation process, you should use the schema generated in the previous step when prompted for an OpenAPI specification.
 
 ## Advanced
+
+### Accessing custom request fields
+
+The event sent by Agents for Amazon Bedrock into your Lambda function contains a number of event fields that might be interesting. The event handler exposes them in the `app.current_event` field:
+
+=== "accessing_request_fields.py"
+
+	```python hl_lines="14-16"
+	--8<-- "examples/event_handler_bedrock_agents/src/accessing_request_fields.py"
+	```
+
+The input event fields are:
+
+| Name                      | Type                         | Description                                                                                                                                                                                                      |
+|---------------------------|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| message_version           | `str`                        | The version of the message that identifies the format of the event data going into the Lambda function and the expected format of the response from a Lambda function. Amazon Bedrock only supports version 1.0. |
+| agent                     | `BedrockAgentInfo`           | Contains information about the name, ID, alias, and version of the agent that the action group belongs to.                                                                                                       |
+| input_text                | `str`                        | The user input for the conversation turn.                                                                                                                                                                        |
+| session_id                | `str`                        | The unique identifier of the agent session.                                                                                                                                                                      |
+| action_group              | `str`                        | The name of the action group.                                                                                                                                                                                    |
+| api_path                  | `str`                        | The path to the API operation, as defined in the OpenAPI schema.                                                                                                                                                 |
+| http_method               | `str`                        | The method of the API operation, as defined in the OpenAPI schema.                                                                                                                                               |
+| parameters                | `List[BedrockAgentProperty]` | Contains a list of objects. Each object contains the name, type, and value of a parameter in the API operation, as defined in the OpenAPI schema.                                                                |
+| request_body              | `BedrockAgentRequestBody`    | Contains the request body and its properties, as defined in the OpenAPI schema.                                                                                                                                  |
+| session_attributes        | `Dict[str, str]`             | Contains session attributes and their values.                                                                                                                                                                    |
+| prompt_session_attributes | `Dict[str, str]`             | Contains prompt attributes and their values.                                                                                                                                                                     |
 
 ### Additional metadata
 
 To enrich the view that Agents for Amazon Bedrock has of your Lambda functions,
 use a combination of [Pydantic Models](https://docs.pydantic.dev/latest/concepts/models/){target="_blank"} and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your APIs parameters.
 
---8<-- "docs/core/event_handler/_openapi_customization_intro.md"
-
 #### Customizing OpenAPI parameters
 
 --8<-- "docs/core/event_handler/_openapi_customization_parameters.md"
+
+To implement these customizations, include extra constraints when defining your parameters:
+
+```python hl_lines="15" title="customizing_api_parameters.py"
+--8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_parameters.py"
+```
+
+1. Here we say that the title should never be bigger than 200 characters.
 
 #### Customizing API operations
 
