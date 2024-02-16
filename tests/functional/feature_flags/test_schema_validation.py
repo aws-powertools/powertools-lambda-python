@@ -646,7 +646,7 @@ def test_a_validate_time_condition_between_datetime_range_invalid_condition_valu
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match=f"SCHEDULE_BETWEEN_DATETIME_RANGE action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -665,7 +665,7 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match=f"'START' and 'END' must be a valid ISO8601 time format, rule={rule_name}",
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -684,7 +684,7 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match="'START' and 'END' must not include timezone information.*",
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
