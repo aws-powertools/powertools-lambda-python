@@ -1,6 +1,5 @@
-from typing import Annotated
-
 import requests
+from typing_extensions import Annotated
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
 from aws_lambda_powertools.event_handler.openapi.params import Query
