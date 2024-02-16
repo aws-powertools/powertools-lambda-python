@@ -76,6 +76,10 @@ class TimeValues(Enum):
     FRIDAY = "FRIDAY"
     SATURDAY = "SATURDAY"
 
+    @classmethod
+    def days(cls) -> list[str]:
+        return [day.value for day in cls if day.value not in ["START", "END", "TIMEZONE"]]
+
 
 class ModuloRangeValues(Enum):
     """
@@ -375,16 +379,10 @@ class ConditionsValidator(BaseValidator):
         days = value.get(TimeValues.DAYS.value)
         if not isinstance(days, list) or not value:
             raise SchemaValidationError(error_str)
+
+        valid_days = TimeValues.days()
         for day in days:
-            if not isinstance(day, str) or day not in [
-                TimeValues.MONDAY.value,
-                TimeValues.TUESDAY.value,
-                TimeValues.WEDNESDAY.value,
-                TimeValues.THURSDAY.value,
-                TimeValues.FRIDAY.value,
-                TimeValues.SATURDAY.value,
-                TimeValues.SUNDAY.value,
-            ]:
+            if not isinstance(day, str) or day not in valid_days:
                 raise SchemaValidationError(
                     f"condition value DAYS must represent a day of the week in 'TimeValues' enum, rule={rule_name}",
                 )
@@ -399,7 +397,7 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def _validate_schedule_between_time_range_value(value: Dict, rule_name: str) -> bool:
+    def _validate_schedule_between_time_range_value(value: Dict, rule_name: str):
         if not isinstance(value, dict):
             raise SchemaValidationError(
                 f"{RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value} action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
@@ -418,8 +416,6 @@ class ConditionsValidator(BaseValidator):
             )
 
         ConditionsValidator._validate_timezone(timezone=value.get(TimeValues.TIMEZONE.value), rule=rule_name)
-
-        return True
 
     @staticmethod
     def _validate_schedule_between_datetime_range_key(key: str, rule_name: str):
@@ -454,8 +450,10 @@ class ConditionsValidator(BaseValidator):
         base = value.get(ModuloRangeValues.BASE.value)
         start = value.get(ModuloRangeValues.START.value)
         end = value.get(ModuloRangeValues.END.value)
+
         if base is None or start is None or end is None:
             raise SchemaValidationError(error_str)
+
         if not isinstance(base, int) or not isinstance(start, int) or not isinstance(end, int):
             raise SchemaValidationError(f"'BASE', 'START' and 'END' must be integers, rule={rule_name}")
 
