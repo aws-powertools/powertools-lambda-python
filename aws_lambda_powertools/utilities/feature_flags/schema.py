@@ -362,15 +362,7 @@ class ConditionsValidator(BaseValidator):
 
         validator(value, rule_name)
 
-        # time actions need to be parsed to make sure date and time format is valid and timezone is recognized
-        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
-            ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
-                value,
-                rule_name,
-                action,
-                ConditionsValidator._validate_time_value,
-            )
-        elif action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value:
+        if action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
                 value,
                 rule_name,
@@ -409,16 +401,6 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def _validate_time_value(time: str, rule_name: str):
-        # Using a regex instead of strptime because it's several orders of magnitude faster
-        match = TIME_RANGE_RE_PATTERN.match(time)
-
-        if not match:
-            raise SchemaValidationError(
-                f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}",
-            )
-
-    @staticmethod
     def _validate_schedule_between_days_of_week_value(value: dict, rule_name: str):
         error_str = f"condition with a CURRENT_DAY_OF_WEEK action must have a condition value dictionary with 'DAYS' and 'TIMEZONE' (optional) keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
@@ -448,6 +430,35 @@ class ConditionsValidator(BaseValidator):
         # try to see if the timezone string corresponds to any known timezone
         if not tz.gettz(timezone):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
+
+    @staticmethod
+    def _validate_schedule_between_time_range_value(value: Dict, rule_name: str) -> bool:
+        if not isinstance(value, dict):
+            raise SchemaValidationError(
+                f"{RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value} action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+            )
+
+        start_time = value.get(TimeValues.START.value, "")
+        end_time = value.get(TimeValues.END.value, "")
+
+        if not isinstance(start_time, str) or not isinstance(end_time, str):
+            raise SchemaValidationError(f"'START' and 'END' must be a non empty string, rule={rule_name}")
+
+        # Using a regex instead of strptime because it's several orders of magnitude faster
+        if not TIME_RANGE_RE_PATTERN.match(start_time) or not TIME_RANGE_RE_PATTERN.match(end_time):
+            raise SchemaValidationError(
+                f"'START' and 'END' must be a valid time format, time_format={TIME_RANGE_FORMAT}, rule={rule_name}",
+            )
+
+        timezone = value.get(TimeValues.TIMEZONE.value, "UTC")
+        if not isinstance(timezone, str):
+            raise SchemaValidationError(f"'TIMEZONE' must be a string, rule={rule_name}")
+
+        # try to see if the timezone string corresponds to any known timezone
+        if not tz.gettz(timezone):
+            raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
+
+        return True
 
     @staticmethod
     def _validate_schedule_between_time_and_datetime_ranges(
