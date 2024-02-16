@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -885,11 +889,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -988,11 +995,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1397,20 +1407,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1550,20 +1560,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1956,7 +1966,7 @@
 </span><span class="w">    </span><span class="nt">Layers</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Find the latest Layer version in the official documentation</span>
 <span class="w">      </span><span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62</span>
 
 <span class="nt">Resources</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">CaptureLambdaHandlerExample</span><span class="p">:</span>
@@ -2124,7 +2134,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 <p>We do not support asynchronous Lambda handler</p>
 </details>
 <p>You can trace asynchronous functions and generator functions (including context managers) using <code>capture_method</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">capture_method_async.py</label><label for="__tabbed_1_2">capture_method_context_manager.py</label><label for="__tabbed_1_3">capture_method_generators.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="capture_method_asyncpy" name="__tabbed_1" type="radio" /><input id="capture_method_context_managerpy" name="__tabbed_1" type="radio" /><input id="capture_method_generatorspy" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="capture_method_asyncpy">capture_method_async.py</label><label for="capture_method_context_managerpy">capture_method_context_manager.py</label><label for="capture_method_generatorspy">capture_method_generators.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2339,7 +2349,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 <li>You might return <strong>more than 64K</strong> of data <em>e.g., <code>message too long</code> error</em></li>
 </ol>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">disable_capture_response.py</label><label for="__tabbed_2_2">disable_capture_response_streaming_body.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="disable_capture_responsepy" name="__tabbed_2" type="radio" /><input id="disable_capture_response_streaming_bodypy" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="disable_capture_responsepy">disable_capture_response.py</label><label for="disable_capture_response_streaming_bodypy">disable_capture_response_streaming_body.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2757,7 +2767,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
 <p>This can result in the first Tracer config being inherited by new instances, and their modules not being patched.</p>
 <p>Tracer will automatically ignore imported modules that have been patched.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">tracer_reuse.py</label><label for="__tabbed_3_2">tracer_reuse_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="tracer_reusepy" name="__tabbed_3" type="radio" /><input id="tracer_reuse_modulepy" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="tracer_reusepy">tracer_reuse.py</label><label for="tracer_reuse_modulepy">tracer_reuse_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2852,6 +2862,8 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -2891,7 +2903,7 @@ side effects for file-like objects like boto S3 <a href="https://botocore.amazon
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

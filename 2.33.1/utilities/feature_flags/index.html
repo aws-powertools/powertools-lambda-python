@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -657,11 +661,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -760,11 +767,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1460,20 +1470,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1613,20 +1623,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2062,7 +2072,7 @@
 <h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
 <p>By default, this utility provides <a href="https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html" target="_blank">AWS AppConfig</a> as a configuration store.</p>
 <p>The following sample infrastructure will be used throughout this documentation:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">template.yaml</label><label for="__tabbed_1_2">CDK</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="templateyaml" name="__tabbed_1" type="radio" /><input id="cdk" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="templateyaml">template.yaml</label><label for="cdk">CDK</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2313,7 +2323,7 @@
 <li><strong>context</strong>: Value to be evaluated against each rule defined for the given feature</li>
 <li><strong>default</strong>: Sentinel value to use in case we experience any issues with our store, or feature doesn't exist</li>
 </ul>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">getting_started_single_feature_flag.py</label><label for="__tabbed_2_2">getting_started_single_feature_flag_payload.json</label><label for="__tabbed_2_3">getting_started_single_feature_flag_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="getting_started_single_feature_flagpy" name="__tabbed_2" type="radio" /><input id="getting_started_single_feature_flag_payloadjson" name="__tabbed_2" type="radio" /><input id="getting_started_single_feature_flag_featuresjson" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="getting_started_single_feature_flagpy">getting_started_single_feature_flag.py</label><label for="getting_started_single_feature_flag_payloadjson">getting_started_single_feature_flag_payload.json</label><label for="getting_started_single_feature_flag_featuresjson">getting_started_single_feature_flag_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2444,7 +2454,7 @@
 <h4 id="static-flags">Static flags<a class="headerlink" href="#static-flags" title="Permanent link">&para;</a></h4>
 <p>We have a static flag named <code>ten_percent_off_campaign</code>. Meaning, there are no conditional rules, it's either ON or OFF for all customers.</p>
 <p>In this case, we could omit the <code>context</code> parameter and simply evaluate whether we should apply the 10% discount.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">getting_started_static_flag.py</label><label for="__tabbed_3_2">getting_started_static_flag_payload.json</label><label for="__tabbed_3_3">getting_started_static_flag_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="getting_started_static_flagpy" name="__tabbed_3" type="radio" /><input id="getting_started_static_flag_payloadjson" name="__tabbed_3" type="radio" /><input id="getting_started_static_flag_featuresjson" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="getting_started_static_flagpy">getting_started_static_flag.py</label><label for="getting_started_static_flag_payloadjson">getting_started_static_flag_payload.json</label><label for="getting_started_static_flag_featuresjson">getting_started_static_flag_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2523,7 +2533,7 @@
 <h3 id="getting-all-enabled-features">Getting all enabled features<a class="headerlink" href="#getting-all-enabled-features" title="Permanent link">&para;</a></h3>
 <p>As you might have noticed, each <code>evaluate</code> call means an API call to the Store and the more features you have the more costly this becomes.</p>
 <p>You can use <code>get_enabled_features</code> method for scenarios where you need a list of all enabled features according to the input context.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">getting_all_enabled_features.py</label><label for="__tabbed_4_2">getting_all_enabled_features_payload.json</label><label for="__tabbed_4_3">getting_all_enabled_features_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="getting_all_enabled_featurespy" name="__tabbed_4" type="radio" /><input id="getting_all_enabled_features_payloadjson" name="__tabbed_4" type="radio" /><input id="getting_all_enabled_features_featuresjson" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="getting_all_enabled_featurespy">getting_all_enabled_features.py</label><label for="getting_all_enabled_features_payloadjson">getting_all_enabled_features_payload.json</label><label for="getting_all_enabled_features_featuresjson">getting_all_enabled_features_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2734,7 +2744,7 @@ intervals or between certain calendar dates.</p>
 <li>Launch a new feature on a specific date and time</li>
 </ul>
 <p>You can also have features enabled only at certain times of the day for premium tier customers</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">timebased_feature.py</label><label for="__tabbed_5_2">timebased_feature_event.json</label><label for="__tabbed_5_3">timebased_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="timebased_featurepy" name="__tabbed_5" type="radio" /><input id="timebased_feature_eventjson" name="__tabbed_5" type="radio" /><input id="timebased_featuresjson" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="timebased_featurepy">timebased_feature.py</label><label for="timebased_feature_eventjson">timebased_feature_event.json</label><label for="timebased_featuresjson">timebased_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2903,7 +2913,7 @@ intervals or between certain calendar dates.</p>
 </div>
 </div>
 <p>You can also have features enabled only at certain times of the day.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">timebased_happyhour_feature.py</label><label for="__tabbed_6_2">timebased_happyhour_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="timebased_happyhour_featurepy" name="__tabbed_6" type="radio" /><input id="timebased_happyhour_featuresjson" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="timebased_happyhour_featurepy">timebased_happyhour_feature.py</label><label for="timebased_happyhour_featuresjson">timebased_happyhour_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3024,7 +3034,7 @@ intervals or between certain calendar dates.</p>
 </div>
 </div>
 <p>You can also have features enabled only at specific days, for example: enable christmas sale discount during specific dates.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">datetime_feature.py</label><label for="__tabbed_7_2">datetime_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="datetime_featurepy" name="__tabbed_7" type="radio" /><input id="datetime_featuresjson" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="datetime_featurepy">datetime_feature.py</label><label for="datetime_featuresjson">datetime_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3168,7 +3178,7 @@ of the same experiment.</p>
 </ul>
 <p>The modulo range condition takes three values - <code>BASE</code>, <code>START</code> and <code>END</code>.</p>
 <p>The condition evaluates <code>START &lt;= CONTEXT_VALUE % BASE &lt;= END</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">modulo_range_feature.py</label><label for="__tabbed_8_2">modulo_range_feature_event.json</label><label for="__tabbed_8_3">modulo_range_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="modulo_range_featurepy" name="__tabbed_8" type="radio" /><input id="modulo_range_feature_eventjson" name="__tabbed_8" type="radio" /><input id="modulo_range_featuresjson" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="modulo_range_featurepy">modulo_range_feature.py</label><label for="modulo_range_feature_eventjson">modulo_range_feature_event.json</label><label for="modulo_range_featuresjson">modulo_range_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3329,7 +3339,7 @@ of the same experiment.</p>
 </div>
 </div>
 <p>You can run multiple experiments on your users with the spectrum of your choice.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">modulo_range_multiple_feature.py</label><label for="__tabbed_9_2">modulo_range_multiple_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="modulo_range_multiple_featurepy" name="__tabbed_9" type="radio" /><input id="modulo_range_multiple_featuresjson" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="modulo_range_multiple_featurepy">modulo_range_multiple_feature.py</label><label for="modulo_range_multiple_featuresjson">modulo_range_multiple_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3581,7 +3591,7 @@ of the same experiment.</p>
 <p>You might have a list of features to unlock for premium customers, unlock a specific set of features for admin users, etc.</p>
 </details>
 <p>Feature flags can return any JSON values when <code>boolean_type</code> parameter is set to <code>false</code>. These can be dictionaries, list, string, integers, etc.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">beyond_boolean.py</label><label for="__tabbed_10_2">beyond_boolean_payload.json</label><label for="__tabbed_10_3">beyond_boolean_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="beyond_booleanpy" name="__tabbed_10" type="radio" /><input id="beyond_boolean_payloadjson" name="__tabbed_10" type="radio" /><input id="beyond_boolean_featuresjson" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="beyond_booleanpy">beyond_boolean.py</label><label for="beyond_boolean_payloadjson">beyond_boolean_payload.json</label><label for="beyond_boolean_featuresjson">beyond_boolean_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3685,7 +3695,7 @@ of the same experiment.</p>
 <h3 id="adjusting-in-memory-cache">Adjusting in-memory cache<a class="headerlink" href="#adjusting-in-memory-cache" title="Permanent link">&para;</a></h3>
 <p>By default, we cache configuration retrieved from the Store for 5 seconds for performance and reliability reasons.</p>
 <p>You can override <code>max_age</code> parameter when instantiating the store.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">getting_started_with_cache.py</label><label for="__tabbed_11_2">getting_started_with_cache_payload.json</label><label for="__tabbed_11_3">getting_started_with_cache_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="getting_started_with_cachepy" name="__tabbed_11" type="radio" /><input id="getting_started_with_cache_payloadjson" name="__tabbed_11" type="radio" /><input id="getting_started_with_cache_featuresjson" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="getting_started_with_cachepy">getting_started_with_cache.py</label><label for="getting_started_with_cache_payloadjson">getting_started_with_cache_payload.json</label><label for="getting_started_with_cache_featuresjson">getting_started_with_cache_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3768,7 +3778,7 @@ of the same experiment.</p>
 <p>This means you don't need to make another call only to fetch app configuration.</p>
 </details>
 <p>You can access the configuration fetched from the store via <code>get_raw_configuration</code> property within the store instance.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">getting_stored_features.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:1"><input checked="checked" id="getting_stored_featurespy" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="getting_stored_featurespy">getting_stored_features.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3804,7 +3814,7 @@ of the same experiment.</p>
 <p>This utility expects a certain schema to be stored as JSON within AWS AppConfig.</p>
 <h4 id="features">Features<a class="headerlink" href="#features" title="Permanent link">&para;</a></h4>
 <p>A feature can simply have its name and a <code>default</code> value. This is either on or off, also known as a <a href="#static-flags">static flag</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">minimal_schema.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="minimal_schemajson" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="minimal_schemajson">minimal_schema.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -3836,7 +3846,7 @@ of the same experiment.</p>
 <li><code>when_match</code> boolean or JSON value that should be used when conditions match</li>
 <li>A list of <code>conditions</code> for evaluation</li>
 </ol>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">feature_with_rules.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="feature_with_rulesjson" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="feature_with_rulesjson">feature_with_rules.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3909,7 +3919,7 @@ of the same experiment.</p>
 <p>You can have multiple rules with different names. The rule engine will return the first result <code>when_match</code> of the matching rule configuration, or <code>default</code> value when none of the rules apply.</p>
 <h4 id="conditions">Conditions<a class="headerlink" href="#conditions" title="Permanent link">&para;</a></h4>
 <p>The <code>conditions</code> block is a list of conditions that contain <code>action</code>, <code>key</code>, and <code>value</code> keys:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">conditions.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="conditionsjson" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="conditionsjson">conditions.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -3983,6 +3993,18 @@ of the same experiment.</p>
 <td><code>lambda a, b: a not in b</code></td>
 </tr>
 <tr>
+<td><strong>ANY_IN_VALUE</strong></td>
+<td><code>lambda a, b: any of a is in b</code></td>
+</tr>
+<tr>
+<td><strong>ALL_IN_VALUE</strong></td>
+<td><code>lambda a, b: all of a is in b</code></td>
+</tr>
+<tr>
+<td><strong>NONE_IN_VALUE</strong></td>
+<td><code>lambda a, b: none of a is in b</code></td>
+</tr>
+<tr>
 <td><strong>VALUE_IN_KEY</strong></td>
 <td><code>lambda a, b: b in a</code></td>
 </tr>
@@ -4046,7 +4068,7 @@ of the same experiment.</p>
 <h3 id="envelope">Envelope<a class="headerlink" href="#envelope" title="Permanent link">&para;</a></h3>
 <p>There are scenarios where you might want to include feature flags as part of an existing application configuration.</p>
 <p>For this to work, you need to use a JMESPath expression via the <code>envelope</code> parameter to extract that key as the feature flags configuration.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><input id="__tabbed_16_2" name="__tabbed_16" type="radio" /><input id="__tabbed_16_3" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">extracting_envelope.py</label><label for="__tabbed_16_2">extracting_envelope_payload.json</label><label for="__tabbed_16_3">extracting_envelope_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="extracting_envelopepy" name="__tabbed_16" type="radio" /><input id="extracting_envelope_payloadjson" name="__tabbed_16" type="radio" /><input id="extracting_envelope_featuresjson" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="extracting_envelopepy">extracting_envelope.py</label><label for="extracting_envelope_payloadjson">extracting_envelope_payload.json</label><label for="extracting_envelope_featuresjson">extracting_envelope_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4191,7 +4213,7 @@ of the same experiment.</p>
 </tr>
 </tbody>
 </table>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><input id="__tabbed_17_2" name="__tabbed_17" type="radio" /><input id="__tabbed_17_3" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">appconfig_provider_options.py</label><label for="__tabbed_17_2">appconfig_provider_options_payload.json</label><label for="__tabbed_17_3">appconfig_provider_options_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:3"><input checked="checked" id="appconfig_provider_optionspy" name="__tabbed_17" type="radio" /><input id="appconfig_provider_options_payloadjson" name="__tabbed_17" type="radio" /><input id="appconfig_provider_options_featuresjson" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="appconfig_provider_optionspy">appconfig_provider_options.py</label><label for="appconfig_provider_options_payloadjson">appconfig_provider_options_payload.json</label><label for="appconfig_provider_options_featuresjson">appconfig_provider_options_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4332,7 +4354,7 @@ of the same experiment.</p>
 <summary>Note</summary>
 <p>This is just one example of how you can create your own store provider. Before creating a custom store provider, carefully evaluate your requirements and consider factors such as performance, scalability, and ease of maintenance.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><input id="__tabbed_18_2" name="__tabbed_18" type="radio" /><input id="__tabbed_18_3" name="__tabbed_18" type="radio" /><input id="__tabbed_18_4" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">working_with_own_s3_store_provider.py</label><label for="__tabbed_18_2">custom_s3_store_provider.py</label><label for="__tabbed_18_3">working_with_own_s3_store_provider_payload.json</label><label for="__tabbed_18_4">working_with_own_s3_store_provider_features.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:4"><input checked="checked" id="working_with_own_s3_store_providerpy" name="__tabbed_18" type="radio" /><input id="custom_s3_store_providerpy" name="__tabbed_18" type="radio" /><input id="working_with_own_s3_store_provider_payloadjson" name="__tabbed_18" type="radio" /><input id="working_with_own_s3_store_provider_featuresjson" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="working_with_own_s3_store_providerpy">working_with_own_s3_store_provider.py</label><label for="custom_s3_store_providerpy">custom_s3_store_provider.py</label><label for="working_with_own_s3_store_provider_payloadjson">working_with_own_s3_store_provider_payload.json</label><label for="working_with_own_s3_store_provider_featuresjson">working_with_own_s3_store_provider_features.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4489,7 +4511,7 @@ of the same experiment.</p>
 <summary>Warning</summary>
 <p>This excerpt relies on <code>pytest</code> and <code>pytest-mock</code> dependencies.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">Testing your code</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="testing-your-code_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="testing-your-code_1">Testing your code</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4650,7 +4672,7 @@ of the same experiment.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2023-07-28
+    2024-02-13
   </span>
 
     
@@ -4668,6 +4690,8 @@ of the same experiment.</p>
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -4707,7 +4731,7 @@ of the same experiment.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

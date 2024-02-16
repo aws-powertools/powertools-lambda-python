@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -657,11 +661,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -760,11 +767,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1484,20 +1494,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1637,20 +1647,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2127,7 +2137,7 @@
 <div class="admonition note">
 <p class="admonition-title">You do not need any additional IAM permissions to use this utility, except for what each event source requires.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">SQS</label><label for="__tabbed_1_2">Kinesis Data Streams</label><label for="__tabbed_1_3">DynamoDB Streams</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="sqs" name="__tabbed_1" type="radio" /><input id="kinesis-data-streams" name="__tabbed_1" type="radio" /><input id="dynamodb-streams" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="sqs">SQS</label><label for="kinesis-data-streams">Kinesis Data Streams</label><label for="dynamodb-streams">DynamoDB Streams</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">template.yaml</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2477,7 +2487,7 @@
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><input id="__tabbed_2_4" name="__tabbed_2" type="radio" /><input id="__tabbed_2_5" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Recommended</label><label for="__tabbed_2_2">As a context manager</label><label for="__tabbed_2_3">As a decorator (legacy)</label><label for="__tabbed_2_4">Sample response</label><label for="__tabbed_2_5">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:5"><input checked="checked" id="recommended" name="__tabbed_2" type="radio" /><input id="as-a-context-manager" name="__tabbed_2" type="radio" /><input id="as-a-decorator-legacy" name="__tabbed_2" type="radio" /><input id="sample-response" name="__tabbed_2" type="radio" /><input id="sample-event" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="recommended">Recommended</label><label for="as-a-context-manager">As a context manager</label><label for="as-a-decorator-legacy">As a decorator (legacy)</label><label for="sample-response">Sample response</label><label for="sample-event">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2760,7 +2770,7 @@
 <h4 id="fifo-queues">FIFO queues<a class="headerlink" href="#fifo-queues" title="Permanent link">&para;</a></h4>
 <p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" rel="nofollow" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
 This helps preserve the ordering of messages in your queue.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Recommended</label><label for="__tabbed_3_2">As a context manager</label><label for="__tabbed_3_3">As a decorator (legacy)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="recommended_1" name="__tabbed_3" type="radio" /><input id="as-a-context-manager_1" name="__tabbed_3" type="radio" /><input id="as-a-decorator-legacy_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="recommended_1">Recommended</label><label for="as-a-context-manager_1">As a context manager</label><label for="as-a-decorator-legacy_1">As a decorator (legacy)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2941,7 +2951,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:5"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><input id="__tabbed_4_4" name="__tabbed_4" type="radio" /><input id="__tabbed_4_5" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Recommended</label><label for="__tabbed_4_2">As a context manager</label><label for="__tabbed_4_3">As a decorator (legacy)</label><label for="__tabbed_4_4">Sample response</label><label for="__tabbed_4_5">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:5"><input checked="checked" id="recommended_2" name="__tabbed_4" type="radio" /><input id="as-a-context-manager_2" name="__tabbed_4" type="radio" /><input id="as-a-decorator-legacy_2" name="__tabbed_4" type="radio" /><input id="sample-response_1" name="__tabbed_4" type="radio" /><input id="sample-event_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="recommended_2">Recommended</label><label for="as-a-context-manager_2">As a context manager</label><label for="as-a-decorator-legacy_2">As a decorator (legacy)</label><label for="sample-response_1">Sample response</label><label for="sample-event_1">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3221,7 +3231,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <div class="admonition info">
 <p class="admonition-title">This code example uses Tracer and Logger for completion.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:5"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><input id="__tabbed_5_4" name="__tabbed_5" type="radio" /><input id="__tabbed_5_5" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Recommended</label><label for="__tabbed_5_2">As a context manager</label><label for="__tabbed_5_3">As a decorator (legacy)</label><label for="__tabbed_5_4">Sample response</label><label for="__tabbed_5_5">Sample event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:5"><input checked="checked" id="recommended_3" name="__tabbed_5" type="radio" /><input id="as-a-context-manager_3" name="__tabbed_5" type="radio" /><input id="as-a-decorator-legacy_3" name="__tabbed_5" type="radio" /><input id="sample-response_2" name="__tabbed_5" type="radio" /><input id="sample-event_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="recommended_3">Recommended</label><label for="as-a-context-manager_3">As a context manager</label><label for="as-a-decorator-legacy_3">As a decorator (legacy)</label><label for="sample-response_2">Sample response</label><label for="sample-event_2">Sample event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3551,7 +3561,7 @@ This helps preserve the ordering of messages in your queue.</p>
 </div>
 <h3 id="error-handling">Error handling<a class="headerlink" href="#error-handling" title="Permanent link">&para;</a></h3>
 <p>By default, we catch any exception raised by your record handler function. This allows us to <strong>(1)</strong> continue processing the batch, <strong>(2)</strong> collect each batch item that failed processing, and <strong>(3)</strong> return the appropriate  response correctly without failing your Lambda function execution.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Sample error handling with custom exception</label><label for="__tabbed_6_2">Sample response</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="sample-error-handling-with-custom-exception" name="__tabbed_6" type="radio" /><input id="sample-response_3" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="sample-error-handling-with-custom-exception">Sample error handling with custom exception</label><label for="sample-response_3">Sample response</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3831,7 +3841,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="pydantic-integration">Pydantic integration<a class="headerlink" href="#pydantic-integration" title="Permanent link">&para;</a></h3>
 <p>You can bring your own Pydantic models via <strong><code>model</code></strong> parameter when inheriting from <strong><code>SqsRecordModel</code></strong>, <strong><code>KinesisDataStreamRecord</code></strong>, or <strong><code>DynamoDBStreamRecordModel</code></strong></p>
 <p>Inheritance is importance because we need to access message IDs and sequence numbers from these records in the event of failure. Mypy is fully integrated with this utility, so it should identify whether you're passing the incorrect Model.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:6"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><input id="__tabbed_7_3" name="__tabbed_7" type="radio" /><input id="__tabbed_7_4" name="__tabbed_7" type="radio" /><input id="__tabbed_7_5" name="__tabbed_7" type="radio" /><input id="__tabbed_7_6" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">SQS</label><label for="__tabbed_7_2">SQS - Sample Event </label><label for="__tabbed_7_3">Kinesis Data Streams</label><label for="__tabbed_7_4">Kinesis - Sample Event </label><label for="__tabbed_7_5">DynamoDB Streams</label><label for="__tabbed_7_6">DynamoDB - Sample Event </label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:6"><input checked="checked" id="sqs_1" name="__tabbed_7" type="radio" /><input id="sqs---sample-event" name="__tabbed_7" type="radio" /><input id="kinesis-data-streams_1" name="__tabbed_7" type="radio" /><input id="kinesis---sample-event" name="__tabbed_7" type="radio" /><input id="dynamodb-streams_1" name="__tabbed_7" type="radio" /><input id="dynamodb---sample-event" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="sqs_1">SQS</label><label for="sqs---sample-event">SQS - Sample Event </label><label for="kinesis-data-streams_1">Kinesis Data Streams</label><label for="kinesis---sample-event">Kinesis - Sample Event </label><label for="dynamodb-streams_1">DynamoDB Streams</label><label for="dynamodb---sample-event">DynamoDB - Sample Event </label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4370,7 +4380,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <div class="admonition note">
 <p class="admonition-title">If a Pydantic model fails validation early, we serialize its failure record as Event Source Data Class to be able to collect message ID/sequence numbers etc.</p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Accessing raw processed messages</label><label for="__tabbed_8_2">Sample processed messages</label><label for="__tabbed_8_3">Sample processed messages (Pydantic)</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="accessing-raw-processed-messages" name="__tabbed_8" type="radio" /><input id="sample-processed-messages" name="__tabbed_8" type="radio" /><input id="sample-processed-messages-pydantic" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="accessing-raw-processed-messages">Accessing raw processed messages</label><label for="sample-processed-messages">Sample processed messages</label><label for="sample-processed-messages-pydantic">Sample processed messages (Pydantic)</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4532,7 +4542,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <h3 id="accessing-lambda-context">Accessing Lambda Context<a class="headerlink" href="#accessing-lambda-context" title="Permanent link">&para;</a></h3>
 <p>Within your <code>record_handler</code> function, you might need access to the Lambda context to determine how much time you have left before your function times out.</p>
 <p>We can automatically inject the <a href="https://docs.aws.amazon.com/lambda/latest/dg/python-context.html" rel="nofollow" target="_blank">Lambda context</a> into your <code>record_handler</code> if your function signature has a parameter named <code>lambda_context</code>. When using a context manager, you also need to pass the Lambda context object like in the example below.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><input id="__tabbed_9_3" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Recommended</label><label for="__tabbed_9_2">As a decorator (legacy)</label><label for="__tabbed_9_3">As a context manager</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:3"><input checked="checked" id="recommended_4" name="__tabbed_9" type="radio" /><input id="as-a-decorator-legacy_4" name="__tabbed_9" type="radio" /><input id="as-a-context-manager_4" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="recommended_4">Recommended</label><label for="as-a-decorator-legacy_4">As a decorator (legacy)</label><label for="as-a-context-manager_4">As a context manager</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5053,7 +5063,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <p>As there is no external calls, you can unit test your code with <code>BatchProcessor</code> quite easily.</p>
 <p><strong>Example</strong>:</p>
 <p>Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">getting_started_with_test.py</label><label for="__tabbed_10_2">getting_started_with_test_app.py</label><label for="__tabbed_10_3">Sample SQS event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="getting_started_with_testpy" name="__tabbed_10" type="radio" /><input id="getting_started_with_test_apppy" name="__tabbed_10" type="radio" /><input id="sample-sqs-event" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="getting_started_with_testpy">getting_started_with_test.py</label><label for="getting_started_with_test_apppy">getting_started_with_test_app.py</label><label for="sample-sqs-event">Sample SQS event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5348,6 +5358,8 @@ This helps preserve the ordering of messages in your queue.</p>
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -5387,7 +5399,7 @@ This helps preserve the ordering of messages in your queue.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

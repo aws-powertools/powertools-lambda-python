@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -659,11 +663,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" checked>
@@ -762,11 +769,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1171,20 +1181,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1324,20 +1334,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1788,7 +1798,7 @@
 <span class="w">    </span><span class="nt">Layers</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Find the latest Layer version in the official documentation</span>
 <span class="w">      </span><span class="c1"># https://docs.powertools.aws.dev/lambda/python/latest/#lambda-layer</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62</span>
 
 <span class="nt">Resources</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">CaptureLambdaHandlerExample</span><span class="p">:</span>
@@ -1808,7 +1818,7 @@
 <summary>Tip</summary>
 <p>You can initialize Metrics in any other module too. It'll keep track of your aggregate metrics in memory to optimize costs (one blob instead of multiples).</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">add_metrics.py</label><label for="__tabbed_1_2">add_dimension.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="add_metricspy" name="__tabbed_1" type="radio" /><input id="add_dimensionpy" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="add_metricspy">add_metrics.py</label><label for="add_dimensionpy">add_dimension.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1882,7 +1892,7 @@
 <summary>When is it useful?</summary>
 <p>High-resolution metrics are data with a granularity of one second and are very useful in several situations such as telemetry, time series, real-time incident management, and others.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">add_high_resolution_metrics.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="add_high_resolution_metricspy" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="add_high_resolution_metricspy">add_high_resolution_metrics.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1914,7 +1924,7 @@
 </details>
 <h3 id="adding-multi-value-metrics">Adding multi-value metrics<a class="headerlink" href="#adding-multi-value-metrics" title="Permanent link">&para;</a></h3>
 <p>You can call <code>add_metric()</code> with the same metric name multiple times. The values will be grouped together in a list.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">add_multi_value_metrics.py</label><label for="__tabbed_3_2">add_multi_value_metrics_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="add_multi_value_metricspy" name="__tabbed_3" type="radio" /><input id="add_multi_value_metrics_outputjson" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="add_multi_value_metricspy">add_multi_value_metrics.py</label><label for="add_multi_value_metrics_outputjson">add_multi_value_metrics_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2011,7 +2021,7 @@
 <h3 id="adding-default-dimensions">Adding default dimensions<a class="headerlink" href="#adding-default-dimensions" title="Permanent link">&para;</a></h3>
 <p>You can use <code>set_default_dimensions</code> method, or <code>default_dimensions</code> parameter in <code>log_metrics</code> decorator, to persist dimensions across Lambda invocations.</p>
 <p>If you'd like to remove them at some point, you can use <code>clear_default_dimensions</code> method.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">set_default_dimensions.py</label><label for="__tabbed_4_2">set_default_dimensions_log_metrics.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="set_default_dimensionspy" name="__tabbed_4" type="radio" /><input id="set_default_dimensions_log_metricspy" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="set_default_dimensionspy">set_default_dimensions.py</label><label for="set_default_dimensions_log_metricspy">set_default_dimensions_log_metrics.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2084,7 +2094,7 @@
 <h3 id="flushing-metrics">Flushing metrics<a class="headerlink" href="#flushing-metrics" title="Permanent link">&para;</a></h3>
 <p>As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the <code>log_metrics</code> decorator.</p>
 <p>This decorator also <strong>validates</strong>, <strong>serializes</strong>, and <strong>flushes</strong> all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">add_metrics.py</label><label for="__tabbed_5_2">log_metrics_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="add_metricspy_1" name="__tabbed_5" type="radio" /><input id="log_metrics_outputjson" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="add_metricspy_1">add_metrics.py</label><label for="log_metrics_outputjson">log_metrics_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2199,7 +2209,7 @@
 </details>
 <h3 id="capturing-cold-start-metric">Capturing cold start metric<a class="headerlink" href="#capturing-cold-start-metric" title="Permanent link">&para;</a></h3>
 <p>You can optionally capture cold start metrics with <code>log_metrics</code> decorator via <code>capture_cold_start_metric</code> param.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">capture_cold_start_metric.py</label><label for="__tabbed_6_2">capture_cold_start_metric_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="capture_cold_start_metricpy" name="__tabbed_6" type="radio" /><input id="capture_cold_start_metric_outputjson" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="capture_cold_start_metricpy">capture_cold_start_metric.py</label><label for="capture_cold_start_metric_outputjson">capture_cold_start_metric_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2317,7 +2327,7 @@
 <summary>Info</summary>
 <p><strong>This will not be available during metrics visualization</strong> - Use <strong>dimensions</strong> for this purpose</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">add_metadata.py</label><label for="__tabbed_7_2">add_metadata_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="add_metadatapy" name="__tabbed_7" type="radio" /><input id="add_metadata_outputjson" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="add_metadatapy">add_metadata.py</label><label for="add_metadata_outputjson">add_metadata_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2410,7 +2420,7 @@
 <p>Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing" target="_blank">pay for unique metric</a>. Keep the following formula in mind:</p>
 <p><strong>unique metric = (metric_name + dimension_name + dimension_value)</strong></p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">single_metric.py</label><label for="__tabbed_8_2">single_metric_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="single_metricpy" name="__tabbed_8" type="radio" /><input id="single_metric_outputjson" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="single_metricpy">single_metric.py</label><label for="single_metric_outputjson">single_metric_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2497,7 +2507,7 @@
 </div>
 </div>
 <p>By default it will skip all previously defined dimensions including default dimensions. Use <code>default_dimensions</code> keyword argument if you want to reuse default dimensions or specify custom dimensions from a dictionary.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">single_metric_default_dimensions_inherit.py</label><label for="__tabbed_9_2">single_metric_default_dimensions.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="single_metric_default_dimensions_inheritpy" name="__tabbed_9" type="radio" /><input id="single_metric_default_dimensionspy" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="single_metric_default_dimensions_inheritpy">single_metric_default_dimensions_inherit.py</label><label for="single_metric_default_dimensionspy">single_metric_default_dimensions.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2783,7 +2793,7 @@
 </code></pre></div></td></tr></table></div>
 <h3 id="functional-testing">Functional testing<a class="headerlink" href="#functional-testing" title="Permanent link">&para;</a></h3>
 <p>You can read standard output and assert whether metrics have been flushed. Here's an example using <code>pytest</code> with <code>capsys</code> built-in fixture:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><input id="__tabbed_10_3" name="__tabbed_10" type="radio" /><input id="__tabbed_10_4" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">assert_single_emf_blob.py</label><label for="__tabbed_10_2">add_metrics.py</label><label for="__tabbed_10_3">assert_multiple_emf_blobs.py</label><label for="__tabbed_10_4">assert_multiple_emf_blobs_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="assert_single_emf_blobpy" name="__tabbed_10" type="radio" /><input id="add_metricspy_2" name="__tabbed_10" type="radio" /><input id="assert_multiple_emf_blobspy" name="__tabbed_10" type="radio" /><input id="assert_multiple_emf_blobs_modulepy" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="assert_single_emf_blobpy">assert_single_emf_blob.py</label><label for="add_metricspy_2">add_metrics.py</label><label for="assert_multiple_emf_blobspy">assert_multiple_emf_blobs.py</label><label for="assert_multiple_emf_blobs_modulepy">assert_multiple_emf_blobs_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2976,6 +2986,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -3015,7 +3027,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

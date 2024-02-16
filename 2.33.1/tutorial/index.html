@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -370,14 +368,14 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
@@ -396,7 +394,7 @@
             </a>
             
               
-              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="">
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
                 <span class="md-nav__icon md-icon"></span>
               </label>
             
@@ -561,20 +559,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" >
         
           
-          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -653,11 +651,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -756,11 +757,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1435,20 +1439,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1588,20 +1592,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2002,7 +2006,7 @@
 </ul>
 <h3 id="code-example">Code example<a class="headerlink" href="#code-example" title="Permanent link">&para;</a></h3>
 <p>Let's configure our base application to look like the following code snippet.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">app.py</label><label for="__tabbed_1_2">template.yaml</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="apppy" name="__tabbed_1" type="radio" /><input id="templateyaml" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="apppy">app.py</label><label for="templateyaml">template.yaml</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2156,7 +2160,7 @@ Successfully<span class="w"> </span>created/updated<span class="w"> </span>stack
 <h3 id="adding-a-new-route">Adding a new route<a class="headerlink" href="#adding-a-new-route" title="Permanent link">&para;</a></h3>
 <p>Let's expand our application with a new route - <code>/hello/{name}</code>. It will accept an username as a path input and return it in the response.</p>
 <p>For this to work, we could create a new Lambda function to handle incoming requests for <code>/hello/{name}</code> - It'd look like this:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">hello_by_name.py</label><label for="__tabbed_2_2">template.yaml</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="hello_by_namepy" name="__tabbed_2" type="radio" /><input id="templateyaml_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="hello_by_namepy">hello_by_name.py</label><label for="templateyaml_1">template.yaml</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2272,7 +2276,7 @@ Successfully<span class="w"> </span>created/updated<span class="w"> </span>stack
 <p>If you want a more detailed explanation of these two approaches, head over to the <a href="../core/event_handler/api_gateway/#considerations" target="_blank">trade-offs on each approach</a> later.</p>
 </details>
 <p>A first attempt at the routing logic might look similar to the following code snippet.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">app.py</label><label for="__tabbed_3_2">template.yaml</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="apppy_1" name="__tabbed_3" type="radio" /><input id="templateyaml_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="apppy_1">app.py</label><label for="templateyaml_2">template.yaml</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2425,7 +2429,7 @@ Successfully<span class="w"> </span>created/updated<span class="w"> </span>stack
 <p>This is available for both <a href="../core/event_handler/api_gateway/" target="_blank">REST API (API Gateway, ALB)</a> and <a href="../core/event_handler/appsync/" target="_blank">GraphQL API (AppSync)</a>.</p>
 </details>
 <p>Let's include Powertools for AWS Lambda (Python) as a dependency in <code>requirement.txt</code>, and use Event Handler to refactor our previous example.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">app.py</label><label for="__tabbed_4_2">requirements.txt</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="apppy_2" name="__tabbed_4" type="radio" /><input id="requirementstxt" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="apppy_2">app.py</label><label for="requirementstxt">requirements.txt</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2487,7 +2491,7 @@ Successfully<span class="w"> </span>created/updated<span class="w"> </span>stack
 <p>This helps not only in searching, but produces consistent logs containing enough context and data to ask arbitrary questions on the status of your system. We can take advantage of CloudWatch Logs and Cloudwatch Insight for this purpose.</p>
 <h3 id="json-as-output">JSON as output<a class="headerlink" href="#json-as-output" title="Permanent link">&para;</a></h3>
 <p>The first option could be to use the standard Python Logger, and use a specialized library like <code>pythonjsonlogger</code> to create a JSON Formatter.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">app.py</label><label for="__tabbed_5_2">requirements.txt</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="apppy_3" name="__tabbed_5" type="radio" /><input id="requirementstxt_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="apppy_3">app.py</label><label for="requirementstxt_1">requirements.txt</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2568,7 +2572,7 @@ python-json-logger
 <li><strong>L12</strong>: Sets the logging level set in the <code>POWERTOOLS_LOG_LEVEL</code> environment variable, or <code>INFO</code> as a sentinel value.</li>
 </ul>
 <p>After that, we use this logger in our application code to record the required information. We see logs structured as follows:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">JSON output</label><label for="__tabbed_6_2">Normal output</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="json-output" name="__tabbed_6" type="radio" /><input id="normal-output" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="json-output">JSON output</label><label for="normal-output">Normal output</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2684,7 +2688,7 @@ python-json-logger
 <!-- markdownlint-disable-next-line MD013 -->
 <p>From here, we could <a href="../core/logger/#append_keys-method" target="_blank">set specific keys</a> to add additional contextual information about a given operation, <a href="../core/logger/#logging-exceptions" target="_blank">log exceptions</a> to easily enumerate them later, <a href="../core/logger/#sampling-debug-logs" target="_blank">sample debug logs</a>, etc.</p>
 <p>By having structured logs like this, we can easily search and analyse them in <a href="https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AnalyzingLogData.html" target="_blank">CloudWatch Logs Insight</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">CloudWatch Logs Insight Example</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="cloudwatch-logs-insight-example" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="cloudwatch-logs-insight-example">CloudWatch Logs Insight Example</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
 </div>
@@ -2705,7 +2709,7 @@ python-json-logger
 <li>Instrument your application code.</li>
 </ol>
 <p>Let's explore how we can instrument our code with <a href="https://docs.aws.amazon.com/xray-sdk-for-python/latest/reference/index.html" target="_blank">AWS X-Ray SDK</a>, and then simplify it with <a href="../core/tracer/" target="_blank">Powertools for AWS Lambda (Python) Tracer</a> feature.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><input id="__tabbed_8_3" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">app.py</label><label for="__tabbed_8_2">template.yaml</label><label for="__tabbed_8_3">requirements.txt</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:3"><input checked="checked" id="apppy_4" name="__tabbed_8" type="radio" /><input id="templateyaml_3" name="__tabbed_8" type="radio" /><input id="requirementstxt_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="apppy_4">app.py</label><label for="templateyaml_3">template.yaml</label><label for="requirementstxt_2">requirements.txt</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3080,7 +3084,7 @@ aws-xray-sdk
 <p>You can <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-metrics-and-dimensions.html#api-gateway-metricdimensions" target="_blank">optionally enable detailed metrics</a> per each API route, stage, and method in API Gateway.</p>
 </details>
 <p>Let's expand our application with custom metrics using AWS SDK to see how it works, then let's upgrade it with Powertools for AWS Lambda (Python) :-)</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">app.py</label><label for="__tabbed_9_2">template.yaml</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="apppy_5" name="__tabbed_9" type="radio" /><input id="templateyaml_4" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="apppy_5">app.py</label><label for="templateyaml_4">template.yaml</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3475,7 +3479,7 @@ aws-xray-sdk
 </details>
 <details class="question" open="open">
 <summary>Have ideas for other tutorials?</summary>
-<p>You can open up a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=documentation&amp;template=documentation-improvements.md&amp;title=Tutorial%20Suggestion" target="_blank">documentation issue</a>, or via e-mail <a href="mailto:aws-lambda-powertools-feedback@amazon.com">aws-lambda-powertools-feedback@amazon.com</a>.</p>
+<p>You can open up a <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=documentation&amp;template=documentation-improvements.md&amp;title=Tutorial%20Suggestion" target="_blank">documentation issue</a>, or via e-mail <a href="mailto:aws-powertools-maintainers@amazon.com">aws-powertools-maintainers@amazon.com</a>.</p>
 </details>
 
 
@@ -3497,7 +3501,7 @@ aws-xray-sdk
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2023-12-14
+    2024-02-14
   </span>
 
     
@@ -3515,6 +3519,8 @@ aws-xray-sdk
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -3554,7 +3560,7 @@ aws-xray-sdk
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.8fd75fb4.min.js"></script>

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -657,11 +661,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -760,11 +767,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1307,20 +1317,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1460,20 +1470,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1748,7 +1758,7 @@
 <h3 id="validator-decorator">Validator decorator<a class="headerlink" href="#validator-decorator" title="Permanent link">&para;</a></h3>
 <p><strong>Validator</strong> decorator is typically used to validate either inbound or functions' response.</p>
 <p>It will fail fast with <code>SchemaValidationError</code> exception if event or response doesn't conform with given JSON Schema.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">getting_started_validator_decorator_function.py</label><label for="__tabbed_1_2">getting_started_validator_decorator_schema.py</label><label for="__tabbed_1_3">getting_started_validator_decorator_payload.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="getting_started_validator_decorator_functionpy" name="__tabbed_1" type="radio" /><input id="getting_started_validator_decorator_schemapy" name="__tabbed_1" type="radio" /><input id="getting_started_validator_decorator_payloadjson" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="getting_started_validator_decorator_functionpy">getting_started_validator_decorator_function.py</label><label for="getting_started_validator_decorator_schemapy">getting_started_validator_decorator_schema.py</label><label for="getting_started_validator_decorator_payloadjson">getting_started_validator_decorator_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -1983,7 +1993,7 @@
 <h3 id="validate-function">Validate function<a class="headerlink" href="#validate-function" title="Permanent link">&para;</a></h3>
 <p><strong>Validate</strong> standalone function is typically used within the Lambda handler, or any other methods that perform data validation.</p>
 <p>You can also gracefully handle schema validation errors by catching <code>SchemaValidationError</code> exception.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">getting_started_validator_standalone_function.py</label><label for="__tabbed_2_2">getting_started_validator_standalone_schema.py</label><label for="__tabbed_2_3">getting_started_validator_standalone_payload.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="getting_started_validator_standalone_functionpy" name="__tabbed_2" type="radio" /><input id="getting_started_validator_standalone_schemapy" name="__tabbed_2" type="radio" /><input id="getting_started_validator_standalone_payloadjson" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="getting_started_validator_standalone_functionpy">getting_started_validator_standalone_function.py</label><label for="getting_started_validator_standalone_schemapy">getting_started_validator_standalone_schema.py</label><label for="getting_started_validator_standalone_payloadjson">getting_started_validator_standalone_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2133,7 +2143,7 @@
 <p>You might want to validate only a portion of your event - This is what the <code>envelope</code> parameter is for.</p>
 <p>Envelopes are <a href="https://jmespath.org/tutorial.html" rel="nofollow" target="_blank">JMESPath expressions</a> to extract a portion of JSON you want before applying JSON Schema validation.</p>
 <p>Here is a sample custom EventBridge event, where we only validate what's inside the <code>detail</code> key:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">getting_started_validator_unwrapping_function.py</label><label for="__tabbed_3_2">getting_started_validator_unwrapping_schema.py</label><label for="__tabbed_3_3">getting_started_validator_unwrapping_payload.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="getting_started_validator_unwrapping_functionpy" name="__tabbed_3" type="radio" /><input id="getting_started_validator_unwrapping_schemapy" name="__tabbed_3" type="radio" /><input id="getting_started_validator_unwrapping_payloadjson" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="getting_started_validator_unwrapping_functionpy">getting_started_validator_unwrapping_function.py</label><label for="getting_started_validator_unwrapping_schemapy">getting_started_validator_unwrapping_schema.py</label><label for="getting_started_validator_unwrapping_payloadjson">getting_started_validator_unwrapping_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2378,7 +2388,7 @@
 <p>When combined, these features allow you to extract what you need before validating the actual payload.</p>
 <h3 id="built-in-envelopes">Built-in envelopes<a class="headerlink" href="#built-in-envelopes" title="Permanent link">&para;</a></h3>
 <p>We provide built-in envelopes to easily extract the payload from popular event sources.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">unwrapping_popular_event_source_function.py</label><label for="__tabbed_4_2">unwrapping_popular_event_source_schema.py</label><label for="__tabbed_4_3">unwrapping_popular_event_source_payload.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="unwrapping_popular_event_source_functionpy" name="__tabbed_4" type="radio" /><input id="unwrapping_popular_event_source_schemapy" name="__tabbed_4" type="radio" /><input id="unwrapping_popular_event_source_payloadjson" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="unwrapping_popular_event_source_functionpy">unwrapping_popular_event_source_function.py</label><label for="unwrapping_popular_event_source_schemapy">unwrapping_popular_event_source_schema.py</label><label for="unwrapping_popular_event_source_payloadjson">unwrapping_popular_event_source_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2585,7 +2595,7 @@
 <span class="p">}</span>
 </code></pre></div></td></tr></table></div>
 <p>For each format defined in a dictionary key, you must use a regex, or a function that returns a boolean to instruct the validator on how to proceed when encountering that type.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><input id="__tabbed_5_3" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">custom_format_function.py</label><label for="__tabbed_5_2">custom_format_schema.py</label><label for="__tabbed_5_3">custom_format_payload.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:3"><input checked="checked" id="custom_format_functionpy" name="__tabbed_5" type="radio" /><input id="custom_format_schemapy" name="__tabbed_5" type="radio" /><input id="custom_format_payloadjson" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="custom_format_functionpy">custom_format_function.py</label><label for="custom_format_schemapy">custom_format_schema.py</label><label for="custom_format_payloadjson">custom_format_payload.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2769,6 +2779,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -2808,7 +2820,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -657,11 +661,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -760,11 +767,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1457,20 +1467,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1610,20 +1620,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2085,7 +2095,7 @@
 </div>
 <p>Before you start, you will need a KMS symmetric key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.</p>
 <p><strong>NOTE</strong>. We recommend setting a minimum of 1024MB of memory <em>(CPU intensive)</em>, and separate Lambda functions for encrypt and decrypt. For more information, you can see the full reports of our <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597" target="_blank">load tests</a> and <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923" target="_blank">traces</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">AWS Serverless Application Model (SAM) example</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="aws-serverless-application-model-sam-example" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="aws-serverless-application-model-sam-example">AWS Serverless Application Model (SAM) example</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2232,7 +2242,7 @@
 </div>
 <h3 id="erasing-data">Erasing data<a class="headerlink" href="#erasing-data" title="Permanent link">&para;</a></h3>
 <p>Erasing will remove the original data and replace it with a <code>*****</code>. This means you cannot recover erased data, and the data type will change to <code>str</code> for all data unless the data to be erased is of an Iterable type (<code>list</code>, <code>tuple</code>, <code>set</code>), in which case the method will return a new object of the same type as the input data but with each element replaced by the string <code>*****</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><input id="__tabbed_2_3" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">getting_started_erase_data.py</label><label for="__tabbed_2_2">generic_data_input.json</label><label for="__tabbed_2_3">getting_started_erase_data_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="getting_started_erase_datapy" name="__tabbed_2" type="radio" /><input id="generic_data_inputjson" name="__tabbed_2" type="radio" /><input id="getting_started_erase_data_outputjson" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="getting_started_erase_datapy">getting_started_erase_data.py</label><label for="generic_data_inputjson">generic_data_input.json</label><label for="getting_started_erase_data_outputjson">getting_started_erase_data_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2358,7 +2368,7 @@
 </details>
 <p>To encrypt, you will need an <a href="#providers">encryption provider</a>. Here, we will use <code>AWSEncryptionSDKProvider</code>.</p>
 <p>Under the hood, we delegate a <a href="#encrypt-operation-with-encryption-sdk-kms">number of operations</a> to AWS Encryption SDK to authenticate, create a portable encryption message, and actual data encryption.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><input id="__tabbed_3_3" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">getting_started_encrypt_data.py</label><label for="__tabbed_3_2">generic_data_input.json</label><label for="__tabbed_3_3">encrypt_data_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="getting_started_encrypt_datapy" name="__tabbed_3" type="radio" /><input id="generic_data_inputjson_1" name="__tabbed_3" type="radio" /><input id="encrypt_data_outputjson" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="getting_started_encrypt_datapy">getting_started_encrypt_data.py</label><label for="generic_data_inputjson_1">generic_data_input.json</label><label for="encrypt_data_outputjson">encrypt_data_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2482,7 +2492,7 @@
 </details>
 <p>To decrypt, you will need an <a href="#providers">encryption provider</a>. Here, we will use <code>AWSEncryptionSDKProvider</code>.</p>
 <p>Under the hood, we delegate a <a href="#decrypt-operation-with-encryption-sdk-kms">number of operations</a> to AWS Encryption SDK to verify authentication, integrity, and actual ciphertext decryption.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">getting_started_decrypt_data.py</label><label for="__tabbed_4_2">getting_started_decrypt_data_input.json</label><label for="__tabbed_4_3">getting_started_decrypt_data_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="getting_started_decrypt_datapy" name="__tabbed_4" type="radio" /><input id="getting_started_decrypt_data_inputjson" name="__tabbed_4" type="radio" /><input id="getting_started_decrypt_data_outputjson" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="getting_started_decrypt_datapy">getting_started_decrypt_data.py</label><label for="getting_started_decrypt_data_inputjson">getting_started_decrypt_data_input.json</label><label for="getting_started_decrypt_data_outputjson">getting_started_decrypt_data_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p><strong>NOTE</strong>. Decryption only works with KMS Key ARN.</p>
@@ -2604,7 +2614,7 @@
 <li><strong>Use non-sensitive data only</strong>. When using KMS, encryption context is available as plaintext in AWS CloudTrail, unless you <a href="https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events" target="_blank">intentionally disabled KMS events</a>.</li>
 </ol>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">getting_started_encryption_context.py</label><label for="__tabbed_5_2">getting_started_decryption_context.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="getting_started_encryption_contextpy" name="__tabbed_5" type="radio" /><input id="getting_started_decryption_contextpy" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="getting_started_encryption_contextpy">getting_started_encryption_context.py</label><label for="getting_started_decryption_contextpy">getting_started_decryption_context.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2771,11 +2781,11 @@
 </tbody>
 </table>
 <p>Here are common scenarios to best visualize how to use <code>fields</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:8"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><input id="__tabbed_6_3" name="__tabbed_6" type="radio" /><input id="__tabbed_6_4" name="__tabbed_6" type="radio" /><input id="__tabbed_6_5" name="__tabbed_6" type="radio" /><input id="__tabbed_6_6" name="__tabbed_6" type="radio" /><input id="__tabbed_6_7" name="__tabbed_6" type="radio" /><input id="__tabbed_6_8" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Top keys only</label><label for="__tabbed_6_2">Nested key</label><label for="__tabbed_6_3">Multiple keys</label><label for="__tabbed_6_4">All key items</label><label for="__tabbed_6_5">Complex nested key</label><label for="__tabbed_6_6">All fields in a list</label><label for="__tabbed_6_7">Slicing a list</label><label for="__tabbed_6_8">Complex expressions</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:8"><input checked="checked" id="top-keys-only" name="__tabbed_6" type="radio" /><input id="nested-key" name="__tabbed_6" type="radio" /><input id="multiple-keys" name="__tabbed_6" type="radio" /><input id="all-key-items" name="__tabbed_6" type="radio" /><input id="complex-nested-key" name="__tabbed_6" type="radio" /><input id="all-fields-in-a-list" name="__tabbed_6" type="radio" /><input id="slicing-a-list" name="__tabbed_6" type="radio" /><input id="complex-expressions" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="top-keys-only">Top keys only</label><label for="nested-key">Nested key</label><label for="multiple-keys">Multiple keys</label><label for="all-key-items">All key items</label><label for="complex-nested-key">Complex nested key</label><label for="all-fields-in-a-list">All fields in a list</label><label for="slicing-a-list">Slicing a list</label><label for="complex-expressions">Complex expressions</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>You want to erase data in the <code>card_number</code> field.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Data</label><label for="__tabbed_7_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="data" name="__tabbed_7" type="radio" /><input id="result" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="data">Data</label><label for="result">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -2809,7 +2819,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data in the <code>postcode</code> field.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Data</label><label for="__tabbed_8_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="data_1" name="__tabbed_8" type="radio" /><input id="result_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="data_1">Data</label><label for="result_1">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -2855,7 +2865,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data in both <code>postcode</code> and <code>street</code> fields.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Data</label><label for="__tabbed_9_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="data_2" name="__tabbed_9" type="radio" /><input id="result_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="data_2">Data</label><label for="result_2">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -2905,7 +2915,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data under <code>address</code> field.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><input id="__tabbed_10_2" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">Data</label><label for="__tabbed_10_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="data_3" name="__tabbed_10" type="radio" /><input id="result_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="data_3">Data</label><label for="result_3">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -2975,7 +2985,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data under <code>name</code> field.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">Data</label><label for="__tabbed_11_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="data_4" name="__tabbed_11" type="radio" /><input id="result_4" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="data_4">Data</label><label for="result_4">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -3033,7 +3043,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data under <code>street</code> field located at the any index of the address list.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">Data</label><label for="__tabbed_12_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="data_5" name="__tabbed_12" type="radio" /><input id="result_5" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="data_5">Data</label><label for="result_5">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -3107,7 +3117,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data by slicing a list.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><input id="__tabbed_13_2" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">Data</label><label for="__tabbed_13_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="data_6" name="__tabbed_13" type="radio" /><input id="result_6" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="data_6">Data</label><label for="result_6">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -3197,7 +3207,7 @@
 </div>
 <div class="tabbed-block">
 <p>You want to erase data by finding for a field with conditional expression.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><input id="__tabbed_14_2" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">Data</label><label for="__tabbed_14_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="data_7" name="__tabbed_14" type="radio" /><input id="result_7" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="data_7">Data</label><label for="result_7">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <blockquote>
@@ -3294,7 +3304,7 @@
 <h4 id="json">JSON<a class="headerlink" href="#json" title="Permanent link">&para;</a></h4>
 <p>We also support data in JSON string format as input. We automatically deserialize it, then handle each field operation as expected.</p>
 <p>Note that the return will be a deserialized JSON and your desired fields updated.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><input id="__tabbed_15_2" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">Data</label><label for="__tabbed_15_2">Result</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="data_8" name="__tabbed_15" type="radio" /><input id="result_8" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="data_8">Data</label><label for="result_8">Result</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Expression: <code>data_masker.erase(data, fields=["card_number", "address.postcode"])</code></p>
@@ -3766,7 +3776,7 @@
 <h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
 <h3 id="testing-erase-operation">Testing erase operation<a class="headerlink" href="#testing-erase-operation" title="Permanent link">&para;</a></h3>
 <p>Testing your code with a simple erase operation</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">test_lambda_mask.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="test_lambda_maskpy" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="test_lambda_maskpy">test_lambda_mask.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
 </div>
@@ -3831,7 +3841,7 @@
     <span class="c1"># THEN: Assert that the result matches the expected output</span>
     <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;testkey&quot;</span><span class="p">:</span> <span class="s2">&quot;*****&quot;</span><span class="p">}</span>
 </code></pre></div></td></tr></table></div>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">lambda_mask.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="lambda_maskpy" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="lambda_maskpy">lambda_mask.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block"></div>
 </div>
@@ -3902,6 +3912,8 @@
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -3941,7 +3953,7 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>

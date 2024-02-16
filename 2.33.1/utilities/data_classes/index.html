@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.8">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.9">
     
     
       
@@ -89,8 +89,6 @@
           <div class="md-banner__inner md-grid md-typeset">
             
             
-<p>🚨 As of February 8, 2024, AWS Lambda will no longer allow Python 3.7 functions to be updated. Inline with this, Powertools releases will stop supporting it.</p>
-<p>Please ensure you update your functions to Python 3.8 or later to continue to use the latest version of Powertools for AWS Lambda (Python).</p>
 
           </div>
           
@@ -372,14 +370,17 @@
       
     
     
-    
-    
+      
+        
+        
       
       
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
@@ -565,14 +566,17 @@
       
     
     
-    
-    
       
       
+        
+          
+          
+        
+      
+    
     
     <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
@@ -657,11 +661,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
@@ -760,11 +767,14 @@
       
     
     
+      
+      
+        
+      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
@@ -1622,20 +1632,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -1775,20 +1785,20 @@
       
     
     
-    
-    
       
-      
-    
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
         
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
         
           
-          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -2364,7 +2374,7 @@ Lambda function.</p>
 by using the <code>event_source</code> decorator.</p>
 <p>For example, if your Lambda function is being triggered by an API Gateway proxy integration, you can use the
 <code>APIGatewayProxyEvent</code> class.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="apppy" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="apppy">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2383,7 +2393,7 @@ by using the <code>event_source</code> decorator.</p>
 </div>
 </div>
 <p>Same example as above, but using the <code>event_source</code> decorator</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="apppy_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="apppy_1">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2402,7 +2412,7 @@ by using the <code>event_source</code> decorator.</p>
 </div>
 </div>
 <p>Log Data Event for Troubleshooting</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="apppy_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="apppy_2">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2570,7 +2580,7 @@ documentation inherently (via autocompletion, types and docstrings).</p>
 <p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" target="_blank">Active MQ payloads</a>, also see
 the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-as-an-event-source-for-aws-lambda/" target="_blank">AWS blog post</a>
 for more details.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:1"><input checked="checked" id="apppy_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="apppy_3">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2610,7 +2620,7 @@ for more details.</p>
 </blockquote>
 <p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/apigateway-use-lambda-authorizer.html" target="_blank">API Gateway Rest API Lambda Authorizer payload</a>.</p>
 <p>Use <strong><code>APIGatewayAuthorizerRequestEvent</code></strong> for type <code>REQUEST</code> and <strong><code>APIGatewayAuthorizerTokenEvent</code></strong> for type <code>TOKEN</code>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">app_type_request.py</label><label for="__tabbed_5_2">app_type_token.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="app_type_requestpy" name="__tabbed_5" type="radio" /><input id="app_type_tokenpy" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="app_type_requestpy">app_type_request.py</label><label for="app_type_tokenpy">app_type_token.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This example uses the <code>APIGatewayAuthorizerResponse</code> to decline a given request if the user is not found.</p>
@@ -2776,7 +2786,7 @@ for more details.</p>
 </blockquote>
 <p>It is used for <a href="https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-lambda-authorizer.html" target="_blank">API Gateway HTTP API Lambda Authorizer payload version 2</a>.
 See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambda-authorizers-for-amazon-api-gateway-http-apis/" target="_blank">this blog post</a> for more details.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:1"><input checked="checked" id="apppy_4" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="apppy_4">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>This example looks up user details via <code>x-token</code> header. It uses <code>APIGatewayAuthorizerResponseV2</code> to return a deny policy when user is not found or authorized.</p>
@@ -2833,7 +2843,7 @@ See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambd
 </div>
 <h3 id="api-gateway-proxy">API Gateway Proxy<a class="headerlink" href="#api-gateway-proxy" title="Permanent link">&para;</a></h3>
 <p>It is used for either API Gateway REST API or HTTP API using v1 proxy event.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:1"><input checked="checked" id="apppy_5" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="apppy_5">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2859,7 +2869,7 @@ See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambd
 </div>
 <h3 id="api-gateway-proxy-v2">API Gateway Proxy V2<a class="headerlink" href="#api-gateway-proxy-v2" title="Permanent link">&para;</a></h3>
 <p>It is used for HTTP API using v2 proxy event.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:1"><input checked="checked" id="apppy_6" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="apppy_6">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2879,7 +2889,7 @@ See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambd
 </div>
 <h3 id="application-load-balancer">Application Load Balancer<a class="headerlink" href="#application-load-balancer" title="Permanent link">&para;</a></h3>
 <p>Is it used for Application load balancer event.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:1"><input checked="checked" id="apppy_7" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="apppy_7">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2905,7 +2915,7 @@ See also <a href="https://aws.amazon.com/blogs/compute/introducing-iam-and-lambd
 See blog post <a href="https://aws.amazon.com/blogs/mobile/appsync-lambda-auth/" target="_blank">Introducing Lambda authorization for AWS AppSync GraphQL APIs</a>
 or read the Amplify documentation on using <a href="https://docs.amplify.aws/lib/graphqlapi/authz/q/platform/js#aws-lambda" target="_blank">AWS Lambda for authorization</a> with AppSync.</p>
 <p>In this example extract the <code>requestId</code> as the <code>correlation_id</code> for logging, used <code>@event_source</code> decorator and builds the AppSync authorizer using the <code>AppSyncAuthorizerResponse</code> helper.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="__tabbed_10_1" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="__tabbed_10_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:1"><input checked="checked" id="apppy_8" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="apppy_8">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2984,7 +2994,7 @@ or read the Amplify documentation on using <a href="https://docs.amplify.aws/lib
 <p>Used when building Lambda GraphQL Resolvers with <a href="https://docs.amplify.aws/cli/graphql-transformer/function" target="_blank">Amplify GraphQL Transform Library</a> (<code>@function</code>),
 and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target="_blank">AppSync Direct Lambda Resolvers</a>.</p>
 <p>In this example, we also use the new Logger <code>correlation_id</code> and built-in <code>correlation_paths</code> to extract, if available, X-Ray Trace ID in AppSync request headers:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="__tabbed_11_1" name="__tabbed_11" type="radio" /><input id="__tabbed_11_2" name="__tabbed_11" type="radio" /><input id="__tabbed_11_3" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="__tabbed_11_1">app.py</label><label for="__tabbed_11_2">Example AppSync Event</label><label for="__tabbed_11_3">Example CloudWatch Log</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="apppy_9" name="__tabbed_11" type="radio" /><input id="example-appsync-event" name="__tabbed_11" type="radio" /><input id="example-cloudwatch-log" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="apppy_9">app.py</label><label for="example-appsync-event">Example AppSync Event</label><label for="example-cloudwatch-log">Example CloudWatch Log</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3143,7 +3153,7 @@ and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target=
 </div>
 </div>
 <h3 id="aws-config-rule">AWS Config Rule<a class="headerlink" href="#aws-config-rule" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="__tabbed_12_1" name="__tabbed_12" type="radio" /><input id="__tabbed_12_2" name="__tabbed_12" type="radio" /><input id="__tabbed_12_3" name="__tabbed_12" type="radio" /><input id="__tabbed_12_4" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="__tabbed_12_1">aws_config_rule.py</label><label for="__tabbed_12_2">Event - ItemChanged</label><label for="__tabbed_12_3">Event - Oversized</label><label for="__tabbed_12_4">Event - ScheduledNotification</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="aws_config_rulepy" name="__tabbed_12" type="radio" /><input id="event---itemchanged" name="__tabbed_12" type="radio" /><input id="event---oversized" name="__tabbed_12" type="radio" /><input id="event---schedulednotification" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="aws_config_rulepy">aws_config_rule.py</label><label for="event---itemchanged">Event - ItemChanged</label><label for="event---oversized">Event - Oversized</label><label for="event---schedulednotification">Event - ScheduledNotification</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3266,7 +3276,7 @@ and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target=
 </div>
 </div>
 <h3 id="bedrock-agent">Bedrock Agent<a class="headerlink" href="#bedrock-agent" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="__tabbed_13_1" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="__tabbed_13_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:1"><input checked="checked" id="apppy_10" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="apppy_10">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3323,7 +3333,7 @@ and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target=
 </div>
 </div>
 <h3 id="cloudwatch-dashboard-custom-widget">CloudWatch Dashboard Custom Widget<a class="headerlink" href="#cloudwatch-dashboard-custom-widget" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="__tabbed_14_1" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="__tabbed_14_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:1"><input checked="checked" id="apppy_11" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="apppy_11">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3386,7 +3396,7 @@ and <a href="https://aws.amazon.com/blogs/mobile/appsync-direct-lambda/" target=
 <h3 id="cloudwatch-logs">CloudWatch Logs<a class="headerlink" href="#cloudwatch-logs" title="Permanent link">&para;</a></h3>
 <p>CloudWatch Logs events by default are compressed and base64 encoded. You can use the helper function provided to decode,
 decompress and parse json data from the event.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="__tabbed_15_1" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="__tabbed_15_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:1"><input checked="checked" id="apppy_12" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="apppy_12">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -3412,7 +3422,7 @@ decompress and parse json data from the event.</p>
 </div>
 <h4 id="kinesis-integration">Kinesis integration<a class="headerlink" href="#kinesis-integration" title="Permanent link">&para;</a></h4>
 <p><a href="https://aws.amazon.com/premiumsupport/knowledge-center/streaming-cloudwatch-logs/" target="_blank">When streaming CloudWatch Logs to a Kinesis Data Stream</a> (cross-account or not), you can use <code>extract_cloudwatch_logs_from_event</code> to decode, decompress and extract logs as <code>CloudWatchLogsDecodedData</code> to ease log processing.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="__tabbed_16_1" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="__tabbed_16_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="apppy_13" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="apppy_13">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3449,7 +3459,7 @@ decompress and parse json data from the event.</p>
 </div>
 </div>
 <p>Alternatively, you can use <code>extract_cloudwatch_logs_from_record</code> to seamless integrate with the <a href="../batch/" target="_blank">Batch utility</a> for more robust log processing.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="__tabbed_17_1" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="__tabbed_17_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="apppy_14" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="apppy_14">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3489,7 +3499,7 @@ decompress and parse json data from the event.</p>
 </div>
 <h3 id="codepipeline-job">CodePipeline Job<a class="headerlink" href="#codepipeline-job" title="Permanent link">&para;</a></h3>
 <p>Data classes and utility functions to help create continuous delivery pipelines tasks with AWS Lambda</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="__tabbed_18_1" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="__tabbed_18_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:1"><input checked="checked" id="apppy_15" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="apppy_15">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3633,7 +3643,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 </tbody>
 </table>
 <h4 id="post-confirmation-example">Post Confirmation Example<a class="headerlink" href="#post-confirmation-example" title="Permanent link">&para;</a></h4>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="__tabbed_19_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="__tabbed_19_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:1"><input checked="checked" id="apppy_16" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="apppy_16">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -3659,7 +3669,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 <p>In this example we are modifying the wrapped dict response fields, so we need to return the json serializable wrapped event in <code>event.raw_event</code>.</p>
 </details>
 <p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-define-auth-challenge.html" target="_blank">Define Auth Challenge Lambda Trigger</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="20:4"><input checked="checked" id="__tabbed_20_1" name="__tabbed_20" type="radio" /><input id="__tabbed_20_2" name="__tabbed_20" type="radio" /><input id="__tabbed_20_3" name="__tabbed_20" type="radio" /><input id="__tabbed_20_4" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="__tabbed_20_1">app.py</label><label for="__tabbed_20_2">SPR_A response</label><label for="__tabbed_20_3">PASSWORD_VERIFIER success response</label><label for="__tabbed_20_4">CUSTOM_CHALLENGE success response</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="20:4"><input checked="checked" id="apppy_17" name="__tabbed_20" type="radio" /><input id="spr_a-response" name="__tabbed_20" type="radio" /><input id="password_verifier-success-response" name="__tabbed_20" type="radio" /><input id="custom_challenge-success-response" name="__tabbed_20" type="radio" /><div class="tabbed-labels"><label for="apppy_17">app.py</label><label for="spr_a-response">SPR_A response</label><label for="password_verifier-success-response">PASSWORD_VERIFIER success response</label><label for="custom_challenge-success-response">CUSTOM_CHALLENGE success response</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3937,7 +3947,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 </div>
 <h4 id="create-auth-challenge-example">Create Auth Challenge Example<a class="headerlink" href="#create-auth-challenge-example" title="Permanent link">&para;</a></h4>
 <p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-create-auth-challenge.html" target="_blank">Create Auth Challenge Lambda Trigger</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="21:1"><input checked="checked" id="__tabbed_21_1" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="__tabbed_21_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="21:1"><input checked="checked" id="apppy_18" name="__tabbed_21" type="radio" /><div class="tabbed-labels"><label for="apppy_18">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -3965,7 +3975,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 </div>
 <h4 id="verify-auth-challenge-response-example">Verify Auth Challenge Response Example<a class="headerlink" href="#verify-auth-challenge-response-example" title="Permanent link">&para;</a></h4>
 <p>This example is based on the AWS Cognito docs for <a href="https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-lambda-verify-auth-challenge-response.html" target="_blank">Verify Auth Challenge Response Lambda Trigger</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="22:1"><input checked="checked" id="__tabbed_22_1" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="__tabbed_22_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="22:1"><input checked="checked" id="apppy_19" name="__tabbed_22" type="radio" /><div class="tabbed-labels"><label for="apppy_19">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -3993,7 +4003,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 <blockquote>
 <p>New in 1.11.0</p>
 </blockquote>
-<div class="tabbed-set tabbed-alternate" data-tabs="23:1"><input checked="checked" id="__tabbed_23_1" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="__tabbed_23_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="23:1"><input checked="checked" id="apppy_20" name="__tabbed_23" type="radio" /><div class="tabbed-labels"><label for="apppy_20">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4029,7 +4039,7 @@ can be imported from <code>aws_lambda_powertools.data_classes.cognito_user_pool_
 <p>The DynamoDB data class utility provides the base class for <code>DynamoDBStreamEvent</code>, as well as enums for stream view type (<code>StreamViewType</code>) and event type.
 (<code>DynamoDBRecordEventName</code>).
 The class automatically deserializes DynamoDB types into their equivalent Python types.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="__tabbed_24_1" name="__tabbed_24" type="radio" /><input id="__tabbed_24_2" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="__tabbed_24_1">app.py</label><label for="__tabbed_24_2">multiple_records_types.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="apppy_21" name="__tabbed_24" type="radio" /><input id="multiple_records_typespy" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="apppy_21">app.py</label><label for="multiple_records_typespy">multiple_records_types.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4084,7 +4094,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 </div>
 </div>
 <h3 id="eventbridge">EventBridge<a class="headerlink" href="#eventbridge" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:1"><input checked="checked" id="__tabbed_25_1" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="__tabbed_25_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:1"><input checked="checked" id="apppy_22" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="apppy_22">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4102,7 +4112,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 </div>
 <h3 id="kafka">Kafka<a class="headerlink" href="#kafka" title="Permanent link">&para;</a></h3>
 <p>This example is based on the AWS docs for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-msk.html" target="_blank">Amazon MSK</a> and <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-kafka.html" target="_blank">self-managed Apache Kafka</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:1"><input checked="checked" id="__tabbed_26_1" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="__tabbed_26_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:1"><input checked="checked" id="apppy_23" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="apppy_23">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4123,7 +4133,7 @@ The class automatically deserializes DynamoDB types into their equivalent Python
 <h3 id="kinesis-streams">Kinesis streams<a class="headerlink" href="#kinesis-streams" title="Permanent link">&para;</a></h3>
 <p>Kinesis events by default contain base64 encoded data. You can use the helper function to access the data either as json
 or plain text, depending on the original payload.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="__tabbed_27_1" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="__tabbed_27_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:1"><input checked="checked" id="apppy_24" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="apppy_24">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4163,7 +4173,7 @@ or plain text, depending on the original payload.</p>
 <li><strong>C)</strong> Indicate a record failed data transformation and should be retried</li>
 </ul>
 <p>To do that, you can use <code>KinesisFirehoseDataTransformationResponse</code> class along with helper functions to make it easier to decode and encode base64 data in the stream.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="__tabbed_28_1" name="__tabbed_28" type="radio" /><input id="__tabbed_28_2" name="__tabbed_28" type="radio" /><input id="__tabbed_28_3" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="__tabbed_28_1">Transforming streaming records</label><label for="__tabbed_28_2">Dropping invalid records</label><label for="__tabbed_28_3">Indicating a processing failure</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:3"><input checked="checked" id="transforming-streaming-records" name="__tabbed_28" type="radio" /><input id="dropping-invalid-records" name="__tabbed_28" type="radio" /><input id="indicating-a-processing-failure" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="transforming-streaming-records">Transforming streaming records</label><label for="dropping-invalid-records">Dropping invalid records</label><label for="indicating-a-processing-failure">Indicating a processing failure</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4398,7 +4408,7 @@ or plain text, depending on the original payload.</p>
 </div>
 </div>
 <h3 id="lambda-function-url">Lambda Function URL<a class="headerlink" href="#lambda-function-url" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="__tabbed_29_1" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="__tabbed_29_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:1"><input checked="checked" id="apppy_25" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="apppy_25">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4418,7 +4428,7 @@ or plain text, depending on the original payload.</p>
 <p>It is used for <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-mq.html" target="_blank">Rabbit MQ payloads</a>, also see
 the <a href="https://aws.amazon.com/blogs/compute/using-amazon-mq-for-rabbitmq-as-an-event-source-for-lambda/" target="_blank">blog post</a>
 for more details.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="30:1"><input checked="checked" id="__tabbed_30_1" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="__tabbed_30_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:1"><input checked="checked" id="apppy_26" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="apppy_26">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4457,7 +4467,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="s3">S3<a class="headerlink" href="#s3" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="31:1"><input checked="checked" id="__tabbed_31_1" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="__tabbed_31_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="31:1"><input checked="checked" id="apppy_27" name="__tabbed_31" type="radio" /><div class="tabbed-labels"><label for="apppy_27">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4489,7 +4499,7 @@ for more details.</p>
 </div>
 <h3 id="s3-batch-operations">S3 Batch Operations<a class="headerlink" href="#s3-batch-operations" title="Permanent link">&para;</a></h3>
 <p>This example is based on the AWS S3 Batch Operations documentation <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-invoke-lambda.html" target="_blank">Example Lambda function for S3 Batch Operations</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="32:1"><input checked="checked" id="__tabbed_32_1" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="__tabbed_32_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="32:1"><input checked="checked" id="apppy_28" name="__tabbed_32" type="radio" /><div class="tabbed-labels"><label for="apppy_28">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4571,7 +4581,7 @@ for more details.</p>
 </div>
 <h3 id="s3-object-lambda">S3 Object Lambda<a class="headerlink" href="#s3-object-lambda" title="Permanent link">&para;</a></h3>
 <p>This example is based on the AWS Blog post <a href="https://aws.amazon.com/blogs/aws/introducing-amazon-s3-object-lambda-use-your-code-to-process-data-as-it-is-being-retrieved-from-s3/" target="_blank">Introducing Amazon S3 Object Lambda – Use Your Code to Process Data as It Is Being Retrieved from S3</a>.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="33:1"><input checked="checked" id="__tabbed_33_1" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="__tabbed_33_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="33:1"><input checked="checked" id="apppy_29" name="__tabbed_33" type="radio" /><div class="tabbed-labels"><label for="apppy_29">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4634,7 +4644,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="s3-eventbridge-notification">S3 EventBridge Notification<a class="headerlink" href="#s3-eventbridge-notification" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="34:1"><input checked="checked" id="__tabbed_34_1" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="__tabbed_34_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="34:1"><input checked="checked" id="apppy_30" name="__tabbed_34" type="radio" /><div class="tabbed-labels"><label for="apppy_30">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4654,7 +4664,7 @@ for more details.</p>
 </div>
 <h3 id="secrets-manager">Secrets Manager<a class="headerlink" href="#secrets-manager" title="Permanent link">&para;</a></h3>
 <p>AWS Secrets Manager rotation uses an AWS Lambda function to update the secret. <a href="https://docs.aws.amazon.com/secretsmanager/latest/userguide/rotating-secrets.html" target="_blank">Click here</a> for more information about rotating AWS Secrets Manager secrets.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="35:2"><input checked="checked" id="__tabbed_35_1" name="__tabbed_35" type="radio" /><input id="__tabbed_35_2" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="__tabbed_35_1">app.py</label><label for="__tabbed_35_2">Secrets Manager Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="35:2"><input checked="checked" id="apppy_31" name="__tabbed_35" type="radio" /><input id="secrets-manager-example-event" name="__tabbed_35" type="radio" /><div class="tabbed-labels"><label for="apppy_31">app.py</label><label for="secrets-manager-example-event">Secrets Manager Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4705,7 +4715,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="ses">SES<a class="headerlink" href="#ses" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="__tabbed_36_1" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="__tabbed_36_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="36:1"><input checked="checked" id="apppy_32" name="__tabbed_36" type="radio" /><div class="tabbed-labels"><label for="apppy_32">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4732,7 +4742,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="sns">SNS<a class="headerlink" href="#sns" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="__tabbed_37_1" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="__tabbed_37_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="37:1"><input checked="checked" id="apppy_33" name="__tabbed_37" type="radio" /><div class="tabbed-labels"><label for="apppy_33">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4759,7 +4769,7 @@ for more details.</p>
 </div>
 </div>
 <h3 id="sqs">SQS<a class="headerlink" href="#sqs" title="Permanent link">&para;</a></h3>
-<div class="tabbed-set tabbed-alternate" data-tabs="38:1"><input checked="checked" id="__tabbed_38_1" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="__tabbed_38_1">app.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="38:1"><input checked="checked" id="apppy_34" name="__tabbed_38" type="radio" /><div class="tabbed-labels"><label for="apppy_34">app.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -4782,7 +4792,7 @@ for more details.</p>
 <h3 id="vpc-lattice-v2">VPC Lattice V2<a class="headerlink" href="#vpc-lattice-v2" title="Permanent link">&para;</a></h3>
 <p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service using <a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html#vpc-lattice-receiving-events" target="_blank">Payload V2</a>.</p>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="39:2"><input checked="checked" id="__tabbed_39_1" name="__tabbed_39" type="radio" /><input id="__tabbed_39_2" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="__tabbed_39_1">app.py</label><label for="__tabbed_39_2">Lattice Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="39:2"><input checked="checked" id="apppy_35" name="__tabbed_39" type="radio" /><input id="lattice-example-event" name="__tabbed_39" type="radio" /><div class="tabbed-labels"><label for="apppy_35">app.py</label><label for="lattice-example-event">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4891,7 +4901,7 @@ for more details.</p>
 <h3 id="vpc-lattice-v1">VPC Lattice V1<a class="headerlink" href="#vpc-lattice-v1" title="Permanent link">&para;</a></h3>
 <p>You can register your Lambda functions as targets within an Amazon VPC Lattice service network. By doing this, your Lambda function becomes a service within the network, and clients that have access to the VPC Lattice service network can call your service.</p>
 <p><a href="https://docs.aws.amazon.com/lambda/latest/dg/services-vpc-lattice.html" target="_blank">Click here</a> for more information about using AWS Lambda with Amazon VPC Lattice.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="40:2"><input checked="checked" id="__tabbed_40_1" name="__tabbed_40" type="radio" /><input id="__tabbed_40_2" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="__tabbed_40_1">app.py</label><label for="__tabbed_40_2">Lattice Example Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="40:2"><input checked="checked" id="apppy_36" name="__tabbed_40" type="radio" /><input id="lattice-example-event_1" name="__tabbed_40" type="radio" /><div class="tabbed-labels"><label for="apppy_36">app.py</label><label for="lattice-example-event_1">Lattice Example Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4974,7 +4984,7 @@ for more details.</p>
 <div class="admonition warning">
 <p class="admonition-title">If we fail to deserialize a field value (e.g., JSON), they will appear as <code>[Cannot be deserialized]</code></p>
 </div>
-<div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="__tabbed_41_1" name="__tabbed_41" type="radio" /><input id="__tabbed_41_2" name="__tabbed_41" type="radio" /><input id="__tabbed_41_3" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="__tabbed_41_1">debugging.py</label><label for="__tabbed_41_2">debugging_event.json</label><label for="__tabbed_41_3">debugging_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="41:3"><input checked="checked" id="debuggingpy" name="__tabbed_41" type="radio" /><input id="debugging_eventjson" name="__tabbed_41" type="radio" /><input id="debugging_outputjson" name="__tabbed_41" type="radio" /><div class="tabbed-labels"><label for="debuggingpy">debugging.py</label><label for="debugging_eventjson">debugging_event.json</label><label for="debugging_outputjson">debugging_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -5209,6 +5219,8 @@ for more details.</p>
             </div>
           
           
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
 <script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
@@ -5248,7 +5260,7 @@ for more details.</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
       <script src="../../assets/javascripts/bundle.8fd75fb4.min.js"></script>
