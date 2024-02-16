@@ -1630,3 +1630,40 @@ def test_intersection_non_list_value(mocker, config, intersection_action):
 
     # THEN TypeError should be swallowed and use default value
     assert toggle == expected_value
+
+
+def test_exception_handler(mocker, config):
+    # GIVEN a schema with list intersection action
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    @feature_flags.exception_handler(ValueError)
+    def catch_exception(exc):
+        raise TypeError("re-raised")
+
+    # WHEN a context value isn't a list
+    # THEN exception handler should be able to intercept and raise, instead of returning `False`
+    with pytest.raises(TypeError):
+        feature_flags.evaluate(
+            name="my_feature",
+            context={"tenant_id": "not a list value"},
+            default=False,
+        )

@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import logging
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Callable, Dict, List, Optional, TypeVar, Union, cast
+
+from typing_extensions import ParamSpec
 
 from ... import Logger
 from ...shared.types import JSONType
@@ -15,6 +19,9 @@ from .comparators import (
     compare_time_range,
 )
 from .exceptions import ConfigurationStoreError
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 RULE_ACTION_MAPPING = {
     schema.RuleAction.EQUALS.value: lambda a, b: a == b,
@@ -73,6 +80,7 @@ class FeatureFlags:
         """
         self.store = store
         self.logger = logger or logging.getLogger(__name__)
+        self._exception_handlers: dict[Exception, Callable] = {}
 
     def _match_by_action(self, action: str, condition_value: Any, context_value: Any) -> bool:
         try:
@@ -80,6 +88,12 @@ class FeatureFlags:
             return func(context_value, condition_value)
         except Exception as exc:
             self.logger.debug(f"caught exception while matching action: action={action}, exception={str(exc)}")
+
+            handler = self._lookup_exception_handler(exc)
+            if handler:
+                self.logger.debug("Exception handler found! Delegating response.")
+                return handler(exc)
+
             return False
 
     def _evaluate_conditions(
@@ -335,3 +349,23 @@ class FeatureFlags:
                 features_enabled.append(name)
 
         return features_enabled
+
+    def exception_handler(self, exc_class: Exception | list[Exception]):
+        def register_exception_handler(func: Callable[P, T]) -> Callable[P, T]:
+            if isinstance(exc_class, list):
+                for exp in exc_class:
+                    self._exception_handlers[exp] = func
+            else:
+                self._exception_handlers[exc_class] = func
+
+            return func
+
+        return register_exception_handler
+
+    def _lookup_exception_handler(self, exc: BaseException) -> Callable | None:
+        # Use "Method Resolution Order" to allow for matching against a base class
+        # of an exception
+        for cls in type(exc).__mro__:
+            if cls in self._exception_handlers:
+                return self._exception_handlers[cls]  # type: ignore[index] # index is correct
+        return None
