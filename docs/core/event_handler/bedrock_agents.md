@@ -150,6 +150,10 @@ To create an Agent for Amazon Bedrock, refer to the [official documentation](htt
 
 The following video demonstrates the end-to-end process:
 
+<center>
+<iframe width="720" height="405" src="https://www.youtube-nocookie.com/embed/NWoC5FTSt7s?si=AG2qpLJbxCkyiLma&amp;controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</center>
+
 During the creation process, you can use the schema generated in the previous step when prompted for an OpenAPI specification.
 
 ## Advanced
