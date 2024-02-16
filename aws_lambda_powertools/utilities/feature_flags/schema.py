@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import re
 from datetime import datetime
@@ -375,8 +377,6 @@ class ConditionsValidator(BaseValidator):
                 action,
                 ConditionsValidator._validate_datetime_value,
             )
-        elif action == RuleAction.MODULO_RANGE.value:
-            ConditionsValidator._validate_modulo_range(value, rule_name)
 
     @staticmethod
     def _validate_noop_value(*args, **kwargs):
@@ -419,7 +419,7 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def _validate_schedule_between_days_of_week_value(value: Any, rule_name: str):
+    def _validate_schedule_between_days_of_week_value(value: dict, rule_name: str):
         error_str = f"condition with a CURRENT_DAY_OF_WEEK action must have a condition value dictionary with 'DAYS' and 'TIMEZONE' (optional) keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
             raise SchemaValidationError(error_str)
@@ -479,7 +479,7 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'TIMEZONE' value must represent a valid IANA timezone, rule={rule_name}")
 
     @staticmethod
-    def _validate_modulo_range(value: Any, rule_name: str):
+    def _validate_modulo_range_value(value: dict, rule_name: str):
         error_str = f"condition with a 'MODULO_RANGE' action must have a condition value type dictionary with 'BASE', 'START' and 'END' keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
             raise SchemaValidationError(error_str)
