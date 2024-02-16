@@ -350,6 +350,16 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'value' key must not be null, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
 
+        # maintenance: we may need a new design if we end up with more exceptions like datetime/time range
+        # e.g., visitor pattern, registry etc.
+        validator = getattr(
+            ConditionsValidator,
+            f"_validate_{action.lower()}_value",
+            ConditionsValidator._validate_noop_value,
+        )
+
+        validator(value, rule_name)
+
         # time actions need to be parsed to make sure date and time format is valid and timezone is recognized
         if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value:
             ConditionsValidator._validate_schedule_between_time_and_datetime_ranges(
@@ -365,11 +375,12 @@ class ConditionsValidator(BaseValidator):
                 action,
                 ConditionsValidator._validate_datetime_value,
             )
-        elif action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value:
-            ConditionsValidator._validate_schedule_between_days_of_week(value, rule_name)
-        # modulo range condition needs validation on base, start, and end attributes
         elif action == RuleAction.MODULO_RANGE.value:
             ConditionsValidator._validate_modulo_range(value, rule_name)
+
+    @staticmethod
+    def _validate_noop_value(*args, **kwargs):
+        return True
 
     @staticmethod
     def _validate_datetime_value(datetime_str: str, rule_name: str):
@@ -408,7 +419,7 @@ class ConditionsValidator(BaseValidator):
             )
 
     @staticmethod
-    def _validate_schedule_between_days_of_week(value: Any, rule_name: str):
+    def _validate_schedule_between_days_of_week_value(value: Any, rule_name: str):
         error_str = f"condition with a CURRENT_DAY_OF_WEEK action must have a condition value dictionary with 'DAYS' and 'TIMEZONE' (optional) keys, rule={rule_name}"  # noqa: E501
         if not isinstance(value, dict):
             raise SchemaValidationError(error_str)
