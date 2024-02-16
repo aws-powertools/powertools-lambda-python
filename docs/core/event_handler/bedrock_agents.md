@@ -163,7 +163,7 @@ use a combination of [Pydantic Models](https://docs.pydantic.dev/latest/concepts
 To implement these customizations, include extra parameters when defining your routes:
 
 ```python hl_lines="14-23 25" title="customizing_api_operations.py"
---8<-- "examples/event_handler_bedrock_agents/src/customizing_api_operations.py"
+--8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
 
 #### Customizing OpenAPI metadata
@@ -175,7 +175,7 @@ Include extra parameters when exporting your OpenAPI specification to apply thes
 === "customizing_api_metadata.py"
 
     ```python hl_lines="25-31"
-    --8<-- "examples/event_handler_bedrock_agents/src/customizing_api_metadata.py"
+    --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_metadata.py"
     ```
 
 ### Data validation
