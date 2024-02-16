@@ -1588,3 +1588,45 @@ def test_flags_none_in_value_no_match(mocker, config):
     )
 
     assert toggle == expected_value
+
+
+@pytest.mark.parametrize(
+    "intersection_action",
+    [
+        RuleAction.ALL_IN_VALUE.value,
+        RuleAction.ANY_IN_VALUE.value,
+        RuleAction.NONE_IN_VALUE.value,
+    ],
+)
+def test_intersection_non_list_value(mocker, config, intersection_action):
+    # GIVEN a schema with list intersection action
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": intersection_action,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    # WHEN a context value isn't a list
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": "not a list value"},
+        default=False,
+    )
+
+    # THEN TypeError should be swallowed and use default value
+    assert toggle == expected_value
