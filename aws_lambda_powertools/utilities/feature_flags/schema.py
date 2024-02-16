@@ -327,23 +327,16 @@ class ConditionsValidator(BaseValidator):
         if not key or not isinstance(key, str):
             raise SchemaValidationError(f"'key' value must be a non empty string, rule={rule_name}")
 
-        # time actions need to have very specific keys
-        # SCHEDULE_BETWEEN_TIME_RANGE => CURRENT_TIME
-        # SCHEDULE_BETWEEN_DATETIME_RANGE => CURRENT_DATETIME
-        # SCHEDULE_BETWEEN_DAYS_OF_WEEK => CURRENT_DAY_OF_WEEK
         action = condition.get(CONDITION_ACTION, "")
-        if action == RuleAction.SCHEDULE_BETWEEN_TIME_RANGE.value and key != TimeKeys.CURRENT_TIME.value:
-            raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_TIME' condition key, rule={rule_name}",  # noqa: E501
-            )
-        if action == RuleAction.SCHEDULE_BETWEEN_DATETIME_RANGE.value and key != TimeKeys.CURRENT_DATETIME.value:
-            raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME' condition key, rule={rule_name}",  # noqa: E501
-            )
-        if action == RuleAction.SCHEDULE_BETWEEN_DAYS_OF_WEEK.value and key != TimeKeys.CURRENT_DAY_OF_WEEK.value:
-            raise SchemaValidationError(
-                f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_OF_WEEK' condition key, rule={rule_name}",  # noqa: E501
-            )
+        # maintenance: we may need a new design if we end up with more exceptions like datetime/time range
+        # e.g., visitor pattern, registry etc.
+        validator = getattr(
+            ConditionsValidator,
+            f"_validate_{action.lower()}_key",
+            ConditionsValidator._validate_noop_value,
+        )
+
+        validator(key, rule_name)
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
@@ -365,6 +358,13 @@ class ConditionsValidator(BaseValidator):
     @staticmethod
     def _validate_noop_value(*args, **kwargs):
         return True
+
+    @staticmethod
+    def _validate_schedule_between_days_of_week_key(key: str, rule_name: str):
+        if key != TimeKeys.CURRENT_DAY_OF_WEEK.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_DAYS_OF_WEEK' action must have a 'CURRENT_DAY_OF_WEEK' condition key, rule={rule_name}",  # noqa: E501
+            )
 
     @staticmethod
     def _validate_schedule_between_days_of_week_value(value: dict, rule_name: str):
@@ -392,6 +392,13 @@ class ConditionsValidator(BaseValidator):
         ConditionsValidator._validate_timezone(timezone=value.get(TimeValues.TIMEZONE.value), rule=rule_name)
 
     @staticmethod
+    def _validate_schedule_between_time_range_key(key: str, rule_name: str):
+        if key != TimeKeys.CURRENT_TIME.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a 'CURRENT_TIME' condition key, rule={rule_name}",  # noqa: E501
+            )
+
+    @staticmethod
     def _validate_schedule_between_time_range_value(value: Dict, rule_name: str) -> bool:
         if not isinstance(value, dict):
             raise SchemaValidationError(
@@ -413,6 +420,13 @@ class ConditionsValidator(BaseValidator):
         ConditionsValidator._validate_timezone(timezone=value.get(TimeValues.TIMEZONE.value), rule=rule_name)
 
         return True
+
+    @staticmethod
+    def _validate_schedule_between_datetime_range_key(key: str, rule_name: str):
+        if key != TimeKeys.CURRENT_DATETIME.value:
+            raise SchemaValidationError(
+                f"'condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a 'CURRENT_DATETIME' condition key, rule={rule_name}",  # noqa: E501
+            )
 
     @staticmethod
     def _validate_schedule_between_datetime_range_value(value: dict, rule_name: str):
