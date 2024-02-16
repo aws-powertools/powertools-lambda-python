@@ -103,9 +103,18 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 The resolvers used by Agents for Amazon Bedrock are compatible with the full suite of Powertools for AWS Lambda utilities.
 This includes [Logger](../logger.md), [Metrics](../metrics.md) and [Tracer](../tracer.md).
 
-### Validating parameters
+### Validating input and output
 
-Add an example for validating parameters like EmailStr from Pydantic.
+You can define the expected format for incoming data and responses by using type annotations.
+
+```python hl_lines="5 17-20 25"
+--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
+```
+
+1. No need to add the `enable_validation` parameter, as it's enabled by default.
+2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)
+3. Describe each input and output using human-readable descriptions
+4. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
 
 ### Generating OpenAPI schemas
 
@@ -177,17 +186,6 @@ Include extra parameters when exporting your OpenAPI specification to apply thes
     ```python hl_lines="25-31"
     --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_metadata.py"
     ```
-
-### Data validation
-
-The Agents for Amazon Bedrock resolver allows for the clear definition of the expected format for incoming data and responses.
-By delegating data validation tasks to Powertools for AWS Lambda, you can significantly reduce the amount of repetitive code in your project.
-
-For detailed guidance on implementing this feature, see the [REST API validation documentation](api_gateway.md#data-validation).
-There, you'll find step-by-step instructions on how to apply data validation when using the resolver.
-
-???+ note
-	When using the Agent for Amazon Bedrock resolver, there's no need to add the `enable_validation` parameter, as it's enabled by default.
 
 ## Testing your code
 
