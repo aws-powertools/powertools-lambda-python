@@ -3,13 +3,13 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 from __future__ import annotations
 
-import os
 import json
+import os
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 import boto3
-from botocore.exceptions import ClientError
 from botocore.config import Config
+from botocore.exceptions import ClientError
 
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
@@ -123,11 +123,11 @@ class SecretsProvider(BaseProvider):
         self,
         name: str,
         value: Union[str, dict, bytes],
-        *, # force keyword arguments
-        idempotency_id: Optional[str] = None,
+        *,  # force keyword arguments
+        client_request_token: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
         create: bool = True,
-        **sdk_options
+        **sdk_options,
     ) -> str:
         """
         Modifies the details of a secret, including metadata and the secret value.
@@ -138,7 +138,7 @@ class SecretsProvider(BaseProvider):
             The ARN or name of the secret to add a new version to.
         value: str or bytes
             Specifies text data that you want to encrypt and store in this new version of the secret.
-        idempotency_token: str, optional
+        client_request_token: str, optional
             This value helps ensure idempotency. Recommended that you generate
             a UUID-type value to ensure uniqueness within the specified secret.
             This value becomes the VersionId of the new version. This field is
@@ -171,8 +171,8 @@ class SecretsProvider(BaseProvider):
 
         if version_stages:
             sdk_options["VersionStages"] = version_stages
-        if idempotency_id:
-            sdk_options["ClientRequestToken"] = idempotency_id
+        if client_request_token:
+            sdk_options["ClientRequestToken"] = client_request_token
 
         try:
             value = self.client.put_secret_value(**sdk_options)
@@ -190,7 +190,6 @@ class SecretsProvider(BaseProvider):
                     return value["VersionId"]
                 except Exception as exc:
                     raise SetParameterError(str(exc)) from exc
-
 
 
 def get_secret(
@@ -264,11 +263,11 @@ def get_secret(
 def set_secret(
     name: str,
     value: Union[str, bytes],
-    *, # force keyword arguments
-    idempotency_id: Optional[str] = None,
+    *,  # force keyword arguments
+    client_request_token: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
     create: bool = True,
-    **sdk_options
+    **sdk_options,
 ) -> str:
     """
     Retrieve a parameter value from AWS Secrets Manager
@@ -279,7 +278,7 @@ def set_secret(
         Name of the parameter
     value: str or bytes
         Secret value to set
-    idempotency_token: str, optional
+    client_request_token: str, optional
         This value helps ensure idempotency. Recommended that you generate
         a UUID-type value to ensure uniqueness within the specified secret.
         This value becomes the VersionId of the new version. This field is
@@ -313,14 +312,14 @@ def set_secret(
         >>>
         >>> parameters.set_secret(name="llamas-are-awesome", value="supers3cr3tllam@passw0rd")
 
-    **Sets a secret and includes an idempotency_id**
+    **Sets a secret and includes an client_request_token**
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
         >>> parameters.set_secret(
                 name="my-secret",
                 value='{"password": "supers3cr3tllam@passw0rd"}',
-                idempotency_id="61f2af5f-5f75-44b1-a29f-0cc37af55b11"
+                client_request_token="61f2af5f-5f75-44b1-a29f-0cc37af55b11"
             )
     """
 
@@ -329,5 +328,10 @@ def set_secret(
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
     return DEFAULT_PROVIDERS["secrets"]._set(
-        name=name, value=value, idempotency_id=idempotency_id, version_stages=version_stages, create=create, **sdk_options
+        name=name,
+        value=value,
+        client_request_token=client_request_token,
+        version_stages=version_stages,
+        create=create,
+        **sdk_options,
     )
