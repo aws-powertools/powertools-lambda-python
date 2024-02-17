@@ -180,16 +180,6 @@ class SecretsProvider(BaseProvider):
         except ClientError as exc:
             if exc.response["Error"]["Code"] != "ResourceNotFoundException":
                 raise SetParameterError(str(exc)) from exc
-            elif not create:
-                raise SetParameterError("Parameter does not exist, create before setting or set 'create' to True.")
-            else:
-                sdk_options.pop("SecretId")
-                sdk_options["Name"] = name
-                try:
-                    value = self.client.create_secret(**sdk_options)
-                    return value["VersionId"]
-                except Exception as exc:
-                    raise SetParameterError(str(exc)) from exc
 
 
 def get_secret(
