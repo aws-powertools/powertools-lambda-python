@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any, Dict, List, Optional, overload
+from typing import Any, Dict, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -139,13 +139,6 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         return self["query_string_parameters"]
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
-        if self.query_string_parameters is not None:
-            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
-            return query_string
-        return None
-
-    @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
         if self.headers is not None:
             headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
@@ -256,23 +249,21 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
 
     @property
     def request_context(self) -> vpcLatticeEventV2RequestContext:
-        """he VPC Lattice v2 Event request context."""
+        """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
 
     @property
     def query_string_parameters(self) -> Optional[Dict[str, str]]:
-        """The request query string parameters."""
-        return self.get("queryStringParameters")
+        """The request query string parameters.
 
-    @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
-        if self.query_string_parameters is not None:
-            query_string = {
-                key: value.split(",") if not isinstance(value, list) else value
-                for key, value in self.query_string_parameters.items()
-            }
-            return query_string
-        return None
+        For VPC Lattice V2, the queryStringParameters will contain a Dict[str, List[str]]
+        so to keep compatibility with existing utilities, we merge all the values with a comma.
+        """
+        params = self.get("queryStringParameters")
+        if params:
+            return {key: ",".join(value) for key, value in params.items()}
+        else:
+            return None
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, str]]:

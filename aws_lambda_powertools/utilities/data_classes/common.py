@@ -104,7 +104,7 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
+    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
@@ -116,7 +116,7 @@ class BaseProxyEvent(DictWrapper):
             query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
             return query_string
 
-        return None
+        return {}
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:

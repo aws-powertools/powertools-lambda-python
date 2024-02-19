@@ -369,7 +369,7 @@ def _get_embed_body(
 
 
 def _normalize_multi_query_string_with_param(
-    query_string: Optional[Dict[str, List[str]]],
+    query_string: Dict[str, List[str]],
     params: Sequence[ModelField],
 ) -> Dict[str, Any]:
     """
@@ -386,18 +386,15 @@ def _normalize_multi_query_string_with_param(
     -------
     A dictionary containing the processed multi_query_string_parameters.
     """
-    if not query_string:
-        return {}
-    else:
-        resolved_query_string: Dict[str, Any] = query_string
-        for param in filter(is_scalar_field, params):
-            try:
-                # if the target parameter is a scalar, we keep the first value of the query string
-                # regardless if there are more in the payload
-                resolved_query_string[param.alias] = query_string[param.alias][0]
-            except KeyError:
-                pass
-        return resolved_query_string
+    resolved_query_string: Dict[str, Any] = query_string
+    for param in filter(is_scalar_field, params):
+        try:
+            # if the target parameter is a scalar, we keep the first value of the query string
+            # regardless if there are more in the payload
+            resolved_query_string[param.alias] = query_string[param.alias][0]
+        except KeyError:
+            pass
+    return resolved_query_string
 
 
 def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]], params: Sequence[ModelField]):

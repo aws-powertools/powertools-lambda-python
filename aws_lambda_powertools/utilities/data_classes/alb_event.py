@@ -36,15 +36,11 @@ class ALBEvent(BaseProxyEvent):
         return self.get("multiValueQueryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
+    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         if self.multi_value_query_string_parameters:
             return self.multi_value_query_string_parameters
 
-        if self.query_string_parameters:
-            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
-            return query_string
-
-        return None
+        return super().resolved_query_string_parameters
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
