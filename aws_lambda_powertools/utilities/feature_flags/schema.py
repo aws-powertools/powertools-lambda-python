@@ -4,6 +4,7 @@ import logging
 import re
 from datetime import datetime
 from enum import Enum
+from functools import lru_cache
 from typing import Any, Dict, List, Optional, Union
 
 from dateutil import tz
@@ -77,6 +78,7 @@ class TimeValues(Enum):
     SATURDAY = "SATURDAY"
 
     @classmethod
+    @lru_cache(maxsize=1)
     def days(cls) -> list[str]:
         return [day.value for day in cls if day.value not in ["START", "END", "TIMEZONE"]]
 
