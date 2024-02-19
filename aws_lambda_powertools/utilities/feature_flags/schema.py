@@ -25,6 +25,8 @@ TIME_RANGE_FORMAT = "%H:%M"  # hour:min 24 hours clock
 TIME_RANGE_PATTERN = re.compile(r"2[0-3]:[0-5]\d|[0-1]\d:[0-5]\d")  # 24 hour clock
 HOUR_MIN_SEPARATOR = ":"
 
+LOGGER: logging.Logger | Logger = logging.getLogger(__name__)
+
 
 class RuleAction(str, Enum):
     EQUALS = "EQUALS"
@@ -196,7 +198,12 @@ class SchemaValidator(BaseValidator):
 
     def __init__(self, schema: Dict[str, Any], logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or LOGGER
+
+        # Validators are designed for modular testing
+        # therefore we link the custom logger with global LOGGER
+        # so custom validators can use them when necessary
+        SchemaValidator._link_global_logger(self.logger)
 
     def validate(self) -> None:
         self.logger.debug("Validating schema")
@@ -206,13 +213,18 @@ class SchemaValidator(BaseValidator):
         features = FeaturesValidator(schema=self.schema, logger=self.logger)
         features.validate()
 
+    @staticmethod
+    def _link_global_logger(logger: logging.Logger | Logger):
+        global LOGGER
+        LOGGER = logger
+
 
 class FeaturesValidator(BaseValidator):
     """Validates each feature and calls RulesValidator to validate its rules"""
 
     def __init__(self, schema: Dict, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.schema = schema
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or LOGGER
 
     def validate(self):
         for name, feature in self.schema.items():
@@ -250,7 +262,7 @@ class RulesValidator(BaseValidator):
         self.feature = feature
         self.feature_name = next(iter(self.feature))
         self.rules: Optional[Dict] = self.feature.get(RULES_KEY)
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or LOGGER
         self.boolean_feature = boolean_feature
 
     def validate(self):
@@ -297,7 +309,7 @@ class ConditionsValidator(BaseValidator):
     def __init__(self, rule: Dict[str, Any], rule_name: str, logger: Optional[Union[logging.Logger, Logger]] = None):
         self.conditions: List[Dict[str, Any]] = rule.get(CONDITIONS_KEY, {})
         self.rule_name = rule_name
-        self.logger = logger or logging.getLogger(__name__)
+        self.logger = logger or LOGGER
 
     def validate(self):
         if not self.conditions or not isinstance(self.conditions, list):
@@ -341,14 +353,17 @@ class ConditionsValidator(BaseValidator):
         # SCHEDULE_BETWEEN_DAYS_OF_WEEK_KEY
         # - extra validation: `_validate_schedule_between_days_of_week_key`
         #
-        # maintenance: we can split to separate file and classes for better organization later, e.g., visitor pattern.
+        # maintenance: we should split to separate file/classes for better organization, e.g., visitor pattern.
 
-        custom_validator = getattr(
-            ConditionsValidator,
-            f"_validate_{action.lower()}_key",
-            ConditionsValidator._validate_noop_value,
-        )
+        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_key")
 
+        # ~90% of actions available don't require a custom validator
+        # logging a debug statement for no-match will increase CPU cycles for most customers
+        # for that reason only, we invert and log only when extra validation is found.
+        if custom_validator is None:
+            return
+
+        LOGGER.debug(f"{action} requires key validation. Running '{custom_validator}' validator.")
         custom_validator(key, rule_name)
 
     @staticmethod
@@ -364,19 +379,19 @@ class ConditionsValidator(BaseValidator):
         # SCHEDULE_BETWEEN_DAYS_OF_WEEK_KEY
         # - extra validation: `_validate_schedule_between_days_of_week_value`
         #
-        # maintenance: we can split to separate file and classes for better organization later, e.g., visitor pattern.
+        # maintenance: we should split to separate file/classes for better organization, e.g., visitor pattern.
 
-        custom_validator = getattr(
-            ConditionsValidator,
-            f"_validate_{action.lower()}_value",
-            ConditionsValidator._validate_noop_value,
-        )
+        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_value")
+
+        # ~90% of actions available don't require a custom validator
+        # logging a debug statement for no-match will increase CPU cycles for most customers
+        # for that reason only, we invert and log only when extra validation is found.
+        if custom_validator is None:
+            return
+
+        LOGGER.debug(f"{action} requires value validation. Running '{custom_validator}' validator.")
 
         custom_validator(value, rule_name)
-
-    @staticmethod
-    def _validate_noop_value(*args, **kwargs):
-        return True
 
     @staticmethod
     def _validate_schedule_between_days_of_week_key(key: str, rule_name: str):

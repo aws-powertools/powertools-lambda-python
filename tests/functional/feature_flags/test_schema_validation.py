@@ -1,8 +1,8 @@
-import logging
 import re
 
-import pytest  # noqa: F401
+import pytest
 
+from aws_lambda_powertools.logging.logger import Logger  # noqa: F401
 from aws_lambda_powertools.utilities.feature_flags.exceptions import (
     SchemaValidationError,
 )
@@ -23,8 +23,6 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
-
-logger = logging.getLogger(__name__)
 
 EMPTY_SCHEMA = {"": ""}
 
