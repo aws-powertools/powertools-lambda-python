@@ -7,12 +7,7 @@ Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/){targe
 
 <center>
 ```mermaid
-flowchart LR
-	Bedrock[Foundational Model] <-- calls --> Agent
-	You[User input] --> Agent
-	Agent[Agents for Amazon Bedrock] -- invokes --> Lambda[AWS Lambda function]
-	Agent -- consults --> OpenAPI{{OpenAPI schema}}
-	OpenAPI -. generated from .-> Lambda
+--8<-- "docs/core/event_handler/bedrock_agents.mermaid"
 ```
 </center>
 
