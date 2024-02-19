@@ -1692,7 +1692,13 @@ class ApiGatewayResolver(BaseRouter):
                     body=escaped_spec,
                 )
 
-            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css, swagger_base_url)
+            body = generate_swagger_html(
+                escaped_spec,
+                f"{base_path}{path}",
+                swagger_js,
+                swagger_css,
+                swagger_base_url,
+            )
 
             return Response(
                 status_code=200,
