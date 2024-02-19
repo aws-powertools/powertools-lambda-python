@@ -178,7 +178,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 === "getting_all_enabled_features.py"
 
-    ```python hl_lines="2 9 26"
+    ```python hl_lines="4 9 11 28"
     --8<-- "examples/feature_flags/src/getting_all_enabled_features.py"
     ```
 
@@ -472,7 +472,7 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 
 === "extracting_envelope.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="10"
     --8<-- "examples/feature_flags/src/extracting_envelope.py"
     ```
 
