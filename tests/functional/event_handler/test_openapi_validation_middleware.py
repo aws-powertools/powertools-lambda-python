@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import PurePath
@@ -40,17 +41,18 @@ def test_validate_scalars():
         print(user_id)
 
     # sending a number
-    LOAD_GW_EVENT["path"] = "/users/123"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/users/123"
 
     # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
 
     # sending a string
-    LOAD_GW_EVENT["path"] = "/users/abc"
+    event["path"] = "/users/abc"
 
     # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
@@ -65,17 +67,18 @@ def test_validate_scalars_with_default():
         print(user_id)
 
     # sending a number
-    LOAD_GW_EVENT["path"] = "/users/123"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/users/123"
 
     # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
 
     # sending a string
-    LOAD_GW_EVENT["path"] = "/users/abc"
+    event["path"] = "/users/abc"
 
     # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
@@ -90,17 +93,18 @@ def test_validate_scalars_with_default_and_optional():
         print(user_id)
 
     # sending a number
-    LOAD_GW_EVENT["path"] = "/users/123"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/users/123"
 
     # THEN the handler should be invoked and return 200
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
 
     # sending a string
-    LOAD_GW_EVENT["path"] = "/users/abc"
+    event["path"] = "/users/abc"
 
     # THEN the handler should be invoked and return 422
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert any(text in result["body"] for text in ["type_error.integer", "int_parsing"])
 
@@ -114,11 +118,12 @@ def test_validate_return_type():
     def handler() -> int:
         return 123
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be 123
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert result["body"] == "123"
 
@@ -132,11 +137,12 @@ def test_validate_return_list():
     def handler() -> List[int]:
         return [123, 234]
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be [123, 234]
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == [123, 234]
 
@@ -152,11 +158,12 @@ def test_validate_return_tuple():
     def handler() -> Tuple:
         return sample_tuple
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a tuple
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == [1, 2, 3]
 
@@ -173,11 +180,12 @@ def test_validate_return_purepath():
     def handler() -> str:
         return sample_path.as_posix()
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a string
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert result["body"] == sample_path.as_posix()
 
@@ -194,11 +202,12 @@ def test_validate_return_enum():
     def handler() -> Model:
         return Model.name.value
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a string
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert result["body"] == "powertools"
 
@@ -217,11 +226,12 @@ def test_validate_return_dataclass():
     def handler() -> Model:
         return Model(name="John", age=30)
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a JSON object
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
@@ -239,11 +249,12 @@ def test_validate_return_model():
     def handler() -> Model:
         return Model(name="John", age=30)
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a JSON object
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
@@ -261,11 +272,12 @@ def test_validate_invalid_return_model():
     def handler() -> Model:
         return {"name": "John"}  # type: ignore
 
-    LOAD_GW_EVENT["path"] = "/"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["path"] = "/"
 
     # THEN the handler should be invoked and return 422
     # THEN the body must be a dict
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert "missing" in result["body"]
 
@@ -283,13 +295,14 @@ def test_validate_body_param():
     def handler(user: Model) -> Model:
         return user
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["path"] = "/"
+    event["body"] = json.dumps({"name": "John", "age": 30})
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a JSON object
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
@@ -308,14 +321,15 @@ def test_validate_body_param_with_stripped_headers():
     def handler(user: Model) -> Model:
         return user
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["headers"] = {"Content-type": " application/json "}
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["headers"] = {"Content-type": " application/json "}
+    event["path"] = "/"
+    event["body"] = json.dumps({"name": "John", "age": 30})
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a JSON object
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
@@ -333,13 +347,14 @@ def test_validate_body_param_with_invalid_date():
     def handler(user: Model) -> Model:
         return user
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = "{"  # invalid JSON
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["path"] = "/"
+    event["body"] = "{"  # invalid JSON
 
     # THEN the handler should be invoked and return 422
     # THEN the body must have the "json_invalid" error message
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert "json_invalid" in result["body"]
 
@@ -357,20 +372,21 @@ def test_validate_embed_body_param():
     def handler(user: Annotated[Model, Body(embed=True)]) -> Model:
         return user
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["path"] = "/"
+    event["body"] = json.dumps({"name": "John", "age": 30})
 
     # THEN the handler should be invoked and return 422
     # THEN the body must be a dict
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert "missing" in result["body"]
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a dict
-    LOAD_GW_EVENT["body"] = json.dumps({"user": {"name": "John", "age": 30}})
-    result = app(LOAD_GW_EVENT, {})
+    event["body"] = json.dumps({"user": {"name": "John", "age": 30}})
+    result = app(event, {})
     assert result["statusCode"] == 200
 
 
@@ -387,13 +403,14 @@ def test_validate_response_return():
     def handler(user: Model) -> Response[Model]:
         return Response(body=user, status_code=200, content_type="application/json")
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = json.dumps({"name": "John", "age": 30})
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["path"] = "/"
+    event["body"] = json.dumps({"name": "John", "age": 30})
 
     # THEN the handler should be invoked and return 200
     # THEN the body must be a dict
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 200
     assert json.loads(result["body"]) == {"name": "John", "age": 30}
 
@@ -411,13 +428,14 @@ def test_validate_response_invalid_return():
     def handler(user: Model) -> Response[Model]:
         return Response(body=user, status_code=200)
 
-    LOAD_GW_EVENT["httpMethod"] = "POST"
-    LOAD_GW_EVENT["path"] = "/"
-    LOAD_GW_EVENT["body"] = json.dumps({})
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "POST"
+    event["path"] = "/"
+    event["body"] = json.dumps({})
 
     # THEN the handler should be invoked and return 422
     # THEN the body should have the word missing
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == 422
     assert "missing" in result["body"]
 
@@ -435,8 +453,9 @@ def test_validation_query_string_with_api_rest_resolver(handler_func, expected_s
     # GIVEN a APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
-    LOAD_GW_EVENT["httpMethod"] = "GET"
-    LOAD_GW_EVENT["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "GET"
+    event["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -455,8 +474,8 @@ def test_validation_query_string_with_api_rest_resolver(handler_func, expected_s
 
     # Define handler3 without params
     if handler_func == "handler3_without_query_params":
-        LOAD_GW_EVENT["queryStringParameters"] = None
-        LOAD_GW_EVENT["multiValueQueryStringParameters"] = None
+        event["queryStringParameters"] = None
+        event["multiValueQueryStringParameters"] = None
 
         @app.get("/users")
         def handler3():
@@ -464,7 +483,7 @@ def test_validation_query_string_with_api_rest_resolver(handler_func, expected_s
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -484,9 +503,10 @@ def test_validation_query_string_with_api_http_resolver(handler_func, expected_s
     # GIVEN a APIGatewayHttpResolver with validation enabled
     app = APIGatewayHttpResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_HTTP)
+    event["rawPath"] = "/users"
+    event["requestContext"]["http"]["method"] = "GET"
+    event["requestContext"]["http"]["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -505,7 +525,7 @@ def test_validation_query_string_with_api_http_resolver(handler_func, expected_s
 
     # Define handler3 without params
     if handler_func == "handler3_without_query_params":
-        LOAD_GW_EVENT_HTTP["queryStringParameters"] = None
+        event["queryStringParameters"] = None
 
         @app.get("/users")
         def handler3():
@@ -513,7 +533,7 @@ def test_validation_query_string_with_api_http_resolver(handler_func, expected_s
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_HTTP, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -533,7 +553,8 @@ def test_validation_query_string_with_alb_resolver(handler_func, expected_status
     # GIVEN a ALBResolver with validation enabled
     app = ALBResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_ALB["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_ALB)
+    event["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -552,7 +573,7 @@ def test_validation_query_string_with_alb_resolver(handler_func, expected_status
 
     # Define handler3 without params
     if handler_func == "handler3_without_query_params":
-        LOAD_GW_EVENT_HTTP["multiValueQueryStringParameters"] = None
+        event["multiValueQueryStringParameters"] = None
 
         @app.get("/users")
         def handler3():
@@ -560,7 +581,7 @@ def test_validation_query_string_with_alb_resolver(handler_func, expected_status
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_ALB, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -580,9 +601,10 @@ def test_validation_query_string_with_lambda_url_resolver(handler_func, expected
     # GIVEN a LambdaFunctionUrlResolver with validation enabled
     app = LambdaFunctionUrlResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_LAMBDA_URL)
+    event["rawPath"] = "/users"
+    event["requestContext"]["http"]["method"] = "GET"
+    event["requestContext"]["http"]["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -601,7 +623,7 @@ def test_validation_query_string_with_lambda_url_resolver(handler_func, expected
 
     # Define handler3 without params
     if handler_func == "handler3_without_query_params":
-        LOAD_GW_EVENT_LAMBDA_URL["queryStringParameters"] = None
+        event["queryStringParameters"] = None
 
         @app.get("/users")
         def handler3():
@@ -609,7 +631,7 @@ def test_validation_query_string_with_lambda_url_resolver(handler_func, expected
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -629,7 +651,8 @@ def test_validation_query_string_with_vpc_lattice_resolver(handler_func, expecte
     # GIVEN a VPCLatticeV2Resolver with validation enabled
     app = VPCLatticeV2Resolver(enable_validation=True)
 
-    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_VPC_LATTICE)
+    event["path"] = "/users"
 
     # WHEN a handler is defined with various parameters and routes
 
@@ -649,7 +672,7 @@ def test_validation_query_string_with_vpc_lattice_resolver(handler_func, expecte
 
     # Define handler3 without params
     if handler_func == "handler3_without_query_params":
-        LOAD_GW_EVENT_VPC_LATTICE["queryStringParameters"] = None
+        event["queryStringParameters"] = None
 
         @app.get("/users")
         def handler3():
@@ -657,7 +680,7 @@ def test_validation_query_string_with_vpc_lattice_resolver(handler_func, expecte
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -679,8 +702,9 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
     # GIVEN a APIGatewayRestResolver with validation enabled
     app = APIGatewayRestResolver(enable_validation=True)
 
-    LOAD_GW_EVENT["httpMethod"] = "GET"
-    LOAD_GW_EVENT["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT)
+    event["httpMethod"] = "GET"
+    event["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -709,8 +733,8 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT["headers"] = None
-        LOAD_GW_EVENT["multiValueHeaders"] = None
+        event["headers"] = None
+        event["multiValueHeaders"] = None
 
         @app.get("/users")
         def handler4():
@@ -718,7 +742,7 @@ def test_validation_header_with_api_rest_resolver(handler_func, expected_status_
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -739,9 +763,10 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
     # GIVEN a APIGatewayHttpResolver with validation enabled
     app = APIGatewayHttpResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_HTTP["rawPath"] = "/users"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_HTTP["requestContext"]["http"]["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_HTTP)
+    event["rawPath"] = "/users"
+    event["requestContext"]["http"]["method"] = "GET"
+    event["requestContext"]["http"]["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -770,7 +795,7 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT_HTTP["headers"] = None
+        event["headers"] = None
 
         @app.get("/users")
         def handler4():
@@ -778,7 +803,7 @@ def test_validation_header_with_http_rest_resolver(handler_func, expected_status
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_HTTP, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -799,7 +824,8 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
     # GIVEN a ALBResolver with validation enabled
     app = ALBResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_ALB["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_ALB)
+    event["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -828,7 +854,7 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT_ALB["multiValueHeaders"] = None
+        event["multiValueHeaders"] = None
 
         @app.get("/users")
         def handler4():
@@ -836,7 +862,7 @@ def test_validation_header_with_alb_resolver(handler_func, expected_status_code,
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_ALB, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -857,9 +883,10 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
     # GIVEN a LambdaFunctionUrlResolver with validation enabled
     app = LambdaFunctionUrlResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_LAMBDA_URL["rawPath"] = "/users"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["method"] = "GET"
-    LOAD_GW_EVENT_LAMBDA_URL["requestContext"]["http"]["path"] = "/users"
+    event = deepcopy(LOAD_GW_EVENT_LAMBDA_URL)
+    event["rawPath"] = "/users"
+    event["requestContext"]["http"]["method"] = "GET"
+    event["requestContext"]["http"]["path"] = "/users"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -888,7 +915,7 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT_LAMBDA_URL["headers"] = None
+        event["headers"] = None
 
         @app.get("/users")
         def handler4():
@@ -896,7 +923,7 @@ def test_validation_header_with_lambda_url_resolver(handler_func, expected_statu
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_LAMBDA_URL, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -917,8 +944,9 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
     # GIVEN a VPCLatticeResolver with validation enabled
     app = VPCLatticeResolver(enable_validation=True)
 
-    LOAD_GW_EVENT_VPC_LATTICE_V1["raw_path"] = "/users"
-    LOAD_GW_EVENT_VPC_LATTICE_V1["method"] = "GET"
+    event = deepcopy(LOAD_GW_EVENT_VPC_LATTICE_V1)
+    event["raw_path"] = "/users"
+    event["method"] = "GET"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -947,7 +975,7 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT_VPC_LATTICE_V1["headers"] = None
+        event["headers"] = None
 
         @app.get("/users")
         def handler4():
@@ -955,7 +983,7 @@ def test_validation_header_with_vpc_lattice_v1_resolver(handler_func, expected_s
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_VPC_LATTICE_V1, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -976,8 +1004,9 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
     # GIVEN a VPCLatticeV2Resolver with validation enabled
     app = VPCLatticeV2Resolver(enable_validation=True)
 
-    LOAD_GW_EVENT_VPC_LATTICE["path"] = "/users"
-    LOAD_GW_EVENT_VPC_LATTICE["method"] = "GET"
+    event = deepcopy(LOAD_GW_EVENT_VPC_LATTICE)
+    event["path"] = "/users"
+    event["method"] = "GET"
     # WHEN a handler is defined with various parameters and routes
 
     # Define handler1 with correct params
@@ -1006,7 +1035,7 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
 
     # Define handler4 without params
     if handler_func == "handler4_without_header_params":
-        LOAD_GW_EVENT_VPC_LATTICE["headers"] = None
+        event["headers"] = None
 
         @app.get("/users")
         def handler3():
@@ -1014,7 +1043,7 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
 
     # THEN the handler should be invoked with the expected result
     # AND the status code should match the expected_status_code
-    result = app(LOAD_GW_EVENT_VPC_LATTICE, {})
+    result = app(event, {})
     assert result["statusCode"] == expected_status_code
 
     # IF expected_error_text is provided, THEN check for its presence in the response body
@@ -1023,9 +1052,9 @@ def test_validation_header_with_vpc_lattice_v2_resolver(handler_func, expected_s
 
 
 def test_validation_with_alias():
-    # GIVEN a Http API V2 proxy type event
+    # GIVEN a REST API V2 proxy type event
     app = APIGatewayRestResolver(enable_validation=True)
-    event = load_event("apiGatewayProxyEvent.json")
+    event = deepcopy(LOAD_GW_EVENT)
 
     class FunkyTown(BaseModel):
         parameter: str
@@ -1038,5 +1067,26 @@ def test_validation_with_alias():
         assert parameter == "value1"
         return Response(200, content_types.APPLICATION_JSON, FunkyTown(parameter=parameter))
 
+    result = app(event, {})
+    assert result["statusCode"] == 200
+
+
+def test_validation_with_http_single_param():
+    # GIVEN a HTTP API V2 proxy type event
+    app = APIGatewayHttpResolver(enable_validation=True)
+    event = deepcopy(LOAD_GW_EVENT_HTTP)
+
+    class FunkyTown(BaseModel):
+        parameter: str
+
+    # WHEN a handler is defined with a single parameter
+    @app.post("/my/path")
+    def my_path(
+        parameter2: str,
+    ) -> Response[FunkyTown]:
+        assert parameter2 == "value"
+        return Response(200, content_types.APPLICATION_JSON, FunkyTown(parameter=parameter2))
+
+    # THEN the handler should be invoked and return 200
     result = app(event, {})
     assert result["statusCode"] == 200

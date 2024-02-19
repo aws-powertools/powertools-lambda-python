@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any, Dict, Optional, overload
+from typing import Any, Dict, List, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -73,8 +73,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         name: str,
         default_value: str,
         case_sensitive: Optional[bool] = False,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def get_header_value(
@@ -82,8 +81,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: Optional[bool] = False,
-    ) -> Optional[str]:
-        ...
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,
@@ -141,8 +139,11 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         return self["query_string_parameters"]
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.query_string_parameters
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
+        if self.query_string_parameters is not None:
+            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
+            return query_string
+        return None
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
@@ -264,8 +265,14 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
         return self.get("queryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.query_string_parameters
+    def resolved_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
+        if self.query_string_parameters is not None:
+            query_string = {
+                key: value.split(",") if not isinstance(value, list) else value
+                for key, value in self.query_string_parameters.items()
+            }
+            return query_string
+        return None
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, str]]:
