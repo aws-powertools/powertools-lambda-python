@@ -1,10 +1,11 @@
+from __future__ import annotations
+
 from datetime import datetime, tzinfo
 from typing import Any, Dict, Optional
 
 from dateutil.tz import gettz
 
 from .schema import HOUR_MIN_SEPARATOR, ModuloRangeValues, TimeValues
-from .exceptions import SchemaValidationError
 
 
 def _get_now_from_timezone(timezone: Optional[tzinfo]) -> datetime:
@@ -85,41 +86,64 @@ def compare_modulo_range(context_value: int, condition_value: Dict) -> bool:
     return start <= context_value % base <= end
 
 
-def compare_any_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
-        raise SchemaValidationError()
-    
-    results = False
-    for key in key_list:
-        if key in value_list:
-            results = True
-            break
-        
-    return results
+def compare_any_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for ANY_IN_VALUE action
+
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
+
+    Returns
+    -------
+    bool
+        Whether any list item in context_value is available in condition_value
+    """
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare ANY_IN_VALUE action.")
+
+    return any(key in condition_value for key in context_value)
 
 
-def compare_all_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
-        raise SchemaValidationError()
+def compare_all_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for ALL_IN_VALUE action
 
-    results = True
-    for key in key_list:
-        if key not in value_list:
-            results = False
-            break
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
 
-    return results
+    Returns
+    -------
+    bool
+        Whether all list items in context_value are available in condition_value
+    """
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare ALL_IN_VALUE action.")
+
+    return all(key in condition_value for key in context_value)
 
 
-def compare_none_in_list(key_list, value_list):
-    if not (isinstance(key_list, list) and isinstance(value_list, list)):
-        raise SchemaValidationError()
+def compare_none_in_list(context_value: list, condition_value: list) -> bool:
+    """Comparator for NONE_IN_VALUE action
 
-    results = True
-    for key in key_list:
-        if key in value_list:
-            results = False
-            break
+    Parameters
+    ----------
+    context_value : list
+        user-defined context for flag evaluation
+    condition_value : list
+        schema value available for condition being evaluated
 
-    return results
+    Returns
+    -------
+    bool
+        Whether list items in context_value are **not** available in condition_value
+    """
+    if not isinstance(context_value, list):
+        raise ValueError("Context provided must be a list. Unable to compare NONE_IN_VALUE action.")
 
+    return all(key not in condition_value for key in context_value)
