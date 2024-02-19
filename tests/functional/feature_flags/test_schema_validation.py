@@ -1,8 +1,8 @@
-import logging
 import re
 
-import pytest  # noqa: F401
+import pytest
 
+from aws_lambda_powertools.logging.logger import Logger  # noqa: F401
 from aws_lambda_powertools.utilities.feature_flags.exceptions import (
     SchemaValidationError,
 )
@@ -23,8 +23,6 @@ from aws_lambda_powertools.utilities.feature_flags.schema import (
     TimeKeys,
     TimeValues,
 )
-
-logger = logging.getLogger(__name__)
 
 EMPTY_SCHEMA = {"": ""}
 
@@ -441,7 +439,7 @@ def test_validate_time_condition_between_time_range_invalid_condition_value():
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match=f"SCHEDULE_BETWEEN_TIME_RANGE action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -460,7 +458,7 @@ def test_validate_time_condition_between_time_range_invalid_condition_value_no_s
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match="'START' and 'END' must be a valid time format",
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -477,10 +475,7 @@ def test_validate_time_condition_between_time_range_invalid_condition_value_no_e
 
     # WHEN calling validate_condition
     # THEN raise SchemaValidationError
-    with pytest.raises(
-        SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_TIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
-    ):
+    with pytest.raises(SchemaValidationError, match="'START' and 'END' must be a valid time format"):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
 
@@ -649,7 +644,7 @@ def test_a_validate_time_condition_between_datetime_range_invalid_condition_valu
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match=f"SCHEDULE_BETWEEN_DATETIME_RANGE action must have a dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -668,7 +663,7 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match=f"'START' and 'END' must be a valid ISO8601 time format, rule={rule_name}",
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -687,7 +682,7 @@ def test_validate_time_condition_between_datetime_range_invalid_condition_value_
     # THEN raise SchemaValidationError
     with pytest.raises(
         SchemaValidationError,
-        match=f"condition with a 'SCHEDULE_BETWEEN_DATETIME_RANGE' action must have a condition value type dictionary with 'START' and 'END' keys, rule={rule_name}",  # noqa: E501
+        match="'START' and 'END' must not include timezone information.*",
     ):
         ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
 
@@ -1032,3 +1027,48 @@ def test_validate_modulo_range_condition_valid():
     # WHEN calling validate_condition
     # THEN nothing is raised
     ConditionsValidator.validate_condition_value(condition=condition, rule_name="dummy")
+
+
+def test_validate_any_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.ANY_IN_VALUE.value,
+        CONDITION_VALUE: "Gerald",
+    }
+
+    rule_name = "non-list value for ANY_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="ANY_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_all_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.ALL_IN_VALUE.value,
+        CONDITION_VALUE: "Leandro",
+    }
+
+    rule_name = "non-list value for ALL_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="ALL_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)
+
+
+def test_validate_none_in_value_condition_invalid_value():
+    # GIVEN a schema with a ANY_IN_VALUE action with non-list value
+    condition = {
+        CONDITION_ACTION: RuleAction.NONE_IN_VALUE.value,
+        CONDITION_VALUE: "Heitor",
+    }
+
+    rule_name = "non-list value for NONE_IN_VALUE"
+
+    # WHEN calling validate_condition
+    # THEN raise SchemaValidationError
+    with pytest.raises(SchemaValidationError, match="NONE_IN_VALUE action must have a list"):
+        ConditionsValidator.validate_condition_value(condition=condition, rule_name=rule_name)

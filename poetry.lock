@@ -158,13 +158,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.127.0"
+version = "2.128.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.127.0.tar.gz", hash = "sha256:ed4ace6dc0ed42cb980b2ff833c685f6fe64b3bfad94676b6ea2ee3dfa161dc8"},
-    {file = "aws_cdk_lib-2.127.0-py3-none-any.whl", hash = "sha256:abbb50bd9100cdbcc789d098457f60c842efe0f56f8571345f3603be5cc52b38"},
+    {file = "aws-cdk-lib-2.128.0.tar.gz", hash = "sha256:796459062daa0dbe0581925874db121d4c220295c6c35e73dedfe39e82ca301f"},
+    {file = "aws_cdk_lib-2.128.0-py3-none-any.whl", hash = "sha256:49170b21cb738d30d67f7aa361b78ba3a8b711f8dd15523cbfe64710f9386553"},
 ]
 
 [package.dependencies]
@@ -485,13 +485,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.85.1"
+version = "0.85.2"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.85.1.tar.gz", hash = "sha256:f003603a6f13bcda125c60f5021fc19b96f18a27ebc44498947709cb7627d0d6"},
-    {file = "cfn_lint-0.85.1-py3-none-any.whl", hash = "sha256:5d5b31609ded0bc513f1c57c0dc0017ec1613c2b33ef8e74802149bedb01a3de"},
+    {file = "cfn-lint-0.85.2.tar.gz", hash = "sha256:f8a5cc55daeaaa747b8d776dcf62fe1b6bfb8cb46ae60950cbe627601facccd7"},
+    {file = "cfn_lint-0.85.2-py3-none-any.whl", hash = "sha256:e7a0aafb9ad93dbe5db54cbefca92a94f2d173309218273ef997ecb048125d89"},
 ]
 
 [package.dependencies]
@@ -1925,13 +1925,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.34.0"
-description = "Type annotations for boto3.Lambda 1.34.0 service generated with mypy-boto3-builder 7.21.0"
+version = "1.34.44"
+description = "Type annotations for boto3.Lambda 1.34.44 service generated with mypy-boto3-builder 7.23.1"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-lambda-1.34.0.tar.gz", hash = "sha256:e74c0ce548da747a8c6e643c39dad8aa54d67e057f57740ec780a7e565590627"},
-    {file = "mypy_boto3_lambda-1.34.0-py3-none-any.whl", hash = "sha256:109a7e126e84d6da6cacf8ab5c7c6f2be022417fe7bfb7f9b019767d7034f73b"},
+    {file = "mypy-boto3-lambda-1.34.44.tar.gz", hash = "sha256:b465e00c33267ceffdf3040c9562755d73aee21902a16d9b84294f7f0e378ab9"},
+    {file = "mypy_boto3_lambda-1.34.44-py3-none-any.whl", hash = "sha256:0ef2063a00fad20a4fc096720a8c5c43b08a133cf27738ba9b1c70ea71b271b9"},
 ]
 
 [package.dependencies]
@@ -1967,13 +1967,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.34.17"
-description = "Type annotations for boto3.SecretsManager 1.34.17 service generated with mypy-boto3-builder 7.23.1"
+version = "1.34.43"
+description = "Type annotations for boto3.SecretsManager 1.34.43 service generated with mypy-boto3-builder 7.23.1"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.34.17.tar.gz", hash = "sha256:a547932d99c3f711b27b9ea1c38fc063050910c0bf6c8eb346abd96ace61668e"},
-    {file = "mypy_boto3_secretsmanager-1.34.17-py3-none-any.whl", hash = "sha256:0dbd1cdbe7992324c3414cccf0256e3905827bbf1f6a8d58c255635f6a2b4bfb"},
+    {file = "mypy-boto3-secretsmanager-1.34.43.tar.gz", hash = "sha256:abbf560775c2fe0dc383b7f70c16a1bf753d9b3ffc0caa5e35447e685783a68b"},
+    {file = "mypy_boto3_secretsmanager-1.34.43-py3-none-any.whl", hash = "sha256:64e9df58f71072f0a912ecaca626683f4536da078caa204ac07928c4b1481b8b"},
 ]
 
 [package.dependencies]
@@ -3402,4 +3402,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "21b9c95f6120a15da1da969297f3050cc32643222f2819006995d154d3c5945a"
+content-hash = "e8d75b05c3a926caf77267d46696fc0eb838f3d276387af45337cad5b28eb467"

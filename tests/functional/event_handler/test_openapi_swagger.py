@@ -73,3 +73,30 @@ def test_openapi_swagger_json_view_with_custom_path():
     assert result["multiValueHeaders"]["Content-Type"] == ["application/json"]
     assert isinstance(json.loads(result["body"]), Dict)
     assert "OpenAPI JSON View" in result["body"]
+
+
+def test_openapi_swagger_with_rest_api_default_stage():
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger()
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["path"] = "/swagger"
+    event["requestContext"]["stage"] = "$default"
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert "ui.specActions.updateUrl('/swagger?format=json')" in result["body"]
+
+
+def test_openapi_swagger_with_rest_api_stage():
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger()
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["path"] = "/swagger"
+    event["requestContext"]["stage"] = "prod"
+    event["requestContext"]["path"] = "/prod/swagger"
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert "ui.specActions.updateUrl('/prod/swagger?format=json')" in result["body"]
