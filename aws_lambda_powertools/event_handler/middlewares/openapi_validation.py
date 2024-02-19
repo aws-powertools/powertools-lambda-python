@@ -371,7 +371,7 @@ def _get_embed_body(
 def _normalize_multi_query_string_with_param(
     query_string: Optional[Dict[str, List[str]]],
     params: Sequence[ModelField],
-):
+) -> Optional[Dict[str, Any]]:
     """
     Extract and normalize resolved_query_string_parameters
 
