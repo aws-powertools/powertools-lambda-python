@@ -371,7 +371,7 @@ def _get_embed_body(
 def _normalize_multi_query_string_with_param(
     query_string: Optional[Dict[str, List[str]]],
     params: Sequence[ModelField],
-) -> Optional[Dict[str, Any]]:
+) -> Dict[str, Any]:
     """
     Extract and normalize resolved_query_string_parameters
 
@@ -387,7 +387,7 @@ def _normalize_multi_query_string_with_param(
     A dictionary containing the processed multi_query_string_parameters.
     """
     if not query_string:
-        return None
+        return {}
     else:
         resolved_query_string: Dict[str, Any] = query_string
         for param in filter(is_scalar_field, params):
