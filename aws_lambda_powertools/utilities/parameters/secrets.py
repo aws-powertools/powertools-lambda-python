@@ -126,7 +126,6 @@ class SecretsProvider(BaseProvider):
         *,  # force keyword arguments
         client_request_token: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
-        create: bool = True,
         **sdk_options,
     ) -> str:
         """
@@ -145,8 +144,6 @@ class SecretsProvider(BaseProvider):
             autopopulated if not provided.
         version_stages: list[str], optional
             Specifies a list of staging labels that are attached to this version of the secret.
-        create: bool, optional
-            Create the secret by default unless this is set to False, defaults to True
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -256,7 +253,6 @@ def set_secret(
     *,  # force keyword arguments
     client_request_token: Optional[str] = None,
     version_stages: Optional[list[str]] = None,
-    create: bool = True,
     **sdk_options,
 ) -> str:
     """
@@ -275,8 +271,6 @@ def set_secret(
         autopopulated if not provided.
     version_stages: list[str], optional
         A list of staging labels that are attached to this version of the secret.
-    create: bool, optional
-        Create the secret by default unless this is set to False, defaults to True
     sdk_options: dict, optional
         Dictionary of options that will be passed to the get_secret_value call
 
@@ -322,6 +316,5 @@ def set_secret(
         value=value,
         client_request_token=client_request_token,
         version_stages=version_stages,
-        create=create,
         **sdk_options,
     )
