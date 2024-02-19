@@ -355,7 +355,7 @@ class ConditionsValidator(BaseValidator):
         #
         # maintenance: we should split to separate file/classes for better organization, e.g., visitor pattern.
 
-        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_key")
+        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_key", None)
 
         # ~90% of actions available don't require a custom validator
         # logging a debug statement for no-match will increase CPU cycles for most customers
@@ -381,7 +381,7 @@ class ConditionsValidator(BaseValidator):
         #
         # maintenance: we should split to separate file/classes for better organization, e.g., visitor pattern.
 
-        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_value")
+        custom_validator = getattr(ConditionsValidator, f"_validate_{action.lower()}_value", None)
 
         # ~90% of actions available don't require a custom validator
         # logging a debug statement for no-match will increase CPU cycles for most customers
