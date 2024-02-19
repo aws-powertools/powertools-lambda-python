@@ -392,7 +392,7 @@ class FeatureFlags:
         return features_enabled
 
     def validation_exception_handler(self, exc_class: Exception | list[Exception]):
-        """Registers function to handle unexpected exceptions when evaluating flags.
+        """Registers function to handle unexpected validation exceptions when evaluating flags.
 
         It does not override the function of a default flag value in case of network and IAM permissions.
         For example, you won't be able to catch ConfigurationStoreError exception.
