@@ -332,15 +332,22 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'key' value must be a non empty string, rule={rule_name}")
 
         action = condition.get(CONDITION_ACTION, "")
-        # maintenance: we may need a new design if we end up with more exceptions like datetime/time range
-        # e.g., visitor pattern, registry etc.
-        validator = getattr(
+
+        # To allow for growth and prevent if/elif chains, we align extra validators based on the action name.
+        # for example:
+        #
+        # SCHEDULE_BETWEEN_DAYS_OF_WEEK_KEY
+        # - extra validation: `_validate_schedule_between_days_of_week_key`
+        #
+        # maintenance: we can split to separate file and classes for better organization later, e.g., visitor pattern.
+
+        custom_validator = getattr(
             ConditionsValidator,
             f"_validate_{action.lower()}_key",
             ConditionsValidator._validate_noop_value,
         )
 
-        validator(key, rule_name)
+        custom_validator(key, rule_name)
 
     @staticmethod
     def validate_condition_value(condition: Dict[str, Any], rule_name: str):
@@ -349,15 +356,21 @@ class ConditionsValidator(BaseValidator):
             raise SchemaValidationError(f"'value' key must not be null, rule={rule_name}")
         action = condition.get(CONDITION_ACTION, "")
 
-        # maintenance: we may need a new design if we end up with more exceptions like datetime/time range
-        # e.g., visitor pattern, registry etc.
-        validator = getattr(
+        # To allow for growth and prevent if/elif chains, we align extra validators based on the action name.
+        # for example:
+        #
+        # SCHEDULE_BETWEEN_DAYS_OF_WEEK_KEY
+        # - extra validation: `_validate_schedule_between_days_of_week_value`
+        #
+        # maintenance: we can split to separate file and classes for better organization later, e.g., visitor pattern.
+
+        custom_validator = getattr(
             ConditionsValidator,
             f"_validate_{action.lower()}_value",
             ConditionsValidator._validate_noop_value,
         )
 
-        validator(value, rule_name)
+        custom_validator(value, rule_name)
 
     @staticmethod
     def _validate_noop_value(*args, **kwargs):
