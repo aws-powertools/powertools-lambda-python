@@ -223,6 +223,22 @@ class FeatureFlags:
         2. Feature exists but has either no rules or no match, return feature default value
         3. Feature doesn't exist in stored schema, encountered an error when fetching -> return default value provided
 
+        ┌────────────────────────┐      ┌────────────────────────┐       ┌────────────────────────┐
+        │     Feature flags      │──────▶   Get Configuration    ├───────▶     Evaluate rules     │
+        └────────────────────────┘      │                        │       │                        │
+                                        │┌──────────────────────┐│       │┌──────────────────────┐│
+                                        ││     Fetch schema     ││       ││      Match rule      ││
+                                        │└───────────┬──────────┘│       │└───────────┬──────────┘│
+                                        │            │           │       │            │           │
+                                        │┌───────────▼──────────┐│       │┌───────────▼──────────┐│
+                                        ││     Cache schema     ││       ││   Match condition    ││
+                                        │└───────────┬──────────┘│       │└───────────┬──────────┘│
+                                        │            │           │       │            │           │
+                                        │┌───────────▼──────────┐│       │┌───────────▼──────────┐│
+                                        ││   Validate schema    ││       ││     Match action     ││
+                                        │└──────────────────────┘│       │└──────────────────────┘│
+                                        └────────────────────────┘       └────────────────────────┘
+
         Parameters
         ----------
         name: str
@@ -235,6 +251,31 @@ class FeatureFlags:
             default value if feature flag doesn't exist in the schema,
             or there has been an error when fetching the configuration from the store
             Can be boolean or any JSON values for non-boolean features.
+
+
+        Examples
+        --------
+
+        ```python
+        from aws_lambda_powertools.utilities.feature_flags import AppConfigStore, FeatureFlags
+        from aws_lambda_powertools.utilities.typing import LambdaContext
+
+        app_config = AppConfigStore(environment="dev", application="product-catalogue", name="features")
+
+        feature_flags = FeatureFlags(store=app_config)
+
+
+        def lambda_handler(event: dict, context: LambdaContext):
+            # Get customer's tier from incoming request
+            ctx = {"tier": event.get("tier", "standard")}
+
+            # Evaluate whether customer's tier has access to premium features
+            # based on `has_premium_features` rules
+            has_premium_features: bool = feature_flags.evaluate(name="premium_features", context=ctx, default=False)
+            if has_premium_features:
+                # enable premium features
+                ...
+        ```
 
         Returns
         ------
@@ -351,6 +392,28 @@ class FeatureFlags:
         return features_enabled
 
     def exception_handler(self, exc_class: Exception | list[Exception]):
+        """Registers function to handle unexpected exceptions when evaluating flags.
+
+        It does not override the function of a default flag value in case of network and IAM permissions.
+        For example, you won't be able to catch ConfigurationStoreError exception.
+
+        Parameters
+        ----------
+        exc_class : Exception | list[Exception]
+            One or more exceptions to catch
+
+        Examples
+        --------
+
+        ```python
+        feature_flags = FeatureFlags(store=app_config)
+
+        @feature_flags.exception_handler(Exception)  # any exception
+        def catch_exception(exc):
+            raise TypeError("re-raised") from exc
+        ```
+        """
+
         def register_exception_handler(func: Callable[P, T]) -> Callable[P, T]:
             if isinstance(exc_class, list):
                 for exp in exc_class:
