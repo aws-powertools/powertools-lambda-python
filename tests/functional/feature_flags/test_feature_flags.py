@@ -1410,3 +1410,260 @@ def test_get_all_enabled_features_non_boolean_truthy_defaults(mocker, config):
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
     enabled_list: List[str] = feature_flags.get_enabled_features(context={"tenant_id": "6", "username": "a"})
     assert enabled_list == expected_value
+
+
+def test_flags_any_in_value_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Gerald"]},
+        default=False,
+    )
+    assert toggle == expected_value
+
+
+def test_flags_any_in_value_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Simon"]},
+        default=False,
+    )
+    assert toggle == expected_value
+
+
+def test_flags_all_in_value_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ALL_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Gerald"]},
+        default=False,
+    )
+
+    assert toggle == expected_value
+
+
+def test_flags_all_in_value_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ALL_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Gerald", "Simon"]},
+        default=False,
+    )
+
+    assert toggle == expected_value
+
+
+def test_flags_none_in_value_match(mocker, config):
+    expected_value = True
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NONE_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Rubao"]},
+        default=False,
+    )
+
+    assert toggle == expected_value
+
+
+def test_flags_none_in_value_no_match(mocker, config):
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.NONE_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": ["Heitor"]},
+        default=False,
+    )
+
+    assert toggle == expected_value
+
+
+@pytest.mark.parametrize(
+    "intersection_action",
+    [
+        RuleAction.ALL_IN_VALUE.value,
+        RuleAction.ANY_IN_VALUE.value,
+        RuleAction.NONE_IN_VALUE.value,
+    ],
+)
+def test_intersection_non_list_value(mocker, config, intersection_action):
+    # GIVEN a schema with list intersection action
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": intersection_action,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    # WHEN a context value isn't a list
+    toggle = feature_flags.evaluate(
+        name="my_feature",
+        context={"tenant_id": "not a list value"},
+        default=False,
+    )
+
+    # THEN TypeError should be swallowed and use default value
+    assert toggle == expected_value
+
+
+def test_exception_handler(mocker, config):
+    # GIVEN a schema with list intersection action
+    expected_value = False
+    mocked_app_config_schema = {
+        "my_feature": {
+            "default": False,
+            "rules": {
+                "tenant_id is in allowed list": {
+                    "when_match": expected_value,
+                    "conditions": [
+                        {
+                            "action": RuleAction.ANY_IN_VALUE.value,
+                            "key": "tenant_id",
+                            "value": ["Łukasz", "Gerald", "Leandro", "Heitor"],
+                        },
+                    ],
+                },
+            },
+        },
+    }
+
+    feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
+
+    @feature_flags.validation_exception_handler(ValueError)
+    def catch_exception(exc):
+        raise TypeError("re-raised")
+
+    # WHEN a context value isn't a list
+    # THEN exception handler should be able to intercept and raise, instead of returning `False`
+    with pytest.raises(TypeError):
+        feature_flags.evaluate(
+            name="my_feature",
+            context={"tenant_id": "not a list value"},
+            default=False,
+        )

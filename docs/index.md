@@ -56,8 +56,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`.
 
-    * **x86 architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-    * **ARM architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+    * **x86 architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+    * **ARM architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
 
     ???+ note "Code snippets for popular infrastructure as code frameworks"
 
@@ -70,7 +70,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                     Type: AWS::Serverless::Function
                     Properties:
                         Layers:
-                            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61
+                            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62
                 ```
 
             === "Serverless framework"
@@ -80,7 +80,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             		hello:
             		  handler: lambda_function.lambda_handler
             		  layers:
-            			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61
+            			- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62
                 ```
 
             === "CDK"
@@ -96,7 +96,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
                             self,
                             id="lambda-powertools",
-                            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61"
+                            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62"
                         )
                         aws_lambda.Function(self,
                             'sample-app-lambda',
@@ -145,7 +145,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                   role          = aws_iam_role.iam_for_lambda.arn
                   handler       = "index.test"
                   runtime 		= "python3.9"
-                  layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61"]
+                  layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62"]
 
                   source_code_hash = filebase64sha256("lambda_function_payload.zip")
                 }
@@ -198,7 +198,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 ? Do you want to configure advanced settings? Yes
                 ...
                 ? Do you want to enable Lambda layers for this function? Yes
-                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61
+                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62
                 ❯ amplify push -y
 
 
@@ -209,7 +209,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 - Name: <NAME-OF-FUNCTION>
                 ? Which setting do you want to update? Lambda layers configuration
                 ? Do you want to enable Lambda layers for this function? Yes
-                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61
+                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62
                 ? Do you want to edit the local lambda function now? No
                 ```
 
@@ -223,7 +223,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                     Properties:
                         Architectures: [arm64]
                         Layers:
-                            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61
+                            - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62
                 ```
 
             === "Serverless framework"
@@ -234,7 +234,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             		    handler: lambda_function.lambda_handler
                         architecture: arm64
             		    layers:
-            		  	- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61
+            		  	- arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62
                 ```
 
             === "CDK"
@@ -250,7 +250,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
                             self,
                             id="lambda-powertools",
-                            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61"
+                            layer_version_arn=f"arn:aws:lambda:{env.region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62"
                         )
                         aws_lambda.Function(self,
                             'sample-app-lambda',
@@ -300,7 +300,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                   role          = aws_iam_role.iam_for_lambda.arn
                   handler       = "index.test"
                   runtime 		= "python3.9"
-                  layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61"]
+                  layers 		= ["arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62"]
                   architectures = ["arm64"]
 
                   source_code_hash = filebase64sha256("lambda_function_payload.zip")
@@ -356,7 +356,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 ? Do you want to configure advanced settings? Yes
                 ...
                 ? Do you want to enable Lambda layers for this function? Yes
-                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61
+                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62
                 ❯ amplify push -y
 
 
@@ -367,7 +367,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 - Name: <NAME-OF-FUNCTION>
                 ? Which setting do you want to update? Lambda layers configuration
                 ? Do you want to enable Lambda layers for this function? Yes
-                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61
+                ? Enter up to 5 existing Lambda layer ARNs (comma-separated): arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62
                 ? Do you want to edit the local lambda function now? No
                 ```
 
@@ -414,74 +414,74 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
         | Region           | Layer ARN                                                                                                  |
         | ---------------- | ---------------------------------------------------------------------------------------------------------- |
-        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
+        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
         | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
-        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ap-southeast-4` | [arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard: |
-        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:   |
-        | `ca-west-1`      | [arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:   |
-        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:   |
-        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `il-central-1`   | [arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:   |
-        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:   |
-        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:     |
-        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
-        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:61](#){: .copyMe}:clipboard:      |
+        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ap-southeast-4` | [arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard: |
+        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:   |
+        | `ca-west-1`      | [arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:   |
+        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:   |
+        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `il-central-1`   | [arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:   |
+        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:   |
+        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:     |
+        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
+        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:62](#){: .copyMe}:clipboard:      |
 
     === "arm64"
 
         | Region           | Layer ARN                                                                                                        |
         | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
-        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
+        | `af-south-1`     | [arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `ap-east-1`      | [arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `ap-northeast-1` | [arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
+        | `ap-northeast-2` | [arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
+        | `ap-northeast-3` | [arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
         | `ap-south-1`     | [arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
-        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard: |
-        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:   |
-        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:   |
-        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:   |
-        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `il-central-1`   | [arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:   |
-        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:   |
-        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:     |
-        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
-        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:61](#){: .copyMe}:clipboard:      |
+        | `ap-south-2`     | [arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `ap-southeast-1` | [arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
+        | `ap-southeast-2` | [arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
+        | `ap-southeast-3` | [arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard: |
+        | `ca-central-1`   | [arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:   |
+        | `eu-central-1`   | [arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:   |
+        | `eu-central-2`   | [arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:   |
+        | `eu-north-1`     | [arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `eu-south-1`     | [arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `eu-south-2`     | [arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `eu-west-1`      | [arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `eu-west-2`      | [arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `eu-west-3`      | [arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `il-central-1`   | [arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:   |
+        | `me-central-1`   | [arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:   |
+        | `me-south-1`     | [arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:     |
+        | `sa-east-1`      | [arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `us-east-1`      | [arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `us-east-2`      | [arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `us-west-1`      | [arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
+        | `us-west-2`      | [arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:62](#){: .copyMe}:clipboard:      |
 
 **Want to inspect the contents of the Layer?**
 
 Replace `{region}` with your AWS region, _e.g. `eu-west-1`_. The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output.
 
 ```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:61 --region {region}
+aws lambda get-layer-version-by-arn --arn arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:62 --region {region}
 ```
 
 #### SAR
