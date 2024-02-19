@@ -1655,7 +1655,7 @@ def test_exception_handler(mocker, config):
 
     feature_flags = init_feature_flags(mocker, mocked_app_config_schema, config)
 
-    @feature_flags.exception_handler(ValueError)
+    @feature_flags.validation_exception_handler(ValueError)
     def catch_exception(exc):
         raise TypeError("re-raised")
 

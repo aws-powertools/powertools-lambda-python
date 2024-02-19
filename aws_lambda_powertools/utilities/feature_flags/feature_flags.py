@@ -391,7 +391,7 @@ class FeatureFlags:
 
         return features_enabled
 
-    def exception_handler(self, exc_class: Exception | list[Exception]):
+    def validation_exception_handler(self, exc_class: Exception | list[Exception]):
         """Registers function to handle unexpected exceptions when evaluating flags.
 
         It does not override the function of a default flag value in case of network and IAM permissions.
@@ -408,7 +408,7 @@ class FeatureFlags:
         ```python
         feature_flags = FeatureFlags(store=app_config)
 
-        @feature_flags.exception_handler(Exception)  # any exception
+        @feature_flags.validation_exception_handler(Exception)  # any exception
         def catch_exception(exc):
             raise TypeError("re-raised") from exc
         ```
