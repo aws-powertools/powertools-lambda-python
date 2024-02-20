@@ -406,6 +406,8 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
+    # GIVEN an idempotent record already exists for the same transaction
+    # and payload validation was enabled ('validation' key)
     stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
         "Item": {
@@ -423,8 +425,11 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     def lambda_handler(event, context):
         return lambda_response
 
+    # WHEN the subsequent request is the same but validated field is tampered
+    lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
+
+    # THEN we should raise
     with pytest.raises(IdempotencyValidationError):
-        lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
         lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
@@ -1172,11 +1177,9 @@ class MockPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord) -> None:
         assert data_record.idempotency_key == self.expected_idempotency_key
 
-    def _get_record(self, idempotency_key) -> DataRecord:
-        ...
+    def _get_record(self, idempotency_key) -> DataRecord: ...
 
-    def _delete_record(self, data_record: DataRecord) -> None:
-        ...
+    def _delete_record(self, data_record: DataRecord) -> None: ...
 
 
 def test_idempotent_lambda_event_source(lambda_context):
