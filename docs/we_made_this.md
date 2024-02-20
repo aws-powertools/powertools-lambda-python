@@ -39,6 +39,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){:target="_blank"}
 
+* [Serverless API Documentation with Powertools for AWS](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
