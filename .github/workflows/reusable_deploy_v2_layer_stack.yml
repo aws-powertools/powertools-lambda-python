@@ -193,7 +193,7 @@ jobs:
         run: |
           mkdir cdk-layer-stack
           jq -r -c '.LayerV2Stack.LatestLayerArn' cdk-outputs.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
-          jq -r -c '.LayerV2Stack.LatestLayerArm64Arn' cdk-outputs.json >> cdk-layer-stack/${{ matrix.region }}-layer-version.txt
+          jq -r -c '.LayerV2Stack.LatestLayerArm64Arn' cdk-outputs.json > cdk-layer-stack/${{ matrix.region }}-layer-version.txt
           cat cdk-layer-stack/${{ matrix.region }}-layer-version.txt
       - name: Save Layer ARN artifact
         if: ${{ inputs.stage == 'PROD' }}
