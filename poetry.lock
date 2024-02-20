@@ -2067,6 +2067,33 @@ deprecated = ">=1.2.6"
 importlib-metadata = ">=6.0,<7.0"
 
 [[package]]
+name = "opentelemetry-sdk"
+version = "1.22.0"
+description = "OpenTelemetry Python SDK"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "opentelemetry_sdk-1.22.0-py3-none-any.whl", hash = "sha256:a730555713d7c8931657612a88a141e3a4fe6eb5523d9e2d5a8b1e673d76efa6"},
+    {file = "opentelemetry_sdk-1.22.0.tar.gz", hash = "sha256:45267ac1f38a431fc2eb5d6e0c0d83afc0b78de57ac345488aa58c28c17991d0"},
+]
+
+[package.dependencies]
+opentelemetry-api = "1.22.0"
+opentelemetry-semantic-conventions = "0.43b0"
+typing-extensions = ">=3.7.4"
+
+[[package]]
+name = "opentelemetry-semantic-conventions"
+version = "0.43b0"
+description = "OpenTelemetry Semantic Conventions"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "opentelemetry_semantic_conventions-0.43b0-py3-none-any.whl", hash = "sha256:291284d7c1bf15fdaddf309b3bd6d3b7ce12a253cec6d27144439819a15d8445"},
+    {file = "opentelemetry_semantic_conventions-0.43b0.tar.gz", hash = "sha256:b9576fb890df479626fa624e88dde42d3d60b8b6c8ae1152ad157a8b97358635"},
+]
+
+[[package]]
 name = "packaging"
 version = "23.2"
 description = "Core utilities for Python packages"
@@ -3402,4 +3429,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7.4"
-content-hash = "a9db62332c148ebb92c77e667cc75da0062ff2626af1255c0bfa2642bd587240"
+content-hash = "cb1f8062892aeece0e0331a70a80f99f895b76af9eae104c80ab76b3ef40251d"

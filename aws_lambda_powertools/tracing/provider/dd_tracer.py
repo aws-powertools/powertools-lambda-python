@@ -7,7 +7,7 @@ from typing import Any, Generator, List, Optional, Sequence
 
 import ddtrace
 
-from .base import BaseProvider, BaseSegment
+from ..base import BaseProvider, BaseSegment
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +47,8 @@ class DDSpan(BaseSegment):
                 self.dd_span.set_exc_info(exc_type, exc_val, exc_tb)
             print("exited")
             self.close()
-        except Exception:
-            logger.exception("error closing trace")
+        except Exception as e:
+            logger.exception(f"error closing trace {e}")
 
 
 class DDTraceProvider(BaseProvider):
@@ -77,7 +77,7 @@ class DDTraceProvider(BaseProvider):
         self.dd_tracer.context_provider.active().set_tag(key=key, value=value)
 
     def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
-        self.dd_tracer.context_provider.active().set_tag(key=f"{namespace},{key}", value=value)
+        self.dd_tracer.context_provider.active().set_tag(key=f"{namespace}.{key}", value=value)
 
     def patch(self, modules: Sequence[str]) -> None:
         module_to_patch = {}

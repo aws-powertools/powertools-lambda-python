@@ -17,6 +17,7 @@ class BaseSegment(abc.ABC):
         Parameters
         ----------
         end_time: int
+        # TO-discuss: Providers typically use ns(time_ns -> nanosecond) as start or close time
             Time in epoch seconds, by default current time will be used.
         """
 

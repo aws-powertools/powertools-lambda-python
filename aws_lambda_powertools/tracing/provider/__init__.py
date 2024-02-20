@@ -1,3 +1,4 @@
-from .xray_provider import Xray_provider
+from .dd_tracer import DDTraceProvider
+from .otel_tracer import OtelProvider
 
-__all__ = ["Xray_provider"]
+__all__ = ["DDTraceProvider", "OtelProvider"]
