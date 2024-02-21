@@ -136,11 +136,10 @@ class AppSyncResolver(Router):
 
         self.lambda_context = context
 
-        response = (
-            self._call_batch_resolver(event=event, data_model=data_model)
-            if isinstance(event, list)
-            else self._call_single_resolver(event=event, data_model=data_model)
-        )
+        if isinstance(event, list):
+            response = self._call_batch_resolver(event=event, data_model=data_model)
+        else:
+            response = self._call_single_resolver(event=event, data_model=data_model)
 
         self.clear_context()
 
