@@ -83,13 +83,8 @@ class BaseResolverRegistry(ABC):
         raise NotImplementedError
 
 
-class BasePublic(ABC):
-    """
-    Abstract base class for public interface methods for resolver.
-
-    This class outlines the methods that must be implemented by subclasses to manage resolvers and
-    context information.
-    """
+class BaseRouter(ABC):
+    """Abstract base class for Router (resolvers)"""
 
     @abstractmethod
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
@@ -224,7 +219,7 @@ class BasePublic(ABC):
     @abstractmethod
     def append_context(self, **additional_context) -> None:
         """
-        Append additional context information.
+        Appends context information available under any route.
 
         Parameters
         -----------

@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from aws_lambda_powertools.event_handler.graphql_appsync.base import BasePublic, BaseResolverRegistry
+from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseResolverRegistry, BaseRouter
 
 logger = logging.getLogger(__name__)
 
@@ -84,7 +84,7 @@ class ResolverRegistry(BaseResolverRegistry):
         return resolver
 
 
-class Router(BasePublic):
+class Router(BaseRouter):
     def __init__(self):
         self._resolver_registry: BaseResolverRegistry = ResolverRegistry()
         self._batch_resolver_registry: BaseResolverRegistry = ResolverRegistry()
