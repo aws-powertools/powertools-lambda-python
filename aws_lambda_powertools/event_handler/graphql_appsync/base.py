@@ -176,7 +176,7 @@ class BasePublic(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def batch_async_resolver(
+    def async_batch_resolver(
         self,
         type_name: str = "*",
         field_name: Optional[str] = None,
@@ -206,7 +206,7 @@ class BasePublic(ABC):
 
         app = AppSyncResolver()
 
-        @app.batch_async_resolver(type_name="Query", field_name="getPost")
+        @app.async_batch_resolver(type_name="Query", field_name="getPost")
         async def related_posts(event: AppSyncResolverEvent, id) -> Optional[list]:
             return {"post_id": id}
 

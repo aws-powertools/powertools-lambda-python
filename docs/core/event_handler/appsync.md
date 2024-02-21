@@ -290,7 +290,7 @@ You can use `append_context` when you want to share data between your App and Ro
 
 ### Batch processing
 
-We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` or `@batch_async_resolver` decorators.
+We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` or `@async_batch_resolver` decorators.
 
 ???+ info
     If you want to understand more how to configure batch processing for the AppSync, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.

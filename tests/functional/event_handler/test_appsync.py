@@ -451,7 +451,7 @@ def test_async_resolve_batch_processing_with_raise_on_exception():
 
     app = AppSyncResolver()
 
-    @app.batch_async_resolver(field_name="listLocations", raise_on_error=True)
+    @app.async_batch_resolver(field_name="listLocations", raise_on_error=True)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
@@ -556,7 +556,7 @@ def test_resolve_async_batch_processing_without_exception():
 
     app = AppSyncResolver()
 
-    @app.batch_async_resolver(field_name="listLocations", raise_on_error=False)
+    @app.async_batch_resolver(field_name="listLocations", raise_on_error=False)
     def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
@@ -670,7 +670,7 @@ def test_resolver_batch_with_sync_and_async_resolver_at_same_time():
     def get_locations(event: AppSyncResolverEvent, name: str) -> str:
         return "get_locations#" + name + "#" + event.source["id"]
 
-    @router.batch_async_resolver(type_name="Query", field_name="listCars")
+    @router.async_batch_resolver(type_name="Query", field_name="listCars")
     async def get_locations_async(event: AppSyncResolverEvent, name: str) -> str:
         return "get_locations#" + name + "#" + event.source["id"]
 
@@ -775,7 +775,7 @@ def test_resolve_async_batch_processing():
 
     app = AppSyncResolver()
 
-    @app.batch_async_resolver(field_name="listLocations")
+    @app.async_batch_resolver(field_name="listLocations")
     async def create_something(event: AppSyncResolverEvent) -> Optional[list]:
         return event.source["id"] if event.source else None
 
@@ -791,7 +791,7 @@ def test_resolve_async_batch_and_sync_singular_processing():
     app = AppSyncResolver()
     router = Router()
 
-    @router.batch_async_resolver(type_name="Query", field_name="listLocations")
+    @router.async_batch_resolver(type_name="Query", field_name="listLocations")
     async def get_locations(event: AppSyncResolverEvent, name: str) -> str:
         return "get_locations#" + name + "#" + event.source["id"]
 
@@ -831,11 +831,11 @@ def test_async_resolver_include_batch_resolver():
     app = AppSyncResolver()
     router = Router()
 
-    @router.batch_async_resolver(type_name="Query", field_name="listLocations")
+    @router.async_batch_resolver(type_name="Query", field_name="listLocations")
     async def get_locations(event: AppSyncResolverEvent, name: str) -> str:
         return "get_locations#" + name + "#" + event.source["id"]
 
-    @app.batch_async_resolver(field_name="listLocations2")
+    @app.async_batch_resolver(field_name="listLocations2")
     async def get_locations2(event: AppSyncResolverEvent, name: str) -> str:
         return "get_locations2#" + name + "#" + event.source["id"]
 

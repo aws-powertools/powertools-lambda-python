@@ -14,7 +14,7 @@ posts_related = {
 }
 
 
-@app.batch_async_resolver(type_name="Query", field_name="relatedPosts")
+@app.async_batch_resolver(type_name="Query", field_name="relatedPosts")
 async def related_posts(event: AppSyncResolverEvent, post_id: str) -> Optional[Dict]:
     return posts_related.get(post_id, None)
 

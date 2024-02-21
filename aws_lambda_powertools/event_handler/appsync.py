@@ -112,7 +112,7 @@ class Router(BasePublic):
             raise_on_error=raise_on_error,
         )
 
-    def batch_async_resolver(
+    def async_batch_resolver(
         self,
         type_name: str = "*",
         field_name: Optional[str] = None,
@@ -469,7 +469,7 @@ class AppSyncResolver(Router):
             raise_on_error=raise_on_error,
         )
 
-    def batch_async_resolver(
+    def async_batch_resolver(
         self,
         type_name: str = "*",
         field_name: Optional[str] = None,
