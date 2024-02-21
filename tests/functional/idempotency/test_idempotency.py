@@ -9,6 +9,7 @@ from botocore import stub
 from botocore.config import Config
 from pydantic import BaseModel
 from pytest import FixtureRequest
+from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
@@ -1928,3 +1929,60 @@ def test_idempotency_payload_validation_with_tampering_nested_object(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+def test_idempotency_cache_with_payload_tampering(
+    persistence_store: DynamoDBPersistenceLayer,
+    timestamp_future,
+    lambda_context,
+    request: FixtureRequest,
+    mocker: MockerFixture,
+):
+    # GIVEN an idempotency config with a compound idempotency key (refund, customer_id)
+    # AND with payload validation key to prevent tampering
+
+    cache_spy = mocker.spy(persistence_store, "_save_to_cache")
+
+    validation_key = "amount"
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath='["refund_id", "customer_id"]',
+        payload_validation_jmespath=validation_key,
+        use_local_cache=True,
+    )
+
+    # AND a previous transaction already processed in the persistent store
+    transaction = {
+        "refund_id": "ffd11882-d476-4598-bbf1-643f2be5addf",
+        "customer_id": "9e9fc440-9e65-49b5-9e71-1382ea1b1658",
+        "amount": 100,
+    }
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = build_idempotency_put_item_response_stub(
+        data=transaction,
+        expiration=timestamp_future,
+        status="COMPLETED",
+        request=request,
+        validation_data=transaction[validation_key],
+    )
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    # AND an upcoming tampered transaction
+    tampered_transaction = copy.deepcopy(transaction)
+    tampered_transaction["amount"] = 10_000
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return event
+
+    # WHEN the tampered request is made
+    with pytest.raises(IdempotencyValidationError):
+        lambda_handler(tampered_transaction, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+    # THEN we should not cache a transaction that failed validation
+    assert cache_spy.call_count == 0

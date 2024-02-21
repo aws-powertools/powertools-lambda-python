@@ -259,10 +259,10 @@ class DynamoDBPersistenceLayer(BasePersistenceLayer):
                         f"expiry_timestamp: {old_data_record.expiry_timestamp}, "
                         f"and in_progress_expiry_timestamp: {old_data_record.in_progress_expiry_timestamp}",
                     )
-                    self._save_to_cache(data_record=old_data_record)
 
                     try:
                         self._validate_payload(data_payload=data_record, stored_data_record=old_data_record)
+                        self._save_to_cache(data_record=old_data_record)
                     except IdempotencyValidationError as idempotency_validation_error:
                         raise idempotency_validation_error from exc
 
