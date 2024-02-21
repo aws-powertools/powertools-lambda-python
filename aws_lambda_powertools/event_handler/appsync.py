@@ -300,7 +300,7 @@ class AppSyncResolver(Router):
         type_name, field_name = self.current_batch_event[0].type_name, self.current_batch_event[0].field_name
 
         resolver = self._batch_resolver_registry.find_resolver(type_name, field_name)
-        async_resolver = self._batch_async_resolver_registry.find_resolver(type_name, field_name)
+        async_resolver = self._async_batch_resolver_registry.find_resolver(type_name, field_name)
 
         if resolver and async_resolver:
             warnings.warn(
@@ -333,13 +333,12 @@ class AppSyncResolver(Router):
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
-        self._resolver_registry.resolvers = router._resolver_registry.resolvers
-        self._batch_resolver_registry.resolvers = router._batch_resolver_registry.resolvers
-        self._batch_async_resolver_registry.resolvers = router._batch_async_resolver_registry.resolvers
+        self._resolver_registry.merge(router._resolver_registry)
+        self._batch_resolver_registry.merge(router._batch_resolver_registry)
+        self._async_batch_resolver_registry.merge(router._async_batch_resolver_registry)
 
-    # Interfaces
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
+        return self._resolver_registry.register(field_name=field_name, type_name=type_name)
 
     def batch_resolver(
         self,
@@ -347,7 +346,7 @@ class AppSyncResolver(Router):
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
     ) -> Callable:
-        return self._batch_resolver_registry.resolver(
+        return self._batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
@@ -359,7 +358,7 @@ class AppSyncResolver(Router):
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
     ) -> Callable:
-        return self._batch_async_resolver_registry.resolver(
+        return self._async_batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,

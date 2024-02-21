@@ -171,11 +171,11 @@ def test_resolver_include_resolver():
 
     @router.resolver(type_name="Query", field_name="listLocations")
     def get_locations(name: str):
-        return "get_locations#" + name
+        return f"get_locations#{name}"
 
     @app.resolver(field_name="listLocations2")
     def get_locations2(name: str):
-        return "get_locations2#" + name
+        return f"get_locations2#{name}"
 
     app.include_router(router)
 
@@ -201,7 +201,7 @@ def test_resolver_include_mixed_resolver():
 
     @app.resolver(field_name="listLocations2")
     def get_locations2(name: str) -> str:
-        return "get_locations2#" + name
+        return f"get_locations2#{name}"
 
     app.include_router(router)
 

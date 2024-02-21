@@ -1,24 +1,21 @@
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseResolverRegistry, BaseRouter
+from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseRouter
 
 logger = logging.getLogger(__name__)
 
 
-class ResolverRegistry(BaseResolverRegistry):
+class ResolverRegistry:
     def __init__(self):
-        self._resolvers: Dict[str, Dict[str, Any]] = {}
+        self.resolvers: Dict[str, Dict[str, Any]] = {}
 
-    @property
-    def resolvers(self) -> Dict[str, Dict[str, Any]]:
-        return self._resolvers
-
-    @resolvers.setter
-    def resolvers(self, resolvers: dict) -> None:
-        self._resolvers.update(resolvers)
-
-    def resolver(self, type_name: str = "*", field_name: Optional[str] = None, raise_on_error: bool = False):
+    def register(
+        self,
+        type_name: str = "*",
+        field_name: Optional[str] = None,
+        raise_on_error: bool = False,
+    ) -> Callable:
         """Registers the resolver for field_name
 
         Parameters
@@ -37,12 +34,12 @@ class ResolverRegistry(BaseResolverRegistry):
             A dictionary with the resolver and if raise exception on error
         """
 
-        def register(func):
+        def _register(func) -> Callable:
             logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
-            self._resolvers[f"{type_name}.{field_name}"] = {"func": func, "raise_on_error": raise_on_error}
+            self.resolvers[f"{type_name}.{field_name}"] = {"func": func, "raise_on_error": raise_on_error}
             return func
 
-        return register
+        return _register
 
     def find_resolver(self, type_name: str, field_name: str) -> Optional[Dict]:
         """Find resolver based on type_name and field_name
@@ -59,10 +56,17 @@ class ResolverRegistry(BaseResolverRegistry):
             A dictionary with the resolver and if raise exception on error
         """
 
-        resolver = self._resolvers.get(f"{type_name}.{field_name}", self._resolvers.get(f"*.{field_name}"))
-        if not resolver:
-            return None
-        return resolver
+        return self.resolvers.get(f"{type_name}.{field_name}", self.resolvers.get(f"*.{field_name}"))
+
+    def merge(self, other_registry: "ResolverRegistry"):
+        """Update current registry with incoming registry
+
+        Parameters
+        ----------
+        other_registry : ResolverRegistry
+            Registry to merge from
+        """
+        self.resolvers.update(**other_registry.resolvers)
 
 
 class Router(BaseRouter):
@@ -70,13 +74,12 @@ class Router(BaseRouter):
 
     def __init__(self):
         self.context = {}  # early init as customers might add context before event resolution
-        self._resolver_registry: BaseResolverRegistry = ResolverRegistry()
-        self._batch_resolver_registry: BaseResolverRegistry = ResolverRegistry()
-        self._batch_async_resolver_registry: BaseResolverRegistry = ResolverRegistry()
+        self._resolver_registry = ResolverRegistry()
+        self._batch_resolver_registry = ResolverRegistry()
+        self._async_batch_resolver_registry = ResolverRegistry()
 
-    # Interfaces
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
-        return self._resolver_registry.resolver(field_name=field_name, type_name=type_name)
+        return self._resolver_registry.register(field_name=field_name, type_name=type_name)
 
     def batch_resolver(
         self,
@@ -84,7 +87,7 @@ class Router(BaseRouter):
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
     ) -> Callable:
-        return self._batch_resolver_registry.resolver(
+        return self._batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
@@ -96,7 +99,7 @@ class Router(BaseRouter):
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
     ) -> Callable:
-        return self._batch_async_resolver_registry.resolver(
+        return self._async_batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
