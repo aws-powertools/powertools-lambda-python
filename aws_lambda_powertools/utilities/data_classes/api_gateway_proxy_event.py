@@ -112,7 +112,7 @@ class APIGatewayProxyEvent(BaseProxyEvent):
 
     @property
     def multi_value_headers(self) -> Dict[str, List[str]]:
-        return self["multiValueHeaders"]
+        return self.get("multiValueHeaders") or {}
 
     @property
     def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
@@ -141,12 +141,12 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return APIGatewayEventRequestContext(self._data)
 
     @property
-    def path_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("pathParameters")
+    def path_parameters(self) -> Dict[str, str]:
+        return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Optional[Dict[str, str]]:
-        return self.get("stageVariables")
+    def stage_variables(self) -> Dict[str, str]:
+        return self.get("stageVariables") or {}
 
     def header_serializer(self) -> BaseHeadersSerializer:
         return MultiValueHeadersSerializer()
