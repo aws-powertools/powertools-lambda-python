@@ -4,15 +4,16 @@
 <a name="unreleased"></a>
 # Unreleased
 
+
+<a name="v2.34.1"></a>
+## [v2.34.1] - 2024-02-21
 ## Bug Fixes
 
-* **ci:** inject PR_LABELS env for PR Label automation ([#3819](https://github.com/aws-powertools/powertools-lambda-python/issues/3819))
-* **ci:** revert layer version bump write-only back to append  ([#3818](https://github.com/aws-powertools/powertools-lambda-python/issues/3818))
+* **event-handler:** return dict on missing multi_value_headers ([#3824](https://github.com/aws-powertools/powertools-lambda-python/issues/3824))
 
 ## Maintenance
 
-* **deps-dev:** bump ruff from 0.2.1 to 0.2.2 ([#3802](https://github.com/aws-powertools/powertools-lambda-python/issues/3802))
-* **deps-dev:** bump the boto-typing group with 2 updates ([#3810](https://github.com/aws-powertools/powertools-lambda-python/issues/3810))
+* version bump
 
 
 <a name="v2.34.0"></a>
@@ -4422,7 +4423,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.0...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.1...HEAD
+[v2.34.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.0...v2.34.1
 [v2.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.1...v2.34.0
 [v2.33.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.0...v2.33.1
 [v2.33.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.32.0...v2.33.0
