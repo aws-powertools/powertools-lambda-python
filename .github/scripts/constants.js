@@ -19,6 +19,9 @@ module.exports = Object.freeze({
     "PR_IS_MERGED": process.env.PR_IS_MERGED || "false",
 
     /** @type {string} */
+    "PR_LABELS": process.env.PR_LABELS || "",
+
+    /** @type {string} */
     "LABEL_BLOCK": "do-not-merge",
 
     /** @type {string} */
