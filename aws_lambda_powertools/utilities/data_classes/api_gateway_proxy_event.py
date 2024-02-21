@@ -141,12 +141,12 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return APIGatewayEventRequestContext(self._data)
 
     @property
-    def path_parameters(self) -> Dict[str, str]:
-        return self.get("pathParameters") or {}
+    def path_parameters(self) -> Optional[Dict[str, str]]:
+        return self.get("pathParameters")
 
     @property
-    def stage_variables(self) -> Dict[str, str]:
-        return self.get("stageVariables") or {}
+    def stage_variables(self) -> Optional[Dict[str, str]]:
+        return self.get("stageVariables")
 
     def header_serializer(self) -> BaseHeadersSerializer:
         return MultiValueHeadersSerializer()
