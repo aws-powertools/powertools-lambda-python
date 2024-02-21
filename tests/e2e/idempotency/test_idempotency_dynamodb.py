@@ -1,10 +1,14 @@
 import json
+from copy import deepcopy
 from time import sleep
 
 import pytest
 
 from tests.e2e.utils import data_fetcher
-from tests.e2e.utils.data_fetcher.common import GetLambdaResponseOptions, get_lambda_response_in_parallel
+from tests.e2e.utils.data_fetcher.common import (
+    GetLambdaResponseOptions,
+    get_lambda_response_in_parallel,
+)
 
 
 @pytest.fixture
@@ -30,6 +34,11 @@ def function_thread_safety_handler_fn_arn(infrastructure: dict) -> str:
 @pytest.fixture
 def optional_idempotency_key_fn_arn(infrastructure: dict) -> str:
     return infrastructure.get("OptionalIdempotencyKeyHandlerArn", "")
+
+
+@pytest.fixture
+def payload_tampering_validation_fn_arn(infrastructure: dict) -> str:
+    return infrastructure.get("PayloadTamperingValidationHandlerArn", "")
 
 
 @pytest.fixture
@@ -186,3 +195,27 @@ def test_optional_idempotency_key(optional_idempotency_key_fn_arn: str):
     assert first_execution_response != second_execution_response
     assert first_execution_response != third_execution_response
     assert second_execution_response != third_execution_response
+
+
+@pytest.mark.xdist_group(name="idempotency")
+def test_payload_tampering_validation(payload_tampering_validation_fn_arn: str):
+    # GIVEN a transaction with the idempotency key on refund and customer IDs
+    transaction = {
+        "refund_id": "ffd11882-d476-4598-bbf1-643f2be5addf",
+        "customer_id": "9e9fc440-9e65-49b5-9e71-1382ea1b1658",
+        "details": {"company_name": "Parker, Johnson and Rath", "currency": "Turkish Lira"},
+    }
+
+    # AND a second transaction with the exact idempotency key but different currency
+    tampered_transaction = deepcopy(transaction)
+    tampered_transaction["details"]["currency"] = "Euro"
+
+    # WHEN we make both requests to a Lambda Function that enabled payload validation
+    data_fetcher.get_lambda_response(lambda_arn=payload_tampering_validation_fn_arn, payload=json.dumps(transaction))
+
+    # THEN we should receive a payload validation error in the second request
+    with pytest.raises(RuntimeError, match="Payload does not match stored record"):
+        data_fetcher.get_lambda_response(
+            lambda_arn=payload_tampering_validation_fn_arn,
+            payload=json.dumps(tampered_transaction),
+        )

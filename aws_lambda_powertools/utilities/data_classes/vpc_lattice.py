@@ -73,8 +73,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         name: str,
         default_value: str,
         case_sensitive: Optional[bool] = False,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def get_header_value(
@@ -82,8 +81,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: Optional[bool] = False,
-    ) -> Optional[str]:
-        ...
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,
@@ -139,10 +137,6 @@ class VPCLatticeEvent(VPCLatticeEventBase):
     def query_string_parameters(self) -> Dict[str, str]:
         """The request query string parameters."""
         return self["query_string_parameters"]
-
-    @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.query_string_parameters
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
@@ -255,17 +249,21 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
 
     @property
     def request_context(self) -> vpcLatticeEventV2RequestContext:
-        """he VPC Lattice v2 Event request context."""
+        """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
 
     @property
     def query_string_parameters(self) -> Optional[Dict[str, str]]:
-        """The request query string parameters."""
-        return self.get("queryStringParameters")
+        """The request query string parameters.
 
-    @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.query_string_parameters
+        For VPC Lattice V2, the queryStringParameters will contain a Dict[str, List[str]]
+        so to keep compatibility with existing utilities, we merge all the values with a comma.
+        """
+        params = self.get("queryStringParameters")
+        if params:
+            return {key: ",".join(value) for key, value in params.items()}
+        else:
+            return None
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, str]]:

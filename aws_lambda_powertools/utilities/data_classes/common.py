@@ -104,7 +104,7 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
@@ -112,7 +112,11 @@ class BaseProxyEvent(DictWrapper):
         This is necessary because different resolvers use different formats to encode
         multi query string parameters.
         """
-        return self.query_string_parameters
+        if self.query_string_parameters is not None:
+            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
+            return query_string
+
+        return {}
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
@@ -186,8 +190,7 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: str,
         case_sensitive: Optional[bool] = False,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def get_header_value(
@@ -195,8 +198,7 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: Optional[bool] = False,
-    ) -> Optional[str]:
-        ...
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,

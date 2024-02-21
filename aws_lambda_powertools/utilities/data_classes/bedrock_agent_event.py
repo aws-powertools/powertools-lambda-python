@@ -110,9 +110,5 @@ class BedrockAgentEvent(BaseProxyEvent):
         return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.query_string_parameters
-
-    @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
         return {}
