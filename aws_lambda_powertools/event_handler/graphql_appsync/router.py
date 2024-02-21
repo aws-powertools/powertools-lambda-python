@@ -6,25 +6,6 @@ from aws_lambda_powertools.event_handler.graphql_appsync.base import BaseResolve
 logger = logging.getLogger(__name__)
 
 
-class RouterContext:
-    def __init__(self):
-        self._context = {}
-
-    @property
-    def context(self) -> Dict[str, Any]:
-        return self._context
-
-    @context.setter
-    def context(self, additional_context: Dict[str, Any]) -> None:
-        """Append key=value data as routing context"""
-        self._context.update(**additional_context)
-
-    @context.deleter
-    def context(self):
-        """Resets routing context"""
-        self._context.clear()
-
-
 class ResolverRegistry(BaseResolverRegistry):
     def __init__(self):
         self._resolvers: Dict[str, Dict[str, Any]] = {}
@@ -85,11 +66,13 @@ class ResolverRegistry(BaseResolverRegistry):
 
 
 class Router(BaseRouter):
+    context: dict
+
     def __init__(self):
+        self.context = {}  # early init as customers might add context before event resolution
         self._resolver_registry: BaseResolverRegistry = ResolverRegistry()
         self._batch_resolver_registry: BaseResolverRegistry = ResolverRegistry()
         self._batch_async_resolver_registry: BaseResolverRegistry = ResolverRegistry()
-        self._router_context: RouterContext = RouterContext()
 
     # Interfaces
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
@@ -119,5 +102,10 @@ class Router(BaseRouter):
             raise_on_error=raise_on_error,
         )
 
-    def append_context(self, **additional_context) -> None:
-        self._router_context.context = additional_context
+    def append_context(self, **additional_context):
+        """Append key=value data as routing context"""
+        self.context.update(**additional_context)
+
+    def clear_context(self):
+        """Resets routing context"""
+        self.context.clear()

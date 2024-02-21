@@ -43,6 +43,8 @@ class AppSyncResolver(Router):
         Initialize a new instance of the AppSyncResolver.
         """
         super().__init__()
+        self.context = {}  # early init as customers might add context before event resolution
+
         self.current_batch_event: List[AppSyncResolverEvent] = []
         self.current_event: Optional[AppSyncResolverEvent] = None
         self.lambda_context: Optional[LambdaContext] = None
@@ -139,7 +141,8 @@ class AppSyncResolver(Router):
             if isinstance(event, list)
             else self._call_single_resolver(event=event, data_model=data_model)
         )
-        del self._router_context.context
+
+        self.clear_context()
 
         return response
 
@@ -325,9 +328,10 @@ class AppSyncResolver(Router):
         """
 
         # Merge app and router context
-        self._router_context.context = router._router_context.context
+        self.context.update(**router.context)
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
-        router._router_context._context = self._router_context.context
+        router.context = self.context
 
         self._resolver_registry.resolvers = router._resolver_registry.resolvers
         self._batch_resolver_registry.resolvers = router._batch_resolver_registry.resolvers
@@ -360,6 +364,3 @@ class AppSyncResolver(Router):
             type_name=type_name,
             raise_on_error=raise_on_error,
         )
-
-    def append_context(self, **additional_context) -> None:
-        self._router_context.context = additional_context

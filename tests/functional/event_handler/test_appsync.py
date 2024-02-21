@@ -241,13 +241,13 @@ def test_resolver_include_mixed_resolver():
 def test_append_context():
     app = AppSyncResolver()
     app.append_context(is_admin=True)
-    assert app._router_context.context.get("is_admin") is True
+    assert app.context.get("is_admin") is True
 
 
 def test_router_append_context():
     router = Router()
     router.append_context(is_admin=True)
-    assert router._router_context.context.get("is_admin") is True
+    assert router.context.get("is_admin") is True
 
 
 def test_route_context_is_cleared_after_resolve():
@@ -264,7 +264,7 @@ def test_route_context_is_cleared_after_resolve():
     app.resolve(event, {})
 
     # THEN context should be empty
-    assert app._router_context.context == {}
+    assert app.context == {}
 
 
 def test_router_has_access_to_app_context():
@@ -275,7 +275,7 @@ def test_router_has_access_to_app_context():
 
     @router.resolver(type_name="Query", field_name="listLocations")
     def get_locations(name: str):
-        if router._router_context.context.get("is_admin"):
+        if router.context.get("is_admin"):
             return f"get_locations#{name}"
 
     app.include_router(router)
@@ -286,7 +286,7 @@ def test_router_has_access_to_app_context():
 
     # THEN
     assert ret == "get_locations#value"
-    assert router._router_context.context == {}
+    assert router.context == {}
 
 
 def test_include_router_merges_context():
@@ -300,7 +300,7 @@ def test_include_router_merges_context():
 
     app.include_router(router)
 
-    assert app._router_context.context == router._router_context.context
+    assert app.context == router.context
 
 
 # Batch resolver tests
