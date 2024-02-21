@@ -6,6 +6,7 @@
 
 ## Bug Fixes
 
+* **ci:** create one layer artifact per region & merge ([#3808](https://github.com/aws-powertools/powertools-lambda-python/issues/3808))
 * **event-handler:** multi-value query string and validation of scalar parameters ([#3795](https://github.com/aws-powertools/powertools-lambda-python/issues/3795))
 * **event-handler:** swagger schema respects api stage ([#3796](https://github.com/aws-powertools/powertools-lambda-python/issues/3796))
 * **event-handler:** handle aliased parameters e.g., Query(alias="categoryType") ([#3766](https://github.com/aws-powertools/powertools-lambda-python/issues/3766))
@@ -22,6 +23,7 @@
 * **homepage:** discord flat badge style; remove former devax email ([#3768](https://github.com/aws-powertools/powertools-lambda-python/issues/3768))
 * **homepage:** remove leftover announcement banner ([#3783](https://github.com/aws-powertools/powertools-lambda-python/issues/3783))
 * **roadmap:** latest roadmap update; use new grid to de-clutter homepage ([#3755](https://github.com/aws-powertools/powertools-lambda-python/issues/3755))
+* **we-made-this:** add swagger post ([#3799](https://github.com/aws-powertools/powertools-lambda-python/issues/3799))
 * **we-made-this:** add reinvent 2023 session ([#3790](https://github.com/aws-powertools/powertools-lambda-python/issues/3790))
 
 ## Features
@@ -31,17 +33,18 @@
 ## Maintenance
 
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3784](https://github.com/aws-powertools/powertools-lambda-python/issues/3784))
+* **deps:** bump actions/dependency-review-action from 4.1.0 to 4.1.2 ([#3800](https://github.com/aws-powertools/powertools-lambda-python/issues/3800))
 * **deps:** bump actions/dependency-review-action from 4.0.0 to 4.1.0 ([#3771](https://github.com/aws-powertools/powertools-lambda-python/issues/3771))
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3764](https://github.com/aws-powertools/powertools-lambda-python/issues/3764))
 * **deps:** bump squidfunk/mkdocs-material from `6a72238` to `62d3668` in /docs ([#3756](https://github.com/aws-powertools/powertools-lambda-python/issues/3756))
 * **deps:** bump squidfunk/mkdocs-material from `62d3668` to `43b898a` in /docs ([#3801](https://github.com/aws-powertools/powertools-lambda-python/issues/3801))
-* **deps:** bump actions/dependency-review-action from 4.1.0 to 4.1.2 ([#3800](https://github.com/aws-powertools/powertools-lambda-python/issues/3800))
-* **deps-dev:** bump cfn-lint from 0.85.1 to 0.85.2 ([#3786](https://github.com/aws-powertools/powertools-lambda-python/issues/3786))
 * **deps-dev:** bump pytest-asyncio from 0.21.1 to 0.23.5 ([#3773](https://github.com/aws-powertools/powertools-lambda-python/issues/3773))
+* **deps-dev:** bump cfn-lint from 0.85.1 to 0.85.2 ([#3786](https://github.com/aws-powertools/powertools-lambda-python/issues/3786))
 * **deps-dev:** bump aws-cdk from 2.127.0 to 2.128.0 ([#3776](https://github.com/aws-powertools/powertools-lambda-python/issues/3776))
-* **deps-dev:** bump sentry-sdk from 1.40.3 to 1.40.4 ([#3765](https://github.com/aws-powertools/powertools-lambda-python/issues/3765))
 * **deps-dev:** bump the boto-typing group with 2 updates ([#3797](https://github.com/aws-powertools/powertools-lambda-python/issues/3797))
+* **deps-dev:** bump sentry-sdk from 1.40.3 to 1.40.4 ([#3765](https://github.com/aws-powertools/powertools-lambda-python/issues/3765))
 * **deps-dev:** bump aws-cdk-lib from 2.127.0 to 2.128.0 ([#3777](https://github.com/aws-powertools/powertools-lambda-python/issues/3777))
+* **deps-dev:** bump sentry-sdk from 1.40.4 to 1.40.5 ([#3805](https://github.com/aws-powertools/powertools-lambda-python/issues/3805))
 * **deps-dev:** bump mkdocs-material from 9.5.9 to 9.5.10 ([#3803](https://github.com/aws-powertools/powertools-lambda-python/issues/3803))
 * **deps-dev:** bump the boto-typing group with 1 update ([#3757](https://github.com/aws-powertools/powertools-lambda-python/issues/3757))
 * **deps-dev:** bump aws-cdk-lib from 2.126.0 to 2.127.0 ([#3758](https://github.com/aws-powertools/powertools-lambda-python/issues/3758))
@@ -50,7 +53,7 @@
 * **deps-dev:** bump sentry-sdk from 1.40.2 to 1.40.3 ([#3750](https://github.com/aws-powertools/powertools-lambda-python/issues/3750))
 * **deps-dev:** bump cfn-lint from 0.85.0 to 0.85.1 ([#3749](https://github.com/aws-powertools/powertools-lambda-python/issues/3749))
 * **deps-dev:** bump types-redis from 4.6.0.20240106 to 4.6.0.20240218 ([#3804](https://github.com/aws-powertools/powertools-lambda-python/issues/3804))
-* **deps-dev:** bump sentry-sdk from 1.40.4 to 1.40.5 ([#3805](https://github.com/aws-powertools/powertools-lambda-python/issues/3805))
+* **tests:** increase idempotency coverage with nested payload tampering tests ([#3809](https://github.com/aws-powertools/powertools-lambda-python/issues/3809))
 
 
 <a name="v2.33.1"></a>
