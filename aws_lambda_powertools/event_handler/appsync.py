@@ -162,13 +162,13 @@ class AppSyncResolver(Router):
             raise ValueError(f"No resolver found for '{self.current_event.type_name}.{self.current_event.field_name}'")
         return resolver["func"](**self.current_event.arguments)
 
-    def _call_sync_batch_resolver(self, sync_resolver: Callable, raise_on_error: bool = False) -> List[Any]:
+    def _call_sync_batch_resolver(self, resolver: Callable, raise_on_error: bool = False) -> List[Any]:
         """
         Calls a synchronous batch resolver function for each event in the current batch.
 
         Parameters
         ----------
-        sync_resolver: Callable
+        resolver: Callable
             The callable function to resolve events.
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
@@ -183,7 +183,7 @@ class AppSyncResolver(Router):
         # Stop on first exception we encounter
         if raise_on_error:
             return [
-                sync_resolver(event=appconfig_event, **appconfig_event.arguments)
+                resolver(event=appconfig_event, **appconfig_event.arguments)
                 for appconfig_event in self.current_batch_event
             ]
 
@@ -191,7 +191,7 @@ class AppSyncResolver(Router):
         results = []
         for event in self.current_batch_event:
             try:
-                results.append(sync_resolver(event=event, **event.arguments))
+                results.append(resolver(event=event, **event.arguments))
             except Exception:
                 results.append(None)
 
