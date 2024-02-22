@@ -204,13 +204,13 @@ class AppSyncResolver(Router):
 
         return results
 
-    async def _call_async_batch_resolver(self, async_resolver: Callable, raise_on_error: bool = False) -> List[Any]:
+    async def _call_async_batch_resolver(self, resolver: Callable, raise_on_error: bool = False) -> List[Any]:
         """
         Asynchronously call a batch resolver for each event in the current batch.
 
         Parameters
         ----------
-        async_resolver: Callable
+        resolver: Callable
             The asynchronous resolver function.
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
@@ -225,7 +225,7 @@ class AppSyncResolver(Router):
             await asyncio.gather(
                 *[
                     self._async_process_batch_event(
-                        async_resolver,
+                        resolver,
                         appconfig_event,
                         **appconfig_event.arguments,
                         raise_on_error=raise_on_error,
@@ -315,10 +315,13 @@ class AppSyncResolver(Router):
             )
 
         if resolver:
-            return self._call_sync_batch_resolver(resolver["func"], resolver["raise_on_error"])
+            return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
         elif async_resolver:
             return asyncio.run(
-                self._call_async_batch_resolver(async_resolver["func"], async_resolver["raise_on_error"]),
+                self._call_async_batch_resolver(
+                    resolver=async_resolver["func"],
+                    raise_on_error=async_resolver["raise_on_error"],
+                ),
             )
 
         raise ResolverNotFound(f"No resolver found for '{type_name}.{field_name}'")
