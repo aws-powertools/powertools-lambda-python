@@ -20,5 +20,5 @@ class Location(TypedDict, total=False):
 @router.resolver(field_name="locations")
 @tracer.capture_method
 def get_locations(name: str, description: str = "") -> List[Location]:  # match GraphQL Query arguments
-    is_admin: bool = router._router_context.context.get("is_admin", False)
+    is_admin: bool = router.context.get("is_admin", False)
     return [{"name": name, "description": description}] if is_admin else []
