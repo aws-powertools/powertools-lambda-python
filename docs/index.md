@@ -67,8 +67,8 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`.
 
-    * **x86 architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:64__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
-    * **ARM architecture**: [__arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64__](# "Replace {region} with your AWS region, e.g., eu-west-1"){: .copyMe}:clipboard:
+    * <u>x86 architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:64__{: .copyMe}:clipboard:
+    * <u>ARM architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64__{: .copyMe}:clipboard:
 
     ???+ note "Code snippets for popular infrastructure as code frameworks"
 
