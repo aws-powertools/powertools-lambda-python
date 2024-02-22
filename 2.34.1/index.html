@@ -1653,20 +1653,62 @@
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="pip" name="__tabbed_1" type="radio" /><input id="lambda-layer_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="pip">Pip</label><label for="lambda-layer_1">Lambda Layer</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<p>You can install <a href="#extra-dependencies">all extra dependencies</a> at once with the <code>[all]</code> extras.</p>
+<p>Most features use Python standard library and the AWS SDK <em>(boto3)</em> that are available in the AWS Lambda runtime.</p>
 <ul>
-<li><strong>pip</strong>: <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[all]"</code></strong></a></li>
-<li><strong>poetry</strong>: <a class="copyMe" href="#"><strong><code>poetry add "aws-lambda-powertools[all]"</code></strong></a></li>
-<li><strong>pdm</strong>: <a class="copyMe" href="#"><strong><code>pdm add "aws-lambda-powertools[all]"</code></strong></a></li>
+<li><strong>pip</strong>: <strong class="copyMe"><code>pip install "aws-lambda-powertools"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>poetry</strong>: <strong class="copyMe"><code>poetry add "aws-lambda-powertools"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>pdm</strong>: <strong class="copyMe"><code>pdm add "aws-lambda-powertools"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
 </ul>
-<p>Alternatively, see <a href="#extra-dependencies">extra dependencies</a> if you want to install only what you need.</p>
+<h3 id="extra-dependencies">Extra dependencies<a class="headerlink" href="#extra-dependencies" title="Permanent link">&para;</a></h3>
+<p>However, you will need additional dependencies if you are using any of the features below:</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Install</th>
+<th>Default dependency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><a href="core/tracer/#install">Tracer</a></strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[tracer]"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><code>aws-xray-sdk</code></td>
+</tr>
+<tr>
+<td><strong><a href="utilities/validation/#install">Validation</a></strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[validation]"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><code>fastjsonschema</code></td>
+</tr>
+<tr>
+<td><strong><a href="utilities/parser/#install">Parser</a></strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[parser]"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><code>pydantic</code> <em>(v1)</em>; <a href="utilities/parser/#using-pydantic-v2">v2 is possible</a></td>
+</tr>
+<tr>
+<td><strong><a href="utilities/data_masking/#install">Data Masking</a></strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[datamasking]"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><code>aws-encryption-sdk</code>, <code>jsonpath-ng</code></td>
+</tr>
+<tr>
+<td><strong>All extra dependencies at once</strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[all]"</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Two or more extra dependencies only, not all</strong></td>
+<td><strong class="copyMe"><code>pip install "aws-lambda-powertools[tracer,parser,datamasking"]</code></strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td></td>
+</tr>
+</tbody>
+</table>
 </div>
 <div class="tabbed-block">
 <p>You can add our layer both in the <a href="https://eu-west-1.console.aws.amazon.com/lambda/home#/add/layer" target="_blank">AWS Lambda Console <em>(under <code>Layers</code>)</em></a>, or via your favorite infrastructure as code framework with the ARN value.</p>
 <p>For the latter, make sure to replace <code>{region}</code> with your AWS region, e.g., <code>eu-west-1</code>.</p>
 <ul>
-<li><strong>x86 architecture</strong>: <a class="copyMe" href="#" title="Replace {region} with your AWS region, e.g., eu-west-1"><strong>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-<li><strong>ARM architecture</strong>: <a class="copyMe" href="#" title="Replace {region} with your AWS region, e.g., eu-west-1"><strong>arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><u>x86 architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><u>ARM architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
 </ul>
 <details class="note" open="open">
 <summary>Code snippets for popular infrastructure as code frameworks</summary>
@@ -2202,48 +2244,6 @@ General<span class="w"> </span>information
 </div>
 </div>
 </div>
-<h3 id="extra-dependencies">Extra dependencies<a class="headerlink" href="#extra-dependencies" title="Permanent link">&para;</a></h3>
-<p>The vast majority of <a href="#features">features</a> rely on standard library and AWS SDK <em>(boto3)</em> only. The following features however require additional dependencies:</p>
-<table>
-<thead>
-<tr>
-<th>Feature</th>
-<th>Pip</th>
-<th>Dependency</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Tracer</td>
-<td><strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[tracer]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></td>
-<td><code>aws-xray-sdk</code></td>
-</tr>
-<tr>
-<td>Validation</td>
-<td><strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[validation]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></td>
-<td><code>fastjsonschema</code></td>
-</tr>
-<tr>
-<td>Parser</td>
-<td><strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[parser]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></td>
-<td><code>pydantic</code></td>
-</tr>
-<tr>
-<td>Data Masking</td>
-<td><strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[datamasking]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></td>
-<td><code>aws-encryption-sdk</code>, <code>jsonpath-ng</code></td>
-</tr>
-<tr>
-<td>Idempotency (Redis)</td>
-<td><strong><a class="copyMe" href="#"><code>pip install "aws-lambda-powertools[redis]"</code></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></strong></td>
-<td><code>redis</code></td>
-</tr>
-</tbody>
-</table>
-<blockquote>
-<p>New to pip?</p>
-</blockquote>
-<p>You can use <code>,</code> delimiter to install multiple at once: <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[tracer,parser,datamasking"]</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></p>
 <h3 id="local-development">Local development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
 <div class="admonition info">
 <p class="admonition-title">Using Lambda Layer? Simply add <a class="copyMe" href="#"><strong><code>"aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /> as a development dependency.</p>
@@ -2261,9 +2261,9 @@ General<span class="w"> </span>information
 <li><strong>(B)</strong> a more up-to-date version if another package you use also depends on <code>boto3</code>, for example <a href="core/tracer/" target="_blank">Powertools for AWS Lambda (Python) Tracer</a></li>
 </ul>
 <h3 id="lambda-layer">Lambda Layer<a class="headerlink" href="#lambda-layer" title="Permanent link">&para;</a></h3>
-<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize <a href="#extra-dependencies">all dependencies</a>, and <a href="https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36" target="_blank">remove duplicate dependencies already available in the Lambda runtime</a> to achieve the most optimal size.</p>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize <a href="#install">all dependencies</a>, and remove duplicate dependencies <a href="https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36" target="_blank">already available in the Lambda runtime</a> to achieve the most optimal size.</p>
 <details class="note">
-<summary>Note: Click to expand and copy any regional Lambda Layer ARN</summary>
+<summary>Click to expand and copy any regional Lambda Layer ARN</summary>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="x86_65" name="__tabbed_5" type="radio" /><input id="arm64_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="x86_65">x86_64</label><label for="arm64_1">arm64</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -2276,120 +2276,120 @@ General<span class="w"> </span>information
 </thead>
 <tbody>
 <tr>
-<td><code>af-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>af-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-south-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-4</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-4</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ca-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ca-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ca-west-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ca-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-central-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-central-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-north-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-north-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-south-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>il-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>il-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>me-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>me-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>me-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>me-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>sa-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>sa-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-east-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-east-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-west-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-west-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 </tbody>
 </table>
@@ -2404,112 +2404,112 @@ General<span class="w"> </span>information
 </thead>
 <tbody>
 <tr>
-<td><code>af-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>af-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-northeast-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-northeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-south-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ap-southeast-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ap-southeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>ca-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>ca-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-central-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-central-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-north-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-north-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-south-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>eu-west-3</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>eu-west-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>il-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>il-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>me-central-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>me-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>me-south-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>me-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>sa-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>sa-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-east-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-east-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-east-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-west-1</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
-<td><code>us-west-2</code></td>
-<td><a class="copyMe" href="#">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+<td><strong><code>us-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 </tbody>
 </table>
@@ -2518,8 +2518,8 @@ General<span class="w"> </span>information
 </div>
 </details>
 <p><strong>Want to inspect the contents of the Layer?</strong></p>
-<p>Replace <code>{region}</code> with your AWS region, <em>e.g. <code>eu-west-1</code></em>. The pre-signed URL to download this Lambda Layer will be within <code>Location</code> key in the CLI output.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">AWS CLI command to download Lambda Layer content</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>aws<span class="w"> </span>lambda<span class="w"> </span>get-layer-version-by-arn<span class="w"> </span>--arn<span class="w"> </span>arn:aws:lambda:<span class="o">{</span>region<span class="o">}</span>:017000801446:layer:AWSLambdaPowertoolsPythonV2:64<span class="w"> </span>--region<span class="w"> </span><span class="o">{</span>region<span class="o">}</span>
+<p>The pre-signed URL to download this Lambda Layer will be within <code>Location</code> key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">AWS CLI command to download Lambda Layer content</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>aws<span class="w"> </span>lambda<span class="w"> </span>get-layer-version-by-arn<span class="w"> </span>--arn<span class="w"> </span>arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:64<span class="w"> </span>--region<span class="w"> </span>eu-west-1
 </code></pre></div></td></tr></table></div>
 <h4 id="sar">SAR<a class="headerlink" href="#sar" title="Permanent link">&para;</a></h4>
 <p>Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.</p>
@@ -3158,7 +3158,7 @@ General<span class="w"> </span>information
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-02-21
+    2024-02-22
   </span>
 
     
