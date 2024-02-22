@@ -53,6 +53,7 @@ class ResolverRegistry:
         Optional[Dict]
             A dictionary with the resolver and if raise exception on error
         """
+        logger.debug(f"Looking for resolver for type={type_name}, field={field_name}.")
         return self.resolvers.get(f"{type_name}.{field_name}", self.resolvers.get(f"*.{field_name}"))
 
     def merge(self, other_registry: "ResolverRegistry"):

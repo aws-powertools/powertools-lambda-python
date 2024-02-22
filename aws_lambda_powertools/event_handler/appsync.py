@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
@@ -6,6 +7,8 @@ from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentP
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+logger = logging.getLogger(__name__)
 
 
 class AppSyncResolver(Router):
@@ -137,8 +140,10 @@ class AppSyncResolver(Router):
         self.lambda_context = context
 
         if isinstance(event, list):
+            logger.debug("Received batch resolver event.")
             response = self._call_batch_resolver(event=event, data_model=data_model)
         else:
+            logger.debug("Received single resolver event.")
             response = self._call_single_resolver(event=event, data_model=data_model)
 
         self.clear_context()
@@ -182,6 +187,7 @@ class AppSyncResolver(Router):
 
         # Stop on first exception we encounter
         if raise_on_error:
+            logger.debug("Graceful error handling disabled.")
             return [
                 resolver(event=appconfig_event, **appconfig_event.arguments)
                 for appconfig_event in self.current_batch_event
@@ -189,10 +195,11 @@ class AppSyncResolver(Router):
 
         # By default, we gracefully append `None` for any records that failed processing
         results = []
-        for event in self.current_batch_event:
+        for idx, event in enumerate(self.current_batch_event):
             try:
                 results.append(resolver(event=event, **event.arguments))
             except Exception:
+                logger.debug(f"Failed to process event number {idx} from field '{event.info.field_name}'")
                 results.append(None)
 
         return results
