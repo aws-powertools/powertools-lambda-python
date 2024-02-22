@@ -180,23 +180,22 @@ class AppSyncResolver(Router):
             A list of results corresponding to the resolved events.
         """
 
-        # Check if we should raise errors or continue and append None in failed records
-        if not raise_on_error:
-            results: List = []
-            for appconfig_event in self.current_batch_event:
-                try:
-                    results.append(sync_resolver(event=appconfig_event, **appconfig_event.arguments))
-                except Exception:
-                    # If an error occurs and raise_error_on_failed_batch is False,
-                    # append None to the results and continue with the next event.
-                    results.append(None)
+        # Stop on first exception we encounter
+        if raise_on_error:
+            return [
+                sync_resolver(event=appconfig_event, **appconfig_event.arguments)
+                for appconfig_event in self.current_batch_event
+            ]
 
-            return results
+        # By default, we gracefully append `None` for any records that failed processing
+        results = []
+        for event in self.current_batch_event:
+            try:
+                results.append(sync_resolver(event=event, **event.arguments))
+            except Exception:
+                results.append(None)
 
-        return [
-            sync_resolver(event=appconfig_event, **appconfig_event.arguments)
-            for appconfig_event in self.current_batch_event
-        ]
+        return results
 
     async def _call_async_batch_resolver(self, async_resolver: Callable, raise_on_error: bool = False) -> List[Any]:
         """
@@ -274,7 +273,7 @@ class AppSyncResolver(Router):
         event : List[dict]
             Event
         data_model : Type[AppSyncResolverEvent]
-            Data_model to decode AppSync event, by default it is of AppSyncResolverEvent type or subclass of it
+            Data_model to decode AppSync event, by default AppSyncResolverEvent or a subclass
 
         Returns
         -------
@@ -314,8 +313,8 @@ class AppSyncResolver(Router):
             return asyncio.run(
                 self._call_async_batch_resolver(async_resolver["func"], async_resolver["raise_on_error"]),
             )
-        else:
-            raise ResolverNotFound(f"No resolver found for '{type_name}.{field_name}'")
+
+        raise ResolverNotFound(f"No resolver found for '{type_name}.{field_name}'")
 
     def include_router(self, router: "Router") -> None:
         """Adds all resolvers defined in a router
