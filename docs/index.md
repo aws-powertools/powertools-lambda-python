@@ -42,13 +42,24 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Pip"
 
-    You can install [all extra dependencies](#extra-dependencies) at once with the `[all]` extras.
+    Most features use Python standard library and the AWS SDK _(boto3)_ that are available in the AWS Lambda runtime.
 
-    * **pip**: [**`pip install "aws-lambda-powertools[all]"`**](#){: .copyMe}
-    * **poetry**: [**`poetry add "aws-lambda-powertools[all]"`**](#){: .copyMe}
-    * **pdm**: [**`pdm add "aws-lambda-powertools[all]"`**](#){: .copyMe}
+    * **pip**: **`pip install "aws-lambda-powertools"`**{: .copyMe}:clipboard:
+    * **poetry**: **`poetry add "aws-lambda-powertools"`**{: .copyMe}:clipboard:
+    * **pdm**: **`pdm add "aws-lambda-powertools"`**{: .copyMe}:clipboard:
 
-    Alternatively, see [extra dependencies](#extra-dependencies) if you want to install only what you need.
+    ### Extra dependencies
+
+    However, you will need additional dependencies if you are using any of the features below:
+
+    | Feature                                                 | Install                                                                                  | Default dependency                                                           |
+    | ------------------------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+    | **[Tracer](./core/tracer.md#install)**                  | **`pip install "aws-lambda-powertools[tracer]"`**{.copyMe}:clipboard:                    | `aws-xray-sdk`                                                               |
+    | **[Validation](./utilities/validation.md#install)**     | **`pip install "aws-lambda-powertools[validation]"`**{.copyMe}:clipboard:                | `fastjsonschema`                                                             |
+    | **[Parser](./utilities/parser.md#install)**             | **`pip install "aws-lambda-powertools[parser]"`**{.copyMe}:clipboard:                    | `pydantic` _(v1)_; [v2 is possible](./utilities/parser.md#using-pydantic-v2) |
+    | **[Data Masking](./utilities/data_masking.md#install)** | **`pip install "aws-lambda-powertools[datamasking]"`**{.copyMe}:clipboard:               | `aws-encryption-sdk`, `jsonpath-ng`                                          |
+    | **All extra dependencies at once**                      | **`pip install "aws-lambda-powertools[all]"`**{.copyMe}:clipboard:                       |
+    | **Two or more extra dependencies only, not all**        | **`pip install "aws-lambda-powertools[tracer,parser,datamasking"]`**{.copyMe}:clipboard: |
 
 === "Lambda Layer"
 
@@ -371,22 +382,6 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 ? Do you want to edit the local lambda function now? No
                 ```
 
-### Extra dependencies
-
-The vast majority of [features](#features) rely on standard library and AWS SDK _(boto3)_ only. The following features however require additional dependencies:
-
-| Feature             | Pip                                                                               | Dependency                          |
-| ------------------- | --------------------------------------------------------------------------------- | ----------------------------------- |
-| Tracer              | **[`pip install "aws-lambda-powertools[tracer]"`](#){: .copyMe}:clipboard:**      | `aws-xray-sdk`                      |
-| Validation          | **[`pip install "aws-lambda-powertools[validation]"`](#){: .copyMe}:clipboard:**  | `fastjsonschema`                    |
-| Parser              | **[`pip install "aws-lambda-powertools[parser]"`](#){: .copyMe}:clipboard:**      | `pydantic`                          |
-| Data Masking        | **[`pip install "aws-lambda-powertools[datamasking]"`](#){: .copyMe}:clipboard:** | `aws-encryption-sdk`, `jsonpath-ng` |
-| Idempotency (Redis) | **[`pip install "aws-lambda-powertools[redis]"`](#){: .copyMe}:clipboard:**       | `redis`                             |
-
-> New to pip?
-
-You can use `,` delimiter to install multiple at once: [**`pip install "aws-lambda-powertools[tracer,parser,datamasking"]`**](#){: .copyMe}:clipboard:
-
 ### Local development
 
 !!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
@@ -406,7 +401,7 @@ In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependen
 
 ### Lambda Layer
 
-[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#extra-dependencies), and [remove duplicate dependencies already available in the Lambda runtime](https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and [remove duplicate dependencies already available in the Lambda runtime](https://github.com/awslabs/cdk-aws-lambda-powertools-layer/blob/main/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
 ??? note "Note: Click to expand and copy any regional Lambda Layer ARN"
 
