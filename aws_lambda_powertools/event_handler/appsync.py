@@ -139,11 +139,12 @@ class AppSyncResolver(Router):
 
         self.lambda_context = context
 
-        if isinstance(event, list):
-            logger.debug("Received batch resolver event.")
+        is_batch_event = isinstance(event, list)
+        logger.debug(f"Resolving event: {is_batch_event=}")
+
+        if is_batch_event:
             response = self._call_batch_resolver(event=event, data_model=data_model)
         else:
-            logger.debug("Received single resolver event.")
             response = self._call_single_resolver(event=event, data_model=data_model)
 
         self.clear_context()
@@ -187,7 +188,6 @@ class AppSyncResolver(Router):
 
         # Stop on first exception we encounter
         if raise_on_error:
-            logger.debug("Graceful error handling disabled.")
             return [
                 resolver(event=appconfig_event, **appconfig_event.arguments)
                 for appconfig_event in self.current_batch_event
@@ -286,10 +286,14 @@ class AppSyncResolver(Router):
                 stacklevel=2,
             )
 
+        logger.debug(f'Graceful error handling: {resolver["raise_on_error"]}')
+
         if resolver:
+            logger.debug(f"Found sync resolver. {resolver=}, {field_name=}")
             return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
 
         if async_resolver:
+            logger.debug(f"Found async resolver. {resolver=}, {field_name=}")
             return asyncio.run(
                 self._call_async_batch_resolver(
                     resolver=async_resolver["func"],
@@ -309,11 +313,13 @@ class AppSyncResolver(Router):
         """
 
         # Merge app and router context
+        logger.debug("Merging router and app context")
         self.context.update(**router.context)
 
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
+        logger.debug("Merging router resolver registries")
         self._resolver_registry.merge(router._resolver_registry)
         self._batch_resolver_registry.merge(router._batch_resolver_registry)
         self._async_batch_resolver_registry.merge(router._async_batch_resolver_registry)
