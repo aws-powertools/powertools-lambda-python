@@ -227,10 +227,16 @@ class AppSyncResolver(Router):
         # Prime coroutines
         tasks = [resolver(event=e, **e.arguments) for e in self.current_batch_event]
 
+        # Aggregate results or raise at first error
         if raise_on_error:
             response.extend(await asyncio.gather(*tasks))
             return response
 
+        # Aggregate results and exceptions, then filter them out
+        # Use `None` upon exception for graceful error handling at GraphQL engine level
+        #
+        # NOTE: asyncio.gather(return_exceptions=True) catches and includes exceptions in the results
+        #       this will become useful when we support exception handling in AppSync resolver
         results = await asyncio.gather(*tasks, return_exceptions=True)
         response.extend(None if isinstance(ret, Exception) else ret for ret in results)
 
