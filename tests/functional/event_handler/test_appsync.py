@@ -452,7 +452,7 @@ def test_async_resolve_batch_processing_with_raise_on_exception():
     app = AppSyncResolver()
 
     @app.async_batch_resolver(field_name="listLocations", raise_on_error=True)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
     # Call the implicit handler
@@ -557,7 +557,7 @@ def test_resolve_async_batch_processing_without_exception():
     app = AppSyncResolver()
 
     @app.async_batch_resolver(field_name="listLocations", raise_on_error=False)
-    def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: AppSyncResolverEvent) -> Optional[list]:  # noqa AA03 VNE003
         raise RuntimeError
 
     # Call the implicit handler

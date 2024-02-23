@@ -221,56 +221,20 @@ class AppSyncResolver(Router):
         List[Any]
             A list of results corresponding to the resolved events.
         """
-        return list(
-            await asyncio.gather(
-                *[
-                    self._async_process_batch_event(
-                        resolver,
-                        appconfig_event,
-                        **appconfig_event.arguments,
-                        raise_on_error=raise_on_error,
-                    )
-                    for appconfig_event in self.current_batch_event
-                ],
-            ),
-        )
 
-    async def _async_process_batch_event(
-        self,
-        async_resolver: Callable,
-        appconfig_event: AppSyncResolverEvent,
-        raise_on_error: bool = False,
-        **kwargs,
-    ):
-        """
-        Asynchronously process a batch event using the provided async_resolver.
+        response = []
 
-        Parameters
-        ----------
-        async_resolver: Callable
-            The asynchronous resolver function.
-        appconfig_event: AppSyncResolverEvent
-            The event to process.
-        raise_on_error: bool
-            A flag indicating whether to raise an error when processing batches
-            with failed items. Defaults to False, which means errors are handled without raising exceptions.
-        **kwargs
-            Additional keyword arguments to pass to the resolver.
+        # Prime coroutines
+        tasks = [resolver(event=e, **e.arguments) for e in self.current_batch_event]
 
-        Returns
-        -------
-        Any
-            The result of the resolver function or None if an error occurs and self.raise_error_on_failed_batch is False
-        """
+        if raise_on_error:
+            response.extend(await asyncio.gather(*tasks))
+            return response
 
-        if not raise_on_error:
-            try:
-                return await async_resolver(event=appconfig_event, **kwargs)
-            except Exception:
-                return None
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        response.extend(None if isinstance(ret, Exception) else ret for ret in results)
 
-        # If raise_error_on_failed_batch is False, proceed without raising errors
-        return await async_resolver(event=appconfig_event, **kwargs)
+        return response
 
     def _call_batch_resolver(self, event: List[dict], data_model: Type[AppSyncResolverEvent]) -> List[Any]:
         """Call batch event resolver for sync and async methods
