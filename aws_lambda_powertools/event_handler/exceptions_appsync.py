@@ -1,10 +1,10 @@
-class ResolverNotFound(Exception):
+class ResolverNotFoundError(Exception):
     """
     When a resolver is not found during a lookup.
     """
 
 
-class InconsistentPayload(Exception):
+class InconsistentPayloadError(Exception):
     """
     When a payload is inconsistent or violates expected structure.
     """

@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
-from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayload, ResolverNotFound
+from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayloadError, ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -607,7 +607,7 @@ def test_resolver_batch_resolver_many_fields_with_different_name():
         },
     ]
 
-    with pytest.raises(InconsistentPayload):
+    with pytest.raises(InconsistentPayloadError):
         app.resolve(mock_event1, LambdaContext())
 
 
@@ -640,7 +640,7 @@ def test_resolver_batch_with_resolver_not_found():
     app.include_router(router)
 
     # THEN must fail with ValueError
-    with pytest.raises(ResolverNotFound, match="No resolver found for.*"):
+    with pytest.raises(ResolverNotFoundError, match="No resolver found for.*"):
         app.resolve(mock_event1, LambdaContext())
 
 
