@@ -139,10 +139,7 @@ class AppSyncResolver(Router):
 
         self.lambda_context = context
 
-        is_batch_event = isinstance(event, list)
-        logger.debug(f"Resolving event: {is_batch_event=}")
-
-        if is_batch_event:
+        if isinstance(event, list):
             response = self._call_batch_resolver(event=event, data_model=data_model)
         else:
             response = self._call_single_resolver(event=event, data_model=data_model)
@@ -161,6 +158,8 @@ class AppSyncResolver(Router):
         data_model : Type[AppSyncResolverEvent]
             Data_model to decode AppSync event, by default it is of AppSyncResolverEvent type or subclass of it
         """
+
+        logger.debug("Processing direct resolver event")
 
         self.current_event = data_model(event)
         resolver = self._resolver_registry.find_resolver(self.current_event.type_name, self.current_event.field_name)
@@ -268,6 +267,7 @@ class AppSyncResolver(Router):
         ResolverNotFoundError:
             When no resolver is found for the specified type and field.
         """
+        logger.debug("Processing batch resolver event")
 
         # All events in the batch must have the same fieldName
         field_names = {field_name["info"]["fieldName"] for field_name in event}
