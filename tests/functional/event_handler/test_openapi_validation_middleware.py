@@ -1108,3 +1108,23 @@ def test_validation_with_http_single_param(gw_event_http):
     # THEN the handler should be invoked and return 200
     result = app(gw_event_http, {})
     assert result["statusCode"] == 200
+
+
+def test_validate_with_minimal_event():
+    # GIVEN an APIGatewayRestResolver with validation enabled
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    # WHEN a handler is defined with a default scalar parameter
+    @app.get("/users/<user_id>")
+    def handler(user_id: int = 123):
+        print(user_id)
+
+    minimal_event = {
+        "path": "/users/123",
+        "httpMethod": "GET",
+        "requestContext": {"requestId": "227b78aa-779d-47d4-a48e-ce62120393b8"},  # correlation ID
+    }
+
+    # THEN the handler should be invoked and return 200
+    result = app(minimal_event, {})
+    assert result["statusCode"] == 200
