@@ -326,6 +326,47 @@ class AppSyncResolver(Router):
         self._async_batch_resolver_registry.merge(router._async_batch_resolver_registry)
 
     def resolver(self, type_name: str = "*", field_name: Optional[str] = None) -> Callable:
+        """Registers direct resolver function for GraphQL type and field name.
+
+        Parameters
+        ----------
+        type_name : str, optional
+            GraphQL type e.g., Query, Mutation, by default "*" meaning any
+        field_name : Optional[str], optional
+            GraphQL field e.g., getTodo, createTodo, by default None
+
+        Returns
+        -------
+        Callable
+            Registered resolver
+
+        Example
+        -------
+
+        ```python
+        from aws_lambda_powertools.event_handler import AppSyncResolver
+
+        from typing import TypedDict
+
+        app = AppSyncResolver()
+
+        class Todo(TypedDict, total=False):
+            id: str
+            userId: str
+            title: str
+            completed: bool
+
+        # resolve any GraphQL `getTodo` queries
+        # arguments are injected as function arguments as-is
+        @app.resolver(type_name="Query", field_name="getTodo")
+        def get_todo(id: str = "", status: str = "open") -> Todo:
+            logger.info(f"Fetching Todo {id}")
+            todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{id}")
+            todos.raise_for_status()
+
+            return todos.json()
+        ```
+        """
         return self._resolver_registry.register(field_name=field_name, type_name=type_name)
 
     def batch_resolver(
