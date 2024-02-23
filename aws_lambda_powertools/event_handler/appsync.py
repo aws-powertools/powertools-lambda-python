@@ -360,11 +360,13 @@ class AppSyncResolver(Router):
         # arguments are injected as function arguments as-is
         @app.resolver(type_name="Query", field_name="getTodo")
         def get_todo(id: str = "", status: str = "open") -> Todo:
-            logger.info(f"Fetching Todo {id}")
             todos: Response = requests.get(f"https://jsonplaceholder.typicode.com/todos/{id}")
             todos.raise_for_status()
 
             return todos.json()
+
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
         ```
         """
         return self._resolver_registry.register(field_name=field_name, type_name=type_name)
