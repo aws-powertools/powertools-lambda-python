@@ -186,6 +186,8 @@ class AppSyncResolver(Router):
             A list of results corresponding to the resolved events.
         """
 
+        logger.debug(f"Graceful error handling flag {raise_on_error=}")
+
         # Stop on first exception we encounter
         if raise_on_error:
             return [
@@ -222,6 +224,7 @@ class AppSyncResolver(Router):
             A list of results corresponding to the resolved events.
         """
 
+        logger.debug(f"Graceful error handling flag {raise_on_error=}")
         response = []
 
         # Prime coroutines
@@ -287,11 +290,11 @@ class AppSyncResolver(Router):
             )
 
         if resolver:
-            logger.debug(f'Found sync resolver. {resolver=}, {field_name=}, {resolver["raise_on_error"]=}')
+            logger.debug(f"Found sync resolver. {resolver=}, {field_name=}")
             return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
 
         if async_resolver:
-            logger.debug(f'Found async resolver. {resolver=}, {field_name=} {resolver["raise_on_error"]=}')
+            logger.debug(f"Found async resolver. {resolver=}, {field_name=}")
             return asyncio.run(
                 self._call_async_batch_resolver(
                     resolver=async_resolver["func"],
