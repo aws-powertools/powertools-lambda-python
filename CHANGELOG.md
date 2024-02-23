@@ -4,16 +4,28 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Documentation
+
+* **install:** make minimum install the default option then extra ([#3834](https://github.com/aws-powertools/powertools-lambda-python/issues/3834))
+
+## Maintenance
+
+
 
 <a name="v2.34.1"></a>
 ## [v2.34.1] - 2024-02-21
 ## Bug Fixes
 
+* **ci:** inject PR_LABELS env for PR Label automation ([#3819](https://github.com/aws-powertools/powertools-lambda-python/issues/3819))
+* **ci:** revert layer version bump write-only back to append  ([#3818](https://github.com/aws-powertools/powertools-lambda-python/issues/3818))
 * **event-handler:** return dict on missing multi_value_headers ([#3824](https://github.com/aws-powertools/powertools-lambda-python/issues/3824))
+* **idempotency:** validate before saving to cache ([#3822](https://github.com/aws-powertools/powertools-lambda-python/issues/3822))
 
 ## Maintenance
 
 * version bump
+* **deps-dev:** bump ruff from 0.2.1 to 0.2.2 ([#3802](https://github.com/aws-powertools/powertools-lambda-python/issues/3802))
+* **deps-dev:** bump the boto-typing group with 2 updates ([#3810](https://github.com/aws-powertools/powertools-lambda-python/issues/3810))
 
 
 <a name="v2.34.0"></a>
