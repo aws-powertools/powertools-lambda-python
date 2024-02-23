@@ -375,6 +375,25 @@ class AppSyncResolver(Router):
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
     ) -> Callable:
+        """Registers batch resolver function for GraphQL type and field name.
+
+        By default, we handle errors gracefully by returning `None`. If you want
+        to short-circuit and fail the entire batch use `raise_on_error=True`.
+
+        Parameters
+        ----------
+        type_name : str, optional
+            GraphQL type e.g., Query, Mutation, by default "*" meaning any
+        field_name : Optional[str], optional
+            GraphQL field e.g., getTodo, createTodo, by default None
+        raise_on_error : bool, optional
+            Whether to fail entire batch upon error, or handle errors gracefully (None), by default False
+
+        Returns
+        -------
+        Callable
+            Registered resolver
+        """
         return self._batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
