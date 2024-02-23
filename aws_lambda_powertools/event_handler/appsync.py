@@ -248,7 +248,7 @@ class AppSyncResolver(Router):
         Parameters
         ----------
         event : List[dict]
-            Event
+            Batch event
         data_model : Type[AppSyncResolverEvent]
             Data_model to decode AppSync event, by default AppSyncResolverEvent or a subclass
 
@@ -260,10 +260,10 @@ class AppSyncResolver(Router):
         Raises
         ------
         InconsistentPayloadError:
-            If all events in the batch do not have the same fieldName.
+            When all events in the batch do not have the same fieldName.
 
         ResolverNotFoundError:
-            If no resolver is found for the specified type and field.
+            When no resolver is found for the specified type and field.
         """
 
         # All events in the batch must have the same fieldName
@@ -286,14 +286,12 @@ class AppSyncResolver(Router):
                 stacklevel=2,
             )
 
-        logger.debug(f'Graceful error handling: {resolver["raise_on_error"]}')
-
         if resolver:
-            logger.debug(f"Found sync resolver. {resolver=}, {field_name=}")
+            logger.debug(f'Found sync resolver. {resolver=}, {field_name=}, {resolver["raise_on_error"]=}')
             return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
 
         if async_resolver:
-            logger.debug(f"Found async resolver. {resolver=}, {field_name=}")
+            logger.debug(f'Found async resolver. {resolver=}, {field_name=} {resolver["raise_on_error"]=}')
             return asyncio.run(
                 self._call_async_batch_resolver(
                     resolver=async_resolver["func"],
