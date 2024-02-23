@@ -288,7 +288,8 @@ class AppSyncResolver(Router):
 
         if resolver:
             return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
-        elif async_resolver:
+
+        if async_resolver:
             return asyncio.run(
                 self._call_async_batch_resolver(
                     resolver=async_resolver["func"],
