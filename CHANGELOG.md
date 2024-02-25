@@ -4,12 +4,22 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **typing:** ensure return type is a str when default_value is set ([#3840](https://github.com/aws-powertools/powertools-lambda-python/issues/3840))
+
 ## Documentation
 
 * **install:** make minimum install the default option then extra ([#3834](https://github.com/aws-powertools/powertools-lambda-python/issues/3834))
 
 ## Maintenance
 
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3835](https://github.com/aws-powertools/powertools-lambda-python/issues/3835))
+* **deps:** bump cryptography from 42.0.2 to 42.0.4 ([#3827](https://github.com/aws-powertools/powertools-lambda-python/issues/3827))
+* **deps-dev:** bump httpx from 0.26.0 to 0.27.0 ([#3828](https://github.com/aws-powertools/powertools-lambda-python/issues/3828))
+* **deps-dev:** bump aws-cdk from 2.128.0 to 2.129.0 ([#3831](https://github.com/aws-powertools/powertools-lambda-python/issues/3831))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3836](https://github.com/aws-powertools/powertools-lambda-python/issues/3836))
+* **deps-dev:** bump aws-cdk-lib from 2.128.0 to 2.130.0 ([#3838](https://github.com/aws-powertools/powertools-lambda-python/issues/3838))
 
 
 <a name="v2.34.1"></a>
