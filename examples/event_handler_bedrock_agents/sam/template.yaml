@@ -5,7 +5,7 @@ Description: >
 
 Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
   Function:
-    Timeout: 5
+    Timeout: 30
     Runtime: python3.12
     Tracing: Active
     Environment:
@@ -16,8 +16,6 @@ Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/devel
 Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
     Properties:
       Handler: getting_started.lambda_handler
       Description: Agent for Amazon Bedrock handler function

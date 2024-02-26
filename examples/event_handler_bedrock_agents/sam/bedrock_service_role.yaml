@@ -23,7 +23,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - bedrock:InvokeModel
-                Resource:
+                Resource: # (1)!
                   - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2
                   - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2:1
                   - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-instant-v1
@@ -31,4 +31,4 @@ Resources:
 Outputs:
   BedrockServiceRole:
     Description: The role ARN to be used by Amazon Bedrock
-    Value: !GetAtt BedrockServiceRole.Arn  # (1)!
+    Value: !GetAtt BedrockServiceRole.Arn  # (2)!

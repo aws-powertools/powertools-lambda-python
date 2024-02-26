@@ -22,7 +22,9 @@ class ScheduleMeetingResponse(BaseModel):  # (2)!
 
 @app.get("/schedule_meeting", description="Schedules a meeting with the team")
 @tracer.capture_method
-def schedule_meeting(email: EmailStr) -> ScheduleMeetingResponse:  # (4)!
+def schedule_meeting(
+    email: Annotated[EmailStr, Body(description="The email address of the customer")],
+) -> ScheduleMeetingResponse:  # (4)!
     logger.info("Scheduling a meeting", email=email)
     return ScheduleMeetingResponse(
         date=datetime.datetime.fromtimestamp(time() + 60 * 60 * 24 * 7),  # 7 days from now

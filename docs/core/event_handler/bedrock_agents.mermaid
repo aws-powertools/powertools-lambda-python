@@ -1,5 +1,5 @@
 flowchart LR
-    Bedrock[Foundation Model] <-- uses --> Agent
+    Bedrock[LLM] <-- uses --> Agent
     You[User input] --> Agent
     Agent -- consults --> OpenAPI
     Agent[Agents for Amazon Bedrock] -- invokes --> Lambda
