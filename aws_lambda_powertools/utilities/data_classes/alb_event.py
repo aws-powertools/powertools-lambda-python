@@ -32,8 +32,8 @@ class ALBEvent(BaseProxyEvent):
         return ALBEventRequestContext(self._data)
 
     @property
-    def multi_value_query_string_parameters(self) -> Optional[Dict[str, List[str]]]:
-        return self.get("multiValueQueryStringParameters")
+    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+        return self.get("multiValueQueryStringParameters") or {}
 
     @property
     def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
