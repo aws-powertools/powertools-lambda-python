@@ -193,7 +193,7 @@ class BaseProxyEvent(DictWrapper):
         self,
         name: str,
         default_values: Optional[List[str]] = None,
-    ) -> Optional[List[str]]:
+    ) ->List[str]:
         """Get multi-value query string parameter values by name
 
         Parameters
