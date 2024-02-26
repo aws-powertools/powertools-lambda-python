@@ -11,7 +11,9 @@ def test_alb_event():
     assert parsed_event.path == raw_event["path"]
     assert parsed_event.query_string_parameters == raw_event["queryStringParameters"]
     assert parsed_event.headers == raw_event["headers"]
-    assert parsed_event.multi_value_query_string_parameters == raw_event.get("multiValueQueryStringParameters")
+
+    assert parsed_event.multi_value_query_string_parameters == raw_event.get("multiValueQueryStringParameters", {})
+
     assert parsed_event.multi_value_headers == raw_event.get("multiValueHeaders")
     assert parsed_event.body == raw_event["body"]
     assert parsed_event.is_base64_encoded == raw_event["isBase64Encoded"]
