@@ -73,7 +73,7 @@ graph LR
 
 ### Install
 
-!!! warning "Our Lambda layer does not include the aws-encryption-sdk. Please install it as a dependency in your project to use this utility."
+!!! info "Our Lambda layer does not include the aws-encryption-sdk. Please install it as a dependency in your project to use this utility."
 
 Add `aws-lambda-powertools[datamasking]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_. This will install the [AWS Encryption SDK](https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html){target="_blank"}.
 
