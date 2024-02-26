@@ -275,7 +275,7 @@ def test_base_proxy_event_get_multi_value_query_string_values():
     assert values == default_values
 
     values = event.get_multi_value_query_string_values("unknown")
-    assert values is None
+    assert values == []
 
 
 def test_base_proxy_event_get_header_value():

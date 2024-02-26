@@ -90,7 +90,7 @@ def get_multi_value_query_string_values(
     multi_value_query_string_parameters: Dict[str, list[str]] | None,
     name: str,
     default_values: list[str] | None = None,
-) -> list[str] | None:
+) -> list[str]:
     """
     Retrieves the values of a multi-value string parameters specified by the given name.
 
@@ -107,5 +107,7 @@ def get_multi_value_query_string_values(
         The values of the query string parameter if found, or the default values if not found.
     """
 
-    params = multi_value_query_string_parameters
-    return default_values if not params else params.get(name, default_values)
+    default = default_values or []
+    params = multi_value_query_string_parameters or {}
+
+    return params.get(name) or default
