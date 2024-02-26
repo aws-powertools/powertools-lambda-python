@@ -101,8 +101,6 @@ all = [
   "pydantic",
   "aws-xray-sdk",
   "fastjsonschema",
-  "aws-encryption-sdk",
-  "jsonpath-ng",
 ]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
