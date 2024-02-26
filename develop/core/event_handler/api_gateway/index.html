@@ -5263,7 +5263,10 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">requests</span> <span class="kn">import</span> <span class="n">Response</span>
@@ -5285,9 +5288,12 @@ return a 200 OK HTTP status. You can optionally set a different HTTP status code
 </span>    <span class="c1"># alternatively</span>
     <span class="n">_</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">query_string_parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Payload</span>
-<span class="hll">    <span class="n">_</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">body</span>  <span class="c1"># raw str | None</span>
+    <span class="c1"># or multi-value query string parameters; ?category=&quot;red&quot;&amp;?category=&quot;blue&quot;</span>
+<span class="hll">    <span class="n">_</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">get_multi_value_query_string_values</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
 </span>
+    <span class="c1"># Payload</span>
+    <span class="n">_</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">app</span><span class="o">.</span><span class="n">current_event</span><span class="o">.</span><span class="n">body</span>  <span class="c1"># raw str | None</span>
+
     <span class="n">endpoint</span> <span class="o">=</span> <span class="s2">&quot;https://jsonplaceholder.typicode.com/todos&quot;</span>
     <span class="k">if</span> <span class="n">todo_id</span><span class="p">:</span>
         <span class="n">endpoint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">endpoint</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">todo_id</span><span class="si">}</span><span class="s2">&quot;</span>
