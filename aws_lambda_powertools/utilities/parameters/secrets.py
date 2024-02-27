@@ -2,7 +2,6 @@
 AWS Secrets Manager parameter retrieval and caching utility
 """
 
-
 import os
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 

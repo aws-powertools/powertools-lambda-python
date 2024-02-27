@@ -2,7 +2,6 @@
 Idempotency errors
 """
 
-
 from typing import Optional, Union
 
 from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
