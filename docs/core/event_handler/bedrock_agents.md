@@ -11,6 +11,8 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 ```
 </center>
 
+![Agents for Bedrock Overview](../../media/bedrock_agents_intro.svg)
+
 ## Key features
 
 * Same declarative syntax as the [other event handler resolvers](api_gateway.md)
@@ -76,7 +78,8 @@ Before you start, you need to the following permissions:
 	1. Amazon Bedrock needs permissions to invoke this Lambda function
 
 === "Using AWS Cloud Developer Kit (CDK)"
-	Use the [Generative AI CDK constructs](https://awslabs.github.io/generative-ai-cdk-constructs/src/cdk-lib/bedrock/#agents){target="_blank"} to create your Agent with CDK.
+	Use the [Generative AI CDK constructs](https://awslabs.github.io/generative-ai-cdk-constructs/src/cdk-lib/bedrock/#agents){target="_blank"} to create your Agent with [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"}.
+	These constructs abstract all the underlying permission setup and bundling of your Lambda function.
 
 	```python
     --8<-- "examples/event_handler_bedrock_agents/cdk/bedrock_agent_stack.py"
@@ -122,7 +125,7 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
 
-!!! note "It's important to include a `description` for each API endpoint because it will improve the understanding Amazon Bedrock has of your actions"
+!!! note "It's required to include a `description` for each API endpoint and input parameter. This will improve the understanding Amazon Bedrock has of your actions."
 
 ### Validating input and output
 
@@ -217,9 +220,9 @@ During the creation process, you should use the schema generated in the previous
 
 The event sent by Agents for Amazon Bedrock into your Lambda function contains a number of event fields that might be interesting. The event handler exposes them in the `app.current_event` field:
 
-=== "accessing_request_fields.py"
+=== "Accessing request fields"
 
-	```python hl_lines="14-16"
+	```python hl_lines="15-17"
 	--8<-- "examples/event_handler_bedrock_agents/src/accessing_request_fields.py"
 	```
 
