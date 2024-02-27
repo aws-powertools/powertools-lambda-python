@@ -172,6 +172,75 @@ class SSMProvider(BaseProvider):
 
         return super().get(name, max_age, transform, force_fetch, **sdk_options)
 
+    @overload
+    def set(
+        self,
+        name: str,
+        value: list[str],
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["StringList"] = "StringList",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str | None = "None",
+        **sdk_options,
+    ): ...
+
+    @overload
+    def set(
+        self,
+        name: str,
+        value: str,
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["SecureString"] = "SecureString",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str,
+        **sdk_options,
+    ): ...
+
+    @overload
+    def set(
+        self,
+        name: str,
+        value: str,
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["String"] = "String",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str | None = None,
+        **sdk_options,
+    ): ...
+
+    def set(
+        self,
+        name: str,
+        value: str | list[str],
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: SSM_PARAMETER_TYPES = "String",
+        tier: SSM_PARAMETER_TIER = "Standard",
+        kms_key_id: str | None = None,
+        **sdk_options,
+    ):
+        opts = {
+            "Name": name,
+            "Value": value,
+            "Overwrite": overwrite,
+            "Type": parameter_type,
+            "Tier": tier,
+            "Description": description,
+            **sdk_options,
+        }
+
+        if kms_key_id:
+            opts["KeyId"] = kms_key_id
+
+        return self.client.put_parameter(**opts)
+
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
         Retrieve a parameter value from AWS Systems Manager Parameter Store
@@ -877,7 +946,7 @@ def set_parameter(
     if "ssm" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
-    return DEFAULT_PROVIDERS["ssm"]._set(
+    return DEFAULT_PROVIDERS["ssm"].set(
         path,
         value,
         parameter_type=parameter_type,

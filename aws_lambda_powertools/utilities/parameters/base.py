@@ -154,10 +154,7 @@ class BaseProvider(ABC):
         """
         raise NotImplementedError()
 
-    def _set(self, name: str, **sdk_options) -> Union[str, bytes]:
-        """
-        Sets a parameter value from the underlying parameter store
-        """
+    def set(self, name: str, value: Any, *, overwrite: bool = False, **kwargs):
         raise NotImplementedError()
 
     def get_multiple(
