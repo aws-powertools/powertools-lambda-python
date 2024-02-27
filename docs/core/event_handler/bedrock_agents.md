@@ -120,9 +120,29 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 
 You can define the expected format for incoming data and responses by using type annotations.
 
-```python hl_lines="5 17-20 26" title="Automatic validation of inputs and outputs"
---8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
-```
+=== "Lambda handler"
+
+	```python hl_lines="5 17-20 26"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
+	```
+
+=== "OpenAPI schema"
+
+	```json
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
+	```
+
+=== "Input payload"
+
+	```json hl_lines="6-13 20"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.json"
+	```
+
+=== "Output payload"
+
+	```json hl_lines="10"
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
+	```
 
 1. No need to add the `enable_validation` parameter, as it's enabled by default.
 2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)

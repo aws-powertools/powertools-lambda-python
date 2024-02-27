@@ -1,0 +1,141 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Powertools API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/schedule_meeting": {
+      "get": {
+        "summary": "GET /schedule_meeting",
+        "description": "Schedules a meeting with the team",
+        "operationId": "schedule_meeting_schedule_meeting_get",
+        "requestBody": {
+          "description": "The email address of the customer",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "email",
+                "title": "Email",
+                "description": "The email address of the customer"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ScheduleMeetingResponse"
+                    }
+                  ],
+                  "title": "Return",
+                  "description": "Scheduled meeting details"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ScheduleMeetingResponse": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Date",
+            "description": "The date of the scheduled meeting"
+          },
+          "team": {
+            "type": "string",
+            "title": "Team",
+            "description": "The team that will handle the support request"
+          },
+          "cancellationEmail": {
+            "type": "string",
+            "format": "email",
+            "title": "Cancellationemail",
+            "description": "The email address to request a meeting cancellation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "team",
+          "cancellationEmail"
+        ],
+        "title": "ScheduleMeetingResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
