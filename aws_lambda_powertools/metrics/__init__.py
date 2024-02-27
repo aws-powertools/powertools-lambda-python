@@ -1,5 +1,6 @@
 """CloudWatch Embedded Metric Format utility
 """
+
 from aws_lambda_powertools.metrics.base import MetricResolution, MetricUnit, single_metric
 from aws_lambda_powertools.metrics.exceptions import (
     MetricResolutionError,

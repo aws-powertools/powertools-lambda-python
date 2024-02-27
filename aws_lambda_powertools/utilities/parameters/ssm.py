@@ -1,6 +1,7 @@
 """
 AWS SSM Parameter retrieval and caching utility
 """
+
 from __future__ import annotations
 
 import os
@@ -556,8 +557,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
-) -> str:
-    ...
+) -> str: ...
 
 
 @overload
@@ -568,8 +568,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
-) -> dict:
-    ...
+) -> dict: ...
 
 
 @overload
@@ -580,8 +579,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
-) -> Union[str, dict, bytes]:
-    ...
+) -> Union[str, dict, bytes]: ...
 
 
 @overload
@@ -592,8 +590,7 @@ def get_parameter(
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
-) -> bytes:
-    ...
+) -> bytes: ...
 
 
 def get_parameter(
@@ -686,8 +683,7 @@ def get_parameters(
     max_age: Optional[int] = None,
     raise_on_transform_error: bool = False,
     **sdk_options,
-) -> Dict[str, str]:
-    ...
+) -> Dict[str, str]: ...
 
 
 @overload
@@ -700,8 +696,7 @@ def get_parameters(
     max_age: Optional[int] = None,
     raise_on_transform_error: bool = False,
     **sdk_options,
-) -> Dict[str, dict]:
-    ...
+) -> Dict[str, dict]: ...
 
 
 @overload
@@ -714,8 +709,7 @@ def get_parameters(
     max_age: Optional[int] = None,
     raise_on_transform_error: bool = False,
     **sdk_options,
-) -> Dict[str, bytes]:
-    ...
+) -> Dict[str, bytes]: ...
 
 
 @overload
@@ -728,8 +722,7 @@ def get_parameters(
     max_age: Optional[int] = None,
     raise_on_transform_error: bool = False,
     **sdk_options,
-) -> Union[Dict[str, bytes], Dict[str, dict], Dict[str, str]]:
-    ...
+) -> Union[Dict[str, bytes], Dict[str, dict], Dict[str, str]]: ...
 
 
 def get_parameters(
@@ -903,8 +896,7 @@ def get_parameters_by_name(
     decrypt: Optional[bool] = None,
     max_age: Optional[int] = None,
     raise_on_error: bool = True,
-) -> Dict[str, str]:
-    ...
+) -> Dict[str, str]: ...
 
 
 @overload
@@ -914,8 +906,7 @@ def get_parameters_by_name(
     decrypt: Optional[bool] = None,
     max_age: Optional[int] = None,
     raise_on_error: bool = True,
-) -> Dict[str, bytes]:
-    ...
+) -> Dict[str, bytes]: ...
 
 
 @overload
@@ -925,8 +916,7 @@ def get_parameters_by_name(
     decrypt: Optional[bool] = None,
     max_age: Optional[int] = None,
     raise_on_error: bool = True,
-) -> Dict[str, Dict[str, Any]]:
-    ...
+) -> Dict[str, Dict[str, Any]]: ...
 
 
 @overload
@@ -936,8 +926,7 @@ def get_parameters_by_name(
     decrypt: Optional[bool] = None,
     max_age: Optional[int] = None,
     raise_on_error: bool = True,
-) -> Union[Dict[str, str], Dict[str, dict]]:
-    ...
+) -> Union[Dict[str, str], Dict[str, dict]]: ...
 
 
 def get_parameters_by_name(

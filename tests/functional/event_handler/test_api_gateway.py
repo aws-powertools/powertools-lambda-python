@@ -716,16 +716,13 @@ def test_cors_preflight():
     app = ApiGatewayResolver(cors=CORSConfig())
 
     @app.get("/foo")
-    def foo_cors():
-        ...
+    def foo_cors(): ...
 
     @app.route(method="delete", rule="/foo")
-    def foo_delete_cors():
-        ...
+    def foo_delete_cors(): ...
 
     @app.post("/foo", cors=False)
-    def post_no_cors():
-        ...
+    def post_no_cors(): ...
 
     # WHEN calling the handler
     result = app({"path": "/foo", "httpMethod": "OPTIONS", "headers": {"Origin": "http://example.org"}}, None)
@@ -756,8 +753,7 @@ def test_custom_preflight_response():
         )
 
     @app.route(method="CUSTOM", rule="/some-call", cors=True)
-    def custom_method():
-        ...
+    def custom_method(): ...
 
     # AND the request includes an origin
     headers = {"Origin": "https://example.org"}
@@ -1094,8 +1090,7 @@ def test_remove_prefix(path: str):
         raise ValueError("should not be matching")
 
     @app.get("/foo")
-    def foo():
-        ...
+    def foo(): ...
 
     # WHEN calling handler
     response = app({"httpMethod": "GET", "path": path}, None)
@@ -1116,8 +1111,7 @@ def test_remove_prefix_by_regex(path: str):
     app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
 
     @app.get("/foo")
-    def foo():
-        ...
+    def foo(): ...
 
     response = app({"httpMethod": "GET", "path": path}, None)
 
@@ -1128,8 +1122,7 @@ def test_empty_path_when_using_regexes():
     app = ApiGatewayResolver(strip_prefixes=[re.compile(r"/(dev|stg)")])
 
     @app.get("/")
-    def foo():
-        ...
+    def foo(): ...
 
     response = app({"httpMethod": "GET", "path": "/dev"}, None)
 
@@ -1151,8 +1144,7 @@ def test_ignore_invalid(prefix):
     app = ApiGatewayResolver(strip_prefixes=prefix)
 
     @app.get("/foo/status")
-    def foo():
-        ...
+    def foo(): ...
 
     # WHEN calling handler
     response = app({"httpMethod": "GET", "path": "/foo/status"}, None)
@@ -1473,8 +1465,7 @@ def test_exception_handler_with_data_validation():
         )
 
     @app.get("/my/path")
-    def get_lambda(param: int):
-        ...
+    def get_lambda(param: int): ...
 
     # WHEN calling the event handler
     # AND a RequestValidationError is raised
@@ -1502,8 +1493,7 @@ def test_exception_handler_with_data_validation_pydantic_response():
         )
 
     @app.get("/my/path")
-    def get_lambda(param: int):
-        ...
+    def get_lambda(param: int): ...
 
     # WHEN calling the event handler
     # AND a RequestValidationError is raised
@@ -1519,8 +1509,7 @@ def test_data_validation_error():
     app = ApiGatewayResolver(enable_validation=True)
 
     @app.get("/my/path")
-    def get_lambda(param: int):
-        ...
+    def get_lambda(param: int): ...
 
     # WHEN calling the event handler
     # AND a RequestValidationError is raised
