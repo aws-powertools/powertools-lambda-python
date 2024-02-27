@@ -34,6 +34,7 @@ from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
@@ -1458,6 +1459,20 @@ class ApiGatewayResolver(BaseRouter):
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
+
+        # Pydantic V2 has no support for OpenAPI schema 3.0
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+            warnings.warn(
+                "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
+                stacklevel=2,
+            )
+            openapi_version = DEFAULT_OPENAPI_VERSION
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+            warnings.warn(
+                "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
+                stacklevel=2,
+            )
+            openapi_version = DEFAULT_OPENAPI_VERSION
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
