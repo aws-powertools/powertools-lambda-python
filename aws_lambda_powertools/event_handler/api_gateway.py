@@ -1466,13 +1466,13 @@ class ApiGatewayResolver(BaseRouter):
                 "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
                 stacklevel=2,
             )
-            openapi_version = DEFAULT_OPENAPI_VERSION
+            openapi_version = "3.1.0"
         elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
             warnings.warn(
                 "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
                 stacklevel=2,
             )
-            openapi_version = DEFAULT_OPENAPI_VERSION
+            openapi_version = "3.0.3"
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
