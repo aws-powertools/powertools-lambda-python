@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 import requests
 from requests import Response
@@ -19,6 +19,9 @@ def get_todos():
     todo_id: str = app.current_event.get_query_string_value(name="id", default_value="")
     # alternatively
     _: Optional[str] = app.current_event.query_string_parameters.get("id")
+
+    # or multi-value query string parameters; ?category="red"&?category="blue"
+    _: List[str] = app.current_event.get_multi_value_query_string_values(name="category")
 
     # Payload
     _: Optional[str] = app.current_event.body  # raw str | None

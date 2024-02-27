@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
+    get_multi_value_query_string_values,
     get_query_string_value,
 )
 
@@ -104,6 +105,10 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
+    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+        return self.get("multiValueQueryStringParameters") or {}
+
+    @property
     def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
@@ -182,6 +187,31 @@ class BaseProxyEvent(DictWrapper):
             query_string_parameters=self.query_string_parameters,
             name=name,
             default_value=default_value,
+        )
+
+    def get_multi_value_query_string_values(
+        self,
+        name: str,
+        default_values: Optional[List[str]] = None,
+    ) ->List[str]:
+        """Get multi-value query string parameter values by name
+
+        Parameters
+        ----------
+        name: str
+            Multi-Value query string parameter name
+        default_values: List[str], optional
+            Default values is no values are found by name
+        Returns
+        -------
+        List[str], optional
+            List of query string values
+
+        """
+        return get_multi_value_query_string_values(
+            multi_value_query_string_parameters=self.multi_value_query_string_parameters,
+            name=name,
+            default_values=default_values,
         )
 
     @overload

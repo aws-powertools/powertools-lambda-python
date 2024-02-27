@@ -4,12 +4,37 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+
+
+<a name="v2.34.2"></a>
+## [v2.34.2] - 2024-02-26
+## Bug Fixes
+
+* **typing:** ensure return type is a str when default_value is set ([#3840](https://github.com/aws-powertools/powertools-lambda-python/issues/3840))
+
 ## Documentation
 
 * **install:** make minimum install the default option then extra ([#3834](https://github.com/aws-powertools/powertools-lambda-python/issues/3834))
 
+## Features
+
+* **event-source:** add function to get multi-value query string params by name ([#3846](https://github.com/aws-powertools/powertools-lambda-python/issues/3846))
+
 ## Maintenance
 
+* version bump
+* **ci:** remove aws-encryption-sdk from Lambda layer due to cffi being tied to python version ([#3853](https://github.com/aws-powertools/powertools-lambda-python/issues/3853))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3844](https://github.com/aws-powertools/powertools-lambda-python/issues/3844))
+* **deps:** bump cryptography from 42.0.2 to 42.0.4 ([#3827](https://github.com/aws-powertools/powertools-lambda-python/issues/3827))
+* **deps:** bump codecov/codecov-action from 4.0.1 to 4.0.2 ([#3842](https://github.com/aws-powertools/powertools-lambda-python/issues/3842))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3835](https://github.com/aws-powertools/powertools-lambda-python/issues/3835))
+* **deps-dev:** bump httpx from 0.26.0 to 0.27.0 ([#3828](https://github.com/aws-powertools/powertools-lambda-python/issues/3828))
+* **deps-dev:** bump aws-cdk from 2.128.0 to 2.129.0 ([#3831](https://github.com/aws-powertools/powertools-lambda-python/issues/3831))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3836](https://github.com/aws-powertools/powertools-lambda-python/issues/3836))
+* **deps-dev:** bump aws-cdk from 2.129.0 to 2.130.0 ([#3843](https://github.com/aws-powertools/powertools-lambda-python/issues/3843))
+* **deps-dev:** bump aws-cdk-lib from 2.128.0 to 2.130.0 ([#3838](https://github.com/aws-powertools/powertools-lambda-python/issues/3838))
 
 
 <a name="v2.34.1"></a>
@@ -4435,7 +4460,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.1...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.2...HEAD
+[v2.34.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.1...v2.34.2
 [v2.34.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.0...v2.34.1
 [v2.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.1...v2.34.0
 [v2.33.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.0...v2.33.1
