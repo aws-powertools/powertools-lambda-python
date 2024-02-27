@@ -32,6 +32,8 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 
 **Large Language Models (LLM)** are very large deep learning models that are pre-trained on vast amounts of data, capable of extracting meanings from a sequence of text and understanding the relationship between words and phrases on it.
 
+**Agent for Amazon Bedrock** is an AWS service to build and deploy conversational agents that can interact with your customers using Large Language Models (LLM) and AWS Lambda functions.
+
 ## Getting started
 
 ???+ tip
