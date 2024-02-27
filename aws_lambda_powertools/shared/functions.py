@@ -57,18 +57,15 @@ def resolve_max_age(env: str, choice: Optional[int]) -> int:
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: float) -> float: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: str) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: str) -> str: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str: ...
 
 
 def resolve_env_var_choice(

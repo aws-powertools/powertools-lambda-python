@@ -1,4 +1,5 @@
 """aws_lambda_logging tests."""
+
 import io
 import json
 import os

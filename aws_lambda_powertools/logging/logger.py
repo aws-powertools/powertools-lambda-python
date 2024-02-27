@@ -345,8 +345,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> AnyCallableT:
-        ...
+    ) -> AnyCallableT: ...
 
     @overload
     def inject_lambda_context(
@@ -355,8 +354,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        ...
+    ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
         self,

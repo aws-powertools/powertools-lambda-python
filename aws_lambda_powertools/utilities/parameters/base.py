@@ -1,6 +1,7 @@
 """
 Base for Parameter providers
 """
+
 from __future__ import annotations
 
 import base64
@@ -372,8 +373,7 @@ def transform_value(
     transform: TransformOptions,
     raise_on_transform_error: bool = False,
     key: str = "",
-) -> Dict[str, Any]:
-    ...
+) -> Dict[str, Any]: ...
 
 
 @overload
@@ -382,8 +382,7 @@ def transform_value(
     transform: TransformOptions,
     raise_on_transform_error: bool = False,
     key: str = "",
-) -> Optional[Union[str, bytes, Dict[str, Any]]]:
-    ...
+) -> Optional[Union[str, bytes, Dict[str, Any]]]: ...
 
 
 def transform_value(
