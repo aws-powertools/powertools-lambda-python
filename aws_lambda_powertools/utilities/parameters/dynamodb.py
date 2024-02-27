@@ -2,7 +2,6 @@
 Amazon DynamoDB parameter retrieval and caching utility
 """
 
-
 from typing import TYPE_CHECKING, Dict, Optional
 
 import boto3

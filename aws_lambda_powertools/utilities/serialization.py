@@ -1,4 +1,5 @@
 """Standalone functions to serialize/deserialize common data structures"""
+
 import base64
 import json
 from typing import Any, Callable

@@ -1,7 +1,6 @@
 """Tracing utility
 """
 
-
 from .extensions import aiohttp_trace_config
 from .tracer import Tracer
 

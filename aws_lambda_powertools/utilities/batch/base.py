@@ -339,12 +339,15 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         return failures
 
     @overload
-    def _to_batch_type(self, record: dict, event_type: EventType, model: "BatchTypeModels") -> "BatchTypeModels":
-        ...  # pragma: no cover
+    def _to_batch_type(
+        self,
+        record: dict,
+        event_type: EventType,
+        model: "BatchTypeModels",
+    ) -> "BatchTypeModels": ...  # pragma: no cover
 
     @overload
-    def _to_batch_type(self, record: dict, event_type: EventType) -> EventSourceDataClassTypes:
-        ...  # pragma: no cover
+    def _to_batch_type(self, record: dict, event_type: EventType) -> EventSourceDataClassTypes: ...  # pragma: no cover
 
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
