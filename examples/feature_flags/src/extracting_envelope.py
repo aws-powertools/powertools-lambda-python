@@ -6,8 +6,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 app_config = AppConfigStore(
     environment="dev",
     application="product-catalogue",
-    name="features",
-    envelope="feature_flags",
+    name="feature_flags",
+    envelope="features",
 )
 
 feature_flags = FeatureFlags(store=app_config)

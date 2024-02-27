@@ -1,6 +1,7 @@
 """
 Persistence layers supporting idempotency
 """
+
 import datetime
 import hashlib
 import json
@@ -383,9 +384,9 @@ class BasePersistenceLayer(ABC):
 
         record = self._get_record(idempotency_key=idempotency_key)
 
+        self._validate_payload(data_payload=data, stored_data_record=record)
         self._save_to_cache(data_record=record)
 
-        self._validate_payload(data_payload=data, stored_data_record=record)
         return record
 
     @abstractmethod

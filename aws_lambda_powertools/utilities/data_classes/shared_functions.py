@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from typing import Any
+from typing import Any, Dict
 
 
 def base64_decode(value: str) -> str:
@@ -63,7 +63,7 @@ def get_header_value(
 
 
 def get_query_string_value(
-    query_string_parameters: dict[str, str] | None,
+    query_string_parameters: Dict[str, str] | None,
     name: str,
     default_value: str | None = None,
 ) -> str | None:
@@ -84,3 +84,30 @@ def get_query_string_value(
     """
     params = query_string_parameters
     return default_value if params is None else params.get(name, default_value)
+
+
+def get_multi_value_query_string_values(
+    multi_value_query_string_parameters: Dict[str, list[str]] | None,
+    name: str,
+    default_values: list[str] | None = None,
+) -> list[str]:
+    """
+    Retrieves the values of a multi-value string parameters specified by the given name.
+
+    Parameters
+    ----------
+    name: str
+        The name of the query string parameter to retrieve.
+    default_value: list[str], optional
+        The default value to return if the parameter is not found. Defaults to None.
+
+    Returns
+    -------
+    List[str]. optional
+        The values of the query string parameter if found, or the default values if not found.
+    """
+
+    default = default_values or []
+    params = multi_value_query_string_parameters or {}
+
+    return params.get(name) or default

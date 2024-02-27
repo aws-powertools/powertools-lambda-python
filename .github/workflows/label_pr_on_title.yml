@@ -56,6 +56,7 @@ jobs:
         env:
           PR_NUMBER: ${{ needs.get_pr_details.outputs.prNumber }}
           PR_TITLE: ${{ needs.get_pr_details.outputs.prTitle }}
+          PR_LABELS: ${{ needs.get_pr_details.outputs.prLabels }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # This safely runs in our base repo, not on fork

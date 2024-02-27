@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
+    get_multi_value_query_string_values,
     get_query_string_value,
 )
 
@@ -104,7 +105,11 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+        return self.get("multiValueQueryStringParameters") or {}
+
+    @property
+    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
@@ -112,7 +117,11 @@ class BaseProxyEvent(DictWrapper):
         This is necessary because different resolvers use different formats to encode
         multi query string parameters.
         """
-        return self.query_string_parameters
+        if self.query_string_parameters is not None:
+            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
+            return query_string
+
+        return {}
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
@@ -180,14 +189,38 @@ class BaseProxyEvent(DictWrapper):
             default_value=default_value,
         )
 
+    def get_multi_value_query_string_values(
+        self,
+        name: str,
+        default_values: Optional[List[str]] = None,
+    ) ->List[str]:
+        """Get multi-value query string parameter values by name
+
+        Parameters
+        ----------
+        name: str
+            Multi-Value query string parameter name
+        default_values: List[str], optional
+            Default values is no values are found by name
+        Returns
+        -------
+        List[str], optional
+            List of query string values
+
+        """
+        return get_multi_value_query_string_values(
+            multi_value_query_string_parameters=self.multi_value_query_string_parameters,
+            name=name,
+            default_values=default_values,
+        )
+
     @overload
     def get_header_value(
         self,
         name: str,
         default_value: str,
         case_sensitive: Optional[bool] = False,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def get_header_value(
@@ -195,8 +228,7 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: Optional[bool] = False,
-    ) -> Optional[str]:
-        ...
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,

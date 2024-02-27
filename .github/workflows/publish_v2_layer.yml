@@ -257,11 +257,12 @@ jobs:
           integrity_hash: ${{ inputs.source_code_integrity_hash }}
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
-      - name: Download CDK layer artifact
+      - name: Download CDK layer artifacts
         uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
         with:
-          name: cdk-layer-stack
-          path: cdk-layer-stack/
+          path: cdk-layer-stack
+          pattern: cdk-layer-stack-*  # merge all Layer artifacts created per region earlier (reusable_deploy_v2_layer_stack.yml; step "Save Layer ARN artifact")
+          merge-multiple: true
       - name: Replace layer versions in documentation
         run: |
           ls -la cdk-layer-stack/

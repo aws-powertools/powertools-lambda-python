@@ -1,5 +1,5 @@
 # Enable rules.
-select = [
+lint.select = [
     "A",   # flake8-builtins - https://beta.ruff.rs/docs/rules/#flake8-builtins-a
     "B",   # flake8-bugbear-b - https://beta.ruff.rs/docs/rules/#flake8-bugbear-b
     "C4",  # flake8-comprehensions - https://beta.ruff.rs/docs/rules/#flake8-comprehensions-c4
@@ -28,7 +28,7 @@ select = [
 ]
 
 # Ignore specific rules
-ignore = [
+lint.ignore = [
     "W291",    # https://beta.ruff.rs/docs/rules/trailing-whitespace/
     "PLR0913", # https://beta.ruff.rs/docs/rules/too-many-arguments/
     "PLR2004", #https://beta.ruff.rs/docs/rules/magic-value-comparison/
@@ -60,28 +60,28 @@ line-length = 120
 
 
 fix = true
-fixable = ["I", "COM812", "W"]
+lint.fixable = ["I", "COM812", "W"]
 
 # See: https://github.com/astral-sh/ruff/issues/128
-typing-modules = [
+lint.typing-modules = [
     "aws_lambda_powertools.utilities.parser.types",
     "aws_lambda_powertools.shared.types",
 ]
 
-[mccabe]
+[lint.mccabe]
 # Maximum cyclomatic complexity
 max-complexity = 15
 
-[pylint]
+[lint.pylint]
 # Maximum number of nested blocks
 max-branches = 15
 # Maximum number of if statements in a function
 max-statements = 70
 
-[isort]
+[lint.isort]
 split-on-trailing-comma = true
 
-[per-file-ignores]
+[lint.per-file-ignores]
 # Ignore specific rules for specific files
 "tests/e2e/utils/data_builder/__init__.py" = ["F401"]
 "tests/e2e/utils/data_fetcher/__init__.py" = ["F401"]
