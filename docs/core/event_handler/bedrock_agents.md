@@ -3,7 +3,7 @@ title: Agents for Amazon Bedrock
 description: Core utility
 ---
 
-Author [Agents for Amazon Bedrock](https://aws.amazon.com/bedrock/agents/){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
+Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html#agents-how){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
 
 <center>
 ```mermaid
@@ -99,7 +99,7 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
     --8<-- "examples/event_handler_bedrock_agents/src/getting_started.py"
     ```
 
-	1. `description` is a recommended field that should contain a human readable description of your action
+	1. `description` is a **required** field that should contain a human readable description of your action
 	2. We take care of **parsing**, **validating**, **routing** and **responding** to the request.
 
 === "OpenAPI schema"
@@ -187,6 +187,17 @@ The script will generate the schema directly to standard output, which you can r
 ```sh
 python app.py > schema.json
 ```
+
+### Crafting effective OpenAPI schemas
+
+Working with Agents for Amazon Bedrock will introduce [non-deterministic behaviour to your system](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-how.html#agents-rt){target="_blank"}.
+The OpenAPI schema provides context and semantics to the Agent that will support the decision process for invoking our Lambda function. Sparse or ambiguous schema can result in unexpected outcomes.
+
+We recommend enriching your OpenAPI schema with as many details as possible, which will help the Agent understand your functions and make correct invocations. To achieve that:
+
+* always describe your function behaviour using the `description` field in your annotations
+* in case of refactoring, update your description field to match the function outcomes
+* use distinct `description` for each function to have clear separation of semantics
 
 ### Walkthrough for creating the agent
 
