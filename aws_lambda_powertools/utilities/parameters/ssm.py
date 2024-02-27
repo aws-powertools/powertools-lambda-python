@@ -884,7 +884,7 @@ def get_parameters(
 
 
 def set_parameter(
-    path: str,
+    name: str,
     value: str,
     *,  # force keyword arguments
     parameter_type: SSM_PARAMETER_TYPES = "String",
@@ -899,8 +899,8 @@ def set_parameter(
 
     Parameters
     ----------
-    path: str
-        The fully qualified name includes the complete hierarchy of the parameter path and name.
+    name: str
+        The fully qualified name includes the complete hierarchy of the parameter name and name.
     value: str
         The parameter value
     parameter_type: str, optional
@@ -936,7 +936,7 @@ def set_parameter(
 
         >>> from aws_lambda_powertools.utilities import parameters
         >>>
-        >>> response = parameters.set_parameter(path="/my/example/parameter", value="More Powertools")
+        >>> response = parameters.set_parameter(name="/my/example/parameter", value="More Powertools")
         >>>
         >>> print(response)
         123
@@ -947,7 +947,7 @@ def set_parameter(
         DEFAULT_PROVIDERS["ssm"] = SSMProvider()
 
     return DEFAULT_PROVIDERS["ssm"].set(
-        path,
+        name,
         value,
         parameter_type=parameter_type,
         overwrite=overwrite,
