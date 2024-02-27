@@ -34,7 +34,6 @@ from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
-from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
@@ -1456,6 +1455,7 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
+        from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
