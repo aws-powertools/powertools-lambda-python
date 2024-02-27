@@ -85,6 +85,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
         )
         self._response_builder_class = BedrockResponseBuilder
 
+    # Note: we need ignore[override] because we are making the optional `description` field required.
     @override
     def get(  # type: ignore[override]
         self,
