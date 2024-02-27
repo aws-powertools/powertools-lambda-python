@@ -48,8 +48,7 @@ def provider_stub(mocker):
         def patch(self, *args, **kwargs):
             return self.patch_mock(*args, **kwargs)
 
-        def patch_all(self):
-            ...
+        def patch_all(self): ...
 
     return CustomProvider
 
