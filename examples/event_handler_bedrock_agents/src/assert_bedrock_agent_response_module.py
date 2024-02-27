@@ -1,8 +1,9 @@
-import requests
-from requests import Response
+import time
+from typing import Annotated
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
+from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 tracer = Tracer()
@@ -10,13 +11,10 @@ logger = Logger()
 app = BedrockAgentResolver()
 
 
-@app.get("/todos", description="Gets the first 10 todos")
+@app.get("/current_time", description="Gets the current time")
 @tracer.capture_method
-def get_todos():
-    todos: Response = requests.get("https://jsonplaceholder.typicode.com/todos")
-    todos.raise_for_status()
-
-    return {"todos": todos.json()[:10]}
+def current_time() -> Annotated[int, Body(description="Current time in milliseconds")]:
+    return round(time.time() * 1000)
 
 
 @logger.inject_lambda_context

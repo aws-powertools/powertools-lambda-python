@@ -1,6 +1,6 @@
 <!-- markdownlint-disable MD041 MD043 -->
 
-Customize your API endpoints by adding metadata to endpoint definitions. This provides descriptive documentation for API consumers and gives extra instructions to the framework.
+Customize your API endpoints by adding metadata to endpoint definitions.
 
 Here's a breakdown of various customizable fields:
 

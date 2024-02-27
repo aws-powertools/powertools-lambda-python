@@ -18,7 +18,7 @@ def lambda_context():
 
 def test_lambda_handler(lambda_context):
     minimal_event = {
-        "apiPath": "/todos",
+        "apiPath": "/current_time",
         "httpMethod": "GET",
         "inputText": "What is the current time?",
     }

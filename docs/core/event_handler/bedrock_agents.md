@@ -102,6 +102,14 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 	1. `description` is a recommended field that should contain a human readable description of your action
 	2. We take care of **parsing**, **validating**, **routing** and **responding** to the request.
 
+=== "OpenAPI schema"
+
+	Powertools for AWS Lambda [generates this automatically](#generating-openapi-schemas) from the Lambda handler.
+
+	```json
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_schema.json"
+	```
+
 === "Input payload"
 
 	```json hl_lines="4 6 13"
@@ -122,20 +130,20 @@ You can define the expected format for incoming data and responses by using type
 
 === "Lambda handler"
 
-	```python hl_lines="5 17-20 26"
+	```python hl_lines="5 23-26 32-33"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
-	```
-
-=== "OpenAPI schema"
-
-	```json
-	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
 	```
 
 	1. No need to add the `enable_validation` parameter, as it's enabled by default.
 	2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)
 	3. Describe each input and output using human-readable descriptions
 	4. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
+
+=== "OpenAPI schema"
+
+	```json
+	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
+	```
 
 === "Input payload"
 
@@ -225,17 +233,20 @@ The input event fields are:
 To enrich the view that Agents for Amazon Bedrock has of your Lambda functions,
 use a combination of [Pydantic Models](https://docs.pydantic.dev/latest/concepts/models/){target="_blank"} and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your APIs parameters.
 
+???+ info "When is this useful?"
+	Adding constraints to your function parameters can help you to enforce data validation and improve the understanding of your APIs by Amazon Bedrock.
+
 #### Customizing OpenAPI parameters
 
 --8<-- "docs/core/event_handler/_openapi_customization_parameters.md"
 
 To implement these customizations, include extra constraints when defining your parameters:
 
-```python hl_lines="15" title="customizing_api_parameters.py"
+```python hl_lines="19" title="customizing_api_parameters.py" title="Customizing API parameters"
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_parameters.py"
 ```
 
-1. Here we say that the title should never be bigger than 200 characters.
+1. Title should not be larger than 200 characters and [strict mode](https://docs.pydantic.dev/latest/concepts/strict_mode/){target="_blank"} is activated
 
 #### Customizing API operations
 
@@ -243,21 +254,9 @@ To implement these customizations, include extra constraints when defining your 
 
 To implement these customizations, include extra parameters when defining your routes:
 
-```python hl_lines="13-22 24" title="customizing_api_operations.py"
+```python hl_lines="13-22" title="customizing_api_operations.py" title="Customzing API operations"
 --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_operations.py"
 ```
-
-#### Customizing OpenAPI metadata
-
---8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
-
-Include extra parameters when exporting your OpenAPI specification to apply these customizations:
-
-=== "customizing_api_metadata.py"
-
-    ```python hl_lines="25-31"
-    --8<-- "examples/event_handler_bedrock_agents/src/customizing_bedrock_api_metadata.py"
-    ```
 
 ## Testing your code
 
@@ -265,12 +264,12 @@ Test your routes by passing an [Agent for Amazon Bedrock proxy event](https://do
 
 === "assert_bedrock_agent_response.py"
 
-	```python hl_lines="21-23"
+	```python hl_lines="21-23 27"
 	--8<-- "examples/event_handler_bedrock_agents/src/assert_bedrock_agent_response.py"
 	```
 
 === "assert_bedrock_agent_response_module.py"
 
-	```python
+	```python hl_lines="14-17"
 	--8<-- "examples/event_handler_bedrock_agents/src/assert_bedrock_agent_response_module.py"
 	```
