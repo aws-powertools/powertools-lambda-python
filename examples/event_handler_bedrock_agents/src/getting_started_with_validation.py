@@ -1,13 +1,19 @@
 import datetime
 from time import time
+from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from typing_extensions import Annotated
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import BedrockAgentResolver
 from aws_lambda_powertools.event_handler.openapi.params import Body, Query
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+if TYPE_CHECKING:  # Pydantic's V1 EmailStr is not compatible with mypy
+    EmailStr = Annotated[str, ...]  # https://github.com/pydantic/pydantic/issues/1490#issuecomment-630131270
+else:
+    from pydantic import EmailStr
 
 tracer = Tracer()
 logger = Logger()
