@@ -3,7 +3,7 @@ import logging
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayloadError, ResolverNotFoundError
+from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -268,13 +268,6 @@ class AppSyncResolver(Router):
             When no resolver is found for the specified type and field.
         """
         logger.debug("Processing batch resolver event")
-
-        # All events in the batch must have the same fieldName
-        field_names = {field_name["info"]["fieldName"] for field_name in event}
-        if len(field_names) > 1:
-            raise InconsistentPayloadError(
-                f"All events in the batch must have the same fieldName. Found: {field_names}",
-            )
 
         self.current_batch_event = [data_model(e) for e in event]
         type_name, field_name = self.current_batch_event[0].type_name, self.current_batch_event[0].field_name

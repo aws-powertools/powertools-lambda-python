@@ -4,7 +4,7 @@ from typing import Optional
 import pytest
 
 from aws_lambda_powertools.event_handler import AppSyncResolver
-from aws_lambda_powertools.event_handler.exceptions_appsync import InconsistentPayloadError, ResolverNotFoundError
+from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -566,49 +566,6 @@ def test_resolve_async_batch_processing_without_exception():
 
     assert app.current_batch_event and len(app.current_batch_event) == len(event)
     assert not app.current_event
-
-
-def test_resolver_batch_resolver_many_fields_with_different_name():
-    # GIVEN
-    app = AppSyncResolver()
-    router = Router()
-
-    @router.batch_resolver(type_name="Query", field_name="listLocations")
-    def get_locations(event: AppSyncResolverEvent, name: str) -> str:
-        return "get_locations#" + name + "#" + event.source["id"]
-
-    app.include_router(router)
-
-    # WHEN
-    mock_event1 = [
-        {
-            "typeName": "Query",
-            "info": {
-                "fieldName": "listLocations",
-                "parentTypeName": "Query",
-            },
-            "fieldName": "listLocations",
-            "arguments": {"name": "value"},
-            "source": {
-                "id": "1",
-            },
-        },
-        {
-            "typeName": "Query",
-            "info": {
-                "fieldName": "listLocationsDifferent",
-                "parentTypeName": "Query",
-            },
-            "fieldName": "listLocations",
-            "arguments": {"name": "value"},
-            "source": {
-                "id": "1",
-            },
-        },
-    ]
-
-    with pytest.raises(InconsistentPayloadError):
-        app.resolve(mock_event1, LambdaContext())
 
 
 def test_resolver_batch_with_resolver_not_found():
