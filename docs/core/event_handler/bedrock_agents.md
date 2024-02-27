@@ -132,6 +132,11 @@ You can define the expected format for incoming data and responses by using type
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_schema.json"
 	```
 
+	1. No need to add the `enable_validation` parameter, as it's enabled by default.
+	2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)
+	3. Describe each input and output using human-readable descriptions
+	4. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
+
 === "Input payload"
 
 	```json hl_lines="6-13 20"
@@ -143,11 +148,6 @@ You can define the expected format for incoming data and responses by using type
 	```json hl_lines="10"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
 	```
-
-1. No need to add the `enable_validation` parameter, as it's enabled by default.
-2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)
-3. Describe each input and output using human-readable descriptions
-4. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
 
 If the request validation, your event handler will not be called, and an error message is returned to Bedrock.
 Similarly, if the response fails validation, your handler will abort the response.

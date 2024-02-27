@@ -6,7 +6,7 @@
   "apiPath": "/schedule_meeting",
   "parameters": [
     {
-      "name": "string",
+      "name": "email",
       "type": "string",
       "value": "foo@example.org"
     }

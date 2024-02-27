@@ -7,7 +7,7 @@
     "httpStatusCode": 200,
     "responseBody": {
       "application/json": {
-        "body": "{\"date\": \"\", \"team\": \"\", \"cancellationEmail\": \"\"}"
+        "body": "{\"date\":\"2024-03-05T11:18:28.023979\",\"team\":\"Customer Support Team B\",\"cancellationEmail\":\"cancel@example.org\"}"
       }
     }
   }

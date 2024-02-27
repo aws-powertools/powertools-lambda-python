@@ -13,7 +13,7 @@ def test_bedrock_agent_event():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
 
-    @app.get("/claims")
+    @app.get("/claims", description="Gets claims")
     def claims() -> Dict[str, Any]:
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
@@ -38,7 +38,7 @@ def test_bedrock_agent_with_path_params():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
 
-    @app.get("/claims/<claim_id>")
+    @app.get("/claims/<claim_id>", description="Gets claims by ID")
     def claims(claim_id: str):
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
@@ -61,7 +61,7 @@ def test_bedrock_agent_event_with_response():
     app = BedrockAgentResolver()
     output = {"output": claims_response}
 
-    @app.get("/claims")
+    @app.get("/claims", description="Gets claims")
     def claims():
         assert isinstance(app.current_event, BedrockAgentEvent)
         assert app.lambda_context == {}
@@ -86,7 +86,7 @@ def test_bedrock_agent_event_with_no_matches():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
 
-    @app.get("/no_match")
+    @app.get("/no_match", description="Matches nothing")
     def claims():
         raise RuntimeError()
 
@@ -106,7 +106,7 @@ def test_bedrock_agent_event_with_validation_error():
     # GIVEN a Bedrock Agent event
     app = BedrockAgentResolver()
 
-    @app.get("/claims")
+    @app.get("/claims", description="Gets claims")
     def claims() -> Dict[str, Any]:
         return "oh no, this is not a dict"  # type: ignore
 
@@ -140,7 +140,7 @@ def test_bedrock_agent_event_with_exception():
             body="Something went wrong",
         )
 
-    @app.get("/claims")
+    @app.get("/claims", description="Gets claims")
     def claims():
         raise RuntimeError()
 
