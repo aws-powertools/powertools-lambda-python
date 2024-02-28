@@ -117,17 +117,18 @@ It's required to include a `description` for each API endpoint and input paramet
 ### Validating input and output
 
 You can define the expected format for incoming data and responses by using type annotations.
+Define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/).
 
 === "Lambda handler"
+	This example uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function. That function returns an object containing the scheduled meeting details.
 
 	```python hl_lines="5 23-26 32-33"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
 	```
 
 	1. No need to add the `enable_validation` parameter, as it's enabled by default.
-	2. You can define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/)
-	3. Describe each input and output using human-readable descriptions
-	4. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
+	2. Describe each input and output using human-readable descriptions
+	3. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
 
 === "OpenAPI schema"
 

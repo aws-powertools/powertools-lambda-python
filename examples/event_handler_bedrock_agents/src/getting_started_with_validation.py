@@ -20,8 +20,8 @@ logger = Logger()
 app = BedrockAgentResolver()  # (1)!
 
 
-class ScheduleMeetingResponse(BaseModel):  # (2)!
-    date: Annotated[datetime.datetime, Body(description="The date of the scheduled meeting")]  # (3)!
+class ScheduleMeetingResponse(BaseModel):
+    date: Annotated[datetime.datetime, Body(description="The date of the scheduled meeting")]  # (2)!
     team: Annotated[str, Body(description="The team that will handle the support request")]
     cancellationEmail: Annotated[EmailStr, Body(description="The email address to request a meeting cancellation")]
 
@@ -29,7 +29,7 @@ class ScheduleMeetingResponse(BaseModel):  # (2)!
 @app.get("/schedule_meeting", description="Schedules a meeting with the team")
 @tracer.capture_method
 def schedule_meeting(
-    email: Annotated[EmailStr, Query(description="The email address of the customer")],  # (4)!
+    email: Annotated[EmailStr, Query(description="The email address of the customer")],  # (3)!
 ) -> Annotated[ScheduleMeetingResponse, Body(description="Scheduled meeting details")]:
     logger.info("Scheduling a meeting", email=email)
     return ScheduleMeetingResponse(
