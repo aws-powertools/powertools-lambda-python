@@ -157,6 +157,8 @@ Use the `get_openapi_json_schema` function provided by the resolver.
 This function will produce a JSON-serialized string that represents your OpenAPI schema.
 You can print this string or save it to a file. You'll use the file later when creating the Agent.
 
+You'll need to regenerate the OpenAPI schema and update your Agent everytime your API changes.
+
 === "app.py"
 
     ```python hl_lines="24 25"
