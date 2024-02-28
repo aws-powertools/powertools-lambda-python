@@ -29,3 +29,33 @@ Resources:
       FunctionName: !GetAtt ApiFunction.Arn
       Principal: bedrock.amazonaws.com
       SourceAccount: !Sub ${AWS::AccountId}
+
+  BedrockServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Action:
+                - sts:assumeRole
+              Service:
+                - bedrock.amazonaws.com
+      Policies:
+        - PolicyName: bedrock
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: # (2)!
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2:1
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-instant-v1
+
+Outputs:
+  BedrockServiceRole:
+    Description: The role ARN to be used by Amazon Bedrock
+    Value: !GetAtt BedrockServiceRole.Arn  # (3)!

@@ -46,31 +46,23 @@ You need to add `pydantic` as a dependency in your preferred tool _e.g., require
 
 To build Agents for Amazon Bedrock, you will need:
 
-* [Create the Lambda function](#your-first-agent) that defines the business logic for the action that your agent carries out.
-* [Create an OpenAPI schema](#generating-openapi-schemas) with the API description, structure, and parameters for the action group.
-* Ensure that Amazon Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
+| Requirement                                                                                                           | Description                                                                    | SAM Supported | CDK Supported |
+|-----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|:-------------:|:-------------:|
+| [Lambda Function](#your-first-agent)                                                                                  | Defines your business logic for the action group                               |       ✅       |       ✅       |
+| [OpenAPI Schema](#generating-openapi-schemas)                                                                         | API description, structure, and action group parameters                        |       ❌       |       ✅       |
+| Bedrock [Service Role](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html){target="_blank"} | Allows Amazon Bedrock to invoke foundation models                              |       ✅       |       ✅       |
+| Agent for Bedrock                                                                                                     | The service that will combine all the above to create the conversational agent |       ❌       |       ✅       |
 
-Before you start, you need to the following permissions:
+=== "Using AWS Serverless Application Model (SAM)"
+	Using [AWS SAM](https://aws.amazon.com/serverless/sam/){target="_blank"} you can create your Lambda function and the necessary permissions. However, you still have to create your Agent for Amazon Bedrock [using the AWS console](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html){target="_blank"}.
 
-* A **service role**, which allows Amazon Bedrock to invoke foundation models
-* **Lambda permissions** allowing Amazon Bedrock to invoke it
-
-=== "Service Role Example using AWS CloudFormation"
-	You'll need this role when [creating an Agent in the AWS Console](#video-walkthrough).
-
-  	```yaml hl_lines="14-17 24-29 34"
-  	--8<-- "examples/event_handler_bedrock_agents/sam/bedrock_service_role.yaml"
-  	```
-
-	1. Check the [supported foundational models](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html){target="_blank"}
-	2. You need the role ARN when creating the Agent for Amazon Bedrock
-
-=== "Lambda permissions using AWS Serverless Application Model (SAM)"
-	```yaml hl_lines="27-33"
+	```yaml hl_lines="18 26 34 61"
 	--8<-- "examples/event_handler_bedrock_agents/sam/template.yaml"
 	```
 
 	1. Amazon Bedrock needs permissions to invoke this Lambda function
+	2. Check the [supported foundational models](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-supported.html){target="_blank"}
+	3. You need the role ARN when creating the Agent for Amazon Bedrock
 
 === "Using AWS Cloud Developer Kit (CDK)"
 	This example uses the [Generative AI CDK constructs](https://awslabs.github.io/generative-ai-cdk-constructs/src/cdk-lib/bedrock/#agents){target="_blank"} to create your Agent with [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"}.
