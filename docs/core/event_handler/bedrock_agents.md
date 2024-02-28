@@ -11,24 +11,22 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 ```
 </center>
 
-![Agents for Bedrock Overview](../../media/bedrock_agents_intro.svg)
-
 ## Key features
 
-* Same declarative syntax as the [other event handler resolvers](api_gateway.md)
-* Drastic reduction of the boilerplate to build Agents for Amazon Bedrock
+* Similar experience when authoring [REST](api_gateway.md){target="_blank"} and [GraphQL APIs](appsync.md){target="_blank"}
+* Minimal boilerplate to build Agents for Amazon Bedrock
 * Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
 * Built-in data validation for requests and responses
 
 ## Terminology
 
-**Data validation** automatically validates the user input and the response of your Lambda function against a set of constraints defined by you
+**Data validation** automatically validates the user input and the response of your AWS Lambda function against a set of constraints defined by you.
 
-**Event handler** is a Powertools for AWS feature that processes an event, runs data parsing and validation, routes the request to a specific function, and returns a response to the caller in the proper format
+**Event handler** is a Powertools for AWS feature that processes an event, runs data parsing and validation, routes the request to a specific function, and returns a response to the caller in the proper format.
 
-**[OpenAPI schema](https://www.openapis.org/){target="_blank"}** is an industry standard JSON-serialized string that represents the structure and parameters of your API
+**[OpenAPI schema](https://www.openapis.org/){target="_blank"}** is an industry standard JSON-serialized string that represents the structure and parameters of your API.
 
-**Action group** is a collection of two resources where you define the actions that the agent should carry out: an OpenAPI schema to define the APIs that the agent can invoke to carry out its tasks, and a Lambda function to execute those actions
+**Action group** is a collection of two resources where you define the actions that the agent should carry out: an OpenAPI schema to define the APIs that the agent can invoke to carry out its tasks, and a Lambda function to execute those actions.
 
 **Large Language Models (LLM)** are very large deep learning models that are pre-trained on vast amounts of data, capable of extracting meanings from a sequence of text and understanding the relationship between words and phrases on it.
 
@@ -36,26 +34,21 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 
 ## Getting started
 
-???+ tip
-	All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples){target="_blank"}.
-
-To build Agents for Amazon Bedrock, you need:
-
-* [Create the Lambda function](#your-first-agent) that defines the business logic for the action that your agent carries out.
-* [Create an OpenAPI schema](#generating-openapi-schemas) with the API description, structure, and parameters for the action group.
-* Ensure that Amazon Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
-
-Powertools for AWS Lambda makes it easier to author the Lambda function and the creation of the OpenAPI schema.
+???+ tip "All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples)"
 
 ### Install
 
 !!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
-You need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_.
-
-At this time, we support both Pydantic V1 and V2. For a future major version, we will only support Pydantic V2.
+You need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we support both Pydantic V1 and V2. For a future major version, we will only support Pydantic V2.
 
 ### Required resources
+
+To build Agents for Amazon Bedrock, you will need:
+
+* [Create the Lambda function](#your-first-agent) that defines the business logic for the action that your agent carries out.
+* [Create an OpenAPI schema](#generating-openapi-schemas) with the API description, structure, and parameters for the action group.
+* Ensure that Amazon Bedrock and your Lambda functions have the [necessary permissions](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html).
 
 Before you start, you need to the following permissions:
 
@@ -63,7 +56,7 @@ Before you start, you need to the following permissions:
 * **Lambda permissions** allowing Amazon Bedrock to invoke it
 
 === "Service Role Example using AWS CloudFormation"
-	You'll need this role when [creating an Agent in the AWS Console](#walkthrough-for-creating-the-agent).
+	You'll need this role when [creating an Agent in the AWS Console](#video-walkthrough).
 
   	```yaml hl_lines="14-17 24-29 34"
   	--8<-- "examples/event_handler_bedrock_agents/sam/bedrock_service_role.yaml"
@@ -80,8 +73,8 @@ Before you start, you need to the following permissions:
 	1. Amazon Bedrock needs permissions to invoke this Lambda function
 
 === "Using AWS Cloud Developer Kit (CDK)"
-	Use the [Generative AI CDK constructs](https://awslabs.github.io/generative-ai-cdk-constructs/src/cdk-lib/bedrock/#agents){target="_blank"} to create your Agent with [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"}.
-	These constructs abstract all the underlying permission setup and bundling of your Lambda function.
+	This example uses the [Generative AI CDK constructs](https://awslabs.github.io/generative-ai-cdk-constructs/src/cdk-lib/bedrock/#agents){target="_blank"} to create your Agent with [AWS CDK](https://aws.amazon.com/cdk/){target="_blank"}.
+	These constructs abstract the underlying permission setup and code bundling of your Lambda function.
 
 	```python
     --8<-- "examples/event_handler_bedrock_agents/cdk/bedrock_agent_stack.py"
@@ -95,10 +88,12 @@ Before you start, you need to the following permissions:
 To create an Agent for Amazon Bedrock, use the `BedrockAgentResolver` to annotate your actions.
 This is similar to the way [all the other Event Handler](api_gateway.md) resolvers work.
 
+It's required to include a `description` for each API endpoint and input parameter. This will improve the understanding Amazon Bedrock has of your actions.
+
 === "Lambda handler"
 
-	The resolvers used by Agents for Amazon Bedrock are compatible with the full suite of Powertools for AWS Lambda utilities.
-	This includes [Logger](../logger.md), [Metrics](../metrics.md) and [Tracer](../tracer.md).
+	The resolvers used by Agents for Amazon Bedrock are compatible with all Powertools for AWS Lambda [features](../../index.md#features){target="blank"}.
+	For reference, we use [Logger](../logger.md) and [Tracer](../tracer.md) in this example.
 
     ```python hl_lines="4 9 12 21"
     --8<-- "examples/event_handler_bedrock_agents/src/getting_started.py"
@@ -126,8 +121,6 @@ This is similar to the way [all the other Event Handler](api_gateway.md) resolve
 	```json hl_lines="10"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
-
-!!! note "It's required to include a `description` for each API endpoint and input parameter. This will improve the understanding Amazon Bedrock has of your actions."
 
 ### Validating input and output
 
@@ -171,7 +164,7 @@ Use the `get_openapi_json_schema` function provided by the resolver.
 This function will produce a JSON-serialized string that represents your OpenAPI schema.
 You can print this string or save it to a file. You'll use the file later when creating the Agent.
 
-=== "Generating the OpenAPI schema"
+=== "app.py"
 
     ```python hl_lines="24 25"
     --8<-- "examples/event_handler_bedrock_agents/src/generating_openapi_schema.py"
@@ -190,7 +183,7 @@ To get the OpenAPI schema, run the Python script from your terminal.
 The script will generate the schema directly to standard output, which you can redirect to a file.
 
 ```sh
-python app.py > schema.json
+python3 app.py > schema.json
 ```
 
 ### Crafting effective OpenAPI schemas
@@ -198,13 +191,13 @@ python app.py > schema.json
 Working with Agents for Amazon Bedrock will introduce [non-deterministic behaviour to your system](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-how.html#agents-rt){target="_blank"}.
 The OpenAPI schema provides context and semantics to the Agent that will support the decision process for invoking our Lambda function. Sparse or ambiguous schema can result in unexpected outcomes.
 
-We recommend enriching your OpenAPI schema with as many details as possible, which will help the Agent understand your functions and make correct invocations. To achieve that:
+We recommend enriching your OpenAPI schema with as many details as possible to help the Agent understand your functions, and make correct invocations. To achieve that, keep the following suggestions in mind:
 
-* always describe your function behaviour using the `description` field in your annotations
-* in case of refactoring, update your description field to match the function outcomes
-* use distinct `description` for each function to have clear separation of semantics
+* Always describe your function behaviour using the `description` field in your annotations
+* When refactoring, update your description field to match the function outcomes
+* Use distinct `description` for each function to have clear separation of semantics
 
-### Walkthrough for creating the agent
+### Video walkthrough
 
 To create an Agent for Amazon Bedrock, refer to the [official documentation](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html) provided by AWS.
 
