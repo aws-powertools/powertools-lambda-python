@@ -5,7 +5,7 @@ from typing import List, Optional
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-class AlarmStateValue(Enum):
+class CloudWatchAlarmStateValue(Enum):
     OK = auto()
     ALARM = auto()
     INSUFFICIENT_DATA = auto()
@@ -13,11 +13,11 @@ class AlarmStateValue(Enum):
 
 class CloudWatchAlarmState(DictWrapper):
     @property
-    def value(self) -> AlarmStateValue:
+    def value(self) -> CloudWatchAlarmStateValue:
         """
         Overall state of the alarm.
         """
-        return AlarmStateValue[self["value"]]
+        return CloudWatchAlarmStateValue[self["value"]]
 
     @property
     def reason(self) -> Optional[str]:
