@@ -7,6 +7,7 @@ from .api_gateway_proxy_event import APIGatewayProxyEvent, APIGatewayProxyEventV
 from .appsync_resolver_event import AppSyncResolverEvent
 from .aws_config_rule_event import AWSConfigRuleEvent
 from .bedrock_agent_event import BedrockAgentEvent
+from .cloud_watch_alarm_event import CloudWatchAlarmEvent
 from .cloud_watch_custom_widget_event import CloudWatchDashboardCustomWidgetEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
 from .code_pipeline_job_event import CodePipelineJobEvent
@@ -42,6 +43,7 @@ __all__ = [
     "AppSyncResolverEvent",
     "ALBEvent",
     "BedrockAgentEvent",
+    "CloudWatchAlarmEvent",
     "CloudWatchDashboardCustomWidgetEvent",
     "CloudWatchLogsEvent",
     "CodePipelineJobEvent",
