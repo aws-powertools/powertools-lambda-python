@@ -540,10 +540,17 @@ You can use the `CloudWathAlarmEvent` data class to access the fields containing
     from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchAlarmEvent
 
     @event_source(data_class=CloudWatchAlarmEvent)
-    def lambda_handler(event: CloudWatchAlarmEvent, context):
-        if event.state.value == "ALARM":
-            print(f"{event.alarm_name} is on alarm because {event.state.reason}...")
-            do_something_with(event.alarm_arn)
+    def lambda_handler(event: CloudWatchAlarmEvent, context: LambdaContext) -> dict:
+    logger.info(f"Alarm {event.alarm_data.name} state is {event.alarm_data.state.value}")
+    
+        # You can now work with event. For example, you can enrich the received data, and
+        # decide on how you want to route the alarm.
+    
+        return {
+            "name": event.alarm_data.name,
+            "arn": event.alarm_arn,
+            "urgent": "Priority: P1" in event.alarm_data.description,
+        }
     ```
 
 ### CloudWatch Logs
