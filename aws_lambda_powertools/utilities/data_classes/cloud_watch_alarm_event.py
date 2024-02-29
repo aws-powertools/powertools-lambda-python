@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from functools import cached_property
 from typing import Any, List, Literal, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -30,7 +31,7 @@ class CloudWatchAlarmState(DictWrapper):
         """
         return self.get("reasonData", None)
 
-    @property
+    @cached_property
     def reason_data_decoded(self) -> Optional[Any]:
         """
         Deserialized version of reason_data.
