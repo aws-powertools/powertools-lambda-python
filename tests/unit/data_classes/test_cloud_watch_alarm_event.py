@@ -1,5 +1,3 @@
-import json
-
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_alarm_event import (
     CloudWatchAlarmEvent,
     CloudWatchAlarmStateValue,
@@ -19,14 +17,16 @@ def test_cloud_watch_alarm_event():
 
     assert parsed_event.state.value == CloudWatchAlarmStateValue[raw_event["alarmData"]["state"]["value"]]
     assert parsed_event.state.reason == raw_event["alarmData"]["state"]["reason"]
-    assert parsed_event.state.reason_data == json.loads(raw_event["alarmData"]["state"]["reasonData"])
+    assert parsed_event.state.reason_data == raw_event["alarmData"]["state"]["reasonData"]
+    assert parsed_event.state.reason_data_decoded["queryDate"] == "2024-02-17T11:53:08.423+0000"
     assert parsed_event.state.timestamp == raw_event["alarmData"]["state"]["timestamp"]
 
     assert (
         parsed_event.previous_state.value == CloudWatchAlarmStateValue[raw_event["alarmData"]["previousState"]["value"]]
     )
     assert parsed_event.previous_state.reason == raw_event["alarmData"]["previousState"]["reason"]
-    assert parsed_event.previous_state.reason_data == json.loads(raw_event["alarmData"]["previousState"]["reasonData"])
+    assert parsed_event.previous_state.reason_data == raw_event["alarmData"]["previousState"]["reasonData"]
+    assert parsed_event.previous_state.reason_data_decoded["queryDate"] == "2024-02-17T11:51:31.460+0000"
     assert parsed_event.previous_state.timestamp == raw_event["alarmData"]["previousState"]["timestamp"]
 
     # test the 'expression' metric

@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-import json
 from enum import Enum, auto
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
@@ -29,15 +28,19 @@ class CloudWatchAlarmState(DictWrapper):
         return self.get("reason")
 
     @property
-    def reason_data(self) -> Optional[dict]:
+    def reason_data(self) -> Optional[str]:
         """
         Additional data to back up the reason, usually contains the evaluated data points,
         the calculated threshold and timestamps.
         """
-        if self.get("reasonData") is None:
+        return self.get("reasonData", None)
+
+    @property
+    def reason_data_decoded(self) -> Optional[Any]:
+        if self.reason_data is None:
             return None
 
-        return json.loads(str(self.get("reasonData")))
+        return self._json_deserializer(self.reason_data)
 
     @property
     def timestamp(self) -> str:
