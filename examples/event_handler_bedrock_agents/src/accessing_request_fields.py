@@ -10,13 +10,13 @@ app = BedrockAgentResolver()
 
 @app.get("/current_time", description="Gets the current time in seconds")  # (1)!
 def current_time() -> int:
-    logger.info(
-        "Serving current_time",
+    logger.append_keys(
+        session_id=app.current_event.session_id,
         action_group=app.current_event.action_group,
         input_text=app.current_event.input_text,
-        session_attributes=app.current_event.session_attributes,
     )
 
+    logger.info("Serving current_time")
     return int(time())
 
 

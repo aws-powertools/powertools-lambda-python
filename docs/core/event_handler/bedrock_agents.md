@@ -197,9 +197,17 @@ python3 app.py > schema.json
 ### Crafting effective OpenAPI schemas
 
 Working with Agents for Amazon Bedrock will introduce [non-deterministic behaviour to your system](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-how.html#agents-rt){target="_blank"}.
-The OpenAPI schema provides context and semantics to the Agent that will support the decision process for invoking our Lambda function. Sparse or ambiguous schema can result in unexpected outcomes.
 
-We recommend enriching your OpenAPI schema with as many details as possible to help the Agent understand your functions, and make correct invocations. To achieve that, keep the following suggestions in mind:
+???+ note "Why is that?"
+	Amazon Bedrock uses LLMs to understand and respond to user input.
+	These models are trained on vast amounts of data and are capable of extracting meanings from a sequence of text and understanding the relationship between words and phrases on it.
+	However, this means that the same input can result in different outputs, depending on the characteristics of the LLM being used.
+
+The OpenAPI schema provides context and semantics to the Agent that will support the decision process for invoking our Lambda function.
+Sparse or ambiguous schemas can result in unexpected outcomes.
+
+We recommend enriching your OpenAPI schema with as many details as possible to help the Agent understand your functions, and make correct invocations.
+To achieve that, keep the following suggestions in mind:
 
 * Always describe your function behaviour using the `description` field in your annotations
 * When refactoring, update your description field to match the function outcomes
@@ -221,11 +229,17 @@ During the creation process, you should use the schema generated in the previous
 
 ### Accessing custom request fields
 
-The event sent by Agents for Amazon Bedrock into your Lambda function contains a number of event fields that might be interesting. The event handler exposes them in the `app.current_event` field:
+The event sent by Agents for Amazon Bedrock into your Lambda function contains a number of extra event fields, exposed in the `app.current_event` field.
+
+???+ note "Why is this useful?"
+	You can for instance identify new conversations (`session_id`) or store and analyze entire conversations (`input_text`).
 
 === "Accessing request fields"
 
-	```python hl_lines="15-17"
+	In this example, we [append correlation data](../logger.md#appending-additional-keys) to all generated logs.
+ 	This can be used to aggregate logs by `session_id` and observe the entire conversation between a user and the Agent.
+
+	```python hl_lines="13-16"
 	--8<-- "examples/event_handler_bedrock_agents/src/accessing_request_fields.py"
 	```
 
