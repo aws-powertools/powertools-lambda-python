@@ -22,7 +22,13 @@
       "description": "This is description **here**",
       "metrics": [
         {
-          "id": "5ac6db74-a82d-24b1-6f62-b2ac23cc8ea4",
+          "id": "e1",
+          "expression": "m1/m2",
+          "label": "Expression1",
+          "returnData": true
+        },
+        {
+          "id": "m1",
           "metricStat": {
             "metric": {
               "namespace": "AWS/Lambda",
@@ -32,7 +38,20 @@
             "period": 60,
             "stat": "SampleCount"
           },
-          "returnData": true
+          "returnData": false
+        },
+        {
+          "id": "m2",
+          "metricStat": {
+            "metric": {
+              "namespace": "AWS/Lambda",
+              "name": "Duration",
+              "dimensions": {}
+            },
+            "period": 60,
+            "stat": "SampleCount"
+          },
+          "returnData": false
         }
       ]
     }

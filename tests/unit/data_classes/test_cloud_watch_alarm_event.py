@@ -29,19 +29,30 @@ def test_cloud_watch_alarm_event():
     assert parsed_event.previous_state.reason_data == json.loads(raw_event["alarmData"]["previousState"]["reasonData"])
     assert parsed_event.previous_state.timestamp == raw_event["alarmData"]["previousState"]["timestamp"]
 
+    # test the 'expression' metric
     assert parsed_event.alarm_metrics[0].metric_id == raw_event["alarmData"]["configuration"]["metrics"][0]["id"]
     assert (
-        parsed_event.alarm_metrics[0].name
-        == raw_event["alarmData"]["configuration"]["metrics"][0]["metricStat"]["metric"]["name"]
+        parsed_event.alarm_metrics[0].expression == raw_event["alarmData"]["configuration"]["metrics"][0]["expression"]
     )
-    assert (
-        parsed_event.alarm_metrics[0].namespace
-        == raw_event["alarmData"]["configuration"]["metrics"][0]["metricStat"]["metric"]["namespace"]
-    )
-    assert (
-        parsed_event.alarm_metrics[0].dimensions
-        == raw_event["alarmData"]["configuration"]["metrics"][0]["metricStat"]["metric"]["dimensions"]
-    )
+    assert parsed_event.alarm_metrics[0].label == raw_event["alarmData"]["configuration"]["metrics"][0]["label"]
     assert (
         parsed_event.alarm_metrics[0].return_data == raw_event["alarmData"]["configuration"]["metrics"][0]["returnData"]
+    )
+
+    # test the 'metric' metric
+    assert parsed_event.alarm_metrics[1].metric_id == raw_event["alarmData"]["configuration"]["metrics"][1]["id"]
+    assert (
+        parsed_event.alarm_metrics[1].name
+        == raw_event["alarmData"]["configuration"]["metrics"][1]["metricStat"]["metric"]["name"]
+    )
+    assert (
+        parsed_event.alarm_metrics[1].namespace
+        == raw_event["alarmData"]["configuration"]["metrics"][1]["metricStat"]["metric"]["namespace"]
+    )
+    assert (
+        parsed_event.alarm_metrics[1].dimensions
+        == raw_event["alarmData"]["configuration"]["metrics"][1]["metricStat"]["metric"]["dimensions"]
+    )
+    assert (
+        parsed_event.alarm_metrics[1].return_data == raw_event["alarmData"]["configuration"]["metrics"][1]["returnData"]
     )

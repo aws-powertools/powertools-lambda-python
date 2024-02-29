@@ -61,6 +61,20 @@ class CloudWatchAlarmMetric(DictWrapper):
         return self["id"]
 
     @property
+    def expression(self) -> Optional[str]:
+        """
+        The mathematical expression for calculating the metric, if applicable.
+        """
+        return self.get("expression", None)
+
+    @property
+    def label(self) -> Optional[str]:
+        """
+        Optional label of the metric.
+        """
+        return self.get("label", None)
+
+    @property
     def namespace(self) -> Optional[str]:
         """
         Namespace of the correspondent CloudWatch Metric.
@@ -112,6 +126,9 @@ class CloudWatchAlarmMetric(DictWrapper):
 
     @property
     def return_data(self) -> bool:
+        """
+        Whether this metric data is used to determine the state of the alarm or not.
+        """
         return self["returnData"]
 
 
