@@ -32,6 +32,9 @@ class CloudWatchAlarmState(DictWrapper):
 
     @property
     def reason_data_decoded(self) -> Optional[Any]:
+        """
+        Deserialized version of reason_data.
+        """
         if self.reason_data is None:
             return None
 
@@ -185,9 +188,9 @@ class CloudWatchAlarmData(DictWrapper):
 
 class CloudWatchAlarmEvent(DictWrapper):
     @property
-    def source(self) -> str:
+    def source(self) -> Literal["aws.cloudwatch"]:
         """
-        Source of the triggered event, usually it is "aws.cloudwatch".
+        Source of the triggered event.
         """
         return self["source"]
 
