@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from enum import Enum, auto
 from typing import List, Optional
@@ -32,7 +34,10 @@ class CloudWatchAlarmState(DictWrapper):
         Additional data to back up the reason, usually contains the evaluated data points,
         the calculated threshold and timestamps.
         """
-        return json.loads(self.get("reasonData")) if self.get("reasonData") is not None else None
+        if self.get("reasonData") is None:
+            return None
+
+        return json.loads(str(self.get("reasonData")))
 
     @property
     def timestamp(self) -> str:
@@ -43,6 +48,11 @@ class CloudWatchAlarmState(DictWrapper):
 
 
 class CloudWatchAlarmMetric(DictWrapper):
+    def __init__(self, data: dict):
+        super().__init__(data)
+
+        self._metric_stat: dict | None = self.get("metricStat")
+
     @property
     def metric_id(self) -> str:
         """
@@ -55,35 +65,50 @@ class CloudWatchAlarmMetric(DictWrapper):
         """
         Namespace of the correspondent CloudWatch Metric.
         """
-        return self.get("metricStat", {}).get("metric", {}).get("namespace", None)
+        if self._metric_stat is not None:
+            return self._metric_stat.get("metric", {}).get("namespace", None)
+
+        return None
 
     @property
     def name(self) -> Optional[str]:
         """
         Name of the correspondent CloudWatch Metric.
         """
-        return self.get("metricStat", {}).get("metric", {}).get("name", None)
+        if self._metric_stat is not None:
+            return self._metric_stat.get("metric", {}).get("name", None)
+
+        return None
 
     @property
     def dimensions(self) -> Optional[dict]:
         """
         Additional dimensions of the correspondent CloudWatch Metric, if available.
         """
-        return self.get("metricStat", {}).get("metric", {}).get("dimensions", None)
+        if self._metric_stat is not None:
+            return self._metric_stat.get("metric", {}).get("dimensions", None)
+
+        return None
 
     @property
     def period(self) -> Optional[int]:
         """
         Metric evaluation period, in seconds.
         """
-        return self.get("metricStat", {}).get("period", None)
+        if self._metric_stat is not None:
+            return self._metric_stat.get("period", None)
+
+        return None
 
     @property
     def stat(self) -> Optional[str]:
         """
         Statistical aggregation of metric points, e.g. Average, SampleCount, etc.
         """
-        return self.get("metricStat", {}).get("stat", None)
+        if self._metric_stat is not None:
+            return self._metric_stat.get("stat", None)
+
+        return None
 
     @property
     def return_data(self) -> bool:
@@ -131,14 +156,14 @@ class CloudWatchAlarmEvent(DictWrapper):
         """
         Alarm name.
         """
-        return self.get("alarmData").get("alarmName")
+        return self["alarmData"]["alarmName"]
 
     @property
     def alarm_description(self) -> Optional[str]:
         """
         Optional description for the Alarm.
         """
-        return self.get("alarmData").get("configuration", {}).get("description", None)
+        return self["alarmData"].get("configuration", {}).get("description", None)
 
     @property
     def state(self):
@@ -156,7 +181,7 @@ class CloudWatchAlarmEvent(DictWrapper):
 
     @property
     def alarm_metrics(self) -> Optional[List[CloudWatchAlarmMetric]]:
-        maybe_metrics = self.get("alarmData", {}).get("configuration", {}).get("metrics", None)
+        maybe_metrics = self["alarmData"].get("configuration", {}).get("metrics", None)
 
         if maybe_metrics is not None:
             return [CloudWatchAlarmMetric(i) for i in maybe_metrics]

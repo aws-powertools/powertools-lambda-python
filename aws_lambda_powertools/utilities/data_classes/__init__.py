@@ -9,9 +9,9 @@ from .aws_config_rule_event import AWSConfigRuleEvent
 from .bedrock_agent_event import BedrockAgentEvent
 from .cloud_watch_alarm_event import (
     CloudWatchAlarmEvent,
-    CloudWatchAlarmStateValue,
-    CloudWatchAlarmState,
     CloudWatchAlarmMetric,
+    CloudWatchAlarmState,
+    CloudWatchAlarmStateValue,
 )
 from .cloud_watch_custom_widget_event import CloudWatchDashboardCustomWidgetEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
