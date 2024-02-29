@@ -74,40 +74,40 @@ Log Data Event for Troubleshooting
 
 ## Supported event sources
 
-| Event Source                                                              | Data_class                                         |
-|---------------------------------------------------------------------------|----------------------------------------------------|
-| [Active MQ](#active-mq)                                                   | `ActiveMQEvent`                                    |
-| [API Gateway Authorizer](#api-gateway-authorizer)                         | `APIGatewayAuthorizerRequestEvent`                 |
-| [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                   | `APIGatewayAuthorizerEventV2`                      |
-| [API Gateway Proxy](#api-gateway-proxy)                                   | `APIGatewayProxyEvent`                             |
-| [API Gateway Proxy V2](#api-gateway-proxy-v2)                             | `APIGatewayProxyEventV2`                           |
-| [Application Load Balancer](#application-load-balancer)                   | `ALBEvent`                                         |
-| [AppSync Authorizer](#appsync-authorizer)                                 | `AppSyncAuthorizerEvent`                           |
-| [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
-| [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
-| [Bedrock Agent](#bedrock-agent)                                           | `BedrockAgent`                                     |
-| [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent` |
-| [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
-| [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
-| [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
-| [Cognito User Pool](#cognito-user-pool)                                   | Multiple available under `cognito_user_pool_event` |
-| [Connect Contact Flow](#connect-contact-flow)                             | `ConnectContactFlowEvent`                          |
-| [DynamoDB streams](#dynamodb-streams)                                     | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`   |
-| [EventBridge](#eventbridge)                                               | `EventBridgeEvent`                                 |
-| [Kafka](#kafka)                                                           | `KafkaEvent`                                       |
-| [Kinesis Data Stream](#kinesis-streams)                                   | `KinesisStreamEvent`                               |
-| [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream)     | `KinesisFirehoseEvent`                             |
-| [Lambda Function URL](#lambda-function-url)                               | `LambdaFunctionUrlEvent`                           |
-| [Rabbit MQ](#rabbit-mq)                                                   | `RabbitMQEvent`                                    |
-| [S3](#s3)                                                                 | `S3Event`                                          |
-| [S3 Batch Operations](#s3-batch-operations)                               | `S3BatchOperationEvent`                            |
-| [S3 Object Lambda](#s3-object-lambda)                                     | `S3ObjectLambdaEvent`                              |
-| [S3 EventBridge Notification](#s3-eventbridge-notification)               | `S3EventBridgeNotificationEvent`                   |
-| [SES](#ses)                                                               | `SESEvent`                                         |
-| [SNS](#sns)                                                               | `SNSEvent`                                         |
-| [SQS](#sqs)                                                               | `SQSEvent`                                         |
-| [VPC Lattice V2](#vpc-lattice-v2)                                         | `VPCLatticeV2Event`                                |
-| [VPC Lattice V1](#vpc-lattice-v1)                                         | `VPCLatticeEvent`                                  |
+| Event Source                                                                  | Data_class                                         |
+|-------------------------------------------------------------------------------|----------------------------------------------------|
+| [Active MQ](#active-mq)                                                       | `ActiveMQEvent`                                    |
+| [API Gateway Authorizer](#api-gateway-authorizer)                             | `APIGatewayAuthorizerRequestEvent`                 |
+| [API Gateway Authorizer V2](#api-gateway-authorizer-v2)                       | `APIGatewayAuthorizerEventV2`                      |
+| [API Gateway Proxy](#api-gateway-proxy)                                       | `APIGatewayProxyEvent`                             |
+| [API Gateway Proxy V2](#api-gateway-proxy-v2)                                 | `APIGatewayProxyEventV2`                           |
+| [Application Load Balancer](#application-load-balancer)                       | `ALBEvent`                                         |
+| [AppSync Authorizer](#appsync-authorizer)                                     | `AppSyncAuthorizerEvent`                           |
+| [AppSync Resolver](#appsync-resolver)                                         | `AppSyncResolverEvent`                             |
+| [AWS Config Rule](#aws-config-rule)                                           | `AWSConfigRuleEvent`                               |
+| [Bedrock Agent](#bedrock-agent)                                               | `BedrockAgent`                                     |
+| [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
+| [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
+| [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
+| [CodePipeline Job Event](#codepipeline-job)                                   | `CodePipelineJobEvent`                             |
+| [Cognito User Pool](#cognito-user-pool)                                       | Multiple available under `cognito_user_pool_event` |
+| [Connect Contact Flow](#connect-contact-flow)                                 | `ConnectContactFlowEvent`                          |
+| [DynamoDB streams](#dynamodb-streams)                                         | `DynamoDBStreamEvent`, `DynamoDBRecordEventName`   |
+| [EventBridge](#eventbridge)                                                   | `EventBridgeEvent`                                 |
+| [Kafka](#kafka)                                                               | `KafkaEvent`                                       |
+| [Kinesis Data Stream](#kinesis-streams)                                       | `KinesisStreamEvent`                               |
+| [Kinesis Firehose Delivery Stream](#kinesis-firehose-delivery-stream)         | `KinesisFirehoseEvent`                             |
+| [Lambda Function URL](#lambda-function-url)                                   | `LambdaFunctionUrlEvent`                           |
+| [Rabbit MQ](#rabbit-mq)                                                       | `RabbitMQEvent`                                    |
+| [S3](#s3)                                                                     | `S3Event`                                          |
+| [S3 Batch Operations](#s3-batch-operations)                                   | `S3BatchOperationEvent`                            |
+| [S3 Object Lambda](#s3-object-lambda)                                         | `S3ObjectLambdaEvent`                              |
+| [S3 EventBridge Notification](#s3-eventbridge-notification)                   | `S3EventBridgeNotificationEvent`                   |
+| [SES](#ses)                                                                   | `SESEvent`                                         |
+| [SNS](#sns)                                                                   | `SNSEvent`                                         |
+| [SQS](#sqs)                                                                   | `SQSEvent`                                         |
+| [VPC Lattice V2](#vpc-lattice-v2)                                             | `VPCLatticeV2Event`                                |
+| [VPC Lattice V1](#vpc-lattice-v1)                                             | `VPCLatticeEvent`                                  |
 
 ???+ info
     The examples provided below are far from exhaustive - the data classes themselves are designed to provide a form of
