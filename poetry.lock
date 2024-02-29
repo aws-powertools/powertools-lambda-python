@@ -348,17 +348,17 @@ uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
 name = "boto3"
-version = "1.34.50"
+version = "1.34.52"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "boto3-1.34.50-py3-none-any.whl", hash = "sha256:8d709365231234bc4f0ca98fdf33a25eeebf78072853c6aa3d259f0f5cf09877"},
-    {file = "boto3-1.34.50.tar.gz", hash = "sha256:290952be7899560039cb0042e8a2354f61a7dead0d0ca8bea6ba901930df0468"},
+    {file = "boto3-1.34.52-py3-none-any.whl", hash = "sha256:898ad2123b18cae8efd85adc56ac2d1925be54592aebc237020d4f16e9a9e7a9"},
+    {file = "boto3-1.34.52.tar.gz", hash = "sha256:66303b5f26d92afb72656ff490b22ea72dfff8bf1a29e4a0c5d5f11ec56245dd"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.50,<1.35.0"
+botocore = ">=1.34.52,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -367,13 +367,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.50"
+version = "1.34.52"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "botocore-1.34.50-py3-none-any.whl", hash = "sha256:fda510559dbe796eefdb59561cc81be1b99afba3dee53fd23db9a3d587adc0ab"},
-    {file = "botocore-1.34.50.tar.gz", hash = "sha256:33ab82cb96c4bb684f0dbafb071808e4817d83debc88b223e7d988256370c6d7"},
+    {file = "botocore-1.34.52-py3-none-any.whl", hash = "sha256:05567d8aba344826060481ea309555432c96f0febe22bee7cf5a3b6d3a03cec8"},
+    {file = "botocore-1.34.52.tar.gz", hash = "sha256:187da93aec3f2e87d8a31eced16fa2cb9c71fe2d69b0a797f9f7a9220f5bf7ae"},
 ]
 
 [package.dependencies]
@@ -428,13 +428,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.47"
+version = "2.28.49"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.47.tar.gz", hash = "sha256:0e4966751f008a6fc95342a6efe35492ecfab9b2286a5a199dafc4e32afd58b5"},
-    {file = "cdk_nag-2.28.47-py3-none-any.whl", hash = "sha256:7fdc76e45d82797e2f669ae739753a7e328040d2302cf8ebe8467eb60e2dac98"},
+    {file = "cdk-nag-2.28.49.tar.gz", hash = "sha256:e7fe25e933147007307590b6424d8f7e95f403e5fddc14d5efbbd863751a8cf2"},
+    {file = "cdk_nag-2.28.49-py3-none-any.whl", hash = "sha256:48f57b64c8c302057bf54f77fe00e97ab88b216d5b2bad9c5df3d25434e49e8a"},
 ]
 
 [package.dependencies]
@@ -446,17 +446,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.74"
+version = "0.1.78"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.74.tar.gz", hash = "sha256:88b5e0305766134f1286e8f4f6ed656cab33a9c0b807d08bec21dd2987ed06f3"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.74-py3-none-any.whl", hash = "sha256:40e2e860f9e204dfc5d541017a5675d8baeb411ac5f6d4770dd62e034e11fde6"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.78.tar.gz", hash = "sha256:b8c6f3061327e215d0609ea3422efa7db73d5ec6d7b7b8b809ba06e9fb0d0241"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.78-py3-none-any.whl", hash = "sha256:6258b02bde294a7d0896c7d027e5eddab9c0e5d17774c00c0715aadccbd73c74"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.116.0,<3.0.0"
+aws-cdk-lib = ">=2.122.0,<3.0.0"
 cdk-nag = ">=2.28.46,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.94.0,<2.0.0"
@@ -540,17 +540,17 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.85.2"
+version = "0.85.3"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = ">=3.8, <=4.0, !=4.0"
 files = [
-    {file = "cfn-lint-0.85.2.tar.gz", hash = "sha256:f8a5cc55daeaaa747b8d776dcf62fe1b6bfb8cb46ae60950cbe627601facccd7"},
-    {file = "cfn_lint-0.85.2-py3-none-any.whl", hash = "sha256:e7a0aafb9ad93dbe5db54cbefca92a94f2d173309218273ef997ecb048125d89"},
+    {file = "cfn-lint-0.85.3.tar.gz", hash = "sha256:efed015205051664285f0aedac106209c80f8b251b231fce93d0911db0e07cec"},
+    {file = "cfn_lint-0.85.3-py3-none-any.whl", hash = "sha256:53121526fe50c04a3551379fd835417d7c05959280df8869e12070946af977a3"},
 ]
 
 [package.dependencies]
-aws-sam-translator = ">=1.84.0"
+aws-sam-translator = ">=1.85.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
 jsonschema = ">=3.0,<5"
@@ -1820,13 +1820,13 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.11"
+version = "9.5.12"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.11-py3-none-any.whl", hash = "sha256:788ee0f3e036dca2dc20298d65e480297d348a44c9d7b2ee05c5262983e66072"},
-    {file = "mkdocs_material-9.5.11.tar.gz", hash = "sha256:7af7f8af0dea16175558f3fb9245d26c83a17199baa5f157755e63d7437bf971"},
+    {file = "mkdocs_material-9.5.12-py3-none-any.whl", hash = "sha256:d6f0c269f015e48c76291cdc79efb70f7b33bbbf42d649cfe475522ebee61b1f"},
+    {file = "mkdocs_material-9.5.12.tar.gz", hash = "sha256:5f69cef6a8aaa4050b812f72b1094fda3d079b9a51cf27a247244c03ec455e97"},
 ]
 
 [package.dependencies]
@@ -2663,17 +2663,17 @@ toml = ["tomli (>=2.0.1)"]
 
 [[package]]
 name = "redis"
-version = "5.0.1"
+version = "5.0.2"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "redis-5.0.1-py3-none-any.whl", hash = "sha256:ed4802971884ae19d640775ba3b03aa2e7bd5e8fb8dfaed2decce4d0fc48391f"},
-    {file = "redis-5.0.1.tar.gz", hash = "sha256:0dab495cd5753069d3bc650a0dde8a8f9edde16fc5691b689a566eda58100d0f"},
+    {file = "redis-5.0.2-py3-none-any.whl", hash = "sha256:4caa8e1fcb6f3c0ef28dba99535101d80934b7d4cd541bbb47f4a3826ee472d1"},
+    {file = "redis-5.0.2.tar.gz", hash = "sha256:3f82cc80d350e93042c8e6e7a5d0596e4dd68715babffba79492733e1f367037"},
 ]
 
 [package.dependencies]
-async-timeout = {version = ">=4.0.2", markers = "python_full_version <= \"3.11.2\""}
+async-timeout = ">=4.0.3"
 
 [package.extras]
 hiredis = ["hiredis (>=1.0.0)"]
@@ -2832,13 +2832,13 @@ decorator = ">=3.4.2"
 
 [[package]]
 name = "rich"
-version = "13.7.0"
+version = "13.7.1"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.7.0"
 files = [
-    {file = "rich-13.7.0-py3-none-any.whl", hash = "sha256:6da14c108c4866ee9520bbffa71f6fe3962e193b7da68720583850cd4548e235"},
-    {file = "rich-13.7.0.tar.gz", hash = "sha256:5cb5123b5cf9ee70584244246816e9114227e0b98ad9176eede6ad54bf5403fa"},
+    {file = "rich-13.7.1-py3-none-any.whl", hash = "sha256:4edbae314f59eb482f54e9e30bf00d33350aaa94f4bfcd4e9e3110e64d0d7222"},
+    {file = "rich-13.7.1.tar.gz", hash = "sha256:9be308cb1fe2f1f57d67ce99e95af38a1e2bc71ad9813b0e247cf7ffbcc3a432"},
 ]
 
 [package.dependencies]
@@ -3199,13 +3199,13 @@ test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
 name = "types-pyopenssl"
-version = "24.0.0.20240130"
+version = "24.0.0.20240228"
 description = "Typing stubs for pyOpenSSL"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-pyOpenSSL-24.0.0.20240130.tar.gz", hash = "sha256:c812e5c1c35249f75ef5935708b2a997d62abf9745be222e5f94b9595472ab25"},
-    {file = "types_pyOpenSSL-24.0.0.20240130-py3-none-any.whl", hash = "sha256:24a255458b5b8a7fca8139cf56f2a8ad5a4f1a5f711b73a5bb9cb50dc688fab5"},
+    {file = "types-pyOpenSSL-24.0.0.20240228.tar.gz", hash = "sha256:cd990717d8aa3743ef0e73e0f462e64b54d90c304249232d48fece4f0f7c3c6a"},
+    {file = "types_pyOpenSSL-24.0.0.20240228-py3-none-any.whl", hash = "sha256:a472cf877a873549175e81972f153f44e975302a3cf17381eb5f3d41ccfb75a4"},
 ]
 
 [package.dependencies]
@@ -3509,4 +3509,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "162dc191f1f7b6c3cf08a22d27947ff422a5306cacfd2c7f9cc8d1749e62e1a7"
+content-hash = "53d14954067c32c308c19b301379e8429c3a8180ba382e49f3dd425a9cb4020d"

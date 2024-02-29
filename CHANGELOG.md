@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **deps:** bump codecov/codecov-action from 4.0.2 to 4.1.0 ([#3856](https://github.com/aws-powertools/powertools-lambda-python/issues/3856))
+* **deps:** bump squidfunk/mkdocs-material from `43b898a` to `49d1bfd` in /docs ([#3857](https://github.com/aws-powertools/powertools-lambda-python/issues/3857))
+* **deps-dev:** bump black from 24.1.1 to 24.2.0 ([#3760](https://github.com/aws-powertools/powertools-lambda-python/issues/3760))
 
 
 <a name="v2.34.2"></a>
