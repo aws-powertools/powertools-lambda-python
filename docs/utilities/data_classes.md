@@ -86,6 +86,7 @@ Log Data Event for Troubleshooting
 | [AppSync Resolver](#appsync-resolver)                                     | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                       | `AWSConfigRuleEvent`                               |
 | [Bedrock Agent](#bedrock-agent)                                           | `BedrockAgent`                                     |
+| [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent` |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget) | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                       | `CloudWatchLogsEvent`                              |
 | [CodePipeline Job Event](#codepipeline-job)                               | `CodePipelineJobEvent`                             |
@@ -526,6 +527,23 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
         # Alternatively, you can return markdown that will be rendered by CloudWatch
         echo = event.widget_context.params["echo"]
         return { "markdown": f"# {echo}" }
+    ```
+
+### CloudWatch Alarm State Change Action
+
+[CloudWatch supports Lambda as an alarm state change action](https://aws.amazon.com/about-aws/whats-new/2023/12/amazon-cloudwatch-alarms-lambda-change-action/){target="_blank"}.
+You can use the `CloudWathAlarmEvent` data class to access the fields containing such data as alarm information, current state, and previous state.
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, CloudWatchAlarmEvent
+
+    @event_source(data_class=CloudWatchAlarmEvent)
+    def lambda_handler(event: CloudWatchAlarmEvent, context):
+        if event.state.value.name == "ALARM":
+            print(f"{event.alarm_name} is on alarm because {event.state.reason}...")
+            do_something_with(event.alarm_arn)
     ```
 
 ### CloudWatch Logs
