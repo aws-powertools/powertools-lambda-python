@@ -130,6 +130,59 @@ class CloudWatchAlarmMetric(DictWrapper):
         return self["returnData"]
 
 
+class CloudWatchAlarmData(DictWrapper):
+    def __init__(self, data: dict):
+        super().__init__(data)
+
+        self._configuration = self.get("configuration", None)
+
+    @property
+    def name(self) -> str:
+        """
+        Alarm name.
+        """
+        return self["alarmName"]
+
+    @property
+    def description(self) -> Optional[str]:
+        """
+        Optional description for the Alarm.
+        """
+        if self._configuration is not None:
+            return self._configuration.get("description", None)
+
+        return None
+
+    @property
+    def state(self) -> CloudWatchAlarmState:
+        """
+        The current state of the Alarm.
+        """
+        return CloudWatchAlarmState(self["state"])
+
+    @property
+    def previous_state(self) -> CloudWatchAlarmState:
+        """
+        The previous state of the Alarm.
+        """
+        return CloudWatchAlarmState(self["previousState"])
+
+    @property
+    def metrics(self) -> Optional[List[CloudWatchAlarmMetric]]:
+        """
+        The metrics evaluated for the Alarm.
+        """
+        if self._configuration is None:
+            return None
+
+        maybe_metrics = self._configuration.get("metrics", None)
+
+        if maybe_metrics is not None:
+            return [CloudWatchAlarmMetric(i) for i in maybe_metrics]
+
+        return None
+
+
 class CloudWatchAlarmEvent(DictWrapper):
     @property
     def source(self) -> str:
@@ -167,38 +220,8 @@ class CloudWatchAlarmEvent(DictWrapper):
         return self["time"]
 
     @property
-    def alarm_name(self) -> str:
+    def alarm_data(self) -> CloudWatchAlarmData:
         """
-        Alarm name.
+        Contains basic data about the Alarm and its current and previous states.
         """
-        return self["alarmData"]["alarmName"]
-
-    @property
-    def alarm_description(self) -> Optional[str]:
-        """
-        Optional description for the Alarm.
-        """
-        return self["alarmData"].get("configuration", {}).get("description", None)
-
-    @property
-    def state(self):
-        """
-        The current state of the Alarm.
-        """
-        return CloudWatchAlarmState(self.get("alarmData").get("state"))
-
-    @property
-    def previous_state(self):
-        """
-        The previous state of the Alarm.
-        """
-        return CloudWatchAlarmState(self.get("alarmData").get("previousState"))
-
-    @property
-    def alarm_metrics(self) -> Optional[List[CloudWatchAlarmMetric]]:
-        maybe_metrics = self["alarmData"].get("configuration", {}).get("metrics", None)
-
-        if maybe_metrics is not None:
-            return [CloudWatchAlarmMetric(i) for i in maybe_metrics]
-
-        return None
+        return CloudWatchAlarmData(self["alarmData"])
