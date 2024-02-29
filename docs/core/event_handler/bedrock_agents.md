@@ -114,6 +114,16 @@ It's required to include a `description` for each API endpoint and input paramet
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_output.json"
 	```
 
+??? note "What happens under the hood?"
+	Powertools will handle the request from the Agent, parse, validate, and route it to the correct method in your code.
+	The response is then validated and formatted back to the Agent.
+
+	<center>
+	```mermaid
+	--8<-- "docs/core/event_handler/bedrock_agents_getting_started.mermaid"
+	```
+	</center>
+
 ### Validating input and output
 
 You can define the expected format for incoming data and responses by using type annotations.
@@ -150,6 +160,8 @@ Pydantic is a popular library for data validation using Python type annotations.
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
 	```
 
+#### When validation fails
+
 If the request validation fails, your event handler will not be called, and an error message is returned to Bedrock.
 Similarly, if the response fails validation, your handler will abort the response.
 
@@ -157,6 +169,18 @@ Similarly, if the response fails validation, your handler will abort the respons
 	The event handler will always return a response according to the OpenAPI schema.
 	A validation failure always results in a [422 response](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422).
 	However, how Amazon Bedrock interprets that failure is non-deterministic, since it depends on the characteristics of the LLM being used.
+
+=== "Input payload"
+
+	```json hl_lines="11"
+	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_input.json"
+	```
+
+=== "Output payload"
+
+	```json hl_lines="10"
+	--8<-- "examples/event_handler_bedrock_agents/src/validation_failure_output.json"
+	```
 
 <center>
 ```mermaid
