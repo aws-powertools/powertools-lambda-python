@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from enum import Enum, auto
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
-
-class CloudWatchAlarmStateValue(Enum):
-    OK = auto()
-    ALARM = auto()
-    INSUFFICIENT_DATA = auto()
+CloudWatchAlarmStateValue = Literal["OK", "ALARM", "INSUFFICIENT_DATA"]
 
 
 class CloudWatchAlarmState(DictWrapper):
@@ -18,7 +13,7 @@ class CloudWatchAlarmState(DictWrapper):
         """
         Overall state of the alarm.
         """
-        return CloudWatchAlarmStateValue[self["value"]]
+        return self["value"]
 
     @property
     def reason(self) -> Optional[str]:

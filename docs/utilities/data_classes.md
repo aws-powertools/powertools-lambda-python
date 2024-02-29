@@ -541,7 +541,7 @@ You can use the `CloudWathAlarmEvent` data class to access the fields containing
 
     @event_source(data_class=CloudWatchAlarmEvent)
     def lambda_handler(event: CloudWatchAlarmEvent, context):
-        if event.state.value.name == "ALARM":
+        if event.state.value == "ALARM":
             print(f"{event.alarm_name} is on alarm because {event.state.reason}...")
             do_something_with(event.alarm_arn)
     ```

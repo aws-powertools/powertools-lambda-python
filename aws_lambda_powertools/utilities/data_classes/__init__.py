@@ -11,7 +11,6 @@ from .cloud_watch_alarm_event import (
     CloudWatchAlarmEvent,
     CloudWatchAlarmMetric,
     CloudWatchAlarmState,
-    CloudWatchAlarmStateValue,
 )
 from .cloud_watch_custom_widget_event import CloudWatchDashboardCustomWidgetEvent
 from .cloud_watch_logs_event import CloudWatchLogsEvent
@@ -51,7 +50,6 @@ __all__ = [
     "CloudWatchAlarmEvent",
     "CloudWatchAlarmMetric",
     "CloudWatchAlarmState",
-    "CloudWatchAlarmStateValue",
     "CloudWatchDashboardCustomWidgetEvent",
     "CloudWatchLogsEvent",
     "CodePipelineJobEvent",
