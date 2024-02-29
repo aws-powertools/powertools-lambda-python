@@ -13,6 +13,11 @@ from ..base import BaseProvider, BaseSegment
 logger = logging.getLogger(__name__)
 
 
+# optl terminology first
+# 1. Provider based on OTel terminology
+# 2. X-Ray provider on top of the new BaseProvider
+# 3. Datadog provider on top of the new BaseProvider
+# access xray sdk
 class OtelSpan(BaseSegment):
     def __init__(self, otel_span=otel_trace.Span):
         self.otel_span = otel_span
