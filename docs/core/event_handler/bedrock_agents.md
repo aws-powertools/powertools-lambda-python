@@ -118,16 +118,18 @@ It's required to include a `description` for each API endpoint and input paramet
 
 You can define the expected format for incoming data and responses by using type annotations.
 Define constraints using standard Python types, [dataclasses](https://docs.python.org/3/library/dataclasses.html) or [Pydantic models](https://docs.pydantic.dev/latest/concepts/models/).
+Pydantic is a popular library for data validation using Python type annotations.
 
 === "Lambda handler"
-	This example uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function. That function returns an object containing the scheduled meeting details.
+	This example uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function.
+    The function then returns a boolean indicating if the meeting was successfully scheduled.
 
-	```python hl_lines="5 23-26 32-33"
+	```python hl_lines="1 2 16-18"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
 	```
 
 	1. No need to add the `enable_validation` parameter, as it's enabled by default.
-	2. Describe each input and output using human-readable descriptions
+	2. Describe each input using human-readable descriptions
 	3. Add the typing annotations to your parameters and return types, and let the event handler take care of the rest
 
 === "OpenAPI schema"
@@ -148,8 +150,19 @@ Define constraints using standard Python types, [dataclasses](https://docs.pytho
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation_output.json"
 	```
 
-If the request validation, your event handler will not be called, and an error message is returned to Bedrock.
+If the request validation fails, your event handler will not be called, and an error message is returned to Bedrock.
 Similarly, if the response fails validation, your handler will abort the response.
+
+???+ info "What does this mean for my Agent?"
+	The event handler will always return a response according to the OpenAPI schema.
+	A validation failure always results in a [422 response](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/422).
+	However, how Amazon Bedrock interprets that failure is non-deterministic, since it depends on the characteristics of the LLM being used.
+
+<center>
+```mermaid
+--8<-- "docs/core/event_handler/bedrock_agents_validation_sequence_diagram.mermaid"
+```
+</center>
 
 ### Generating OpenAPI schemas
 
