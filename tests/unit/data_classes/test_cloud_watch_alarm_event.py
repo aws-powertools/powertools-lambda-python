@@ -23,6 +23,14 @@ def test_cloud_watch_alarm_event():
     assert parsed_event.alarm_data.previous_state.reason_data == raw_event["alarmData"]["previousState"]["reasonData"]
     assert parsed_event.alarm_data.previous_state.reason_data_decoded["queryDate"] == "2024-02-17T11:51:31.460+0000"
     assert parsed_event.alarm_data.previous_state.timestamp == raw_event["alarmData"]["previousState"]["timestamp"]
+    assert (
+        parsed_event.alarm_data.previous_state.actions_suppressed_by
+        == raw_event["alarmData"]["previousState"]["actionsSuppressedBy"]
+    )
+    assert (
+        parsed_event.alarm_data.previous_state.actions_suppressed_reason
+        == raw_event["alarmData"]["previousState"]["actionsSuppressedReason"]
+    )
 
     # test the 'expression' metric
     assert parsed_event.alarm_data.metrics[0].metric_id == raw_event["alarmData"]["configuration"]["metrics"][0]["id"]

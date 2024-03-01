@@ -6,6 +6,7 @@ from typing import Any, List, Literal, Optional
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 CloudWatchAlarmStateValue = Literal["OK", "ALARM", "INSUFFICIENT_DATA"]
+CloudWatchAlarmActionSuppressor = Literal["Alarm", "ExtensionPeriod", "WaitPeriod"]
 
 
 class CloudWatchAlarmState(DictWrapper):
@@ -40,6 +41,21 @@ class CloudWatchAlarmState(DictWrapper):
             return None
 
         return self._json_deserializer(self.reason_data)
+
+    @property
+    def actions_suppressed_by(self) -> Optional[CloudWatchAlarmActionSuppressor]:
+        """
+        Describes why the actions when the value is `ALARM` are suppressed in a composite
+        alarm.
+        """
+        return self.get("actionsSuppressedBy", None)
+
+    @property
+    def actions_suppressed_reason(self) -> Optional[str]:
+        """
+        Captures the reason for action suppression.
+        """
+        return self.get("actionsSuppressedReason", None)
 
     @property
     def timestamp(self) -> str:

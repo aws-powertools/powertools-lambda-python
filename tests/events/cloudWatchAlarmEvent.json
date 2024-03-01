@@ -16,7 +16,9 @@
       "value": "OK",
       "reason": "Threshold Crossed: 1 out of the last 1 datapoints [1.0 (17/02/24 11:50:00)] was not greater than the threshold (10.0) (minimum 1 datapoint for ALARM -> OK transition).",
       "reasonData": "{\"version\":\"1.0\",\"queryDate\":\"2024-02-17T11:51:31.460+0000\",\"startDate\":\"2024-02-17T11:50:00.000+0000\",\"statistic\":\"SampleCount\",\"period\":60,\"recentDatapoints\":[1.0],\"threshold\":10.0,\"evaluatedDatapoints\":[{\"timestamp\":\"2024-02-17T11:50:00.000+0000\",\"sampleCount\":1.0,\"value\":1.0}]}",
-      "timestamp": "2024-02-17T11:51:31.462+0000"
+      "timestamp": "2024-02-17T11:51:31.462+0000",
+      "actionsSuppressedBy": "WaitPeriod",
+      "actionsSuppressedReason": "Actions suppressed by WaitPeriod"
     },
     "configuration": {
       "description": "This is description **here**",
