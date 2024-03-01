@@ -962,7 +962,7 @@ This will enable full tracebacks errors in the response, print request and respo
 When you enable [Data Validation](#data-validation), we use a combination of Pydantic Models and [OpenAPI](https://www.openapis.org/){target="_blank"} type annotations to add constraints to your API's parameters.
 
 ???+ warning "OpenAPI schema version depends on the installed version of Pydantic"
-    Pydantic v1 generates valid OpenAPI 3.0.3 schemas, and Pydantic v2 generates valid OpenAPI 3.1.0 schemas.
+    Pydantic v1 generates [valid OpenAPI 3.0.3 schemas](https://docs.pydantic.dev/1.10/usage/schema/){target="_blank"}, and Pydantic v2 generates [valid OpenAPI 3.1.0 schemas](https://docs.pydantic.dev/latest/why/#json-schema){target="_blank"}.
 
 In OpenAPI documentation tools like [SwaggerUI](#enabling-swaggerui), these annotations become readable descriptions, offering a self-explanatory API interface. This reduces boilerplate code while improving functionality and enabling auto-documentation.
 
