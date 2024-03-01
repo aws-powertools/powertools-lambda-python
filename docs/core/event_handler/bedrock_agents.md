@@ -3,7 +3,7 @@ title: Agents for Amazon Bedrock
 description: Core utility
 ---
 
-Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html#agents-how){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
+Create [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html#agents-how){target="_blank"} using event handlers and auto generation of OpenAPI schemas.
 
 <center>
 ```mermaid
@@ -13,10 +13,10 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 
 ## Key features
 
-* Similar experience when authoring [REST](api_gateway.md){target="_blank"} and [GraphQL APIs](appsync.md){target="_blank"}
 * Minimal boilerplate to build Agents for Amazon Bedrock
 * Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
 * Built-in data validation for requests and responses
+* Similar experience when authoring [REST](api_gateway.md){target="_blank"} and [GraphQL APIs](appsync.md){target="_blank"}
 
 ## Terminology
 
@@ -30,11 +30,11 @@ Author [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 
 **Large Language Models (LLM)** are very large deep learning models that are pre-trained on vast amounts of data, capable of extracting meanings from a sequence of text and understanding the relationship between words and phrases on it.
 
-**Agent for Amazon Bedrock** is an AWS service to build and deploy conversational agents that can interact with your customers using Large Language Models (LLM) and AWS Lambda functions.
+**Agent for Amazon Bedrock** is an Amazon Bedrock feature to build and deploy conversational agents that can interact with your customers using Large Language Models (LLM) and AWS Lambda functions.
 
 ## Getting started
 
-???+ tip "All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples)"
+!!! tip "All examples shared in this documentation are available within the [project repository](https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples)"
 
 ### Install
 
@@ -50,8 +50,8 @@ To build Agents for Amazon Bedrock, you will need:
 |-----------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|:-------------:|:-------------:|
 | [Lambda Function](#your-first-agent)                                                                                  | Defines your business logic for the action group                               |       ✅       |       ✅       |
 | [OpenAPI Schema](#generating-openapi-schemas)                                                                         | API description, structure, and action group parameters                        |       ❌       |       ✅       |
-| Bedrock [Service Role](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html){target="_blank"} | Allows Amazon Bedrock to invoke foundation models                              |       ✅       |       ✅       |
-| Agent for Bedrock                                                                                                     | The service that will combine all the above to create the conversational agent |       ❌       |       ✅       |
+| [Bedrock Service Role](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-permissions.html){target="_blank"} | Allows Amazon Bedrock to invoke foundation models                              |       ✅       |       ✅       |
+| Agents for Bedrock                                                                                                    | The service that will combine all the above to create the conversational agent |       ❌       |       ✅       |
 
 === "Using AWS Serverless Application Model (SAM)"
 	Using [AWS SAM](https://aws.amazon.com/serverless/sam/){target="_blank"} you can create your Lambda function and the necessary permissions. However, you still have to create your Agent for Amazon Bedrock [using the AWS console](https://docs.aws.amazon.com/bedrock/latest/userguide/agents-create.html){target="_blank"}.
@@ -77,10 +77,10 @@ To build Agents for Amazon Bedrock, you will need:
 
 ### Your first Agent
 
-To create an Agent for Amazon Bedrock, use the `BedrockAgentResolver` to annotate your actions.
+To create an agent, use the `BedrockAgentResolver` to annotate your actions.
 This is similar to the way [all the other Event Handler](api_gateway.md) resolvers work.
 
-It's required to include a `description` for each API endpoint and input parameter. This will improve the understanding Amazon Bedrock has of your actions.
+You are required to add a `description` parameter in each endpoint, doing so will improve Bedrock's understanding of your actions.
 
 === "Lambda handler"
 
@@ -190,8 +190,7 @@ Similarly, if the response fails validation, your handler will abort the respons
 
 ### Generating OpenAPI schemas
 
-Use the `get_openapi_json_schema` function provided by the resolver.
-This function will produce a JSON-serialized string that represents your OpenAPI schema.
+Use the `get_openapi_json_schema` function provided by the resolver to produce a JSON-serialized string that represents your OpenAPI schema.
 You can print this string or save it to a file. You'll use the file later when creating the Agent.
 
 You'll need to regenerate the OpenAPI schema and update your Agent everytime your API changes.
@@ -247,13 +246,13 @@ The following video demonstrates the end-to-end process:
 <iframe width="720" height="405" src="https://www.youtube-nocookie.com/embed/NWoC5FTSt7s?si=AG2qpLJbxCkyiLma&amp;controls=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 </center>
 
-During the creation process, you should use the schema generated in the previous step when prompted for an OpenAPI specification.
+During the creation process, you should use the schema [previously generated](#generating-openapi-schemas) when prompted for an OpenAPI specification.
 
 ## Advanced
 
 ### Accessing custom request fields
 
-The event sent by Agents for Amazon Bedrock into your Lambda function contains a number of extra event fields, exposed in the `app.current_event` field.
+The event sent by Agents for Amazon Bedrock into your Lambda function contains a [number of extra event fields](#request_fields_table), exposed in the `app.current_event` field.
 
 ???+ note "Why is this useful?"
 	You can for instance identify new conversations (`session_id`) or store and analyze entire conversations (`input_text`).
@@ -267,6 +266,7 @@ The event sent by Agents for Amazon Bedrock into your Lambda function contains a
 	--8<-- "examples/event_handler_bedrock_agents/src/accessing_request_fields.py"
 	```
 
+<a id="request_fields_table"></a>
 The input event fields are:
 
 | Name                      | Type                         | Description                                                                                                                                                                                                      |
