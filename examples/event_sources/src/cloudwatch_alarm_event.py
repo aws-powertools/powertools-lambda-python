@@ -15,5 +15,5 @@ def lambda_handler(event: CloudWatchAlarmEvent, context: LambdaContext) -> dict:
     return {
         "name": event.alarm_data.name,
         "arn": event.alarm_arn,
-        "urgent": "Priority: P1" in event.alarm_data.description,
+        "urgent": "Priority: P1" in (event.alarm_data.description or ""),
     }
