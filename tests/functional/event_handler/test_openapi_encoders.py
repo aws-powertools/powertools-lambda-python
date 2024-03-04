@@ -9,15 +9,6 @@ from pydantic.color import Color
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 
 
-@pytest.fixture
-def pydanticv1_only():
-    from pydantic import __version__
-
-    version = __version__.split(".")
-    if version[0] != "1":
-        pytest.skip("pydanticv1 test only")
-
-
 def test_openapi_encode_include():
     class User(BaseModel):
         name: str
