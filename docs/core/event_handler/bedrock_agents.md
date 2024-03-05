@@ -40,7 +40,7 @@ Create [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 
 !!! info "This is unnecessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../../index.md#lambda-layer){target="_blank"}."
 
-You need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we support both Pydantic V1 and V2. For a future major version, we will only support Pydantic V2.
+You need to add `pydantic` as a dependency in your preferred tool _e.g., requirements.txt, pyproject.toml_. At this time, we only support Pydantic V1, due to an incompatibility with Pydantic V2 generated schemas and the Agents' API.
 
 ### Required resources
 
