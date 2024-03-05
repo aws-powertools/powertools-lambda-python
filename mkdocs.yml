@@ -22,6 +22,7 @@ nav:
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md
+              - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
           - utilities/batch.md
           - utilities/typing.md
