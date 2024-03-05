@@ -16,7 +16,7 @@ Create [Agents for Amazon Bedrock](https://docs.aws.amazon.com/bedrock/latest/us
 * Minimal boilerplate to build Agents for Amazon Bedrock
 * Automatic generation of [OpenAPI schemas](https://www.openapis.org/){target="_blank"} from your business logic code
 * Built-in data validation for requests and responses
-* Similar experience when authoring [REST](api_gateway.md){target="_blank"} and [GraphQL APIs](appsync.md){target="_blank"}
+* Similar experience to authoring [REST and HTTP APIs](api_gateway.md){target="_blank"}
 
 ## Terminology
 
