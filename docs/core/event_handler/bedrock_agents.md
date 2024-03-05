@@ -134,7 +134,7 @@ Pydantic is a popular library for data validation using Python type annotations.
 	This example uses [Pydantic's EmailStr](https://docs.pydantic.dev/2.0/usage/types/string_types/#emailstr){target="_blank"} to validate the email address passed to the `schedule_meeting` function.
     The function then returns a boolean indicating if the meeting was successfully scheduled.
 
-	```python hl_lines="1 2 16-18"
+	```python hl_lines="1 2 6 16-18"
 	--8<-- "examples/event_handler_bedrock_agents/src/getting_started_with_validation.py"
 	```
 
