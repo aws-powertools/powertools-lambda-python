@@ -258,7 +258,7 @@ jobs:
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
       - name: Download CDK layer artifacts
-        uses: actions/download-artifact@87c55149d96e628cc2ef7e6fc2aab372015aec85 # v4.1.3
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
           path: cdk-layer-stack
           pattern: cdk-layer-stack-*  # merge all Layer artifacts created per region earlier (reusable_deploy_v2_layer_stack.yml; step "Save Layer ARN artifact")
