@@ -1,0 +1,28 @@
+flowchart LR
+    Bedrock[LLM] <-- uses --> Agent
+    You[User input] --> Agent
+    Agent -- consults --> OpenAPI
+    Agent[Agents for Amazon Bedrock] -- invokes --> Lambda
+
+    subgraph OpenAPI
+        Schema
+    end
+
+    subgraph Lambda[Lambda Function]
+        direction TB
+        Parsing[Parameter Parsing] --> Validation
+        Validation[Parameter Validation] --> Routing
+        Routing --> Code[Your code]
+        Code --> ResponseValidation[Response Validation]
+        ResponseValidation --> ResponseBuilding[Response Building]
+    end
+
+    subgraph ActionGroup[Action Group]
+        OpenAPI -. generated from .-> Lambda
+    end
+
+    style Code fill:#ffa500,color:black,font-weight:bold,stroke-width:3px
+    style You stroke:#0F0,stroke-width:2px
+
+
+
