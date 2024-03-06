@@ -4,13 +4,13 @@
 <a name="unreleased"></a>
 # Unreleased
 
-## Bug Fixes
 
-* **event_handler:** OpenAPI schema version respects Pydantic version ([#3860](https://github.com/aws-powertools/powertools-lambda-python/issues/3860))
+<a name="v2.35.0"></a>
+## [v2.35.0] - 2024-03-06
+## Maintenance
 
-## Code Refactoring
-
-* **logger:** improve typing ([#3869](https://github.com/aws-powertools/powertools-lambda-python/issues/3869))
+* version bump
+* **docs:** add Bedrock Agents to feature list ([#3889](https://github.com/aws-powertools/powertools-lambda-python/issues/3889))
 
 ## Documentation
 
@@ -4489,7 +4489,8 @@
 * Merge pull request [#5](https://github.com/aws-powertools/powertools-lambda-python/issues/5) from jfuss/feat/python38
 
 
-[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.2...HEAD
+[Unreleased]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.35.0...HEAD
+[v2.35.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.2...v2.35.0
 [v2.34.2]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.1...v2.34.2
 [v2.34.1]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.34.0...v2.34.1
 [v2.34.0]: https://github.com/aws-powertools/powertools-lambda-python/compare/v2.33.1...v2.34.0
