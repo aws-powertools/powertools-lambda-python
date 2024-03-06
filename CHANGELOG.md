@@ -12,6 +12,30 @@
 * version bump
 * **docs:** add Bedrock Agents to feature list ([#3889](https://github.com/aws-powertools/powertools-lambda-python/issues/3889))
 
+## Documentation
+
+* **event_handler:** add bedrock agent resolver documentation ([#3602](https://github.com/aws-powertools/powertools-lambda-python/issues/3602))
+
+## Maintenance
+
+* **deps:** bump pypa/gh-action-pypi-publish from 1.8.11 to 1.8.12 ([#3863](https://github.com/aws-powertools/powertools-lambda-python/issues/3863))
+* **deps:** bump actions/download-artifact from 4.1.3 to 4.1.4 ([#3875](https://github.com/aws-powertools/powertools-lambda-python/issues/3875))
+* **deps:** bump squidfunk/mkdocs-material from `49d1bfd` to `7be068b` in /docs ([#3872](https://github.com/aws-powertools/powertools-lambda-python/issues/3872))
+* **deps:** bump codecov/codecov-action from 4.0.2 to 4.1.0 ([#3856](https://github.com/aws-powertools/powertools-lambda-python/issues/3856))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3884](https://github.com/aws-powertools/powertools-lambda-python/issues/3884))
+* **deps:** bump squidfunk/mkdocs-material from `43b898a` to `49d1bfd` in /docs ([#3857](https://github.com/aws-powertools/powertools-lambda-python/issues/3857))
+* **deps:** bump docker/setup-buildx-action from 3.0.0 to 3.1.0 ([#3864](https://github.com/aws-powertools/powertools-lambda-python/issues/3864))
+* **deps:** bump actions/download-artifact from 4.1.2 to 4.1.3 ([#3862](https://github.com/aws-powertools/powertools-lambda-python/issues/3862))
+* **deps:** bump redis from 5.0.1 to 5.0.2 ([#3867](https://github.com/aws-powertools/powertools-lambda-python/issues/3867))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#3887](https://github.com/aws-powertools/powertools-lambda-python/issues/3887))
+* **deps-dev:** bump cfn-lint from 0.85.2 to 0.85.3 ([#3861](https://github.com/aws-powertools/powertools-lambda-python/issues/3861))
+* **deps-dev:** bump black from 24.1.1 to 24.2.0 ([#3760](https://github.com/aws-powertools/powertools-lambda-python/issues/3760))
+* **deps-dev:** bump mkdocs-material from 9.5.11 to 9.5.12 ([#3870](https://github.com/aws-powertools/powertools-lambda-python/issues/3870))
+* **deps-dev:** bump aws-cdk-lib from 2.130.0 to 2.131.0 ([#3881](https://github.com/aws-powertools/powertools-lambda-python/issues/3881))
+* **deps-dev:** bump aws-cdk from 2.130.0 to 2.131.0 ([#3883](https://github.com/aws-powertools/powertools-lambda-python/issues/3883))
+* **deps-dev:** bump cfn-lint from 0.85.3 to 0.86.0 ([#3882](https://github.com/aws-powertools/powertools-lambda-python/issues/3882))
+* **deps-dev:** bump ruff from 0.2.2 to 0.3.0 ([#3871](https://github.com/aws-powertools/powertools-lambda-python/issues/3871))
+
 
 <a name="v2.34.2"></a>
 ## [v2.34.2] - 2024-02-26
