@@ -21,7 +21,7 @@ format:
 	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run ruff aws_lambda_powertools tests examples
+	poetry run ruff check aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"
