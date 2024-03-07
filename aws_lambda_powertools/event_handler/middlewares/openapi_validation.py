@@ -2,7 +2,7 @@ import dataclasses
 import json
 import logging
 from copy import deepcopy
-from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
 
 from pydantic import BaseModel
 
@@ -54,6 +54,9 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
       return [Todo(name="hello world")]
     ```
     """
+
+    def __init__(self, response_serializer: Optional[Callable[[Any], str]] = None):
+        self._response_serializer = response_serializer
 
     def handler(self, app: EventHandlerInstance, next_middleware: NextMiddleware) -> Response:
         logger.debug("OpenAPIValidationMiddleware handler")
@@ -181,10 +184,11 @@ class OpenAPIValidationMiddleware(BaseMiddlewareHandler):
                 exclude_unset=exclude_unset,
                 exclude_defaults=exclude_defaults,
                 exclude_none=exclude_none,
+                custom_serializer=self._response_serializer,
             )
         else:
             # Just serialize the response content returned from the handler
-            return jsonable_encoder(response_content)
+            return jsonable_encoder(response_content, custom_serializer=self._response_serializer)
 
     def _prepare_response_content(
         self,
