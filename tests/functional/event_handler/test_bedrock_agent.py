@@ -1,9 +1,10 @@
 import json
-from typing import Annotated, Any, Dict
+from typing import Any, Dict
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
 
