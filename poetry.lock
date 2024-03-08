@@ -247,13 +247,13 @@ dev = ["black (==23.10.1)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverle
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.12.1"
+version = "2.13.0"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "aws-xray-sdk-2.12.1.tar.gz", hash = "sha256:0bbfdbc773cfef4061062ac940b85e408297a2242f120bcdfee2593209b1e432"},
-    {file = "aws_xray_sdk-2.12.1-py2.py3-none-any.whl", hash = "sha256:f6803832dc08d18cc265e2327a69bfa9ee41c121fac195edc9745d04b7a566c3"},
+    {file = "aws-xray-sdk-2.13.0.tar.gz", hash = "sha256:816186126917bc35ae4e6e2f304702a43d494ecef34a39e6330f5018bdecc9f5"},
+    {file = "aws_xray_sdk-2.13.0-py2.py3-none-any.whl", hash = "sha256:d18604a8688b4bed03ce4a858cc9acd72b71400e085bf7512fc31cf657ca85f9"},
 ]
 
 [package.dependencies]
@@ -446,13 +446,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.82"
+version = "0.1.83"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.82.tar.gz", hash = "sha256:ccb3c0788b019d85a582ba25934cc56313918b2573dad358834a52f62fb577b0"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.82-py3-none-any.whl", hash = "sha256:93869e25e3b9c1081241c8d194c57c1cc9d04d9220f55758d49d4f3a4c4671c9"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.83.tar.gz", hash = "sha256:c259c531a7994a3b18bd3cbc18c112f72221a4d6a2aedf325f2364692d7a9344"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.83-py3-none-any.whl", hash = "sha256:05bdee0e50fa518b5aa26b4c110fc166401739aacbaaebaaa98bb65e36633383"},
 ]
 
 [package.dependencies]
@@ -849,13 +849,13 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "5.88.0"
+version = "5.89.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
 python-versions = ">=3.8.0,<4"
 files = [
-    {file = "datadog_lambda-5.88.0-py3-none-any.whl", hash = "sha256:84eacaab1c5b274bdb9b5843e3ebfb32c8b9624bf22a5813283a6cf482e66805"},
-    {file = "datadog_lambda-5.88.0.tar.gz", hash = "sha256:ce191634c36fed62d82f1b624e25e8ab226a5f67397e29286015e2eb6482094e"},
+    {file = "datadog_lambda-5.89.0-py3-none-any.whl", hash = "sha256:d58d01d6d047096490de004f68ce05d5261b4dba6ebfeb41cf78b2e9afd9dee9"},
+    {file = "datadog_lambda-5.89.0.tar.gz", hash = "sha256:26c2d58712de0dcf7221cdc50d7f361bef217dd99b139e3636685a22cf841764"},
 ]
 
 [package.dependencies]
@@ -868,7 +868,7 @@ urllib3 = [
 wrapt = ">=1.11.2,<2.0.0"
 
 [package.extras]
-dev = ["boto3 (>=1.28.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "nose2 (>=0.9.1,<0.10.0)", "requests (>=2.22.0,<3.0.0)"]
+dev = ["boto3 (>=1.28.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "pytest (>=8.0.0,<9.0.0)", "requests (>=2.22.0,<3.0.0)"]
 
 [[package]]
 name = "ddsketch"
@@ -2005,13 +2005,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.34.46"
-description = "Type annotations for boto3.DynamoDB 1.34.46 service generated with mypy-boto3-builder 7.23.1"
+version = "1.34.57"
+description = "Type annotations for boto3.DynamoDB 1.34.57 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-dynamodb-1.34.46.tar.gz", hash = "sha256:126da0a29ca48502cfa9a26e3024341233d8419f7e03273cea17af7d38e724bd"},
-    {file = "mypy_boto3_dynamodb-1.34.46-py3-none-any.whl", hash = "sha256:1af7c80a0891edac29e5b70441122f6803eb772a3b7b498396eec30368232541"},
+    {file = "mypy-boto3-dynamodb-1.34.57.tar.gz", hash = "sha256:8ad0eaa33811eb7eb0f8e2bcc2dbcefa86c91d7a21b13af500c3a8bacbe99db0"},
+    {file = "mypy_boto3_dynamodb-1.34.57-py3-none-any.whl", hash = "sha256:3f957d604d7289834e549c236d77c229ab8fab107b8a2c9f8a07066348fbd3a3"},
 ]
 
 [package.dependencies]
@@ -3018,13 +3018,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.40.6"
+version = "1.41.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.40.6.tar.gz", hash = "sha256:f143f3fb4bb57c90abef6e2ad06b5f6f02b2ca13e4060ec5c0549c7a9ccce3fa"},
-    {file = "sentry_sdk-1.40.6-py2.py3-none-any.whl", hash = "sha256:becda09660df63e55f307570e9817c664392655a7328bbc414b507e9cb874c67"},
+    {file = "sentry-sdk-1.41.0.tar.gz", hash = "sha256:4f2d6c43c07925d8cd10dfbd0970ea7cb784f70e79523cca9dbcd72df38e5a46"},
+    {file = "sentry_sdk-1.41.0-py2.py3-none-any.whl", hash = "sha256:be4f8f4b29a80b6a3b71f0f31487beb9e296391da20af8504498a328befed53f"},
 ]
 
 [package.dependencies]
@@ -3050,7 +3050,7 @@ huey = ["huey (>=2)"]
 loguru = ["loguru (>=0.5)"]
 opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
 opentelemetry-experimental = ["opentelemetry-distro (>=0.40b0,<1.0)", "opentelemetry-instrumentation-aiohttp-client (>=0.40b0,<1.0)", "opentelemetry-instrumentation-django (>=0.40b0,<1.0)", "opentelemetry-instrumentation-fastapi (>=0.40b0,<1.0)", "opentelemetry-instrumentation-flask (>=0.40b0,<1.0)", "opentelemetry-instrumentation-requests (>=0.40b0,<1.0)", "opentelemetry-instrumentation-sqlite3 (>=0.40b0,<1.0)", "opentelemetry-instrumentation-urllib (>=0.40b0,<1.0)"]
-pure-eval = ["asttokens", "executing", "pure_eval"]
+pure-eval = ["asttokens", "executing", "pure-eval"]
 pymongo = ["pymongo (>=3.1)"]
 pyspark = ["pyspark (>=2.4.4)"]
 quart = ["blinker (>=1.1)", "quart (>=0.16.1)"]
@@ -3512,4 +3512,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c3182ab9d0b52c91b164faa969501424f4a83d721ecf4e9cbc606252ad54ec14"
+content-hash = "70538aa75ee90d7aef93e61ec119c372fecbf957931dd640def961eb817bf7e2"
