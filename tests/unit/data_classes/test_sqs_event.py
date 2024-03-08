@@ -2,6 +2,7 @@ import json
 
 from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
+from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSMessageAttributes
 from tests.functional.utils import load_event
 
 
@@ -132,3 +133,10 @@ def test_decode_nested_sns_event():
     raw_message = json.loads(raw_body["Message"])
     assert message["message"] == raw_message["message"]
     assert message["username"] == raw_message["username"]
+
+
+def test_sqs_event_typing():
+    attributes = SQSMessageAttributes({"key": {"stringValue": "value", "dataType": "String"}})
+
+    # This assertion compares the return from .items() to the return of __getitem__
+    assert list(attributes.items())[0][1] == attributes["key"]
