@@ -849,13 +849,13 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "5.88.0"
+version = "5.89.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
 python-versions = ">=3.8.0,<4"
 files = [
-    {file = "datadog_lambda-5.88.0-py3-none-any.whl", hash = "sha256:84eacaab1c5b274bdb9b5843e3ebfb32c8b9624bf22a5813283a6cf482e66805"},
-    {file = "datadog_lambda-5.88.0.tar.gz", hash = "sha256:ce191634c36fed62d82f1b624e25e8ab226a5f67397e29286015e2eb6482094e"},
+    {file = "datadog_lambda-5.89.0-py3-none-any.whl", hash = "sha256:d58d01d6d047096490de004f68ce05d5261b4dba6ebfeb41cf78b2e9afd9dee9"},
+    {file = "datadog_lambda-5.89.0.tar.gz", hash = "sha256:26c2d58712de0dcf7221cdc50d7f361bef217dd99b139e3636685a22cf841764"},
 ]
 
 [package.dependencies]
@@ -868,7 +868,7 @@ urllib3 = [
 wrapt = ">=1.11.2,<2.0.0"
 
 [package.extras]
-dev = ["boto3 (>=1.28.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "nose2 (>=0.9.1,<0.10.0)", "requests (>=2.22.0,<3.0.0)"]
+dev = ["boto3 (>=1.28.0,<2.0.0)", "flake8 (>=5.0.4,<6.0.0)", "pytest (>=8.0.0,<9.0.0)", "requests (>=2.22.0,<3.0.0)"]
 
 [[package]]
 name = "ddsketch"
@@ -3512,4 +3512,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "1e892fa64dedb8bd58ca4dfe90ac1a76efe1bc5afcfd89ab14fc7c594f6c1b99"
+content-hash = "70538aa75ee90d7aef93e61ec119c372fecbf957931dd640def961eb817bf7e2"
