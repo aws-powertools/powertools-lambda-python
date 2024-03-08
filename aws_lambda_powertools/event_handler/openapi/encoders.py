@@ -56,6 +56,8 @@ def jsonable_encoder(  # noqa: PLR0911
         by default False
     exclude_none : bool, optional
         Whether fields that are equal to None should be excluded, by default False
+    custom_serializer : Callable, optional
+        A custom serializer to use for encoding the object, when everything else fails.
 
     Returns
     -------
