@@ -1,5 +1,5 @@
 from functools import cached_property
-from typing import Any, Dict, Iterator, Optional, Type, TypeVar
+from typing import Any, Dict, ItemsView, Iterator, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -81,6 +81,9 @@ class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
     def __getitem__(self, key: str) -> Optional[SQSMessageAttribute]:  # type: ignore
         item = super().get(key)
         return None if item is None else SQSMessageAttribute(item)  # type: ignore
+
+    def items(self) -> ItemsView[str, SQSMessageAttribute]:  # type: ignore
+        return {k: SQSMessageAttribute(v) for k, v in super().items()}.items()  # type: ignore
 
 
 class SQSRecord(DictWrapper):
