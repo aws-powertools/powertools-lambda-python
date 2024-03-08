@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, List, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
@@ -112,3 +113,16 @@ class BedrockAgentEvent(BaseProxyEvent):
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
         return {}
+
+    @cached_property
+    def json_body(self) -> Any:
+        # In Bedrock Agent events, body parameters are encoded differently
+        # @see https://docs.aws.amazon.com/bedrock/latest/userguide/agents-lambda.html#agents-lambda-input
+        if not self.request_body:
+            return None
+
+        json_body = self.request_body.content.get("application/json")
+        if not json_body:
+            return None
+
+        return {x.name: x.value for x in json_body.properties}

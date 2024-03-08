@@ -2,7 +2,9 @@ import json
 from typing import Any, Dict
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
+from aws_lambda_powertools.event_handler.openapi.params import Body
 from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
 
@@ -157,3 +159,28 @@ def test_bedrock_agent_event_with_exception():
 
     body = result["response"]["responseBody"]["text/plain"]["body"]
     assert body == "Something went wrong"
+
+
+def test_bedrock_agent_with_post():
+    # GIVEN a Bedrock Agent resolver with a POST method
+    app = BedrockAgentResolver()
+
+    @app.post("/send-reminders", description="Sends reminders")
+    def send_reminders(
+        _claim_id: Annotated[int, Body(description="Claim ID", alias="claimId")],
+        _pending_documents: Annotated[str, Body(description="Social number and VAT", alias="pendingDocuments")],
+    ) -> Annotated[bool, Body(description="returns true if I like the email")]:
+        return True
+
+    # WHEN calling the event handler
+    result = app(load_event("bedrockAgentPostEvent.json"), {})
+
+    # THEN process the event correctly
+    assert result["messageVersion"] == "1.0"
+    assert result["response"]["apiPath"] == "/send-reminders"
+    assert result["response"]["httpMethod"] == "POST"
+    assert result["response"]["httpStatusCode"] == 200
+
+    # THEN return the correct result
+    body = result["response"]["responseBody"]["application/json"]["body"]
+    assert json.loads(body) is True

@@ -1401,7 +1401,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._enable_validation:
             from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
 
-            self.use([OpenAPIValidationMiddleware()])
+            # Note the serializer argument: only use custom serializer if provided by the caller
+            # Otherwise, fully rely on the internal Pydantic based mechanism to serialize responses for validation.
+            self.use([OpenAPIValidationMiddleware(validation_serializer=serializer)])
 
     def get_openapi_schema(
         self,
