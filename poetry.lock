@@ -1949,13 +1949,13 @@ reports = ["lxml"]
 
 [[package]]
 name = "mypy-boto3-appconfig"
-version = "1.34.0"
-description = "Type annotations for boto3.AppConfig 1.34.0 service generated with mypy-boto3-builder 7.21.0"
+version = "1.34.58"
+description = "Type annotations for boto3.AppConfig 1.34.58 service generated with mypy-boto3-builder 7.23.2"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-appconfig-1.34.0.tar.gz", hash = "sha256:9a10372e74bdba9c88f3d5cf8dd4ce6932966c731117fc48867625e37daceb1e"},
-    {file = "mypy_boto3_appconfig-1.34.0-py3-none-any.whl", hash = "sha256:426cdb7fb01f186eab062f0cca41b3a5bdfdcd33843eb9cebc04116155fce819"},
+    {file = "mypy-boto3-appconfig-1.34.58.tar.gz", hash = "sha256:7f4ef77171240f2ce43de38f725852d0ee9956f12660f9063cc5eb003f0b904e"},
+    {file = "mypy_boto3_appconfig-1.34.58-py3-none-any.whl", hash = "sha256:5fe5b74bed5b61f563df1d2876ea40ac52bdd39a157c1ac0b34645a73523a7b2"},
 ]
 
 [package.dependencies]
@@ -2019,13 +2019,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-lambda"
-version = "1.34.46"
-description = "Type annotations for boto3.Lambda 1.34.46 service generated with mypy-boto3-builder 7.23.1"
+version = "1.34.58"
+description = "Type annotations for boto3.Lambda 1.34.58 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-lambda-1.34.46.tar.gz", hash = "sha256:275297944c5e36a170b37ce70229f21db6dd3561606799f18d96e36ac5df6876"},
-    {file = "mypy_boto3_lambda-1.34.46-py3-none-any.whl", hash = "sha256:a12232002e04ee06b413b47068bc6bb085aeaa3693d28e9bf0efd76fa6953a0b"},
+    {file = "mypy-boto3-lambda-1.34.58.tar.gz", hash = "sha256:903822c74bd1b34748eb2d72eab0f132fbc3b392c8041aa8fe4d9552a44b0c65"},
+    {file = "mypy_boto3_lambda-1.34.58-py3-none-any.whl", hash = "sha256:6ab1b9611ff396e9310ad77f02994a6e03d40c8a0eea51085e355b4fd2a0cbc9"},
 ]
 
 [package.dependencies]
@@ -3512,4 +3512,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "70538aa75ee90d7aef93e61ec119c372fecbf957931dd640def961eb817bf7e2"
+content-hash = "f2bdc4cfdc81904bc99bd90416fea661245220341772a390ff1521b77e728971"
