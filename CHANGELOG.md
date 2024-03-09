@@ -4,9 +4,22 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **parameters:** improve typing for get_secret method ([#3910](https://github.com/aws-powertools/powertools-lambda-python/issues/3910))
+
+## Maintenance
+
+
 
 <a name="v2.35.1"></a>
 ## [v2.35.1] - 2024-03-08
+## Bug Fixes
+
+* **data_sources:** ensure correct types on SQSMessageAttributes ([#3898](https://github.com/aws-powertools/powertools-lambda-python/issues/3898))
+* **event_handler:** validate POST bodies on BedrockAgentResolver ([#3903](https://github.com/aws-powertools/powertools-lambda-python/issues/3903))
+* **internal:** call ruff with correct args ([#3901](https://github.com/aws-powertools/powertools-lambda-python/issues/3901))
+
 ## Features
 
 * **event_handler:** use custom serializer during openapi serialization ([#3900](https://github.com/aws-powertools/powertools-lambda-python/issues/3900))
@@ -14,6 +27,15 @@
 ## Maintenance
 
 * version bump
+* **deps:** bump aws-xray-sdk from 2.12.1 to 2.13.0 ([#3906](https://github.com/aws-powertools/powertools-lambda-python/issues/3906))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#3911](https://github.com/aws-powertools/powertools-lambda-python/issues/3911))
+* **deps:** bump squidfunk/mkdocs-material from `7be068b` to `3678304` in /docs ([#3894](https://github.com/aws-powertools/powertools-lambda-python/issues/3894))
+* **deps:** bump datadog-lambda from 5.88.0 to 5.89.0 ([#3907](https://github.com/aws-powertools/powertools-lambda-python/issues/3907))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.81 to 0.1.82 ([#3896](https://github.com/aws-powertools/powertools-lambda-python/issues/3896))
+* **deps-dev:** bump sentry-sdk from 1.40.6 to 1.41.0 ([#3905](https://github.com/aws-powertools/powertools-lambda-python/issues/3905))
+* **deps-dev:** bump mkdocs-material from 9.5.12 to 9.5.13 ([#3895](https://github.com/aws-powertools/powertools-lambda-python/issues/3895))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.82 to 0.1.83 ([#3908](https://github.com/aws-powertools/powertools-lambda-python/issues/3908))
+* **deps-dev:** bump the boto-typing group with 1 update ([#3904](https://github.com/aws-powertools/powertools-lambda-python/issues/3904))
 
 
 <a name="v2.35.0"></a>
