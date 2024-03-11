@@ -19,7 +19,7 @@ class CloudWatchAlarmState(DictWrapper):
         """
         Reason why alarm was changed to this state.
         """
-        return self.get("reason")
+        return self["reason"]
 
     @property
     def reason_data(self) -> str:
@@ -27,7 +27,7 @@ class CloudWatchAlarmState(DictWrapper):
         Additional data to back up the reason, usually contains the evaluated data points,
         the calculated threshold and timestamps.
         """
-        return self.get("reasonData", None)
+        return self["reasonData"]
 
     @cached_property
     def reason_data_decoded(self) -> Optional[Any]:
@@ -76,7 +76,7 @@ class CloudWatchAlarmMetric(DictWrapper):
         return self.get("expression", None)
 
     @property
-    def label(self) -> str:
+    def label(self) -> Optional[str]:
         """
         Optional label of the alarm metric.
         """
@@ -117,7 +117,7 @@ class CloudWatchAlarmMetricStat(DictWrapper):
         return self.get("unit", None)
 
     @property
-    def metric(self) -> Dict:
+    def metric(self) -> Optional[Dict]:
         """
         Metric details
         """

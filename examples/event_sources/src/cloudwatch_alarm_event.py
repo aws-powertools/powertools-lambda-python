@@ -7,13 +7,13 @@ logger = Logger()
 
 @event_source(data_class=CloudWatchAlarmEvent)
 def lambda_handler(event: CloudWatchAlarmEvent, context: LambdaContext) -> dict:
-    logger.info(f"Alarm {event.alarm_data.name} state is {event.alarm_data.state.value}")
+    logger.info(f"Alarm {event.alarm_data.alarm_name} state is {event.alarm_data.state.value}")
 
     # You can now work with event. For example, you can enrich the received data, and
     # decide on how you want to route the alarm.
 
     return {
-        "name": event.alarm_data.name,
+        "name": event.alarm_data.alarm_name,
         "arn": event.alarm_arn,
-        "urgent": "Priority: P1" in (event.alarm_data.description or ""),
+        "urgent": "Priority: P1" in (event.alarm_data.configuration.description or ""),
     }

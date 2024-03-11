@@ -531,7 +531,7 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 
 ### CloudWatch Alarm State Change Action
 
-[CloudWatch supports Lambda as an alarm state change action](https://aws.amazon.com/about-aws/whats-new/2023/12/amazon-cloudwatch-alarms-lambda-change-action/){target="_blank"}.
+[CloudWatch supports Lambda as an alarm state change action](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/AlarmThatSendsEmail.html#alarms-and-actions){target="_blank"}.
 You can use the `CloudWathAlarmEvent` data class to access the fields containing such data as alarm information, current state, and previous state.
 
 === "app.py"
