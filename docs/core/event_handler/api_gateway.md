@@ -971,46 +971,11 @@ In OpenAPI documentation tools like [SwaggerUI](#enabling-swaggerui), these anno
 
 #### Customizing OpenAPI parameters
 
-Whenever you use OpenAPI parameters to validate [query strings](#validating-query-strings) or [path parameters](#validating-path-parameters), you can enhance validation and OpenAPI documentation by using any of these parameters:
-
-| Field name            | Type          | Description                                                                                                                                                                |
-| --------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `alias`               | `str`         | Alternative name for a field, used when serializing and deserializing data                                                                                                 |
-| `validation_alias`    | `str`         | Alternative name for a field during validation (but not serialization)                                                                                                     |
-| `serialization_alias` | `str`         | Alternative name for a field during serialization (but not during validation)                                                                                              |
-| `description`         | `str`         | Human-readable description                                                                                                                                                 |
-| `gt`                  | `float`       | Greater than. If set, value must be greater than this. Only applicable to numbers                                                                                          |
-| `ge`                  | `float`       | Greater than or equal. If set, value must be greater than or equal to this. Only applicable to numbers                                                                     |
-| `lt`                  | `float`       | Less than. If set, value must be less than this. Only applicable to numbers                                                                                                |
-| `le`                  | `float`       | Less than or equal. If set, value must be less than or equal to this. Only applicable to numbers                                                                           |
-| `min_length`          | `int`         | Minimum length for strings                                                                                                                                                 |
-| `max_length`          | `int`         | Maximum length for strings                                                                                                                                                 |
-| `pattern`             | `string`      | A regular expression that the string must match.                                                                                                                           |
-| `strict`              | `bool`        | If `True`, strict validation is applied to the field. See [Strict Mode](https://docs.pydantic.dev/latest/concepts/strict_mode/){target"_blank" rel="nofollow"} for details |
-| `multiple_of`         | `float`       | Value must be a multiple of this. Only applicable to numbers                                                                                                               |
-| `allow_inf_nan`       | `bool`        | Allow `inf`, `-inf`, `nan`. Only applicable to numbers                                                                                                                     |
-| `max_digits`          | `int`         | Maximum number of allow digits for strings                                                                                                                                 |
-| `decimal_places`      | `int`         | Maximum number of decimal places allowed for numbers                                                                                                                       |
-| `examples`            | `List\[Any\]` | List of examples of the field                                                                                                                                              |
-| `deprecated`          | `bool`        | Marks the field as deprecated                                                                                                                                              |
-| `include_in_schema`   | `bool`        | If `False` the field will not be part of the exported OpenAPI schema                                                                                                       |
-| `json_schema_extra`   | `JsonDict`    | Any additional JSON schema data for the schema property                                                                                                                    |
+--8<-- "docs/core/event_handler/_openapi_customization_parameters.md"
 
 #### Customizing API operations
 
-Customize your API endpoints by adding metadata to endpoint definitions. This provides descriptive documentation for API consumers and gives extra instructions to the framework.
-
-Here's a breakdown of various customizable fields:
-
-| Field Name             | Type                                    | Description                                                                                                                                                                                                                                                                                                                |
-| ---------------------- |-----------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `summary`              | `str`                                   | A concise overview of the main functionality of the endpoint. This brief introduction is usually displayed in autogenerated API documentation and helps consumers quickly understand what the endpoint does.                                                                                                               |
-| `description`          | `str`                                   | A more detailed explanation of the endpoint, which can include information about the operation's behavior, including side effects, error states, and other operational guidelines.                                                                                                                                         |
-| `responses`            | `Dict[int, Dict[str, OpenAPIResponse]]` | A dictionary that maps each HTTP status code to a Response Object as defined by the [OpenAPI Specification](https://swagger.io/specification/#response-object). This allows you to describe expected responses, including default or error messages, and their corresponding schemas or models for different status codes. |
-| `response_description` | `str`                                   | Provides the default textual description of the response sent by the endpoint when the operation is successful. It is intended to give a human-readable understanding of the result.                                                                                                                                       |
-| `tags`                 | `List[str]`                             | Tags are a way to categorize and group endpoints within the API documentation. They can help organize the operations by resources or other heuristic.                                                                                                                                                                      |
-| `operation_id`         | `str`                                   | A unique identifier for the operation, which can be used for referencing this operation in documentation or code. This ID must be unique across all operations described in the API.                                                                                                                                       |
-| `include_in_schema`    | `bool`                                  | A boolean value that determines whether or not this operation should be included in the OpenAPI schema. Setting it to `False` can hide the endpoint from generated documentation and schema exports, which might be useful for private or experimental endpoints.                                                          |
+--8<-- "docs/core/event_handler/_openapi_customization_operations.md"
 
 To implement these customizations, include extra parameters when defining your routes:
 
@@ -1043,20 +1008,7 @@ Below is an example configuration for serving Swagger UI from a custom path or C
 
 #### Customizing OpenAPI metadata
 
-Defining and customizing OpenAPI metadata gives detailed, top-level information about your API. Here's the method to set and tailor this metadata:
-
-| Field Name         | Type           | Description                                                                                                                                                                                                            |
-| ------------------ | -------------- |------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `title`            | `str`          | The title for your API. It should be a concise, specific name that can be used to identify the API in documentation or listings.                                                                                       |
-| `version`          | `str`          | The version of the API you are documenting. This could reflect the release iteration of the API and helps clients understand the evolution of the API.                                                                 |
-| `openapi_version`  | `str`          | Specifies the version of the OpenAPI Specification on which your API is based. When using Pydantic v1 it defaults to 3.0.3, and when using Pydantic v2, it defaults to 3.1.0.                                          |
-| `summary`          | `str`          | A short and informative summary that can provide an overview of what the API does. This can be the same as or different from the title but should add context or information. **Not supported when using Pydantic v1** |
-| `description`      | `str`          | A verbose description that can include Markdown formatting, providing a full explanation of the API's purpose, functionalities, and general usage instructions.                                                        |
-| `tags`             | `List[str]`    | A collection of tags that categorize endpoints for better organization and navigation within the documentation. This can group endpoints by their functionality or other criteria.                                     |
-| `servers`          | `List[Server]` | An array of Server objects, which specify the URL to the server and a description for its environment (production, staging, development, etc.), providing connectivity information.                                    |
-| `terms_of_service` | `str`          | A URL that points to the terms of service for your API. This could provide legal information and user responsibilities related to the usage of the API.                                                                |
-| `contact`          | `Contact`      | A Contact object containing contact details of the organization or individuals maintaining the API. This may include fields such as name, URL, and email.                                                              |
-| `license_info`     | `License`      | A License object providing the license details for the API, typically including the name of the license and the URL to the full license text.                                                                          |
+--8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
 
 Include extra parameters when exporting your OpenAPI specification to apply these customizations:
 

@@ -3,10 +3,12 @@ AWS Secrets Manager parameter retrieval and caching utility
 """
 
 import os
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
 
 import boto3
 from botocore.config import Config
+
+from aws_lambda_powertools.utilities.parameters.types import TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
@@ -116,9 +118,49 @@ class SecretsProvider(BaseProvider):
         raise NotImplementedError()
 
 
+@overload
 def get_secret(
     name: str,
-    transform: Optional[str] = None,
+    transform: None = None,
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> str: ...
+
+
+@overload
+def get_secret(
+    name: str,
+    transform: Literal["json"],
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> dict: ...
+
+
+@overload
+def get_secret(
+    name: str,
+    transform: Literal["binary"],
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> Union[str, dict, bytes]: ...
+
+
+@overload
+def get_secret(
+    name: str,
+    transform: Literal["auto"],
+    force_fetch: bool = False,
+    max_age: Optional[int] = None,
+    **sdk_options,
+) -> bytes: ...
+
+
+def get_secret(
+    name: str,
+    transform: TransformOptions = None,
     force_fetch: bool = False,
     max_age: Optional[int] = None,
     **sdk_options,
