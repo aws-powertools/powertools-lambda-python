@@ -1,31 +1,28 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import Any, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-
-CloudWatchAlarmStateValue = Literal["OK", "ALARM", "INSUFFICIENT_DATA"]
-CloudWatchAlarmActionSuppressor = Literal["Alarm", "ExtensionPeriod", "WaitPeriod"]
 
 
 class CloudWatchAlarmState(DictWrapper):
     @property
-    def value(self) -> CloudWatchAlarmStateValue:
+    def value(self) -> Literal["OK", "ALARM", "INSUFFICIENT_DATA"]:
         """
         Overall state of the alarm.
         """
         return self["value"]
 
     @property
-    def reason(self) -> Optional[str]:
+    def reason(self) -> str:
         """
         Reason why alarm was changed to this state.
         """
         return self.get("reason")
 
     @property
-    def reason_data(self) -> Optional[str]:
+    def reason_data(self) -> str:
         """
         Additional data to back up the reason, usually contains the evaluated data points,
         the calculated threshold and timestamps.
@@ -37,13 +34,11 @@ class CloudWatchAlarmState(DictWrapper):
         """
         Deserialized version of reason_data.
         """
-        if self.reason_data is None:
-            return None
 
-        return self._json_deserializer(self.reason_data)
+        return self._json_deserializer(self.reason_data) if self.reason_data else None
 
     @property
-    def actions_suppressed_by(self) -> Optional[CloudWatchAlarmActionSuppressor]:
+    def actions_suppressed_by(self) -> Optional[Literal["Alarm", "ExtensionPeriod", "WaitPeriod"]]:
         """
         Describes why the actions when the value is `ALARM` are suppressed in a composite
         alarm.
@@ -66,11 +61,6 @@ class CloudWatchAlarmState(DictWrapper):
 
 
 class CloudWatchAlarmMetric(DictWrapper):
-    def __init__(self, data: dict):
-        super().__init__(data)
-
-        self._metric_stat: dict | None = self.get("metricStat")
-
     @property
     def metric_id(self) -> str:
         """
@@ -81,66 +71,16 @@ class CloudWatchAlarmMetric(DictWrapper):
     @property
     def expression(self) -> Optional[str]:
         """
-        The mathematical expression for calculating the metric, if applicable.
+        Optional expression of the alarm metric.
         """
         return self.get("expression", None)
 
     @property
-    def label(self) -> Optional[str]:
+    def label(self) -> str:
         """
-        Optional label of the metric.
+        Optional label of the alarm metric.
         """
         return self.get("label", None)
-
-    @property
-    def namespace(self) -> Optional[str]:
-        """
-        Namespace of the correspondent CloudWatch Metric.
-        """
-        if self._metric_stat is not None:
-            return self._metric_stat.get("metric", {}).get("namespace", None)
-
-        return None
-
-    @property
-    def name(self) -> Optional[str]:
-        """
-        Name of the correspondent CloudWatch Metric.
-        """
-        if self._metric_stat is not None:
-            return self._metric_stat.get("metric", {}).get("name", None)
-
-        return None
-
-    @property
-    def dimensions(self) -> Optional[dict]:
-        """
-        Additional dimensions of the correspondent CloudWatch Metric, if available.
-        """
-        if self._metric_stat is not None:
-            return self._metric_stat.get("metric", {}).get("dimensions", None)
-
-        return None
-
-    @property
-    def period(self) -> Optional[int]:
-        """
-        Metric evaluation period, in seconds.
-        """
-        if self._metric_stat is not None:
-            return self._metric_stat.get("period", None)
-
-        return None
-
-    @property
-    def stat(self) -> Optional[str]:
-        """
-        Statistical aggregation of metric points, e.g. Average, SampleCount, etc.
-        """
-        if self._metric_stat is not None:
-            return self._metric_stat.get("stat", None)
-
-        return None
 
     @property
     def return_data(self) -> bool:
@@ -149,29 +89,48 @@ class CloudWatchAlarmMetric(DictWrapper):
         """
         return self["returnData"]
 
+    @property
+    def metric_stat(self) -> CloudWatchAlarmMetricStat:
+        return CloudWatchAlarmMetricStat(self["metricStat"])
 
-class CloudWatchAlarmData(DictWrapper):
-    def __init__(self, data: dict):
-        super().__init__(data)
 
-        self._configuration = self.get("configuration", None)
+class CloudWatchAlarmMetricStat(DictWrapper):
+    @property
+    def period(self) -> Optional[int]:
+        """
+        Metric evaluation period, in seconds.
+        """
+        return self.get("period", None)
 
     @property
-    def name(self) -> str:
+    def stat(self) -> Optional[str]:
+        """
+        Statistical aggregation of metric points, e.g. Average, SampleCount, etc.
+        """
+        return self.get("stat", None)
+
+    @property
+    def unit(self) -> Optional[str]:
+        """
+        Unit for metric.
+        """
+        return self.get("unit", None)
+
+    @property
+    def metric(self) -> Dict:
+        """
+        Metric details
+        """
+        return self.get("metric", {})
+
+
+class CloudWatchAlarmData(DictWrapper):
+    @property
+    def alarm_name(self) -> str:
         """
         Alarm name.
         """
         return self["alarmName"]
-
-    @property
-    def description(self) -> Optional[str]:
-        """
-        Optional description for the Alarm.
-        """
-        if self._configuration is not None:
-            return self._configuration.get("description", None)
-
-        return None
 
     @property
     def state(self) -> CloudWatchAlarmState:
@@ -188,19 +147,56 @@ class CloudWatchAlarmData(DictWrapper):
         return CloudWatchAlarmState(self["previousState"])
 
     @property
+    def configuration(self) -> CloudWatchAlarmConfiguration:
+        """
+        The configuration of the Alarm.
+        """
+        return CloudWatchAlarmConfiguration(self["configuration"])
+
+
+class CloudWatchAlarmConfiguration(DictWrapper):
+    @property
+    def description(self) -> Optional[str]:
+        """
+        Optional description for the Alarm.
+        """
+        return self.get("description", None)
+
+    @property
+    def alarm_rule(self) -> Optional[str]:
+        """
+        Optional description for the Alarm rule in case of composite alarm.
+        """
+        return self.get("alarmRule", None)
+
+    @property
+    def alarm_actions_suppressor(self) -> Optional[str]:
+        """
+        Optional action suppression for the Alarm rule in case of composite alarm.
+        """
+        return self.get("actionsSuppressor", None)
+
+    @property
+    def alarm_actions_suppressor_wait_period(self) -> Optional[str]:
+        """
+        Optional action suppression wait period for the Alarm rule in case of composite alarm.
+        """
+        return self.get("actionsSuppressorWaitPeriod", None)
+
+    @property
+    def alarm_actions_suppressor_extension_period(self) -> Optional[str]:
+        """
+        Optional action suppression extension period for the Alarm rule in case of composite alarm.
+        """
+        return self.get("actionsSuppressorExtensionPeriod", None)
+
+    @property
     def metrics(self) -> Optional[List[CloudWatchAlarmMetric]]:
         """
         The metrics evaluated for the Alarm.
         """
-        if self._configuration is None:
-            return None
-
-        maybe_metrics = self._configuration.get("metrics", None)
-
-        if maybe_metrics is not None:
-            return [CloudWatchAlarmMetric(i) for i in maybe_metrics]
-
-        return None
+        metrics = self.get("metrics")
+        return [CloudWatchAlarmMetric(i) for i in metrics] if metrics else None
 
 
 class CloudWatchAlarmEvent(DictWrapper):
