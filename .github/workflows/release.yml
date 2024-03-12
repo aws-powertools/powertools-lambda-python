@@ -80,7 +80,7 @@ jobs:
           RELEASE_VERSION="${RELEASE_TAG_VERSION:1}"
           echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -115,7 +115,7 @@ jobs:
       contents: read
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -156,7 +156,7 @@ jobs:
       attestation_hashes: ${{ steps.encoded_hash.outputs.attestation_hashes }}
     steps:
       # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -225,7 +225,7 @@ jobs:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
       # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -259,7 +259,7 @@ jobs:
       contents: write
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -303,7 +303,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # NOTE: we need actions/checkout to authenticate and configure git first
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -357,7 +357,7 @@ jobs:
     env:
       RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
