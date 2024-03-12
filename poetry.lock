@@ -429,38 +429,38 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.54"
+version = "2.28.60"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.54.tar.gz", hash = "sha256:55f17c15369e38ec1f3b8dc40ff1830bfe0452c95c35d1e37317dc36269be3ce"},
-    {file = "cdk_nag-2.28.54-py3-none-any.whl", hash = "sha256:bf901e9f33d39b9d2bfa7117aef14917f708b518494f2247dbdbdba666154164"},
+    {file = "cdk-nag-2.28.60.tar.gz", hash = "sha256:0455e0d9a3758d8ee1442f00da2c6c9daa9670bd9aefff5411a8e2316184ad7b"},
+    {file = "cdk_nag-2.28.60-py3-none-any.whl", hash = "sha256:6a7d819d33345647e9bad02022b71c7731df8dbb2e988fe5409ad33faeccaabf"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.116.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.94.0,<2.0.0"
+jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.83"
+version = "0.1.87"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.83.tar.gz", hash = "sha256:c259c531a7994a3b18bd3cbc18c112f72221a4d6a2aedf325f2364692d7a9344"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.83-py3-none-any.whl", hash = "sha256:05bdee0e50fa518b5aa26b4c110fc166401739aacbaaebaaa98bb65e36633383"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.87.tar.gz", hash = "sha256:97ec12b969989c682494590ed207b6c36c8b1b2886cbb7698abff4a8cc8c2dd9"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.87-py3-none-any.whl", hash = "sha256:d0883e23e48ed692c989f79bcd27768bd825f8a5be35b4d4ad8f4d9cecfc1230"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.52,<3.0.0"
+cdk-nag = ">=2.28.59,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.94.0,<2.0.0"
+jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -3231,24 +3231,24 @@ cryptography = ">=35.0.0"
 
 [[package]]
 name = "types-python-dateutil"
-version = "2.8.19.20240106"
+version = "2.8.19.20240311"
 description = "Typing stubs for python-dateutil"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-python-dateutil-2.8.19.20240106.tar.gz", hash = "sha256:1f8db221c3b98e6ca02ea83a58371b22c374f42ae5bbdf186db9c9a76581459f"},
-    {file = "types_python_dateutil-2.8.19.20240106-py3-none-any.whl", hash = "sha256:efbbdc54590d0f16152fa103c9879c7d4a00e82078f6e2cf01769042165acaa2"},
+    {file = "types-python-dateutil-2.8.19.20240311.tar.gz", hash = "sha256:51178227bbd4cbec35dc9adffbf59d832f20e09842d7dcb8c73b169b8780b7cb"},
+    {file = "types_python_dateutil-2.8.19.20240311-py3-none-any.whl", hash = "sha256:ef813da0809aca76472ca88807addbeea98b19339aebe56159ae2f4b4f70857a"},
 ]
 
 [[package]]
 name = "types-redis"
-version = "4.6.0.20240218"
+version = "4.6.0.20240311"
 description = "Typing stubs for redis"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "types-redis-4.6.0.20240218.tar.gz", hash = "sha256:5103d7e690e5c74c974a161317b2d59ac2303cf8bef24175b04c2a4c3486cb39"},
-    {file = "types_redis-4.6.0.20240218-py3-none-any.whl", hash = "sha256:dc9c45a068240e33a04302aec5655cf41e80f91eecffccbb2df215b2f6fc375d"},
+    {file = "types-redis-4.6.0.20240311.tar.gz", hash = "sha256:e049bbdff0e0a1f8e701b64636811291d21bff79bf1e7850850a44055224a85f"},
+    {file = "types_redis-4.6.0.20240311-py3-none-any.whl", hash = "sha256:6b9d68a29aba1ee400c823d8e5fe88675282eb69d7211e72fe65dbe54b33daca"},
 ]
 
 [package.dependencies]
@@ -3513,4 +3513,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "585eec8b9f7724b3b9501a95bfc904a4cc7aa49fe1a1ca651ce76fa7e952df54"
+content-hash = "97d74d81a05069867553ffb67e81422bd672ddcc47b8cf3fe1e4cd5a4215cc7b"
