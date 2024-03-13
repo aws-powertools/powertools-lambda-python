@@ -2048,13 +2048,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.34.14"
-description = "Type annotations for boto3.S3 1.34.14 service generated with mypy-boto3-builder 7.21.0"
+version = "1.34.62"
+description = "Type annotations for boto3.S3 1.34.62 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-s3-1.34.14.tar.gz", hash = "sha256:71c39ab0623cdb442d225b71c1783f6a513cff4c4a13505a2efbb2e3aff2e965"},
-    {file = "mypy_boto3_s3-1.34.14-py3-none-any.whl", hash = "sha256:f9669ecd182d5bf3532f5f2dcc5e5237776afe157ad5a0b37b26d6bec5fcc432"},
+    {file = "mypy-boto3-s3-1.34.62.tar.gz", hash = "sha256:1d60cb10907aebb56b4d86588ab70ae42db7a114869f058bbbbb4d586eb22e6d"},
+    {file = "mypy_boto3_s3-1.34.62-py3-none-any.whl", hash = "sha256:b08734383f325fba19f0394379199564617fd24ed7dd0bc3344fafbd273f49ff"},
 ]
 
 [package.dependencies]
@@ -3514,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "fda6c963e2deda1b1c3b7c60315f2eb575c76e2844652354d0c8f6d38afdb290"
+content-hash = "c6eb325f066500f98b7b7b398664d7828ee576bdb2d9ab868e153e7eac2e07e5"
