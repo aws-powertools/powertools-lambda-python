@@ -18,6 +18,18 @@ def test_openapi_swagger():
     assert result["multiValueHeaders"]["Content-Type"] == ["text/html"]
 
 
+def test_openapi_swagger_compressed():
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger(compress=True)
+    LOAD_GW_EVENT["headers"] = {"Accept-Encoding": "gzip, deflate, br"}
+    LOAD_GW_EVENT["path"] = "/swagger"
+    result = app(LOAD_GW_EVENT, {})
+    assert result["statusCode"] == 200
+    assert result["isBase64Encoded"]
+    assert result["multiValueHeaders"]["Content-Type"] == ["text/html"]
+    assert result["multiValueHeaders"]["Content-Encoding"] == ["gzip"]
+
+
 def test_openapi_swagger_with_custom_base_url():
     app = APIGatewayRestResolver(enable_validation=True)
     app.enable_swagger(swagger_base_url="https://aws.amazon.com")
