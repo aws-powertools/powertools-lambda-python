@@ -1978,13 +1978,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.34.55"
-description = "Type annotations for boto3.CloudFormation 1.34.55 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.61"
+description = "Type annotations for boto3.CloudFormation 1.34.61 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-cloudformation-1.34.55.tar.gz", hash = "sha256:de9f4d45d0a4e57bb5ef8b8d7a03476f8ef24ffa253d636cd824cde061227439"},
-    {file = "mypy_boto3_cloudformation-1.34.55-py3-none-any.whl", hash = "sha256:78c4d25ef7102bd02c8e87d32211ff60a7b474ec546e9948b46f170d341ae0a2"},
+    {file = "mypy-boto3-cloudformation-1.34.61.tar.gz", hash = "sha256:7d3e3c7a08273723ff70f5e85ef9b7f3acd629f9aeca1032c6bb541b039e9b47"},
+    {file = "mypy_boto3_cloudformation-1.34.61-py3-none-any.whl", hash = "sha256:33ca97567ceeb691c176d91133d7fd8bcccd63782a17fbd58bf59cc2fbfc3945"},
 ]
 
 [package.dependencies]
@@ -2076,13 +2076,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-ssm"
-version = "1.34.47"
-description = "Type annotations for boto3.SSM 1.34.47 service generated with mypy-boto3-builder 7.23.1"
+version = "1.34.61"
+description = "Type annotations for boto3.SSM 1.34.61 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-ssm-1.34.47.tar.gz", hash = "sha256:be70cc32f9a07e6701746ebe65fba14d59c3f24a8511d275fd8322c9365f2270"},
-    {file = "mypy_boto3_ssm-1.34.47-py3-none-any.whl", hash = "sha256:6517b1dc01e3ffe48a251c91e2a7fb6801223baf4a8cf1600411f9e132422297"},
+    {file = "mypy-boto3-ssm-1.34.61.tar.gz", hash = "sha256:4cbc99f42b6913c536c6cc41c02d3f165920d1e7babb9bb17782b410556cde00"},
+    {file = "mypy_boto3_ssm-1.34.61-py3-none-any.whl", hash = "sha256:8ce8d6fc185c07161b5cc3a589df10130d6bbe3182aeeb01549eb95b5580f51c"},
 ]
 
 [package.dependencies]
@@ -3513,4 +3513,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "ba6ca7f61ec209832e688ca321c8e8d3e138b5da4c33b6dbb6a798af58f08e66"
+content-hash = "3a98c670817e6d3fd15506031fb7f3d0298df183ca101b599b2979333dada4de"
