@@ -150,13 +150,16 @@ class BaseProxyEvent(DictWrapper):
     @cached_property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        return self._json_deserializer(self.decoded_body)
+        if self.decoded_body:
+            return self._json_deserializer(self.decoded_body)
+
+        return None
 
     @cached_property
-    def decoded_body(self) -> str:
-        """Dynamically base64 decode body as a str"""
-        body: str = self["body"]
-        if self.is_base64_encoded:
+    def decoded_body(self) -> Optional[str]:
+        """Decode the body from base64 if encoded, otherwise return it as is."""
+        body: Optional[str] = self.body
+        if self.is_base64_encoded and body:
             return base64.b64decode(body.encode()).decode()
         return body
 
