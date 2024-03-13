@@ -1623,6 +1623,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
+        compress: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1655,11 +1656,13 @@ class ApiGatewayResolver(BaseRouter):
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
+        compress: bool, default = False
+            Whether or not to enable gzip compression swagger route.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
-        @self.get(path, middlewares=middlewares, include_in_schema=False)
+        @self.get(path, middlewares=middlewares, include_in_schema=False, compress=compress)
         def swagger_handler():
             base_path = self._get_base_path()
 
