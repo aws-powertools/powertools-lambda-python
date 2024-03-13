@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.60"
+version = "2.28.62"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.60.tar.gz", hash = "sha256:0455e0d9a3758d8ee1442f00da2c6c9daa9670bd9aefff5411a8e2316184ad7b"},
-    {file = "cdk_nag-2.28.60-py3-none-any.whl", hash = "sha256:6a7d819d33345647e9bad02022b71c7731df8dbb2e988fe5409ad33faeccaabf"},
+    {file = "cdk-nag-2.28.62.tar.gz", hash = "sha256:e55043aea61eec92cf7a309cf23a4b956a6cebcee6d3d693d4bfc4e15546ee8a"},
+    {file = "cdk_nag-2.28.62-py3-none-any.whl", hash = "sha256:d8d725771869018fd065a70c1aa66f03949f3debe2ad0367a17a32814ccb687d"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.88"
+version = "0.1.89"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.88.tar.gz", hash = "sha256:93fc8538cfc4156a116cbd049ff9e56ee239131717c4c46381dcddf3ade80878"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.88-py3-none-any.whl", hash = "sha256:c58bed0fc7dceac09249012819a0ff4fa68cd2fcec7d20dbf184f69b1fd65c0e"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.89.tar.gz", hash = "sha256:ed0e8388967df9cab9ee06da9856789486b7b959ebe6c3ae3f7898e8315c8027"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.89-py3-none-any.whl", hash = "sha256:2d345d20d8f8c743a4e8704d5a15200a20b77c90d0a067a054536d21caa46bee"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.59,<3.0.0"
+cdk-nag = ">=2.28.61,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
@@ -3514,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c6eb325f066500f98b7b7b398664d7828ee576bdb2d9ab868e153e7eac2e07e5"
+content-hash = "12e76993d704eed834b9df882db3728a3c20c933876fec1914b73473a22a3f07"
