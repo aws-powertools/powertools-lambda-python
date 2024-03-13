@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from numbers import Number
-from typing import Generator
+from typing import Generator, Sequence
 
 from ...shared import constants
 from ...shared.lazy_import import LazyLoader
@@ -50,8 +50,8 @@ class XrayProvider(BaseProvider):
             yield XraySpan(subsegment=sub_segment)
 
     @contextmanager
-    def trace_async(self, name: str) -> Generator[XraySpan, None, None]:
-        with self.in_subsegment_async(name=name) as sub_segment:
+    async def trace_async(self, name: str) -> Generator[XraySpan, None, None]:
+        async with self.in_subsegment_async(name=name) as sub_segment:
             yield XraySpan(subsegment=sub_segment)
 
     def set_attribute(self, key: str, value: str | Number | bool, **kwargs) -> None:
@@ -59,3 +59,9 @@ class XrayProvider(BaseProvider):
             self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
         else:
             self.put_annotation(key=key, value=value)
+
+    def patch(self, modules: Sequence[str]) -> None:
+        pass
+
+    def patch_all(self) -> None:
+        pass

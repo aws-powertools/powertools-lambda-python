@@ -308,7 +308,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, **kwargs):
-            with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
+            with self.provider.trace(name=f"## {lambda_handler_name}") as subsegment:
                 try:
                     logger.debug("Calling lambda handler")
                     response = lambda_handler(event, context, **kwargs)
@@ -573,7 +573,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
-            async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+            async with self.provider.trace_async(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = await method(*args, **kwargs)
@@ -606,7 +606,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     result = yield from method(*args, **kwargs)
@@ -640,7 +640,7 @@ class Tracer:
         @functools.wraps(method)
         @contextlib.contextmanager
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     with method(*args, **kwargs) as return_val:
@@ -673,7 +673,7 @@ class Tracer:
     ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = method(*args, **kwargs)
