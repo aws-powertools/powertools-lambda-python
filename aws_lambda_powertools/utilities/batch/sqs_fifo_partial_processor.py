@@ -1,5 +1,5 @@
 import logging
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
 from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
@@ -106,22 +106,35 @@ class SqsFifoPartialProcessor(BatchProcessor):
             # If a processed message fail and skip_group_on_error is True,
             # mark subsequent messages from the same MessageGroupId as skipped
             if processed_messages[0] == "fail" and self._skip_group_on_error:
-                _attributes_record = record.get("attributes", {})
-                for subsequent_record in self.records[i + 1 :]:
-                    _attributes = subsequent_record.get("attributes", {})
-                    if _attributes.get("MessageGroupId") == _attributes_record.get("MessageGroupId"):
-                        skip_messages_group_id.append(subsequent_record.get("messageId"))
-                        data = self._to_batch_type(
-                            record=subsequent_record,
-                            event_type=self.event_type,
-                            model=self.model,
-                        )
-                        result.append(self.failure_handler(record=data, exception=self.circuit_breaker_exc))
+                self._process_failed_subsequent_messages(record, i, skip_messages_group_id, result)
 
             # Append the processed message normally
             result.append(processed_messages)
 
         return result
+
+    def _process_failed_subsequent_messages(
+        self,
+        record: Dict,
+        i: int,
+        skip_messages_group_id: List,
+        result: List[Tuple],
+    ) -> None:
+        """
+        Process failed subsequent messages from the same MessageGroupId and mark them as skipped.
+        """
+        _attributes_record = record.get("attributes", {})
+
+        for subsequent_record in self.records[i + 1 :]:
+            _attributes = subsequent_record.get("attributes", {})
+            if _attributes.get("MessageGroupId") == _attributes_record.get("MessageGroupId"):
+                skip_messages_group_id.append(subsequent_record.get("messageId"))
+                data = self._to_batch_type(
+                    record=subsequent_record,
+                    event_type=self.event_type,
+                    model=self.model,
+                )
+                result.append(self.failure_handler(record=data, exception=self.circuit_breaker_exc))
 
     def _short_circuit_processing(self, first_failure_index: int, result: List[Tuple]) -> List[Tuple]:
         """
