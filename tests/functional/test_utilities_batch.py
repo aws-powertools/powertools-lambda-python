@@ -28,6 +28,7 @@ from aws_lambda_powertools.utilities.parser import BaseModel, validator
 from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamRecordModel,
+    SqsRecordModel,
 )
 from aws_lambda_powertools.utilities.parser.types import Literal
 from tests.functional.batch.sample_models import (
@@ -728,13 +729,13 @@ def test_sqs_fifo_batch_processor_middleware_with_failure(sqs_event_fifo_factory
     assert result["batchItemFailures"][1]["itemIdentifier"] == third_record.message_id
 
 
-def test_sqs_fifo_batch_processor_middleware_without_first_failure(sqs_event_fifo_factory, record_handler):
+def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error(sqs_event_fifo_factory, record_handler):
     # GIVEN a batch of 5 records with 3 different MessageGroupID
     first_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
     second_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
     third_record = SQSRecord(sqs_event_fifo_factory("fail", "2"))
-    fourth_record = SQSRecord(sqs_event_fifo_factory("fail", "2"))
-    fifth_record = SQSRecord(sqs_event_fifo_factory("success", "3"))
+    fourth_record = SQSRecord(sqs_event_fifo_factory("success", "2"))
+    fifth_record = SQSRecord(sqs_event_fifo_factory("fail", "3"))
     event = {
         "Records": [
             first_record.raw_event,
@@ -746,7 +747,7 @@ def test_sqs_fifo_batch_processor_middleware_without_first_failure(sqs_event_fif
     }
 
     # WHEN the FIFO processor is set to continue processing even after encountering errors in specific MessageGroupID
-    processor = SqsFifoPartialProcessor(return_on_first_error=False)
+    processor = SqsFifoPartialProcessor(skip_group_on_error=True)
 
     @batch_processor(record_handler=record_handler, processor=processor)
     def lambda_handler(event, context):
@@ -755,10 +756,53 @@ def test_sqs_fifo_batch_processor_middleware_without_first_failure(sqs_event_fif
     # WHEN
     result = lambda_handler(event, {})
 
-    # THEN only failed messages should originate from MessageGroupID 2
-    assert len(result["batchItemFailures"]) == 2
+    # THEN only failed messages should originate from MessageGroupID 3
+    assert len(result["batchItemFailures"]) == 3
     assert result["batchItemFailures"][0]["itemIdentifier"] == third_record.message_id
     assert result["batchItemFailures"][1]["itemIdentifier"] == fourth_record.message_id
+    assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
+
+
+def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error_and_model(sqs_event_fifo_factory, record_handler):
+    # GIVEN a batch of 5 records with 3 different MessageGroupID
+    first_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
+    second_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
+    third_record = SQSRecord(sqs_event_fifo_factory("fail", "2"))
+    fourth_record = SQSRecord(sqs_event_fifo_factory("success", "2"))
+    fifth_record = SQSRecord(sqs_event_fifo_factory("fail", "3"))
+    event = {
+        "Records": [
+            first_record.raw_event,
+            second_record.raw_event,
+            third_record.raw_event,
+            fourth_record.raw_event,
+            fifth_record.raw_event,
+        ],
+    }
+
+    class OrderSqsRecord(SqsRecordModel):
+        receiptHandle: str
+
+    # WHEN the FIFO processor is set to continue processing even after encountering errors in specific MessageGroupID
+    # WHEN processor is using a Pydantic Model we must be able to access MessageGroupID property
+    processor = SqsFifoPartialProcessor(skip_group_on_error=True, model=OrderSqsRecord)
+
+    def record_handler(record: OrderSqsRecord):
+        if record.body == "fail":
+            raise ValueError("blah")
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN only failed messages should originate from MessageGroupID 3
+    assert len(result["batchItemFailures"]) == 3
+    assert result["batchItemFailures"][0]["itemIdentifier"] == third_record.message_id
+    assert result["batchItemFailures"][1]["itemIdentifier"] == fourth_record.message_id
+    assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
 
 
 def test_async_batch_processor_middleware_success_only(sqs_event_factory, async_record_handler):

@@ -141,7 +141,9 @@ Processing batches from SQS works in three stages:
 
 #### FIFO queues
 
-When working with [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, it's important to know that a batch sent from SQS to Lambda can include multiple messages from different group IDs.
+When working with [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, you should know that a batch may include messages from different group IDs.
+
+By default, we will stop processing at the first failure and mark unprocessed messages as failed to preserve ordering.
 
 By default, message processing halts after the initial failure, returning all failed and unprocessed messages in `batchItemFailures` to preserve the ordering of messages in your queue. However, customers can opt to continue processing messages and retrieve failed messages within a message group ID by setting `return_on_first_error` to False.
 
