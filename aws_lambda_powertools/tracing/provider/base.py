@@ -8,6 +8,8 @@ from typing import Generator, Sequence, Union
 class BaseSpan(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
+    """Triggering"""
+
     @abc.abstractmethod
     def set_attribute(self, key: str, value: Union[str, numbers.Number, bool], **kwargs) -> None:
         """Annotate segment or subsegment with a key-value pair.
