@@ -58,6 +58,17 @@ class SqsFifoPartialProcessor(BatchProcessor):
     )
 
     def __init__(self, model: Optional["BatchSqsTypeModel"] = None, return_on_first_error: bool = True):
+        """
+        Initialize the SqsFifoProcessor.
+
+        Parameters
+        ----------
+        model: Optional["BatchSqsTypeModel"]
+            An optional model for batch processing.
+        return_on_first_error: bool
+            Flag to determine whether to return on the first error encountered. Default is True
+
+        """
         self.return_on_first_error = return_on_first_error
         super().__init__(EventType.SQS, model)
 
