@@ -57,7 +57,8 @@ class SqsFifoPartialProcessor(BatchProcessor):
         None,
     )
 
-    def __init__(self, model: Optional["BatchSqsTypeModel"] = None):
+    def __init__(self, model: Optional["BatchSqsTypeModel"] = None, return_on_first_error: bool = True):
+        self.return_on_first_error = return_on_first_error
         super().__init__(EventType.SQS, model)
 
     def process(self) -> List[Tuple]:
@@ -68,13 +69,26 @@ class SqsFifoPartialProcessor(BatchProcessor):
         result: List[Tuple] = []
 
         for i, record in enumerate(self.records):
-            # If we have failed messages, it means that the last message failed.
-            # We then short circuit the process, failing the remaining messages
-            if self.fail_messages:
+            # If we have failed messages and we are set to return on the first error,
+            # short circuit the process and return the remaining messages as failed items
+            if self.fail_messages and self.return_on_first_error:
                 return self._short_circuit_processing(i, result)
 
-            # Otherwise, process the message normally
-            result.append(self._process_record(record))
+            # Process the current record
+            processed_messages = self._process_record(record)
+
+            # If a processed message fail,
+            # mark subsequent messages from the same MessageGroupId as skipped
+            if processed_messages[0] == "fail":
+                for subsequent_record in self.records[i + 1 :]:
+                    if subsequent_record.get("attributes", {}).get("MessageGroupId") == record.get(
+                        "attributes",
+                        {},
+                    ).get("MessageGroupId"):
+                        continue  # Skip subsequent message from the same MessageGroupId
+
+            # Append the processed message normally
+            result.append(processed_messages)
 
         return result
 
