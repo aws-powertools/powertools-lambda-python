@@ -1,0 +1,14 @@
+{
+  "messageVersion": "1.0",
+  "response": {
+    "actionGroup": "CurrentTime",
+    "apiPath": "/current_time",
+    "httpMethod": "GET",
+    "httpStatusCode": 200,
+    "responseBody": {
+      "application/json": {
+        "body": "1704708165"
+      }
+    }
+  }
+}

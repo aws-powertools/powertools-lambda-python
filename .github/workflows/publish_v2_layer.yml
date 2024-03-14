@@ -88,7 +88,7 @@ jobs:
         working-directory: ./layer
     steps:
       - name: checkout
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -124,7 +124,7 @@ jobs:
 
       - name: Set up Docker Buildx
         id: builder
-        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+        uses: docker/setup-buildx-action@2b51285047da1547ffb1b2203d8be4c0af6b1f20 # v3.2.0
         with:
           install: true
           driver: docker
@@ -247,7 +247,7 @@ jobs:
       pages: none
     steps:
       - name: Checkout repository # reusable workflows start clean, so we need to checkout again
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
@@ -258,7 +258,7 @@ jobs:
           artifact_name: ${{ inputs.source_code_artifact_name }}
 
       - name: Download CDK layer artifacts
-        uses: actions/download-artifact@eaceaf801fd36c7dee90939fad912460b18a1ffe # v4.1.2
+        uses: actions/download-artifact@c850b930e6ba138125429b7e5c93fc707a7f8427 # v4.1.4
         with:
           path: cdk-layer-stack
           pattern: cdk-layer-stack-*  # merge all Layer artifacts created per region earlier (reusable_deploy_v2_layer_stack.yml; step "Save Layer ARN artifact")

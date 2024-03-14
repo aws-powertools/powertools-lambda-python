@@ -1,0 +1,23 @@
+{
+  "sessionId": "123456789012345",
+  "sessionAttributes": {},
+  "inputText": "Schedule a meeting with the team. My email is foo@example.org",
+  "promptSessionAttributes": {},
+  "apiPath": "/schedule_meeting",
+  "parameters": [
+    {
+      "name": "email",
+      "type": "string",
+      "value": "foo@example.org"
+    }
+  ],
+  "agent": {
+    "name": "TimeAgent",
+    "version": "DRAFT",
+    "id": "XLHH72XNF2",
+    "alias": "TSTALIASID"
+  },
+  "httpMethod": "GET",
+  "messageVersion": "1.0",
+  "actionGroup": "SupportAssistant"
+}

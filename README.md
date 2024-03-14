@@ -20,6 +20,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 * **[Metrics](https://docs.powertools.aws.dev/lambda/python/latest/core/metrics/)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 * **[Event handler: AppSync](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/appsync/)** - AWS AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
 * **[Event handler: API Gateway and ALB](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)** - Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration
+* **[Event handler: Agents for Amazon Bedrock](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/bedrock_agents/)** - Create Agents for Amazon Bedrock, automatically generating OpenAPI schemas
 * **[Bring your own middleware](https://docs.powertools.aws.dev/lambda/python/latest/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 * **[Parameters utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, or DynamoDB
 * **[Batch processing](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/)** - Handle partial failures for AWS SQS batch processing

@@ -1,5 +1,6 @@
 import json
 
+import fastjsonschema
 import pytest
 
 from tests.functional.utils import load_event
@@ -71,3 +72,45 @@ def gw_event_vpc_lattice():
 @pytest.fixture
 def gw_event_vpc_lattice_v1():
     return load_event("vpcLatticeEvent.json")
+
+
+@pytest.fixture(scope="session")
+def pydanticv1_only():
+    from pydantic import __version__
+
+    version = __version__.split(".")
+    if version[0] != "1":
+        pytest.skip("pydanticv1 test only")
+
+
+@pytest.fixture(scope="session")
+def pydanticv2_only():
+    from pydantic import __version__
+
+    version = __version__.split(".")
+    if version[0] != "2":
+        pytest.skip("pydanticv2 test only")
+
+
+@pytest.fixture(scope="session")
+def openapi30_schema():
+    from urllib.request import urlopen
+
+    f = urlopen("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.0/schema.json")
+    data = json.loads(f.read().decode("utf-8"))
+    return fastjsonschema.compile(
+        data,
+        use_formats=False,
+    )
+
+
+@pytest.fixture(scope="session")
+def openapi31_schema():
+    from urllib.request import urlopen
+
+    f = urlopen("https://raw.githubusercontent.com/OAI/OpenAPI-Specification/main/schemas/v3.1/schema.json")
+    data = json.loads(f.read().decode("utf-8"))
+    return fastjsonschema.compile(
+        data,
+        use_formats=False,
+    )
