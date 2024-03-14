@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.60"
+version = "2.28.62"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.60.tar.gz", hash = "sha256:0455e0d9a3758d8ee1442f00da2c6c9daa9670bd9aefff5411a8e2316184ad7b"},
-    {file = "cdk_nag-2.28.60-py3-none-any.whl", hash = "sha256:6a7d819d33345647e9bad02022b71c7731df8dbb2e988fe5409ad33faeccaabf"},
+    {file = "cdk-nag-2.28.62.tar.gz", hash = "sha256:e55043aea61eec92cf7a309cf23a4b956a6cebcee6d3d693d4bfc4e15546ee8a"},
+    {file = "cdk_nag-2.28.62-py3-none-any.whl", hash = "sha256:d8d725771869018fd065a70c1aa66f03949f3debe2ad0367a17a32814ccb687d"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.88"
+version = "0.1.89"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.88.tar.gz", hash = "sha256:93fc8538cfc4156a116cbd049ff9e56ee239131717c4c46381dcddf3ade80878"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.88-py3-none-any.whl", hash = "sha256:c58bed0fc7dceac09249012819a0ff4fa68cd2fcec7d20dbf184f69b1fd65c0e"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.89.tar.gz", hash = "sha256:ed0e8388967df9cab9ee06da9856789486b7b959ebe6c3ae3f7898e8315c8027"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.89-py3-none-any.whl", hash = "sha256:2d345d20d8f8c743a4e8704d5a15200a20b77c90d0a067a054536d21caa46bee"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.59,<3.0.0"
+cdk-nag = ">=2.28.61,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
@@ -2048,13 +2048,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.34.14"
-description = "Type annotations for boto3.S3 1.34.14 service generated with mypy-boto3-builder 7.21.0"
+version = "1.34.62"
+description = "Type annotations for boto3.S3 1.34.62 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-s3-1.34.14.tar.gz", hash = "sha256:71c39ab0623cdb442d225b71c1783f6a513cff4c4a13505a2efbb2e3aff2e965"},
-    {file = "mypy_boto3_s3-1.34.14-py3-none-any.whl", hash = "sha256:f9669ecd182d5bf3532f5f2dcc5e5237776afe157ad5a0b37b26d6bec5fcc432"},
+    {file = "mypy-boto3-s3-1.34.62.tar.gz", hash = "sha256:1d60cb10907aebb56b4d86588ab70ae42db7a114869f058bbbbb4d586eb22e6d"},
+    {file = "mypy_boto3_s3-1.34.62-py3-none-any.whl", hash = "sha256:b08734383f325fba19f0394379199564617fd24ed7dd0bc3344fafbd273f49ff"},
 ]
 
 [package.dependencies]
@@ -3019,13 +3019,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.41.0"
+version = "1.42.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.41.0.tar.gz", hash = "sha256:4f2d6c43c07925d8cd10dfbd0970ea7cb784f70e79523cca9dbcd72df38e5a46"},
-    {file = "sentry_sdk-1.41.0-py2.py3-none-any.whl", hash = "sha256:be4f8f4b29a80b6a3b71f0f31487beb9e296391da20af8504498a328befed53f"},
+    {file = "sentry-sdk-1.42.0.tar.gz", hash = "sha256:4a8364b8f7edbf47f95f7163e48334c96100d9c098f0ae6606e2e18183c223e6"},
+    {file = "sentry_sdk-1.42.0-py2.py3-none-any.whl", hash = "sha256:a654ee7e497a3f5f6368b36d4f04baeab1fe92b3105f7f6965d6ef0de35a9ba4"},
 ]
 
 [package.dependencies]
@@ -3049,6 +3049,7 @@ grpcio = ["grpcio (>=1.21.1)"]
 httpx = ["httpx (>=0.16.0)"]
 huey = ["huey (>=2)"]
 loguru = ["loguru (>=0.5)"]
+openai = ["openai (>=1.0.0)", "tiktoken (>=0.3.0)"]
 opentelemetry = ["opentelemetry-distro (>=0.35b0)"]
 opentelemetry-experimental = ["opentelemetry-distro (>=0.40b0,<1.0)", "opentelemetry-instrumentation-aiohttp-client (>=0.40b0,<1.0)", "opentelemetry-instrumentation-django (>=0.40b0,<1.0)", "opentelemetry-instrumentation-fastapi (>=0.40b0,<1.0)", "opentelemetry-instrumentation-flask (>=0.40b0,<1.0)", "opentelemetry-instrumentation-requests (>=0.40b0,<1.0)", "opentelemetry-instrumentation-sqlite3 (>=0.40b0,<1.0)", "opentelemetry-instrumentation-urllib (>=0.40b0,<1.0)"]
 pure-eval = ["asttokens", "executing", "pure-eval"]
@@ -3513,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "fda6c963e2deda1b1c3b7c60315f2eb575c76e2844652354d0c8f6d38afdb290"
+content-hash = "12e76993d704eed834b9df882db3728a3c20c933876fec1914b73473a22a3f07"
