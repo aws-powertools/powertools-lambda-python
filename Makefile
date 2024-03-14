@@ -8,20 +8,20 @@ dev:
 	pip install --upgrade pip pre-commit poetry
 	poetry config --local virtualenvs.in-project true
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all datamasking-aws-sdk redis"
+	poetry install --extras "all redis datamasking"
 	pre-commit install
 
 dev-gitpod:
 	pip install --upgrade pip poetry
 	@$(MAKE) dev-version-plugin
-	poetry install --extras "all datamasking-aws-sdk redis"
+	poetry install --extras "all redis datamasking"
 	pre-commit install
 
 format:
 	poetry run black aws_lambda_powertools tests examples
 
 lint: format
-	poetry run ruff aws_lambda_powertools tests examples
+	poetry run ruff check aws_lambda_powertools tests examples
 
 lint-docs:
 	docker run -v ${PWD}:/markdown 06kellyjac/markdownlint-cli "docs"

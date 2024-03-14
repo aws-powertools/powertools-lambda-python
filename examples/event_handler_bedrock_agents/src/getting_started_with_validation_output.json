@@ -1,0 +1,14 @@
+{
+  "messageVersion": "1.0",
+  "response": {
+    "actionGroup": "SupportAssistant",
+    "apiPath": "/schedule_meeting",
+    "httpMethod": "GET",
+    "httpStatusCode": 200,
+    "responseBody": {
+      "application/json": {
+        "body": "true"
+      }
+    }
+  }
+}

@@ -57,18 +57,15 @@ def resolve_max_age(env: str, choice: Optional[int]) -> int:
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: float) -> float: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: str) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: str) -> str: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str: ...
 
 
 def resolve_env_var_choice(
@@ -96,10 +93,18 @@ def resolve_env_var_choice(
 
 def base64_decode(value: str) -> bytes:
     try:
-        logger.debug("Decoding base64 record item before parsing")
+        logger.debug("Decoding base64 item to bytes")
         return base64.b64decode(value)
     except (BinAsciiError, TypeError):
-        raise ValueError("base64 decode failed")
+        raise ValueError("base64 decode failed - is this base64 encoded string?")
+
+
+def bytes_to_base64_string(value: bytes) -> str:
+    try:
+        logger.debug("Encoding bytes to base64 string")
+        return base64.b64encode(value).decode()
+    except TypeError:
+        raise ValueError(f"base64 encoding failed - is this bytes data? type: {type(value)}")
 
 
 def bytes_to_string(value: bytes) -> str:

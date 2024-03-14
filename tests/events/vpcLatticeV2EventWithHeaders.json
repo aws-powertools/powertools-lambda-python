@@ -2,12 +2,31 @@
     "version": "2.0",
     "path": "/newpath",
     "method": "GET",
-    "headers": {
-      "user_agent": "curl/7.64.1",
-      "x-forwarded-for": "10.213.229.10",
-      "host": "test-lambda-service-3908sdf9u3u.dkfjd93.vpc-lattice-svcs.us-east-2.on.aws",
-      "accept": "*/*"
-    },
+    "headers":{
+      "user-agent":[
+         "curl/8.3.0"
+      ],
+      "accept":[
+         "*/*"
+      ],
+      "powertools":[
+         "a",
+         "b"
+      ],
+      "x-forwarded-for":[
+         "172.31.40.143"
+      ],
+      "host":[
+         "lattice-svc-027b423199122da5f.7d67968.vpc-lattice-svcs.us-east-1.on.aws"
+      ],
+      "Header1": [
+        "value1"
+      ],
+      "Header2": [
+        "value1",
+        "value2"
+      ]
+   },
     "queryStringParameters": {
       "parameter1": [
         "value1",

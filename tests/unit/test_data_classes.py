@@ -259,6 +259,25 @@ def test_base_proxy_event_get_query_string_value():
     assert value is None
 
 
+def test_base_proxy_event_get_multi_value_query_string_values():
+    default_values = ["default_1", "default_2"]
+    set_values = ["value_1", "value_2"]
+
+    event = BaseProxyEvent({})
+    values = event.get_multi_value_query_string_values("test", default_values)
+    assert values == default_values
+
+    event._data["multiValueQueryStringParameters"] = {"test": set_values}
+    values = event.get_multi_value_query_string_values("test", default_values)
+    assert values == set_values
+
+    values = event.get_multi_value_query_string_values("unknown", default_values)
+    assert values == default_values
+
+    values = event.get_multi_value_query_string_values("unknown")
+    assert values == []
+
+
 def test_base_proxy_event_get_header_value():
     default_value = "default"
     set_value = "value"
@@ -305,25 +324,11 @@ def test_base_proxy_event_get_header_value_case_insensitive():
     assert value is None
 
 
-def test_base_proxy_event_json_body_key_error():
-    event = BaseProxyEvent({})
-    with pytest.raises(KeyError) as ke:
-        assert not event.json_body
-    assert str(ke.value) == "'body'"
-
-
 def test_base_proxy_event_json_body():
     data = {"message": "Foo"}
     event = BaseProxyEvent({"body": json.dumps(data)})
     assert event.json_body == data
     assert event.json_body["message"] == "Foo"
-
-
-def test_base_proxy_event_decode_body_key_error():
-    event = BaseProxyEvent({})
-    with pytest.raises(KeyError) as ke:
-        assert not event.decoded_body
-    assert str(ke.value) == "'body'"
 
 
 def test_base_proxy_event_decode_body_encoded_false():

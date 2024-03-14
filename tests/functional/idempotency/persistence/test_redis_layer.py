@@ -1,36 +1,33 @@
 # ruff: noqa
 import copy
+import datetime
 import json
 import time as t
+from unittest import mock
 
 import pytest
-from unittest.mock import patch
+from multiprocess import Lock, Manager, Process
 
-from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
-    RedisCachePersistenceLayer,
-)
-import datetime
-
-from aws_lambda_powertools.utilities.idempotency.persistence.base import (
-    STATUS_CONSTANTS,
-    DataRecord,
-)
-
-from unittest import mock
-from multiprocessing import Process, Manager, Lock
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyItemAlreadyExistsError,
     IdempotencyItemNotFoundError,
-    IdempotencyPersistenceConnectionError,
     IdempotencyPersistenceConfigError,
+    IdempotencyPersistenceConnectionError,
     IdempotencyPersistenceConsistencyError,
     IdempotencyValidationError,
 )
 from aws_lambda_powertools.utilities.idempotency.idempotency import (
+    IdempotencyConfig,
     idempotent,
     idempotent_function,
-    IdempotencyConfig,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    STATUS_CONSTANTS,
+    DataRecord,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
+    RedisCachePersistenceLayer,
 )
 
 redis_badhost = "badhost"
@@ -557,6 +554,7 @@ def test_redis_orphan_record_race_condition(lambda_context):
         port="63005",
         mock_latency_ms=50,
     )
+
     manager = Manager()
     # use a thread safe dict
     redis_client.expire_dict = manager.dict()
@@ -576,11 +574,13 @@ def test_redis_orphan_record_race_condition(lambda_context):
 
     # run handler for the first time to create a valid record in cache
     lambda_handler(mock_event, lambda_context)
+
     # modify the cache expiration to create the orphan record
     for key, item in redis_client.cache.items():
         json_dict = json.loads(item)
         json_dict["expiration"] = int(t.time()) - 4000
         redis_client.cache[key] = json.dumps(json_dict).encode()
+
     # Given orphan idempotency record with same payload already in Redis
     # When running two lambda handler at the same time
     redis_client.cache["exec_count"] = 0
@@ -590,6 +590,7 @@ def test_redis_orphan_record_race_condition(lambda_context):
     p2.start()
     p1.join()
     p2.join()
+
     # Then only one handler will actually run
     assert redis_client.cache["exec_count"] == 1
 

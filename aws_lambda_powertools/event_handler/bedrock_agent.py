@@ -1,13 +1,15 @@
 from re import Match
-from typing import Any, Dict
+from typing import Any, Callable, Dict, List, Optional
 
 from typing_extensions import override
 
 from aws_lambda_powertools.event_handler import ApiGatewayResolver
 from aws_lambda_powertools.event_handler.api_gateway import (
+    _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
     ProxyEventType,
     ResponseBuilder,
 )
+from aws_lambda_powertools.event_handler.openapi.types import OpenAPIResponse
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 
 
@@ -82,6 +84,166 @@ class BedrockAgentResolver(ApiGatewayResolver):
             enable_validation=enable_validation,
         )
         self._response_builder_class = BedrockResponseBuilder
+
+    # Note: we need ignore[override] because we are making the optional `description` field required.
+    @override
+    def get(  # type: ignore[override]
+        self,
+        rule: str,
+        description: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        return super(BedrockAgentResolver, self).get(
+            rule,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            middlewares,
+        )
+
+    # Note: we need ignore[override] because we are making the optional `description` field required.
+    @override
+    def post(  # type: ignore[override]
+        self,
+        rule: str,
+        description: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
+        return super().post(
+            rule,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            middlewares,
+        )
+
+    # Note: we need ignore[override] because we are making the optional `description` field required.
+    @override
+    def put(  # type: ignore[override]
+        self,
+        rule: str,
+        description: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
+        return super().put(
+            rule,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            middlewares,
+        )
+
+    # Note: we need ignore[override] because we are making the optional `description` field required.
+    @override
+    def patch(  # type: ignore[override]
+        self,
+        rule: str,
+        description: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        middlewares: Optional[List[Callable]] = None,
+    ):
+        return super().patch(
+            rule,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            middlewares,
+        )
+
+    # Note: we need ignore[override] because we are making the optional `description` field required.
+    @override
+    def delete(  # type: ignore[override]
+        self,
+        rule: str,
+        description: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        middlewares: Optional[List[Callable[..., Any]]] = None,
+    ):
+        return super().delete(
+            rule,
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            middlewares,
+        )
 
     @override
     def _convert_matches_into_route_keys(self, match: Match) -> Dict[str, str]:
