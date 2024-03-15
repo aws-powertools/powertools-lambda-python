@@ -3,32 +3,61 @@ title: GraphQL API
 description: Core utility
 ---
 
-Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.
+Event Handler for AWS AppSync and Amplify GraphQL Transformer.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    EventSource: AWS Lambda Event Sources
+    EventHandlerResolvers: AWS AppSync Direct invocation<br/><br/> AWS AppSync Batch invocation
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Adapts response to Event Source contract
+    LambdaResponse: Lambda response
+
+    state EventSource {
+        EventHandlerResolvers
+    }
+
+    EventHandlerResolvers --> LambdaInit
+
+    LambdaInit --> EventHandler
+    EventHandler --> EventHandlerResolver
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+    }
+
+    EventHandler --> LambdaResponse
+```
 
 ## Key Features
 
-* Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
-* Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
-* Support async Python 3.8+ functions, and generators
+* Automatically parse API arguments to function arguments
+* Integrates with [Event Source Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
+* Support async Python 3.8+ functions and generators
 
 ## Terminology
 
 **[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
 
-**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language _(SDL)_, _e.g., `@function`_. Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
 
 ## Getting started
 
+???+ tip "Tip: Designing GraphQL Schemas for the first time?"
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} to understand how to define types, nesting, and pagination.
+
 ### Required resources
 
-You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.
+You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use Event Handler as routing requires no dependency (_standard library_).
 
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
-
-???+ tip "Tip: Designing GraphQL Schemas for the first time?"
-    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
 === "getting_started_schema.graphql"
 
@@ -36,7 +65,7 @@ This is the sample infrastructure we are using for the initial examples with a A
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "template.yml"
+=== "template.yaml"
 
     ```yaml hl_lines="59-60 71-72 94-95 104-105 112-113"
     --8<-- "examples/event_handler_graphql/sam/template.yaml"
@@ -258,6 +287,59 @@ You can use `append_context` when you want to share data between your App and Ro
 	```python hl_lines="23"
     --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
 	```
+
+### Batch processing
+
+We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` or `@async_batch_resolver` decorators.
+
+???+ info
+    If you want to understand more how to configure batch processing for the AppSync, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
+
+=== "getting_started_with_batch_resolver.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver.py"
+  	```
+
+=== "getting_started_with_batch_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+  	```
+
+#### Handling exceptions
+
+By default, records that fail during Lambda execution return `None` to ensure the entire batch doesn't fail due to processing errors. However, you have the option to actively return exceptions for debugging or troubleshooting.
+
+???+ tip
+    For better error handling, you may need to configure response mapping templates and specify error keys. Explore more on returning individual errors [here](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}.
+
+=== "enable_exceptions_batch_resolver.py"
+  	```python hl_lines="3 7 21"
+    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver.py"
+  	```
+
+    1. You can enable the exceptions by setting `raise_on_error` to True.
+
+=== "enable_exceptions_batch_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver_payload.json"
+  	```
+
+#### Async
+
+Choose the asynchronous batch processor when your objective is to leverage concurrency capabilities without the necessity of preserving records in a specific order.
+
+???+ warning
+    Make sure that preserving the order of the response is not a requirement of your logic.
+
+=== "getting_started_with_batch_async_resolver.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver.py"
+  	```
+
+=== "getting_started_with_batch_async_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_async_resolver_payload.json"
+  	```
 
 ## Testing your code
 
