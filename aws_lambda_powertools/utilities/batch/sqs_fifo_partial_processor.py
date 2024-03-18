@@ -78,8 +78,13 @@ class SqsFifoPartialProcessor(BatchProcessor):
 
     def process(self) -> List[Tuple]:
         """
-        Call instance's handler for each record. When the first failed message is detected,
-        the process is short-circuited, and the remaining messages are reported as failed items.
+        Call instance's handler for each record.
+
+        If skip_group_on_error is set to False, the process short-circuits upon detecting the first failed message,
+        and the remaining messages are reported as failed items.
+
+        If skip_group_on_error is set to True, upon encountering the first failed message for a specific MessageGroupID,
+        all messages from that MessageGroupID are skipped and reported as failed items.
         """
         result: List[Tuple] = []
         skip_message_ids: List = []
