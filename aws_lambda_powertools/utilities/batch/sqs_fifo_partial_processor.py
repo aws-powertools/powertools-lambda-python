@@ -69,8 +69,8 @@ class SqsFifoPartialProcessor(BatchProcessor):
         model: Optional["BatchSqsTypeModel"]
             An optional model for batch processing.
         skip_group_on_error: bool
-            # TODO: Alterar
-            Determine whether to return on the first error encountered. Default is True
+            Determines whether to exclusively skip messages from the MessageGroupID that encountered processing failures
+            Default is False
 
         """
         self._skip_group_on_error = skip_group_on_error
@@ -82,7 +82,7 @@ class SqsFifoPartialProcessor(BatchProcessor):
         the process is short-circuited, and the remaining messages are reported as failed items.
         """
         result: List[Tuple] = []
-        skip_messages_group_id: List = []
+        skip_message_ids: List = []
 
         for i, record in enumerate(self.records):
             # If we have failed messages and we are set to return on the first error,
@@ -95,21 +95,21 @@ class SqsFifoPartialProcessor(BatchProcessor):
 
             # skip_group_on_error is True:
             # Skip processing the current message if its ID belongs to a group with failed messages
-            if msg_id in skip_messages_group_id:
+            if msg_id in skip_message_ids:
                 logger.debug(
                     f"Skipping message with ID '{msg_id}' as it is part of a group containing failed messages.",
                 )
                 continue
 
-            processed_messages = self._process_record(record)
+            processed_message = self._process_record(record)
 
             # If a processed message fail and skip_group_on_error is True,
             # mark subsequent messages from the same MessageGroupId as skipped
-            if processed_messages[0] == "fail" and self._skip_group_on_error:
-                self._process_failed_subsequent_messages(record, i, skip_messages_group_id, result)
+            if processed_message[0] == "fail" and self._skip_group_on_error:
+                self._process_failed_subsequent_messages(record, i, skip_message_ids, result)
 
             # Append the processed message normally
-            result.append(processed_messages)
+            result.append(processed_message)
 
         return result
 
