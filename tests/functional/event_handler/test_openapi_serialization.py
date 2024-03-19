@@ -37,3 +37,27 @@ def test_openapi_serialize_json():
 
     # THEN we should get a dictionary
     assert isinstance(schema, Dict)
+
+
+def test_openapi_serialize_other(gw_event):
+    # GIVEN a custom serializer
+    def serializer(_):
+        return "hello world"
+
+    # GIVEN APIGatewayRestResolver is initialized with enable_validation=True and the custom serializer
+    app = APIGatewayRestResolver(enable_validation=True, serializer=serializer)
+
+    # GIVEN a custom class
+    class CustomClass(object):
+        __slots__ = []
+
+    # GIVEN a handler that returns an instance of that class
+    @app.get("/my/path")
+    def handler():
+        return CustomClass()
+
+    # WHEN we invoke the handler
+    response = app(gw_event, {})
+
+    # THEN we the custom serializer should be used
+    assert response["body"] == "hello world"

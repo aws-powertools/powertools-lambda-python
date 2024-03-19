@@ -1,6 +1,5 @@
 import copy
 import datetime
-import sys
 import warnings
 from unittest.mock import MagicMock
 
@@ -9,6 +8,8 @@ import pytest
 from botocore import stub
 from botocore.config import Config
 from pydantic import BaseModel
+from pytest import FixtureRequest
+from pytest_mock import MockerFixture
 
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
@@ -39,11 +40,18 @@ from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
     DataRecord,
 )
-from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import CustomDictSerializer
-from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import DataclassSerializer
-from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import PydanticSerializer
+from aws_lambda_powertools.utilities.idempotency.serialization.custom_dict import (
+    CustomDictSerializer,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.dataclass import (
+    DataclassSerializer,
+)
+from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import (
+    PydanticSerializer,
+)
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 from tests.functional.idempotency.utils import (
+    build_idempotency_put_item_response_stub,
     build_idempotency_put_item_stub,
     build_idempotency_update_item_stub,
     hash_idempotency_key,
@@ -143,7 +151,6 @@ def test_idempotent_lambda_in_progress(
     stubber.deactivate()
 
 
-@pytest.mark.skipif(sys.version_info < (3, 8), reason="issue with pytest mock lib for < 3.8")
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_in_progress_with_cache(
     idempotency_config: IdempotencyConfig,
@@ -408,6 +415,8 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
+    # GIVEN an idempotent record already exists for the same transaction
+    # and payload validation was enabled ('validation' key)
     stubber = stub.Stubber(persistence_store.client)
     ddb_response = {
         "Item": {
@@ -425,8 +434,11 @@ def test_idempotent_lambda_already_completed_with_validation_bad_payload(
     def lambda_handler(event, context):
         return lambda_response
 
+    # WHEN the subsequent request is the same but validated field is tampered
+    lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
+
+    # THEN we should raise
     with pytest.raises(IdempotencyValidationError):
-        lambda_apigw_event["requestContext"]["accountId"] += "1"  # Alter the request payload
         lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
@@ -1174,11 +1186,9 @@ class MockPersistenceLayer(BasePersistenceLayer):
     def _update_record(self, data_record: DataRecord) -> None:
         assert data_record.idempotency_key == self.expected_idempotency_key
 
-    def _get_record(self, idempotency_key) -> DataRecord:
-        ...
+    def _get_record(self, idempotency_key) -> DataRecord: ...
 
-    def _delete_record(self, data_record: DataRecord) -> None:
-        ...
+    def _delete_record(self, data_record: DataRecord) -> None: ...
 
 
 def test_idempotent_lambda_event_source(lambda_context):
@@ -1713,7 +1723,6 @@ def test_invalid_dynamodb_persistence_layer():
     assert str(ve.value) == "key_attr [id] and sort_key_attr [id] cannot be the same!"
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_dataclasses():
     # Scenario _prepare_data should convert a python dataclasses to a dict
     dataclasses = get_dataclasses_lib()
@@ -1747,7 +1756,6 @@ def test_idempotent_function_other(data):
     assert _prepare_data(data) == data
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_dataclass_with_jmespath():
     # GIVEN
     dataclasses = get_dataclasses_lib()
@@ -1773,7 +1781,6 @@ def test_idempotent_function_dataclass_with_jmespath():
     assert result == payment.transaction_id
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python3.7 or higher for dataclasses")
 def test_idempotent_function_pydantic_with_jmespath():
     # GIVEN
     config = IdempotencyConfig(event_key_jmespath="transaction_id", use_local_cache=True)
@@ -1865,3 +1872,117 @@ def test_idempotent_lambda_compound_static_pk_value_has_correct_pk(
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
+
+
+def test_idempotency_payload_validation_with_tampering_nested_object(
+    persistence_store: DynamoDBPersistenceLayer,
+    timestamp_future,
+    lambda_context,
+    request: FixtureRequest,
+):
+    # GIVEN an idempotency config with a compound idempotency key (refund, customer_id)
+    # AND with payload validation key to prevent tampering
+
+    validation_key = "details"
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath='["refund_id", "customer_id"]',
+        payload_validation_jmespath=validation_key,
+        use_local_cache=False,
+    )
+
+    # AND a previous transaction already processed in the persistent store
+    transaction = {
+        "refund_id": "ffd11882-d476-4598-bbf1-643f2be5addf",
+        "customer_id": "9e9fc440-9e65-49b5-9e71-1382ea1b1658",
+        "details": [
+            {
+                "company_name": "Parker, Johnson and Rath",
+                "currency": "Turkish Lira",
+            },
+        ],
+    }
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = build_idempotency_put_item_response_stub(
+        data=transaction,
+        expiration=timestamp_future,
+        status="COMPLETED",
+        request=request,
+        validation_data=transaction[validation_key],
+    )
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    # AND an upcoming tampered transaction
+    tampered_transaction = copy.deepcopy(transaction)
+    tampered_transaction["details"][0]["currency"] = "Euro"
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return event
+
+    # WHEN the tampered request is made
+    # THEN we should raise
+    with pytest.raises(IdempotencyValidationError):
+        lambda_handler(tampered_transaction, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
+def test_idempotency_cache_with_payload_tampering(
+    persistence_store: DynamoDBPersistenceLayer,
+    timestamp_future,
+    lambda_context,
+    request: FixtureRequest,
+    mocker: MockerFixture,
+):
+    # GIVEN an idempotency config with a compound idempotency key (refund, customer_id)
+    # AND with payload validation key to prevent tampering
+
+    cache_spy = mocker.spy(persistence_store, "_save_to_cache")
+
+    validation_key = "amount"
+    idempotency_config = IdempotencyConfig(
+        event_key_jmespath='["refund_id", "customer_id"]',
+        payload_validation_jmespath=validation_key,
+        use_local_cache=True,
+    )
+
+    # AND a previous transaction already processed in the persistent store
+    transaction = {
+        "refund_id": "ffd11882-d476-4598-bbf1-643f2be5addf",
+        "customer_id": "9e9fc440-9e65-49b5-9e71-1382ea1b1658",
+        "amount": 100,
+    }
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = build_idempotency_put_item_response_stub(
+        data=transaction,
+        expiration=timestamp_future,
+        status="COMPLETED",
+        request=request,
+        validation_data=transaction[validation_key],
+    )
+
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    # AND an upcoming tampered transaction
+    tampered_transaction = copy.deepcopy(transaction)
+    tampered_transaction["amount"] = 10_000
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return event
+
+    # WHEN the tampered request is made
+    with pytest.raises(IdempotencyValidationError):
+        lambda_handler(tampered_transaction, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+    # THEN we should not cache a transaction that failed validation
+    assert cache_spy.call_count == 0

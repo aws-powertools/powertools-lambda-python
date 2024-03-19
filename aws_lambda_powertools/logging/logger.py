@@ -22,7 +22,6 @@ from typing import (
     overload,
 )
 
-from aws_lambda_powertools.logging import compat
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
@@ -302,9 +301,6 @@ class Logger:
         self.addHandler(self.logger_handler)
         self.structure_logs(formatter_options=formatter_options, **kwargs)
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        self._logger.findCaller = compat.findCaller  # type: ignore[method-assign]
-
         # Pytest Live Log feature duplicates log records for colored output
         # but we explicitly add a filter for log deduplication.
         # This flag disables this protection when you explicit want logs to be duplicated (#262)
@@ -349,8 +345,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> AnyCallableT:
-        ...
+    ) -> AnyCallableT: ...
 
     @overload
     def inject_lambda_context(
@@ -359,8 +354,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        ...
+    ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
         self,
@@ -457,19 +451,16 @@ class Logger:
     def info(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.info(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.info(
             msg,
             *args,
@@ -482,19 +473,16 @@ class Logger:
     def error(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.error(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.error(
             msg,
             *args,
@@ -507,19 +495,16 @@ class Logger:
     def exception(
         self,
         msg: object,
-        *args,
+        *args: object,
         exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.exception(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.exception(
             msg,
             *args,
@@ -532,19 +517,16 @@ class Logger:
     def critical(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.critical(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.critical(
             msg,
             *args,
@@ -557,19 +539,16 @@ class Logger:
     def warning(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.warning(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.warning(
             msg,
             *args,
@@ -582,19 +561,16 @@ class Logger:
     def debug(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
 
-        # Maintenance: We can drop this upon Py3.7 EOL. It's a backport for "location" key to work
-        if sys.version_info < (3, 8):  # pragma: no cover
-            return self._logger.debug(msg, *args, exc_info=exc_info, stack_info=stack_info, extra=extra)
         return self._logger.debug(
             msg,
             *args,

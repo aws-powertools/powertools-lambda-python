@@ -1,7 +1,11 @@
+from __future__ import annotations
+
 import hashlib
+import json
 from typing import Any, Dict
 
 from botocore import stub
+from pytest import FixtureRequest
 
 from tests.functional.utils import json_serialize
 
@@ -75,3 +79,30 @@ def build_idempotency_update_item_stub(
         "TableName": "TEST_TABLE",
         "UpdateExpression": "SET #response_data = :response_data, #expiry = :expiry, #status = :status",
     }
+
+
+def build_idempotency_key_id(data: Dict, request: FixtureRequest):
+    return f"test-func.{request.function.__module__}.{request.function.__qualname__}.<locals>.lambda_handler#{hash_idempotency_key(data)}"  # noqa: E501
+
+
+def build_idempotency_put_item_response_stub(
+    data: Dict,
+    expiration: int,
+    status: str,
+    request: FixtureRequest,
+    validation_data: Any | None,
+):
+    response = {
+        "Item": {
+            "id": {"S": build_idempotency_key_id(data, request)},
+            "expiration": {"N": expiration},
+            "data": {"S": json.dumps(data)},
+            "status": {"S": status},
+            "validation": {"S": hash_idempotency_key(validation_data)},
+        },
+    }
+
+    if validation_data is not None:
+        response["Item"]["validation"] = {"S": hash_idempotency_key(validation_data)}
+
+    return response

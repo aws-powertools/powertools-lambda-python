@@ -17,6 +17,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Mapping,
     Match,
     Optional,
     Pattern,
@@ -200,7 +201,7 @@ class CORSConfig:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers
-        headers: Dict[str, str] = {
+        headers = {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
@@ -222,7 +223,7 @@ class Response(Generic[ResponseT]):
         status_code: int,
         content_type: Optional[str] = None,
         body: Optional[ResponseT] = None,
-        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        headers: Optional[Mapping[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
     ):
@@ -237,7 +238,7 @@ class Response(Generic[ResponseT]):
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict[str, Union[str, List[str]]]
+        headers: Mapping[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[Cookie]
             Optionally set cookies.
@@ -245,7 +246,7 @@ class Response(Generic[ResponseT]):
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.headers: Dict[str, Union[str, List[str]]] = dict(headers) if headers else {}
         self.cookies = cookies or []
         self.compress = compress
         self.content_type = content_type
@@ -1400,7 +1401,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._enable_validation:
             from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
 
-            self.use([OpenAPIValidationMiddleware()])
+            # Note the serializer argument: only use custom serializer if provided by the caller
+            # Otherwise, fully rely on the internal Pydantic based mechanism to serialize responses for validation.
+            self.use([OpenAPIValidationMiddleware(validation_serializer=serializer)])
 
     def get_openapi_schema(
         self,
@@ -1454,9 +1457,24 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
+        from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
+
+        # Pydantic V2 has no support for OpenAPI schema 3.0
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+            warnings.warn(
+                "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
+                stacklevel=2,
+            )
+            openapi_version = "3.1.0"
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+            warnings.warn(
+                "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
+                stacklevel=2,
+            )
+            openapi_version = "3.0.3"
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
@@ -1605,6 +1623,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
+        compress: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1637,11 +1656,13 @@ class ApiGatewayResolver(BaseRouter):
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
+        compress: bool, default = False
+            Whether or not to enable gzip compression swagger route.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
-        @self.get(path, middlewares=middlewares, include_in_schema=False)
+        @self.get(path, middlewares=middlewares, include_in_schema=False, compress=compress)
         def swagger_handler():
             base_path = self._get_base_path()
 
@@ -1691,7 +1712,13 @@ class ApiGatewayResolver(BaseRouter):
                     body=escaped_spec,
                 )
 
-            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css, swagger_base_url)
+            body = generate_swagger_html(
+                escaped_spec,
+                f"{base_path}{path}",
+                swagger_js,
+                swagger_css,
+                swagger_base_url,
+            )
 
             return Response(
                 status_code=200,
@@ -1940,7 +1967,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers: Dict[str, Union[str, List[str]]] = {}
+        headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))

@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -23,12 +24,9 @@ class ActiveMQMessage(DictWrapper):
         """Decodes the data as a str"""
         return base64_decode(self.data)
 
-    @property
+    @cached_property
     def json_data(self) -> Any:
-        """Parses the data as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_data)
-        return self._json_data
+        return self._json_deserializer(self.decoded_data)
 
     @property
     def connection_id(self) -> str:

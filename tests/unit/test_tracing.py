@@ -1,5 +1,4 @@
 import contextlib
-import sys
 from typing import NamedTuple
 from unittest import mock
 from unittest.mock import MagicMock
@@ -51,8 +50,7 @@ def provider_stub(mocker):
         def patch(self, *args, **kwargs):
             return self.patch_mock(*args, **kwargs)
 
-        def patch_all(self):
-            ...
+        def patch_all(self): ...
 
     return CustomProvider
 
@@ -85,9 +83,7 @@ def in_subsegment_mock():
     in_subsegment = InSubsegment()
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_annotation = in_subsegment.put_annotation
     in_subsegment.in_subsegment.return_value.__enter__.return_value.put_metadata = in_subsegment.put_metadata
-
-    if sys.version_info >= (3, 8):  # 3.8 introduced AsyncMock
-        in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
+    in_subsegment.in_subsegment.return_value.__aenter__.return_value.put_metadata = in_subsegment.put_metadata
 
     yield in_subsegment
 

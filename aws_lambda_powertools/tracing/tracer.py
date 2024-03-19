@@ -347,8 +347,7 @@ class Tracer:
 
     # see #465
     @overload
-    def capture_method(self, method: "AnyCallableT") -> "AnyCallableT":
-        ...  # pragma: no cover
+    def capture_method(self, method: "AnyCallableT") -> "AnyCallableT": ...  # pragma: no cover
 
     @overload
     def capture_method(
@@ -356,8 +355,7 @@ class Tracer:
         method: None = None,
         capture_response: Optional[bool] = None,
         capture_error: Optional[bool] = None,
-    ) -> Callable[["AnyCallableT"], "AnyCallableT"]:
-        ...  # pragma: no cover
+    ) -> Callable[["AnyCallableT"], "AnyCallableT"]: ...  # pragma: no cover
 
     def capture_method(
         self,

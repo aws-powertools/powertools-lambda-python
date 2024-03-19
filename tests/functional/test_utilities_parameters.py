@@ -655,8 +655,7 @@ def test_providers_global_clear_cache(mock_name, mock_value, monkeypatch):
         def _get(self, name: str, **kwargs) -> str:
             return mock_value
 
-        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
-            ...
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]: ...
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())

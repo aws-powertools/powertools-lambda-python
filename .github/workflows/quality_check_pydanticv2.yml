@@ -43,13 +43,13 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
       contents: read # checkout code only
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.2
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}

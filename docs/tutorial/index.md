@@ -1045,4 +1045,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Powertools for AWS Lambda (Python) is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a [documentation issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-powertools-maintainers@amazon.com](mailto:aws-powertools-maintainers@amazon.com).
