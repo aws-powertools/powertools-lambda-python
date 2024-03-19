@@ -2133,6 +2133,9 @@ class ApiGatewayResolver(BaseRouter):
         logger.debug("Appending Router middlewares into App middlewares.")
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
+        logger.debug("Appending Router exception_handler into App exception_handler.")
+        self._exception_handlers.update(router._exception_handlers)
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
@@ -2198,6 +2201,7 @@ class Router(BaseRouter):
         self._routes_with_middleware: Dict[tuple, List[Callable]] = {}
         self.api_resolver: Optional[BaseRouter] = None
         self.context = {}  # early init as customers might add context before event resolution
+        self._exception_handlers: Dict[Type, Callable] = {}
 
     def route(
         self,
@@ -2251,6 +2255,17 @@ class Router(BaseRouter):
             return func
 
         return register_route
+
+    def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
+        def register_exception_handler(func: Callable):
+            if isinstance(exc_class, list):
+                for exp in exc_class:
+                    self._exception_handlers[exp] = func
+            else:
+                self._exception_handlers[exc_class] = func
+            return func
+
+        return register_exception_handler
 
 
 class APIGatewayRestResolver(ApiGatewayResolver):
