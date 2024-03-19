@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Set, override
+from typing import Optional, Set
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, ExceptionInfo, FailureResponse
 from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
@@ -92,7 +92,6 @@ class SqsFifoPartialProcessor(BatchProcessor):
         self._failed_group_ids: Set[str] = set()
         super().__init__(EventType.SQS, model)
 
-    @override
     def _process_record(self, record):
         self._current_group_id = record.get("attributes", {}).get("MessageGroupId")
 
@@ -108,7 +107,6 @@ class SqsFifoPartialProcessor(BatchProcessor):
 
         return super()._process_record(record)
 
-    @override
     def failure_handler(self, record, exception: ExceptionInfo) -> FailureResponse:
         # If we are failing a message and the `skip_group_on_error` is on, we store the failed group ID
         # This way, future messages with the same group ID will be failed automatically.
@@ -117,7 +115,6 @@ class SqsFifoPartialProcessor(BatchProcessor):
 
         return super().failure_handler(record, exception)
 
-    @override
     def _clean(self):
         self._failed_group_ids.clear()
         self._current_group_id = None
