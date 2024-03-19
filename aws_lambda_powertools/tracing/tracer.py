@@ -12,6 +12,7 @@ from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_ch
 from ..shared.lazy_import import LazyLoader
 from ..shared.types import AnyCallableT
 from .base import BaseProvider, BaseSegment
+from .provider import xray_tracer
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -808,11 +809,8 @@ class Tracer:
         # Due to Lazy Import, we need to activate `core` attrib via import
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
-        provider = xray_recorder
-        provider.patch = aws_xray_sdk.core.patch
-        provider.patch_all = aws_xray_sdk.core.patch_all
+        provider = xray_tracer.XrayProvider()
 
         return provider
 
@@ -827,7 +825,7 @@ class Tracer:
         aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def _is_xray_provider(self):
-        return "aws_xray_sdk" in self.provider.__module__
+        return isinstance(self.provider, xray_tracer.XrayProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being

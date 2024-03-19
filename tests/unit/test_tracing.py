@@ -33,9 +33,11 @@ def provider_stub(mocker):
             self.put_metadata_mock = put_metadata_mock or mocker.MagicMock()
             self.put_annotation_mock = put_annotation_mock or mocker.MagicMock()
             self.in_subsegment = in_subsegment or mocker.MagicMock()
+            self.trace = self.in_subsegment
             self.patch_mock = patch_mock or mocker.MagicMock()
             self.disable_tracing_provider_mock = disable_tracing_provider_mock or mocker.MagicMock()
             self.in_subsegment_async = in_subsegment_async or mocker.MagicMock(spec=True)
+            self.trace_async = self.in_subsegment_async
 
         def put_metadata(self, *args, **kwargs):
             return self.put_metadata_mock(*args, **kwargs)

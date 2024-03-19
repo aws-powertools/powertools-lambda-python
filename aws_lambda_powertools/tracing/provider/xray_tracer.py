@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
 from typing import Generator, Sequence
 
@@ -49,7 +49,7 @@ class XrayProvider(BaseProvider):
         with self.in_subsegment(name=name) as sub_segment:
             yield XraySpan(subsegment=sub_segment)
 
-    @contextmanager
+    @asynccontextmanager
     async def trace_async(self, name: str) -> Generator[XraySpan, None, None]:
         async with self.in_subsegment_async(name=name) as sub_segment:
             yield XraySpan(subsegment=sub_segment)
@@ -61,6 +61,7 @@ class XrayProvider(BaseProvider):
             self.put_annotation(key=key, value=value)
 
     def patch(self, modules: Sequence[str]) -> None:
+        # defined in init
         pass
 
     def patch_all(self) -> None:
