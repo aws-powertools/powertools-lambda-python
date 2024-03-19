@@ -93,7 +93,7 @@ class SqsFifoPartialProcessor(BatchProcessor):
             # If we have failed messages and we are set to return on the first error,
             # short circuit the process and return the remaining messages as failed items
             if self.fail_messages and not self._skip_group_on_error:
-                logger.debug("Processing of failed messages stopped due to the 'skip_group_on_error' is set to False")
+                logger.debug("Processing of failed messages stopped because 'skip_group_on_error' is False")
                 return self._short_circuit_processing(i, result)
 
             msg_id = record.get("messageId")
