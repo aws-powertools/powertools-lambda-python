@@ -763,6 +763,43 @@ def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error(sqs_event_
     assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
 
 
+def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error_first_message_fail(
+    sqs_event_fifo_factory,
+    record_handler,
+):
+    # GIVEN a batch of 5 records with 3 different MessageGroupID
+    first_record = SQSRecord(sqs_event_fifo_factory("fail", "1"))
+    second_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
+    third_record = SQSRecord(sqs_event_fifo_factory("fail", "2"))
+    fourth_record = SQSRecord(sqs_event_fifo_factory("success", "2"))
+    fifth_record = SQSRecord(sqs_event_fifo_factory("fail", "3"))
+    event = {
+        "Records": [
+            first_record.raw_event,
+            second_record.raw_event,
+            third_record.raw_event,
+            fourth_record.raw_event,
+            fifth_record.raw_event,
+        ],
+    }
+
+    # WHEN the FIFO processor is set to continue processing even after encountering errors in specific MessageGroupID
+    processor = SqsFifoPartialProcessor(skip_group_on_error=True)
+
+    @batch_processor(record_handler=record_handler, processor=processor)
+    def lambda_handler(event, context):
+        return processor.response()
+
+    # WHEN
+    result = lambda_handler(event, {})
+
+    # THEN only failed messages should originate from MessageGroupID 3
+    assert len(result["batchItemFailures"]) == 3
+    assert result["batchItemFailures"][0]["itemIdentifier"] == third_record.message_id
+    assert result["batchItemFailures"][1]["itemIdentifier"] == fourth_record.message_id
+    assert result["batchItemFailures"][2]["itemIdentifier"] == fifth_record.message_id
+
+
 def test_sqs_fifo_batch_processor_middleware_with_skip_group_on_error_and_model(sqs_event_fifo_factory, record_handler):
     # GIVEN a batch of 5 records with 3 different MessageGroupID
     first_record = SQSRecord(sqs_event_fifo_factory("success", "1"))
