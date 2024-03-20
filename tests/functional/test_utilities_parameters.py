@@ -545,9 +545,6 @@ def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, moc
     """
     Test SSMProvider._set() without specifying the config
     """
-
-    mock_value = "leo"
-
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
 
     # Create a new provider
@@ -580,8 +577,6 @@ def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value
     """
     Test SSMProvider._set() without specifying the config
     """
-
-    mock_value = "leo"
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
 
