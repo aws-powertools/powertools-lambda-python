@@ -102,7 +102,6 @@ You can set a parameter using the `set_parameter` high-level function. This will
     --8<-- "examples/parameters/src/getting_started_set_ssm_parameter_overwrite.py"
     ```
 
-
 ### Fetching secrets
 
 You can fetch secrets stored in Secrets Manager using `get_secret`.
@@ -120,7 +119,6 @@ You can set secrets stored in Secrets Manager using `set_secret`.
     ```python hl_lines="5 15"
     --8<-- "examples/parameters/src/getting_started_setting_secret.py"
     ```
-
 
 ### Fetching app configurations
 

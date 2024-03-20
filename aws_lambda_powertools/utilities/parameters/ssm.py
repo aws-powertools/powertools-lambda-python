@@ -4,6 +4,7 @@ AWS SSM Parameter retrieval and caching utility
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
@@ -32,6 +33,8 @@ if TYPE_CHECKING:
 
 SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
 SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
+
+logger = logging.getLogger(__name__)
 
 
 class SSMProvider(BaseProvider):

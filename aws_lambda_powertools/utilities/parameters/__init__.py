@@ -9,7 +9,7 @@ from .base import BaseProvider, clear_caches
 from .dynamodb import DynamoDBProvider
 from .exceptions import GetParameterError, TransformParameterError
 from .secrets import SecretsProvider, get_secret, set_secret
-from .ssm import SSMProvider, get_parameter, set_parameter, get_parameters, get_parameters_by_name
+from .ssm import SSMProvider, get_parameter, get_parameters, get_parameters_by_name, set_parameter
 
 __all__ = [
     "AppConfigProvider",

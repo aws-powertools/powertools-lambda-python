@@ -526,15 +526,16 @@ def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
         "Value": mock_value,
         "Type": "String",
         "Overwrite": False,
+        "Description": "",
         "Tier": "Standard",
     }
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
 
     try:
-        version = provider.set(mock_name, mock_value)
+        version = provider.set(name=mock_name, value=mock_value)
 
-        assert version == mock_version
+        assert version == response
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
@@ -544,6 +545,43 @@ def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, moc
     """
     Test SSMProvider._set() without specifying the config
     """
+
+    mock_value = "leo"
+
+    monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
+
+    # Create a new provider
+    provider = parameters.SSMProvider()
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Version": mock_version, "Tier": "Advanced"}
+    expected_params = {
+        "Name": mock_name,
+        "Value": mock_value,
+        "Type": "String",
+        "Overwrite": False,
+        "Tier": "Standard",
+        "Description": "",
+    }
+    stubber.add_response("put_parameter", response, expected_params)
+    stubber.activate()
+
+    try:
+        version = provider.set(name=mock_name, value=mock_value)
+
+        assert version == response
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value, mock_version):
+    """
+    Test SSMProvider._set() without specifying the config
+    """
+
+    mock_value = "leo"
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
 
@@ -557,16 +595,24 @@ def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, moc
         "Name": mock_name,
         "Value": mock_value,
         "Type": "SecureString",
-        "Overwrite": False,
+        "Overwrite": True,
         "Tier": "Advanced",
+        "Description": "Parameter",
     }
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
 
     try:
-        version = provider._set(mock_name, mock_value)
+        version = provider.set(
+            name=mock_name,
+            value=mock_value,
+            tier="Advanced",
+            parameter_type="SecureString",
+            overwrite=True,
+            description="Parameter",
+        )
 
-        assert version == mock_version
+        assert version == response
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
