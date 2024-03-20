@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
 
 
 class SecretsProvider(BaseProvider):
@@ -171,7 +172,10 @@ class SecretsProvider(BaseProvider):
         if client_request_token:
             sdk_options["ClientRequestToken"] = client_request_token
 
-        return self.client.put_secret_value(**sdk_options)
+        try:
+            return self.client.put_secret_value(**sdk_options)
+        except Exception as exc:
+            raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
 
 
 @overload

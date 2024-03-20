@@ -593,6 +593,7 @@ def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value
         "Overwrite": True,
         "Tier": "Advanced",
         "Description": "Parameter",
+        "KeyId": "arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
     }
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
@@ -605,12 +606,44 @@ def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value
             parameter_type="SecureString",
             overwrite=True,
             description="Parameter",
+            kms_key_id="arn:aws:kms:us-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab",
         )
 
         assert version == response
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_ssm_provider_set_raise_on_failure(mock_name, mock_value, mock_version, config):
+    """
+    Test SSMProvider.set_parameter() with failure
+    """
+    # Create a new provider
+    provider = parameters.SSMProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Version": mock_version, "Tier": "Standard"}
+    expected_params = {
+        "Name": mock_name,
+        "Value": mock_value,
+        "Type": "String",
+        "Overwrite": False,
+        "Description": "",
+        "Tier": "NoTier",
+    }
+    stubber.add_response("put_parameter", response, expected_params)
+    stubber.activate()
+
+    # WHEN cannot set a Parameter with tier=NoTier
+    # THEN raise SetParameterError
+    with pytest.raises(parameters.exceptions.SetParameterError, match="Error setting parameter*"):
+        try:
+            provider.set(name=mock_name, value=mock_value)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
 
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):

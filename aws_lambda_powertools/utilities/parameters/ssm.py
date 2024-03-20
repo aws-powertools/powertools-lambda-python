@@ -24,7 +24,7 @@ from aws_lambda_powertools.utilities.parameters.base import (
     BaseProvider,
     transform_value,
 )
-from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
 from aws_lambda_powertools.utilities.parameters.types import PutParameterResponse, TransformOptions
 
 if TYPE_CHECKING:
@@ -246,7 +246,10 @@ class SSMProvider(BaseProvider):
         if kms_key_id:
             opts["KeyId"] = kms_key_id
 
-        return self.client.put_parameter(**opts)
+        try:
+            return self.client.put_parameter(**opts)
+        except Exception as exc:
+            raise SetParameterError(f"Error setting parameter - {str(exc)}") from exc
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
