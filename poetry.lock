@@ -196,19 +196,19 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "3.1.1"
+version = "3.2.0"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 files = [
-    {file = "aws-encryption-sdk-3.1.1.tar.gz", hash = "sha256:8d5fbf018fc68d6b1cacbe4dd037fd805296c7736a9fe457eb684d053f7f9563"},
-    {file = "aws_encryption_sdk-3.1.1-py2.py3-none-any.whl", hash = "sha256:a3cbbf04e0b9038b9180af8b03da896af19083e00ca011dcfcb403421458ad02"},
+    {file = "aws-encryption-sdk-3.2.0.tar.gz", hash = "sha256:4304fcf8ce2aa3fa98b1acff7a3bf3cd0528c329c0c437b55e0f456bbf62347e"},
+    {file = "aws_encryption_sdk-3.2.0-py2.py3-none-any.whl", hash = "sha256:4e3208809133b4491a5c6d8f3e6622fceb9d5b7c157c90a0f2a2e3ae4504fa31"},
 ]
 
 [package.dependencies]
 attrs = ">=17.4.0"
 boto3 = ">=1.10.0"
-cryptography = ">=2.5.0"
+cryptography = ">=3.4.6"
 wrapt = ">=1.10.11"
 
 [[package]]
@@ -447,13 +447,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.91"
+version = "0.1.94"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.91.tar.gz", hash = "sha256:ee283058399c43349d4d7a9a2eb54d94e327dc7bd567fef95ee2a7cb45e378c7"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.91-py3-none-any.whl", hash = "sha256:b5454e5a442cef07790fd7c01e02d4c1b4ea16545664f1af370b21c1318b8a0c"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.94.tar.gz", hash = "sha256:d77d0cdc2ff4eb54aa30b71acfb2e4f016ffc91f13da75886cfb07289782af21"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.94-py3-none-any.whl", hash = "sha256:62bbf471ad64b66b0d70ad8ca4e10ffeea9d101d68ba892c49e5d42a46dbd791"},
 ]
 
 [package.dependencies]
@@ -1978,13 +1978,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.34.65"
-description = "Type annotations for boto3.CloudFormation 1.34.65 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.66"
+description = "Type annotations for boto3.CloudFormation 1.34.66 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-cloudformation-1.34.65.tar.gz", hash = "sha256:0902493f25f23e708d631294b779bbbb3e9468542dd7e247de6e8ac8e2477a54"},
-    {file = "mypy_boto3_cloudformation-1.34.65-py3-none-any.whl", hash = "sha256:60dd327a37e444ee90bc0a7152ab561b5cf27b8872fb7b7a6197fe0bb0046838"},
+    {file = "mypy-boto3-cloudformation-1.34.66.tar.gz", hash = "sha256:295ddb878f3f4b61489b83bd4bad949382deb8a478ff5ae66c22ca3ffbabbe95"},
+    {file = "mypy_boto3_cloudformation-1.34.66-py3-none-any.whl", hash = "sha256:e0080e4ba0cd464479f3ee285faddd863e40147e8f331b78445aef210afc91ed"},
 ]
 
 [package.dependencies]
@@ -2034,13 +2034,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-logs"
-version = "1.34.36"
-description = "Type annotations for boto3.CloudWatchLogs 1.34.36 service generated with mypy-boto3-builder 7.23.1"
+version = "1.34.66"
+description = "Type annotations for boto3.CloudWatchLogs 1.34.66 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-logs-1.34.36.tar.gz", hash = "sha256:1549b54da88a869852458e186e589449d53a7805354b5afd7d53b4d275c53c2e"},
-    {file = "mypy_boto3_logs-1.34.36-py3-none-any.whl", hash = "sha256:c58cc7d498e24b963d4c78700a3e82d5af82e62d6694e30237c166a1fd6d326f"},
+    {file = "mypy-boto3-logs-1.34.66.tar.gz", hash = "sha256:cf5fac4801dd92f05007fb1b4444ff98258544d1f21e64e9228e34188046f841"},
+    {file = "mypy_boto3_logs-1.34.66-py3-none-any.whl", hash = "sha256:53c4988f655e21d2834dadcc600f3c182f34924c37d7a25bbd1b10857acb8b18"},
 ]
 
 [package.dependencies]
@@ -2418,13 +2418,13 @@ testing = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygm
 
 [[package]]
 name = "pytest-asyncio"
-version = "0.23.5.post1"
+version = "0.23.6"
 description = "Pytest support for asyncio"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-asyncio-0.23.5.post1.tar.gz", hash = "sha256:b9a8806bea78c21276bc34321bbf234ba1b2ea5b30d9f0ce0f2dea45e4685813"},
-    {file = "pytest_asyncio-0.23.5.post1-py3-none-any.whl", hash = "sha256:30f54d27774e79ac409778889880242b0403d09cabd65b727ce90fe92dd5d80e"},
+    {file = "pytest-asyncio-0.23.6.tar.gz", hash = "sha256:ffe523a89c1c222598c76856e76852b787504ddb72dd5d9b6617ffa8aa2cde5f"},
+    {file = "pytest_asyncio-0.23.6-py3-none-any.whl", hash = "sha256:68516fdd1018ac57b846c9846b954f0393b26f094764a28c955eabb0536a4e8a"},
 ]
 
 [package.dependencies]
@@ -3514,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "7daa4e9c75099554c6f99cc02f0895bd5245f00605651cdeeacc65fa1fc00dbb"
+content-hash = "496e44e1025f23545a301e2fa8e10e376269edf7d773dd2a538be65a065d1c49"
