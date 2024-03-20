@@ -120,13 +120,23 @@ class SecretsProvider(BaseProvider):
         """
         raise NotImplementedError()
 
-    def _set(
+    def _create_secret(self, name: str, **sdk_options):
+        try:
+            sdk_options["Name"] = name
+            return self.client.create_secret(**sdk_options)
+        except Exception as exc:
+            raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
+
+    def _update_secret(self, name: str, **sdk_options):
+        sdk_options["SecretId"] = name
+        return self.client.put_secret_value(**sdk_options)
+
+    def set(
         self,
         name: str,
         value: Union[str, dict, bytes],
         *,  # force keyword arguments
         client_request_token: Optional[str] = None,
-        version_stages: Optional[list[str]] = None,
         **sdk_options,
     ) -> SetSecretResponse:
         """
@@ -143,8 +153,6 @@ class SecretsProvider(BaseProvider):
             a UUID-type value to ensure uniqueness within the specified secret.
             This value becomes the VersionId of the new version. This field is
             autopopulated if not provided.
-        version_stages: list[str], optional
-            Specifies a list of staging labels that are attached to this version of the secret.
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -157,8 +165,6 @@ class SecretsProvider(BaseProvider):
             https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
         """
 
-        sdk_options["SecretId"] = name
-
         if isinstance(value, dict):
             value = json.dumps(value)
 
@@ -167,13 +173,13 @@ class SecretsProvider(BaseProvider):
         else:
             sdk_options["SecretString"] = value
 
-        if version_stages:
-            sdk_options["VersionStages"] = version_stages
         if client_request_token:
             sdk_options["ClientRequestToken"] = client_request_token
 
         try:
-            return self.client.put_secret_value(**sdk_options)
+            return self._update_secret(name=name, **sdk_options)
+        except self.client.exceptions.ResourceNotFoundException:
+            return self._create_secret(name=name, **sdk_options)
         except Exception as exc:
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
 
@@ -350,10 +356,9 @@ def set_secret(
     if "secrets" not in DEFAULT_PROVIDERS:
         DEFAULT_PROVIDERS["secrets"] = SecretsProvider()
 
-    return DEFAULT_PROVIDERS["secrets"]._set(
+    return DEFAULT_PROVIDERS["secrets"].set(
         name=name,
         value=value,
         client_request_token=client_request_token,
-        version_stages=version_stages,
         **sdk_options,
     )

@@ -513,7 +513,7 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
 
 def test_set_parameter(monkeypatch, mock_name, mock_value):
     """
-    Test get_parameter()
+    Test set_parameter()
     """
 
     class TestProvider(BaseProvider):
@@ -534,7 +534,7 @@ def test_set_parameter(monkeypatch, mock_name, mock_value):
     assert value == mock_value
 
 
-def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
+def test_ssm_provider_set_parameter(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.set_parameter() with a non-cached value
     """
@@ -564,7 +564,7 @@ def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
         stubber.deactivate()
 
 
-def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, mock_version):
+def test_ssm_provider_set_parameter_default_config(monkeypatch, mock_name, mock_value, mock_version):
     """
     Test SSMProvider._set() without specifying the config
     """
@@ -596,9 +596,9 @@ def test_ssm_provider_set_default_config(monkeypatch, mock_name, mock_value, moc
         stubber.deactivate()
 
 
-def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value, mock_version):
+def test_ssm_provider_set_parameter_with_custom_options(monkeypatch, mock_name, mock_value, mock_version):
     """
-    Test SSMProvider._set() without specifying the config
+    Test SSMProvider._set() with custom options
     """
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
@@ -638,7 +638,7 @@ def test_ssm_provider_set_with_custom_options(monkeypatch, mock_name, mock_value
         stubber.deactivate()
 
 
-def test_ssm_provider_set_raise_on_failure(mock_name, mock_value, mock_version, config):
+def test_ssm_provider_set_parameter_raise_on_failure(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.set_parameter() with failure
     """
@@ -667,6 +667,29 @@ def test_ssm_provider_set_raise_on_failure(mock_name, mock_value, mock_version, 
             stubber.assert_no_pending_responses()
         finally:
             stubber.deactivate()
+
+
+def test_set_secret(monkeypatch, mock_name, mock_value):
+    """
+    Test set_secret()
+    """
+
+    class TestProvider(BaseProvider):
+        def set(self, name: str, value: Any, *, overwrite: bool = False, **kwargs) -> str:
+            assert name == mock_name
+            return mock_value
+
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
+
+    value = parameters.set_secret(name=mock_name, value=mock_value)
+
+    assert value == mock_value
 
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):

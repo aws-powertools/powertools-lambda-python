@@ -32,10 +32,10 @@ This utility requires additional permissions to work as expected.
 | SSM       | **`get_parameter`**, **`SSMProvider.get`**                             | **`ssm:GetParameter`**                                                               |
 | SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
 | SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
-| SSM       | **`set_parameter`**                                                    | **`ssm:PutParameter`**                                                               |
+| SSM       | **`set_parameter`**, **`SSMProvider.set_parameter`**                   | **`ssm:PutParameter`**                                                               |
 | SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
 | Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                  |
-| Secrets   | **`set_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:PutSecretValue`** and or **`secretsmanager:CreateSecret`**         |
+| Secrets   | **`set_secret`**, **`SecretsProvider.set`**                            | **`secretsmanager:PutSecretValue`** and or **`secretsmanager:CreateSecret`**         |
 | DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
 | DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
 | AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |

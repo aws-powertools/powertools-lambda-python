@@ -9,7 +9,7 @@ logger = Logger(serialize_stacktrace=True)
 
 def access_token(client_id: str, client_secret: str, audience: str) -> str:
     # example function that returns a JWT Access Token
-    ...
+    # add your own logic here
     return f"{client_id}.{client_secret}.{audience}"
 
 
@@ -25,6 +25,6 @@ def lambda_handler(event: dict, context: LambdaContext):
         update_secret_version_id = parameters.set_secret(name="/aws-powertools/jwt_token", value=jwt_token)
 
         return {"access_token": "updated", "statusCode": 200, "update_secret_version_id": update_secret_version_id}
-    except parameters.exceptions.SetParameterError as error:
+    except parameters.exceptions.SetSecretError as error:
         logger.exception(error)
         return {"access_token": "updated", "statusCode": 400}
