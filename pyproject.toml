@@ -51,6 +51,7 @@ ddtrace = "^2.5.2"
 opentelemetry-api = "^1.22.0"
 opentelemetry-sdk = "^1.22.0"
 jsonpath-ng = { version = "^1.6.0", optional = true }
+types-aws-xray-sdk = "^2.13.0.20240308"
 
 [tool.poetry.dev-dependencies]
 coverage = { extras = ["toml"], version = "^7.4" }

@@ -12,7 +12,7 @@ from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resol
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
-from aws_lambda_powertools.tracing.provider import xray_tracer
+from aws_lambda_powertools.tracing.provider import XrayProvider
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -810,7 +810,7 @@ class Tracer:
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
 
-        provider = xray_tracer.XrayProvider()
+        provider = XrayProvider()
 
         return provider
 
@@ -825,7 +825,7 @@ class Tracer:
         aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def _is_xray_provider(self):
-        return isinstance(self.provider, xray_tracer.XrayProvider)
+        return isinstance(self.provider, XrayProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being

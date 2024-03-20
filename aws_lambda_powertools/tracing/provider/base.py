@@ -1,14 +1,12 @@
 import abc
 import numbers
-from contextlib import contextmanager
-from typing import Generator, Sequence, Union
+from contextlib import asynccontextmanager, contextmanager
+from typing import AsyncGenerator, Generator, Sequence, Union
 
 
 ## TO-Discuss how to refactor this one. Segment seems X-ray exclusive concept
 class BaseSpan(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
-
-    """Triggering"""
 
     @abc.abstractmethod
     def set_attribute(self, key: str, value: Union[str, numbers.Number, bool], **kwargs) -> None:
@@ -39,7 +37,7 @@ class BaseSpan(abc.ABC):
 class BaseProvider(abc.ABC):
     @abc.abstractmethod
     @contextmanager
-    def trace(self, name=None, **kwargs) -> Generator[BaseSpan, None, None]:
+    def trace(self, name: str, **kwargs) -> Generator[BaseSpan, None, None]:
         """Return a span context manger.
 
         Parameters
@@ -51,8 +49,8 @@ class BaseProvider(abc.ABC):
         """
 
     @abc.abstractmethod
-    @contextmanager
-    def trace_async(self, name=None, **kwargs) -> Generator[BaseSpan, None, None]:
+    @asynccontextmanager
+    def trace_async(self, name: str, **kwargs) -> AsyncGenerator[BaseSpan, None]:
         """Return a async span context manger.
 
         Parameters

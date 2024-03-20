@@ -3248,6 +3248,17 @@ doc = ["sphinx-autodoc-typehints (>=1.2.0)", "sphinx-rtd-theme"]
 test = ["mypy", "pytest", "typing-extensions"]
 
 [[package]]
+name = "types-aws-xray-sdk"
+version = "2.13.0.20240308"
+description = "Typing stubs for aws-xray-sdk"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "types-aws-xray-sdk-2.13.0.20240308.tar.gz", hash = "sha256:034f76378a5f0854f59aa8df17bfd3ee526e9172cee410757e4382b67c8f86da"},
+    {file = "types_aws_xray_sdk-2.13.0.20240308-py3-none-any.whl", hash = "sha256:e29e3ef6a3c10d962575ad32cc1d623a079a30c287b980e6372017292a4c9e55"},
+]
+
+[[package]]
 name = "types-pyopenssl"
 version = "24.0.0.20240311"
 description = "Typing stubs for pyOpenSSL"
@@ -3559,4 +3570,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "73cacb6abaf392f5c2bf68a6c09121d26eb123c0de7816d4cea41d73e2068a27"
+content-hash = "c190d67369d09d1c48d1fd5e8759b2abeb39c8877f6ee4927841301118c33eed"
