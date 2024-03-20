@@ -2782,9 +2782,10 @@
 </div>
 </div>
 <h4 id="fifo-queues">FIFO queues<a class="headerlink" href="#fifo-queues" title="Permanent link">&para;</a></h4>
-<p>When using <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" rel="nofollow" target="_blank">SQS FIFO queues</a>, we will stop processing messages after the first failure, and return all failed and unprocessed messages in <code>batchItemFailures</code>.
-This helps preserve the ordering of messages in your queue.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="recommended_1" name="__tabbed_3" type="radio" /><input id="as-a-context-manager_1" name="__tabbed_3" type="radio" /><input id="as-a-decorator-legacy_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="recommended_1">Recommended</label><label for="as-a-context-manager_1">As a context manager</label><label for="as-a-decorator-legacy_1">As a decorator (legacy)</label></div>
+<p>When working with <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html" target="_blank">SQS FIFO queues</a>, a batch may include messages from different group IDs.</p>
+<p>By default, we will stop processing at the first failure and mark unprocessed messages as failed to preserve ordering. However, this behavior may not be optimal for customers who wish to proceed with processing messages from a different group ID.</p>
+<p>Enable the <code>skip_group_on_error</code> option for seamless processing of messages from various group IDs. This setup ensures that messages from a failed group ID are sent back to SQS, enabling uninterrupted processing of messages from the subsequent group ID.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:4"><input checked="checked" id="recommended_1" name="__tabbed_3" type="radio" /><input id="as-a-context-manager_1" name="__tabbed_3" type="radio" /><input id="as-a-decorator-legacy_1" name="__tabbed_3" type="radio" /><input id="enabling-skip_group_on_error-flag" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="recommended_1">Recommended</label><label for="as-a-context-manager_1">As a context manager</label><label for="as-a-decorator-legacy_1">As a decorator (legacy)</label><label for="enabling-skip_group_on_error-flag">Enabling skip_group_on_error flag</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2952,6 +2953,54 @@ This helps preserve the ordering of messages in your queue.</p>
 </span><span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">processor</span><span class="o">.</span><span class="n">response</span><span class="p">()</span>
 </code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">Tracer</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span class="hll">    <span class="n">SqsFifoPartialProcessor</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">process_partial_response</span><span class="p">,</span>
+</span><span class="hll"><span class="p">)</span>
+</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_classes.sqs_event</span> <span class="kn">import</span> <span class="n">SQSRecord</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="hll"><span class="n">processor</span> <span class="o">=</span> <span class="n">SqsFifoPartialProcessor</span><span class="p">(</span><span class="n">skip_group_on_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span class="n">tracer</span> <span class="o">=</span> <span class="n">Tracer</span><span class="p">()</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_method</span>
+<span class="k">def</span> <span class="nf">record_handler</span><span class="p">(</span><span class="n">record</span><span class="p">:</span> <span class="n">SQSRecord</span><span class="p">):</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">json_body</span>  <span class="c1"># if json string data, otherwise record.body for str</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="nd">@tracer</span><span class="o">.</span><span class="n">capture_lambda_handler</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+<span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
 </div>
 </div>
 </div>
@@ -3708,7 +3757,7 @@ This helps preserve the ordering of messages in your queue.</p>
 <blockquote>
 <p>Read more about <a href="https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting" target="_blank">Batch Failure Reporting feature in AWS Lambda</a>.</p>
 </blockquote>
-<p>Sequence diagram to explain how <a href="#fifo-queues"><code>SqsFifoPartialProcessor</code> works</a> with SQS FIFO queues.</p>
+<p>Sequence diagram to explain how <a href="#fifo-queues"><code>SqsFifoPartialProcessor</code> works</a> with SQS FIFO queues without <code>skip_group_on_error</code> flag.</p>
 <p><center>
 <pre class="mermaid"><code>sequenceDiagram
     autonumber
@@ -3725,6 +3774,27 @@ This helps preserve the ordering of messages in your queue.</p>
     activate SQS queue
     Lambda service-&gt;&gt;SQS queue: Delete successful messages (1-2)
     SQS queue--&gt;&gt;SQS queue: Failed messages return (3-10)
+    deactivate SQS queue</code></pre>
+<i>SQS FIFO mechanism with Batch Item Failures</i>
+</center></p>
+<p>Sequence diagram to explain how <a href="#fifo-queues"><code>SqsFifoPartialProcessor</code> works</a> with SQS FIFO queues with <code>skip_group_on_error</code> flag.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service-&gt;&gt;SQS queue: Poll
+    Lambda service-&gt;&gt;Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function--&gt;Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function--&gt;Lambda function: Process messages from another MessageGroupID
+    Lambda function-&gt;&gt;Lambda service: Report 3rd batch item and all messages within the same MessageGroupID as failure
+    deactivate Lambda function
+    activate SQS queue
+    Lambda service-&gt;&gt;SQS queue: Delete successful messages processed
+    SQS queue--&gt;&gt;SQS queue: Failed messages return
     deactivate SQS queue</code></pre>
 <i>SQS FIFO mechanism with Batch Item Failures</i>
 </center></p>
@@ -5354,7 +5424,7 @@ This helps preserve the ordering of messages in your queue.</p>
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2023-07-28
+    2024-03-20
   </span>
 
     
