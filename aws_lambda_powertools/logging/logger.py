@@ -580,7 +580,7 @@ class Logger:
             extra=extra,
         )
 
-    def append_keys(self, **additional_keys) -> None:
+    def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
     def remove_keys(self, keys: Iterable[str]) -> None:
