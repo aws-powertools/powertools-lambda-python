@@ -141,8 +141,11 @@ Processing batches from SQS works in three stages:
 
 #### FIFO queues
 
-When using [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank" rel="nofollow"}, we will stop processing messages after the first failure, and return all failed and unprocessed messages in `batchItemFailures`.
-This helps preserve the ordering of messages in your queue.
+When working with [SQS FIFO queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/FIFO-queues.html){target="_blank"}, a batch may include messages from different group IDs.
+
+By default, we will stop processing at the first failure and mark unprocessed messages as failed to preserve ordering. However, this behavior may not be optimal for customers who wish to proceed with processing messages from a different group ID.
+
+Enable the `skip_group_on_error` option for seamless processing of messages from various group IDs. This setup ensures that messages from a failed group ID are sent back to SQS, enabling uninterrupted processing of messages from the subsequent group ID.
 
 === "Recommended"
 
@@ -162,6 +165,12 @@ This helps preserve the ordering of messages in your queue.
 
     ```python hl_lines="5-6 11 26"
     --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_decorator.py"
+    ```
+
+=== "Enabling skip_group_on_error flag"
+
+    ```python hl_lines="2-6 9 23"
+    --8<-- "examples/batch_processing/src/getting_started_sqs_fifo_skip_on_error.py"
     ```
 
 ### Processing messages from Kinesis
@@ -311,7 +320,7 @@ sequenceDiagram
 
 > Read more about [Batch Failure Reporting feature in AWS Lambda](https://docs.aws.amazon.com/lambda/latest/dg/with-sqs.html#services-sqs-batchfailurereporting){target="_blank"}.
 
-Sequence diagram to explain how [`SqsFifoPartialProcessor` works](#fifo-queues) with SQS FIFO queues.
+Sequence diagram to explain how [`SqsFifoPartialProcessor` works](#fifo-queues) with SQS FIFO queues without `skip_group_on_error` flag.
 
 <center>
 ```mermaid
@@ -330,6 +339,31 @@ sequenceDiagram
     activate SQS queue
     Lambda service->>SQS queue: Delete successful messages (1-2)
     SQS queue-->>SQS queue: Failed messages return (3-10)
+    deactivate SQS queue
+```
+<i>SQS FIFO mechanism with Batch Item Failures</i>
+</center>
+
+Sequence diagram to explain how [`SqsFifoPartialProcessor` works](#fifo-queues) with SQS FIFO queues with `skip_group_on_error` flag.
+
+<center>
+```mermaid
+sequenceDiagram
+    autonumber
+    participant SQS queue
+    participant Lambda service
+    participant Lambda function
+    Lambda service->>SQS queue: Poll
+    Lambda service->>Lambda function: Invoke (batch event)
+    activate Lambda function
+    Lambda function-->Lambda function: Process 2 out of 10 batch items
+    Lambda function--xLambda function: Fail on 3rd batch item
+    Lambda function-->Lambda function: Process messages from another MessageGroupID
+    Lambda function->>Lambda service: Report 3rd batch item and all messages within the same MessageGroupID as failure
+    deactivate Lambda function
+    activate SQS queue
+    Lambda service->>SQS queue: Delete successful messages processed
+    SQS queue-->>SQS queue: Failed messages return
     deactivate SQS queue
 ```
 <i>SQS FIFO mechanism with Batch Item Failures</i>
