@@ -12,4 +12,8 @@ class TransformParameterError(Exception):
 
 
 class SetParameterError(Exception):
-    """When a provider raises an exception on setting a parameter"""
+    """When a provider raises an exception on setting a SSM parameter"""
+
+
+class SetSecretError(Exception):
+    """When a provider raises an exception on setting an AWS Secret"""

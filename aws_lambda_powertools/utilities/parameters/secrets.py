@@ -19,9 +19,8 @@ if TYPE_CHECKING:
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
-
-from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
-from .exceptions import SetParameterError
+from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
+from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
 
 
 class SecretsProvider(BaseProvider):
@@ -179,7 +178,7 @@ class SecretsProvider(BaseProvider):
             return value["VersionId"]
         except ClientError as exc:
             if exc.response["Error"]["Code"] != "ResourceNotFoundException":
-                raise SetParameterError(str(exc)) from exc
+                raise SetSecretError(str(exc)) from exc
 
 
 @overload
