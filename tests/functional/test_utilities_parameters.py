@@ -511,6 +511,29 @@ def test_ssm_provider_get(mock_name, mock_value, mock_version, config):
         stubber.deactivate()
 
 
+def test_set_parameter(monkeypatch, mock_name, mock_value):
+    """
+    Test get_parameter()
+    """
+
+    class TestProvider(BaseProvider):
+        def set(self, name: str, value: Any, *, overwrite: bool = False, **kwargs) -> str:
+            assert name == mock_name
+            return mock_value
+
+        def _get(self, name: str, **kwargs) -> str:
+            raise NotImplementedError()
+
+        def _get_multiple(self, path: str, **kwargs) -> Dict[str, str]:
+            raise NotImplementedError()
+
+    monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "ssm", TestProvider())
+
+    value = parameters.set_parameter(name=mock_name, value=mock_value)
+
+    assert value == mock_value
+
+
 def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
     """
     Test SSMProvider.set_parameter() with a non-cached value

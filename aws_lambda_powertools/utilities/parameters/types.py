@@ -14,3 +14,4 @@ class SetSecretResponse(TypedDict):
     Name: str
     VersionId: str
     VersionStages: List[str]
+    ResponseMetadata: dict
