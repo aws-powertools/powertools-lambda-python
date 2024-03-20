@@ -36,3 +36,19 @@ class BatchProcessingError(BaseBatchProcessingError):
     def __str__(self):
         parent_exception_str = super(BatchProcessingError, self).__str__()
         return self.format_exceptions(parent_exception_str)
+
+
+class SQSFifoCircuitBreakerError(Exception):
+    """
+    Signals a record not processed due to the SQS FIFO processing being interrupted
+    """
+
+    pass
+
+
+class SQSFifoMessageGroupCircuitBreakerError(Exception):
+    """
+    Signals a record not processed due to the SQS FIFO message group processing being interrupted
+    """
+
+    pass
