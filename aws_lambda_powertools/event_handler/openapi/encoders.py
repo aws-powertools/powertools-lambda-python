@@ -29,6 +29,7 @@ def jsonable_encoder(  # noqa: PLR0911
     exclude_unset: bool = False,
     exclude_defaults: bool = False,
     exclude_none: bool = False,
+    custom_serializer: Optional[Callable[[Any], str]] = None,
 ) -> Any:
     """
     JSON encodes an arbitrary Python object into JSON serializable data types.
@@ -55,6 +56,8 @@ def jsonable_encoder(  # noqa: PLR0911
         by default False
     exclude_none : bool, optional
         Whether fields that are equal to None should be excluded, by default False
+    custom_serializer : Callable, optional
+        A custom serializer to use for encoding the object, when everything else fails.
 
     Returns
     -------
@@ -133,6 +136,10 @@ def jsonable_encoder(  # noqa: PLR0911
     for encoder, classes_tuple in encoders_by_class_tuples.items():
         if isinstance(obj, classes_tuple):
             return encoder(obj)
+
+    # Use custom serializer if present
+    if custom_serializer:
+        return custom_serializer(obj)
 
     # Default
     return _dump_other(
@@ -259,7 +266,7 @@ def _dump_other(
     exclude_defaults: bool = False,
 ) -> Any:
     """
-    Dump an object to ah hashable object, using the same parameters as jsonable_encoder
+    Dump an object to a hashable object, using the same parameters as jsonable_encoder
     """
     try:
         data = dict(obj)

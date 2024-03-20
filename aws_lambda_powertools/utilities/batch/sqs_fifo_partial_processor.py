@@ -1,15 +1,14 @@
-from typing import List, Optional, Tuple
+import logging
+from typing import Optional, Set
 
-from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType
+from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, ExceptionInfo, FailureResponse
+from aws_lambda_powertools.utilities.batch.exceptions import (
+    SQSFifoCircuitBreakerError,
+    SQSFifoMessageGroupCircuitBreakerError,
+)
 from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
 
-
-class SQSFifoCircuitBreakerError(Exception):
-    """
-    Signals a record not processed due to the SQS FIFO processing being interrupted
-    """
-
-    pass
+logger = logging.getLogger(__name__)
 
 
 class SqsFifoPartialProcessor(BatchProcessor):
@@ -57,36 +56,59 @@ class SqsFifoPartialProcessor(BatchProcessor):
         None,
     )
 
-    def __init__(self, model: Optional["BatchSqsTypeModel"] = None):
+    group_circuit_breaker_exc = (
+        SQSFifoMessageGroupCircuitBreakerError,
+        SQSFifoMessageGroupCircuitBreakerError("A previous record from this message group failed processing"),
+        None,
+    )
+
+    def __init__(self, model: Optional["BatchSqsTypeModel"] = None, skip_group_on_error: bool = False):
+        """
+        Initialize the SqsFifoProcessor.
+
+        Parameters
+        ----------
+        model: Optional["BatchSqsTypeModel"]
+            An optional model for batch processing.
+        skip_group_on_error: bool
+            Determines whether to exclusively skip messages from the MessageGroupID that encountered processing failures
+            Default is False.
+
+        """
+        self._skip_group_on_error: bool = skip_group_on_error
+        self._current_group_id = None
+        self._failed_group_ids: Set[str] = set()
         super().__init__(EventType.SQS, model)
 
-    def process(self) -> List[Tuple]:
-        """
-        Call instance's handler for each record. When the first failed message is detected,
-        the process is short-circuited, and the remaining messages are reported as failed items.
-        """
-        result: List[Tuple] = []
+    def _process_record(self, record):
+        self._current_group_id = record.get("attributes", {}).get("MessageGroupId")
 
-        for i, record in enumerate(self.records):
-            # If we have failed messages, it means that the last message failed.
-            # We then short circuit the process, failing the remaining messages
-            if self.fail_messages:
-                return self._short_circuit_processing(i, result)
+        # Short-circuits the process if:
+        #     - There are failed messages, OR
+        #     - The `skip_group_on_error` option is on, and the current message is part of a failed group.
+        fail_entire_batch = bool(self.fail_messages) and not self._skip_group_on_error
+        fail_group_id = self._skip_group_on_error and self._current_group_id in self._failed_group_ids
+        if fail_entire_batch or fail_group_id:
+            return self.failure_handler(
+                record=self._to_batch_type(record, event_type=self.event_type, model=self.model),
+                exception=self.group_circuit_breaker_exc if self._skip_group_on_error else self.circuit_breaker_exc,
+            )
 
-            # Otherwise, process the message normally
-            result.append(self._process_record(record))
+        return super()._process_record(record)
 
-        return result
+    def failure_handler(self, record, exception: ExceptionInfo) -> FailureResponse:
+        # If we are failing a message and the `skip_group_on_error` is on, we store the failed group ID
+        # This way, future messages with the same group ID will be failed automatically.
+        if self._skip_group_on_error and self._current_group_id:
+            self._failed_group_ids.add(self._current_group_id)
 
-    def _short_circuit_processing(self, first_failure_index: int, result: List[Tuple]) -> List[Tuple]:
-        """
-        Starting from the first failure index, fail all the remaining messages, and append them to the result list.
-        """
-        remaining_records = self.records[first_failure_index:]
-        for remaining_record in remaining_records:
-            data = self._to_batch_type(record=remaining_record, event_type=self.event_type, model=self.model)
-            result.append(self.failure_handler(record=data, exception=self.circuit_breaker_exc))
-        return result
+        return super().failure_handler(record, exception)
+
+    def _clean(self):
+        self._failed_group_ids.clear()
+        self._current_group_id = None
+
+        super()._clean()
 
     async def _async_process_record(self, record: dict):
         raise NotImplementedError()
