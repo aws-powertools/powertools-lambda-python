@@ -24,7 +24,7 @@ from .types import TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
-    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef
+    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef, PutParameterResultTypeDef
 
 SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
 SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
@@ -225,7 +225,7 @@ class SSMProvider(BaseProvider):
         tier: SSM_PARAMETER_TIER = "Standard",
         kms_key_id: str | None = None,
         **sdk_options,
-    ):
+    ) -> PutParameterResultTypeDef:
         opts = {
             "Name": name,
             "Value": value,
@@ -895,7 +895,7 @@ def set_parameter(
     **sdk_options,
 ) -> int:
     """
-    Retrieve a parameter value from AWS Systems Manager (SSM) Parameter Store
+    Sets a parameter in AWS Systems Manager Parameter Store.
 
     Parameters
     ----------
@@ -915,10 +915,6 @@ def set_parameter(
         The KMS key id to use to encrypt the parameter
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Parameter Store get_parameter API call
-
-    Returns:
-    --------
-        The version (integer) of the parameter that was set
 
     Raises
     ------
@@ -940,6 +936,10 @@ def set_parameter(
         >>>
         >>> print(response)
         123
+
+    Returns
+    -------
+    int: The status code indicating the success or failure of the operation.
     """
 
     # Only create the provider if this function is called at least once

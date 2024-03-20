@@ -532,7 +532,7 @@ def test_ssm_provider_set(mock_name, mock_value, mock_version, config):
     stubber.activate()
 
     try:
-        version = provider._set(mock_name, mock_value)
+        version = provider.set(mock_name, mock_value)
 
         assert version == mock_version
         stubber.assert_no_pending_responses()
