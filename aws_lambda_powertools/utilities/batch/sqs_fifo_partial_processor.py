@@ -2,25 +2,13 @@ import logging
 from typing import Optional, Set
 
 from aws_lambda_powertools.utilities.batch import BatchProcessor, EventType, ExceptionInfo, FailureResponse
+from aws_lambda_powertools.utilities.batch.exceptions import (
+    SQSFifoCircuitBreakerError,
+    SQSFifoMessageGroupCircuitBreakerError,
+)
 from aws_lambda_powertools.utilities.batch.types import BatchSqsTypeModel
 
 logger = logging.getLogger(__name__)
-
-
-class SQSFifoCircuitBreakerError(Exception):
-    """
-    Signals a record not processed due to the SQS FIFO processing being interrupted
-    """
-
-    pass
-
-
-class SQSFifoMessageGroupCircuitBreakerError(Exception):
-    """
-    Signals a record not processed due to the SQS FIFO message group processing being interrupted
-    """
-
-    pass
 
 
 class SqsFifoPartialProcessor(BatchProcessor):
