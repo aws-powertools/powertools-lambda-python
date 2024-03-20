@@ -10,9 +10,8 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
 
 import boto3
 from botocore.config import Config
-from botocore.exceptions import ClientError
 
-from aws_lambda_powertools.utilities.parameters.types import TransformOptions
+from aws_lambda_powertools.utilities.parameters.types import SetSecretResponse, TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
@@ -20,7 +19,6 @@ if TYPE_CHECKING:
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
-from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
 
 
 class SecretsProvider(BaseProvider):
@@ -129,7 +127,7 @@ class SecretsProvider(BaseProvider):
         client_request_token: Optional[str] = None,
         version_stages: Optional[list[str]] = None,
         **sdk_options,
-    ) -> str:
+    ) -> SetSecretResponse:
         """
         Modifies the details of a secret, including metadata and the secret value.
 
@@ -173,12 +171,7 @@ class SecretsProvider(BaseProvider):
         if client_request_token:
             sdk_options["ClientRequestToken"] = client_request_token
 
-        try:
-            value = self.client.put_secret_value(**sdk_options)
-            return value["VersionId"]
-        except ClientError as exc:
-            if exc.response["Error"]["Code"] != "ResourceNotFoundException":
-                raise SetSecretError(str(exc)) from exc
+        return self.client.put_secret_value(**sdk_options)
 
 
 @overload

@@ -6,10 +6,12 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = Logger(serialize_stacktrace=True)
 
+
 def access_token(client_id: str, client_secret: str, audience: str) -> str:
     # example function that returns a JWT Access Token
     ...
-    return access_token
+    return f"{client_id}.{client_secret}.{audience}"
+
 
 def lambda_handler(event: dict, context: LambdaContext):
     try:
