@@ -2006,13 +2006,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.34.57"
-description = "Type annotations for boto3.DynamoDB 1.34.57 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.67"
+description = "Type annotations for boto3.DynamoDB 1.34.67 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-dynamodb-1.34.57.tar.gz", hash = "sha256:8ad0eaa33811eb7eb0f8e2bcc2dbcefa86c91d7a21b13af500c3a8bacbe99db0"},
-    {file = "mypy_boto3_dynamodb-1.34.57-py3-none-any.whl", hash = "sha256:3f957d604d7289834e549c236d77c229ab8fab107b8a2c9f8a07066348fbd3a3"},
+    {file = "mypy-boto3-dynamodb-1.34.67.tar.gz", hash = "sha256:09447ef3ea6bdfe0be4e32ca23283820573341d340bea3065ded2153cc593d22"},
+    {file = "mypy_boto3_dynamodb-1.34.67-py3-none-any.whl", hash = "sha256:081ee9e184c0c2d93f648b25cec798e75533af26e631fbe80259f48fddb89758"},
 ]
 
 [package.dependencies]
@@ -3019,13 +3019,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.42.0"
+version = "1.43.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.42.0.tar.gz", hash = "sha256:4a8364b8f7edbf47f95f7163e48334c96100d9c098f0ae6606e2e18183c223e6"},
-    {file = "sentry_sdk-1.42.0-py2.py3-none-any.whl", hash = "sha256:a654ee7e497a3f5f6368b36d4f04baeab1fe92b3105f7f6965d6ef0de35a9ba4"},
+    {file = "sentry-sdk-1.43.0.tar.gz", hash = "sha256:41df73af89d22921d8733714fb0fc5586c3461907e06688e6537d01a27e0e0f6"},
+    {file = "sentry_sdk-1.43.0-py2.py3-none-any.whl", hash = "sha256:8d768724839ca18d7b4c7463ef7528c40b7aa2bfbf7fe554d5f9a7c044acfd36"},
 ]
 
 [package.dependencies]
@@ -3039,6 +3039,7 @@ asyncpg = ["asyncpg (>=0.23)"]
 beam = ["apache-beam (>=2.12)"]
 bottle = ["bottle (>=0.12.13)"]
 celery = ["celery (>=3)"]
+celery-redbeat = ["celery-redbeat (>=2)"]
 chalice = ["chalice (>=1.16.0)"]
 clickhouse-driver = ["clickhouse-driver (>=0.2.0)"]
 django = ["django (>=1.8)"]
@@ -3514,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "496e44e1025f23545a301e2fa8e10e376269edf7d773dd2a538be65a065d1c49"
+content-hash = "8bf529cea0ad373f26ff05b9e6868072d6d0be327ce65e75b56e218278914093"
