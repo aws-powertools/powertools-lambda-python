@@ -17,14 +17,18 @@ from aws_lambda_powertools.shared.functions import (
     slice_dictionary,
 )
 from aws_lambda_powertools.shared.types import Literal
-
-from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
-from .exceptions import GetParameterError
-from .types import TransformOptions
+from aws_lambda_powertools.utilities.parameters.base import (
+    DEFAULT_MAX_AGE_SECS,
+    DEFAULT_PROVIDERS,
+    BaseProvider,
+    transform_value,
+)
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError
+from aws_lambda_powertools.utilities.parameters.types import PutParameterResponse, TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
-    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef, PutParameterResultTypeDef
+    from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef
 
 SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
 SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
@@ -225,7 +229,7 @@ class SSMProvider(BaseProvider):
         tier: SSM_PARAMETER_TIER = "Standard",
         kms_key_id: str | None = None,
         **sdk_options,
-    ) -> PutParameterResultTypeDef:
+    ) -> PutParameterResponse:
         opts = {
             "Name": name,
             "Value": value,
@@ -887,13 +891,13 @@ def set_parameter(
     name: str,
     value: str,
     *,  # force keyword arguments
-    parameter_type: SSM_PARAMETER_TYPES = "String",
     overwrite: bool = False,
+    description: str = "",
+    parameter_type: SSM_PARAMETER_TYPES = "String",
     tier: SSM_PARAMETER_TIER = "Standard",
-    description: Optional[str] = None,
-    kms_key_id: Optional[str] = None,
+    kms_key_id: str | None = None,
     **sdk_options,
-) -> int:
+) -> PutParameterResponse:
     """
     Sets a parameter in AWS Systems Manager Parameter Store.
 
