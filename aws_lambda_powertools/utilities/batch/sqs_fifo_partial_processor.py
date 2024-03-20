@@ -98,8 +98,9 @@ class SqsFifoPartialProcessor(BatchProcessor):
         # Short-circuits the process if:
         #     - There are failed messages, OR
         #     - The `skip_group_on_error` option is on, and the current message is part of a failed group.
+        fail_entire_batch = bool(self.fail_messages) and not self._skip_group_on_error
         fail_group_id = self._skip_group_on_error and self._current_group_id in self._failed_group_ids
-        if self.fail_messages or fail_group_id:
+        if fail_entire_batch or fail_group_id:
             return self.failure_handler(
                 record=self._to_batch_type(record, event_type=self.event_type, model=self.model),
                 exception=self.group_circuit_breaker_exc if self._skip_group_on_error else self.circuit_breaker_exc,
