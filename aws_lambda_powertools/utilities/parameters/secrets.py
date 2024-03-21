@@ -361,7 +361,6 @@ def set_secret(
     value: Union[str, bytes],
     *,  # force keyword arguments
     client_request_token: Optional[str] = None,
-    version_stages: Optional[list[str]] = None,
     **sdk_options,
 ) -> str:
     """
