@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
-from typing import AsyncGenerator, Generator, Sequence
+from typing import Any, AsyncGenerator, Generator, Sequence
 
 from ....shared import constants
 from ....shared.lazy_import import LazyLoader
@@ -37,12 +37,8 @@ class XrayProvider(BaseProvider):
         if not xray_recorder:
             from aws_xray_sdk.core import xray_recorder
         self.recorder = xray_recorder
-        self.patch = aws_xray_sdk.core.patch
-        self.patch_all = aws_xray_sdk.core.patch_all
         self.in_subsegment = self.recorder.in_subsegment
         self.in_subsegment_async = self.recorder.in_subsegment_async
-        self.put_annotation = self.recorder.put_annotation
-        self.put_metadata = self.recorder.put_metadata
 
     @contextmanager
     def trace(self, name: str, **kwargs) -> Generator[XraySpan, None, None]:
@@ -60,9 +56,14 @@ class XrayProvider(BaseProvider):
         else:
             self.put_annotation(key=key, value=value)
 
+    def put_annotation(self, key: str, value: str | Number | bool) -> None:
+        return self.recorder.put_annotation(key=key, value=value)
+
+    def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:
+        return self.recorder.put_metadata(key=key, value=value, namespace=namespace)
+
     def patch(self, modules: Sequence[str]) -> None:
-        # defined in init
-        pass
+        return aws_xray_sdk.core.patch(modules)
 
     def patch_all(self) -> None:
-        pass
+        return aws_xray_sdk.core.patch_all()

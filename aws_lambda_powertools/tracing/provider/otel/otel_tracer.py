@@ -80,4 +80,5 @@ class OtelProvider(BaseProvider):
         pass
 
     def patch_all(self) -> None:
+        # OTEL sdk doesn't have patch
         pass

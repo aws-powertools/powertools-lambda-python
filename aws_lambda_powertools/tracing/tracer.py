@@ -11,8 +11,8 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
 from aws_lambda_powertools.tracing.provider import XrayProvider
+from aws_lambda_powertools.tracing.provider.base import BaseProvider, BaseSpan
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -172,8 +172,16 @@ class Tracer:
             self.patch(modules=patch_modules)
 
         if self._is_xray_provider():
-            # TO why?
             self._disable_xray_trace_batching()
+
+    def set_attribute(self, key: str, value: Union[str, numbers.Number, bool]):
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting put_annotation")
+            return
+
+        logger.debug(f"setting attribute on key '{key}' with '{value}'")
+
+        self.provider.set_attribute(key=key, value=value)
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
@@ -197,7 +205,11 @@ class Tracer:
             return
 
         logger.debug(f"Annotating on key '{key}' with '{value}'")
-        self.provider.put_annotation(key=key, value=value)
+
+        if not self._is_custom_provider():
+            self.provider.put_annotation(key=key, value=value)  # type: ignore
+        else:
+            self.provider.set_attribute(key=key, value=value)
 
     def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
@@ -225,7 +237,10 @@ class Tracer:
 
         namespace = namespace or self.service
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
-        self.provider.put_metadata(key=key, value=value, namespace=namespace)
+        if not self._is_custom_provider():
+            self.provider.put_metadata(key=key, value=value, namespace=namespace)  # type: ignore
+        else:
+            self.provider.set_attribute(key=f"{namespace}.{key}", value=value)
 
     def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
@@ -700,7 +715,7 @@ class Tracer:
         self,
         method_name: Optional[str] = None,
         data: Optional[Any] = None,
-        subsegment: Optional[BaseSegment] = None,
+        subsegment: Optional[BaseSpan] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -718,14 +733,16 @@ class Tracer:
         """
         if data is None or not capture_response or subsegment is None:
             return
-
-        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)
+        if not self._is_custom_provider():
+            subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)  # type: ignore
+        else:
+            subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service)
 
     def _add_full_exception_as_metadata(
         self,
         method_name: str,
         error: Exception,
-        subsegment: BaseSegment,
+        subsegment: BaseSpan,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -744,7 +761,14 @@ class Tracer:
         if not capture_error:
             return
 
-        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)
+        if not self._is_custom_provider():
+            subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)  # type: ignore
+        else:
+            subsegment.set_attribute(
+                key=f"{self.service}.{method_name} error",
+                value=str(error),
+                namespace=self.service,
+            )
 
     @staticmethod
     def _disable_tracer_provider():
@@ -826,6 +850,9 @@ class Tracer:
 
     def _is_xray_provider(self):
         return isinstance(self.provider, XrayProvider)
+
+    def _is_custom_provider(self):
+        return not self._is_xray_provider and isinstance(self.provider, BaseProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
