@@ -4,8 +4,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 def lambda_handler(event: dict, context: LambdaContext) -> dict:
     try:
-        # Set a single parameter, but overwrite if it already exists
-        # by default, overwrite is False, explicitly set it to True
+        # Set a single parameter, but overwrite if it already exists.
+        # Overwrite is False by default, so we explicitly set it to True
         updating_parameter = parameters.set_parameter(
             name="/mySuper/Parameter",
             value="PowerToolsIsAwesome",
