@@ -4,6 +4,7 @@ import base64
 import json
 import random
 import string
+import uuid
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Any, Dict, List, Tuple
@@ -556,9 +557,7 @@ def test_ssm_provider_set_parameter(mock_name, mock_value, mock_version, config)
     stubber.activate()
 
     try:
-        version = provider.set(name=mock_name, value=mock_value)
-
-        assert version == response
+        assert provider.set(name=mock_name, value=mock_value) == response
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
@@ -588,9 +587,7 @@ def test_ssm_provider_set_parameter_default_config(monkeypatch, mock_name, mock_
     stubber.activate()
 
     try:
-        version = provider.set(name=mock_name, value=mock_value)
-
-        assert version == response
+        assert provider.set(name=mock_name, value=mock_value) == response
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
@@ -674,6 +671,7 @@ def test_set_secret(monkeypatch, mock_name, mock_value):
     Test set_secret()
     """
 
+    # GIVEN a mock implementation of BaseProvider set method
     class TestProvider(BaseProvider):
         def set(self, name: str, value: Any, *, overwrite: bool = False, **kwargs) -> str:
             assert name == mock_name
@@ -687,9 +685,158 @@ def test_set_secret(monkeypatch, mock_name, mock_value):
 
     monkeypatch.setitem(parameters.base.DEFAULT_PROVIDERS, "secrets", TestProvider())
 
+    # WHEN set_secret function is called
     value = parameters.set_secret(name=mock_name, value=mock_value)
 
+    # THEN it should return the mock_value
     assert value == mock_value
+
+
+def test_secret_provider_update_secret_with_plain_text_value(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.set() with a plain text value
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    client_request_token = str(uuid.uuid4())
+
+    # WHEN setting a secret with a plain text value
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "SecretId": mock_name,
+        "SecretString": mock_value,
+        "ClientRequestToken": client_request_token,
+    }
+    stubber.add_response("put_secret_value", response, expected_params)
+    stubber.activate()
+
+    # THEN it should call put_secret_value with the plain text value and the client request token
+    try:
+        assert response == provider.set(name=mock_name, value=mock_value, client_request_token=client_request_token)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secret_provider_update_secret_with_binary_value(mock_name, config):
+    """
+    Test SecretsProvider.set() with a binary value
+    """
+
+    mock_value = b"value_to_test"
+
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    # WHEN setting a secret with a binary value
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "SecretId": mock_name,
+        "SecretBinary": mock_value,
+    }
+    stubber.add_response("put_secret_value", response, expected_params)
+    stubber.activate()
+
+    # THEN it should call put_secret_value with the binary value
+    try:
+        assert response == provider.set(name=mock_name, value=mock_value)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secret_provider_update_secret_with_dict_value(mock_name, config):
+    """
+    Test SecretsProvider.set() with a dict value
+    """
+
+    mock_value = {"key": "powertools"}
+
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    # WHEN setting a secret with a dictionary value
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "SecretId": mock_name,
+        "SecretString": json.dumps(mock_value),
+    }
+    stubber.add_response("put_secret_value", response, expected_params)
+    stubber.activate()
+
+    # THEN it should encode the dictionary as JSON and call put_secret_value with the encoded value
+    try:
+        assert response == provider.set(name=mock_name, value=mock_value)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
+
+
+def test_secret_provider_update_secret_with_raise_on_failure(mock_name, mock_value, config):
+    """
+    Test SecretsProvider.set() with raise on failure
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "SecretName": mock_name,
+        "SecretString": mock_value,
+    }
+    stubber.add_response("put_secret_value", response, expected_params)
+    stubber.activate()
+
+    # WHEN cannot update a Secret with wrong parameter
+    # THEN raise SetSecretError
+    with pytest.raises(parameters.exceptions.SetSecretError, match="Error setting secret*"):
+        try:
+            assert response == provider.set(name=mock_name, value=mock_value)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
+
+
+def test_secret_provider_create_secret(mocker, mock_name, mock_value, config):
+    """
+    Test Test SecretsProvider.set() forcing a new secret creation
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    # WHEN the put_secret_value method raises a ResourceNotFoundException
+    mock_update_secret = mocker.patch.object(provider, "_update_secret")
+    mock_update_secret.side_effect = provider.client.exceptions.ResourceNotFoundException(
+        {"Error": {"Code": "ResourceNotFoundException"}},
+        "put_secret_value",
+    )
+
+    # WHEN setting values for a new secret
+    client_request_token = str(uuid.uuid4())
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "Name": mock_name,
+        "SecretString": mock_value,
+        "ClientRequestToken": client_request_token,
+    }
+
+    # THEN it should call create_secret
+    stubber.add_response("create_secret", response, expected_params)
+    stubber.activate()
+
+    try:
+        assert response == provider.set(name=mock_name, value=mock_value, client_request_token=client_request_token)
+        stubber.assert_no_pending_responses()
+    finally:
+        stubber.deactivate()
 
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):

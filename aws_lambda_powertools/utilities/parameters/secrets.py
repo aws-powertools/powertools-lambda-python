@@ -190,7 +190,7 @@ class SecretsProvider(BaseProvider):
             This value helps ensure idempotency. Recommended that you generate
             a UUID-type value to ensure uniqueness within the specified secret.
             This value becomes the VersionId of the new version. This field is
-            autopopulated if not provided.
+            auto-populated if not provided.
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -392,7 +392,7 @@ def set_secret(
         This value helps ensure idempotency. Recommended that you generate
         a UUID-type value to ensure uniqueness within the specified secret.
         This value becomes the VersionId of the new version. This field is
-        autopopulated if not provided.
+        auto-populated if not provided.
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
