@@ -115,8 +115,11 @@ You can fetch secrets stored in Secrets Manager using `get_secret`.
 
 You can set secrets stored in Secrets Manager using `set_secret`.
 
+???+ note
+    We strive to minimize API calls by attempting to update existing secrets as our primary approach. If a secret doesn't exist, we proceed to create a new one.
+
 === "getting_started_secret.py"
-    ```python hl_lines="5 15"
+    ```python hl_lines="4 25"
     --8<-- "examples/parameters/src/getting_started_setting_secret.py"
     ```
 

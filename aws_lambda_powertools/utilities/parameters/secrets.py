@@ -5,6 +5,7 @@ AWS Secrets Manager parameter retrieval and caching utility
 from __future__ import annotations
 
 import json
+import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
 
@@ -20,6 +21,8 @@ from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
+
+logger = logging.getLogger(__name__)
 
 
 class SecretsProvider(BaseProvider):
@@ -241,8 +244,10 @@ class SecretsProvider(BaseProvider):
             sdk_options["ClientRequestToken"] = client_request_token
 
         try:
+            logger.debug(f"Attempting to update secret {name}")
             return self._update_secret(name=name, **sdk_options)
         except self.client.exceptions.ResourceNotFoundException:
+            logger.debug(f"Secret {name} doesn't exist, creating a new one")
             return self._create_secret(name=name, **sdk_options)
         except Exception as exc:
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc

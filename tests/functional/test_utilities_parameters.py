@@ -539,10 +539,10 @@ def test_ssm_provider_set_parameter(mock_name, mock_value, mock_version, config)
     """
     Test SSMProvider.set_parameter() with a non-cached value
     """
-    # Create a new provider
+    # GIVEN a SSMProvider instance with default values
     provider = parameters.SSMProvider(config=config)
 
-    # Stub the boto3 client
+    # WHEN setting a parameter
     stubber = stub.Stubber(provider.client)
     response = {"Version": mock_version, "Tier": "Standard"}
     expected_params = {
@@ -556,6 +556,7 @@ def test_ssm_provider_set_parameter(mock_name, mock_value, mock_version, config)
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
 
+    # THEN it should return values
     try:
         assert provider.set(name=mock_name, value=mock_value) == response
         stubber.assert_no_pending_responses()
@@ -569,10 +570,10 @@ def test_ssm_provider_set_parameter_default_config(monkeypatch, mock_name, mock_
     """
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
 
-    # Create a new provider
+    # GIVEN a SSMProvider instance with default values
     provider = parameters.SSMProvider()
 
-    # Stub the boto3 client
+    # WHEN setting a parameter
     stubber = stub.Stubber(provider.client)
     response = {"Version": mock_version, "Tier": "Advanced"}
     expected_params = {
@@ -586,6 +587,7 @@ def test_ssm_provider_set_parameter_default_config(monkeypatch, mock_name, mock_
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
 
+    # THEN it should return values
     try:
         assert provider.set(name=mock_name, value=mock_value) == response
         stubber.assert_no_pending_responses()
@@ -600,10 +602,10 @@ def test_ssm_provider_set_parameter_with_custom_options(monkeypatch, mock_name, 
 
     monkeypatch.setenv("AWS_DEFAULT_REGION", "us-east-2")
 
-    # Create a new provider
+    # GIVEN a SSMProvider instance
     provider = parameters.SSMProvider()
 
-    # Stub the boto3 client
+    # WHEN using custom parameters
     stubber = stub.Stubber(provider.client)
     response = {"Version": mock_version, "Tier": "Advanced"}
     expected_params = {
@@ -618,6 +620,7 @@ def test_ssm_provider_set_parameter_with_custom_options(monkeypatch, mock_name, 
     stubber.add_response("put_parameter", response, expected_params)
     stubber.activate()
 
+    # THEN it should return values
     try:
         version = provider.set(
             name=mock_name,
@@ -639,7 +642,7 @@ def test_ssm_provider_set_parameter_raise_on_failure(mock_name, mock_value, mock
     """
     Test SSMProvider.set_parameter() with failure
     """
-    # Create a new provider
+    # GIVEN a SSMProvider instance
     provider = parameters.SSMProvider(config=config)
 
     # Stub the boto3 client
@@ -837,6 +840,43 @@ def test_secret_provider_create_secret(mocker, mock_name, mock_value, config):
         stubber.assert_no_pending_responses()
     finally:
         stubber.deactivate()
+
+
+def test_secret_provider_create_secret_raise_on_error(mocker, mock_name, mock_value, config):
+    """
+    Test Test SecretsProvider.set() forcing a new secret creation
+    """
+    # GIVEN a SecretsProvider instance
+    provider = parameters.SecretsProvider(config=config)
+
+    # WHEN the put_secret_value method raises a ResourceNotFoundException
+    mock_update_secret = mocker.patch.object(provider, "_update_secret")
+    mock_update_secret.side_effect = provider.client.exceptions.ResourceNotFoundException(
+        {"Error": {"Code": "ResourceNotFoundException"}},
+        "put_secret_value",
+    )
+
+    # WHEN setting values for a new secret with wrong parameters
+    client_request_token = str(uuid.uuid4())
+    # Stub the boto3 client
+    stubber = stub.Stubber(provider.client)
+    response = {"Name": mock_name, "ARN": f"arn:aws:secretsmanager:us-east-1:132456789012:secret/{mock_name}"}
+    expected_params = {
+        "NameSecret": mock_name,
+        "SecretString": mock_value,
+        "ClientRequestToken": client_request_token,
+    }
+    stubber.add_response("create_secret", response, expected_params)
+    stubber.activate()
+
+    # WHEN cannot update a Secret with wrong parameter
+    # THEN raise SetSecretError
+    with pytest.raises(parameters.exceptions.SetSecretError, match="Error setting secret*"):
+        try:
+            assert response == provider.set(name=mock_name, value=mock_value)
+            stubber.assert_no_pending_responses()
+        finally:
+            stubber.deactivate()
 
 
 def test_ssm_provider_get_with_custom_client(mock_name, mock_value, mock_version, config):
