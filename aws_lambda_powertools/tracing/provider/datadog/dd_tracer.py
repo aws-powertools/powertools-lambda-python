@@ -53,13 +53,13 @@ class DDTraceProvider(BaseProvider):
         span_type: Optional[str] = None,
         **kwargs,
     ) -> Generator[DDSpan, None, None]:
-        dd_span = self.dd_tracer.trace(
+        with self.dd_tracer.trace(
             name=name,
             service=service,
             resource=resource,
             span_type=span_type,
-        )
-        yield DDSpan(dd_span=dd_span)
+        ) as dd_span:
+            yield DDSpan(dd_span=dd_span)
 
     in_subsegment = trace
 

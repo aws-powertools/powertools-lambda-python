@@ -348,13 +348,19 @@ class Tracer:
                 finally:
                     global is_cold_start
                     logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+                    if not self._is_custom_provider():
+                        subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+                    else:
+                        subsegment.set_attribute(key="ColdStart", value=is_cold_start)
 
                     if is_cold_start:
                         is_cold_start = False
 
                     if self.service:
-                        subsegment.put_annotation(key="Service", value=self.service)
+                        if not self._is_custom_provider():
+                            subsegment.put_annotation(key="Service", value=self.service)
+                        else:
+                            subsegment.set_attribute(key="Service", value=self.service)
 
                 return response
 
@@ -852,7 +858,7 @@ class Tracer:
         return isinstance(self.provider, XrayProvider)
 
     def _is_custom_provider(self):
-        return not self._is_xray_provider and isinstance(self.provider, BaseProvider)
+        return not self._is_xray_provider() and isinstance(self.provider, BaseProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
