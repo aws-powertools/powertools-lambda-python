@@ -52,7 +52,7 @@ def test_openapi_no_params():
 
     assert JSON_CONTENT_TYPE in response.content
     json_response = response.content[JSON_CONTENT_TYPE]
-    assert json_response.schema_ == Schema()
+    assert json_response.schema_ is None
     assert not json_response.examples
     assert not json_response.encoding
 
