@@ -503,8 +503,23 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
+        # Validation failure response (422) will always be part of the schema
+        default_responses: Dict[int, OpenAPIResponse] = {
+            422: {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            },
+        }
+
         # Add the response to the OpenAPI operation
         if self.responses:
+            # Merge default responses with user responses
+            self.responses = {**default_responses, **self.responses}
+
             for status_code in list(self.responses):
                 response = self.responses[status_code]
 
@@ -552,8 +567,7 @@ class Route:
             operation["responses"] = self.responses
         else:
             # Set the default 200 response
-            responses = operation.setdefault("responses", {})
-            success_response = responses.setdefault(200, {})
+            success_response = default_responses.setdefault(200, {})
             success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
             success_response["content"] = {"application/json": {"schema": {}}}
             json_response = success_response["content"].setdefault("application/json", {})
@@ -567,24 +581,16 @@ class Route:
                 ),
             )
 
-            # Add validation failure response (422)
-            operation["responses"][422] = {
-                "description": "Validation Error",
-                "content": {
-                    "application/json": {
-                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                    },
-                },
-            }
+            operation["responses"] = default_responses
 
-            # Add the validation error schema to the definitions, but only if it hasn't been added yet
-            if "ValidationError" not in definitions:
-                definitions.update(
-                    {
-                        "ValidationError": validation_error_definition,
-                        "HTTPValidationError": validation_error_response_definition,
-                    },
-                )
+        # Add the validation error schema to the definitions, but only if it hasn't been added yet
+        if "ValidationError" not in definitions:
+            definitions.update(
+                {
+                    "ValidationError": validation_error_definition,
+                    "HTTPValidationError": validation_error_response_definition,
+                },
+            )
 
         path[self.method.lower()] = operation
 

@@ -50,8 +50,8 @@ def test_openapi_200_custom_response():
     assert 202 in responses.keys()
     assert responses[202].description == "Custom response"
 
-    assert 200 not in responses.keys()
-    assert 422 not in responses.keys()
+    assert 200 not in responses.keys()  # 200 was not added due to custom responses
+    assert 422 in responses.keys()  # 422 is always added due to potential data validation errors
 
 
 def test_openapi_200_custom_schema():
