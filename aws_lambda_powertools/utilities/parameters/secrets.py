@@ -12,15 +12,15 @@ from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Union, overload
 import boto3
 from botocore.config import Config
 
-from aws_lambda_powertools.utilities.parameters.types import SetSecretResponse, TransformOptions
-
 if TYPE_CHECKING:
     from mypy_boto3_secretsmanager import SecretsManagerClient
 
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import resolve_max_age
+from aws_lambda_powertools.shared.json_encoder import Encoder
 from aws_lambda_powertools.utilities.parameters.base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider
 from aws_lambda_powertools.utilities.parameters.exceptions import SetSecretError
+from aws_lambda_powertools.utilities.parameters.types import SetSecretResponse, TransformOptions
 
 logger = logging.getLogger(__name__)
 
@@ -167,7 +167,6 @@ class SecretsProvider(BaseProvider):
     ) -> SetSecretResponse:
         """
         Modify the details of a secret or create a new secret if it doesn't already exist.
-        It includes metadata and the secret value.
 
         We aim to minimize API calls by assuming that the secret already exists and needs updating.
         If it doesn't exist, we attempt to create a new one. Refer to the following workflow for a better understanding:
@@ -190,10 +189,10 @@ class SecretsProvider(BaseProvider):
         value: str, dict or bytes
             Specifies text data that you want to encrypt and store in this new version of the secret.
         client_request_token: str, optional
-            This value helps ensure idempotency. Recommended that you generate
+            This value helps ensure idempotency. It's recommended that you generate
             a UUID-type value to ensure uniqueness within the specified secret.
             This value becomes the VersionId of the new version. This field is
-            auto-populated if not provided.
+            auto-populated if not provided, but no idempotency will be enforced this way.
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
@@ -233,7 +232,7 @@ class SecretsProvider(BaseProvider):
         """
 
         if isinstance(value, dict):
-            value = json.dumps(value)
+            value = json.dumps(value, cls=Encoder)
 
         if isinstance(value, bytes):
             sdk_options["SecretBinary"] = value
@@ -367,10 +366,9 @@ def set_secret(
     *,  # force keyword arguments
     client_request_token: Optional[str] = None,
     **sdk_options,
-) -> str:
+) -> SetSecretResponse:
     """
     Modify the details of a secret or create a new secret if it doesn't already exist.
-    It includes metadata and the secret value.
 
     We aim to minimize API calls by assuming that the secret already exists and needs updating.
     If it doesn't exist, we attempt to create a new one. Refer to the following workflow for a better understanding:
@@ -393,10 +391,10 @@ def set_secret(
     value: str, dict or bytes
         Specifies text data that you want to encrypt and store in this new version of the secret.
     client_request_token: str, optional
-        This value helps ensure idempotency. Recommended that you generate
+        This value helps ensure idempotency. It's recommended that you generate
         a UUID-type value to ensure uniqueness within the specified secret.
         This value becomes the VersionId of the new version. This field is
-        auto-populated if not provided.
+        auto-populated if not provided, but no idempotency will be enforced this way.
     sdk_options: dict, optional
         Dictionary of options that will be passed to the Secrets Manager update_secret API call
 

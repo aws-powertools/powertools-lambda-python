@@ -242,14 +242,14 @@ class SSMProvider(BaseProvider):
             The fully qualified name includes the complete hierarchy of the parameter name and name.
         value: str
             The parameter value
-        parameter_type: str, optional
-            Type of the parameter.  Allowed values are String, StringList, and SecureString
         overwrite: bool, optional
             If the parameter value should be overwritten, False by default
-        tier: str, optional
-            The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
         description: str, optional
             The description of the parameter
+        parameter_type: str, optional
+            Type of the parameter.  Allowed values are String, StringList, and SecureString
+        tier: str, optional
+            The parameter tier to use. Allowed values are Standard, Advanced, and Intelligent-Tiering
         kms_key_id: str, optional
             The KMS key id to use to encrypt the parameter
         sdk_options: dict, optional
@@ -961,14 +961,14 @@ def set_parameter(
         The fully qualified name includes the complete hierarchy of the parameter name and name.
     value: str
         The parameter value
-    parameter_type: str, optional
-        Type of the parameter.  Allowed values are String, StringList, and SecureString
     overwrite: bool, optional
         If the parameter value should be overwritten, False by default
-    tier: str, optional
-        The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
     description: str, optional
         The description of the parameter
+    parameter_type: str, optional
+        Type of the parameter.  Allowed values are String, StringList, and SecureString
+    tier: str, optional
+        The parameter tier to use. Allowed values are Standard, Advanced, and Intelligent-Tiering
     kms_key_id: str, optional
         The KMS key id to use to encrypt the parameter
     sdk_options: dict, optional
