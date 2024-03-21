@@ -503,6 +503,18 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
+        # Validation failure response (422) will always be part of the schema
+        operation_responses: Dict[int, OpenAPIResponse] = {
+            422: {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            },
+        }
+
         # Add the response to the OpenAPI operation
         if self.responses:
             for status_code in list(self.responses):
@@ -549,44 +561,33 @@ class Route:
 
                         response["content"][content_type] = new_payload
 
-            operation["responses"] = self.responses
+                # Merge the user provided response with the default responses
+                operation_responses[status_code] = response
         else:
             # Set the default 200 response
-            responses = operation.setdefault("responses", {})
-            success_response = responses.setdefault(200, {})
-            success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
-            success_response["content"] = {"application/json": {"schema": {}}}
-            json_response = success_response["content"].setdefault("application/json", {})
-
-            # Add the response schema to the OpenAPI 200 response
-            json_response.update(
-                self._openapi_operation_return(
-                    param=dependant.return_param,
-                    model_name_map=model_name_map,
-                    field_mapping=field_mapping,
-                ),
+            response_schema = self._openapi_operation_return(
+                param=dependant.return_param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
             )
 
-            # Add validation failure response (422)
-            operation["responses"][422] = {
-                "description": "Validation Error",
-                "content": {
-                    "application/json": {
-                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                    },
-                },
+            # Add the response schema to the OpenAPI 200 response
+            operation_responses[200] = {
+                "description": self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+                "content": {"application/json": response_schema},
             }
 
-            # Add the validation error schema to the definitions, but only if it hasn't been added yet
-            if "ValidationError" not in definitions:
-                definitions.update(
-                    {
-                        "ValidationError": validation_error_definition,
-                        "HTTPValidationError": validation_error_response_definition,
-                    },
-                )
-
+        operation["responses"] = operation_responses
         path[self.method.lower()] = operation
+
+        # Add the validation error schema to the definitions, but only if it hasn't been added yet
+        if "ValidationError" not in definitions:
+            definitions.update(
+                {
+                    "ValidationError": validation_error_definition,
+                    "HTTPValidationError": validation_error_response_definition,
+                },
+            )
 
         # Generate the response schema
         return path, definitions

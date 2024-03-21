@@ -28,7 +28,7 @@ validation_error_definition = {
             "type": "array",
             "items": {"anyOf": [{"type": "string"}, {"type": "integer"}]},
         },
-        "msg": {"title": "Message", "type": "string"},
+        # For security reasons, we hide **msg** details (don't leak Python, Pydantic or filenames)
         "type": {"title": "Error Type", "type": "string"},
     },
     "required": ["loc", "msg", "type"],
