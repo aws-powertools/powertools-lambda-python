@@ -233,6 +233,54 @@ class SSMProvider(BaseProvider):
         kms_key_id: str | None = None,
         **sdk_options,
     ) -> PutParameterResponse:
+        """
+        Sets a parameter in AWS Systems Manager Parameter Store.
+
+        Parameters
+        ----------
+        name: str
+            The fully qualified name includes the complete hierarchy of the parameter name and name.
+        value: str
+            The parameter value
+        parameter_type: str, optional
+            Type of the parameter.  Allowed values are String, StringList, and SecureString
+        overwrite: bool, optional
+            If the parameter value should be overwritten, False by default
+        tier: str, optional
+            The parameter tier to use.  Allowed values are Standard, Advanced, and Intelligent-Tiering
+        description: str, optional
+            The description of the parameter
+        kms_key_id: str, optional
+            The KMS key id to use to encrypt the parameter
+        sdk_options: dict, optional
+            Dictionary of options that will be passed to the Parameter Store get_parameter API call
+
+        Raises
+        ------
+        SetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+
+        URLs:
+        -------
+            https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm/client/put_parameter.html
+
+        Example
+        -------
+        **Sets a parameter value from Systems Manager Parameter Store**
+
+            >>> from aws_lambda_powertools.utilities import parameters
+            >>>
+            >>> response = parameters.set_parameter(name="/my/example/parameter", value="More Powertools")
+            >>>
+            >>> print(response)
+            123
+
+        Returns
+        -------
+        PutParameterResponse
+            The dict returned by boto3.
+        """
         opts = {
             "Name": name,
             "Value": value,
@@ -929,8 +977,7 @@ def set_parameter(
     Raises
     ------
     SetParameterError
-        When the parameter provider fails to retrieve a parameter value for
-        a given name.
+        When attempting to set a parameter fails.
 
     URLs:
     -------
@@ -949,7 +996,8 @@ def set_parameter(
 
     Returns
     -------
-    int: The status code indicating the success or failure of the operation.
+    PutParameterResponse
+        The dict returned by boto3.
     """
 
     # Only create the provider if this function is called at least once

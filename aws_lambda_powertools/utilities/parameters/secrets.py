@@ -121,6 +121,19 @@ class SecretsProvider(BaseProvider):
         raise NotImplementedError()
 
     def _create_secret(self, name: str, **sdk_options):
+        """
+        Create a secret with the given name.
+
+        Parameters:
+        ----------
+        name: str
+            The name of the secret.
+        **sdk_options:
+            Additional options to be passed to the create_secret method.
+
+        Raises:
+            SetSecretError: If there is an error setting the secret.
+        """
         try:
             sdk_options["Name"] = name
             return self.client.create_secret(**sdk_options)
@@ -128,6 +141,16 @@ class SecretsProvider(BaseProvider):
             raise SetSecretError(f"Error setting secret - {str(exc)}") from exc
 
     def _update_secret(self, name: str, **sdk_options):
+        """
+        Update a secret with the given name.
+
+        Parameters:
+        ----------
+        name: str
+            The name of the secret.
+        **sdk_options:
+            Additional options to be passed to the create_secret method.
+        """
         sdk_options["SecretId"] = name
         return self.client.put_secret_value(**sdk_options)
 
@@ -140,13 +163,28 @@ class SecretsProvider(BaseProvider):
         **sdk_options,
     ) -> SetSecretResponse:
         """
-        Modifies the details of a secret, including metadata and the secret value.
+        Modify the details of a secret or create a new secret if it doesn't already exist.
+        It includes metadata and the secret value.
+
+        We aim to minimize API calls by assuming that the secret already exists and needs updating.
+        If it doesn't exist, we attempt to create a new one. Refer to the following workflow for a better understanding:
+
+
+                          ┌────────────────────────┐      ┌─────────────────┐
+                ┌───────▶│Resource NotFound error?│────▶│Create Secret API│─────┐
+                │         └────────────────────────┘      └─────────────────┘     │
+                │                                                                 │
+                │                                                                 │
+                │                                                                 ▼
+        ┌─────────────────┐                                              ┌─────────────────────┐
+        │Update Secret API│────────────────────────────────────────────▶│ Return or Exception │
+        └─────────────────┘                                              └─────────────────────┘
 
         Parameters
         ----------
         name: str
-            The ARN or name of the secret to add a new version to.
-        value: str or bytes
+            The ARN or name of the secret to add a new version to or create a new one.
+        value: str, dict or bytes
             Specifies text data that you want to encrypt and store in this new version of the secret.
         client_request_token: str, optional
             This value helps ensure idempotency. Recommended that you generate
@@ -156,13 +194,39 @@ class SecretsProvider(BaseProvider):
         sdk_options: dict, optional
             Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
+        Raises
+        ------
+        SetSecretError
+            When attempting to update or create a secret fails.
+
         Returns:
         -------
-            Version ID of the newly created version of the secret.
+        SetSecretResponse:
+            The dict returned by boto3.
+
+        Example
+        -------
+        **Sets a secret***
+
+            >>> from aws_lambda_powertools.utilities import parameters
+            >>>
+            >>> parameters.set_secret(name="llamas-are-awesome", value="supers3cr3tllam@passw0rd")
+
+        **Sets a secret and includes an client_request_token**
+
+            >>> from aws_lambda_powertools.utilities import parameters
+            >>> import uuid
+            >>>
+            >>> parameters.set_secret(
+                    name="my-secret",
+                    value='{"password": "supers3cr3tllam@passw0rd"}',
+                    client_request_token=str(uuid.uuid4())
+                )
 
         URLs:
         -------
             https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
+            https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/create_secret.html
         """
 
         if isinstance(value, dict):
@@ -301,37 +365,46 @@ def set_secret(
     **sdk_options,
 ) -> str:
     """
-    Retrieve a parameter value from AWS Secrets Manager
+    Modify the details of a secret or create a new secret if it doesn't already exist.
+    It includes metadata and the secret value.
+
+    We aim to minimize API calls by assuming that the secret already exists and needs updating.
+    If it doesn't exist, we attempt to create a new one. Refer to the following workflow for a better understanding:
+
+
+                      ┌────────────────────────┐      ┌─────────────────┐
+            ┌───────▶│Resource NotFound error?│────▶│Create Secret API│─────┐
+            │         └────────────────────────┘      └─────────────────┘     │
+            │                                                                 │
+            │                                                                 │
+            │                                                                 ▼
+    ┌─────────────────┐                                              ┌─────────────────────┐
+    │Update Secret API│────────────────────────────────────────────▶│ Return or Exception │
+    └─────────────────┘                                              └─────────────────────┘
 
     Parameters
     ----------
     name: str
-        Name of the parameter
-    value: str or bytes
-        Secret value to set
+        The ARN or name of the secret to add a new version to or create a new one.
+    value: str, dict or bytes
+        Specifies text data that you want to encrypt and store in this new version of the secret.
     client_request_token: str, optional
         This value helps ensure idempotency. Recommended that you generate
         a UUID-type value to ensure uniqueness within the specified secret.
         This value becomes the VersionId of the new version. This field is
         autopopulated if not provided.
-    version_stages: list[str], optional
-        A list of staging labels that are attached to this version of the secret.
     sdk_options: dict, optional
-        Dictionary of options that will be passed to the get_secret_value call
+        Dictionary of options that will be passed to the Secrets Manager update_secret API call
 
     Raises
     ------
-    SetParameterError
-        When the secrets provider fails to set a secret value or secret binary for
-        a given name.
+    SetSecretError
+        When attempting to update or create a secret fails.
 
     Returns:
     -------
-        Version ID of the newly created version of the secret.
-
-    URLs:
-    -------
-        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
+    SetSecretResponse:
+        The dict returned by boto3.
 
     Example
     -------
@@ -350,6 +423,11 @@ def set_secret(
                 value='{"password": "supers3cr3tllam@passw0rd"}',
                 client_request_token="61f2af5f-5f75-44b1-a29f-0cc37af55b11"
             )
+
+    URLs:
+    -------
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/put_secret_value.html
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager/client/create_secret.html
     """
 
     # Only create the provider if this function is called at least once
