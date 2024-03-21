@@ -54,6 +54,32 @@ def test_openapi_200_custom_response():
     assert 422 in responses.keys()  # 422 is always added due to potential data validation errors
 
 
+def test_openapi_422_default_response():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/")
+    def handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 422 in responses.keys()
+    assert responses[422].description == "Validation Error"
+
+
+def test_openapi_422_custom_response():
+    app = APIGatewayRestResolver(enable_validation=True)
+
+    @app.get("/", responses={422: {"description": "Custom validation response"}})
+    def handler():
+        return {"message": "hello world"}
+
+    schema = app.get_openapi_schema()
+    responses = schema.paths["/"].get.responses
+    assert 422 in responses.keys()
+    assert responses[422].description == "Custom validation response"
+
+
 def test_openapi_200_custom_schema():
     app = APIGatewayRestResolver(enable_validation=True)
 
