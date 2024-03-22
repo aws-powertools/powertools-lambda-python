@@ -125,6 +125,9 @@ class Metrics:
     def add_metadata(self, key: str, value: Any) -> None:
         self.provider.add_metadata(key=key, value=value)
 
+    def set_timestamp(self, timestamp: int):
+        self.provider.set_timestamp(timestamp=timestamp)
+
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         self.provider.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
 

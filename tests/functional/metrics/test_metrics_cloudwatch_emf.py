@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import json
 import warnings
 from collections import namedtuple
@@ -1213,3 +1214,47 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
 
     output = capture_metrics_output_multiple_emf_objects(capsys)
     assert len(output) == 2
+
+
+def test_metric_with_custom_timestamp(namespace, metric, capsys):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Calculate the metric timestamp as 2 days before the current time
+    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+
+    # WHEN we set custom timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    lambda_handler({}, {})
+    invocation = capture_metrics_output(capsys)
+
+    # THEN Timestamp must be the custom value
+    assert invocation["_aws"]["Timestamp"] == metric_timestamp
+
+
+def test_metric_with_wrong_custom_timestamp(namespace, metric):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Setting timestamp as datetime
+    metric_timestamp = datetime.datetime.now()
+
+    # WHEN we set a wrong timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    # THEN should raise a warning
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == (
+            "The timestamp key must be an integer value representing an epoch time. "
+            "The provided value is not valid. Using the current timestamp instead."
+        )

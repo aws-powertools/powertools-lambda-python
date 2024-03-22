@@ -73,6 +73,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
+        self.timestamp: int | None = None
 
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
@@ -231,7 +232,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         return {
             "_aws": {
-                "Timestamp": int(datetime.datetime.now().timestamp() * 1000),  # epoch
+                "Timestamp": self.timestamp or int(datetime.datetime.now().timestamp() * 1000),  # epoch
                 "CloudWatchMetrics": [
                     {
                         "Namespace": self.namespace,  # "test_namespace"
@@ -303,6 +304,16 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             self.metadata_set[key] = value
         else:
             self.metadata_set[str(key)] = value
+
+    def set_timestamp(self, timestamp: int):
+        if not isinstance(timestamp, int):
+            warnings.warn(
+                "The timestamp key must be an integer value representing an epoch time. "
+                "The provided value is not valid. Using the current timestamp instead.",
+                stacklevel=2,
+            )
+        else:
+            self.timestamp = timestamp
 
     def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")
