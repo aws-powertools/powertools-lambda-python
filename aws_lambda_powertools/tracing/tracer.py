@@ -8,7 +8,11 @@ import os
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast, overload
 
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
+from aws_lambda_powertools.shared.functions import (
+    resolve_env_var_choice,
+    resolve_truthy_env_var_choice,
+    sanitize_xray_segment_name,
+)
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
@@ -520,7 +524,8 @@ class Tracer:
             )
 
         # Example: app.ClassA.get_all  # noqa ERA001
-        method_name = f"{method.__module__}.{method.__qualname__}"
+        # Valid characters can be found at http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
+        method_name = sanitize_xray_segment_name(f"{method.__module__}.{method.__qualname__}")
 
         capture_response = resolve_truthy_env_var_choice(
             env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"),
