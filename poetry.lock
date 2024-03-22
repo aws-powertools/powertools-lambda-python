@@ -227,13 +227,13 @@ requests = ">=0.14.0"
 
 [[package]]
 name = "aws-sam-translator"
-version = "1.85.0"
+version = "1.86.0"
 description = "AWS SAM Translator is a library that transform SAM templates into AWS CloudFormation templates"
 optional = false
 python-versions = ">=3.8, <=4.0, !=4.0"
 files = [
-    {file = "aws-sam-translator-1.85.0.tar.gz", hash = "sha256:e41938affa128fb5bde5e1989b260bf539a96369bba3faf316ce66651351df39"},
-    {file = "aws_sam_translator-1.85.0-py3-none-any.whl", hash = "sha256:e8c69a4db7279421ff6c3579cd4d43395fe9b6781f50416528e984be68e25481"},
+    {file = "aws-sam-translator-1.86.0.tar.gz", hash = "sha256:a748dcd7886024cb7586abbbdbabe8c787c44c6547bb6602879d7bb8a6934d05"},
+    {file = "aws_sam_translator-1.86.0-py3-none-any.whl", hash = "sha256:97a44e5ac8b0d141c31f4ed35c57aa94429a0e6cef7fe989831c9a1c40455473"},
 ]
 
 [package.dependencies]
@@ -541,17 +541,17 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.86.0"
+version = "0.86.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
-python-versions = ">=3.8, <=4.0, !=4.0"
+python-versions = "!=4.0,<=4.0,>=3.8"
 files = [
-    {file = "cfn-lint-0.86.0.tar.gz", hash = "sha256:7216e9c10dd27af73821d0ae79b17406cd89f5dfbc25feb5d2ba756eb6e9a651"},
-    {file = "cfn_lint-0.86.0-py3-none-any.whl", hash = "sha256:70cefa0ab91e35698cd8c03a2f99a367d71d848da5a62123192552937652d542"},
+    {file = "cfn-lint-0.86.1.tar.gz", hash = "sha256:ed41e596d807fea2de74dbbfc0cb8b48f8787572c50e3b58cce05382a5af3a64"},
+    {file = "cfn_lint-0.86.1-py3-none-any.whl", hash = "sha256:e599b23f1e3745c11585008fc1d186665dded2fb0ded3cc05e30e7d7b0830082"},
 ]
 
 [package.dependencies]
-aws-sam-translator = ">=1.85.0"
+aws-sam-translator = ">=1.86.0"
 jschema-to-python = ">=1.2.3,<1.3.0"
 jsonpatch = "*"
 jsonschema = ">=3.0,<5"
@@ -3515,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "b0a7f6fa91a0af76906c55d0451552125efcc22c952210677f459cfd7becfefc"
+content-hash = "91c50c8af2d3daecdfb6de20357b2b09e008fb867ac1dd47bd03623a135e4fc8"
