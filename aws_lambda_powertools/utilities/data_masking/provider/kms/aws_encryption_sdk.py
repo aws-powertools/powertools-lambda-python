@@ -105,7 +105,6 @@ class AWSEncryptionSDKProvider(BaseProvider):
 
 
 class KMSKeyProvider:
-
     """
     The KMSKeyProvider is responsible for assembling an AWS Key Management Service (KMS)
     client, a caching mechanism, and a keyring for secure key management and data encryption.

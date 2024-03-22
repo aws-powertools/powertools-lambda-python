@@ -1,6 +1,6 @@
 import enum
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, overload
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
@@ -161,6 +161,22 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
     @property
     def request_context(self) -> BaseRequestContext:
         return BaseRequestContext(self._data)
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: Optional[bool] = False,
+    ) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,

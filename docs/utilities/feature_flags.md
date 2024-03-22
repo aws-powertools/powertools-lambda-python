@@ -178,7 +178,7 @@ You can use `get_enabled_features` method for scenarios where you need a list of
 
 === "getting_all_enabled_features.py"
 
-    ```python hl_lines="2 9 26"
+    ```python hl_lines="4 9 11 28"
     --8<-- "examples/feature_flags/src/getting_all_enabled_features.py"
     ```
 
@@ -431,10 +431,13 @@ The `action` configuration can have the following values, where the expressions 
 | **ENDSWITH**                        | `lambda a, b: a.endswith(b)`                             |
 | **KEY_IN_VALUE**                    | `lambda a, b: a in b`                                    |
 | **KEY_NOT_IN_VALUE**                | `lambda a, b: a not in b`                                |
+| **ANY_IN_VALUE**                    | `lambda a, b: any of a is in b`                          |
+| **ALL_IN_VALUE**                    | `lambda a, b: all of a is in b`                          |
+| **NONE_IN_VALUE**                   | `lambda a, b: none of a is in b`                         |
 | **VALUE_IN_KEY**                    | `lambda a, b: b in a`                                    |
 | **VALUE_NOT_IN_KEY**                | `lambda a, b: b not in a`                                |
-| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: b.start <= time(a) <= b.end`        |
-| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: b.start <= datetime(a) <= b.end` |
+| **SCHEDULE_BETWEEN_TIME_RANGE**     | `lambda a, b: b.start <= time(a) <= b.end`               |
+| **SCHEDULE_BETWEEN_DATETIME_RANGE** | `lambda a, b: b.start <= datetime(a) <= b.end`           |
 | **SCHEDULE_BETWEEN_DAYS_OF_WEEK**   | `lambda a, b: day_of_week(a) in b`                       |
 | **MODULO_RANGE**                    | `lambda a, b: b.start <= a % b.base <= b.end`            |
 
@@ -469,7 +472,7 @@ For this to work, you need to use a JMESPath expression via the `envelope` param
 
 === "extracting_envelope.py"
 
-    ```python hl_lines="7"
+    ```python hl_lines="10"
     --8<-- "examples/feature_flags/src/extracting_envelope.py"
     ```
 

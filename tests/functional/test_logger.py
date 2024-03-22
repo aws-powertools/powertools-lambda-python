@@ -575,8 +575,7 @@ def test_logger_set_correlation_id_path_custom_functions(lambda_context, stdout,
     logger = Logger(service=service_name, stream=stdout)
 
     @logger.inject_lambda_context(correlation_id_path="Records[*].powertools_json(body).id")
-    def handler(event, context):
-        ...
+    def handler(event, context): ...
 
     # WHEN handler is called
     request_id = "xxx-111-222"
@@ -719,8 +718,7 @@ def test_logger_custom_powertools_formatter_clear_state(stdout, service_name, la
 
 
 def test_logger_custom_formatter_has_standard_and_custom_keys(stdout, service_name, lambda_context):
-    class CustomFormatter(LambdaPowertoolsFormatter):
-        ...
+    class CustomFormatter(LambdaPowertoolsFormatter): ...
 
     # GIVEN a Logger is initialized with a custom formatter
     logger = Logger(service=service_name, stream=stdout, logger_formatter=CustomFormatter(), my_key="value")

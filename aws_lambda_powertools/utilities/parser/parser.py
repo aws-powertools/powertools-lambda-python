@@ -104,13 +104,11 @@ def event_parser(
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model]) -> Model:
-    ...  # pragma: no cover
+def parse(event: Dict[str, Any], model: Type[Model]) -> Model: ...  # pragma: no cover
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> Model:
-    ...  # pragma: no cover
+def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> Model: ...  # pragma: no cover
 
 
 def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Envelope]] = None):

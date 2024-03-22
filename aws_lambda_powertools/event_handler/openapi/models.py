@@ -45,7 +45,6 @@ class License(BaseModel):
 # https://swagger.io/specification/#info-object
 class Info(BaseModel):
     title: str
-    summary: Optional[str] = None
     description: Optional[str] = None
     termsOfService: Optional[str] = None
     contact: Optional[Contact] = None
@@ -53,12 +52,13 @@ class Info(BaseModel):
     version: str
 
     if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
+        summary: Optional[str] = None
+        model_config = {"extra": "ignore"}
 
     else:
 
         class Config:
-            extra = "allow"
+            extra = "ignore"
 
 
 # https://swagger.io/specification/#server-variable-object

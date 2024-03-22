@@ -73,6 +73,35 @@ def test_tracer_lambda_outside_lambda_env(monkeypatch, dummy_response):
     handler({}, {})
 
 
+def test_tracer_lambda_running_in_sam_cli(monkeypatch, dummy_response):
+    # GIVEN tracer runs in AWS SAM CLI (ie: `AWS_SAM_LOCAL` is set)
+    monkeypatch.setenv("AWS_SAM_LOCAL", "true")
+    monkeypatch.setenv("LAMBDA_TASK_ROOT", "/opt/")
+    tracer = Tracer()
+
+    # WHEN a lambda function is run through SAM CLI emulator
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    # THEN tracer should run in disabled mode, and not raise an Exception
+    handler({}, {})
+
+
+def test_tracer_lambda_running_in_chalice(monkeypatch, dummy_response):
+    # GIVEN tracer runs in CHALICE (ie: `AWS_CHALICE_CLI_MODE` is set)
+    monkeypatch.setenv("AWS_CHALICE_CLI_MODE", "true")
+    tracer = Tracer()
+
+    # WHEN a lambda function is run through SAM CLI emulator
+    @tracer.capture_lambda_handler
+    def handler(event, context):
+        return dummy_response
+
+    # THEN tracer should run in disabled mode, and not raise an Exception
+    handler({}, {})
+
+
 def test_tracer_metadata_disabled(dummy_response):
     # GIVEN tracer is disabled, and annotations/metadata are used
     tracer = Tracer(disabled=True)

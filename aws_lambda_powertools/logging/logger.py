@@ -345,8 +345,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> AnyCallableT:
-        ...
+    ) -> AnyCallableT: ...
 
     @overload
     def inject_lambda_context(
@@ -355,8 +354,7 @@ class Logger:
         log_event: Optional[bool] = None,
         correlation_id_path: Optional[str] = None,
         clear_state: Optional[bool] = False,
-    ) -> Callable[[AnyCallableT], AnyCallableT]:
-        ...
+    ) -> Callable[[AnyCallableT], AnyCallableT]: ...
 
     def inject_lambda_context(
         self,
@@ -453,12 +451,12 @@ class Logger:
     def info(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -475,12 +473,12 @@ class Logger:
     def error(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -497,12 +495,12 @@ class Logger:
     def exception(
         self,
         msg: object,
-        *args,
+        *args: object,
         exc_info: logging._ExcInfoType = True,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -519,12 +517,12 @@ class Logger:
     def critical(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -541,12 +539,12 @@ class Logger:
     def warning(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -563,12 +561,12 @@ class Logger:
     def debug(
         self,
         msg: object,
-        *args,
-        exc_info=None,
+        *args: object,
+        exc_info: logging._ExcInfoType = None,
         stack_info: bool = False,
         stacklevel: int = 2,
         extra: Optional[Mapping[str, object]] = None,
-        **kwargs,
+        **kwargs: object,
     ) -> None:
         extra = extra or {}
         extra = {**extra, **kwargs}
@@ -582,7 +580,7 @@ class Logger:
             extra=extra,
         )
 
-    def append_keys(self, **additional_keys) -> None:
+    def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
     def remove_keys(self, keys: Iterable[str]) -> None:

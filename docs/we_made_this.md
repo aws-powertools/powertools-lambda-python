@@ -39,6 +39,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Effective Amazon SQS Batch Handling with Powertools for AWS Lambda (Python)](https://www.ranthebuilder.cloud/post/effective-amazon-sqs-batch-handling-with-aws-lambda-powertools){:target="_blank"}
 
+* [Serverless API Documentation with Powertools for AWS](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
@@ -140,7 +142,17 @@ Feature flags can improve your CI/CD process by enabling capabilities otherwise 
 
 In this talk, you will learn the added value of using feature flags as part of your CI/CD process and how AWS Lambda Powertools can help with that.
 
-<iframe width="620" height="378" src="https://www.youtube.com/embed/3IT4UzN9Jds" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+#### AWS re:invent 2023 - OPN305 - The Pragmatic Serverless Python Developer
+
+> **Author: Heitor Lessa & Ran Isenberg**
+
+Are you developing AWS Lambda functions with Python? Always looking for tools to make you more productive? What if you could hear directly from practitioners?
+
+This session covers an opinionated approach to Python project setup, testing, profiling, deployments, and operations. Learn about many open source tools, including Powertools for AWS Lambda—a toolkit that can help you implement serverless best practices and increase developer velocity.
+
+Join to discover tools and patterns for effective serverless development with Python. To maximize your learning experience, the session includes a sample application that implements what’s described.
+
+<iframe width="620" height="378" src="https://www.youtube.com/watch?v=52W3Qyg242Y" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 ## Workshops
 
@@ -169,6 +181,15 @@ This repository provides a working, deployable, open source based, AWS Lambda ha
 This handler embodies Serverless best practices and has all the bells and whistles for a proper production ready handler. It uses many of the AWS Lambda Powertools utilities for Python.
 
 :material-github: [github.com/ran-isenberg/aws-lambda-handler-cookbook](https://github.com/ran-isenberg/aws-lambda-handler-cookbook){:target="_blank"}
+
+> **Author: [Ran Isenberg & Heitor Lessa](mailto:ran.isenberg@ranthebuilder.cloud) [:material-twitter:](https://twitter.com/IsenbergRan){target="_blank" rel="nofollow"} [:material-linkedin:](https://www.linkedin.com/in/ranisenberg/){target="_blank" rel="nofollow"}**
+
+This project covers an opinionated approach to Python project setup, testing, profiling, deployments, and operations. Learn about many open source tools, including Powertools for AWS Lambda—a toolkit that can help you implement serverless best practices and increase developer velocity.
+
+It is based on the AWS Lambda handler cookbook project and served as the examples for the AWS re:invent 2023
+session: OPN305 - The pragmatic serverless python developer.
+
+:material-github: [https://github.com/ran-isenberg/serverless-python-demo](https://github.com/ran-isenberg/serverless-python-demo){:target="_blank"}
 
 ### Serverless Transactional Message App
 

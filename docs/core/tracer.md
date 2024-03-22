@@ -227,7 +227,7 @@ Tracer keeps a copy of its configuration after the first initialization. This is
 
 ## Testing your code
 
-Tracer is disabled by default when not running in the AWS Lambda environment - This means no code changes or environment variables to be set.
+Tracer is disabled by default when not running in the AWS Lambda environment, including AWS SAM CLI and Chalice environments. This means no code changes or environment variables to be set.
 
 ## Tips
 
