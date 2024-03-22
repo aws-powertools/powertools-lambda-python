@@ -4,6 +4,7 @@ AWS SSM Parameter retrieval and caching utility
 
 from __future__ import annotations
 
+import logging
 import os
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple, Union, overload
 
@@ -17,14 +18,23 @@ from aws_lambda_powertools.shared.functions import (
     slice_dictionary,
 )
 from aws_lambda_powertools.shared.types import Literal
-
-from .base import DEFAULT_MAX_AGE_SECS, DEFAULT_PROVIDERS, BaseProvider, transform_value
-from .exceptions import GetParameterError
-from .types import TransformOptions
+from aws_lambda_powertools.utilities.parameters.base import (
+    DEFAULT_MAX_AGE_SECS,
+    DEFAULT_PROVIDERS,
+    BaseProvider,
+    transform_value,
+)
+from aws_lambda_powertools.utilities.parameters.exceptions import GetParameterError, SetParameterError
+from aws_lambda_powertools.utilities.parameters.types import PutParameterResponse, TransformOptions
 
 if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
     from mypy_boto3_ssm.type_defs import GetParametersResultTypeDef
+
+SSM_PARAMETER_TYPES = Literal["String", "StringList", "SecureString"]
+SSM_PARAMETER_TIER = Literal["Standard", "Advanced", "Intelligent-Tiering"]
+
+logger = logging.getLogger(__name__)
 
 
 class SSMProvider(BaseProvider):
@@ -168,6 +178,126 @@ class SSMProvider(BaseProvider):
         sdk_options["decrypt"] = decrypt
 
         return super().get(name, max_age, transform, force_fetch, **sdk_options)
+
+    @overload
+    def set(
+        self,
+        name: str,
+        value: list[str],
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["StringList"] = "StringList",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str | None = "None",
+        **sdk_options,
+    ): ...
+
+    @overload
+    def set(
+        self,
+        name: str,
+        value: str,
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["SecureString"] = "SecureString",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str,
+        **sdk_options,
+    ): ...
+
+    @overload
+    def set(
+        self,
+        name: str,
+        value: str,
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: Literal["String"] = "String",
+        tier: Literal["Standard", "Advanced", "Intelligent-Tiering"] = "Standard",
+        kms_key_id: str | None = None,
+        **sdk_options,
+    ): ...
+
+    def set(
+        self,
+        name: str,
+        value: str | list[str],
+        *,
+        overwrite: bool = False,
+        description: str = "",
+        parameter_type: SSM_PARAMETER_TYPES = "String",
+        tier: SSM_PARAMETER_TIER = "Standard",
+        kms_key_id: str | None = None,
+        **sdk_options,
+    ) -> PutParameterResponse:
+        """
+        Sets a parameter in AWS Systems Manager Parameter Store.
+
+        Parameters
+        ----------
+        name: str
+            The fully qualified name includes the complete hierarchy of the parameter name and name.
+        value: str
+            The parameter value
+        overwrite: bool, optional
+            If the parameter value should be overwritten, False by default
+        description: str, optional
+            The description of the parameter
+        parameter_type: str, optional
+            Type of the parameter.  Allowed values are String, StringList, and SecureString
+        tier: str, optional
+            The parameter tier to use. Allowed values are Standard, Advanced, and Intelligent-Tiering
+        kms_key_id: str, optional
+            The KMS key id to use to encrypt the parameter
+        sdk_options: dict, optional
+            Dictionary of options that will be passed to the Parameter Store get_parameter API call
+
+        Raises
+        ------
+        SetParameterError
+            When the parameter provider fails to retrieve a parameter value for
+            a given name.
+
+        URLs:
+        -------
+            https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm/client/put_parameter.html
+
+        Example
+        -------
+        **Sets a parameter value from Systems Manager Parameter Store**
+
+            >>> from aws_lambda_powertools.utilities import parameters
+            >>>
+            >>> response = parameters.set_parameter(name="/my/example/parameter", value="More Powertools")
+            >>>
+            >>> print(response)
+            123
+
+        Returns
+        -------
+        PutParameterResponse
+            The dict returned by boto3.
+        """
+        opts = {
+            "Name": name,
+            "Value": value,
+            "Overwrite": overwrite,
+            "Type": parameter_type,
+            "Tier": tier,
+            "Description": description,
+            **sdk_options,
+        }
+
+        if kms_key_id:
+            opts["KeyId"] = kms_key_id
+
+        try:
+            return self.client.put_parameter(**opts)
+        except Exception as exc:
+            raise SetParameterError(f"Error setting parameter - {str(exc)}") from exc
 
     def _get(self, name: str, decrypt: bool = False, **sdk_options) -> str:
         """
@@ -807,6 +937,81 @@ def get_parameters(
         transform=transform,
         raise_on_transform_error=raise_on_transform_error,
         force_fetch=force_fetch,
+        **sdk_options,
+    )
+
+
+def set_parameter(
+    name: str,
+    value: str,
+    *,  # force keyword arguments
+    overwrite: bool = False,
+    description: str = "",
+    parameter_type: SSM_PARAMETER_TYPES = "String",
+    tier: SSM_PARAMETER_TIER = "Standard",
+    kms_key_id: str | None = None,
+    **sdk_options,
+) -> PutParameterResponse:
+    """
+    Sets a parameter in AWS Systems Manager Parameter Store.
+
+    Parameters
+    ----------
+    name: str
+        The fully qualified name includes the complete hierarchy of the parameter name and name.
+    value: str
+        The parameter value
+    overwrite: bool, optional
+        If the parameter value should be overwritten, False by default
+    description: str, optional
+        The description of the parameter
+    parameter_type: str, optional
+        Type of the parameter.  Allowed values are String, StringList, and SecureString
+    tier: str, optional
+        The parameter tier to use. Allowed values are Standard, Advanced, and Intelligent-Tiering
+    kms_key_id: str, optional
+        The KMS key id to use to encrypt the parameter
+    sdk_options: dict, optional
+        Dictionary of options that will be passed to the Parameter Store get_parameter API call
+
+    Raises
+    ------
+    SetParameterError
+        When attempting to set a parameter fails.
+
+    URLs:
+    -------
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm/client/put_parameter.html
+
+    Example
+    -------
+    **Sets a parameter value from Systems Manager Parameter Store**
+
+        >>> from aws_lambda_powertools.utilities import parameters
+        >>>
+        >>> response = parameters.set_parameter(name="/my/example/parameter", value="More Powertools")
+        >>>
+        >>> print(response)
+        123
+
+    Returns
+    -------
+    PutParameterResponse
+        The dict returned by boto3.
+    """
+
+    # Only create the provider if this function is called at least once
+    if "ssm" not in DEFAULT_PROVIDERS:
+        DEFAULT_PROVIDERS["ssm"] = SSMProvider()
+
+    return DEFAULT_PROVIDERS["ssm"].set(
+        name,
+        value,
+        parameter_type=parameter_type,
+        overwrite=overwrite,
+        tier=tier,
+        description=description,
+        kms_key_id=kms_key_id,
         **sdk_options,
     )
 
