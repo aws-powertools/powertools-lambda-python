@@ -194,9 +194,9 @@ def test_sanitize_xray_segment_name_with_no_special_characters():
     # GIVEN a name without any invalid characters
     valid_name = "app#lambda_function"
 
-    # WHEN we sanitize this name remains the same
+    # WHEN we sanitize this name
     sanitized_name = sanitize_xray_segment_name(valid_name)
 
-    # THEN the sanitized name is the same as original name
+    # THEN the sanitized name remains the same as the original name
     expected_name = valid_name
     assert sanitized_name == expected_name
