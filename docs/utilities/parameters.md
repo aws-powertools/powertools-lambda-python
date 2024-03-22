@@ -27,18 +27,18 @@ This utility requires additional permissions to work as expected.
 ???+ note
     Different parameter providers require different permissions.
 
-| Provider  | Function/Method                                                        | IAM Permission                                                                       |
-| --------- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| SSM       | **`get_parameter`**, **`SSMProvider.get`**                             | **`ssm:GetParameter`**                                                               |
-| SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                        |
-| SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                   |
-| SSM       | **`set_parameter`**, **`SSMProvider.set_parameter`**                   | **`ssm:PutParameter`**                                                               |
-| SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                              |
-| Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                  |
-| Secrets   | **`set_secret`**, **`SecretsProvider.set`**                            | **`secretsmanager:PutSecretValue`** and or **`secretsmanager:CreateSecret`**         |
-| DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                               |
-| DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                 |
-| AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`** |
+| Provider  | Function/Method                                                        | IAM Permission                                                                                  |
+| --------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| SSM       | **`get_parameter`**, **`SSMProvider.get`**                             | **`ssm:GetParameter`**                                                                          |
+| SSM       | **`get_parameters`**, **`SSMProvider.get_multiple`**                   | **`ssm:GetParametersByPath`**                                                                   |
+| SSM       | **`get_parameters_by_name`**, **`SSMProvider.get_parameters_by_name`** | **`ssm:GetParameter`** and **`ssm:GetParameters`**                                              |
+| SSM       | **`set_parameter`**, **`SSMProvider.set_parameter`**                   | **`ssm:PutParameter`**                                                                          |
+| SSM       | If using **`decrypt=True`**                                            | You must add an additional permission **`kms:Decrypt`**                                         |
+| Secrets   | **`get_secret`**, **`SecretsProvider.get`**                            | **`secretsmanager:GetSecretValue`**                                                             |
+| Secrets   | **`set_secret`**, **`SecretsProvider.set`**                            | **`secretsmanager:PutSecretValue`** and **`secretsmanager:CreateSecret`** (if creating secrets) |
+| DynamoDB  | **`DynamoDBProvider.get`**                                             | **`dynamodb:GetItem`**                                                                          |
+| DynamoDB  | **`DynamoDBProvider.get_multiple`**                                    | **`dynamodb:Query`**                                                                            |
+| AppConfig | **`get_app_config`**, **`AppConfigProvider.get_app_config`**           | **`appconfig:GetLatestConfiguration`** and **`appconfig:StartConfigurationSession`**            |
 
 ### Fetching parameters
 
@@ -96,9 +96,9 @@ You can set a parameter using the `set_parameter` high-level function. This will
     ```
 
 === "getting_started_set_ssm_parameter_overwrite.py"
-    There are occasions where sometimes you are setting a parameter and then you may need to update that parameter later on. In this case, you can use the `overwrite` parameter to overwrite the parameter value if it already exists. If you do not set this parameter, then the parameter will not be overwritten and an exception will be raised.
+    Sometimes you may be setting a parameter that you will have to update later on. Use the `overwrite` option to overwrite any existing value. If you do not set this option, the parameter value will not be overwritten and an exception will be raised.
 
-    ```python hl_lines="8"
+    ```python hl_lines="8 12"
     --8<-- "examples/parameters/src/getting_started_set_ssm_parameter_overwrite.py"
     ```
 
