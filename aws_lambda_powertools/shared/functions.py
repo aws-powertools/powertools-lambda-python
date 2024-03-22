@@ -4,6 +4,7 @@ import base64
 import itertools
 import logging
 import os
+import re
 import warnings
 from binascii import Error as BinAsciiError
 from pathlib import Path
@@ -281,4 +282,4 @@ def abs_lambda_path(relative_path: str = "") -> str:
 
 
 def sanitize_xray_segment_name(name: str) -> str:
-    return "".join(char for char in name if char not in constants.INVALID_XRAY_NAME_CHARACTERS)
+    return re.sub(constants.INVALID_XRAY_NAME_CHARACTERS, "", name)

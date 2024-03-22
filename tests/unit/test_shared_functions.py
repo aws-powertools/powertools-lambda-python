@@ -180,11 +180,23 @@ def test_abs_lambda_path_w_filename_envvar(default_lambda_path):
 
 def test_sanitize_xray_segment_name():
     # GIVEN a name with invalid characters
-    invalid_name = "app.lambda_function.(<locals>).get_todos"
+    invalid_name = "app?;*.lambda_function.(<locals>).get_todos!$~^<>"
 
     # WHEN we sanitize this name by removing invalid characters
     sanitized_name = sanitize_xray_segment_name(invalid_name)
 
     # THEN the sanitized name should not contain invalid characters
     expected_name = "app.lambda_function.locals.get_todos"
+    assert sanitized_name == expected_name
+
+
+def test_sanitize_xray_segment_name_with_no_special_characters():
+    # GIVEN a name without any invalid characters
+    valid_name = "app#lambda_function"
+
+    # WHEN we sanitize this name remains the same
+    sanitized_name = sanitize_xray_segment_name(valid_name)
+
+    # THEN the sanitized name is the same as original name
+    expected_name = valid_name
     assert sanitized_name == expected_name
