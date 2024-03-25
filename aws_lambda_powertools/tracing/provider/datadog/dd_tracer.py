@@ -25,7 +25,7 @@ class DDSpan(BaseSpan):
             kwargs.update(_attributes)
             # attribute should overwrite kwargs
             _attributes = kwargs
-        self.dd_span.set_tags(tags=attributes)
+        self.dd_span.set_tags(tags=_attributes)
 
 
 class DDTraceProvider(BaseProvider):
