@@ -2474,13 +2474,13 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-mock"
-version = "3.13.0"
+version = "3.14.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-mock-3.13.0.tar.gz", hash = "sha256:58c73e7eae1fc05aebe7bd4b3b59eb5beb5c0b644c7e2dd3cc652a749f0056e3"},
-    {file = "pytest_mock-3.13.0-py3-none-any.whl", hash = "sha256:158462fe2124763df267f20c81f098bdccf8928e2649e5e1093955ad1e515f80"},
+    {file = "pytest-mock-3.14.0.tar.gz", hash = "sha256:2719255a1efeceadbc056d6bf3df3d1c5015530fb40cf347c0f9afac88410bd0"},
+    {file = "pytest_mock-3.14.0-py3-none-any.whl", hash = "sha256:0b72c38033392a5f4621342fe11e9219ac11ec9d375f8e2a0c164539e0d70f6f"},
 ]
 
 [package.dependencies]
@@ -3515,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "5dce1e05ed2a1d18ef2ddfc58774c6caf4c9b80adbc8baee5dc63bc257b94a1d"
+content-hash = "ba0432a9dbc18aa50380e11fd440bf7999951a165e3fb2b0024298016d4f31d2"
