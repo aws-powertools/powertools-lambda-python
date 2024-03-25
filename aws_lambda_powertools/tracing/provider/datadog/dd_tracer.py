@@ -68,6 +68,8 @@ class DDTraceProvider(BaseProvider):
         ) as dd_span:
             yield DDSpan(dd_span=dd_span)
 
+    in_subsegment_async = trace_async
+
     def set_attribute(self, key: str | bytes, value: Any, **kwargs: Any) -> None:
         span = self.dd_tracer.context_provider.active()
         # ignore if no active span
