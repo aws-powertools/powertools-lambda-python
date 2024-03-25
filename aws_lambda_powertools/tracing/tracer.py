@@ -175,8 +175,24 @@ class Tracer:
             self._disable_xray_trace_batching()
 
     def set_attribute(self, key: str, value: Union[str, numbers.Number, bool]):
+        """Set attribute on current active trace entity with a key-value pair.
+
+        Parameters
+        ----------
+        key : str
+            attribute key
+        value : Union[str, numbers.Number, bool]
+            Value for attribute
+
+        Example
+        -------
+        Set attribute for a pseudo service named payment
+
+            tracer = Tracer(service="payment")
+            tracer.set_attribute("PaymentStatus", "CONFIRMED")
+        """
         if self.disabled:
-            logger.debug("Tracing has been disabled, aborting put_annotation")
+            logger.debug("Tracing has been disabled, aborting set_attribute")
             return
 
         logger.debug(f"setting attribute on key '{key}' with '{value}'")
@@ -206,10 +222,10 @@ class Tracer:
 
         logger.debug(f"Annotating on key '{key}' with '{value}'")
 
-        if not self._is_custom_provider():
-            self.provider.put_annotation(key=key, value=value)  # type: ignore
-        else:
+        if self._is_custom_provider():
             self.provider.set_attribute(key=key, value=value)
+        else:
+            self.provider.put_annotation(key=key, value=value)  # type: ignore
 
     def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
@@ -237,10 +253,10 @@ class Tracer:
 
         namespace = namespace or self.service
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
-        if not self._is_custom_provider():
-            self.provider.put_metadata(key=key, value=value, namespace=namespace)  # type: ignore
-        else:
+        if self._is_custom_provider():
             self.provider.set_attribute(key=f"{namespace}.{key}", value=value)
+        else:
+            self.provider.put_metadata(key=key, value=value, namespace=namespace)  # type: ignore
 
     def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
@@ -348,19 +364,19 @@ class Tracer:
                 finally:
                     global is_cold_start
                     logger.debug("Annotating cold start")
-                    if not self._is_custom_provider():
-                        subsegment.put_annotation(key="ColdStart", value=is_cold_start)
-                    else:
+                    if self._is_custom_provider():
                         subsegment.set_attribute(key="ColdStart", value=is_cold_start)
+                    else:
+                        subsegment.put_annotation(key="ColdStart", value=is_cold_start)
 
                     if is_cold_start:
                         is_cold_start = False
 
                     if self.service:
-                        if not self._is_custom_provider():
-                            subsegment.put_annotation(key="Service", value=self.service)
-                        else:
+                        if self._is_custom_provider():
                             subsegment.set_attribute(key="Service", value=self.service)
+                        else:
+                            subsegment.put_annotation(key="Service", value=self.service)
 
                 return response
 
@@ -739,10 +755,10 @@ class Tracer:
         """
         if data is None or not capture_response or subsegment is None:
             return
-        if not self._is_custom_provider():
-            subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)  # type: ignore
-        else:
+        if self._is_custom_provider():
             subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service)
+        else:
+            subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)  # type: ignore
 
     def _add_full_exception_as_metadata(
         self,
@@ -767,14 +783,14 @@ class Tracer:
         if not capture_error:
             return
 
-        if not self._is_custom_provider():
-            subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)  # type: ignore
-        else:
+        if self._is_custom_provider():
             subsegment.set_attribute(
                 key=f"{self.service}.{method_name} error",
                 value=str(error),
                 namespace=self.service,
             )
+        else:
+            subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)  # type: ignore
 
     @staticmethod
     def _disable_tracer_provider():
@@ -858,6 +874,7 @@ class Tracer:
         return isinstance(self.provider, XrayProvider)
 
     def _is_custom_provider(self):
+        # check if provider is not default xray_provider. Avoid test conflits
         return not self._is_xray_provider() and isinstance(self.provider, BaseProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):

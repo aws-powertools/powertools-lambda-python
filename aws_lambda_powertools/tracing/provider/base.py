@@ -4,22 +4,19 @@ from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Sequence, Union
 
 
-## TO-Discuss how to refactor this one. Segment seems X-ray exclusive concept
 class BaseSpan(abc.ABC):
-    """Holds common properties and methods on segment and subsegment."""
+    """Holds common properties and methods on span."""
 
     @abc.abstractmethod
     def set_attribute(self, key: str, value: Union[str, numbers.Number, bool], **kwargs) -> None:
-        """Annotate segment or subsegment with a key-value pair.
-
-        Note: Annotations will be indexed for later search query.
+        """set attribute for span with a key-value pair.
 
         Parameters
         ----------
         key: str
-            Metadata key
+            Attribute key
         value: Union[str, numbers.Number, bool]
-            Annotation value
+            Attribute value
         """
 
     @abc.abstractmethod
@@ -63,16 +60,14 @@ class BaseProvider(abc.ABC):
 
     @abc.abstractmethod
     def set_attribute(self, key: str, value: Union[str, numbers.Number, bool], **kwargs) -> None:
-        """Annotate current active trace entity with a key-value pair.
-
-        Note: Annotations will be indexed for later search query.
+        """set attribute on current active trace entity with a key-value pair.
 
         Parameters
         ----------
         key: str
-            Metadata key
+            attribute key
         value: Union[str, numbers.Number, bool]
-            Annotation value
+            attribute value
         """
 
     @abc.abstractmethod

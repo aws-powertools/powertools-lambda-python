@@ -27,18 +27,6 @@ class DDSpan(BaseSpan):
             _attributes = kwargs
         self.dd_span.set_tags(tags=attributes)
 
-    def __enter__(self):
-        print("entered")
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        try:
-            if exc_type:
-                self.dd_span.set_exc_info(exc_type, exc_val, exc_tb)
-            self.dd_span.finish()
-        except Exception as e:
-            logger.exception(f"error closing trace {e}")
-
 
 class DDTraceProvider(BaseProvider):
     def __init__(self, dd_tracer: ddtrace.Tracer):
@@ -72,19 +60,19 @@ class DDTraceProvider(BaseProvider):
         span_type: Optional[str] = None,
         **kwargs,
     ) -> AsyncGenerator[DDSpan, None]:
-        dd_span = self.dd_tracer.trace(
+        with self.dd_tracer.trace(
             name=name,
             service=service,
             resource=resource,
             span_type=span_type,
-        )
-        yield DDSpan(dd_span=dd_span)
+        ) as dd_span:
+            yield DDSpan(dd_span=dd_span)
 
     def set_attribute(self, key: str | bytes, value: Any, **kwargs: Any) -> None:
         span = self.dd_tracer.context_provider.active()
+        # ignore if no active span
         if isinstance(span, ddtrace.Span):
             span.set_tag(key=key, value=value)
-        # ignore if no active span
 
     def patch(self, modules: Sequence[str]) -> None:
         module_to_patch = {}

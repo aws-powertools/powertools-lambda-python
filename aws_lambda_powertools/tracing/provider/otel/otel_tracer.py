@@ -11,16 +11,14 @@ from ..base import BaseProvider, BaseSpan
 logger = logging.getLogger(__name__)
 
 
-# optl terminology first
-# 1. Provider based on OTel terminology
-# 2. X-Ray provider on top of the new BaseProvider
-# 3. Datadog provider on top of the new BaseProvider
-# access xray sdk
 class OtelSpan(BaseSpan):
     def __init__(self, otel_span=otel_trace.Span):
         self.otel_span = otel_span
 
     def set_attribute(self, key: str, value: str | float | bool, **kwargs) -> None:  # type: ignore[override]
+        if not isinstance(value, (str, bool, int, float)):
+            # convert value to str if value is not a supported structur
+            value = str(value)
         self.otel_span.set_attribute(key=key, value=value)
 
     def record_exception(
