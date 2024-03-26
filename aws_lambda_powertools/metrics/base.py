@@ -557,7 +557,6 @@ def single_metric(
     resolution: MetricResolution | int = 60,
     namespace: str | None = None,
     default_dimensions: Dict[str, str] | None = None,
-    timestamp: int | datetime.datetime | None = None,
 ) -> Generator[SingleMetric, None, None]:
     """Context manager to simplify creation of a single metric
 
@@ -619,9 +618,6 @@ def single_metric(
     try:
         metric: SingleMetric = SingleMetric(namespace=namespace)
         metric.add_metric(name=name, unit=unit, value=value, resolution=resolution)
-
-        if timestamp:
-            metric.set_timestamp(timestamp)
 
         if default_dimensions:
             for dim_name, dim_value in default_dimensions.items():

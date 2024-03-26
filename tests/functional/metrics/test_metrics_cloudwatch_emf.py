@@ -158,8 +158,8 @@ def test_single_metric_with_custom_timestamp(capsys, metric, dimension, namespac
         namespace=namespace,
         default_dimensions=default_dimensions,
         **metric,
-        timestamp=timestamp,
     ) as my_metric:
+        my_metric.set_timestamp(timestamp)
         my_metric.add_metric(name="second_metric", unit="Count", value=1)
 
     output = capture_metrics_output(capsys)
