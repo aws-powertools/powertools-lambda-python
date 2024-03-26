@@ -57,6 +57,7 @@ def serialize_single_metric(
     dimension: Dict,
     namespace: str,
     metadata: Dict | None = None,
+    timestamp: int | datetime.datetime | None = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -65,6 +66,9 @@ def serialize_single_metric(
 
     if metadata is not None:
         my_metrics.add_metadata(**metadata)
+
+    if timestamp:
+        my_metrics.set_timestamp(timestamp)
 
     return my_metrics.serialize_metric_set()
 
@@ -140,6 +144,28 @@ def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
 
     # THEN we should have default dimension added to the metric
     remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_with_custom_timestamp(capsys, metric, dimension, namespace):
+    # GIVEN we provide a custom timestamp
+    # WHEN using single_metric context manager
+
+    default_dimensions = {dimension["name"]: dimension["value"]}
+
+    timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+    with single_metric(
+        namespace=namespace,
+        default_dimensions=default_dimensions,
+        **metric,
+        timestamp=timestamp,
+    ) as my_metric:
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace, timestamp=timestamp)
+
+    # THEN we should have custom timestamp added to the metric
     assert expected == output
 
 
