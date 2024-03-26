@@ -133,7 +133,9 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
 
 ### Changing default timestamp
 
-When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the `set_timestamp` function.
+When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the `set_timestamp` function. You can specify a datetime object or an integer representing an epoch timestamp in milliseconds.
+
+Note that when specifying the timestamp using an integer, it must adhere to the epoch timezone format in milliseconds.
 
 ???+ info
     If you need to use different timestamps across multiple metrics, opt for [single_metric](#working-with-different-timestamp).
