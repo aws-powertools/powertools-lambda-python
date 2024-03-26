@@ -1285,6 +1285,6 @@ def test_metric_with_wrong_custom_timestamp(namespace, metric):
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == (
-            "This metric is outside of constraints and will be skipped By Amazon CloudWatch. "
+            "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
             "Ensure the timestamp is within 14 days past or 2 hours future."
         )

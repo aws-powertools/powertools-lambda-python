@@ -307,7 +307,7 @@ class MetricManager:
         # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch-Logs-Monitoring-CloudWatch-Metrics.html
         if not validate_emf_timestamp(timestamp):
             warnings.warn(
-                "This metric is outside of constraints and will be skipped By Amazon CloudWatch. "
+                "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
                 "Ensure the timestamp is within 14 days past or 2 hours future.",
                 stacklevel=2,
             )
