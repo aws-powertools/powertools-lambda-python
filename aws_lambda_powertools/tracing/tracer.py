@@ -15,7 +15,8 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
+from aws_lambda_powertools.tracing.provider import XrayProvider
+from aws_lambda_powertools.tracing.provider.base import BaseProvider, BaseSpan
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -177,6 +178,31 @@ class Tracer:
         if self._is_xray_provider():
             self._disable_xray_trace_batching()
 
+    def set_attribute(self, key: str, value: Union[str, numbers.Number, bool]):
+        """Set attribute on current active trace entity with a key-value pair.
+
+        Parameters
+        ----------
+        key : str
+            attribute key
+        value : Union[str, numbers.Number, bool]
+            Value for attribute
+
+        Example
+        -------
+        Set attribute for a pseudo service named payment
+
+            tracer = Tracer(service="payment")
+            tracer.set_attribute("PaymentStatus", "CONFIRMED")
+        """
+        if self.disabled:
+            logger.debug("Tracing has been disabled, aborting set_attribute")
+            return
+
+        logger.debug(f"setting attribute on key '{key}' with '{value}'")
+
+        self.provider.set_attribute(key=key, value=value)
+
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
 
@@ -199,7 +225,11 @@ class Tracer:
             return
 
         logger.debug(f"Annotating on key '{key}' with '{value}'")
-        self.provider.put_annotation(key=key, value=value)
+
+        if self._is_custom_provider():
+            self.provider.set_attribute(key=key, value=value)
+        else:
+            self.provider.put_annotation(key=key, value=value)  # type: ignore
 
     def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
@@ -227,7 +257,10 @@ class Tracer:
 
         namespace = namespace or self.service
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
-        self.provider.put_metadata(key=key, value=value, namespace=namespace)
+        if self._is_custom_provider():
+            self.provider.set_attribute(key=f"{namespace}.{key}", value=value)
+        else:
+            self.provider.put_metadata(key=key, value=value, namespace=namespace)  # type: ignore
 
     def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
@@ -311,7 +344,7 @@ class Tracer:
 
         @functools.wraps(lambda_handler)
         def decorate(event, context, **kwargs):
-            with self.provider.in_subsegment(name=f"## {lambda_handler_name}") as subsegment:
+            with self.provider.trace(name=f"## {lambda_handler_name}") as subsegment:
                 try:
                     logger.debug("Calling lambda handler")
                     response = lambda_handler(event, context, **kwargs)
@@ -335,13 +368,19 @@ class Tracer:
                 finally:
                     global is_cold_start
                     logger.debug("Annotating cold start")
-                    subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+                    if self._is_custom_provider():
+                        subsegment.set_attribute(key="ColdStart", value=is_cold_start)
+                    else:
+                        subsegment.put_annotation(key="ColdStart", value=is_cold_start)
 
                     if is_cold_start:
                         is_cold_start = False
 
                     if self.service:
-                        subsegment.put_annotation(key="Service", value=self.service)
+                        if self._is_custom_provider():
+                            subsegment.set_attribute(key="Service", value=self.service)
+                        else:
+                            subsegment.put_annotation(key="Service", value=self.service)
 
                 return response
 
@@ -575,7 +614,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         async def decorate(*args, **kwargs):
-            async with self.provider.in_subsegment_async(name=f"## {method_name}") as subsegment:
+            async with self.provider.trace_async(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = await method(*args, **kwargs)
@@ -608,7 +647,7 @@ class Tracer:
     ):
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     result = yield from method(*args, **kwargs)
@@ -642,7 +681,7 @@ class Tracer:
         @functools.wraps(method)
         @contextlib.contextmanager
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     with method(*args, **kwargs) as return_val:
@@ -675,7 +714,7 @@ class Tracer:
     ) -> AnyCallableT:
         @functools.wraps(method)
         def decorate(*args, **kwargs):
-            with self.provider.in_subsegment(name=f"## {method_name}") as subsegment:
+            with self.provider.trace(name=f"## {method_name}") as subsegment:
                 try:
                     logger.debug(f"Calling method: {method_name}")
                     response = method(*args, **kwargs)
@@ -703,7 +742,7 @@ class Tracer:
         self,
         method_name: Optional[str] = None,
         data: Optional[Any] = None,
-        subsegment: Optional[BaseSegment] = None,
+        subsegment: Optional[BaseSpan] = None,
         capture_response: Optional[Union[bool, str]] = None,
     ):
         """Add response as metadata for given subsegment
@@ -721,14 +760,16 @@ class Tracer:
         """
         if data is None or not capture_response or subsegment is None:
             return
-
-        subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)
+        if self._is_custom_provider():
+            subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service)
+        else:
+            subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)  # type: ignore
 
     def _add_full_exception_as_metadata(
         self,
         method_name: str,
         error: Exception,
-        subsegment: BaseSegment,
+        subsegment: BaseSpan,
         capture_error: Optional[bool] = None,
     ):
         """Add full exception object as metadata for given subsegment
@@ -747,7 +788,14 @@ class Tracer:
         if not capture_error:
             return
 
-        subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)
+        if self._is_custom_provider():
+            subsegment.set_attribute(
+                key=f"{self.service}.{method_name} error",
+                value=str(error),
+                namespace=self.service,
+            )
+        else:
+            subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)  # type: ignore
 
     @staticmethod
     def _disable_tracer_provider():
@@ -812,11 +860,8 @@ class Tracer:
         # Due to Lazy Import, we need to activate `core` attrib via import
         # we also need to include `patch`, `patch_all` methods
         # to ensure patch calls are done via the provider
-        from aws_xray_sdk.core import xray_recorder  # type: ignore
 
-        provider = xray_recorder
-        provider.patch = aws_xray_sdk.core.patch
-        provider.patch_all = aws_xray_sdk.core.patch_all
+        provider = XrayProvider()
 
         return provider
 
@@ -831,7 +876,11 @@ class Tracer:
         aws_xray_sdk.core.xray_recorder.configure(streaming_threshold=0)
 
     def _is_xray_provider(self):
-        return "aws_xray_sdk" in self.provider.__module__
+        return isinstance(self.provider, XrayProvider)
+
+    def _is_custom_provider(self):
+        # check if provider is not default xray_provider. Avoid test conflits
+        return not self._is_xray_provider() and isinstance(self.provider, BaseProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being

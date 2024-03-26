@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from typing import Any, Generator, List, Optional, Sequence, Union
 
 
+## this class is deprecated, keep this class for backwards compatibility
 class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
@@ -16,6 +17,7 @@ class BaseSegment(abc.ABC):
         Parameters
         ----------
         end_time: int
+        # TO-discuss: Providers typically use ns(time_ns -> nanosecond) as start or close time
             Time in epoch seconds, by default current time will be used.
         """
 
