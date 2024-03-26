@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime
 
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
@@ -85,7 +85,7 @@ def validate_emf_timestamp(timestamp: int | datetime) -> bool:
     Parameters:
     ----------
     timestamp: int | datetime
-        Datetime object or epoch time representing the timestamp to validate.
+        Datetime object or epoch time in milliseconds representing the timestamp to validate.
 
     Returns
     -------
@@ -97,10 +97,13 @@ def validate_emf_timestamp(timestamp: int | datetime) -> bool:
         return False
 
     if isinstance(timestamp, datetime):
-        # Converting timestamp to integer
+        # Converting timestamp to epoch time in milliseconds
         timestamp = int(timestamp.timestamp() * 1000)
 
-    current_time = int(datetime.now(timezone.utc).timestamp() * 1000)
+    # Consider current timezone when working with date and time
+    current_timezone = datetime.now().astimezone().tzinfo
+
+    current_time = int(datetime.now(current_timezone).timestamp() * 1000)
     min_valid_timestamp = current_time - constants.EMF_MAX_TIMESTAMP_PAST_AGE
     max_valid_timestamp = current_time + constants.EMF_MAX_TIMESTAMP_FUTURE_AGE
 
@@ -114,7 +117,7 @@ def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
     Parameters
     ----------
     timestamp: int | datetime
-        The timestamp to convert. If already in milliseconds format, returns it as is.
+        The timestamp to convert. If already in epoch milliseconds format, returns it as is.
         If datetime object, converts it to milliseconds since Unix epoch.
 
     Returns:

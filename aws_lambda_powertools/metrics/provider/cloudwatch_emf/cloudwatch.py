@@ -308,9 +308,19 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             self.metadata_set[str(key)] = value
 
     def set_timestamp(self, timestamp: int | datetime.datetime):
+        """
+        Set the timestamp for the metric.
+
+        Parameters:
+        -----------
+        timestamp: int | datetime.datetime
+            The timestamp to create the metric.
+            If an integer is provided, it is assumed to be the epoch time in milliseconds.
+            If a datetime object is provided, it will be converted to epoch time in milliseconds.
+        """
         # The timestamp must be a Datetime object or an integer representing an epoch time.
         # This should not exceed 14 days in the past or be more than 2 hours in the future.
-        # any metrics failing to meet this criteria will be skipped by Amazon CloudWatch.
+        # Any metrics failing to meet this criteria will be skipped by Amazon CloudWatch.
         # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
         # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch-Logs-Monitoring-CloudWatch-Metrics.html
         if not validate_emf_timestamp(timestamp):
