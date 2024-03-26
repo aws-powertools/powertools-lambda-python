@@ -1266,12 +1266,36 @@ def test_metric_with_custom_timestamp(namespace, metric, capsys, timestamp):
     assert invocation["_aws"]["Timestamp"] == metric_timestamp
 
 
-def test_metric_with_wrong_custom_timestamp(namespace, metric):
+def test_metric_custom_timestamp_more_than_14days_ago(namespace, metric):
     # GIVEN Metrics instance is initialized
     my_metrics = Metrics(namespace=namespace)
 
     # Setting timestamp outside of contraints with 20 days before
     metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=20)).timestamp() * 1000)
+
+    # WHEN we set a wrong timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    # THEN should raise a warning
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == (
+            "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
+            "Ensure the timestamp is within 14 days past or 2 hours future."
+        )
+
+
+def test_metric_custom_timestamp_with_wrong_type(namespace, metric):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Setting timestamp outside of contraints with 20 days before
+    metric_timestamp = "timestamp_as_string"
 
     # WHEN we set a wrong timestamp before to flush the metric
     @my_metrics.log_metrics

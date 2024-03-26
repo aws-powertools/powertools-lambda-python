@@ -125,4 +125,10 @@ def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
     if isinstance(timestamp, int):
         return timestamp
 
-    return int(round(timestamp.timestamp() * 1000))
+    try:
+        return int(round(timestamp.timestamp() * 1000))
+    except AttributeError:
+        # If this point is reached, it indicates timestamp is not a datetime object
+        # Returning zero represents the initial date of epoch time,
+        # which will be skipped by Amazon CloudWatch.
+        return 0
