@@ -1,9 +1,9 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
-class EventBridgeEvent(DictWrapper):
+class EventBridgeEvent(EventWrapper):
     """Amazon EventBridge Event
 
     Documentation:

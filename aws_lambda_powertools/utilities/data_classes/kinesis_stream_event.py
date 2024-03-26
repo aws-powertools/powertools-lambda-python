@@ -6,7 +6,7 @@ from typing import Iterator, List
 from aws_lambda_powertools.utilities.data_classes.cloud_watch_logs_event import (
     CloudWatchLogsDecodedData,
 )
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
 class KinesisStreamRecordPayload(DictWrapper):
@@ -95,7 +95,7 @@ class KinesisStreamRecord(DictWrapper):
         return KinesisStreamRecordPayload(self._data)
 
 
-class KinesisStreamEvent(DictWrapper):
+class KinesisStreamEvent(EventWrapper):
     """Kinesis stream event
 
     Documentation:
