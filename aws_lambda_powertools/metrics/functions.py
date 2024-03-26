@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.exceptions import (
     MetricResolutionError,
     MetricUnitError,
 )
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
+from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.types import List
 
 
@@ -69,3 +72,57 @@ def extract_cloudwatch_metric_unit_value(metric_units: List, metric_valid_option
         unit = unit.value
 
     return unit
+
+
+def validate_emf_timestamp(timestamp: int | datetime) -> bool:
+    """
+    Validates a given timestamp based on CloudWatch Timestamp guidelines.
+
+    Timestamp must meet CloudWatch requirements, otherwise an InvalidTimestampError will be raised.
+    See [Timestamps](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/cloudwatch_concepts.html#about_timestamp)
+    for valid values.
+
+    Parameters:
+    ----------
+    timestamp: int | datetime
+        Datetime object or epoch time representing the timestamp to validate.
+
+    Returns
+    -------
+    bool
+        Valid or not timestamp values
+    """
+
+    if not isinstance(timestamp, (int, datetime)):
+        return False
+
+    if isinstance(timestamp, datetime):
+        # Assuming the integer timestamp represents seconds since the epoch
+        timestamp = int(timestamp.timestamp() * 1000)
+
+    current_time = int(datetime.now(timezone.utc).timestamp() * 1000)
+    min_valid_timestamp = current_time - constants.EMF_MAX_TIMESTAMP_PAST_AGE
+    max_valid_timestamp = current_time + constants.EMF_MAX_TIMESTAMP_FUTURE_AGE
+
+    return min_valid_timestamp <= timestamp <= max_valid_timestamp
+
+
+def convert_timestamp_to_emf_format(timestamp: int | datetime) -> int:
+    """
+    Converts a timestamp to EMF compatible format.
+
+    Parameters
+    ----------
+    timestamp: int | datetime
+        The timestamp to convert. If already in milliseconds format, returns it as is.
+        If datetime object, converts it to milliseconds since Unix epoch.
+
+    Returns:
+    --------
+    int
+        The timestamp converted to EMF compatible format (milliseconds since Unix epoch).
+    """
+    if isinstance(timestamp, int):
+        return timestamp
+
+    return int(round(timestamp.timestamp() * 1000))

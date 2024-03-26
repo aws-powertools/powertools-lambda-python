@@ -14,6 +14,7 @@ from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaVal
 from aws_lambda_powertools.metrics.functions import (
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
+    validate_emf_timestamp,
 )
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
@@ -305,15 +306,17 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         else:
             self.metadata_set[str(key)] = value
 
-    def set_timestamp(self, timestamp: int):
-        if not isinstance(timestamp, int):
+    def set_timestamp(self, timestamp: int | datetime.datetime):
+        if not validate_emf_timestamp(timestamp):
             warnings.warn(
-                "The timestamp key must be an integer value representing an epoch time. "
-                "The provided value is not valid. Using the current timestamp instead.",
+                "The timestamp must be a Datetime object or an integer representing an epoch time. "
+                "This should not exceed 14 days in the past or be more than 2 hours in the future. "
+                "Any metrics failing to meet this criteria will be skipped by Amazon CloudWatch. "
+                "Please check the EMFValidationErrors metric in AWS/Logs namespace for more details.",
                 stacklevel=2,
             )
-        else:
-            self.timestamp = timestamp
+
+        self.timestamp = timestamp
 
     def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")
