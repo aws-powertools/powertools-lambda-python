@@ -131,6 +131,19 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
     --8<-- "examples/metrics/src/set_default_dimensions_log_metrics.py"
     ```
 
+### Changing default timestamp
+
+When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the `set_timestamp` function.
+
+???+ info
+    If you need to use different timestamps across multiple metrics, opt for [single_metric](#working-with-different-timestamp).
+
+=== "set_custom_timestamp_log_metrics.py"
+
+    ```python hl_lines="15"
+    --8<-- "examples/metrics/src/set_custom_timestamp_log_metrics.py"
+    ```
+
 ### Flushing metrics
 
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the `log_metrics` decorator.
