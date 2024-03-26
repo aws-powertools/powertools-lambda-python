@@ -1216,12 +1216,16 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
     assert len(output) == 2
 
 
-def test_metric_with_custom_timestamp(namespace, metric, capsys):
+@pytest.mark.parametrize(
+    "timestamp",
+    [int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000), 1711105187000],
+)
+def test_metric_with_custom_timestamp(namespace, metric, capsys, timestamp):
     # GIVEN Metrics instance is initialized
     my_metrics = Metrics(namespace=namespace)
 
     # Calculate the metric timestamp as 2 days before the current time
-    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+    metric_timestamp = timestamp
 
     # WHEN we set custom timestamp before to flush the metric
     @my_metrics.log_metrics
@@ -1240,8 +1244,8 @@ def test_metric_with_wrong_custom_timestamp(namespace, metric):
     # GIVEN Metrics instance is initialized
     my_metrics = Metrics(namespace=namespace)
 
-    # Setting timestamp as datetime
-    metric_timestamp = datetime.datetime.now()
+    # Setting timestamp outside of contraints with 20 days before
+    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=20)).timestamp() * 1000)
 
     # WHEN we set a wrong timestamp before to flush the metric
     @my_metrics.log_metrics
@@ -1255,6 +1259,6 @@ def test_metric_with_wrong_custom_timestamp(namespace, metric):
         lambda_handler({}, {})
         assert len(w) == 1
         assert str(w[-1].message) == (
-            "The timestamp key must be an integer value representing an epoch time. "
-            "The provided value is not valid. Using the current timestamp instead."
+            "This metric is outside of constraints and will be skipped By Amazon CloudWatch. "
+            "Ensure the timestamp is within 14 days past or 2 hours future."
         )

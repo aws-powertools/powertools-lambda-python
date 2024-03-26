@@ -97,7 +97,7 @@ def validate_emf_timestamp(timestamp: int | datetime) -> bool:
         return False
 
     if isinstance(timestamp, datetime):
-        # Assuming the integer timestamp represents seconds since the epoch
+        # Converting timestamp to integer
         timestamp = int(timestamp.timestamp() * 1000)
 
     current_time = int(datetime.now(timezone.utc).timestamp() * 1000)

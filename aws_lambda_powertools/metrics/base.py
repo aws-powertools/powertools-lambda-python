@@ -17,6 +17,7 @@ from aws_lambda_powertools.metrics.exceptions import (
     MetricValueError,
     SchemaValidationError,
 )
+from aws_lambda_powertools.metrics.functions import convert_timestamp_to_emf_format, validate_emf_timestamp
 from aws_lambda_powertools.metrics.provider import cold_start
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.metric_properties import MetricResolution, MetricUnit
@@ -298,15 +299,20 @@ class MetricManager:
         else:
             self.metadata_set[str(key)] = value
 
-    def set_timestamp(self, timestamp: int):
-        if not isinstance(timestamp, int):
+    def set_timestamp(self, timestamp: int | datetime.datetime):
+        # The timestamp must be a Datetime object or an integer representing an epoch time.
+        # This should not exceed 14 days in the past or be more than 2 hours in the future.
+        # any metrics failing to meet this criteria will be skipped by Amazon CloudWatch.
+        # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
+        # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch-Logs-Monitoring-CloudWatch-Metrics.html
+        if not validate_emf_timestamp(timestamp):
             warnings.warn(
-                "The timestamp key must be an integer value representing an epoch time. ",
-                "The provided value is not valid. Using the current timestamp instead.",
+                "This metric is outside of constraints and will be skipped By Amazon CloudWatch. "
+                "Ensure the timestamp is within 14 days past or 2 hours future.",
                 stacklevel=2,
             )
-        else:
-            self.timestamp = timestamp
+
+        self.timestamp = convert_timestamp_to_emf_format(timestamp)
 
     def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")
