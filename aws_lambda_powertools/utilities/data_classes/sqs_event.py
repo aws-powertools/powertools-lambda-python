@@ -246,6 +246,5 @@ class SQSEvent(EventWrapper):
 
     @property
     def records(self) -> Iterator[SQSRecord]:
-        print("in here!!")
         for record in self["Records"]:
             yield SQSRecord(data=record, json_deserializer=self._json_deserializer)

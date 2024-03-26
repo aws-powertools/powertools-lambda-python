@@ -121,3 +121,10 @@ class SNSEvent(EventWrapper):
     def sns_message(self) -> str:
         """Return the message for the first sns event record"""
         return self.record.sns.message
+
+    def nested_event_contents(self):
+        for record in self["Records"]:
+            # print('record', record, type(record))
+            body = record['Sns']['Message']
+            # print('body:', body, type(body))
+            yield body

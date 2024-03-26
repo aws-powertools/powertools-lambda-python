@@ -67,3 +67,9 @@ class EventBridgeEvent(DictWrapper):
     def replay_name(self) -> Optional[str]:
         """Identifies whether the event is being replayed and what is the name of the replay."""
         return self["replay-name"]
+
+    def nested_event_contents(self):
+        for record in self["detail"]:
+            print('record', record, type(record))
+            # print('body:', body, type(body))
+            yield record

@@ -94,27 +94,34 @@ class DictWrapper(Mapping):
         return self._data
 
 class EventWrapper(DictWrapper):
+
     NestedEvent = TypeVar("NestedEvent", bound=DictWrapper)
-    @property
+
+    def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
+        """
+        Parameters
+        ----------
+        data : Dict[str, Any]
+            Lambda Event Source Event payload
+        json_deserializer : Callable, optional
+            function to deserialize `str`, `bytes`, `bytearray` 
+            containing a JSON document to a Python `obj`,
+            by default json.loads
+        """
+        super().__init__(data, json_deserializer)
+
     def nested_event_contents(self):
         for record in self["Records"]:
-            yield record["body"]
+            body = record['body']
+            yield body
 
-    # @property
+
     def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
         if nested_event_content_deserializer is None:
             nested_event_content_deserializer = self._json_deserializer
 
-        for content in self.nested_event_contents:
+        for content in self.nested_event_contents():
             yield nested_event_class(nested_event_content_deserializer(content))
-
-    # @property
-    def decode_nested_event(self, nested_event_class, nested_event_content_deserializer = None):
-        if nested_event_content_deserializer is None:
-            nested_event_content_deserializer = self._json_deserializer
-
-        for content in self.nested_event_contents:
-            return nested_event_class(nested_event_content_deserializer(content))
 
 class BaseProxyEvent(DictWrapper):
     @property

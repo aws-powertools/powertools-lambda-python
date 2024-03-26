@@ -1,49 +1,71 @@
+from typing import Iterator
 import json
-
-from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent
-# from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
-from aws_lambda_powertools.utilities.data_classes import event_source
+from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent, SNSEvent, SESEvent, EventBridgeEvent
+import test_events
 
 
-# @event_source(data_class=SQSEvent)
-def lambda_handler(event: SQSEvent, context):
-    event = SQSEvent(event)
-    nesteds3event = event.decode_nested_events(S3Event)
-    for record in event.records: #then how would a for loop work..
-        nested_event = record.decode_nested_event(S3Event) #for loop must be for same events inside one event
-        print(nested_event, nested_event)
-
-    # event = SQSEvent()
-    # sns_events = event.decode_nested_events(Iterator[SNSEvent])
-    # for sns_event in sns_events:
-    #     s3_events = sns_event.decode_nested_events(S3Event)
-    #     for s3_event in s3_events:
-    #         print(s3_event.bucket.name)
+def lambda_handler_sqs_s3(event: SQSEvent = test_events.sqs_s3_event): # sqs(s3)
+    sqs_event = SQSEvent(event)
+    s3_event = sqs_event.decode_nested_events(S3Event)
+    for rec in s3_event:
+        print('rec:', rec.bucket_name)
+    # for sqs_record in sqs_event.records:
+    #     # print('body in main:', sqs_record.body)
+    #     # s3_event = sqs_event.decode_nested_events(Iterator[S3Event]) # is this correct format?
+    #     s3_event = sqs_event.decode_nested_events(S3Event)
+    #     for rec in s3_event:
+    #         print('rec:', rec.bucket_name)
+      # print(next(s3_event).bucket_name) # use this if not inside a for loop
 
 
+def lambda_handler_sqs_sns(event: SQSEvent = test_events.sqs_sns_event): # sqs(sns)
+    sqs_event = SQSEvent(event)
+    sns_event = sqs_event.decode_nested_events(SNSEvent)
+    for rec in sns_event:
+        print('rec:', type(rec), rec.sns_message)
 
 
-event = SQSEvent({
-    "Records": [
-        {
-            "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
-            "receiptHandle": "MessageReceiptHandle",
-            "body": {
-                "Message": "{\"Records\":[{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2023-01-01T00:00:00.000Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:123456789012:example-user\"},\"requestParameters\":{\"sourceIPAddress\":\"127.0.0.1\"},\"responseElements\":{\"x-amz-request-id\":\"example-request-id\",\"x-amz-id-2\":\"example-id\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"testConfigRule\",\"bucket\":{\"name\":\"example-bucket\",\"ownerIdentity\":{\"principalId\":\"EXAMPLE\"},\"arn\":\"arn:aws:s3:::example-bucket\"},\"object\":{\"key\":\"example-object.txt\",\"size\":1024,\"eTag\":\"example-tag\",\"versionId\":\"1\",\"sequencer\":\"example-sequencer\"}}}]}"
-            },
-            "attributes": {
-                "ApproximateReceiveCount": "1",
-                "SentTimestamp": "1523232000000",
-                "SenderId": "123456789012",
-                "ApproximateFirstReceiveTimestamp": "1523232000001"
-            },
-            "messageAttributes": {},
-            "md5OfBody": "7b270e59b47ff90a553787216d55d91d",
-            "eventSource": "aws:sqs",
-            "eventSourceARN": "arn:aws:sqs:us-east-1:123456789012:MyQueue",
-            "awsRegion": "us-east-1"
-        }
-  ]
-})
+def lambda_handler_sns_s3(event: SNSEvent = test_events.sns_s3_event): # sns(s3)
+    sns_event = SNSEvent(event)
+    s3_event = sns_event.decode_nested_events(S3Event)
+    for rec in s3_event:
+        print(type(rec))
+        print('rec:', rec.bucket_name)
 
-lambda_handler(event, {})
+
+def lambda_handler_sqs_s3_multi(event: SQSEvent = test_events.sqs_s3_multi_event): # sqs(s3, s3)
+    sqs_event = SQSEvent(event)
+    s3_event = sqs_event.decode_nested_events(S3Event)
+    for rec in s3_event:
+        print('rec:', rec.bucket_name)
+
+
+def lambda_handler_sqs_sns_s3(event: SQSEvent = test_events.sqs_sns_s3_event): # sqs(sns(s3))
+    sqs_event = SQSEvent(event)
+    sns_event = sqs_event.decode_nested_events(SNSEvent)
+    for rec in sns_event:
+        print('rec:', type(rec), rec.sns_message)
+    # s3_event = sns_event.decode_nested_events(S3Event)
+
+
+def lambda_handler_sns_ses(event: SNSEvent = test_events.sns_ses_event): # sns(ses)
+    sns_event = SNSEvent(event)
+    ses_event = sns_event.decode_nested_events(SESEvent)
+    for rec in ses_event:
+        print(type(rec))
+        print('rec:', rec.get("mail").get('source')) #but can't do rec.mail bc no "Records" key..
+
+def lambda_handler_eb_s3(event: EventBridgeEvent = test_events.eb_s3_event): # eventbridge(s3)
+    eb_event = EventBridgeEvent(event)
+    s3_event = eb_event.decode_nested_events(S3Event)
+    for rec in s3_event:
+        print(type(rec))
+        print('rec:', rec)
+
+lambda_handler_sqs_s3(test_events.sqs_s3_event)
+# lambda_handler_sqs_sns(test_events.sqs_sns_event) #not working bc sns doesn't have Records key
+lambda_handler_sns_s3(test_events.sns_s3_event)
+lambda_handler_sqs_s3_multi(test_events.sqs_s3_multi_event)
+# lambda_handler_sqs_sns_s3(test_events.sqs_sns_s3_event) #not working bc sns doesn't have Records key
+lambda_handler_sns_ses(test_events.sns_ses_event)
+# lambda_handler_eb_s3(test_events.eb_s3_event) #EB returning a str, not dict
