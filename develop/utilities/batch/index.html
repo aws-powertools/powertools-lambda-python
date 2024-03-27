@@ -4933,9 +4933,13 @@
 <li><strong><code>_prepare()</code></strong> – called once as part of the processor initialization</li>
 <li><strong><code>_clean()</code></strong> – teardown logic called once after <code>_process_record</code> completes</li>
 <li><strong><code>_async_process_record()</code></strong> – If you need to implement asynchronous logic, use this method, otherwise define it in your class with empty logic</li>
+<li><strong><code>response()</code></strong> - called upon completion of processing</li>
 </ul>
-<p>You can then use this class as a context manager, or pass it to <code>batch_processor</code> to use as a decorator on your Lambda handler function.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Creating a custom batch processor</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<p>You can utilize this class to instantiate a new processor and then pass it to the <code>process_partial_response</code> function.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="creating-a-custom-batch-processor" name="__tabbed_10" type="radio" /><input id="dynamodb-table-used-for-storing-processed-records" name="__tabbed_10" type="radio" /><input id="sample-event_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="creating-a-custom-batch-processor">Creating a custom batch processor</label><label for="dynamodb-table-used-for-storing-processed-records">DynamoDB table used for storing processed records.</label><label for="sample-event_3">Sample event</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
 <span class="normal"> 4</span>
@@ -5008,7 +5012,15 @@
 <span class="normal">71</span>
 <span class="normal">72</span>
 <span class="normal">73</span>
-<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">os</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">randint</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
@@ -5019,15 +5031,17 @@
 <span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch</span> <span class="kn">import</span> <span class="p">(</span>
 </span><span class="hll">    <span class="n">BasePartialProcessor</span><span class="p">,</span>
 </span><span class="hll">    <span class="n">process_partial_response</span><span class="p">,</span>
-</span><span class="p">)</span>
+</span><span class="hll"><span class="p">)</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.batch.types</span> <span class="kn">import</span> <span class="n">PartialItemFailureResponse</span>
 
-<span class="n">table_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;TABLE_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;table_not_found&quot;</span><span class="p">)</span>
+<span class="n">table_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;TABLE_NAME&quot;</span><span class="p">,</span> <span class="s2">&quot;table_store_batch&quot;</span><span class="p">)</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 
 
 <span class="hll"><span class="k">class</span> <span class="nc">MyPartialProcessor</span><span class="p">(</span><span class="n">BasePartialProcessor</span><span class="p">):</span>
-</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+</span>    <span class="n">DEFAULT_RESPONSE</span><span class="p">:</span> <span class="n">PartialItemFailureResponse</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;batchItemFailures&quot;</span><span class="p">:</span> <span class="p">[]}</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process a record and stores successful results at a Amazon DynamoDB Table</span>
 
 <span class="sd">    Parameters</span>
@@ -5038,6 +5052,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="n">table_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_response</span><span class="p">:</span> <span class="n">PartialItemFailureResponse</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DEFAULT_RESPONSE</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <span class="hll">    <span class="k">def</span> <span class="nf">_prepare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -5045,6 +5060,9 @@
         <span class="c1"># Creates table resource and clean previous results</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ddb_table</span> <span class="o">=</span> <span class="n">boto3</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;dynamodb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">Table</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">table_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">success_messages</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+<span class="hll">    <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PartialItemFailureResponse</span><span class="p">:</span>
+</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_response</span>
 
 <span class="hll">    <span class="k">def</span> <span class="nf">_clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 </span>        <span class="c1"># It&#39;s called once, *after* closing processing all records (closing the context manager)</span>
@@ -5081,8 +5099,73 @@
 
 
 <span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-<span class="hll">    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
-</span></code></pre></div></td></tr></table></div>
+    <span class="k">return</span> <span class="n">process_partial_response</span><span class="p">(</span><span class="n">event</span><span class="o">=</span><span class="n">event</span><span class="p">,</span> <span class="n">record_handler</span><span class="o">=</span><span class="n">record_handler</span><span class="p">,</span> <span class="n">processor</span><span class="o">=</span><span class="n">processor</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">Transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless-2016-10-31</span>
+<span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">IdempotencyTable</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::DynamoDB::Table</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">AttributeDefinitions</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">AttributeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">messageId</span>
+<span class="w">          </span><span class="nt">AttributeType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S</span>
+<span class="w">      </span><span class="nt">KeySchema</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">AttributeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">messageId</span>
+<span class="w">          </span><span class="nt">KeyType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">HASH</span>
+<span class="w">      </span><span class="nt">TimeToLiveSpecification</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">AttributeName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">expiration</span>
+<span class="w">        </span><span class="nt">Enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">BillingMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PAY_PER_REQUEST</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;Records&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;messageId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;059f36b4-87a3-44ab-83d2-661975830a7d&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;receiptHandle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;{\&quot;Message\&quot;: \&quot;success\&quot;}&quot;</span>
+<span class="w">      </span><span class="p">},</span>
+<span class="w">      </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;messageId&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;244fc6b4-87a3-44ab-83d2-361172410c3a&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;receiptHandle&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SGVsbG8sIHRoaXMgaXMgYSB0ZXN0Lg==&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="w">  </span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="caveats">Caveats<a class="headerlink" href="#caveats" title="Permanent link">&para;</a></h3>
 <h4 id="tracer-response-auto-capture-for-large-batch-sizes">Tracer response auto-capture for large batch sizes<a class="headerlink" href="#tracer-response-auto-capture-for-large-batch-sizes" title="Permanent link">&para;</a></h4>
 <p>When using Tracer to capture responses for each batch record processing, you might exceed 64K of tracing data depending on what you return from your <code>record_handler</code> function, or how big is your batch size.</p>
@@ -5147,7 +5230,7 @@
 <p>As there is no external calls, you can unit test your code with <code>BatchProcessor</code> quite easily.</p>
 <p><strong>Example</strong>:</p>
 <p>Given a SQS batch where the first batch record succeeds and the second fails processing, we should have a single item reported in the function response.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:3"><input checked="checked" id="getting_started_with_testpy" name="__tabbed_10" type="radio" /><input id="getting_started_with_test_apppy" name="__tabbed_10" type="radio" /><input id="sample-sqs-event" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="getting_started_with_testpy">getting_started_with_test.py</label><label for="getting_started_with_test_apppy">getting_started_with_test_app.py</label><label for="sample-sqs-event">Sample SQS event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:3"><input checked="checked" id="getting_started_with_testpy" name="__tabbed_11" type="radio" /><input id="getting_started_with_test_apppy" name="__tabbed_11" type="radio" /><input id="sample-sqs-event" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="getting_started_with_testpy">getting_started_with_test.py</label><label for="getting_started_with_test_apppy">getting_started_with_test_app.py</label><label for="sample-sqs-event">Sample SQS event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -5424,7 +5507,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-03-20
+    2024-03-27
   </span>
 
     
