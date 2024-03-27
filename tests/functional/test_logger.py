@@ -9,10 +9,9 @@ import secrets
 import string
 import sys
 import warnings
-from ast import Dict
 from collections import namedtuple
 from datetime import datetime, timezone
-from typing import Any, Callable, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import pytest
 
@@ -625,6 +624,9 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
 
         def append_keys(self, **additional_keys):
             self.custom_format.update(additional_keys)
+
+        def current_keys(self) -> Dict[str, Any]:
+            return self.custom_format
 
         def remove_keys(self, keys: Iterable[str]):
             for key in keys:
