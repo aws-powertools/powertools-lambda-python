@@ -1,0 +1,3981 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Utility">
+      
+      
+        <meta name="author" content="Amazon Web Services">
+      
+      
+      
+        <link rel="prev" href="../idempotency/">
+      
+      
+        <link rel="next" href="../feature_flags/">
+      
+      
+      <link rel="icon" href="../../media/aws-logo-light.svg">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.5.15">
+    
+    
+      
+        <title>Data Masking - Powertools for AWS Lambda (Python)</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e359304.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Ubuntu";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#key-features" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+  You're not viewing the latest version.
+  <a href="../../..">
+    <strong>Click here to go to latest.</strong>
+  </a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),outdated=__md_get("__outdated",sessionStorage);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-header__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Powertools for AWS Lambda (Python)
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Data Masking
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7M9 21a1 1 0 0 0 1 1h4a1 1 0 0 0 1-1v-1H9v1Z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 2.38-1.19 4.47-3 5.74V17a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.26C6.19 13.47 5 11.38 5 9a7 7 0 0 1 7-7M9 21v-1h6v1a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1m3-17a5 5 0 0 0-5 5c0 2.05 1.23 3.81 3 4.58V16h4v-2.42c1.77-.77 3-2.53 3-4.58a5 5 0 0 0-5-5Z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var media,input,key,value,palette=__md_get("__palette");if(palette&&palette.color){"(prefers-color-scheme)"===palette.color.media&&(media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']"),palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent"));for([key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../.." class="md-tabs__link">
+          
+  
+    
+  
+  Homepage
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../tutorial/" class="md-tabs__link">
+        
+  
+    
+  
+  Tutorial
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../security/" class="md-tabs__link">
+          
+  
+    
+  
+  Processes
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Powertools for AWS Lambda (Python)" class="md-nav__button md-logo" aria-label="Powertools for AWS Lambda (Python)" data-md-component="logo">
+      
+  <img src="../../media/aws-logo-light.svg" alt="logo">
+
+    </a>
+    Powertools for AWS Lambda (Python)
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/aws-powertools/powertools-lambda-python" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Homepage
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Homepage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../changelog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Changelog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    API reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../upgrade/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Upgrade guide
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../we_made_this/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    We Made This (Community)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_7" id="__nav_1_7_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Features
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_7_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_7">
+            <span class="md-nav__icon md-icon"></span>
+            Features
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/tracer/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tracer
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/logger/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logger
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../core/metrics/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Metrics
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1_7_3" id="__nav_1_7_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_3">
+            <span class="md-nav__icon md-icon"></span>
+            Metrics
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/metrics/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Amazon CloudWatch EMF
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/metrics/datadog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Datadog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_7_4" id="__nav_1_7_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Event Handler
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_1_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            Event Handler
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/event_handler/api_gateway/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REST API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/event_handler/appsync/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GraphQL API
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../core/event_handler/bedrock_agents/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Agents for Amazon Bedrock
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parameters/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parameters
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../batch/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Batch Processing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../typing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Typing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../validation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Validation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../data_classes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Event Source Data Classes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../parser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parser (Pydantic)
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../idempotency/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Idempotency
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Data Masking
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Data Masking
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erasing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erasing data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypting data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decrypting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decrypting data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encryption-context-for-integrity-and-authenticity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encryption context for integrity and authenticity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-parts-of-your-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing parts of your data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing parts of your data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data serialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-multiple-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using multiple keys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aws-encryption-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      AWS Encryption SDK
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-masking-request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data masking request flow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data masking request flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erase-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erase operation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypt-operation-with-encryption-sdk-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypt operation with Encryption SDK (KMS)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypt-operation-with-multiple-kms-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypt operation with multiple KMS Keys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decrypt-operation-with-encryption-sdk-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decrypt operation with Encryption SDK (KMS)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-encrypt-operations-with-encryption-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching encrypt operations with Encryption SDK
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing your code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing your code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-erase-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing erase operation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../feature_flags/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature flags
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../streaming/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Streaming
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../middleware_factory/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Middleware factory
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../jmespath_functions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    JMESPath Functions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/aws-cloudformation/custom-resource-helper" target="_blank" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    CloudFormation Custom Resources
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../tutorial/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Tutorial
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Processes
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Processes
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../security/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Security
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../automation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../versioning/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Versioning policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../roadmap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roadmap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../maintainers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintainers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_6" id="__nav_3_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_6">
+            <span class="md-nav__icon md-icon"></span>
+            Contributing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Development environment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/getting_started/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Your first contribution
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/conventions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Conventions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Key features
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    <span class="md-ellipsis">
+      Terminology
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting started
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Getting started">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install" class="md-nav__link">
+    <span class="md-ellipsis">
+      Install
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-resources" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required resources
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#erasing-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erasing data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypting data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decrypting-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decrypting data
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encryption-context-for-integrity-and-authenticity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encryption context for integrity and authenticity
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choosing-parts-of-your-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      Choosing parts of your data
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Choosing parts of your data">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#json" class="md-nav__link">
+    <span class="md-ellipsis">
+      JSON
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#data-serialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data serialization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-multiple-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using multiple keys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      Providers
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Providers">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#aws-encryption-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      AWS Encryption SDK
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#data-masking-request-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Data masking request flow
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Data masking request flow">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#erase-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Erase operation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypt-operation-with-encryption-sdk-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypt operation with Encryption SDK (KMS)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#encrypt-operation-with-multiple-kms-keys" class="md-nav__link">
+    <span class="md-ellipsis">
+      Encrypt operation with multiple KMS Keys
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decrypt-operation-with-encryption-sdk-kms" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decrypt operation with Encryption SDK (KMS)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-encrypt-operations-with-encryption-sdk" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching encrypt operations with Encryption SDK
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-your-code" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing your code
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing your code">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#testing-erase-operation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing erase operation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Data Masking</h1>
+
+<!-- markdownlint-disable MD051 -->
+
+<p>The data masking utility can encrypt, decrypt, or irreversibly erase sensitive information to protect data confidentiality.</p>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    LambdaFn: Your Lambda function
+    DataMasking: DataMasking
+    Operation: Possible operations
+    Input: Sensitive value
+    Erase: &lt;strong&gt;Erase&lt;/strong&gt;
+    Encrypt: &lt;strong&gt;Encrypt&lt;/strong&gt;
+    Decrypt: &lt;strong&gt;Decrypt&lt;/strong&gt;
+    Provider: AWS Encryption SDK provider
+    Result: Data transformed &lt;i&gt;(erased, encrypted, or decrypted)&lt;/i&gt;
+
+    LambdaFn --&gt; DataMasking
+    DataMasking --&gt; Operation
+
+    state Operation {
+        [*] --&gt; Input
+        Input --&gt; Erase: Irreversible
+        Input --&gt; Encrypt
+        Input --&gt; Decrypt
+        Encrypt --&gt; Provider
+        Decrypt --&gt; Provider
+    }
+
+    Operation --&gt; Result</code></pre>
+<h2 id="key-features">Key features<a class="headerlink" href="#key-features" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Encrypt, decrypt, or irreversibly erase data with ease</li>
+<li>Erase sensitive information in one or more fields within nested data</li>
+<li>Seamless integration with <a href="https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html" target="_blank">AWS Encryption SDK</a> for industry and AWS security best practices</li>
+</ul>
+<h2 id="terminology">Terminology<a class="headerlink" href="#terminology" title="Permanent link">&para;</a></h2>
+<p><strong>Erasing</strong> replaces sensitive information <strong>irreversibly</strong> with a non-sensitive placeholder <em>(<code>*****</code>)</em>. This operation replaces data in-memory, making it a one-way action.</p>
+<p><strong>Encrypting</strong> transforms plaintext into ciphertext using an encryption algorithm and a cryptographic key. It allows you to encrypt any sensitive data, so only allowed personnel to decrypt it. Learn more about encryption <a href="https://aws.amazon.com/blogs/security/importance-of-encryption-and-how-aws-can-help/" target="_blank">here</a>.</p>
+<p><strong>Decrypting</strong> transforms ciphertext back into plaintext using a decryption algorithm and the correct decryption key.</p>
+<p><strong>Encryption context</strong> is a non-secret <code>key=value</code> data used for authentication like <code>tenant_id:&lt;id&gt;</code>. This adds extra security and confirms encrypted data relationship with a context.</p>
+<p><strong><a href="https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/message-format.html" target="_blank">Encrypted message</a></strong> is a portable data structure that includes encrypted data along with copies of the encrypted data key. It includes everything Encryption SDK needs to validate authenticity, integrity, and to decrypt with the right master key.</p>
+<!-- markdownlint-disable MD013 -->
+<p><strong><a href="https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/concepts.html#envelope-encryption" target="_blank">Envelope encryption</a></strong> uses two different keys to encrypt data safely: master and data key. The data key encrypts the plaintext, and the master key encrypts the data key. It simplifies key management <em>(you own the master key)</em>, isolates compromises to data key, and scales better with large data volumes.</p>
+<!-- markdownlint-enable MD013 -->
+
+<p><center>
+<pre class="mermaid"><code>graph LR
+    M(Master key) --&gt; |Encrypts| D(Data key)
+    D(Data key) --&gt; |Encrypts| S(Sensitive data)</code></pre>
+<i>Envelope encryption visualized.</i>
+</center></p>
+<h2 id="getting-started">Getting started<a class="headerlink" href="#getting-started" title="Permanent link">&para;</a></h2>
+<details class="tip" open="open">
+<summary>Tip</summary>
+<p>All examples shared in this documentation are available within the <a href="https://github.com/aws-powertools/powertools-lambda-python/tree/develop/examples" target="_blank">project repository</a>.</p>
+</details>
+<h3 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Our Lambda layer does not include the aws-encryption-sdk. Please install it as a dependency in your project to use this utility.</p>
+</div>
+<p>Add <code>aws-lambda-powertools[datamasking]</code> as a dependency in your preferred tool: <em>e.g.</em>, <em>requirements.txt</em>, <em>pyproject.toml</em>. This will install the <a href="https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html" target="_blank">AWS Encryption SDK</a>.</p>
+<!-- markdownlint-disable MD013 -->
+<p>AWS Encryption SDK contains non-Python dependencies. This means you should use <a href="https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/using-sam-cli-build.html#using-sam-cli-build-options-container" target="_blank">AWS SAM CLI</a> or <a href="https://gallery.ecr.aws/search?searchTerm=sam%2Fbuild-python&amp;popularRegistries=amazon" target="_blank">official build container images</a> when building your application for AWS Lambda. Local development should work as expected.</p>
+<!-- markdownlint-enable MD013 -->
+
+<h3 id="required-resources">Required resources<a class="headerlink" href="#required-resources" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">By default, we use Amazon Key Management Service (KMS) for encryption and decryption operations.</p>
+</div>
+<p>Before you start, you will need a KMS symmetric key to encrypt and decrypt your data. Your Lambda function will need read and write access to it.</p>
+<p><strong>NOTE</strong>. We recommend setting a minimum of 1024MB of memory <em>(CPU intensive)</em>, and separate Lambda functions for encrypt and decrypt. For more information, you can see the full reports of our <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1730571597" target="_blank">load tests</a> and <a href="https://github.com/aws-powertools/powertools-lambda-python/pull/2197#issuecomment-1732060923" target="_blank">traces</a>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="aws-serverless-application-model-sam-example" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="aws-serverless-application-model-sam-example">AWS Serverless Application Model (SAM) example</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
+<span class="nt">Transform</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless-2016-10-31</span>
+<span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;</span>
+<span class="w">  </span><span class="no">Powertools for AWS Lambda (Python) data masking example</span>
+
+<span class="nt">Globals</span><span class="p">:</span><span class="w"> </span><span class="c1"># https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html</span>
+<span class="w">  </span><span class="nt">Function</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Timeout</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span>
+<span class="w">    </span><span class="nt">Runtime</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3.11</span>
+<span class="w">    </span><span class="nt">Tracing</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Active</span>
+<span class="w">    </span><span class="nt">Environment</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Variables</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">POWERTOOLS_SERVICE_NAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PowertoolsHelloWorld</span>
+<span class="w">        </span><span class="nt">POWERTOOLS_LOG_LEVEL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">INFO</span>
+<span class="hll"><span class="w">        </span><span class="nt">KMS_KEY_ARN</span><span class="p">:</span><span class="w"> </span><span class="kt">!GetAtt</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DataMaskingMasterKey.Arn</span>
+</span>
+<span class="c1"># In production, we recommend you split up the encrypt and decrypt for fine-grained security.</span>
+<span class="c1"># For example, one function can act as the encryption proxy via HTTP requests, data pipeline, etc.,</span>
+<span class="c1"># while only authorized personnel can call decrypt via a separate function.</span>
+<span class="nt">Resources</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">DataMaskingEncryptFunctionExample</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AWS::Serverless::Function</span>
+<span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Handler</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data_masking_function_example.lambda_handler</span>
+<span class="w">      </span><span class="nt">CodeUri</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">../src</span>
+<span class="w">      </span><span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Data Masking encryption function</span>
+<span class="w">      </span><span class="c1"># Cryptographic operations demand more CPU. CPU is proportionally allocated based on memory size.</span>
+<span class="w">      </span><span class="c1"># We recommend allocating a minimum of 1024MB of memory.</span>
+<span class="hll"><span class="w">      </span><span class="nt">MemorySize</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1024</span>
+</span>
+<span class="w">  </span><span class="c1"># DataMaskingDecryptFunctionExample:</span>
+<span class="w">  </span><span class="c1">#   Type: AWS::Serverless::Function</span>
+<span class="w">  </span><span class="c1">#   Properties:</span>
+<span class="w">  </span><span class="c1">#     Handler: data_masking_function_decrypt.lambda_handler</span>
+<span class="w">  </span><span class="c1">#     CodeUri: ../src</span>
+<span class="w">  </span><span class="c1">#     Description: Data Masking decryption function</span>
+<span class="w">  </span><span class="c1">#     MemorySize: 1024</span>
+
+<span class="w">  </span><span class="c1"># KMS Key</span>
+<span class="w">  </span><span class="nt">DataMaskingMasterKey</span><span class="p">:</span>
+<span class="hll"><span class="w">    </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS::KMS::Key&quot;</span>
+</span><span class="w">    </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">Description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">KMS Key for encryption and decryption using Powertools for AWS Lambda Data masking feature</span>
+<span class="w">      </span><span class="c1"># KMS Key support both IAM Resource Policies and Key Policies</span>
+<span class="w">      </span><span class="c1"># For more details: https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html</span>
+<span class="w">      </span><span class="nt">KeyPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2012-10-17&quot;</span>
+<span class="w">        </span><span class="nt">Id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">data-masking-enc-dec</span>
+<span class="w">        </span><span class="nt">Statement</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># For security reasons, ensure your KMS Key has at least one administrator.</span>
+<span class="w">          </span><span class="c1"># In this example, the root account is granted administrator permissions.</span>
+<span class="w">          </span><span class="c1"># However, we recommended configuring specific IAM Roles for enhanced security in production.</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+<span class="w">            </span><span class="nt">Principal</span><span class="p">:</span>
+<span class="w">              </span><span class="nt">AWS</span><span class="p">:</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="s">&quot;arn:aws:iam::${AWS::AccountId}:root&quot;</span><span class="w"> </span><span class="c1"># (1)!</span>
+<span class="w">            </span><span class="nt">Action</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;kms:*&quot;</span>
+<span class="w">            </span><span class="nt">Resource</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+<span class="w">          </span><span class="c1"># We must grant Lambda&#39;s IAM Role access to the KMS Key</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+<span class="w">            </span><span class="nt">Principal</span><span class="p">:</span>
+<span class="hll"><span class="w">              </span><span class="nt">AWS</span><span class="p">:</span><span class="w"> </span><span class="kt">!GetAtt</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">DataMaskingEncryptFunctionExampleRole.Arn</span><span class="w"> </span><span class="c1"># (2)!</span>
+</span><span class="w">            </span><span class="nt">Action</span><span class="p">:</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kms:Decrypt</span><span class="w"> </span><span class="c1"># to decrypt encrypted data key</span>
+<span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kms:GenerateDataKey</span><span class="w"> </span><span class="c1"># to create an unique and random data key for encryption</span>
+<span class="w">              </span><span class="c1"># Encrypt permission is required only when using multiple keys</span>
+<span class="hll"><span class="w">              </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kms:Encrypt</span><span class="w">  </span><span class="c1"># (3)!</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">Resource</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;*&quot;</span>
+</span></code></pre></div></td></tr></table></div>
+<ol>
+<li><a href="https://docs.aws.amazon.com/kms/latest/developerguide/key-policy-default.html#key-policy-default-allow-administrators" target="_blank">Key policy examples using IAM Roles</a></li>
+<li><a href="https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-generated-resources-function.html#sam-specification-generated-resources-function-not-role" target="_blank">SAM generated CloudFormation Resources</a></li>
+<li>Required only when using <a href="#using-multiple-keys">multiple keys</a></li>
+</ol>
+</div>
+</div>
+</div>
+<h3 id="erasing-data">Erasing data<a class="headerlink" href="#erasing-data" title="Permanent link">&para;</a></h3>
+<p>Erasing will remove the original data and replace it with a <code>*****</code>. This means you cannot recover erased data, and the data type will change to <code>str</code> for all data unless the data to be erased is of an Iterable type (<code>list</code>, <code>tuple</code>, <code>set</code>), in which case the method will return a new object of the same type as the input data but with each element replaced by the string <code>*****</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="getting_started_erase_datapy" name="__tabbed_2" type="radio" /><input id="generic_data_inputjson" name="__tabbed_2" type="radio" /><input id="getting_started_erase_data_outputjson" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="getting_started_erase_datapy">getting_started_erase_data.py</label><label for="generic_data_inputjson">generic_data_input.json</label><label for="getting_started_erase_data_outputjson">getting_started_erase_data_output.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="hll"><span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">()</span>
+</span>
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Erasing fields email, address.street, and company_address&quot;</span><span class="p">)</span>
+
+<span class="hll">    <span class="n">erased</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">erase</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;email&quot;</span><span class="p">,</span> <span class="s2">&quot;address.street&quot;</span><span class="p">,</span> <span class="s2">&quot;company_address&quot;</span><span class="p">])</span>  <span class="c1"># (1)!</span>
+</span>
+    <span class="k">return</span> <span class="n">erased</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>See <a href="#working-with-nested-data">working with nested data</a> to learn more about the <code>fields</code> parameter. </br></br>If we omit <code>fields</code> parameter, the entire dictionary will be erased with <code>*****</code>.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;johndoe@example.com&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Main St&quot;</span><span class="p">,</span><span class="w"> </span>
+</span><span class="w">            </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;company_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+</span><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;456 ACME Ave&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span><span class="p">,</span>
+</span><span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span><span class="p">,</span>
+</span><span class="w">        </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;company_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h3 id="encrypting-data">Encrypting data<a class="headerlink" href="#encrypting-data" title="Permanent link">&para;</a></h3>
+<details class="note" open="open">
+<summary>About static typing and encryption</summary>
+<p>Encrypting data may lead to a different data type, as it always transforms into a string <em>(<code>&lt;ciphertext&gt;</code>)</em>.</p>
+</details>
+<p>To encrypt, you will need an <a href="#providers">encryption provider</a>. Here, we will use <code>AWSEncryptionSDKProvider</code>.</p>
+<p>Under the hood, we delegate a <a href="#encrypt-operation-with-encryption-sdk-kms">number of operations</a> to AWS Encryption SDK to authenticate, create a portable encryption message, and actual data encryption.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:3"><input checked="checked" id="getting_started_encrypt_datapy" name="__tabbed_3" type="radio" /><input id="generic_data_inputjson_1" name="__tabbed_3" type="radio" /><input id="encrypt_data_outputjson" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="getting_started_encrypt_datapy">getting_started_encrypt_data.py</label><label for="generic_data_inputjson_1">generic_data_input.json</label><label for="encrypt_data_outputjson">encrypt_data_output.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="p">(</span>
+</span><span class="hll">    <span class="n">AWSEncryptionSDKProvider</span><span class="p">,</span>
+</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="hll"><span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">])</span>  <span class="c1"># (1)!</span>
+</span><span class="hll"><span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encrypting the whole object&quot;</span><span class="p">)</span>
+
+<span class="hll">    <span class="n">encrypted</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">encrypted</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will ensure the data key is encrypted with both keys.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;johndoe@example.com&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Main St&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="nt">&quot;company_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;456 ACME Ave&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">            </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AgV4uF5K2YMtNhYrtviTwKNrUHhqQr73l/jNfukkh+qLOC8AXwABABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEvcjEyaFZHY1R5cjJuTDNKbTJ3UFA3R3ZjaytIdi9hekZqbXVUb25Ya3J5SzFBOUlJZDZxZXpSR1NTVnZDUUxoZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMToyMDA5ODQxMTIzODY6a2V5LzZkODJiMzRlLTM2NjAtNDRlMi04YWJiLTdmMzA1OGJlYTIxMgC4AQIBAHjxYXAO7wQGd+7qxoyvXAajwqboF5FL/9lgYUNJTB8VtAHBP2hwVgw+zypp7GoMNTPAAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMx/B25MTgWwpL7CmuAgEQgDtan3orAOKFUfyNm3v6rFcglb+BVVVDV71fj4aRljhpg1ixsYFaKsoej8NcwRktIiWE+mw9XmTEVb6xFQIAABAA9DeLzlRaRQgTcXMJG0iBu/YTyyDKiROD+bU1Y09X9RBz5LA1nWIENJKq2seAhNSB/////wAAAAEAAAAAAAAAAAAAAAEAAAEBExLJ9wI4n7t+wyPEEP4kjYFBdkmNuLLsVC2Yt8mv9Y1iH2G+/g9SaIcdK57pkoW0ECpBxZVOxCuhmK2s74AJCUdem9McjS1waUKyzYTi9vv2ySNBsABIDwT990rE7jZJ3tEZAqcWZg/eWlxvnksFR/akBWZKsKzFz6lF57+cTgdISCEJRV0E7fcUeCuaMaQGK1Qw2OCmIeHEG5j5iztBkZG2IB2CVND/AbxmDUFHwgjsrJPTzaDYSufcGMoZW1A9X1sLVfqNVKvnOFP5tNY7kPF5eAI9FhGBw8SjTqODXz4k6zuqzy9no8HtXowP265U8NZ5VbVTd/zuVEbZyK5KBqzP1sExW4RhnlpXMoOs9WSuAGcwZQIxANTeEwb9V7CacV2Urt/oCqysUzhoV2AcT2ZjryFqY79Tsg+FRpIx7cBizL4ieRzbhQIwcRasNncO5OZOcmVr0MqHv+gCVznndMgjXJmWwUa7h6skJKmhhMPlN0CsugxtVWnD&quot;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h3 id="decrypting-data">Decrypting data<a class="headerlink" href="#decrypting-data" title="Permanent link">&para;</a></h3>
+<details class="note" open="open">
+<summary>About static typing and decryption</summary>
+<p>Decrypting data may lead to a different data type, as encrypted data is always a string <em>(<code>&lt;ciphertext&gt;</code>)</em>.</p>
+</details>
+<p>To decrypt, you will need an <a href="#providers">encryption provider</a>. Here, we will use <code>AWSEncryptionSDKProvider</code>.</p>
+<p>Under the hood, we delegate a <a href="#decrypt-operation-with-encryption-sdk-kms">number of operations</a> to AWS Encryption SDK to verify authentication, integrity, and actual ciphertext decryption.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="getting_started_decrypt_datapy" name="__tabbed_4" type="radio" /><input id="getting_started_decrypt_data_inputjson" name="__tabbed_4" type="radio" /><input id="getting_started_decrypt_data_outputjson" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="getting_started_decrypt_datapy">getting_started_decrypt_data.py</label><label for="getting_started_decrypt_data_inputjson">getting_started_decrypt_data_input.json</label><label for="getting_started_decrypt_data_outputjson">getting_started_decrypt_data_output.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p><strong>NOTE</strong>. Decryption only works with KMS Key ARN.</p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+</span><span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="n">AWSEncryptionSDKProvider</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>  <span class="c1"># (1)!</span>
+
+<span class="hll"><span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">])</span>  <span class="c1"># (2)!</span>
+</span><span class="hll"><span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Decrypting whole object&quot;</span><span class="p">)</span>
+
+<span class="hll">    <span class="n">decrypted</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span>
+    <span class="k">return</span> <span class="n">decrypted</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>Note that KMS key alias or key ID won't work.</li>
+<li>You can use more than one KMS Key for higher availability but increased latency. </br></br>Encryption SDK will call <code>Decrypt</code> API with all master keys when trying to decrypt the data key.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;AgV4uF5K2YMtNhYrtviTwKNrUHhqQr73l/jNfukkh+qLOC8AXwABABVhd3MtY3J5cHRvLXB1YmxpYy1rZXkAREEvcjEyaFZHY1R5cjJuTDNKbTJ3UFA3R3ZjaytIdi9hekZqbXVUb25Ya3J5SzFBOUlJZDZxZXpSR1NTVnZDUUxoZz09AAEAB2F3cy1rbXMAS2Fybjphd3M6a21zOnVzLWVhc3QtMToyMDA5ODQxMTIzODY6a2V5LzZkODJiMzRlLTM2NjAtNDRlMi04YWJiLTdmMzA1OGJlYTIxMgC4AQIBAHjxYXAO7wQGd+7qxoyvXAajwqboF5FL/9lgYUNJTB8VtAHBP2hwVgw+zypp7GoMNTPAAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMx/B25MTgWwpL7CmuAgEQgDtan3orAOKFUfyNm3v6rFcglb+BVVVDV71fj4aRljhpg1ixsYFaKsoej8NcwRktIiWE+mw9XmTEVb6xFQIAABAA9DeLzlRaRQgTcXMJG0iBu/YTyyDKiROD+bU1Y09X9RBz5LA1nWIENJKq2seAhNSB/////wAAAAEAAAAAAAAAAAAAAAEAAAEBExLJ9wI4n7t+wyPEEP4kjYFBdkmNuLLsVC2Yt8mv9Y1iH2G+/g9SaIcdK57pkoW0ECpBxZVOxCuhmK2s74AJCUdem9McjS1waUKyzYTi9vv2ySNBsABIDwT990rE7jZJ3tEZAqcWZg/eWlxvnksFR/akBWZKsKzFz6lF57+cTgdISCEJRV0E7fcUeCuaMaQGK1Qw2OCmIeHEG5j5iztBkZG2IB2CVND/AbxmDUFHwgjsrJPTzaDYSufcGMoZW1A9X1sLVfqNVKvnOFP5tNY7kPF5eAI9FhGBw8SjTqODXz4k6zuqzy9no8HtXowP265U8NZ5VbVTd/zuVEbZyK5KBqzP1sExW4RhnlpXMoOs9WSuAGcwZQIxANTeEwb9V7CacV2Urt/oCqysUzhoV2AcT2ZjryFqY79Tsg+FRpIx7cBizL4ieRzbhQIwcRasNncO5OZOcmVr0MqHv+gCVznndMgjXJmWwUa7h6skJKmhhMPlN0CsugxtVWnD&quot;</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;age&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;johndoe@example.com&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Main St&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;company_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;456 ACME Ave&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Anytown&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CA&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;zip&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;12345&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h3 id="encryption-context-for-integrity-and-authenticity">Encryption context for integrity and authenticity<a class="headerlink" href="#encryption-context-for-integrity-and-authenticity" title="Permanent link">&para;</a></h3>
+<!-- markdownlint-disable MD013 -->
+<p>For a stronger security posture, you can add metadata to each encryption operation, and verify them during decryption. This is known as additional authenticated data (AAD). These are non-sensitive data that can help protect authenticity and integrity of your encrypted data, and even help to prevent a <a href="https://docs.aws.amazon.com/IAM/latest/UserGuide/confused-deputy.html" target="_blank">confused deputy</a> situation.</p>
+<!-- markdownlint-enable MD013 -->
+
+<details class="danger" open="open">
+<summary>Important considerations you should know</summary>
+<ol>
+<li><strong>Exact match verification on decrypt</strong>. Be careful using random data like <code>timestamps</code> as encryption context if you can't provide them on decrypt.</li>
+<li><strong>Only <code>string</code> values are supported</strong>. We will raise <code>DataMaskingUnsupportedTypeError</code> for non-string values.</li>
+<li><strong>Use non-sensitive data only</strong>. When using KMS, encryption context is available as plaintext in AWS CloudTrail, unless you <a href="https://docs.aws.amazon.com/kms/latest/developerguide/logging-using-cloudtrail.html#filtering-kms-events" target="_blank">intentionally disabled KMS events</a>.</li>
+</ol>
+</details>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="getting_started_encryption_contextpy" name="__tabbed_5" type="radio" /><input id="getting_started_decryption_contextpy" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="getting_started_encryption_contextpy">getting_started_encryption_context.py</label><label for="getting_started_decryption_contextpy">getting_started_decryption_context.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="n">AWSEncryptionSDKProvider</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">])</span>
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encrypting whole object&quot;</span><span class="p">)</span>
+
+    <span class="n">encrypted</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+<span class="hll">        <span class="n">data_classification</span><span class="o">=</span><span class="s2">&quot;confidential&quot;</span><span class="p">,</span>  <span class="c1"># (1)!</span>
+</span><span class="hll">        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;customer-data&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;a06bf973-0734-4b53-9072-39d7ac5b2cba&quot;</span><span class="p">,</span>
+</span>    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">encrypted</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>They must match on <code>decrypt()</code> otherwise the operation will fail with <code>DataMaskingContextMismatchError</code>.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="n">AWSEncryptionSDKProvider</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">])</span>
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Decrypting whole object&quot;</span><span class="p">)</span>
+
+    <span class="n">decrypted</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">decrypt</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+<span class="hll">        <span class="n">data_classification</span><span class="o">=</span><span class="s2">&quot;confidential&quot;</span><span class="p">,</span>  <span class="c1"># (1)!</span>
+</span><span class="hll">        <span class="n">data_type</span><span class="o">=</span><span class="s2">&quot;customer-data&quot;</span><span class="p">,</span>
+</span><span class="hll">        <span class="n">tenant_id</span><span class="o">=</span><span class="s2">&quot;a06bf973-0734-4b53-9072-39d7ac5b2cba&quot;</span><span class="p">,</span>
+</span>    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decrypted</span>
+</code></pre></div></td></tr></table></div>
+<ol>
+<li>They must match otherwise the operation will fail with <code>DataMaskingContextMismatchError</code>.</li>
+</ol>
+</div>
+</div>
+</div>
+<h3 id="choosing-parts-of-your-data">Choosing parts of your data<a class="headerlink" href="#choosing-parts-of-your-data" title="Permanent link">&para;</a></h3>
+<details class="note" open="open">
+<summary>Current limitations</summary>
+<ol>
+<li>The <code>fields</code> parameter is not yet supported in <code>encrypt</code> and <code>decrypt</code> operations.</li>
+<li>We support <code>JSON</code> data types only - see <a href="#data-serialization">data serialization for more details</a>.</li>
+</ol>
+</details>
+<p>You can use the <code>fields</code> parameter with the dot notation <code>.</code> to choose one or more parts of your data to <code>erase</code>. This is useful when you want to keep data structure intact except the confidential fields.</p>
+<p>When <code>fields</code> is present, <code>erase</code> behaves differently:</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Behavior</th>
+<th>Example</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>erase</code></td>
+<td>Replace data while keeping collections type intact.</td>
+<td><code>{"cards": ["a", "b"]}</code></td>
+<td><code>{"cards": ["*****", "*****"]}</code></td>
+</tr>
+</tbody>
+</table>
+<p>Here are common scenarios to best visualize how to use <code>fields</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:8"><input checked="checked" id="top-keys-only" name="__tabbed_6" type="radio" /><input id="nested-key" name="__tabbed_6" type="radio" /><input id="multiple-keys" name="__tabbed_6" type="radio" /><input id="all-key-items" name="__tabbed_6" type="radio" /><input id="complex-nested-key" name="__tabbed_6" type="radio" /><input id="all-fields-in-a-list" name="__tabbed_6" type="radio" /><input id="slicing-a-list" name="__tabbed_6" type="radio" /><input id="complex-expressions" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="top-keys-only">Top keys only</label><label for="nested-key">Nested key</label><label for="multiple-keys">Multiple keys</label><label for="all-key-items">All key items</label><label for="complex-nested-key">Complex nested key</label><label for="all-fields-in-a-list">All fields in a list</label><label for="slicing-a-list">Slicing a list</label><label for="complex-expressions">Complex expressions</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>You want to erase data in the <code>card_number</code> field.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="data" name="__tabbed_7" type="radio" /><input id="result" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="data">Data</label><label for="result">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["card_number"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span>
+</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data in the <code>postcode</code> field.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="data_1" name="__tabbed_8" type="radio" /><input id="result_1" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="data_1">Data</label><label for="result_1">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["address.postcode"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data in both <code>postcode</code> and <code>street</code> fields.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="data_2" name="__tabbed_9" type="radio" /><input id="result_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="data_2">Data</label><label for="result_2">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["address.postcode", "address.street"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+</span><span class="hll"><span class="w">        </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Street&quot;</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">        </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data under <code>address</code> field.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="data_3" name="__tabbed_10" type="radio" /><input id="result_3" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="data_3">Data</label><label for="result_3">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["address"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="hll"><span class="w">        </span><span class="p">{</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Street&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;United States&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/La_Paz&quot;</span>
+</span><span class="hll"><span class="w">        </span><span class="p">},</span>
+</span><span class="hll"><span class="w">        </span><span class="p">{</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Main Street&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;country&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;United States&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">            </span><span class="nt">&quot;timezone&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;America/Mazatlan&quot;</span>
+</span><span class="hll"><span class="w">        </span><span class="p">}</span>
+</span><span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="hll"><span class="w">        </span><span class="s2">&quot;*****&quot;</span><span class="p">,</span>
+</span><span class="hll"><span class="w">        </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data under <code>name</code> field.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="data_4" name="__tabbed_11" type="radio" /><input id="result_4" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="data_4">Data</label><label for="result_4">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["category..name"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;subcategory&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;brand&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;product&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Car&quot;</span>
+</span><span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;category&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;subcategory&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;brand&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="nt">&quot;product&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="hll"><span class="w">                    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">                </span><span class="p">}</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data under <code>street</code> field located at the any index of the address list.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:2"><input checked="checked" id="data_5" name="__tabbed_12" type="radio" /><input id="result_5" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="data_5">Data</label><label for="result_5">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["address[*].street"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Drive&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Main Street,&quot;</span>
+</span><span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data by slicing a list.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="13:2"><input checked="checked" id="data_6" name="__tabbed_13" type="radio" /><input id="result_6" name="__tabbed_13" type="radio" /><div class="tabbed-labels"><label for="data_6">Data</label><label for="result_6">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["address[-1].street"])</code></p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Street&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Main Street&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">78495</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;111 Any Drive&quot;</span>
+</span><span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Street&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Main Street&quot;</span>
+<span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">11111</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>You want to erase data by finding for a field with conditional expression.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="14:2"><input checked="checked" id="data_7" name="__tabbed_14" type="radio" /><input id="result_7" name="__tabbed_14" type="radio" /><div class="tabbed-labels"><label for="data_7">Data</label><label for="result_7">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<blockquote>
+<p>Expression: <code>data_masker.erase(data, fields=["$.address[?(@.postcode &gt; 12000)]"])</code></p>
+<p><code>$</code>: Represents the root of the JSON structure.</p>
+<p><code>.address</code>: Selects the "address" property within the JSON structure.</p>
+<p><code>(@.postcode &gt; 12000)</code>: Specifies the condition that elements should meet. It selects elements where the value of the <code>postcode</code> property is <code>greater than 12000</code>.</p>
+</blockquote>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123 Any Drive&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;111 Main Street&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">11111</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Any Street&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">67890</span><span class="p">,</span>
+<span class="hll"><span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+</span><span class="w">        </span><span class="p">},</span>
+<span class="w">        </span><span class="p">{</span>
+<span class="w">            </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">11111</span><span class="p">,</span>
+<span class="w">            </span><span class="nt">&quot;street&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;100 Any Street&quot;</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>For comprehensive guidance on using JSONPath syntax, please refer to the official documentation available at <a href="https://github.com/h2non/jsonpath-ng#jsonpath-syntax" rel="nofollow" target="_blank">jsonpath-ng</a></p>
+<h4 id="json">JSON<a class="headerlink" href="#json" title="Permanent link">&para;</a></h4>
+<p>We also support data in JSON string format as input. We automatically deserialize it, then handle each field operation as expected.</p>
+<p>Note that the return will be a deserialized JSON and your desired fields updated.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="15:2"><input checked="checked" id="data_8" name="__tabbed_15" type="radio" /><input id="result_8" name="__tabbed_15" type="radio" /><div class="tabbed-labels"><label for="data_8">Data</label><label for="result_8">Result</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Expression: <code>data_masker.erase(data, fields=["card_number", "address.postcode"])</code></p>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="err">&#39;</span><span class="p">{</span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;1111 2222 3333 4444&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">12345</span><span class="p">}}</span><span class="err">&#39;</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Carlos&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;operation&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;non sensitive&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;card_number&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;address&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;postcode&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;*****&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h2 id="advanced">Advanced<a class="headerlink" href="#advanced" title="Permanent link">&para;</a></h2>
+<h3 id="data-serialization">Data serialization<a class="headerlink" href="#data-serialization" title="Permanent link">&para;</a></h3>
+<details class="note" open="open">
+<summary>Current limitations</summary>
+<ol>
+<li>Python classes, <code>Dataclasses</code>, and <code>Pydantic models</code> are not supported yet.</li>
+</ol>
+</details>
+<p>Before we traverse the data structure, we perform two important operations on input data:</p>
+<ol>
+<li>If <code>JSON string</code>, <strong>deserialize</strong> using default or provided deserializer.</li>
+<li>If <code>dictionary</code>, <strong>normalize</strong> into <code>JSON</code> to prevent traversing unsupported data types.</li>
+</ol>
+<p>When decrypting, we revert the operation to restore the original data structure.</p>
+<p>For compatibility or performance, you can optionally pass your own JSON serializer and deserializer to replace <code>json.dumps</code> and <code>json.loads</code> respectively:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">advanced_custom_serializer.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">ujson</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AWSEncryptionSDKProvider</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span>
+    <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">],</span>
+<span class="hll">    <span class="n">json_serializer</span><span class="o">=</span><span class="n">ujson</span><span class="o">.</span><span class="n">dumps</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">json_deserializer</span><span class="o">=</span><span class="n">ujson</span><span class="o">.</span><span class="n">loads</span><span class="p">,</span>
+</span><span class="p">)</span>
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="k">return</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="using-multiple-keys">Using multiple keys<a class="headerlink" href="#using-multiple-keys" title="Permanent link">&para;</a></h3>
+<p>You can use multiple KMS keys from more than one AWS account for higher availability, when instantiating <code>AWSEncryptionSDKProvider</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">using_multiple_keys.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AWSEncryptionSDKProvider</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN_1</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN_1&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+<span class="n">KMS_KEY_ARN_2</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN_2&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="hll"><span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN_1</span><span class="p">,</span> <span class="n">KMS_KEY_ARN_2</span><span class="p">])</span>
+</span><span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encrypting the whole object&quot;</span><span class="p">)</span>
+
+    <span class="n">encrypted</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">encrypted</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="providers">Providers<a class="headerlink" href="#providers" title="Permanent link">&para;</a></h3>
+<h4 id="aws-encryption-sdk">AWS Encryption SDK<a class="headerlink" href="#aws-encryption-sdk" title="Permanent link">&para;</a></h4>
+<p>You can modify the following values when initializing the <code>AWSEncryptionSDKProvider</code> to best accommodate your security and performance thresholds.</p>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Default</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>local_cache_capacity</strong></td>
+<td><code>100</code></td>
+<td>The maximum number of entries that can be retained in the local cryptographic materials cache</td>
+</tr>
+<tr>
+<td><strong>max_cache_age_seconds</strong></td>
+<td><code>300</code></td>
+<td>The maximum time (in seconds) that a cache entry may be kept in the cache</td>
+</tr>
+<tr>
+<td><strong>max_messages_encrypted</strong></td>
+<td><code>4294967296</code></td>
+<td>The maximum number of messages that may be encrypted under a cache entry</td>
+</tr>
+<tr>
+<td><strong>max_bytes_encrypted</strong></td>
+<td><code>9223372036854775807</code></td>
+<td>The maximum number of bytes that may be encrypted under a cache entry</td>
+</tr>
+</tbody>
+</table>
+<p>If required, you can customize the default values when initializing the <code>AWSEncryptionSDKProvider</code> class.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">aws_encryption_provider_example.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AWSEncryptionSDKProvider</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="hll"><span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span>
+</span><span class="hll">    <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">],</span>
+</span><span class="hll">    <span class="n">local_cache_capacity</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">max_cache_age_seconds</span><span class="o">=</span><span class="mi">400</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">max_messages_encrypted</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span>
+</span><span class="hll">    <span class="n">max_bytes_encrypted</span><span class="o">=</span><span class="mi">2000</span><span class="p">)</span>
+</span>
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encrypting the whole object&quot;</span><span class="p">)</span>
+
+    <span class="n">encrypted</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;body&quot;</span><span class="p">:</span> <span class="n">encrypted</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h5 id="passing-additional-sdk-arguments">Passing additional SDK arguments<a class="headerlink" href="#passing-additional-sdk-arguments" title="Permanent link">&para;</a></h5>
+<div class="admonition note">
+<p class="admonition-title">See the <a href="https://aws-encryption-sdk-python.readthedocs.io/en/latest/generated/aws_encryption_sdk.html#aws_encryption_sdk.EncryptionSDKClient.encrypt" target="_blank">AWS Encryption SDK docs for more details</a></p>
+</div>
+<p>As an escape hatch mechanism, you can pass additional arguments to the <code>AWSEncryptionSDKProvider</code> via the <code>provider_options</code> parameter.</p>
+<p>For example, the AWS Encryption SDK defaults to using the <code>AES_256_GCM_HKDF_SHA512_COMMIT_KEY_ECDSA_P384</code> algorithm for encrypting your Data Key. If you want, you have the flexibility to customize and choose a different encryption algorithm.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">changing_default_algorithm.py</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_encryption_sdk.identifiers</span> <span class="kn">import</span> <span class="n">Algorithm</span>
+</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking.provider.kms.aws_encryption_sdk</span> <span class="kn">import</span> <span class="n">AWSEncryptionSDKProvider</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">KMS_KEY_ARN</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;KMS_KEY_ARN&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+<span class="n">encryption_provider</span> <span class="o">=</span> <span class="n">AWSEncryptionSDKProvider</span><span class="p">(</span><span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="n">KMS_KEY_ARN</span><span class="p">])</span>
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">(</span><span class="n">provider</span><span class="o">=</span><span class="n">encryption_provider</span><span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;body&quot;</span><span class="p">,</span> <span class="p">{})</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Encrypting whole object with a different algorithm&quot;</span><span class="p">)</span>
+
+<span class="hll">    <span class="n">provider_options</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;algorithm&quot;</span><span class="p">:</span> <span class="n">Algorithm</span><span class="o">.</span><span class="n">AES_256_GCM_HKDF_SHA512_COMMIT_KEY</span><span class="p">}</span>
+</span>
+    <span class="n">encrypted</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">encrypt</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">,</span>
+<span class="hll">        <span class="n">provider_options</span><span class="o">=</span><span class="n">provider_options</span><span class="p">,</span>
+</span>    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">encrypted</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="data-masking-request-flow">Data masking request flow<a class="headerlink" href="#data-masking-request-flow" title="Permanent link">&para;</a></h3>
+<p>The following sequence diagrams explain how <code>DataMasking</code> behaves under different scenarios.</p>
+<h4 id="erase-operation">Erase operation<a class="headerlink" href="#erase-operation" title="Permanent link">&para;</a></h4>
+<p>Erasing operations occur in-memory and we cannot recover the original value.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking (in memory)
+    Client-&gt;&gt;Lambda: Invoke (event)
+    Lambda-&gt;&gt;DataMasking: erase(data)
+    DataMasking-&gt;&gt;DataMasking: replaces data with *****
+    Note over Lambda,DataMasking: No encryption providers involved.
+    DataMasking-&gt;&gt;Lambda: data masked
+    Lambda--&gt;&gt;Client: Return response</code></pre>
+<i>Simple masking operation</i>
+</center></p>
+<h4 id="encrypt-operation-with-encryption-sdk-kms">Encrypt operation with Encryption SDK (KMS)<a class="headerlink" href="#encrypt-operation-with-encryption-sdk-kms" title="Permanent link">&para;</a></h4>
+<p>We call KMS to generate an unique data key that can be used for multiple <code>encrypt</code> operation in-memory. It improves performance, cost and prevent throttling.</p>
+<p>To make this operation simpler to visualize, we keep caching details in a <a href="#caching-encrypt-operations-with-encryption-sdk">separate sequence diagram</a>. Caching is enabled by default.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client-&gt;&gt;Lambda: Invoke (event)
+    Lambda-&gt;&gt;DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
+    Lambda-&gt;&gt;DataMasking: encrypt(data)
+    DataMasking-&gt;&gt;EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking-&gt;&gt;DataMasking: Cache new unique data key
+    DataMasking-&gt;&gt;DataMasking: DATA_KEY.encrypt(data)
+    DataMasking-&gt;&gt;DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking-&gt;&gt;DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking-&gt;&gt;Lambda: Ciphertext from encrypted message
+    Lambda--&gt;&gt;Client: Return response</code></pre>
+<i>Encrypting operation using envelope encryption.</i>
+</center></p>
+<h4 id="encrypt-operation-with-multiple-kms-keys">Encrypt operation with multiple KMS Keys<a class="headerlink" href="#encrypt-operation-with-multiple-kms-keys" title="Permanent link">&para;</a></h4>
+<p>When encrypting data with multiple KMS keys, the <code>aws_encryption_sdk</code> makes additional API calls to encrypt the data with each of the specified keys.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client-&gt;&gt;Lambda: Invoke (event)
+    Lambda-&gt;&gt;DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KEY_1, KEY_2])
+    Lambda-&gt;&gt;DataMasking: encrypt(data)
+    DataMasking-&gt;&gt;EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API - KEY_1
+    DataMasking-&gt;&gt;DataMasking: Cache new unique data key
+    DataMasking-&gt;&gt;DataMasking: DATA_KEY.encrypt(data)
+    DataMasking-&gt;&gt;DataMasking: KEY_1.encrypt(DATA_KEY)
+    loop For every additional KMS Key
+        DataMasking-&gt;&gt;EncryptionProvider: Encrypt DATA_KEY
+        Note over DataMasking,EncryptionProvider: KMS Encrypt API - KEY_2
+    end
+    DataMasking-&gt;&gt;DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, all data keys encrypted, algorithm, and more.
+    DataMasking-&gt;&gt;Lambda: Ciphertext from encrypted message
+    Lambda--&gt;&gt;Client: Return response</code></pre>
+<i>Encrypting operation using envelope encryption.</i>
+</center></p>
+<h4 id="decrypt-operation-with-encryption-sdk-kms">Decrypt operation with Encryption SDK (KMS)<a class="headerlink" href="#decrypt-operation-with-encryption-sdk-kms" title="Permanent link">&para;</a></h4>
+<p>We call KMS to decrypt the encrypted data key available in the encrypted message. If successful, we run authentication <em>(context)</em> and integrity checks (<em>algorithm, data key length, etc</em>) to confirm its proceedings.</p>
+<p>Lastly, we decrypt the original encrypted data, throw away the decrypted data key for security reasons, and return the original plaintext data.</p>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client-&gt;&gt;Lambda: Invoke (event)
+    Lambda-&gt;&gt;DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
+    Lambda-&gt;&gt;DataMasking: decrypt(data)
+    DataMasking-&gt;&gt;EncryptionProvider: Decrypt encrypted data key
+    Note over DataMasking,EncryptionProvider: KMS Decrypt API
+    DataMasking-&gt;&gt;DataMasking: Authentication and integrity checks
+    DataMasking-&gt;&gt;DataMasking: DATA_KEY.decrypt(data)
+    DataMasking-&gt;&gt;DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking-&gt;&gt;DataMasking: Discards decrypted data key
+    DataMasking-&gt;&gt;Lambda: Plaintext
+    Lambda--&gt;&gt;Client: Return response</code></pre>
+<i>Decrypting operation using envelope encryption.</i>
+</center></p>
+<h4 id="caching-encrypt-operations-with-encryption-sdk">Caching encrypt operations with Encryption SDK<a class="headerlink" href="#caching-encrypt-operations-with-encryption-sdk" title="Permanent link">&para;</a></h4>
+<p>Without caching, every <code>encrypt()</code> operation would generate a new data key. It significantly increases latency and cost for ephemeral and short running environments like Lambda.</p>
+<p>With caching, we balance ephemeral Lambda environment performance characteristics with <a href="#aws-encryption-sdk">adjustable thresholds</a> to meet your security needs.</p>
+<div class="admonition info">
+<p class="admonition-title">Data key recycling</p>
+<p>We request a new data key when a cached data key exceeds any of the following security thresholds:</p>
+<ol>
+<li><strong>Max age in seconds</strong></li>
+<li><strong>Max number of encrypted messages</strong></li>
+<li><strong>Max bytes encrypted</strong> across all operations</li>
+</ol>
+</div>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    autonumber
+    participant Client
+    participant Lambda
+    participant DataMasking as Data Masking
+    participant EncryptionProvider as Encryption Provider
+    Client-&gt;&gt;Lambda: Invoke (event)
+    Lambda-&gt;&gt;DataMasking: Init Encryption Provider with master key
+    Note over Lambda,DataMasking: AWSEncryptionSDKProvider([KMS_KEY])
+    Lambda-&gt;&gt;DataMasking: encrypt(data)
+    DataMasking-&gt;&gt;EncryptionProvider: Create unique data key
+    Note over DataMasking,EncryptionProvider: KMS GenerateDataKey API
+    DataMasking-&gt;&gt;DataMasking: Cache new unique data key
+    DataMasking-&gt;&gt;DataMasking: DATA_KEY.encrypt(data)
+    DataMasking-&gt;&gt;DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    DataMasking-&gt;&gt;DataMasking: Create encrypted message
+    Note over DataMasking: Encrypted message includes encrypted data, data key encrypted, algorithm, and more.
+    DataMasking-&gt;&gt;Lambda: Ciphertext from encrypted message
+    Lambda-&gt;&gt;DataMasking: encrypt(another_data)
+    DataMasking-&gt;&gt;DataMasking: Searches for data key in cache
+    alt Is Data key in cache?
+        DataMasking-&gt;&gt;DataMasking: Reuses data key
+    else Is Data key evicted from cache?
+        DataMasking-&gt;&gt;EncryptionProvider: Create unique data key
+        DataMasking-&gt;&gt;DataMasking: MASTER_KEY.encrypt(DATA_KEY)
+    end
+    DataMasking-&gt;&gt;DataMasking: DATA_KEY.encrypt(data)
+    DataMasking-&gt;&gt;DataMasking: Create encrypted message
+    DataMasking-&gt;&gt;Lambda: Ciphertext from encrypted message
+    Lambda--&gt;&gt;Client: Return response</code></pre>
+<i>Caching data keys during encrypt operation.</i>
+</center></p>
+<h2 id="testing-your-code">Testing your code<a class="headerlink" href="#testing-your-code" title="Permanent link">&para;</a></h2>
+<h3 id="testing-erase-operation">Testing erase operation<a class="headerlink" href="#testing-erase-operation" title="Permanent link">&para;</a></h3>
+<p>Testing your code with a simple erase operation</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="16:1"><input checked="checked" id="test_lambda_maskpy" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="test_lambda_maskpy">test_lambda_mask.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">import</span> <span class="nn">pytest</span>
+<span class="kn">import</span> <span class="nn">test_lambda_mask</span>
+
+
+<span class="nd">@pytest</span><span class="o">.</span><span class="n">fixture</span>
+<span class="k">def</span> <span class="nf">lambda_context</span><span class="p">():</span>
+    <span class="nd">@dataclass</span>
+    <span class="k">class</span> <span class="nc">LambdaContext</span><span class="p">:</span>
+        <span class="n">function_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;test&quot;</span>
+        <span class="n">memory_limit_in_mb</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="n">invoked_function_arn</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;arn:aws:lambda:eu-west-1:111111111:function:test&quot;</span>
+        <span class="n">aws_request_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;52fdfc07-2182-154f-163f-5f0f9a621d72&quot;</span>
+
+        <span class="k">def</span> <span class="nf">get_remaining_time_in_millis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">5</span>
+
+    <span class="k">return</span> <span class="n">LambdaContext</span><span class="p">()</span>
+
+
+<span class="hll"><span class="k">def</span> <span class="nf">test_encrypt_lambda</span><span class="p">(</span><span class="n">lambda_context</span><span class="p">):</span>
+</span>    <span class="c1"># GIVEN: A sample event for testing</span>
+    <span class="n">event</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;testkey&quot;</span><span class="p">:</span> <span class="s2">&quot;testvalue&quot;</span><span class="p">}</span>
+
+    <span class="c1"># WHEN: Invoking the lambda_handler function with the sample event and Lambda context</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">test_lambda_mask</span><span class="o">.</span><span class="n">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">lambda_context</span><span class="p">)</span>
+
+    <span class="c1"># THEN: Assert that the result matches the expected output</span>
+    <span class="k">assert</span> <span class="n">result</span> <span class="o">==</span> <span class="p">{</span><span class="s2">&quot;testkey&quot;</span><span class="p">:</span> <span class="s2">&quot;*****&quot;</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="17:1"><input checked="checked" id="lambda_maskpy" name="__tabbed_17" type="radio" /><div class="tabbed-labels"><label for="lambda_maskpy">lambda_mask.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block"></div>
+</div>
+</div>
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="hll"><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.data_masking</span> <span class="kn">import</span> <span class="n">DataMasking</span>
+</span><span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">data_masker</span> <span class="o">=</span> <span class="n">DataMasking</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">event</span>
+
+<span class="hll">    <span class="n">erased</span> <span class="o">=</span> <span class="n">data_masker</span><span class="o">.</span><span class="n">erase</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;testkey&quot;</span><span class="p">])</span>
+</span>
+    <span class="k">return</span> <span class="n">erased</span>
+</code></pre></div></td></tr></table></div>
+
+
+
+
+
+
+
+  
+    
+  
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
+    </span>
+    2024-02-26
+  </span>
+
+    
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+  <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script>
+
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Amazon Web Services
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.bd41221c.min.js"></script>
+      
+        <script src="../../javascript/aws-amplify.min.js"></script>
+      
+        <script src="../../javascript/extra.js"></script>
+      
+    
+  </body>
+</html>
