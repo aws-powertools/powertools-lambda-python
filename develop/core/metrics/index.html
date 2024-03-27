@@ -1546,6 +1546,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#changing-default-timestamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Changing default timestamp
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#flushing-metrics" class="md-nav__link">
     <span class="md-ellipsis">
       Flushing metrics
@@ -1612,11 +1621,35 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#single-metric-with-a-different-dimension" class="md-nav__link">
+  <a href="#single-metric" class="md-nav__link">
     <span class="md-ellipsis">
-      Single metric with a different dimension
+      Single metric
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="Single metric">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#working-with-different-dimensions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with different dimensions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#working-with-different-timestamp" class="md-nav__link">
+    <span class="md-ellipsis">
+      Working with different timestamp
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2105,10 +2138,53 @@
 </div>
 </div>
 </div>
+<h3 id="changing-default-timestamp">Changing default timestamp<a class="headerlink" href="#changing-default-timestamp" title="Permanent link">&para;</a></h3>
+<p>When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the <code>set_timestamp</code> function. You can specify a datetime object or an integer representing an epoch timestamp in milliseconds.</p>
+<p>Note that when specifying the timestamp using an integer, it must adhere to the epoch timezone format in milliseconds.</p>
+<details class="info" open="open">
+<summary>Info</summary>
+<p>If you need to use different timestamps across multiple metrics, opt for <a href="#working-with-different-timestamp">single_metric</a>.</p>
+</details>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:1"><input checked="checked" id="set_custom_timestamp_log_metricspy" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="set_custom_timestamp_log_metricspy">set_custom_timestamp_log_metrics.py</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Metrics</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">MetricUnit</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">metrics</span> <span class="o">=</span> <span class="n">Metrics</span><span class="p">()</span>
+
+
+<span class="nd">@metrics</span><span class="o">.</span><span class="n">log_metrics</span>  <span class="c1"># ensures metrics are flushed upon request completion/failure</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">metrics</span><span class="o">.</span><span class="n">add_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;SuccessfulBooking&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span> <span class="o">*</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="hll">    <span class="n">metrics</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+</span></code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 <h3 id="flushing-metrics">Flushing metrics<a class="headerlink" href="#flushing-metrics" title="Permanent link">&para;</a></h3>
 <p>As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the <code>log_metrics</code> decorator.</p>
 <p>This decorator also <strong>validates</strong>, <strong>serializes</strong>, and <strong>flushes</strong> all your metrics. During metrics validation, if no metrics are provided then a warning will be logged, but no exception will be raised.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="add_metricspy_1" name="__tabbed_5" type="radio" /><input id="log_metrics_outputjson" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="add_metricspy_1">add_metrics.py</label><label for="log_metrics_outputjson">log_metrics_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="add_metricspy_1" name="__tabbed_6" type="radio" /><input id="log_metrics_outputjson" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="add_metricspy_1">add_metrics.py</label><label for="log_metrics_outputjson">log_metrics_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2223,7 +2299,7 @@
 </details>
 <h3 id="capturing-cold-start-metric">Capturing cold start metric<a class="headerlink" href="#capturing-cold-start-metric" title="Permanent link">&para;</a></h3>
 <p>You can optionally capture cold start metrics with <code>log_metrics</code> decorator via <code>capture_cold_start_metric</code> param.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="capture_cold_start_metricpy" name="__tabbed_6" type="radio" /><input id="capture_cold_start_metric_outputjson" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="capture_cold_start_metricpy">capture_cold_start_metric.py</label><label for="capture_cold_start_metric_outputjson">capture_cold_start_metric_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="capture_cold_start_metricpy" name="__tabbed_7" type="radio" /><input id="capture_cold_start_metric_outputjson" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="capture_cold_start_metricpy">capture_cold_start_metric.py</label><label for="capture_cold_start_metric_outputjson">capture_cold_start_metric_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -2341,7 +2417,7 @@
 <summary>Info</summary>
 <p><strong>This will not be available during metrics visualization</strong> - Use <strong>dimensions</strong> for this purpose</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="add_metadatapy" name="__tabbed_7" type="radio" /><input id="add_metadata_outputjson" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="add_metadatapy">add_metadata.py</label><label for="add_metadata_outputjson">add_metadata_output.json</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="add_metadatapy" name="__tabbed_8" type="radio" /><input id="add_metadata_outputjson" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="add_metadatapy">add_metadata.py</label><label for="add_metadata_outputjson">add_metadata_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2427,14 +2503,12 @@
 </div>
 </div>
 </div>
-<h3 id="single-metric-with-a-different-dimension">Single metric with a different dimension<a class="headerlink" href="#single-metric-with-a-different-dimension" title="Permanent link">&para;</a></h3>
-<p>CloudWatch EMF uses the same dimensions across all your metrics. Use <code>single_metric</code> if you have a metric that should have different dimensions.</p>
-<details class="info" open="open">
-<summary>Info</summary>
-<p>Generally, this would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing" target="_blank">pay for unique metric</a>. Keep the following formula in mind:</p>
-<p><strong>unique metric = (metric_name + dimension_name + dimension_value)</strong></p>
-</details>
-<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="single_metricpy" name="__tabbed_8" type="radio" /><input id="single_metric_outputjson" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="single_metricpy">single_metric.py</label><label for="single_metric_outputjson">single_metric_output.json</label></div>
+<h3 id="single-metric">Single metric<a class="headerlink" href="#single-metric" title="Permanent link">&para;</a></h3>
+<p>CloudWatch EMF uses the same dimensions and timestamp across all your metrics. Use <code>single_metric</code> if you have a metric that should have different dimensions or timestamp.</p>
+<h4 id="working-with-different-dimensions">Working with different dimensions<a class="headerlink" href="#working-with-different-dimensions" title="Permanent link">&para;</a></h4>
+<p>Generally, using different dimensions would be an edge case since you <a href="https://aws.amazon.com/cloudwatch/pricing" target="_blank">pay for unique metric</a>.</p>
+<p>Keep the following formula in mind: <strong>unique metric = (metric_name + dimension_name + dimension_value)</strong></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="single_metricpy" name="__tabbed_9" type="radio" /><input id="single_metric_outputjson" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="single_metricpy">single_metric.py</label><label for="single_metric_outputjson">single_metric_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2521,7 +2595,7 @@
 </div>
 </div>
 <p>By default it will skip all previously defined dimensions including default dimensions. Use <code>default_dimensions</code> keyword argument if you want to reuse default dimensions or specify custom dimensions from a dictionary.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="single_metric_default_dimensions_inheritpy" name="__tabbed_9" type="radio" /><input id="single_metric_default_dimensionspy" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="single_metric_default_dimensions_inheritpy">single_metric_default_dimensions_inherit.py</label><label for="single_metric_default_dimensionspy">single_metric_default_dimensions.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="10:2"><input checked="checked" id="single_metric_default_dimensions_inheritpy" name="__tabbed_10" type="radio" /><input id="single_metric_default_dimensionspy" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="single_metric_default_dimensions_inheritpy">single_metric_default_dimensions_inherit.py</label><label for="single_metric_default_dimensionspy">single_metric_default_dimensions.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2599,6 +2673,106 @@
         <span class="n">default_dimensions</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;environment&quot;</span><span class="p">:</span> <span class="n">STAGE</span><span class="p">},</span>
     <span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
         <span class="n">metric</span><span class="o">.</span><span class="n">add_dimension</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;TableName&quot;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;Users&quot;</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<h4 id="working-with-different-timestamp">Working with different timestamp<a class="headerlink" href="#working-with-different-timestamp" title="Permanent link">&para;</a></h4>
+<p>When working with multiple metrics, customers may need different timestamps between them. In such cases, utilize <code>single_metric</code> to flush individual metrics with specific timestamps.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="11:2"><input checked="checked" id="single_metric_with_different_timestamppy" name="__tabbed_11" type="radio" /><input id="single_metric_with_different_timestamp_payloadjson" name="__tabbed_11" type="radio" /><div class="tabbed-labels"><label for="single_metric_with_different_timestamppy">single_metric_with_different_timestamp.py</label><label for="single_metric_with_different_timestamp_payloadjson">single_metric_with_different_timestamp_payload.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span><span class="p">,</span> <span class="n">single_metric</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.metrics</span> <span class="kn">import</span> <span class="n">MetricUnit</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">record</span> <span class="ow">in</span> <span class="n">event</span><span class="p">:</span>
+
+        <span class="n">record_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;record_id&quot;</span><span class="p">)</span>
+        <span class="n">amount</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">)</span>
+        <span class="n">timestamp</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">record</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
+<span class="hll">
+</span>        <span class="k">with</span> <span class="n">single_metric</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Orders&quot;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">MetricUnit</span><span class="o">.</span><span class="n">Count</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s2">&quot;Powertools&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">metric</span><span class="p">:</span>
+<span class="hll">            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing record id </span><span class="si">{</span><span class="n">record_id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span>            <span class="n">metric</span><span class="o">.</span><span class="n">set_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6ba7b810-9dad-11d1-80b4-00c04fd430c8&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648195200000</span>
+</span><span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6ba7b811-9dad-11d1-80b4-00c04fd430c8&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648224000000</span>
+</span><span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6ba7b812-9dad-11d1-80b4-00c04fd430c8&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">25</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648209600000</span>
+</span><span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6ba7b813-9dad-11d1-80b4-00c04fd430c8&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">40</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648177200000</span>
+</span><span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;record_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;6ba7b814-9dad-11d1-80b4-00c04fd430c8&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;amount&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">32</span><span class="p">,</span>
+<span class="hll"><span class="w">        </span><span class="nt">&quot;timestamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1648216800000</span>
+</span><span class="w">    </span><span class="p">}</span>
+<span class="p">]</span>
 </code></pre></div></td></tr></table></div>
 </div>
 </div>
@@ -2807,7 +2981,7 @@
 </code></pre></div></td></tr></table></div>
 <h3 id="functional-testing">Functional testing<a class="headerlink" href="#functional-testing" title="Permanent link">&para;</a></h3>
 <p>You can read standard output and assert whether metrics have been flushed. Here's an example using <code>pytest</code> with <code>capsys</code> built-in fixture:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="10:4"><input checked="checked" id="assert_single_emf_blobpy" name="__tabbed_10" type="radio" /><input id="add_metricspy_2" name="__tabbed_10" type="radio" /><input id="assert_multiple_emf_blobspy" name="__tabbed_10" type="radio" /><input id="assert_multiple_emf_blobs_modulepy" name="__tabbed_10" type="radio" /><div class="tabbed-labels"><label for="assert_single_emf_blobpy">assert_single_emf_blob.py</label><label for="add_metricspy_2">add_metrics.py</label><label for="assert_multiple_emf_blobspy">assert_multiple_emf_blobs.py</label><label for="assert_multiple_emf_blobs_modulepy">assert_multiple_emf_blobs_module.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="12:4"><input checked="checked" id="assert_single_emf_blobpy" name="__tabbed_12" type="radio" /><input id="add_metricspy_2" name="__tabbed_12" type="radio" /><input id="assert_multiple_emf_blobspy" name="__tabbed_12" type="radio" /><input id="assert_multiple_emf_blobs_modulepy" name="__tabbed_12" type="radio" /><div class="tabbed-labels"><label for="assert_single_emf_blobpy">assert_single_emf_blob.py</label><label for="add_metricspy_2">add_metrics.py</label><label for="assert_multiple_emf_blobspy">assert_multiple_emf_blobs.py</label><label for="assert_multiple_emf_blobs_modulepy">assert_multiple_emf_blobs_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
