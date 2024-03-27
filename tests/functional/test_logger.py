@@ -606,6 +606,19 @@ def test_logger_append_remove_keys(stdout, service_name):
     assert (extra_keys.items() <= keys_removed_log.items()) is False
 
 
+def test_logger_append_and_show_current_keys(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+    extra_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN keys are updated
+    logger.append_keys(**extra_keys)
+
+    # THEN appended keys must be present in logger
+    assert "request_id" in logger.current_keys()
+    assert "context" in logger.current_keys()
+
+
 def test_logger_custom_formatter(stdout, service_name, lambda_context):
     class CustomFormatter(BasePowertoolsFormatter):
         custom_format = {}
