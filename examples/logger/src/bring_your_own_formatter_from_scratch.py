@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging.formatter import BasePowertoolsFormatter
@@ -15,6 +15,9 @@ class CustomFormatter(BasePowertoolsFormatter):
     def append_keys(self, **additional_keys):
         # also used by `inject_lambda_context` decorator
         self.log_format.update(additional_keys)
+
+    def current_keys(self) -> Dict[str, Any]:
+        return self.log_format
 
     def remove_keys(self, keys: Iterable[str]):
         for key in keys:

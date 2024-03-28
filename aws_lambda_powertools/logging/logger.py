@@ -583,6 +583,9 @@ class Logger:
     def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
 
+    def current_keys(self) -> Dict[str, Any]:
+        return self.registered_formatter.current_keys()
+
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
 
