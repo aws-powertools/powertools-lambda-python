@@ -1,16 +1,15 @@
+from __future__ import annotations
 
-from typing import Optional
+import base64
+import json
 from enum import Enum
+from typing import Optional
+
+import botocore.session
+import urllib3
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
-from botocore.credentials import Credentials
-import botocore.session
-from abc import ABC, abstractmethod
-
-import json
-
-import urllib3
-import base64
+from botocore.credentials import Credentials, ReadOnlyCredentials
 
 
 def _authorization_header(client_id: str, client_secret: str) -> str:
@@ -27,6 +26,7 @@ def _authorization_header(client_id: str, client_secret: str) -> str:
     auth_string = f"{client_id}:{client_secret}"
     encoded_auth_string = base64.b64encode(auth_string.encode("utf-8")).decode("utf-8")
     return f"Basic {encoded_auth_string}"
+
 
 def _get_token(response: dict) -> str:
     """
@@ -45,7 +45,8 @@ def _get_token(response: dict) -> str:
     else:
         raise Exception("Unable to get token from response")
 
-def _request_access_token(auth_endpoint: str, body: dict, headers: dict) -> dict:
+
+def _request_access_token(auth_endpoint: str, body: dict, headers: dict) -> str:
     """
     Gets the token from the Auth0 authentication endpoint
 
@@ -71,14 +72,10 @@ def _request_access_token(auth_endpoint: str, body: dict, headers: dict) -> dict
         response = http.request("POST", auth_endpoint, headers=headers, body=json_body)
         response = response.json()
         return _get_token(response)
-    except urllib3.exceptions.RequestError as error:
+    except (urllib3.exceptions.RequestError, urllib3.exceptions.HTTPError) as error:
         # If there is an error with the request, handle it here
-        raise error
-    except urllib3.exceptions.HTTPError as error:
-        raise error
-
-
-
+        # REVIEW: CREATE A CUSTOM EXCEPTION FOR THIS
+        raise Exception(error)
 
 
 class AWSServicePrefix(Enum):
@@ -88,6 +85,7 @@ class AWSServicePrefix(Enum):
     URLs:
         https://docs.aws.amazon.com/service-authorization/latest/reference/reference_policies_actions-resources-contextkeys.html
     """
+
     LATTICE = "vpc-lattice-svcs"
     RESTAPI = "execute-api"
     HTTPAPI = "apigateway"
@@ -98,9 +96,11 @@ class AuthProvider(Enum):
     """
     Auth Provider - Enumerations of the supported authentication providers
     """
+
     AUTH0 = "auth0"
     COGNITO = "cognito"
     OKTA = "okta"
+
 
 class AWSSigV4Auth:
     """
@@ -128,11 +128,10 @@ class AWSSigV4Auth:
     >>> auth = AWSSigV4Auth(region="us-east-2", service=AWSServicePrefix.LATTICE, url="https://test-fake-service.vpc-lattice-svcs.us-east-2.on.aws")
     """
 
-
     def __init__(
         self,
         url: str,
-        region: Optional[str],
+        region: str,
         body: Optional[str] = None,
         params: Optional[dict] = None,
         headers: Optional[dict] = None,
@@ -150,6 +149,8 @@ class AWSSigV4Auth:
         self.data = body
         self.params = params
         self.headers = headers
+
+        self.credentials: Credentials | ReadOnlyCredentials
 
         if access_key and secret_key and token:
             self.access_key = access_key
@@ -178,18 +179,17 @@ class AWSSigV4Auth:
             return self.signed_request
 
 
-
 class JWTAuth:
 
     def __init__(
-            self,
-            client_id: str,
-            client_secret: str,
-            auth_endpoint: str,
-            provider: Enum = AuthProvider.COGNITO,
-            audience: Optional[str] = None,
-            scope: Optional[list] = None
-        ):
+        self,
+        client_id: str,
+        client_secret: str,
+        auth_endpoint: str,
+        provider: Enum = AuthProvider.COGNITO,
+        audience: Optional[str] = None,
+        scope: Optional[list] = None,
+    ):
 
         self.client_id = client_id
         self.client_secret = client_secret
@@ -230,7 +230,4 @@ class JWTAuth:
             if scope:
                 self.body["scope"] = " ".join(self.scope)
 
-
-        response = _request_access_token(auth_endpoint=self.auth_endpoint, body=self.body, headers=self.headers)
-
-
+        # response = _request_access_token(auth_endpoint=self.auth_endpoint, body=self.body, headers=self.headers) # noqa ERA001
