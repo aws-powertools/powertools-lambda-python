@@ -75,7 +75,7 @@ def _request_access_token(auth_endpoint: str, body: dict, headers: dict) -> str:
     except (urllib3.exceptions.RequestError, urllib3.exceptions.HTTPError) as error:
         # If there is an error with the request, handle it here
         # REVIEW: CREATE A CUSTOM EXCEPTION FOR THIS
-        raise Exception(error)
+        raise Exception(error) from error
 
 
 class AWSServicePrefix(Enum):
