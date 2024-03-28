@@ -1,7 +1,8 @@
 import copy
 import datetime
 import warnings
-from unittest.mock import MagicMock
+from typing import Any
+from unittest.mock import MagicMock, Mock
 
 import jmespath
 import pytest
@@ -26,6 +27,7 @@ from aws_lambda_powertools.utilities.idempotency.base import (
     IdempotencyHandler,
     _prepare_data,
 )
+from aws_lambda_powertools.utilities.idempotency.config import IdempotentHookData
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -240,6 +242,39 @@ def test_idempotent_lambda_first_execution(
     stubber.deactivate()
 
 
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_expired(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    lambda_response,
+    expected_params_update_item,
+    expected_params_put_item,
+    lambda_context,
+):
+    """
+    Test idempotent decorator when lambda is called with an event it successfully handled already, but outside of the
+    expiry window
+    """
+
+    stubber = stub.Stubber(persistence_store.client)
+
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+
 @pytest.mark.parametrize("idempotency_config", [{"use_local_cache": True}], indirect=True)
 def test_idempotent_lambda_first_execution_cached(
     idempotency_config: IdempotencyConfig,
@@ -319,39 +354,6 @@ def test_idempotent_lambda_first_execution_event_mutation(
         return lambda_response
 
     lambda_handler(event, lambda_context)
-
-    stubber.assert_no_pending_responses()
-    stubber.deactivate()
-
-
-@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
-def test_idempotent_lambda_expired(
-    idempotency_config: IdempotencyConfig,
-    persistence_store: DynamoDBPersistenceLayer,
-    lambda_apigw_event,
-    lambda_response,
-    expected_params_update_item,
-    expected_params_put_item,
-    lambda_context,
-):
-    """
-    Test idempotent decorator when lambda is called with an event it successfully handled already, but outside of the
-    expiry window
-    """
-
-    stubber = stub.Stubber(persistence_store.client)
-
-    ddb_response = {}
-
-    stubber.add_response("put_item", ddb_response, expected_params_put_item)
-    stubber.add_response("update_item", ddb_response, expected_params_update_item)
-    stubber.activate()
-
-    @idempotent(config=idempotency_config, persistence_store=persistence_store)
-    def lambda_handler(event, context):
-        return lambda_response
-
-    lambda_handler(lambda_apigw_event, lambda_context)
 
     stubber.assert_no_pending_responses()
     stubber.deactivate()
@@ -1986,3 +1988,89 @@ def test_idempotency_cache_with_payload_tampering(
 
     # THEN we should not cache a transaction that failed validation
     assert cache_spy.call_count == 0
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_responsehook_lambda_first_execution(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    expected_params_update_item,
+    expected_params_put_item,
+    lambda_response,
+    lambda_context,
+):
+    """
+    Test response_hook is not called for the idempotent decorator when lambda is executed
+    with an event with a previously unknown event key
+    """
+
+    idempotent_response_hook = Mock()
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = {}
+
+    stubber.add_response("put_item", ddb_response, expected_params_put_item)
+    stubber.add_response("update_item", ddb_response, expected_params_update_item)
+    stubber.activate()
+
+    idempotency_config.response_hook = idempotent_response_hook
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        return lambda_response
+
+    lambda_handler(lambda_apigw_event, lambda_context)
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
+
+    assert not idempotent_response_hook.called
+
+
+@pytest.mark.parametrize("idempotency_config", [{"use_local_cache": False}, {"use_local_cache": True}], indirect=True)
+def test_idempotent_lambda_already_completed_response_hook_is_called(
+    idempotency_config: IdempotencyConfig,
+    persistence_store: DynamoDBPersistenceLayer,
+    lambda_apigw_event,
+    timestamp_future,
+    hashed_idempotency_key,
+    serialized_lambda_response,
+    deserialized_lambda_response,
+    lambda_context,
+):
+    """
+    Test idempotent decorator where event with matching event key has already been successfully processed
+    """
+
+    def idempotent_response_hook(response: Any, idempotent_data: IdempotentHookData):
+        """Modify the response provided by adding a new key"""
+        response["idempotent_response"] = True
+
+        return response
+
+    idempotency_config.response_hook = idempotent_response_hook
+
+    stubber = stub.Stubber(persistence_store.client)
+    ddb_response = {
+        "Item": {
+            "id": {"S": hashed_idempotency_key},
+            "expiration": {"N": timestamp_future},
+            "data": {"S": serialized_lambda_response},
+            "status": {"S": "COMPLETED"},
+        },
+    }
+    stubber.add_client_error("put_item", "ConditionalCheckFailedException", modeled_fields=ddb_response)
+    stubber.activate()
+
+    @idempotent(config=idempotency_config, persistence_store=persistence_store)
+    def lambda_handler(event, context):
+        raise Exception
+
+    lambda_resp = lambda_handler(lambda_apigw_event, lambda_context)
+
+    # Then idempotent_response value will be added to the response
+    assert lambda_resp["idempotent_response"]
+
+    stubber.assert_no_pending_responses()
+    stubber.deactivate()
