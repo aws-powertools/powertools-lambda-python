@@ -1504,6 +1504,36 @@ def test_exception_handler_with_data_validation_pydantic_response():
     assert result["body"] == '{"msg":"Invalid data. Number of errors: 1"}'
 
 
+def test_exception_handler_with_route():
+    app = ApiGatewayResolver()
+    # GIVEN a Router object with an exception handler defined for ValueError
+    router = Router()
+
+    @router.exception_handler(ValueError)
+    def handle_value_error(ex: ValueError):
+        print(f"request path is '{app.current_event.path}'")
+        return Response(
+            status_code=418,
+            content_type=content_types.TEXT_HTML,
+            body=str(ex),
+        )
+
+    @router.get("/my/path")
+    def get_lambda() -> Response:
+        raise ValueError("Foo!")
+
+    app.include_router(router)
+
+    # WHEN calling the event handler
+    # AND a ValueError is raised
+    result = app(LOAD_GW_EVENT, {})
+
+    # THEN call the exception_handler from Router
+    assert result["statusCode"] == 418
+    assert result["multiValueHeaders"]["Content-Type"] == [content_types.TEXT_HTML]
+    assert result["body"] == "Foo!"
+
+
 def test_data_validation_error():
     # GIVEN a resolver without an exception handler
     app = ApiGatewayResolver(enable_validation=True)

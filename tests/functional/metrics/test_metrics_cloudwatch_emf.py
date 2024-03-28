@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 import json
 import warnings
 from collections import namedtuple
@@ -56,6 +57,7 @@ def serialize_single_metric(
     dimension: Dict,
     namespace: str,
     metadata: Dict | None = None,
+    timestamp: int | datetime.datetime | None = None,
 ) -> CloudWatchEMFOutput:
     """Helper function to build EMF object from a given metric, dimension and namespace"""
     my_metrics = AmazonCloudWatchEMFProvider(namespace=namespace)
@@ -64,6 +66,9 @@ def serialize_single_metric(
 
     if metadata is not None:
         my_metrics.add_metadata(**metadata)
+
+    if timestamp:
+        my_metrics.set_timestamp(timestamp)
 
     return my_metrics.serialize_metric_set()
 
@@ -139,6 +144,28 @@ def test_single_metric_default_dimensions(capsys, metric, dimension, namespace):
 
     # THEN we should have default dimension added to the metric
     remove_timestamp(metrics=[output, expected])
+    assert expected == output
+
+
+def test_single_metric_with_custom_timestamp(capsys, metric, dimension, namespace):
+    # GIVEN we provide a custom timestamp
+    # WHEN using single_metric context manager
+
+    default_dimensions = {dimension["name"]: dimension["value"]}
+
+    timestamp = int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000)
+    with single_metric(
+        namespace=namespace,
+        default_dimensions=default_dimensions,
+        **metric,
+    ) as my_metric:
+        my_metric.set_timestamp(timestamp)
+        my_metric.add_metric(name="second_metric", unit="Count", value=1)
+
+    output = capture_metrics_output(capsys)
+    expected = serialize_single_metric(metric=metric, dimension=dimension, namespace=namespace, timestamp=timestamp)
+
+    # THEN we should have custom timestamp added to the metric
     assert expected == output
 
 
@@ -1213,3 +1240,75 @@ def test_ephemeral_metrics_nested_log_metrics(metric, dimension, namespace, meta
 
     output = capture_metrics_output_multiple_emf_objects(capsys)
     assert len(output) == 2
+
+
+@pytest.mark.parametrize(
+    "timestamp",
+    [int((datetime.datetime.now() - datetime.timedelta(days=2)).timestamp() * 1000), 1711105187000],
+)
+def test_metric_with_custom_timestamp(namespace, metric, capsys, timestamp):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Calculate the metric timestamp as 2 days before the current time
+    metric_timestamp = timestamp
+
+    # WHEN we set custom timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    lambda_handler({}, {})
+    invocation = capture_metrics_output(capsys)
+
+    # THEN Timestamp must be the custom value
+    assert invocation["_aws"]["Timestamp"] == metric_timestamp
+
+
+def test_metric_custom_timestamp_more_than_14days_ago(namespace, metric):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Setting timestamp outside of contraints with 20 days before
+    metric_timestamp = int((datetime.datetime.now() - datetime.timedelta(days=20)).timestamp() * 1000)
+
+    # WHEN we set a wrong timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    # THEN should raise a warning
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == (
+            "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
+            "Ensure the timestamp is within 14 days past or 2 hours future."
+        )
+
+
+def test_metric_custom_timestamp_with_wrong_type(namespace, metric):
+    # GIVEN Metrics instance is initialized
+    my_metrics = Metrics(namespace=namespace)
+
+    # Setting timestamp outside of contraints with 20 days before
+    metric_timestamp = "timestamp_as_string"
+
+    # WHEN we set a wrong timestamp before to flush the metric
+    @my_metrics.log_metrics
+    def lambda_handler(evt, ctx):
+        my_metrics.add_metric(**metric)
+        my_metrics.set_timestamp(metric_timestamp)
+
+    # THEN should raise a warning
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+        lambda_handler({}, {})
+        assert len(w) == 1
+        assert str(w[-1].message) == (
+            "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
+            "Ensure the timestamp is within 14 days past or 2 hours future."
+        )

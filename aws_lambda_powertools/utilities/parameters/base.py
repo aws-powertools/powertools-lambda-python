@@ -154,6 +154,12 @@ class BaseProvider(ABC):
         """
         raise NotImplementedError()
 
+    def set(self, name: str, value: Any, *, overwrite: bool = False, **kwargs):
+        """
+        Set parameter value from the underlying parameter store
+        """
+        raise NotImplementedError()
+
     def get_multiple(
         self,
         path: str,

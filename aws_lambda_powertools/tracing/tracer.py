@@ -7,11 +7,15 @@ import numbers
 import os
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union, cast, overload
 
-from ..shared import constants
-from ..shared.functions import resolve_env_var_choice, resolve_truthy_env_var_choice
-from ..shared.lazy_import import LazyLoader
-from ..shared.types import AnyCallableT
-from .base import BaseProvider, BaseSegment
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import (
+    resolve_env_var_choice,
+    resolve_truthy_env_var_choice,
+    sanitize_xray_segment_name,
+)
+from aws_lambda_powertools.shared.lazy_import import LazyLoader
+from aws_lambda_powertools.shared.types import AnyCallableT
+from aws_lambda_powertools.tracing.base import BaseProvider, BaseSegment
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -520,7 +524,8 @@ class Tracer:
             )
 
         # Example: app.ClassA.get_all  # noqa ERA001
-        method_name = f"{method.__module__}.{method.__qualname__}"
+        # Valid characters can be found at http://docs.aws.amazon.com/xray/latest/devguide/xray-api-segmentdocuments.html
+        method_name = sanitize_xray_segment_name(f"{method.__module__}.{method.__qualname__}")
 
         capture_response = resolve_truthy_env_var_choice(
             env=os.getenv(constants.TRACER_CAPTURE_RESPONSE_ENV, "true"),
@@ -766,13 +771,15 @@ class Tracer:
         """
         logger.debug("Verifying whether Tracing has been disabled")
         is_lambda_env = os.getenv(constants.LAMBDA_TASK_ROOT_ENV)
+        is_lambda_sam_cli = os.getenv(constants.SAM_LOCAL_ENV)
+        is_chalice_cli = os.getenv(constants.CHALICE_LOCAL_ENV)
         is_disabled = resolve_truthy_env_var_choice(env=os.getenv(constants.TRACER_DISABLED_ENV, "false"))
 
         if is_disabled:
             logger.debug("Tracing has been disabled via env var POWERTOOLS_TRACE_DISABLED")
             return is_disabled
 
-        if not is_lambda_env:
+        if not is_lambda_env or (is_lambda_sam_cli or is_chalice_cli):
             logger.debug("Running outside Lambda env; disabling Tracing")
             return True
 

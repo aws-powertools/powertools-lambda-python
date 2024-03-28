@@ -503,6 +503,18 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
+        # Validation failure response (422) will always be part of the schema
+        operation_responses: Dict[int, OpenAPIResponse] = {
+            422: {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            },
+        }
+
         # Add the response to the OpenAPI operation
         if self.responses:
             for status_code in list(self.responses):
@@ -549,44 +561,33 @@ class Route:
 
                         response["content"][content_type] = new_payload
 
-            operation["responses"] = self.responses
+                # Merge the user provided response with the default responses
+                operation_responses[status_code] = response
         else:
             # Set the default 200 response
-            responses = operation.setdefault("responses", {})
-            success_response = responses.setdefault(200, {})
-            success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
-            success_response["content"] = {"application/json": {"schema": {}}}
-            json_response = success_response["content"].setdefault("application/json", {})
-
-            # Add the response schema to the OpenAPI 200 response
-            json_response.update(
-                self._openapi_operation_return(
-                    param=dependant.return_param,
-                    model_name_map=model_name_map,
-                    field_mapping=field_mapping,
-                ),
+            response_schema = self._openapi_operation_return(
+                param=dependant.return_param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
             )
 
-            # Add validation failure response (422)
-            operation["responses"][422] = {
-                "description": "Validation Error",
-                "content": {
-                    "application/json": {
-                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                    },
-                },
+            # Add the response schema to the OpenAPI 200 response
+            operation_responses[200] = {
+                "description": self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+                "content": {"application/json": response_schema},
             }
 
-            # Add the validation error schema to the definitions, but only if it hasn't been added yet
-            if "ValidationError" not in definitions:
-                definitions.update(
-                    {
-                        "ValidationError": validation_error_definition,
-                        "HTTPValidationError": validation_error_response_definition,
-                    },
-                )
-
+        operation["responses"] = operation_responses
         path[self.method.lower()] = operation
+
+        # Add the validation error schema to the definitions, but only if it hasn't been added yet
+        if "ValidationError" not in definitions:
+            definitions.update(
+                {
+                    "ValidationError": validation_error_definition,
+                    "HTTPValidationError": validation_error_response_definition,
+                },
+            )
 
         # Generate the response schema
         return path, definitions
@@ -2133,6 +2134,9 @@ class ApiGatewayResolver(BaseRouter):
         logger.debug("Appending Router middlewares into App middlewares.")
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
+        logger.debug("Appending Router exception_handler into App exception_handler.")
+        self._exception_handlers.update(router._exception_handlers)
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
@@ -2198,6 +2202,7 @@ class Router(BaseRouter):
         self._routes_with_middleware: Dict[tuple, List[Callable]] = {}
         self.api_resolver: Optional[BaseRouter] = None
         self.context = {}  # early init as customers might add context before event resolution
+        self._exception_handlers: Dict[Type, Callable] = {}
 
     def route(
         self,
@@ -2251,6 +2256,17 @@ class Router(BaseRouter):
             return func
 
         return register_route
+
+    def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
+        def register_exception_handler(func: Callable):
+            if isinstance(exc_class, list):
+                for exp in exc_class:
+                    self._exception_handlers[exp] = func
+            else:
+                self._exception_handlers[exc_class] = func
+            return func
+
+        return register_exception_handler
 
 
 class APIGatewayRestResolver(ApiGatewayResolver):

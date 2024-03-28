@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 from random import randint
@@ -10,13 +11,15 @@ from aws_lambda_powertools.utilities.batch import (
     BasePartialProcessor,
     process_partial_response,
 )
+from aws_lambda_powertools.utilities.batch.types import PartialItemFailureResponse
 
-table_name = os.getenv("TABLE_NAME", "table_not_found")
+table_name = os.getenv("TABLE_NAME", "table_store_batch")
 
 logger = Logger()
 
 
 class MyPartialProcessor(BasePartialProcessor):
+    DEFAULT_RESPONSE: PartialItemFailureResponse = {"batchItemFailures": []}
     """
     Process a record and stores successful results at a Amazon DynamoDB Table
 
@@ -28,6 +31,7 @@ class MyPartialProcessor(BasePartialProcessor):
 
     def __init__(self, table_name: str):
         self.table_name = table_name
+        self.batch_response: PartialItemFailureResponse = copy.deepcopy(self.DEFAULT_RESPONSE)
         super().__init__()
 
     def _prepare(self):
@@ -35,6 +39,9 @@ class MyPartialProcessor(BasePartialProcessor):
         # Creates table resource and clean previous results
         self.ddb_table = boto3.resource("dynamodb").Table(self.table_name)
         self.success_messages.clear()
+
+    def response(self) -> PartialItemFailureResponse:
+        return self.batch_response
 
     def _clean(self):
         # It's called once, *after* closing processing all records (closing the context manager)

@@ -125,6 +125,19 @@ class Metrics:
     def add_metadata(self, key: str, value: Any) -> None:
         self.provider.add_metadata(key=key, value=value)
 
+    def set_timestamp(self, timestamp: int):
+        """
+        Set the timestamp for the metric.
+
+        Parameters:
+        -----------
+        timestamp: int | datetime.datetime
+            The timestamp to create the metric.
+            If an integer is provided, it is assumed to be the epoch time in milliseconds.
+            If a datetime object is provided, it will be converted to epoch time in milliseconds.
+        """
+        self.provider.set_timestamp(timestamp=timestamp)
+
     def flush_metrics(self, raise_on_empty_metrics: bool = False) -> None:
         self.provider.flush_metrics(raise_on_empty_metrics=raise_on_empty_metrics)
 
