@@ -2,6 +2,7 @@
 Utility for adding idempotency to lambda functions
 """
 
+from aws_lambda_powertools.utilities.idempotency.config import IdempotentHookData, IdempotentHookFunction
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
 )
@@ -17,4 +18,6 @@ __all__ = (
     "idempotent",
     "idempotent_function",
     "IdempotencyConfig",
+    "IdempotentHookData",
+    "IdempotentHookFunction",
 )

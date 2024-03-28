@@ -3,7 +3,10 @@ import logging
 from copy import deepcopy
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
+from aws_lambda_powertools.utilities.idempotency.config import (
+    IdempotencyConfig,
+    IdempotentHookData,
+)
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -227,6 +230,9 @@ class IdempotencyHandler:
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
         if response_dict is not None:
+            if self.config.response_hook is not None:
+                idempotent_data = IdempotentHookData(data_record)
+                return self.output_serializer.from_dict(self.config.response_hook(response_dict, idempotent_data))
             return self.output_serializer.from_dict(response_dict)
         return None
 
