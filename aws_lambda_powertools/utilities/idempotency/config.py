@@ -27,7 +27,7 @@ class IdempotentHookData:
         return self._status
 
     @property
-    def expiry_timestamp(self) -> int:
+    def expiry_timestamp(self) -> Optional[int]:
         return self._expiry_timestamp
 
 
@@ -52,7 +52,7 @@ class IdempotencyConfig:
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
         lambda_context: Optional[LambdaContext] = None,
-        response_hook: IdempotentHookFunction = None,
+        response_hook: Optional[IdempotentHookFunction] = None,
     ):
         """
         Initialize the base persistence layer
@@ -87,7 +87,7 @@ class IdempotencyConfig:
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
         self.lambda_context: Optional[LambdaContext] = lambda_context
-        self.response_hook: IdempotentHookFunction = response_hook
+        self.response_hook: Optional[IdempotentHookFunction] = response_hook
 
     def register_lambda_context(self, lambda_context: LambdaContext):
         """Captures the Lambda context, to calculate the remaining time before the invocation times out"""
