@@ -850,13 +850,13 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "5.91.0"
+version = "5.92.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
-python-versions = ">=3.8.0,<4"
+python-versions = "<4,>=3.8.0"
 files = [
-    {file = "datadog_lambda-5.91.0-py3-none-any.whl", hash = "sha256:4d7d2235f306e64ccd9f02dc54b4412be1914e643f5b92113f8fa9cfe2d176d3"},
-    {file = "datadog_lambda-5.91.0.tar.gz", hash = "sha256:cdb35ce0a730233a886d37163aeb58c736b6d6e152e5236e2eca19cca5a187f4"},
+    {file = "datadog_lambda-5.92.0-py3-none-any.whl", hash = "sha256:1272781932d3f93dbf822872af09f13043a242b0f0aad01e54593e1cb762ff5a"},
+    {file = "datadog_lambda-5.92.0.tar.gz", hash = "sha256:24307abb921d2a27c11e570ef6846c9eeed904b477abb574f0bc461764efe434"},
 ]
 
 [package.dependencies]
@@ -3515,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "8f0d4a399b85ca0f2631ff7388a7f25718a44492329b6722227cf687960729d4"
+content-hash = "f71a7e6ca2cff81a70161310623b4d60fa6df1410a6ac44d6df8d85d599bc3f0"
