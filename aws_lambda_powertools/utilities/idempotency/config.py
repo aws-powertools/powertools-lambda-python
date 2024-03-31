@@ -37,7 +37,7 @@ class IdempotentHookFunction(Protocol):
     This class defines the calling signature for IdempotentHookFunction callbacks.
     """
 
-    def __call__(self, response: Any, idempotent_data: IdempotentHookData): ...
+    def __call__(self, response: Any, idempotent_data: IdempotentHookData) -> Any: ...
 
 
 class IdempotencyConfig:
@@ -75,8 +75,8 @@ class IdempotencyConfig:
             Function to use for calculating hashes, by default md5.
         lambda_context: LambdaContext, optional
             Lambda Context containing information about the invocation, function and execution environment.
-        response_hook: Callable, optional
-            Hook function to be called when a response is idempotent.
+        response_hook: IdempotentHookFunction, optional
+            Hook function to be called when an idempotent response is returned from the idempotent store.
         """
         self.event_key_jmespath = event_key_jmespath
         self.payload_validation_jmespath = payload_validation_jmespath

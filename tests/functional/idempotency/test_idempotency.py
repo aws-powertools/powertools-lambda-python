@@ -2043,7 +2043,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
     Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
-    def idempotent_response_hook(response: Any, idempotent_data: IdempotentHookData):
+    def idempotent_response_hook(response: Any, idempotent_data: IdempotentHookData) -> Any:
         """Modify the response provided by adding a new key"""
         response["idempotent_response"] = True
 
