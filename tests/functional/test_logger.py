@@ -638,7 +638,8 @@ def test_logger_formatter_without_current_keys_method(stdout, service_name):
     # WHEN keys are updated
     logger.append_keys(**extra_keys)
 
-    # THEN appended keys will not persist because customer must implement methods and persists log_format
+    # THEN the appended keys will not persist
+    # unless the customer implements the required methods and persists the log_format
     assert logger.get_current_keys() == {}
 
 
