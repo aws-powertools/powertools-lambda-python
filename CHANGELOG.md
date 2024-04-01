@@ -6,6 +6,9 @@
 
 ## Maintenance
 
+* **deps:** bump datadog-lambda from 5.91.0 to 5.92.0 ([#4038](https://github.com/aws-powertools/powertools-lambda-python/issues/4038))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.133.0a0 to 2.134.0a0 ([#4039](https://github.com/aws-powertools/powertools-lambda-python/issues/4039))
+* **deps-dev:** bump sentry-sdk from 1.43.0 to 1.44.0 ([#4040](https://github.com/aws-powertools/powertools-lambda-python/issues/4040))
 * **deps-dev:** bump aws-cdk-lib from 2.133.0 to 2.134.0 ([#4031](https://github.com/aws-powertools/powertools-lambda-python/issues/4031))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.104 to 0.1.105 ([#4030](https://github.com/aws-powertools/powertools-lambda-python/issues/4030))
 * **deps-dev:** bump aws-cdk from 2.133.0 to 2.134.0 ([#4032](https://github.com/aws-powertools/powertools-lambda-python/issues/4032))
