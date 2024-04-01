@@ -158,31 +158,31 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.133.0a0"
+version = "2.134.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.133.0a0.tar.gz", hash = "sha256:1fb72aab5ce0183a0f94f30973e5c4d3c3cb7d191f334165b99ae4e1a7a09aa0"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.133.0a0-py3-none-any.whl", hash = "sha256:34e843875b4ce1f794b059545f0db3780011f04a1d614eae04f5507a8b4479a7"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.134.0a0.tar.gz", hash = "sha256:36263eadc014ef434554c7213b0b2c30b6ab854a59bc740f5d898b7b5516399a"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.134.0a0-py3-none-any.whl", hash = "sha256:b4d0c9e40c67d4aeaa027f337bb539255bbf9751ed3429c311395bf2f8bb9fcf"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.133.0,<3.0.0"
+aws-cdk-lib = ">=2.134.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.94.0,<2.0.0"
+jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.133.0"
+version = "2.134.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.133.0.tar.gz", hash = "sha256:ef09b237f6840bdaae5081b35bbc9566a9bc38aaf6bd736441db9ee06298312e"},
-    {file = "aws_cdk_lib-2.133.0-py3-none-any.whl", hash = "sha256:59c534e54e2b68ef514b41c5799f65094a0e580a6e0b5f0a275409d34d4bafc7"},
+    {file = "aws-cdk-lib-2.134.0.tar.gz", hash = "sha256:1e3655affc3acc19cdb00aee2c7c193ab935a1bd40191785dd8f039fa8263458"},
+    {file = "aws_cdk_lib-2.134.0-py3-none-any.whl", hash = "sha256:f66ab6276f44a6a6b0ec89d0d8a71718b46327e966e16a656f480c506db00d21"},
 ]
 
 [package.dependencies]
@@ -190,7 +190,7 @@ files = [
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.0.1,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.94.0,<2.0.0"
+jsii = ">=1.95.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -447,13 +447,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.104"
+version = "0.1.105"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.104.tar.gz", hash = "sha256:69f0b6e1fcf53f8f509d2ce2d60a18bd6b07114b07c519ab0189d3f1902b3026"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.104-py3-none-any.whl", hash = "sha256:6fb3862d3050be498ba3a03b0d65e1ee0df0b91b7150fc52f26d4bdde1f93b56"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.105.tar.gz", hash = "sha256:7995dd17d9b6846b4edd102eced0307906d7de143cf4722113cb82c429453f8c"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.105-py3-none-any.whl", hash = "sha256:ab69e3d3fdd5d095f8af0f165d203992f2a0b105af65b2957b90f9729904cbf3"},
 ]
 
 [package.dependencies]
@@ -850,13 +850,13 @@ requests = ">=2.6.0"
 
 [[package]]
 name = "datadog-lambda"
-version = "5.91.0"
+version = "5.92.0"
 description = "The Datadog AWS Lambda Library"
 optional = false
-python-versions = ">=3.8.0,<4"
+python-versions = "<4,>=3.8.0"
 files = [
-    {file = "datadog_lambda-5.91.0-py3-none-any.whl", hash = "sha256:4d7d2235f306e64ccd9f02dc54b4412be1914e643f5b92113f8fa9cfe2d176d3"},
-    {file = "datadog_lambda-5.91.0.tar.gz", hash = "sha256:cdb35ce0a730233a886d37163aeb58c736b6d6e152e5236e2eca19cca5a187f4"},
+    {file = "datadog_lambda-5.92.0-py3-none-any.whl", hash = "sha256:1272781932d3f93dbf822872af09f13043a242b0f0aad01e54593e1cb762ff5a"},
+    {file = "datadog_lambda-5.92.0.tar.gz", hash = "sha256:24307abb921d2a27c11e570ef6846c9eeed904b477abb574f0bc461764efe434"},
 ]
 
 [package.dependencies]
@@ -2062,13 +2062,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.34.63"
-description = "Type annotations for boto3.SecretsManager 1.34.63 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.72"
+description = "Type annotations for boto3.SecretsManager 1.34.72 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.34.63.tar.gz", hash = "sha256:a193373d718f747d53878b5cc7fef2e9b8fde3892e4788ac690fd2b16a35564c"},
-    {file = "mypy_boto3_secretsmanager-1.34.63-py3-none-any.whl", hash = "sha256:3ed3587f9b5a5eb4e8c81edeeaa0b4a9118d8f07cfc4915c137f8edc315028ab"},
+    {file = "mypy-boto3-secretsmanager-1.34.72.tar.gz", hash = "sha256:d0733c5b53e8b5e7bda00f4b42ed84af12e36a20c848917e49c173a0422ef03c"},
+    {file = "mypy_boto3_secretsmanager-1.34.72-py3-none-any.whl", hash = "sha256:c5ed74e4a56e345a6396c609d2808fbe64570f90bb76b256d65e1294eaa24c69"},
 ]
 
 [package.dependencies]
@@ -3019,13 +3019,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "1.43.0"
+version = "1.44.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.43.0.tar.gz", hash = "sha256:41df73af89d22921d8733714fb0fc5586c3461907e06688e6537d01a27e0e0f6"},
-    {file = "sentry_sdk-1.43.0-py2.py3-none-any.whl", hash = "sha256:8d768724839ca18d7b4c7463ef7528c40b7aa2bfbf7fe554d5f9a7c044acfd36"},
+    {file = "sentry-sdk-1.44.0.tar.gz", hash = "sha256:f7125a9235795811962d52ff796dc032cd1d0dd98b59beaced8380371cd9c13c"},
+    {file = "sentry_sdk-1.44.0-py2.py3-none-any.whl", hash = "sha256:eb65289da013ca92fad2694851ad2f086aa3825e808dc285bd7dcaf63602bb18"},
 ]
 
 [package.dependencies]
@@ -3515,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "06ded72b67c32472b583b6be33c596f2caf71327cf931280f8aa5c7a4314898b"
+content-hash = "844e0e524f11bcc2e4fb8168130a38c0ff16a44b61da258f4a59a7e761c4f4bd"

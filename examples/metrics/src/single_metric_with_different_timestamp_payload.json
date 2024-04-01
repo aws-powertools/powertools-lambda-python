@@ -1,0 +1,27 @@
+[
+    {
+        "record_id": "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+        "amount": 10,
+        "timestamp": 1648195200000
+    },
+    {
+        "record_id": "6ba7b811-9dad-11d1-80b4-00c04fd430c8",
+        "amount": 30,
+        "timestamp": 1648224000000
+    },
+    {
+        "record_id": "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+        "amount": 25,
+        "timestamp": 1648209600000
+    },
+    {
+        "record_id": "6ba7b813-9dad-11d1-80b4-00c04fd430c8",
+        "amount": 40,
+        "timestamp": 1648177200000
+    },
+    {
+        "record_id": "6ba7b814-9dad-11d1-80b4-00c04fd430c8",
+        "amount": 32,
+        "timestamp": 1648216800000
+    }
+]

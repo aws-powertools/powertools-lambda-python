@@ -604,12 +604,28 @@ classDiagram
 * **`_prepare()`** – called once as part of the processor initialization
 * **`_clean()`** – teardown logic called once after `_process_record` completes
 * **`_async_process_record()`** – If you need to implement asynchronous logic, use this method, otherwise define it in your class with empty logic
+* **`response()`** - called upon completion of processing
 
-You can then use this class as a context manager, or pass it to `batch_processor` to use as a decorator on your Lambda handler function.
+You can utilize this class to instantiate a new processor and then pass it to the `process_partial_response` function.
 
-```python hl_lines="9-11 19 33 39 46 57 62 66 74" title="Creating a custom batch processor"
---8<-- "examples/batch_processing/src/custom_partial_processor.py"
-```
+=== "Creating a custom batch processor"
+
+    ```python hl_lines="10-13 21 37 43 46 53 64 69 73"
+    --8<-- "examples/batch_processing/src/custom_partial_processor.py"
+    ```
+
+=== "DynamoDB table used for storing processed records."
+
+    ```yaml
+    --8<-- "examples/batch_processing/sam/custom_partial_processor_dynamodb_table.yaml"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/batch_processing/src/custom_partial_processor_payload.json"
+    ```
+
 
 ### Caveats
 
