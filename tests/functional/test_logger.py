@@ -618,15 +618,36 @@ def test_logger_append_and_show_current_keys(stdout, service_name):
     assert "context" in logger.get_current_keys()
 
 
+def test_logger_formatter_without_current_keys_method(stdout, service_name):
+    class CustomFormatter(BasePowertoolsFormatter):
+        def append_keys(self, **additional_keys):
+            # Fake method
+            pass
+
+        def clear_state(self) -> None:
+            # Fake method
+            pass
+
+    custom_formater = CustomFormatter()
+
+    # GIVEN a Logger is initialized with a Logger Formatter from scratch
+
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formater)
+    extra_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN keys are updated
+    logger.append_keys(**extra_keys)
+
+    # THEN appended keys will not persist because customer must implement methods and persists log_format
+    assert logger.get_current_keys() == {}
+
+
 def test_logger_custom_formatter(stdout, service_name, lambda_context):
     class CustomFormatter(BasePowertoolsFormatter):
         custom_format = {}
 
         def append_keys(self, **additional_keys):
             self.custom_format.update(additional_keys)
-
-        def get_current_keys(self) -> Dict[str, Any]:
-            return self.custom_format
 
         def remove_keys(self, keys: Iterable[str]):
             for key in keys:
