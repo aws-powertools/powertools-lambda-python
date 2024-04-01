@@ -614,8 +614,8 @@ def test_logger_append_and_show_current_keys(stdout, service_name):
     logger.append_keys(**extra_keys)
 
     # THEN appended keys must be present in logger
-    assert "request_id" in logger.current_keys()
-    assert "context" in logger.current_keys()
+    assert "request_id" in logger.get_current_keys()
+    assert "context" in logger.get_current_keys()
 
 
 def test_logger_custom_formatter(stdout, service_name, lambda_context):
@@ -625,7 +625,7 @@ def test_logger_custom_formatter(stdout, service_name, lambda_context):
         def append_keys(self, **additional_keys):
             self.custom_format.update(additional_keys)
 
-        def current_keys(self) -> Dict[str, Any]:
+        def get_current_keys(self) -> Dict[str, Any]:
             return self.custom_format
 
         def remove_keys(self, keys: Iterable[str]):
