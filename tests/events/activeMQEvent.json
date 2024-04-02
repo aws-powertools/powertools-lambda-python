@@ -9,7 +9,7 @@
       "connectionId": "myJMSCoID",
       "redelivered": false,
       "destination": {
-        "physicalname": "testQueue"
+        "physicalName": "testQueue"
       },
       "timestamp": 1598827811958,
       "brokerInTime": 1598827811958,
@@ -25,7 +25,7 @@
       "connectionId": "myJMSCoID2",
       "redelivered": false,
       "destination": {
-        "physicalname": "testQueue"
+        "physicalName": "testQueue"
       },
       "timestamp": 1598827811958,
       "brokerInTime": 1598827811958,
@@ -42,7 +42,7 @@
       "connectionId": "myJMSCoID1",
       "persistent": false,
       "destination": {
-        "physicalname": "testQueue"
+        "physicalName": "testQueue"
       },
       "timestamp": 1598827811958,
       "brokerInTime": 1598827811958,
