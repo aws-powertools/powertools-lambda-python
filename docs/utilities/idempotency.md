@@ -918,7 +918,7 @@ You can provide the _**response_hook**_ using _**IdempotentConfig**_.
 
 === "Using an Idempotent Response Hook"
 
-```python hl_lines="15-26 31"
+```python hl_lines="15-25 30"
 --8<-- "examples/idempotency/src/working_with_response_hook.py"
 ```
 
