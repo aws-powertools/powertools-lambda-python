@@ -914,7 +914,7 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 The IdempotentConfig allows you to specify a _**response_hook**_ which is a function that will be called when an already returned response is loaded from the PersistenceStore.  The Hook function will be called with the current de-serialized response object and the Idempotent DataRecord.
 
-You can provide the response_hook using _**IdempotentConfig**_.
+You can provide the _**response_hook**_ using _**IdempotentConfig**_.
 
 === "Using an Idempotent Response Hook"
 
