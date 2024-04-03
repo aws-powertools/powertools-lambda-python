@@ -27,7 +27,6 @@ from aws_lambda_powertools.utilities.idempotency.base import (
     IdempotencyHandler,
     _prepare_data,
 )
-from aws_lambda_powertools.utilities.idempotency.config import IdempotentHookData
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -2043,7 +2042,7 @@ def test_idempotent_lambda_already_completed_response_hook_is_called(
     Test idempotent decorator where event with matching event key has already been successfully processed
     """
 
-    def idempotent_response_hook(response: Any, idempotent_data: IdempotentHookData) -> Any:
+    def idempotent_response_hook(response: Any, idempotent_data: DataRecord) -> Any:
         """Modify the response provided by adding a new key"""
         response["idempotent_response"] = True
 

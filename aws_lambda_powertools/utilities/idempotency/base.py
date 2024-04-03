@@ -5,7 +5,6 @@ from typing import Any, Callable, Dict, Optional, Tuple
 
 from aws_lambda_powertools.utilities.idempotency.config import (
     IdempotencyConfig,
-    IdempotentHookData,
 )
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
@@ -230,12 +229,14 @@ class IdempotencyHandler:
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
         if response_dict is not None:
+            serialized_response = self.output_serializer.from_dict(response_dict)
             if self.config.response_hook is not None:
                 return self.config.response_hook(
-                    self.output_serializer.from_dict(response_dict),
-                    IdempotentHookData(data_record),
+                    serialized_response,
+                    data_record,
                 )
-            return self.output_serializer.from_dict(response_dict)
+            return serialized_response
+
         return None
 
     def _get_function_response(self):

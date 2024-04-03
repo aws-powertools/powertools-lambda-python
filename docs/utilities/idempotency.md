@@ -699,16 +699,16 @@ For advanced configurations, such as setting up SSL certificates or customizing 
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-| Parameter                       | Default | Description                                                                                                                                                                                                                         |
-|---------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                           |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                                                                                        |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                      |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                                                                            |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                        |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                         |
-| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                           |
-| **response_hook**               | `None`  | Function to use for processing the stored Idempotent response.  This function hook is called when an already returned response is found.  See [Modifying The Idempotent Response](idempotency.md#modifying-the-idempotent-repsonse) |
+| Parameter                       | Default | Description                                                                                                                                                                                                                                  |
+|---------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                                    |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                                                                                                 |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                               |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                                                                                     |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                                 |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                  |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                    |
+| **response_hook**               | `None`  | Function to use for processing the stored Idempotent response.  This function hook is called when an existing idempotent response is found.  See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
 ### Handling concurrent executions with the same payload
 
@@ -910,15 +910,15 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
     For example, the `_put_record` method needs to raise an exception if a non-expired record already exists in the data store with a matching key.
 
-### Modifying the Idempotent Repsonse
+### Manipulating the Idempotent Response
 
-The IdempotentConfig allows you to specify a _**response_hook**_ which is a function that will be called when an idempotent response is loaded from the PersistenceStore.
+The IdempotentConfig allows you to specify a _**response_hook**_ which is a function that will be called when an already returned response is loaded from the PersistenceStore.  The Hook function will be called with the current de-serialized response object and the Idempotent DataRecord.
 
-You can provide the response_hook using _**IdempotentConfig**_.
+You can provide the response_hook using_**IdempotentConfig**_.
 
 === "Using an Idempotent Response Hook"
 
-```python hl_lines="10-15 19"
+```python hl_lines="15-23 28"
 --8<-- "examples/idempotency/src/working_with_response_hook.py"
 ```
 

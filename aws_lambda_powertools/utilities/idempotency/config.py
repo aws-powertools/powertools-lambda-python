@@ -1,43 +1,7 @@
-from typing import Any, Dict, Optional
+from typing import Dict, Optional
 
-from aws_lambda_powertools.shared.types import Protocol
-from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import DataRecord
+from aws_lambda_powertools.utilities.idempotency import IdempotentHookFunction
 from aws_lambda_powertools.utilities.typing import LambdaContext
-
-
-class IdempotentHookData:
-    """
-    Idempotent Hook Data
-
-    Contains data relevant to the current Idempotent record which matches the current request.
-    All IdempotentHook functions will be passed this data as well as the current Response.
-    """
-
-    def __init__(self, data_record: DataRecord) -> None:
-        self._idempotency_key = data_record.idempotency_key
-        self._status = data_record.status
-        self._expiry_timestamp = data_record.expiry_timestamp
-
-    @property
-    def idempotency_key(self) -> str:
-        return self._idempotency_key
-
-    @property
-    def status(self) -> str:
-        return self._status
-
-    @property
-    def expiry_timestamp(self) -> Optional[int]:
-        return self._expiry_timestamp
-
-
-class IdempotentHookFunction(Protocol):
-    """
-    The IdempotentHookFunction.
-    This class defines the calling signature for IdempotentHookFunction callbacks.
-    """
-
-    def __call__(self, response: Any, idempotent_data: IdempotentHookData) -> Any: ...
 
 
 class IdempotencyConfig:

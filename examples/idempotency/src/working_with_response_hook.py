@@ -1,17 +1,23 @@
+from datetime import datetime
 from typing import Dict
 
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
-    IdempotentHookData,
     idempotent,
+)
+from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+    DataRecord,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
-def my_response_hook(response: Dict, idempotent_data: IdempotentHookData) -> Dict:
-    # How to add a field to the response
-    response["is_idempotent_response"] = True
+def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
+    # Return inserted Header data into the Idempotent Response
+    expiry_time = datetime.fromtimestamp(idempotent_data.expiry_timestamp)
+
+    response["headers"]["x-idempotent-key"] = idempotent_data.idempotency_key
+    response["headers"]["x-idempotent-expiration"] = expiry_time.isoformat()
 
     # Must return the response here
     return response
