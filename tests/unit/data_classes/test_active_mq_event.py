@@ -27,7 +27,7 @@ def test_active_mq_event():
     assert message.broker_in_time == raw_event["messages"][0]["brokerInTime"]
     assert message.broker_out_time == raw_event["messages"][0]["brokerOutTime"]
     assert message.properties.get("testKey") == raw_event["messages"][0]["properties"]["testKey"]
-    assert message.destination_physicalname == raw_event["messages"][0]["destination"]["physicalname"]
+    assert message.destination_physicalname == raw_event["messages"][0]["destination"]["physicalName"]
     assert message.delivery_mode is None
     assert message.correlation_id is None
     assert message.reply_to is None
