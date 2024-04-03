@@ -111,6 +111,7 @@ class EventWrapper(DictWrapper):
         super().__init__(data, json_deserializer)
 
     def nested_event_contents(self):
+        print('IN COMMON NESTED EVENTS')
         for record in self["Records"]:
             body = record['body']
             yield body
@@ -121,7 +122,9 @@ class EventWrapper(DictWrapper):
             nested_event_content_deserializer = self._json_deserializer
 
         for content in self.nested_event_contents():
-            yield nested_event_class(nested_event_content_deserializer(content))
+            deserialized = nested_event_content_deserializer(content)
+            casted = nested_event_class(deserialized)
+            yield casted
 
 class BaseProxyEvent(DictWrapper):
     @property

@@ -1,7 +1,51 @@
-# kinesis stream -> firehose -> s3 -> lambda: not working ie the event generated is just s3, nothing is nested...
+# kinesis stream -> firehose -> s3 -> lambda: the event generated is just s3, nothing is nested.
 
-# s3 -> sns -> firehose -> lambda: sns not sending messages to firehose for some reason :(
-# working -> ?? -> working? i see test data in CW
+# s3 -> sns -> firehose -> lambda: sns not sending messages to firehose
+# working -> ?? -> working (i see test data in CW)
+
+
+# s3 -> sns -> firehose -> lambda = firehose(sns(s3))
+firehose_sns_s3_event = {}
+
+
+# sns -> firehose -> lambda = firehose(sns)
+firehose_sns_event = {
+  "invocationId": "b1332a68-805c-418f-8bb6-075f5b991134",
+  "deliveryStreamArn": "arn:aws:firehose:us-east-1:200984112386:deliverystream/PUT-S3-vqmly",
+  "region": "us-east-1",
+  "records": [
+    {
+      "recordId": "49650562840674497170060081706384853755200261109279883266000000",
+      "approximateArrivalTimestamp": 1711562009882,
+      "data": "eyJUeXBlIjoiTm90aWZpY2F0aW9uIiwiTWVzc2FnZUlkIjoiMWIzZTEyNDQtZWNjOS01NmFiLTliODUtNGMzYWIzOTA4ZWU5IiwiVG9waWNBcm4iOiJhcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZSIsIlN1YmplY3QiOiJkZGRkZGRkZGRkZGRkZGRkZGQiLCJNZXNzYWdlIjoiZXdyZXdycXdyZXdyXG5zZGFkXG5hc2RcbmFzZFxuYXNcbmR4IiwiVGltZXN0YW1wIjoiMjAyNC0wMy0yN1QxNzo1MzoyOS44MDRaIiwiVW5zdWJzY3JpYmVVUkwiOiJodHRwczovL3Nucy51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS8/QWN0aW9uPVVuc3Vic2NyaWJlJlN1YnNjcmlwdGlvbkFybj1hcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZTo2OTZlMzRhNS1mZDBiLTRhYjQtYjEyMi05ZmZhNzEwYjg5OTUifQo="
+    }
+  ]
+}
+
+
+# CW -> firehose -> lambda = firehose(cw)
+firehose_cw_event = {
+  "invocationId": "cbef637e-fb9e-4c48-84c6-0d04f21f347d",
+  "deliveryStreamArn": "arn:aws:firehose:us-east-1:200984112386:deliverystream/PUT-S3-vqmly",
+  "region": "us-east-1",
+  "records": [
+    {
+      "recordId": "49650562840674497170060081706233738027748410540928532482000000",
+      "approximateArrivalTimestamp": 1711561691435,
+      "data": "H4sIAAAAAAAA/zWOwQrCMBAFfyXsuQhRVMxNpHqpFqzgQURiuzbBNinZrUXEf5daPQ5v4M0LaiTSJR6eDYKCVbo77NPkso2zbLmJIQLfOQz9Uvm26DTnJvElQQSVLzfBtw0oGCjjgLoekNor5cE2bL1b24oxEKjT+evFD3Tc4wtsMehsayTWdQNKzqWczuRsISfzcfTP6wOOifjliV+eEiuD+d26UhjUFRvhb6JAYut0/yzWNqDxhCN4n98fsU8ThOwAAAA="
+    },
+    {
+      "recordId": "49650562840674497170060081706248245137583787946450878466000000",
+      "approximateArrivalTimestamp": 1711561718674,
+      "data": "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"
+    },
+    {
+      "recordId": "49650562840674497170060081706253080840862247081624993794000000",
+      "approximateArrivalTimestamp": 1711561727636,
+      "data": "H4sIAAAAAAAA/92a23IbxxGGXwW1lUuu1OcD7mhLdg6W7Uh0nJTAci2ApcMKSSgEGMVW6d1TA8oWTwPvluBc8I6DwaD/ne3+pruH75rzfr3ufuyPfnrTN9Pm2eHR4Q8vnr96dfjl8+agWb296C+baUMAGYJIHNYcNGerH7+8XF29aabN0+7t+ulZdz5fdk8XV+vN6rzdnJ736013/qb9Y392tvp+dXm2/OLqYrE5XV20f58v//HydEWAf/nr9S+92lz23fnWCMlT4KfkT1//4avDo+evjo5PiJbgQtmdpMw7SmACEFJyYcloDpr11Xy9uDx9U37+i9OzTX+5bqavm02/3jTHWwvP/9NfbMqH75rTZTNtONASAd3VOSQFBMjdHdlcNd0DSJyBAlWYRTBZuTz5r8/WTNER1dAxJO3gl31sps2ro8OXR5OX/b+v+vXmT8vpRDt070FbSshWQrGNhXq7UOHovAO1xeRv/eX6dHUxnXx49NlF8/7g0wT7QMG3JibXI+Xr0eHh4R6UxEAln19dXvYXm8nR6Xn/8+qin07+vJedyJH2n3WbfjopDtkCtxQToKnElOPTtQgM1PJu1vzQvV3Pmum7WXP0y4LZLys+vKCDWfP52epq+X23WfzzRb+5PF2UJa/fzZqvu/N+/aZb9LNmOmu+Xb3tLzer1dl61hzMmmen5/1Fcbjtt18fHx/MmvvLtytfXS0W/Xp9cnX22Wr1r9OLH796/s32N767ON1sv/H56upiM2veH78/fn9QWzB9jU/g+H1tB4MhVRnMJZgMOYTKphqSq3qQGauVjXSu72Dc3MHnXz8bG4Z7UCcD1b18/u034zkx2zy7uuw2W1LgE6HJ+Xq2+ez07KxfTj7OXH/8oj9fXf40eXX6cz+dIMXkxWezzYvuv5MPE9+t++V0wrn9/MEnD3YzN2JEl/BUy1AkYzOgCLZEC5V0FGaovpfQ3YCMk4V20nk7F/JWHLTNXHZtMGc3V1v4goYBcpzg6qu6I/jWxA1AllENkOOU6EAlwwE5zn71bKvYHwfIcVqqx9YdLQMAWVY8CkCGABI4KEQyGdMWRqmUChxBQWxGYJTkEXW/Nt8ByCFhuAd1dV+/re4+IAcJvAlIeOL+MCER94PIACIVCIDAEkdBFBSiXtRBQmIwO6dKQmD1cEgL3YnIblG+KNBGLLtWmJdtp8JtcoacIFDOl4MQWQS7cUCQKSUhJWiGU5BbYmAwOqsYRIQm1gU/jMgy8RGR21EFkSOV0EAlgxE50n7tdKvZryEy96BlhxuNROR2xWNAZAAxQQYxWpKRCyqRA6sQqJNjCcsQ3+ZtVDtk0mJXDjkkDPegrlYv3VV3H5GDBN7OIfN3zSEDQQxchVE4MhU1IxkikV1J2AMEAlUdkKxSqRGA8u4csu8JEqWlvudWXKXNkz5bUdUFmHlvPAyQCBIMqqCpERJEROAk5JCsaELhlmZogRaVzKkIlocAuZ34FZDXoxogxympuPQ9JcMBOc5+xWmr9iuAFNiDlh1uJKMAeb3iUQASQUFZNUA8SrCFKCGnUSB6JJTOBaK5GWGtIij7obtyyAFhuAd1O3xdfyOHHCLwNiArKeTeAOkJScBl0zPRs5z6wEFIpe8QzIyKqIwGRJX2UVngOwG5TDrRRGjjpJu3sshlGwDWUp9OuTjpFjIwgxwnuJJB3hN8a+IGIMuoCshRSioZ5D0lIwA5yn4lg6zaHwlIT0YFTtVIdwRWZFFWyzQNyMBSc2uigNW6kEVLjARkUf84AOmpXPgDCGkkkC4SFkmOEspGGS5oioSgVQRx5A5ADgnDPairHsZ31N0H5CCBtwCpv3MGScqsxZsNixu7EwuzEqoYIwCxK5OJGIdrpb1QkgXYCcg+aJn9Sd8uYh6t9PPtFlDLuZRuORfMTocBkpTVTcs5BRACHqUfYK6IgewUoZGCCoaJXsWSEz4MSCe8AcgyqgFynJIqoO4oGQ7IcfYrZW3V/jhAjtOyw41wJCDLikcByNLporKN6QIq5UN2zSAy9G2XovyBRhoAUEWQE+8A5JAw3IO6aoVwR919QA4S+H8tsSUEzYhMiEqmTBgaJBaFh5RIWb7ILGzJ1TQIXXf3IKkX7DrRFrnzVhawaDNPoO0QSq+dSZbD7rFHCq5h6a7gWxMfAbkd1QA5TkkNUHeVDAekROmKEHOUm5FyHQKRpcRJTVbjFAClEGBJl1oujT7qmkZwD1p2uNG4HuT17j0KQEqUG2ESZLKwrduU48ZVGTHYSucChcWYAbWGIHTddU0zJAw/XZ3VKoS76u4DcpDA2xkk/r6AVCMRDCGwdC6dWAgF9tKSjUwIM/VMZkllqR39pcrbCchFis4luBVYzluJk0UbqdmiQIc9ic51YA9SjcwkJJXKzZhuS0hRUnNwMlaULO8qxdWtForl7T4IyDLxEZDbUQ2Q45TUUH1XyXBAjrNfA3TNfg2QD95zhhojQpgIqUVi+W+fpGCK0tuGCEQzEUVh06wViISQ4wC5Vf8oAKnGXM4XDHdzERYorZMwDiMIFAMgTXVBB6y/TYQdgBwShntQV8fEbXX3ATlI4A1A0hORhwHJIwApUAekCXKYBIBTCTBUAANnU1JXCA4rd/oKJRyx1hsmsd0l9hIX/aLHvj2ZU7ayOJHrLsOi65YB8/nCbWCJbYIGKSVJEy13akjsEgmQ5d+1sOQoKKqmwsBVLIk9XGKXiRuALKMaIMcpqbr0HSXDATnOftVpK/bHAXKclh1uNLLE3q54FIA0wZIgpaSblp61i0WCsFkKKFswuYGRUmnu1neQdvUgB4ThHtTt8HX6jR7kEIG3S2z79AzyBiCP3/8PjXEEaBovAAA="
+    }
+  ]
+}
 
 
 # ses -> sns -> lambda = sns(ses)
@@ -256,3 +300,66 @@ sns_s3_event = {
   ]
 }
 
+sns_schema = {
+  "type": "object",
+  "properties": {
+    "Records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "EventSource": {
+            "type": "string"
+          },
+          "EventVersion": {
+            "type": "string"
+          },
+          "EventSubscriptionArn": {
+            "type": "string"
+          },
+          "Sns": {
+            "type": "object",
+            "properties": {
+              "Type": {
+                "type": "string"
+              },
+              "MessageId": {
+                "type": "string"
+              },
+              "TopicArn": {
+                "type": "string"
+              },
+              "Subject": {
+                "type": "string"
+              },
+              "Message": {
+                "type": "string"
+              },
+              "Timestamp": {
+                "type": "string"
+              },
+              "SignatureVersion": {
+                "type": "string"
+              },
+              "Signature": {
+                "type": "string"
+              },
+              "SigningCertUrl": {
+                "type": "string"
+              },
+              "UnsubscribeUrl": {
+                "type": "string"
+              },
+              "MessageAttributes": {
+                "type": "object"
+              }
+            },
+            "required": ["Type", "MessageId", "TopicArn", "Subject", "Message", "Timestamp", "SignatureVersion", "Signature", "SigningCertUrl", "UnsubscribeUrl", "MessageAttributes"]
+          }
+        },
+        "required": ["EventSource", "EventVersion", "EventSubscriptionArn", "Sns"]
+      }
+    }
+  },
+  "required": ["Records"]
+}

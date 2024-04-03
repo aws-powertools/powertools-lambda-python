@@ -1,4 +1,7 @@
 from typing import Dict, Iterator
+import test_events
+import jsonschema
+from jsonschema import validate
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
@@ -78,8 +81,17 @@ class SNSMessage(EventWrapper):
         """The Subject parameter specified when the notification was published to the topic."""
         return self["Subject"]
 
+    def nested_event_contents(self):
+        print('in SNS MESSAGE NESTED EVENT')
+        yield self.message
+        # for record in self.message:
+        #     print('record:', record, type(record))
+        #     # body = record['Sns']['Message']
+        #     # print('body:', body, type(body))
+        #     yield record
 
-class SNSEventRecord(DictWrapper):
+
+class SNSEventRecord(EventWrapper):
     @property
     def event_version(self) -> str:
         """Event version"""
@@ -123,8 +135,19 @@ class SNSEvent(EventWrapper):
         return self.record.sns.message
 
     def nested_event_contents(self):
+        print('in SNS NESTED EVENT')
         for record in self["Records"]:
-            # print('record', record, type(record))
             body = record['Sns']['Message']
-            # print('body:', body, type(body))
             yield body
+
+    def check_schema(self):
+        print(self, type(self))
+        try:
+            validate(instance=self, schema=test_events.sns_schema)
+            print("JSON object is valid.")
+            return self
+        except jsonschema.exceptions.ValidationError: #TODO: or cx needs to tell us to cast to SNSEvent or SNSMessage, we shouldn't have to figure that out ourselves?
+            print("JSON object is not valid.")
+            print("event rec:", SNSMessage(self))
+            corrected = SNSMessage(self)
+            return corrected

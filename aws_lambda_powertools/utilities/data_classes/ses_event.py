@@ -66,7 +66,7 @@ class SESMailCommonHeaders(DictWrapper):
         return self.get("replyTo")
 
 
-class SESMail(DictWrapper):
+class SESMail(EventWrapper):
     @property
     def timestamp(self) -> str:
         """String that contains the time at which the email was received, in ISO8601 format."""
@@ -207,7 +207,7 @@ class SESReceipt(DictWrapper):
         return SESReceiptAction(self["action"])
 
 
-class SESMessage(DictWrapper):
+class SESMessage(EventWrapper):
     @property
     def mail(self) -> SESMail:
         return SESMail(self["ses"]["mail"])
@@ -217,7 +217,7 @@ class SESMessage(DictWrapper):
         return SESReceipt(self["ses"]["receipt"])
 
 
-class SESEventRecord(DictWrapper):
+class SESEventRecord(EventWrapper):
     @property
     def event_source(self) -> str:
         """The AWS service from which the SES event record originated. For SES, this is aws:ses"""
@@ -260,10 +260,9 @@ class SESEvent(EventWrapper):
     @property
     def receipt(self) -> SESReceipt:
         return self.record.ses.receipt
-    
+
     def nested_event_contents(self):
+        print('IN SES NESTED EVENTS')
         for record in self["Records"]:
-            # print('record', record, type(record))
             body = record['ses']
-            # print('body:', body, type(body))
             yield body
