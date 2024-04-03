@@ -950,19 +950,31 @@ You can set up a `response_hook` in the `IdempotentConfig` class to access the r
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="15 17 20 31"
+    ```python hl_lines="18 20 23 32"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 
 === "Sample event"
 
     ```json
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    --8<-- "examples/idempotency/src/working_with_response_hook_payload.json"
     ```
 
 ???+ info "Info: Using custom de-serialization?"
 
     The response_hook is called after the custom de-serialization so the payload you process will be the de-serialized version.
+
+#### Being a good citizen
+
+Using Response hooks can add subtle improvements to manipulating returned data from idempotent operations, but also add significant complexity if you're not careful.
+
+Keep the following in mind when authoring hooks for Idempotency utility:
+
+1. **Response hook works exclusively when operations are idempotent.** Carefully consider the logic within the `Response hook` and prevent any attempt to access the key from relying exclusively on idempotent operations.
+
+2. **Catch your own exceptions.** Catch and handle known exceptions to your logic.
+
+3. **Watch out when you are decorating the Lambda Handler and using the Response hook.** If you don't catch and handle exceptions in your `Response hook`, your function might not run properly.
 
 ## Compatibility with other utilities
 
