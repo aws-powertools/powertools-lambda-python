@@ -114,6 +114,14 @@ This article will guide you through personalizing observability by integrating C
 
 [Creating a serverless API using Powertools for AWS Lambda and CDK](https://www.ranthebuilder.cloud/post/boost-app-engagement-with-aws-cloudwatch-metrics-powertools-for-aws){target="_blank" rel="nofollow"}
 
+### Streaming data with AWS Lambda & Powertools for AWS Lambda
+
+This article will walk you through using Powertools for AWS Lambda to optimize your Lambda function when streaming large files from S3.
+
+> **Author: [Tom Reid](https://www.linkedin.com/in/tom-reid-5a2a3a/){target="_blank" rel="nofollow"}** :material-linkedin:
+
+[Streaming data with AWS Lambda & Powertools for AWS Lambda](https://towardsdev.com/streaming-data-with-aws-lambda-5f0e81f854cd){target="_blank" rel="nofollow"}
+
 ## Videos
 
 #### Building a resilient input handling with Parser
