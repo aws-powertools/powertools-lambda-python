@@ -14,12 +14,13 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 
 def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
     # Return inserted Header data into the Idempotent Response
-    response["headers"]["x-idempotent-key"] = idempotent_data.idempotency_key
+    response["x-idempotent-key"] = idempotent_data.idempotency_key
 
     # expiry_timestamp could be None so include if set
-    if idempotent_data.expiry_timestamp:
-        expiry_time = datetime.fromtimestamp(idempotent_data.expiry_timestamp)
-        response["headers"]["x-idempotent-expiration"] = expiry_time.isoformat()
+    expiry_timestamp = idempotent_data.expiry_timestamp
+    if expiry_timestamp:
+        expiry_time = datetime.fromtimestamp(int(expiry_timestamp))
+        response["x-idempotent-expiration"] = expiry_time.isoformat()
 
     # Must return the response here
     return response
@@ -27,7 +28,7 @@ def my_response_hook(response: Dict, idempotent_data: DataRecord) -> Dict:
 
 persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
 
-config = IdempotencyConfig(event_key_jmespath="body", response_hook=my_response_hook)
+config = IdempotencyConfig(response_hook=my_response_hook)
 
 
 @idempotent(persistence_store=persistence_layer, config=config)

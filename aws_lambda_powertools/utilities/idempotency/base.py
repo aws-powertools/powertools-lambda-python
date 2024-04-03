@@ -231,6 +231,7 @@ class IdempotencyHandler:
         if response_dict is not None:
             serialized_response = self.output_serializer.from_dict(response_dict)
             if self.config.response_hook is not None:
+                logger.debug("Response hook configured, invoking function")
                 return self.config.response_hook(
                     serialized_response,
                     data_record,

@@ -454,6 +454,40 @@ sequenceDiagram
 <i>Idempotent successful request cached</i>
 </center>
 
+#### Successful request with response_hook configured
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Response hook
+    participant Persistence Layer
+    alt initial request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. <br> Prevents concurrent invocations <br> with the same payload
+        Lambda-->>Lambda: Call your function
+        Lambda->>Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer-->>Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. <br> New invocations with the same payload <br> now return the same result
+        Lambda-->>Client: Response sent to client
+    else retried request
+        Client->>Lambda: Invoke (event)
+        Lambda->>Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer-->>Response hook: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Response hook,Persistence Layer: Record status is COMPLETE and not expired
+        Response hook->>Lambda: Response hook invoked
+        Lambda-->>Client: Same response sent to client
+    end
+```
+<i>Idempotent successful request with response hook</i>
+</center>
+
 #### Expired idempotency records
 
 <center>
@@ -708,7 +742,7 @@ Idempotent decorator can be further configured with **`IdempotencyConfig`** as s
 | **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                                 |
 | **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                  |
 | **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                    |
-| **response_hook**               | `None`  | Function to use for processing the stored Idempotent response.  This function hook is called when an existing idempotent response is found.  See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
+| **response_hook**               | `None`  | Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
 ### Handling concurrent executions with the same payload
 
@@ -912,15 +946,19 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 ### Manipulating the Idempotent Response
 
-The IdempotentConfig allows you to specify a _**response_hook**_ which is a function that will be called when an already returned response is loaded from the PersistenceStore.  The Hook function will be called with the current de-serialized response object and the Idempotent DataRecord.
-
-You can provide the _**response_hook**_ using _**IdempotentConfig**_.
+You can set up a `response_hook` in the `IdempotentConfig` class to access the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 === "Using an Idempotent Response Hook"
 
-```python hl_lines="15-25 30"
---8<-- "examples/idempotency/src/working_with_response_hook.py"
-```
+    ```python hl_lines="15 17 20 31"
+    --8<-- "examples/idempotency/src/working_with_response_hook.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
 
 ???+ info "Info: Using custom de-serialization?"
 
