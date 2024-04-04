@@ -10,23 +10,29 @@
 
 ## Maintenance
 
-* **deps:** bump squidfunk/mkdocs-material from `065f3af` to `6b124e1` in /docs ([#4055](https://github.com/aws-powertools/powertools-lambda-python/issues/4055))
+* **ci:** prevent deprecated custom runner from being used ([#4061](https://github.com/aws-powertools/powertools-lambda-python/issues/4061))
 * **deps:** bump datadog-lambda from 5.91.0 to 5.92.0 ([#4038](https://github.com/aws-powertools/powertools-lambda-python/issues/4038))
-* **deps:** bump squidfunk/mkdocs-material from `3307665` to `065f3af` in /docs ([#4052](https://github.com/aws-powertools/powertools-lambda-python/issues/4052))
 * **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#4042](https://github.com/aws-powertools/powertools-lambda-python/issues/4042))
-* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.105 to 0.1.106 ([#4048](https://github.com/aws-powertools/powertools-lambda-python/issues/4048))
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 1 update ([#4066](https://github.com/aws-powertools/powertools-lambda-python/issues/4066))
+* **deps:** bump squidfunk/mkdocs-material from `065f3af` to `6b124e1` in /docs ([#4055](https://github.com/aws-powertools/powertools-lambda-python/issues/4055))
+* **deps:** bump pydantic from 1.10.14 to 1.10.15 ([#4064](https://github.com/aws-powertools/powertools-lambda-python/issues/4064))
+* **deps:** bump squidfunk/mkdocs-material from `3307665` to `065f3af` in /docs ([#4052](https://github.com/aws-powertools/powertools-lambda-python/issues/4052))
 * **deps-dev:** bump the boto-typing group with 1 update ([#4047](https://github.com/aws-powertools/powertools-lambda-python/issues/4047))
 * **deps-dev:** bump mkdocs-material from 9.5.15 to 9.5.16 ([#4050](https://github.com/aws-powertools/powertools-lambda-python/issues/4050))
+* **deps-dev:** bump ruff from 0.3.4 to 0.3.5 ([#4049](https://github.com/aws-powertools/powertools-lambda-python/issues/4049))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.105 to 0.1.106 ([#4048](https://github.com/aws-powertools/powertools-lambda-python/issues/4048))
+* **deps-dev:** bump mkdocs-material from 9.5.16 to 9.5.17 ([#4056](https://github.com/aws-powertools/powertools-lambda-python/issues/4056))
+* **deps-dev:** bump aws-cdk-lib from 2.134.0 to 2.135.0 ([#4057](https://github.com/aws-powertools/powertools-lambda-python/issues/4057))
 * **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.133.0a0 to 2.134.0a0 ([#4039](https://github.com/aws-powertools/powertools-lambda-python/issues/4039))
 * **deps-dev:** bump sentry-sdk from 1.43.0 to 1.44.0 ([#4040](https://github.com/aws-powertools/powertools-lambda-python/issues/4040))
-* **deps-dev:** bump ruff from 0.3.4 to 0.3.5 ([#4049](https://github.com/aws-powertools/powertools-lambda-python/issues/4049))
-* **deps-dev:** bump mkdocs-material from 9.5.16 to 9.5.17 ([#4056](https://github.com/aws-powertools/powertools-lambda-python/issues/4056))
+* **deps-dev:** bump aws-cdk from 2.134.0 to 2.135.0 ([#4058](https://github.com/aws-powertools/powertools-lambda-python/issues/4058))
+* **deps-dev:** bump the boto-typing group with 2 updates ([#4062](https://github.com/aws-powertools/powertools-lambda-python/issues/4062))
 * **deps-dev:** bump aws-cdk-lib from 2.133.0 to 2.134.0 ([#4031](https://github.com/aws-powertools/powertools-lambda-python/issues/4031))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.104 to 0.1.105 ([#4030](https://github.com/aws-powertools/powertools-lambda-python/issues/4030))
 * **deps-dev:** bump aws-cdk from 2.133.0 to 2.134.0 ([#4032](https://github.com/aws-powertools/powertools-lambda-python/issues/4032))
 * **deps-dev:** bump the boto-typing group with 1 update ([#4029](https://github.com/aws-powertools/powertools-lambda-python/issues/4029))
-* **deps-dev:** bump aws-cdk-lib from 2.134.0 to 2.135.0 ([#4057](https://github.com/aws-powertools/powertools-lambda-python/issues/4057))
-* **deps-dev:** bump aws-cdk from 2.134.0 to 2.135.0 ([#4058](https://github.com/aws-powertools/powertools-lambda-python/issues/4058))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.134.0a0 to 2.135.0a0 ([#4063](https://github.com/aws-powertools/powertools-lambda-python/issues/4063))
+* **deps-dev:** bump sentry-sdk from 1.44.0 to 1.44.1 ([#4065](https://github.com/aws-powertools/powertools-lambda-python/issues/4065))
 
 
 <a name="v2.36.0"></a>
