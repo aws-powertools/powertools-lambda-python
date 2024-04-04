@@ -1,6 +1,7 @@
 """
 Primary interface for idempotent Lambda functions utility
 """
+
 import functools
 import logging
 import os

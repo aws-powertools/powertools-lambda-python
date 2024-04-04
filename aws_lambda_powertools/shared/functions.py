@@ -4,6 +4,7 @@ import base64
 import itertools
 import logging
 import os
+import re
 import warnings
 from binascii import Error as BinAsciiError
 from pathlib import Path
@@ -57,18 +58,15 @@ def resolve_max_age(env: str, choice: Optional[int]) -> int:
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: float) -> float:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: float) -> float: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: str) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: str) -> str: ...
 
 
 @overload
-def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str:
-    ...
+def resolve_env_var_choice(env: Optional[str], choice: Optional[str]) -> str: ...
 
 
 def resolve_env_var_choice(
@@ -278,13 +276,10 @@ def abs_lambda_path(relative_path: str = "") -> str:
         If the path is empty, it will return the current working directory.
     """
     # Retrieve the LAMBDA_TASK_ROOT environment variable or default to an empty string
-    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "")
+    current_working_directory = os.environ.get("LAMBDA_TASK_ROOT", "") or str(Path.cwd())
 
-    # If LAMBDA_TASK_ROOT is not set, use the current working directory
-    if not current_working_directory:
-        current_working_directory = str(Path.cwd())
+    return str(Path(current_working_directory, relative_path))
 
-    # Combine the current working directory and the relative path to get the absolute path
-    absolute_path = str(Path(current_working_directory, relative_path))
 
-    return absolute_path
+def sanitize_xray_segment_name(name: str) -> str:
+    return re.sub(constants.INVALID_XRAY_NAME_CHARACTERS, "", name)

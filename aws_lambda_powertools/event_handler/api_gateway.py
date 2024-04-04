@@ -17,6 +17,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Mapping,
     Match,
     Optional,
     Pattern,
@@ -200,7 +201,7 @@ class CORSConfig:
             return {}
 
         # The origin matched an allowed origin, so return the CORS headers
-        headers: Dict[str, str] = {
+        headers = {
             "Access-Control-Allow-Origin": origin,
             "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
         }
@@ -222,7 +223,7 @@ class Response(Generic[ResponseT]):
         status_code: int,
         content_type: Optional[str] = None,
         body: Optional[ResponseT] = None,
-        headers: Optional[Dict[str, Union[str, List[str]]]] = None,
+        headers: Optional[Mapping[str, Union[str, List[str]]]] = None,
         cookies: Optional[List[Cookie]] = None,
         compress: Optional[bool] = None,
     ):
@@ -237,7 +238,7 @@ class Response(Generic[ResponseT]):
             provided http headers
         body: Union[str, bytes, None]
             Optionally set the response body. Note: bytes body will be automatically base64 encoded
-        headers: dict[str, Union[str, List[str]]]
+        headers: Mapping[str, Union[str, List[str]]]
             Optionally set specific http headers. Setting "Content-Type" here would override the `content_type` value.
         cookies: list[Cookie]
             Optionally set cookies.
@@ -245,7 +246,7 @@ class Response(Generic[ResponseT]):
         self.status_code = status_code
         self.body = body
         self.base64_encoded = False
-        self.headers: Dict[str, Union[str, List[str]]] = headers if headers else {}
+        self.headers: Dict[str, Union[str, List[str]]] = dict(headers) if headers else {}
         self.cookies = cookies or []
         self.compress = compress
         self.content_type = content_type
@@ -502,6 +503,18 @@ class Route:
             if request_body_oai:
                 operation["requestBody"] = request_body_oai
 
+        # Validation failure response (422) will always be part of the schema
+        operation_responses: Dict[int, OpenAPIResponse] = {
+            422: {
+                "description": "Validation Error",
+                "content": {
+                    "application/json": {
+                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
+                    },
+                },
+            },
+        }
+
         # Add the response to the OpenAPI operation
         if self.responses:
             for status_code in list(self.responses):
@@ -548,44 +561,33 @@ class Route:
 
                         response["content"][content_type] = new_payload
 
-            operation["responses"] = self.responses
+                # Merge the user provided response with the default responses
+                operation_responses[status_code] = response
         else:
             # Set the default 200 response
-            responses = operation.setdefault("responses", {})
-            success_response = responses.setdefault(200, {})
-            success_response["description"] = self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION
-            success_response["content"] = {"application/json": {"schema": {}}}
-            json_response = success_response["content"].setdefault("application/json", {})
-
-            # Add the response schema to the OpenAPI 200 response
-            json_response.update(
-                self._openapi_operation_return(
-                    param=dependant.return_param,
-                    model_name_map=model_name_map,
-                    field_mapping=field_mapping,
-                ),
+            response_schema = self._openapi_operation_return(
+                param=dependant.return_param,
+                model_name_map=model_name_map,
+                field_mapping=field_mapping,
             )
 
-            # Add validation failure response (422)
-            operation["responses"][422] = {
-                "description": "Validation Error",
-                "content": {
-                    "application/json": {
-                        "schema": {"$ref": COMPONENT_REF_PREFIX + "HTTPValidationError"},
-                    },
-                },
+            # Add the response schema to the OpenAPI 200 response
+            operation_responses[200] = {
+                "description": self.response_description or _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+                "content": {"application/json": response_schema},
             }
 
-            # Add the validation error schema to the definitions, but only if it hasn't been added yet
-            if "ValidationError" not in definitions:
-                definitions.update(
-                    {
-                        "ValidationError": validation_error_definition,
-                        "HTTPValidationError": validation_error_response_definition,
-                    },
-                )
-
+        operation["responses"] = operation_responses
         path[self.method.lower()] = operation
+
+        # Add the validation error schema to the definitions, but only if it hasn't been added yet
+        if "ValidationError" not in definitions:
+            definitions.update(
+                {
+                    "ValidationError": validation_error_definition,
+                    "HTTPValidationError": validation_error_response_definition,
+                },
+            )
 
         # Generate the response schema
         return path, definitions
@@ -1400,7 +1402,9 @@ class ApiGatewayResolver(BaseRouter):
         if self._enable_validation:
             from aws_lambda_powertools.event_handler.middlewares.openapi_validation import OpenAPIValidationMiddleware
 
-            self.use([OpenAPIValidationMiddleware()])
+            # Note the serializer argument: only use custom serializer if provided by the caller
+            # Otherwise, fully rely on the internal Pydantic based mechanism to serialize responses for validation.
+            self.use([OpenAPIValidationMiddleware(validation_serializer=serializer)])
 
     def get_openapi_schema(
         self,
@@ -1454,9 +1458,24 @@ class ApiGatewayResolver(BaseRouter):
             get_definitions,
         )
         from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
+        from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
+
+        # Pydantic V2 has no support for OpenAPI schema 3.0
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+            warnings.warn(
+                "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
+                stacklevel=2,
+            )
+            openapi_version = "3.1.0"
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+            warnings.warn(
+                "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
+                stacklevel=2,
+            )
+            openapi_version = "3.0.3"
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
@@ -1605,6 +1624,7 @@ class ApiGatewayResolver(BaseRouter):
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
+        compress: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1637,11 +1657,13 @@ class ApiGatewayResolver(BaseRouter):
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
+        compress: bool, default = False
+            Whether or not to enable gzip compression swagger route.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
 
-        @self.get(path, middlewares=middlewares, include_in_schema=False)
+        @self.get(path, middlewares=middlewares, include_in_schema=False, compress=compress)
         def swagger_handler():
             base_path = self._get_base_path()
 
@@ -1691,7 +1713,13 @@ class ApiGatewayResolver(BaseRouter):
                     body=escaped_spec,
                 )
 
-            body = generate_swagger_html(escaped_spec, path, swagger_js, swagger_css, swagger_base_url)
+            body = generate_swagger_html(
+                escaped_spec,
+                f"{base_path}{path}",
+                swagger_js,
+                swagger_css,
+                swagger_base_url,
+            )
 
             return Response(
                 status_code=200,
@@ -1940,7 +1968,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def _not_found(self, method: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers: Dict[str, Union[str, List[str]]] = {}
+        headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
             headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
@@ -2106,6 +2134,9 @@ class ApiGatewayResolver(BaseRouter):
         logger.debug("Appending Router middlewares into App middlewares.")
         self._router_middlewares = self._router_middlewares + router._router_middlewares
 
+        logger.debug("Appending Router exception_handler into App exception_handler.")
+        self._exception_handlers.update(router._exception_handlers)
+
         # use pointer to allow context clearance after event is processed e.g., resolve(evt, ctx)
         router.context = self.context
 
@@ -2171,6 +2202,7 @@ class Router(BaseRouter):
         self._routes_with_middleware: Dict[tuple, List[Callable]] = {}
         self.api_resolver: Optional[BaseRouter] = None
         self.context = {}  # early init as customers might add context before event resolution
+        self._exception_handlers: Dict[Type, Callable] = {}
 
     def route(
         self,
@@ -2224,6 +2256,17 @@ class Router(BaseRouter):
             return func
 
         return register_route
+
+    def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
+        def register_exception_handler(func: Callable):
+            if isinstance(exc_class, list):
+                for exp in exc_class:
+                    self._exception_handlers[exp] = func
+            else:
+                self._exception_handlers[exc_class] = func
+            return func
+
+        return register_exception_handler
 
 
 class APIGatewayRestResolver(ApiGatewayResolver):

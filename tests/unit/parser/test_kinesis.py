@@ -94,8 +94,7 @@ def test_kinesis_stream_event_cloudwatch_logs_data_extraction():
 
 def test_kinesis_stream_event_cloudwatch_logs_data_extraction_fails_with_custom_model():
     # GIVEN a custom model replaces Kinesis Record Data bytes
-    class DummyModel(BaseModel):
-        ...
+    class DummyModel(BaseModel): ...
 
     raw_event = load_event("kinesisStreamCloudWatchLogsEvent.json")
     stream_data = KinesisDataStreamModel(**raw_event)

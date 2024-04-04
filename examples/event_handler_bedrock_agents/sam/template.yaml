@@ -1,0 +1,61 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Agents for Amazon Bedrock example with Powertools for AWS Lambda (Python)
+
+Globals: # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy-globals.html
+  Function:
+    Timeout: 30
+    Runtime: python3.12
+    Tracing: Active
+    Environment:
+      Variables:
+        POWERTOOLS_SERVICE_NAME: PowertoolsHelloWorld
+        POWERTOOLS_LOG_LEVEL: INFO
+
+Resources:
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getting_started.lambda_handler
+      Description: Agent for Amazon Bedrock handler function
+      CodeUri: ../src
+
+
+  BedrockPermission: # (1)!
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ApiFunction.Arn
+      Principal: bedrock.amazonaws.com
+      SourceAccount: !Sub ${AWS::AccountId}
+
+  BedrockServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Action:
+                - sts:assumeRole
+              Service:
+                - bedrock.amazonaws.com
+      Policies:
+        - PolicyName: bedrock
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - bedrock:InvokeModel
+                Resource: # (2)!
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-v2:1
+                  - !Sub arn:aws:${AWS::Region}:region::foundation-model/anthropic.claude-instant-v1
+
+Outputs:
+  BedrockServiceRole:
+    Description: The role ARN to be used by Amazon Bedrock
+    Value: !GetAtt BedrockServiceRole.Arn  # (3)!

@@ -1,4 +1,5 @@
-from typing import Any, Dict, Iterator, Optional, Type, TypeVar
+from functools import cached_property
+from typing import Any, Dict, ItemsView, Iterator, Optional, Type, TypeVar
 
 from aws_lambda_powertools.utilities.data_classes import S3Event
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
@@ -81,6 +82,9 @@ class SQSMessageAttributes(Dict[str, SQSMessageAttribute]):
         item = super().get(key)
         return None if item is None else SQSMessageAttribute(item)  # type: ignore
 
+    def items(self) -> ItemsView[str, SQSMessageAttribute]:  # type: ignore
+        return {k: SQSMessageAttribute(v) for k, v in super().items()}.items()  # type: ignore
+
 
 class SQSRecord(EventWrapper):
     """An Amazon SQS message"""
@@ -107,7 +111,7 @@ class SQSRecord(EventWrapper):
         """The message's contents (not URL-encoded)."""
         return self["body"]
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Deserializes JSON string available in 'body' property
 
@@ -132,9 +136,7 @@ class SQSRecord(EventWrapper):
         data: list = record.json_body  # ["telemetry_values"]
         ```
         """
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self["body"])
-        return self._json_data
+        return self._json_deserializer(self["body"])
 
     @property
     def attributes(self) -> SQSRecordAttributes:

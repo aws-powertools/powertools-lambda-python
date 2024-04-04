@@ -17,6 +17,7 @@ class IdempotencyDynamoDBStack(BaseInfrastructure):
         table.grant_read_write_data(functions["ParallelExecutionHandler"])
         table.grant_read_write_data(functions["FunctionThreadSafetyHandler"])
         table.grant_read_write_data(functions["OptionalIdempotencyKeyHandler"])
+        table.grant_read_write_data(functions["PayloadTamperingValidationHandler"])
 
     def _create_dynamodb_table(self) -> Table:
         table = dynamodb.Table(

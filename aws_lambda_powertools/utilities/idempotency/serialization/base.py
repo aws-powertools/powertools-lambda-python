@@ -1,6 +1,7 @@
 """
 Serialization for supporting idempotency
 """
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 

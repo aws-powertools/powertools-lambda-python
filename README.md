@@ -3,15 +3,13 @@
 
 [![Build](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/quality_check.yml/badge.svg)](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/python_build.yml)
 [![codecov.io](https://codecov.io/github/aws-powertools/powertools-lambda-python/branch/develop/graphs/badge.svg)](https://app.codecov.io/gh/aws-powertools/powertools-lambda-python)
-![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.7|%203.8|%203.9|%203.10|%203.11|%203.12&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET)](https://discord.gg/B8zZKbbyET)
+![PythonSupport](https://img.shields.io/static/v1?label=python&message=%203.8|%203.9|%203.10|%203.11|%203.12&color=blue?style=flat-square&logo=python) ![PyPI version](https://badge.fury.io/py/aws-lambda-powertools.svg) ![PyPi monthly downloads](https://img.shields.io/pypi/dm/aws-lambda-powertools) [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python/badge)](https://api.securityscorecards.dev/projects/github.com/aws-powertools/powertools-lambda-python) [![Join our Discord](https://dcbadge.vercel.app/api/server/B8zZKbbyET?style=flat-square)](https://discord.gg/B8zZKbbyET)
 
 Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverless [best practices and increase developer velocity](https://docs.powertools.aws.dev/lambda/python/latest/#features).
 
 > Also available in [Java](https://github.com/aws-powertools/powertools-lambda-java), [Typescript](https://github.com/aws-powertools/powertools-lambda-typescript), and [.NET](https://github.com/aws-powertools/powertools-lambda-dotnet).
 
 **[📜Documentation](https://docs.powertools.aws.dev/lambda/python/)** | **[🐍PyPi](https://pypi.org/project/aws-lambda-powertools/)** | **[Roadmap](https://docs.powertools.aws.dev/lambda/python/latest/roadmap/)** | **[Detailed blog post](https://aws.amazon.com/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/)**
-
-> **An AWS Developer Acceleration (DevAx) initiative by Specialist Solution Architects | <aws-devax-open-source@amazon.com>**
 
 ![hero-image](https://user-images.githubusercontent.com/3340292/198254617-d0fdb672-86a6-4988-8a40-adf437135e0a.png)
 
@@ -22,6 +20,7 @@ Powertools for AWS Lambda (Python) is a developer toolkit to implement Serverles
 * **[Metrics](https://docs.powertools.aws.dev/lambda/python/latest/core/metrics/)** - Custom Metrics created asynchronously via CloudWatch Embedded Metric Format (EMF)
 * **[Event handler: AppSync](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/appsync/)** - AWS AppSync event handler for Lambda Direct Resolver and Amplify GraphQL Transformer function
 * **[Event handler: API Gateway and ALB](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/)** - Amazon API Gateway REST/HTTP API and ALB event handler for Lambda functions invoked using Proxy integration
+* **[Event handler: Agents for Amazon Bedrock](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/bedrock_agents/)** - Create Agents for Amazon Bedrock, automatically generating OpenAPI schemas
 * **[Bring your own middleware](https://docs.powertools.aws.dev/lambda/python/latest/utilities/middleware_factory/)** - Decorator factory to create your own middleware to run logic before, and after each Lambda invocation
 * **[Parameters utility](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/)** - Retrieve and cache parameter values from Parameter Store, Secrets Manager, or DynamoDB
 * **[Batch processing](https://docs.powertools.aws.dev/lambda/python/latest/utilities/batch/)** - Handle partial failures for AWS SQS batch processing
@@ -83,7 +82,7 @@ This helps us understand who uses Powertools for AWS Lambda (Python) in a non-in
 ## Connect
 
 * **Powertools for AWS Lambda on Discord**: `#python` - **[Invite link](https://discord.gg/B8zZKbbyET)**
-* **Email**: <aws-lambda-powertools-feedback@amazon.com>
+* **Email**: <aws-powertools-maintainers@amazon.com>
 
 ## Security disclosures
 

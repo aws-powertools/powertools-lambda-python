@@ -1,4 +1,4 @@
-const { PR_NUMBER, PR_TITLE } = require("./constants")
+const { PR_NUMBER, PR_TITLE, PR_LABELS } = require("./constants")
 
 module.exports = async ({github, context, core}) => {
     const FEAT_REGEX = /feat(\((.+)\))?(:.+)/
@@ -18,10 +18,9 @@ module.exports = async ({github, context, core}) => {
     }
 
     // get PR labels from env
-    const prLabels = process.env.PR_LABELS.replaceAll("\"", "").split(",");
+    const prLabels = PR_LABELS.replaceAll("\"", "").split(",");
     const labelKeys = Object.keys(labels);
 
-    // Maintenance: We should keep track of modified PRs in case their titles change
     let miss = 0;
     try {
         for (const label in labels) {

@@ -19,7 +19,7 @@ class LocalLambdaPowertoolsLayer(BaseLocalLambdaLayer):
 
     def __init__(self, output_dir: Path = CDK_OUT_PATH, architecture: Architecture = Architecture.X86_64):
         super().__init__(output_dir)
-        self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis]"
+        self.package = f"{SOURCE_CODE_ROOT_PATH}[all,redis,datamasking]"
 
         self.platform_args = self._resolve_platform(architecture)
         self.build_args = f"{self.platform_args} --only-binary=:all: --upgrade"

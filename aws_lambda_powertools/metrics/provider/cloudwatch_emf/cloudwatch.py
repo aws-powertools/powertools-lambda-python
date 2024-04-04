@@ -12,8 +12,10 @@ from typing import Any, Dict, List
 from aws_lambda_powertools.metrics.base import single_metric
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.functions import (
+    convert_timestamp_to_emf_format,
     extract_cloudwatch_metric_resolution_value,
     extract_cloudwatch_metric_unit_value,
+    validate_emf_timestamp,
 )
 from aws_lambda_powertools.metrics.provider.base import BaseProvider
 from aws_lambda_powertools.metrics.provider.cloudwatch_emf.constants import MAX_DIMENSIONS, MAX_METRICS
@@ -73,6 +75,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
         self.namespace = resolve_env_var_choice(choice=namespace, env=os.getenv(constants.METRICS_NAMESPACE_ENV))
         self.service = resolve_env_var_choice(choice=service, env=os.getenv(constants.SERVICE_NAME_ENV))
         self.metadata_set = metadata_set if metadata_set is not None else {}
+        self.timestamp: int | None = None
 
         self._metric_units = [unit.value for unit in MetricUnit]
         self._metric_unit_valid_options = list(MetricUnit.__members__)
@@ -231,7 +234,7 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
 
         return {
             "_aws": {
-                "Timestamp": int(datetime.datetime.now().timestamp() * 1000),  # epoch
+                "Timestamp": self.timestamp or int(datetime.datetime.now().timestamp() * 1000),  # epoch
                 "CloudWatchMetrics": [
                     {
                         "Namespace": self.namespace,  # "test_namespace"
@@ -241,8 +244,8 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
                 ],
             },
             # NOTE: Mypy doesn't recognize splats '** syntax' in TypedDict
-            **dimensions,  # type: ignore[misc] # "service": "test_service"
-            **metadata,  # "username": "test"
+            **dimensions,  # "service": "test_service"
+            **metadata,  # type: ignore[typeddict-item] # "username": "test"
             **metric_names_and_values,  # "single_metric": 1.0
         }
 
@@ -303,6 +306,31 @@ class AmazonCloudWatchEMFProvider(BaseProvider):
             self.metadata_set[key] = value
         else:
             self.metadata_set[str(key)] = value
+
+    def set_timestamp(self, timestamp: int | datetime.datetime):
+        """
+        Set the timestamp for the metric.
+
+        Parameters:
+        -----------
+        timestamp: int | datetime.datetime
+            The timestamp to create the metric.
+            If an integer is provided, it is assumed to be the epoch time in milliseconds.
+            If a datetime object is provided, it will be converted to epoch time in milliseconds.
+        """
+        # The timestamp must be a Datetime object or an integer representing an epoch time.
+        # This should not exceed 14 days in the past or be more than 2 hours in the future.
+        # Any metrics failing to meet this criteria will be skipped by Amazon CloudWatch.
+        # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/CloudWatch_Embedded_Metric_Format_Specification.html
+        # See: https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CloudWatch-Logs-Monitoring-CloudWatch-Metrics.html
+        if not validate_emf_timestamp(timestamp):
+            warnings.warn(
+                "This metric doesn't meet the requirements and will be skipped by Amazon CloudWatch. "
+                "Ensure the timestamp is within 14 days past or 2 hours future.",
+                stacklevel=2,
+            )
+
+        self.timestamp = convert_timestamp_to_emf_format(timestamp)
 
     def clear_metrics(self) -> None:
         logger.debug("Clearing out existing metric set from memory")

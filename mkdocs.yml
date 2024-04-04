@@ -22,6 +22,7 @@ nav:
           - Event Handler:
               - core/event_handler/api_gateway.md
               - core/event_handler/appsync.md
+              - core/event_handler/bedrock_agents.md
           - utilities/parameters.md
           - utilities/batch.md
           - utilities/typing.md
@@ -87,6 +88,7 @@ theme:
     - navigation.tabs
     - content.code.annotate
     - content.code.copy
+    - content.tabs.link
   icon:
     repo: fontawesome/brands/github
   logo: media/aws-logo-light.svg
@@ -98,6 +100,9 @@ markdown_extensions:
   - abbr
   - pymdownx.tabbed:
       alternate_style: true
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
   - pymdownx.highlight:
       linenums: true
   - pymdownx.details
@@ -112,9 +117,10 @@ markdown_extensions:
       permalink: true
       toc_depth: 4
   - attr_list
+  - md_in_html
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
-      emoji_generator: !!python/name:materialx.emoji.to_svg
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.inlinehilite
   - pymdownx.superfences:
       custom_fences:

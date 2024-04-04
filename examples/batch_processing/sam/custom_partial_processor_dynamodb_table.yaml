@@ -1,0 +1,15 @@
+Transform: AWS::Serverless-2016-10-31
+Resources:
+  IdempotencyTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: messageId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: messageId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: expiration
+        Enabled: true
+      BillingMode: PAY_PER_REQUEST

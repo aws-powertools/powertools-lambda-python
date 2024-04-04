@@ -44,17 +44,17 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     env:
       PYTHON: "${{ matrix.python-version }}"
     permissions:
       contents: read  # checkout code only
     steps:
-      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
           python-version: ${{ matrix.python-version }}
           cache: "poetry"
@@ -71,7 +71,7 @@ jobs:
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@ab904c41d6ece82784817410c45d8b8c02684457 # 3.1.6
+        uses: codecov/codecov-action@c16abc29c95fcf9174b58eb7e1abf4c866893bc8 # 4.1.1
         with:
           file: ./coverage.xml
           env_vars: PYTHON

@@ -727,7 +727,7 @@ Cross-cutting concerns like filtering traces by Cold Start, including response a
 We can simplify our previous patterns by using [Powertools for AWS Lambda (Python) Tracer](../core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
 
 ???+ note
-    You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
+    You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools[tracer]` only.
 
 ```python title="Refactoring with Powertools for AWS Lambda (Python) Tracer" hl_lines="1 6 11 13 19 21 27"
 from aws_lambda_powertools import Logger, Tracer
@@ -1045,4 +1045,4 @@ This requires a change in mindset to ensure operational excellence is part of th
     Powertools for AWS Lambda (Python) is largely designed to make some of these practices easier to adopt from day 1.
 
 ???+ question "Have ideas for other tutorials?"
-    You can open up a [documentation issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-lambda-powertools-feedback@amazon.com](mailto:aws-lambda-powertools-feedback@amazon.com).
+    You can open up a [documentation issue](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation&template=documentation-improvements.md&title=Tutorial%20Suggestion){target="_blank"}, or via e-mail [aws-powertools-maintainers@amazon.com](mailto:aws-powertools-maintainers@amazon.com).

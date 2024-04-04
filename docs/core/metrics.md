@@ -131,6 +131,21 @@ If you'd like to remove them at some point, you can use `clear_default_dimension
     --8<-- "examples/metrics/src/set_default_dimensions_log_metrics.py"
     ```
 
+### Changing default timestamp
+
+When creating metrics, we use the current timestamp. If you want to change the timestamp of all the metrics you create, utilize the `set_timestamp` function. You can specify a datetime object or an integer representing an epoch timestamp in milliseconds.
+
+Note that when specifying the timestamp using an integer, it must adhere to the epoch timezone format in milliseconds.
+
+???+ info
+    If you need to use different timestamps across multiple metrics, opt for [single_metric](#working-with-different-timestamp).
+
+=== "set_custom_timestamp_log_metrics.py"
+
+    ```python hl_lines="15"
+    --8<-- "examples/metrics/src/set_custom_timestamp_log_metrics.py"
+    ```
+
 ### Flushing metrics
 
 As you finish adding all your metrics, you need to serialize and flush them to standard output. You can do that automatically with the `log_metrics` decorator.
@@ -224,14 +239,15 @@ You can add high-cardinality data as part of your Metrics log with `add_metadata
     --8<-- "examples/metrics/src/add_metadata_output.json"
     ```
 
-### Single metric with a different dimension
+### Single metric
 
-CloudWatch EMF uses the same dimensions across all your metrics. Use `single_metric` if you have a metric that should have different dimensions.
+CloudWatch EMF uses the same dimensions and timestamp across all your metrics. Use `single_metric` if you have a metric that should have different dimensions or timestamp.
 
-???+ info
-    Generally, this would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}. Keep the following formula in mind:
+#### Working with different dimensions
 
-    **unique metric = (metric_name + dimension_name + dimension_value)**
+Generally, using different dimensions would be an edge case since you [pay for unique metric](https://aws.amazon.com/cloudwatch/pricing){target="_blank"}.
+
+Keep the following formula in mind: **unique metric = (metric_name + dimension_name + dimension_value)**
 
 === "single_metric.py"
 
@@ -257,6 +273,22 @@ By default it will skip all previously defined dimensions including default dime
 
     ```python hl_lines="12"
     --8<-- "examples/metrics/src/single_metric_default_dimensions.py"
+    ```
+
+#### Working with different timestamp
+
+When working with multiple metrics, customers may need different timestamps between them. In such cases, utilize `single_metric` to flush individual metrics with specific timestamps.
+
+=== "single_metric_with_different_timestamp.py"
+
+    ```python hl_lines="15 17"
+    --8<-- "examples/metrics/src/single_metric_with_different_timestamp.py"
+    ```
+
+=== "single_metric_with_different_timestamp_payload.json"
+
+    ```json hl_lines="5 10 15 20 25"
+    --8<-- "examples/metrics/src/single_metric_with_different_timestamp_payload.json"
     ```
 
 ### Flushing metrics manually

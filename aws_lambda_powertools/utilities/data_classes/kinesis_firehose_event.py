@@ -2,6 +2,7 @@ import base64
 import json
 import warnings
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import Any, Callable, ClassVar, Dict, Iterator, List, Optional, Tuple
 
 from typing_extensions import Literal
@@ -70,7 +71,6 @@ class KinesisFirehoseDataTransformationRecord:
     metadata: Optional[KinesisFirehoseDataTransformationRecordMetadata] = None
     json_serializer: Callable = json.dumps
     json_deserializer: Callable = json.loads
-    _json_data: Optional[Any] = None
 
     def asdict(self) -> Dict:
         if self.result not in self._valid_result_types:
@@ -102,14 +102,13 @@ class KinesisFirehoseDataTransformationRecord:
             return ""
         return self.data_as_bytes.decode("utf-8")
 
-    @property
+    @cached_property
     def data_as_json(self) -> Dict:
         """Decoded base64-encoded data loaded to json"""
         if not self.data:
             return {}
-        if self._json_data is None:
-            self._json_data = self.json_deserializer(self.data_as_text)
-        return self._json_data
+
+        return self.json_deserializer(self.data_as_text)
 
 
 @dataclass(repr=False, order=False)
@@ -240,12 +239,10 @@ class KinesisFirehoseRecord(DictWrapper):
         """Decoded base64-encoded data as text"""
         return self.data_as_bytes.decode("utf-8")
 
-    @property
+    @cached_property
     def data_as_json(self) -> dict:
         """Decoded base64-encoded data loaded to json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.data_as_text)
-        return self._json_data
+        return self._json_deserializer(self.data_as_text)
 
     def build_data_transformation_response(
         self,

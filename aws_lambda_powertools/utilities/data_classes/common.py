@@ -1,11 +1,13 @@
 import base64
 import json
 from collections.abc import Mapping
+from functools import cached_property
 from typing import Any, Callable, Dict, Iterator, List, Optional, overload, Type, TypeVar
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_header_value,
+    get_multi_value_query_string_values,
     get_query_string_value,
 )
 
@@ -24,7 +26,6 @@ class DictWrapper(Mapping):
             by default json.loads
         """
         self._data = data
-        self._json_data: Optional[Any] = None
         self._json_deserializer = json_deserializer or json.loads
 
     def __getitem__(self, key: str) -> Any:
@@ -136,7 +137,11 @@ class BaseProxyEvent(DictWrapper):
         return self.get("queryStringParameters")
 
     @property
-    def resolved_query_string_parameters(self) -> Optional[Dict[str, str]]:
+    def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
+        return self.get("multiValueQueryStringParameters") or {}
+
+    @property
+    def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
         as a trusted source for validating OpenAPI.
@@ -144,7 +149,11 @@ class BaseProxyEvent(DictWrapper):
         This is necessary because different resolvers use different formats to encode
         multi query string parameters.
         """
-        return self.query_string_parameters
+        if self.query_string_parameters is not None:
+            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
+            return query_string
+
+        return {}
 
     @property
     def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
@@ -170,18 +179,19 @@ class BaseProxyEvent(DictWrapper):
         """Submitted body of the request as a string"""
         return self.get("body")
 
-    @property
+    @cached_property
     def json_body(self) -> Any:
         """Parses the submitted body as json"""
-        if self._json_data is None:
-            self._json_data = self._json_deserializer(self.decoded_body)
-        return self._json_data
+        if self.decoded_body:
+            return self._json_deserializer(self.decoded_body)
 
-    @property
-    def decoded_body(self) -> str:
-        """Dynamically base64 decode body as a str"""
-        body: str = self["body"]
-        if self.is_base64_encoded:
+        return None
+
+    @cached_property
+    def decoded_body(self) -> Optional[str]:
+        """Decode the body from base64 if encoded, otherwise return it as is."""
+        body: Optional[str] = self.body
+        if self.is_base64_encoded and body:
             return base64.b64decode(body.encode()).decode()
         return body
 
@@ -214,14 +224,38 @@ class BaseProxyEvent(DictWrapper):
             default_value=default_value,
         )
 
+    def get_multi_value_query_string_values(
+        self,
+        name: str,
+        default_values: Optional[List[str]] = None,
+    ) -> List[str]:
+        """Get multi-value query string parameter values by name
+
+        Parameters
+        ----------
+        name: str
+            Multi-Value query string parameter name
+        default_values: List[str], optional
+            Default values is no values are found by name
+        Returns
+        -------
+        List[str], optional
+            List of query string values
+
+        """
+        return get_multi_value_query_string_values(
+            multi_value_query_string_parameters=self.multi_value_query_string_parameters,
+            name=name,
+            default_values=default_values,
+        )
+
     @overload
     def get_header_value(
         self,
         name: str,
         default_value: str,
         case_sensitive: Optional[bool] = False,
-    ) -> str:
-        ...
+    ) -> str: ...
 
     @overload
     def get_header_value(
@@ -229,8 +263,7 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: Optional[bool] = False,
-    ) -> Optional[str]:
-        ...
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,
