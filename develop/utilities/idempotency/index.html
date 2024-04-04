@@ -1213,6 +1213,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#successful-request-with-response_hook-configured" class="md-nav__link">
+    <span class="md-ellipsis">
+      Successful request with response_hook configured
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#expired-idempotency-records" class="md-nav__link">
     <span class="md-ellipsis">
       Expired idempotency records
@@ -1406,6 +1415,30 @@
       Bring your own persistent store
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manipulating-the-idempotent-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manipulating the Idempotent Response
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manipulating the Idempotent Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#being-a-good-citizen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Being a good citizen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -2196,6 +2229,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#successful-request-with-response_hook-configured" class="md-nav__link">
+    <span class="md-ellipsis">
+      Successful request with response_hook configured
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#expired-idempotency-records" class="md-nav__link">
     <span class="md-ellipsis">
       Expired idempotency records
@@ -2389,6 +2431,30 @@
       Bring your own persistent store
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#manipulating-the-idempotent-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Manipulating the Idempotent Response
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Manipulating the Idempotent Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#being-a-good-citizen" class="md-nav__link">
+    <span class="md-ellipsis">
+      Being a good citizen
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -4480,6 +4546,36 @@ This means that new invocations will execute your code again despite having the 
     end</code></pre>
 <i>Idempotent successful request cached</i>
 </center></p>
+<h4 id="successful-request-with-response_hook-configured">Successful request with response_hook configured<a class="headerlink" href="#successful-request-with-response_hook-configured" title="Permanent link">&para;</a></h4>
+<p><center>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Response hook
+    participant Persistence Layer
+    alt initial request
+        Client-&gt;&gt;Lambda: Invoke (event)
+        Lambda-&gt;&gt;Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Note over Lambda,Persistence Layer: Set record status to INPROGRESS. &lt;br&gt; Prevents concurrent invocations &lt;br&gt; with the same payload
+        Lambda--&gt;&gt;Lambda: Call your function
+        Lambda-&gt;&gt;Persistence Layer: Update record with result
+        deactivate Persistence Layer
+        Persistence Layer--&gt;&gt;Persistence Layer: Update record
+        Note over Lambda,Persistence Layer: Set record status to COMPLETE. &lt;br&gt; New invocations with the same payload &lt;br&gt; now return the same result
+        Lambda--&gt;&gt;Client: Response sent to client
+    else retried request
+        Client-&gt;&gt;Lambda: Invoke (event)
+        Lambda-&gt;&gt;Persistence Layer: Get or set idempotency_key=hash(payload)
+        activate Persistence Layer
+        Persistence Layer--&gt;&gt;Response hook: Already exists in persistence layer.
+        deactivate Persistence Layer
+        Note over Response hook,Persistence Layer: Record status is COMPLETE and not expired
+        Response hook-&gt;&gt;Lambda: Response hook invoked
+        Lambda--&gt;&gt;Client: Manipulated idempotent response sent to client
+    end</code></pre>
+<i>Successful idempotent request with a response hook</i>
+</center></p>
 <h4 id="expired-idempotency-records">Expired idempotency records<a class="headerlink" href="#expired-idempotency-records" title="Permanent link">&para;</a></h4>
 <p><center>
 <pre class="mermaid"><code>sequenceDiagram
@@ -5110,6 +5206,11 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <td><strong>hash_function</strong></td>
 <td><code>md5</code></td>
 <td>Function to use for calculating hashes, as provided by <a href="https://docs.python.org/3/library/hashlib.html" rel="nofollow" target="_blank">hashlib</a> in the standard library.</td>
+</tr>
+<tr>
+<td><strong>response_hook</strong></td>
+<td><code>None</code></td>
+<td>Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See <a href="./#manipulating-the-idempotent-response">Manipulating The Idempotent Response</a></td>
 </tr>
 </tbody>
 </table>
@@ -5904,6 +6005,161 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 <p>Pay attention to the documentation for each - you may need to perform additional checks inside these methods to ensure the idempotency guarantees remain intact.</p>
 <p>For example, the <code>_put_record</code> method needs to raise an exception if a non-expired record already exists in the data store with a matching key.</p>
 </details>
+<h3 id="manipulating-the-idempotent-response">Manipulating the Idempotent Response<a class="headerlink" href="#manipulating-the-idempotent-response" title="Permanent link">&para;</a></h3>
+<p>You can set up a <code>response_hook</code> in the <code>IdempotentConfig</code> class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="using-an-idempotent-response-hook" name="__tabbed_24" type="radio" /><input id="sample-event_8" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="using-an-idempotent-response-hook">Using an Idempotent Response Hook</label><label for="sample-event_8">Sample event</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DynamoDBPersistenceLayer</span><span class="p">,</span>
+    <span class="n">IdempotencyConfig</span><span class="p">,</span>
+    <span class="n">idempotent_function</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.idempotency.persistence.base</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DataRecord</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+
+<span class="hll">
+</span><span class="k">def</span> <span class="nf">my_response_hook</span><span class="p">(</span><span class="n">response</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">idempotent_data</span><span class="p">:</span> <span class="n">DataRecord</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="hll">    <span class="c1"># Return inserted Header data into the Idempotent Response</span>
+</span>    <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">idempotency_key</span>
+
+<span class="hll">    <span class="c1"># expiry_timestamp could be None so include if set</span>
+</span>    <span class="n">expiry_timestamp</span> <span class="o">=</span> <span class="n">idempotent_data</span><span class="o">.</span><span class="n">expiry_timestamp</span>
+    <span class="k">if</span> <span class="n">expiry_timestamp</span><span class="p">:</span>
+        <span class="n">expiry_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">expiry_timestamp</span><span class="p">))</span>
+        <span class="n">response</span><span class="p">[</span><span class="s2">&quot;x-idempotent-expiration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">expiry_time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+    <span class="c1"># Must return the response here</span>
+    <span class="k">return</span> <span class="n">response</span>
+
+<span class="hll">
+</span><span class="n">dynamodb</span> <span class="o">=</span> <span class="n">DynamoDBPersistenceLayer</span><span class="p">(</span><span class="n">table_name</span><span class="o">=</span><span class="s2">&quot;IdempotencyTable&quot;</span><span class="p">)</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">IdempotencyConfig</span><span class="p">(</span><span class="n">response_hook</span><span class="o">=</span><span class="n">my_response_hook</span><span class="p">)</span>
+
+
+<span class="nd">@idempotent_function</span><span class="p">(</span><span class="n">data_keyword_argument</span><span class="o">=</span><span class="s2">&quot;order&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">persistence_store</span><span class="o">=</span><span class="n">dynamodb</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">process_order</span><span class="p">(</span><span class="n">order</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="c1"># create the order_id</span>
+    <span class="n">order_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+
+    <span class="c1"># create your logic to save the order</span>
+    <span class="c1"># append the order_id created</span>
+    <span class="n">order</span><span class="p">[</span><span class="s2">&quot;order_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">order_id</span>
+
+    <span class="c1"># return the order</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;order&quot;</span><span class="p">:</span> <span class="n">order</span><span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">):</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">register_lambda_context</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>  <span class="c1"># see Lambda timeouts section</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing order id </span><span class="si">{</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;order_id&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">process_order</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="n">event</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;order&quot;</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;status_code&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span> <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Error processing </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;order&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;product_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;123456789&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">30</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
+<details class="info" open="open">
+<summary>Info: Using custom de-serialization?</summary>
+<p>The response_hook is called after the custom de-serialization so the payload you process will be the de-serialized version.</p>
+</details>
+<h4 id="being-a-good-citizen">Being a good citizen<a class="headerlink" href="#being-a-good-citizen" title="Permanent link">&para;</a></h4>
+<p>When using response hooks to manipulate returned data from idempotent operations, it's important to follow best practices to avoid introducing complexity or issues. Keep these guidelines in mind:</p>
+<ol>
+<li>
+<p><strong>Response hook works exclusively when operations are idempotent.</strong> The hook will not be called when an operation is not idempotent, or when the idempotent logic fails.</p>
+</li>
+<li>
+<p><strong>Catch and Handle Exceptions.</strong> Your response hook code should catch and handle any exceptions that may arise from your logic. Unhandled exceptions will cause the Lambda function to fail unexpectedly.</p>
+</li>
+<li>
+<p><strong>Keep Hook Logic Simple</strong> Response hooks should consist of minimal and straightforward logic for manipulating response data. Avoid complex conditional branching and aim for hooks that are easy to reason about.</p>
+</li>
+</ol>
 <h2 id="compatibility-with-other-utilities">Compatibility with other utilities<a class="headerlink" href="#compatibility-with-other-utilities" title="Permanent link">&para;</a></h2>
 <h3 id="batch">Batch<a class="headerlink" href="#batch" title="Permanent link">&para;</a></h3>
 <p>See <a href="#batch-integration">Batch integration</a> above.</p>
@@ -5915,7 +6171,7 @@ For those using Amazon MemoryDB for Redis, refer to <a href="https://aws.amazon.
 event - not the "raw" event Lambda was invoked with.</p>
 <p>Make sure to account for this behavior, if you set the <code>event_key_jmespath</code>.</p>
 </details>
-<div class="tabbed-set tabbed-alternate" data-tabs="24:2"><input checked="checked" id="using-idempotency-with-jsonschema-validation-utility" name="__tabbed_24" type="radio" /><input id="sample-event_8" name="__tabbed_24" type="radio" /><div class="tabbed-labels"><label for="using-idempotency-with-jsonschema-validation-utility">Using Idempotency with JSONSchema Validation utility</label><label for="sample-event_8">Sample Event</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="using-idempotency-with-jsonschema-validation-utility" name="__tabbed_25" type="radio" /><input id="sample-event_9" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="using-idempotency-with-jsonschema-validation-utility">Using Idempotency with JSONSchema Validation utility</label><label for="sample-event_9">Sample Event</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6111,7 +6367,7 @@ event - not the "raw" event Lambda was invoked with.</p>
 <h3 id="disabling-the-idempotency-utility">Disabling the idempotency utility<a class="headerlink" href="#disabling-the-idempotency-utility" title="Permanent link">&para;</a></h3>
 <p>When testing your code, you may wish to disable the idempotency logic altogether and focus on testing your business logic. To do this, you can set the environment variable <code>POWERTOOLS_IDEMPOTENCY_DISABLED</code>
 with a truthy value. If you prefer setting this for specific tests, and are using Pytest, you can use <a href="https://docs.pytest.org/en/latest/monkeypatch.html" rel="nofollow" target="_blank">monkeypatch</a> fixture:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="25:2"><input checked="checked" id="test_disabling_idempotency_utilitypy" name="__tabbed_25" type="radio" /><input id="app_test_disabling_idempotency_utilitypy" name="__tabbed_25" type="radio" /><div class="tabbed-labels"><label for="test_disabling_idempotency_utilitypy">test_disabling_idempotency_utility.py</label><label for="app_test_disabling_idempotency_utilitypy">app_test_disabling_idempotency_utility.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="test_disabling_idempotency_utilitypy" name="__tabbed_26" type="radio" /><input id="app_test_disabling_idempotency_utilitypy" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="test_disabling_idempotency_utilitypy">test_disabling_idempotency_utility.py</label><label for="app_test_disabling_idempotency_utilitypy">app_test_disabling_idempotency_utility.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6211,7 +6467,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 </div>
 <h3 id="testing-with-dynamodb-local">Testing with DynamoDB Local<a class="headerlink" href="#testing-with-dynamodb-local" title="Permanent link">&para;</a></h3>
 <p>To test with <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.DownloadingAndRunning.html" target="_blank">DynamoDB Local</a>, you can replace the <code>DynamoDB client</code> used by the persistence layer with one you create inside your tests. This allows you to set the endpoint_url.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="test_with_dynamodb_localpy" name="__tabbed_26" type="radio" /><input id="app_test_dynamodb_localpy" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="test_with_dynamodb_localpy">test_with_dynamodb_local.py</label><label for="app_test_dynamodb_localpy">app_test_dynamodb_local.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="test_with_dynamodb_localpy" name="__tabbed_27" type="radio" /><input id="app_test_dynamodb_localpy" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="test_with_dynamodb_localpy">test_with_dynamodb_local.py</label><label for="app_test_dynamodb_localpy">app_test_dynamodb_local.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6320,7 +6576,7 @@ with a truthy value. If you prefer setting this for specific tests, and are usin
 <h3 id="how-do-i-mock-all-dynamodb-io-operations">How do I mock all DynamoDB I/O operations<a class="headerlink" href="#how-do-i-mock-all-dynamodb-io-operations" title="Permanent link">&para;</a></h3>
 <p>The idempotency utility lazily creates the dynamodb <a href="https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table" target="_blank">Table</a> which it uses to access DynamoDB.
 This means it is possible to pass a mocked Table resource, or stub various methods.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="27:2"><input checked="checked" id="test_with_io_operationspy" name="__tabbed_27" type="radio" /><input id="app_test_io_operationspy" name="__tabbed_27" type="radio" /><div class="tabbed-labels"><label for="test_with_io_operationspy">test_with_io_operations.py</label><label for="app_test_io_operationspy">app_test_io_operations.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="test_with_io_operationspy" name="__tabbed_28" type="radio" /><input id="app_test_io_operationspy" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="test_with_io_operationspy">test_with_io_operations.py</label><label for="app_test_io_operationspy">app_test_io_operations.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6420,7 +6676,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 </div>
 <h3 id="testing-with-redis">Testing with Redis<a class="headerlink" href="#testing-with-redis" title="Permanent link">&para;</a></h3>
 <p>To test locally, you can either utilize <a href="https://github.com/cunla/fakeredis-py">fakeredis-py</a> for a simulated Redis environment or refer to the <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/ba6532a1c73e20fdaee88c5795fd40e978553e14/tests/functional/idempotency/persistence/test_redis_layer.py#L34-L66">MockRedis</a> class used in our tests to mock Redis operations.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="28:2"><input checked="checked" id="test_with_mock_redispy" name="__tabbed_28" type="radio" /><input id="mock_redispy" name="__tabbed_28" type="radio" /><div class="tabbed-labels"><label for="test_with_mock_redispy">test_with_mock_redis.py</label><label for="mock_redispy">mock_redis.py</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="test_with_mock_redispy" name="__tabbed_29" type="radio" /><input id="mock_redispy" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="test_with_mock_redispy">test_with_mock_redis.py</label><label for="mock_redispy">mock_redis.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6599,7 +6855,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
 </div>
 </div>
 <p>If you want to set up a real Redis client for integration testing, you can reference the code provided below.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="29:2"><input checked="checked" id="test_with_real_redispy" name="__tabbed_29" type="radio" /><input id="makefile" name="__tabbed_29" type="radio" /><div class="tabbed-labels"><label for="test_with_real_redispy">test_with_real_redis.py</label><label for="makefile">Makefile</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="30:2"><input checked="checked" id="test_with_real_redispy" name="__tabbed_30" type="radio" /><input id="makefile" name="__tabbed_30" type="radio" /><div class="tabbed-labels"><label for="test_with_real_redispy">test_with_real_redis.py</label><label for="makefile">Makefile</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -6757,7 +7013,7 @@ This means it is possible to pass a mocked Table resource, or stub various metho
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-02-05
+    2024-04-04
   </span>
 
     
