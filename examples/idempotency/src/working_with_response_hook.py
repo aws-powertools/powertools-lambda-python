@@ -53,4 +53,4 @@ def lambda_handler(event: dict, context: LambdaContext):
         logger.info(f"Processing order id {event.get('order_id')}")
         return process_order(order=event.get("order"))
     except Exception as err:
-        return {"status_code": 400, "error": f"Erro processing {str(err)}"}
+        return {"status_code": 400, "error": f"Error processing {str(err)}"}

@@ -482,10 +482,10 @@ sequenceDiagram
         deactivate Persistence Layer
         Note over Response hook,Persistence Layer: Record status is COMPLETE and not expired
         Response hook->>Lambda: Response hook invoked
-        Lambda-->>Client: Same response sent to client
+        Lambda-->>Client: Manipulated idempotent response sent to client
     end
 ```
-<i>Idempotent successful request with response hook</i>
+<i>Successful idempotent request with a response hook</i>
 </center>
 
 #### Expired idempotency records
@@ -946,7 +946,7 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 
 ### Manipulating the Idempotent Response
 
-You can set up a `response_hook` in the `IdempotentConfig` class to access the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
+You can set up a `response_hook` in the `IdempotentConfig` class to manipulate the returned data when an operation is idempotent. The hook function will be called with the current deserialized response object and the Idempotency record.
 
 === "Using an Idempotent Response Hook"
 
@@ -966,15 +966,13 @@ You can set up a `response_hook` in the `IdempotentConfig` class to access the r
 
 #### Being a good citizen
 
-Using Response hooks can add subtle improvements to manipulating returned data from idempotent operations, but also add significant complexity if you're not careful.
+When using response hooks to manipulate returned data from idempotent operations, it's important to follow best practices to avoid introducing complexity or issues. Keep these guidelines in mind:
 
-Keep the following in mind when authoring hooks for Idempotency utility:
+1. **Response hook works exclusively when operations are idempotent.** The hook will not be called when an operation is not idempotent, or when the idempotent logic fails.
 
-1. **Response hook works exclusively when operations are idempotent.** Carefully consider the logic within the `Response hook` and prevent any attempt to access the key from relying exclusively on idempotent operations.
+2. **Catch and Handle Exceptions.** Your response hook code should catch and handle any exceptions that may arise from your logic. Unhandled exceptions will cause the Lambda function to fail unexpectedly.
 
-2. **Catch your own exceptions.** Catch and handle known exceptions to your logic.
-
-3. **Watch out when you are decorating the Lambda Handler and using the Response hook.** If you don't catch and handle exceptions in your `Response hook`, your function might not run properly.
+3. **Keep Hook Logic Simple** Response hooks should consist of minimal and straightforward logic for manipulating response data. Avoid complex conditional branching and aim for hooks that are easy to reason about.
 
 ## Compatibility with other utilities
 
