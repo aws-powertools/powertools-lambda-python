@@ -1,12 +1,5 @@
-# kinesis stream -> firehose -> s3 -> lambda: the event generated is just s3, nothing is nested.
-
-# s3 -> sns -> firehose -> lambda: sns not sending messages to firehose
-# working -> ?? -> working (i see test data in CW)
-
-
 # s3 -> sns -> firehose -> lambda = firehose(sns(s3))
 firehose_sns_s3_event = {}
-
 
 # sns -> firehose -> lambda = firehose(sns)
 firehose_sns_event = {
@@ -96,7 +89,6 @@ sqs_eb_s3_event = {
 }
 
 
-
 # s3 -> eventbridge -> lambda = eventbridge(s3)
 eb_s3_event = {
   "version": "0",
@@ -128,7 +120,7 @@ eb_s3_event = {
 }
 
 
-# in unwrap CF stack: s3 -> sns -> sqs -> lambda = sqs(sns(s3))
+# s3 -> sns -> sqs -> lambda = sqs(sns(s3))
 sqs_sns_s3_event = {
   "Records": [
     {
@@ -173,7 +165,7 @@ sqs_rawsns_s3_event = {
 }
 
 
-# added more events in Records list: sqs(s3, s3)
+# sqs(s3, s3)
 sqs_s3_multi_event = {
   "Records": [
     {
@@ -205,7 +197,7 @@ sqs_s3_multi_event = {
 }
 
 
-#generated from lambda invoke s3 -> sqs -> lambda == sqs(s3)
+# s3 -> sqs -> lambda == sqs(s3)
 sqs_s3_event = {
   "Records": [
     {
@@ -227,10 +219,7 @@ sqs_s3_event = {
   ]
 }
 
-# generated from invoking lambda with sns -> sqs -> lambda == sqs(sns)
-# this does not have a Records key inside the SNS event, or the Sns key. But if SNS sends an event directly to Lambda
-# (without having SQS in the middle), it would have a Records and Sns key. That's why it's failing
-# even after being casted into a SNS event: it doesn't have a Records or Sns key
+# sns -> sqs -> lambda == sqs(sns)
 sqs_sns_event = {
   "Records": [
     {
@@ -276,7 +265,7 @@ sqs_rawsns_event = {
 }
 
 
-# generated from invoking lambda with s3 -> sns -> lambda == sns(s3).
+# s3 -> sns -> lambda == sns(s3).
 sns_s3_event = {
   "Records": [
     {
@@ -298,68 +287,4 @@ sns_s3_event = {
       }
     }
   ]
-}
-
-sns_schema = {
-  "type": "object",
-  "properties": {
-    "Records": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "properties": {
-          "EventSource": {
-            "type": "string"
-          },
-          "EventVersion": {
-            "type": "string"
-          },
-          "EventSubscriptionArn": {
-            "type": "string"
-          },
-          "Sns": {
-            "type": "object",
-            "properties": {
-              "Type": {
-                "type": "string"
-              },
-              "MessageId": {
-                "type": "string"
-              },
-              "TopicArn": {
-                "type": "string"
-              },
-              "Subject": {
-                "type": "string"
-              },
-              "Message": {
-                "type": "string"
-              },
-              "Timestamp": {
-                "type": "string"
-              },
-              "SignatureVersion": {
-                "type": "string"
-              },
-              "Signature": {
-                "type": "string"
-              },
-              "SigningCertUrl": {
-                "type": "string"
-              },
-              "UnsubscribeUrl": {
-                "type": "string"
-              },
-              "MessageAttributes": {
-                "type": "object"
-              }
-            },
-            "required": ["Type", "MessageId", "TopicArn", "Subject", "Message", "Timestamp", "SignatureVersion", "Signature", "SigningCertUrl", "UnsubscribeUrl", "MessageAttributes"]
-          }
-        },
-        "required": ["EventSource", "EventVersion", "EventSubscriptionArn", "Sns"]
-      }
-    }
-  },
-  "required": ["Records"]
 }

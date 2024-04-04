@@ -306,7 +306,5 @@ class KinesisFirehoseEvent(EventWrapper):
 
     def nested_event_contents(self):
         for record in self["records"]:
-            # print('record', record, type(record))
-            # body = record[]
-            # print('body:', body, type(body))
-            yield record
+            body = record['data']
+            yield body

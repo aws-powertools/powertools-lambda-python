@@ -82,13 +82,7 @@ class SNSMessage(EventWrapper):
         return self["Subject"]
 
     def nested_event_contents(self):
-        print('in SNS MESSAGE NESTED EVENT')
         yield self.message
-        # for record in self.message:
-        #     print('record:', record, type(record))
-        #     # body = record['Sns']['Message']
-        #     # print('body:', body, type(body))
-        #     yield record
 
 
 class SNSEventRecord(EventWrapper):
@@ -135,19 +129,6 @@ class SNSEvent(EventWrapper):
         return self.record.sns.message
 
     def nested_event_contents(self):
-        print('in SNS NESTED EVENT')
         for record in self["Records"]:
             body = record['Sns']['Message']
             yield body
-
-    def check_schema(self):
-        print(self, type(self))
-        try:
-            validate(instance=self, schema=test_events.sns_schema)
-            print("JSON object is valid.")
-            return self
-        except jsonschema.exceptions.ValidationError: #TODO: or cx needs to tell us to cast to SNSEvent or SNSMessage, we shouldn't have to figure that out ourselves?
-            print("JSON object is not valid.")
-            print("event rec:", SNSMessage(self))
-            corrected = SNSMessage(self)
-            return corrected

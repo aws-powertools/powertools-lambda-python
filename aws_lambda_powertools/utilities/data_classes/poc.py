@@ -1,14 +1,13 @@
-from typing import Iterator
-import json
-from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent, SNSEvent, SESEvent, EventBridgeEvent
+from aws_lambda_powertools.utilities.data_classes import S3Event, SQSEvent, SNSEvent, EventBridgeEvent
 from aws_lambda_powertools.utilities.data_classes.sns_event import SNSMessage
-from aws_lambda_powertools.utilities.data_classes.ses_event import SESEventRecord, SESMail, SESMessage
+from aws_lambda_powertools.utilities.data_classes.ses_event import SESMessage
 import test_events
 
-
+#TODO: handler for firehose
+# TODO: tests + error handling
 def lambda_handler_sqs_s3(event: SQSEvent = test_events.sqs_s3_event): # sqs(s3)
     sqs_event = SQSEvent(event)
-    s3_event = sqs_event.decode_nested_events(S3Event)
+    s3_event = sqs_event.decode_nested_events(SNSEvent)
     for rec in s3_event:
         print('rec:', rec.bucket_name)
 
@@ -18,14 +17,6 @@ def lambda_handler_sqs_sns(event: SQSEvent = test_events.sqs_sns_event): # sqs(s
     for rec in sns_event:
         print('rec:', type(rec))
         print(rec.message)
-        # try:
-        #     validate(instance=rec, schema=test_events.sns_schema)
-        #     print("JSON object is valid.")
-        # except jsonschema.exceptions.ValidationError:
-        #     print("JSON object is not valid.")
-        #     # rec = json.dumps(rec)
-        #     asdf = SNSEvent({"Records": {"Sns": rec.records}})
-        #     print(asdf)
 
 
 def lambda_handler_sns_s3(event: SNSEvent = test_events.sns_s3_event): # sns(s3)
@@ -59,10 +50,10 @@ def lambda_handler_sqs_sns_s3(event: SQSEvent = test_events.sqs_sns_s3_event): #
 def lambda_handler_sns_ses(event: SNSEvent = test_events.sns_ses_event): # sns(ses)
     sns_event = SNSEvent(event)
     ses_event = sns_event.decode_nested_events(SESMessage)
-    for rec in ses_event:
+    for rec in ses_event: #TODO: how to get the first record without the for loop
         print('rec:', type(rec), rec)
         print('rec:', rec.get("mail").get('source'))
-        # print('rec:', rec.mail) #but can't do rec.mail bc no "SES" key..
+        # print('rec:', rec.mail) #but can't do rec.mail bc no "SES" key
 
 def lambda_handler_eb_s3(event: EventBridgeEvent = test_events.eb_s3_event): # eventbridge(s3)
     eb_event = EventBridgeEvent(event)

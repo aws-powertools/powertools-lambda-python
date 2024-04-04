@@ -112,7 +112,6 @@ class EventWrapper(DictWrapper):
         super().__init__(data, json_deserializer)
 
     def nested_event_contents(self):
-        print('IN COMMON NESTED EVENTS')
         for record in self["Records"]:
             body = record['body']
             yield body

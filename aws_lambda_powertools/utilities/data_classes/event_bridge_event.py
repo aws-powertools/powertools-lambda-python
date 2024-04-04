@@ -70,5 +70,4 @@ class EventBridgeEvent(EventWrapper):
         return self["replay-name"]
 
     def nested_event_contents(self):
-        print('IN EB NESTED EVENTS')
         yield json.dumps(self['detail'])
