@@ -13,7 +13,7 @@ permissions:
 
 jobs:
     call-workflow-passing-data:
-        uses: aws-powertools/actions/.github/workflows/monthly_roadmap_reminder.yml@fd4575466e5c2ac10703ac16f5aa9fb8890f532a
+        uses: aws-powertools/actions/.github/workflows/monthly_roadmap_reminder.yml@main
         with:
             token: ${{ github.token }}
 
