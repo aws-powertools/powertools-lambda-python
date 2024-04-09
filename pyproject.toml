@@ -44,7 +44,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.26.164", optional = true }
 redis = { version = ">=4.4,<6.0", optional = true }
-typing-extensions = "^4.6.2"
+typing-extensions = "^4.11.0"
 datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
 ddtrace = "^2.5.2"
@@ -69,12 +69,12 @@ xenon = "^0.9.1"
 mkdocs-git-revision-date-plugin = "^0.3.2"
 mike = "^1.1.2"
 pytest-xdist = "^3.5.0"
-aws-cdk-lib = "^2.135.0"
+aws-cdk-lib = "^2.136.0"
 "aws-cdk.aws-apigatewayv2-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-integrations-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-apigatewayv2-authorizers-alpha" = "^2.38.1-alpha.0"
 "aws-cdk.aws-lambda-python-alpha" = "^2.135.0a0"
-"cdklabs.generative-ai-cdk-constructs" = "^0.1.106"
+"cdklabs.generative-ai-cdk-constructs" = "^0.1.107"
 pytest-benchmark = "^4.0.0"
 mypy-boto3-appconfig = "^1.34.58"
 mypy-boto3-cloudformation = "^1.34.77"
@@ -114,7 +114,7 @@ datadog = ["datadog-lambda"]
 datamasking = ["aws-encryption-sdk", "jsonpath-ng"]
 
 [tool.poetry.group.dev.dependencies]
-cfn-lint = "0.86.1"
+cfn-lint = "0.86.2"
 mypy = "^1.1.1"
 types-python-dateutil = "^2.8.19.6"
 httpx = ">=0.23.3,<0.28.0"
