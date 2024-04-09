@@ -1,0 +1,14 @@
+{
+    "Records": [
+      {
+        "messageId": "059f36b4-87a3-44ab-83d2-661975830a7d",
+        "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
+        "body": "{\"Message\": \"success\"}"
+      },
+      {
+        "messageId": "244fc6b4-87a3-44ab-83d2-361172410c3a",
+        "receiptHandle": "AQEBwJnKyrHigUMZj6rYigCgxlaS3SLy0a",
+        "body": "SGVsbG8sIHRoaXMgaXMgYSB0ZXN0Lg=="
+      }
+    ]
+  }

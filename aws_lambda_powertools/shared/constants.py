@@ -39,6 +39,11 @@ LAMBDA_LOG_LEVEL_ENV: str = "AWS_LAMBDA_LOG_LEVEL"
 METRICS_NAMESPACE_ENV: str = "POWERTOOLS_METRICS_NAMESPACE"
 DATADOG_FLUSH_TO_LOG: str = "DD_FLUSH_TO_LOG"
 SERVICE_NAME_ENV: str = "POWERTOOLS_SERVICE_NAME"
+# If the timestamp of log event is more than 2 hours in future, the log event is skipped.
+# If the timestamp of log event is more than 14 days in past, the log event is skipped.
+# See https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/AgentReference.html
+EMF_MAX_TIMESTAMP_PAST_AGE = 14 * 24 * 60 * 60 * 1000  # 14 days
+EMF_MAX_TIMESTAMP_FUTURE_AGE = 2 * 60 * 60 * 1000  # 2 hours
 
 # Parameters constants
 PARAMETERS_SSM_DECRYPT_ENV: str = "POWERTOOLS_PARAMETERS_SSM_DECRYPT"
