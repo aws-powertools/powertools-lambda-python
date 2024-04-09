@@ -10,6 +10,7 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_multi_value_query_string_values,
     get_query_string_value,
 )
+from aws_lambda_powertools.utilities.data_classes.exceptions import ClassTransformationException
 
 
 class DictWrapper(Mapping):
@@ -112,19 +113,34 @@ class EventWrapper(DictWrapper):
         super().__init__(data, json_deserializer)
 
     def nested_event_contents(self):
-        for record in self["Records"]:
-            body = record['body']
-            yield body
-
+        records = self.get("Records")
+        if records is None:
+            raise KeyError("No 'Records' key found in the event data.")
+        for record in records:
+            if not isinstance(record, dict):
+                raise TypeError(f"Expected each record to be a dictionary, but got {type(record)}.")
+            body = record.get('body')
+            if body is not None:
+                yield body
+            else:
+                raise KeyError("No 'body' key found in the record.")
 
     def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
         if nested_event_content_deserializer is None:
             nested_event_content_deserializer = self._json_deserializer
 
         for content in self.nested_event_contents():
-            deserialized = nested_event_content_deserializer(content)
-            casted = nested_event_class(deserialized)
-            yield casted
+            deserialized_data = nested_event_content_deserializer(content)
+            yield nested_event_class(deserialized_data)
+
+    def decode_nested_event(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
+        if nested_event_content_deserializer is None:
+            nested_event_content_deserializer = self._json_deserializer
+
+        for content in self.nested_event_contents():
+            deserialized_data = nested_event_content_deserializer(content)
+            return nested_event_class(deserialized_data)
+
 
 class BaseProxyEvent(DictWrapper):
     @property

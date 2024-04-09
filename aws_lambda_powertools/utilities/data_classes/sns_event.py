@@ -1,8 +1,4 @@
 from typing import Dict, Iterator
-import test_events
-import jsonschema
-from jsonschema import validate
-
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
@@ -129,6 +125,6 @@ class SNSEvent(EventWrapper):
         return self.record.sns.message
 
     def nested_event_contents(self):
-        for record in self["Records"]:
-            body = record['Sns']['Message']
+        for record in self.get("Records"):
+            body = record.get('Sns').get('Message')
             yield body

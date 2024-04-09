@@ -2,10 +2,10 @@ import base64
 import zlib
 from typing import Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
+from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
-class CloudWatchLogsLogEvent(DictWrapper):
+class CloudWatchLogsLogEvent(EventWrapper):
     @property
     def get_id(self) -> str:
         """The ID property is a unique identifier for every log event."""
@@ -72,7 +72,7 @@ class CloudWatchLogsDecodedData(DictWrapper):
         return [CloudWatchLogsLogEvent(i) for i in self["logEvents"]]
 
 
-class CloudWatchLogsEvent(DictWrapper):
+class CloudWatchLogsEvent(EventWrapper):
     """CloudWatch Logs log stream event
 
     You can use a Lambda function to monitor and analyze logs from an Amazon CloudWatch Logs log stream.

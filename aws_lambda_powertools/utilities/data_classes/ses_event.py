@@ -262,7 +262,6 @@ class SESEvent(EventWrapper):
         return self.record.ses.receipt
 
     def nested_event_contents(self):
-        print('IN SES NESTED EVENTS')
-        for record in self["Records"]:
-            body = record['ses']
+        for record in self.get("Records"):
+            body = record.get('ses')
             yield body
