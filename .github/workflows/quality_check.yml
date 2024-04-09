@@ -71,7 +71,7 @@ jobs:
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@7afa10ed9b269c561c2336fd862446844e0cbf71 # 4.2.0
+        uses: codecov/codecov-action@84508663e988701840491b86de86b666e8a86bed # 4.3.0
         with:
           file: ./coverage.xml
           env_vars: PYTHON
