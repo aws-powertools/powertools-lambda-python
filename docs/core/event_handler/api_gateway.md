@@ -874,6 +874,13 @@ You can use the `Response` class to have full control over the response. For exa
     --8<-- "examples/event_handler_rest/src/fine_grained_responses_output.json"
     ```
 
+???- note "Using `Response` with data validation?"
+    When using the [data validation](#data-validation) feature with `enable_validation=True`, you need to specify the concreate type for the `Response` class. This is necessary for the validation middleware to infer the underlying type and perform the validation correctly.
+
+    ```python hl_lines="8 26 32"
+    --8<-- "examples/event_handler_rest/src/data_validation_fine_grained_response.py"
+    ```
+
 ### Compress
 
 You can compress with gzip and base64 encode your responses via `compress` parameter. You have the option to pass the `compress` parameter when working with a specific route or using the Response object.
