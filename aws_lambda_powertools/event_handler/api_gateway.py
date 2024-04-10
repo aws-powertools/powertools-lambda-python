@@ -88,6 +88,7 @@ if TYPE_CHECKING:
         Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
+    from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import OAuth2Config
     from aws_lambda_powertools.event_handler.openapi.types import (
         TypeModelOrEnum,
     )
@@ -1671,6 +1672,9 @@ class ApiGatewayResolver(BaseRouter):
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
         compress: bool = False,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
+        oauth2Config: Optional["OAuth2Config"] = None,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1705,6 +1709,12 @@ class ApiGatewayResolver(BaseRouter):
             List of middlewares to be used for the swagger route.
         compress: bool, default = False
             Whether or not to enable gzip compression swagger route.
+        security_schemes: Dict[str, "SecurityScheme"], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
+        oauth2Config: OAuth2Config, optional
+            The OAuth2 configuration for the Swagger UI.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
@@ -1736,6 +1746,8 @@ class ApiGatewayResolver(BaseRouter):
                 terms_of_service=terms_of_service,
                 contact=contact,
                 license_info=license_info,
+                security_schemes=security_schemes,
+                security=security,
             )
 
             # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
@@ -1765,6 +1777,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js,
                 swagger_css,
                 swagger_base_url,
+                oauth2Config,
             )
 
             return Response(
