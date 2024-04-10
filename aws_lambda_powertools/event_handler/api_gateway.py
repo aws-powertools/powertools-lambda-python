@@ -83,9 +83,11 @@ if TYPE_CHECKING:
         Contact,
         License,
         OpenAPI,
+        SecurityScheme,
         Server,
         Tag,
     )
+    from aws_lambda_powertools.event_handler.openapi.oauth2 import OAuth2Config
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
         TypeModelOrEnum,
@@ -282,6 +284,7 @@ class Route:
         tags: Optional[List[str]],
         operation_id: Optional[str],
         include_in_schema: bool,
+        security: Optional[List[Dict[str, List[str]]]],
         middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
@@ -317,6 +320,8 @@ class Route:
             The OpenAPI operationId for this route
         include_in_schema: bool
             Whether or not to include this route in the OpenAPI schema
+        security: List[Dict[str, List[str]]], optional
+            The OpenAPI security for this route
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -339,6 +344,7 @@ class Route:
         self.response_description = response_description
         self.tags = tags or []
         self.include_in_schema = include_in_schema
+        self.security = security
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
 
@@ -485,6 +491,10 @@ class Route:
             field_mapping=field_mapping,
         )
         parameters.extend(operation_params)
+
+        # Add security if present
+        if self.security:
+            operation["security"] = self.security
 
         # Add the parameters to the OpenAPI operation
         if parameters:
@@ -885,6 +895,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -943,6 +954,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -980,6 +992,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -996,6 +1009,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -1034,6 +1048,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1050,6 +1065,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -1088,6 +1104,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1104,6 +1121,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -1141,6 +1159,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1157,6 +1176,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -1197,6 +1217,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1419,6 +1440,8 @@ class ApiGatewayResolver(BaseRouter):
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
     ) -> "OpenAPI":
         """
         Returns the OpenAPI schema as a pydantic model.
@@ -1445,6 +1468,10 @@ class ApiGatewayResolver(BaseRouter):
             The contact information for the exposed API.
         license_info: License, optional
             The license information for the exposed API.
+        security_schemes: Dict[str, "SecurityScheme"]], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
 
         Returns
         -------
@@ -1498,6 +1525,16 @@ class ApiGatewayResolver(BaseRouter):
             # with an url value of /.
             output["servers"] = [Server(url="/")]
 
+        if security:
+            if not security_schemes:
+                raise ValueError("security_schemes must be provided if security is provided")
+
+            # Check if all keys in security are present in the security_schemes
+            if not all(key in security_schemes for sec in security for key in sec):
+                raise ValueError("Some security schemes not found in security_schemes")
+
+            output["security"] = security
+
         components: Dict[str, Dict[str, Any]] = {}
         paths: Dict[str, Dict[str, Any]] = {}
         operation_ids: Set[str] = set()
@@ -1534,6 +1571,8 @@ class ApiGatewayResolver(BaseRouter):
 
         if definitions:
             components["schemas"] = {k: definitions[k] for k in sorted(definitions)}
+        if security_schemes:
+            components["securitySchemes"] = security_schemes
         if components:
             output["components"] = components
         if tags:
@@ -1556,6 +1595,8 @@ class ApiGatewayResolver(BaseRouter):
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1582,6 +1623,10 @@ class ApiGatewayResolver(BaseRouter):
             The contact information for the exposed API.
         license_info: License, optional
             The license information for the exposed API.
+        security_schemes: Dict[str, "SecurityScheme"]], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
 
         Returns
         -------
@@ -1602,6 +1647,8 @@ class ApiGatewayResolver(BaseRouter):
                 terms_of_service=terms_of_service,
                 contact=contact,
                 license_info=license_info,
+                security_schemes=security_schemes,
+                security=security,
             ),
             by_alias=True,
             exclude_none=True,
@@ -1623,6 +1670,7 @@ class ApiGatewayResolver(BaseRouter):
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
+        oauth2: Optional["OAuth2Config"] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
         compress: bool = False,
     ):
@@ -1655,6 +1703,8 @@ class ApiGatewayResolver(BaseRouter):
             The license information for the exposed API.
         swagger_base_url: str, optional
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
+        oauth2: OAuth2Config, optional
+            The OAuth2 configuration for the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
         compress: bool, default = False
@@ -1719,6 +1769,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js,
                 swagger_css,
                 swagger_base_url,
+                oauth2,
             )
 
             return Response(
@@ -1741,6 +1792,7 @@ class ApiGatewayResolver(BaseRouter):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1767,6 +1819,7 @@ class ApiGatewayResolver(BaseRouter):
                     tags,
                     operation_id,
                     include_in_schema,
+                    security,
                     middlewares,
                 )
 
@@ -2318,6 +2371,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
@@ -2334,6 +2388,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
