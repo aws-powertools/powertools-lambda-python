@@ -584,7 +584,7 @@ class Logger:
         self.registered_formatter.append_keys(**additional_keys)
 
     def get_current_keys(self) -> Dict[str, Any]:
-        if hasattr(self.registered_formatter, "log_format"):
+        if isinstance(self.registered_formatter, LambdaPowertoolsFormatter):
             return self.registered_formatter.get_current_keys()
 
         return {}
