@@ -87,7 +87,6 @@ if TYPE_CHECKING:
         Server,
         Tag,
     )
-    from aws_lambda_powertools.event_handler.openapi.oauth2 import OAuth2Config
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
     from aws_lambda_powertools.event_handler.openapi.types import (
         TypeModelOrEnum,
@@ -1670,7 +1669,6 @@ class ApiGatewayResolver(BaseRouter):
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
         swagger_base_url: Optional[str] = None,
-        oauth2: Optional["OAuth2Config"] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
         compress: bool = False,
     ):
@@ -1703,8 +1701,6 @@ class ApiGatewayResolver(BaseRouter):
             The license information for the exposed API.
         swagger_base_url: str, optional
             The base url for the swagger UI. If not provided, we will serve a recent version of the Swagger UI.
-        oauth2: OAuth2Config, optional
-            The OAuth2 configuration for the Swagger UI.
         middlewares: List[Callable[..., Response]], optional
             List of middlewares to be used for the swagger route.
         compress: bool, default = False
@@ -1769,7 +1765,6 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js,
                 swagger_css,
                 swagger_base_url,
-                oauth2,
             )
 
             return Response(
