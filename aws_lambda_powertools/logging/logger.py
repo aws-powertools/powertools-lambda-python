@@ -584,10 +584,7 @@ class Logger:
         self.registered_formatter.append_keys(**additional_keys)
 
     def get_current_keys(self) -> Dict[str, Any]:
-        if isinstance(self.registered_formatter, LambdaPowertoolsFormatter):
-            return self.registered_formatter.get_current_keys()
-
-        return {}
+        return self.registered_formatter.get_current_keys()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
