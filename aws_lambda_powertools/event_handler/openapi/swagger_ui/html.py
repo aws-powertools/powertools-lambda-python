@@ -9,7 +9,7 @@ def generate_swagger_html(
     swagger_js: str,
     swagger_css: str,
     swagger_base_url: str,
-    oauth2: Optional[OAuth2Config],
+    oauth2_config: Optional[OAuth2Config],
 ) -> str:
     """
     Generate Swagger UI HTML page
@@ -26,7 +26,7 @@ def generate_swagger_html(
         The URL to the Swagger UI CSS file
     swagger_base_url: str
         The base URL for Swagger UI
-    oauth2: OAuth2Config, optional
+    oauth2_config: OAuth2Config, optional
         The OAuth2 configuration.
     """
 
@@ -40,7 +40,9 @@ def generate_swagger_html(
         swagger_js_content = f"<script>{swagger_js}</script>"
 
     # Prepare oauth2 config
-    oauth2_content = f"ui.initOAuth({oauth2.json(exclude_none=True, exclude_unset=True)});" if oauth2 else ""
+    oauth2_content = (
+        f"ui.initOAuth({oauth2_config.json(exclude_none=True, exclude_unset=True)});" if oauth2_config else ""
+    )
 
     return f"""
 <!DOCTYPE html>
