@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
-from typing import Any, AsyncGenerator, Generator, Sequence
+from typing import Any, AsyncGenerator, Generator, Sequence, Union
 
 from ....shared import constants
 from ....shared.lazy_import import LazyLoader
@@ -21,7 +21,7 @@ class XraySpan(BaseSpan):
         self.add_exception = self.subsegment.add_exception
         self.close = self.subsegment.close
 
-    def set_attribute(self, key: str, value: str | Number | bool, **kwargs) -> None:
+    def set_attribute(self, key: str, value: Any, **kwargs) -> None:
         if kwargs.get("namespace", "") != "":
             self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
         else:
@@ -42,21 +42,23 @@ class XrayProvider(BaseProvider):
 
     @contextmanager
     def trace(self, name: str, **kwargs) -> Generator[XraySpan, None, None]:
-        with self.in_subsegment(name=name) as sub_segment:
+        with self.in_subsegment(name=name, **kwargs) as sub_segment:
             yield XraySpan(subsegment=sub_segment)
 
     @asynccontextmanager
     async def trace_async(self, name: str, **kwargs) -> AsyncGenerator[XraySpan, None]:
-        async with self.in_subsegment_async(name=name) as subsegment:
+        async with self.in_subsegment_async(name=name, **kwargs) as subsegment:
             yield XraySpan(subsegment=subsegment)
 
-    def set_attribute(self, key: str, value: str | Number | bool, **kwargs) -> None:
-        if kwargs.get("namespace", "") != "":
-            self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
-        else:
+    def set_attribute(self, key: str, value: Any, **kwargs) -> None:
+        # for x_ray, put annotation support str, Number, bool
+        # we use put_metadata if any unsupported values are provided
+        if isinstance(value, (str, Number, bool)):
             self.put_annotation(key=key, value=value)
+        else:
+            self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
 
-    def put_annotation(self, key: str, value: str | Number | bool) -> None:
+    def put_annotation(self, key: str, value: Union[str, Number, bool]) -> None:
         return self.recorder.put_annotation(key=key, value=value)
 
     def put_metadata(self, key: str, value: Any, namespace: str = "default") -> None:

@@ -15,8 +15,8 @@ from aws_lambda_powertools.shared.functions import (
 )
 from aws_lambda_powertools.shared.lazy_import import LazyLoader
 from aws_lambda_powertools.shared.types import AnyCallableT
-from aws_lambda_powertools.tracing.provider import XrayProvider
 from aws_lambda_powertools.tracing.provider.base import BaseProvider, BaseSpan
+from aws_lambda_powertools.tracing.provider.xray.xray_tracer import XrayProvider
 
 is_cold_start = True
 logger = logging.getLogger(__name__)
@@ -178,15 +178,17 @@ class Tracer:
         if self._is_xray_provider():
             self._disable_xray_trace_batching()
 
-    def set_attribute(self, key: str, value: Union[str, numbers.Number, bool]):
+    def set_attribute(self, key: str, value: Any, **kwargs):
         """Set attribute on current active trace entity with a key-value pair.
 
         Parameters
         ----------
         key : str
             attribute key
-        value : Union[str, numbers.Number, bool]
+        value : Any
             Value for attribute
+        kwargs: Optional[dict]
+            Optional parameters to be passed to provider.set_attributes
 
         Example
         -------
@@ -201,7 +203,10 @@ class Tracer:
 
         logger.debug(f"setting attribute on key '{key}' with '{value}'")
 
-        self.provider.set_attribute(key=key, value=value)
+        namespace = kwargs.get("namespace") or self.service
+        kwargs.update({"namespace": namespace})
+
+        self.provider.set_attribute(key=key, value=value, **kwargs)
 
     def put_annotation(self, key: str, value: Union[str, numbers.Number, bool]):
         """Adds annotation to existing segment or subsegment
