@@ -2266,6 +2266,7 @@ class Router(BaseRouter):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -2287,6 +2288,7 @@ class Router(BaseRouter):
                 frozen_tags,
                 operation_id,
                 include_in_schema,
+                security,
             )
 
             # Collate Middleware for routes
