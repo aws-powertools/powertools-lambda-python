@@ -274,6 +274,16 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
     --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
 
+### Accessing currently configured keys
+
+You can view all currently configured keys from the Logger state using the `get_current_keys()` method. This method is useful when you need to avoid overwriting keys that are already configured.
+
+=== "get_current_keys.py"
+
+    ```python hl_lines="4 11"
+    --8<-- "examples/logger/src/get_current_keys.py"
+    ```
+
 ### Log levels
 
 The default log level is `INFO`. It can be set using the `level` constructor option, `setLevel()` method or by using the `POWERTOOLS_LOG_LEVEL` environment variable.

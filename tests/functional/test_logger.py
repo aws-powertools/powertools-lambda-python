@@ -614,11 +614,12 @@ def test_logger_append_and_show_current_keys(stdout, service_name):
     logger.append_keys(**extra_keys)
 
     # THEN appended keys must be present in logger
-    assert "request_id" in logger.get_current_keys()
-    assert "context" in logger.get_current_keys()
+    current_keys = logger.get_current_keys()
+    assert "request_id" in current_keys
+    assert "context" in current_keys
 
 
-def test_logger_formatter_without_current_keys_method(stdout, service_name):
+def test_logger_formatter_without_get_current_keys_method(stdout, service_name):
     class CustomFormatter(BasePowertoolsFormatter):
         def append_keys(self, **additional_keys):
             # Fake method
