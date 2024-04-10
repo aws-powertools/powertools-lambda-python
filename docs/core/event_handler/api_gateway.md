@@ -875,7 +875,7 @@ You can use the `Response` class to have full control over the response. For exa
     ```
 
 ???- note "Using `Response` with data validation?"
-    When using the [data validation](#data-validation) feature with `enable_validation=True`, you need to specify the concreate type for the `Response` class. This is necessary for the validation middleware to infer the underlying type and perform the validation correctly.
+    When using the [data validation](#data-validation) feature with `enable_validation=True`, you must specify the concrete type for the `Response` class. This allows the validation middleware to infer the underlying type and perform validation correctly.
 
     ```python hl_lines="8 26 32"
     --8<-- "examples/event_handler_rest/src/data_validation_fine_grained_response.py"
