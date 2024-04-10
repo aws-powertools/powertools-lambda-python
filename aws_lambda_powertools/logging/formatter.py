@@ -49,7 +49,7 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
         raise NotImplementedError()
 
     def get_current_keys(self) -> Dict[str, Any]:
-        raise NotImplementedError()
+        return {}
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
