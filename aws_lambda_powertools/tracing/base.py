@@ -5,19 +5,18 @@ from contextlib import contextmanager
 from typing import Any, Generator, List, Optional, Sequence, Union
 
 
-## this class is deprecated, keep this class for backwards compatibility
+## MAINTENANCE: deprecated, kept for backwards compatibility until v3 is released
 class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
     @abc.abstractmethod
-    def close(self, end_time: Optional[int] = None):
+    def close(self, end_time: Optional[float] = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
 
         Parameters
         ----------
-        end_time: int
-        # TO-discuss: Providers typically use ns(time_ns -> nanosecond) as start or close time
+        end_time: float
             Time in epoch seconds, by default current time will be used.
         """
 
