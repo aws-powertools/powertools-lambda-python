@@ -1484,7 +1484,7 @@ class ApiGatewayResolver(BaseRouter):
             get_compat_model_name_map,
             get_definitions,
         )
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
@@ -1504,23 +1504,12 @@ class ApiGatewayResolver(BaseRouter):
 
         info.update({field: value for field, value in optional_fields.items() if value})
 
-        output: Dict[str, Any] = {"openapi": openapi_version, "info": info}
-        if servers:
-            output["servers"] = servers
-        else:
-            # If the servers property is not provided, or is an empty array, the default value would be a Server Object
-            # with an url value of /.
-            output["servers"] = [Server(url="/")]
-
-        if security:
-            if not security_schemes:
-                raise ValueError("security_schemes must be provided if security is provided")
-
-            # Check if all keys in security are present in the security_schemes
-            if not all(key in security_schemes for sec in security for key in sec):
-                raise ValueError("Some security schemes not found in security_schemes")
-
-            output["security"] = security
+        output: Dict[str, Any] = {
+            "openapi": openapi_version,
+            "info": info,
+            "servers": self._get_openapi_servers(servers),
+            "security": self._get_openapi_security(security, security_schemes),
+        }
 
         components: Dict[str, Dict[str, Any]] = {}
         paths: Dict[str, Dict[str, Any]] = {}
@@ -1568,6 +1557,31 @@ class ApiGatewayResolver(BaseRouter):
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
         return OpenAPI(**output)
+
+    @staticmethod
+    def _get_openapi_servers(servers: Optional[List["Server"]]) -> List["Server"]:
+        from aws_lambda_powertools.event_handler.openapi.models import Server
+
+        # If the 'servers' property is not provided or is an empty array,
+        # the default behavior is to return a Server Object with a URL value of "/".
+        return servers if servers else [Server(url="/")]
+
+    @staticmethod
+    def _get_openapi_security(
+        security: Optional[List[Dict[str, List[str]]]],
+        security_schemes: Optional[Dict[str, "SecurityScheme"]],
+    ) -> Optional[List[Dict[str, List[str]]]]:
+        if security:
+            if not security_schemes:
+                raise ValueError("security_schemes must be provided if security is provided")
+
+            # Check if all keys in security are present in the security_schemes
+            if not all(key in security_schemes for sec in security for key in sec):
+                raise ValueError("Some security schemes not found in security_schemes")
+
+            return security
+        else:
+            return None
 
     @staticmethod
     def _determine_openapi_version(openapi_version):
