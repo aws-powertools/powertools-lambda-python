@@ -441,7 +441,7 @@ class SecurityBase(BaseModel):
     description: Optional[str] = None
 
     if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
+        model_config = {"extra": "allow", "populate_by_name": True}
 
     else:
 
