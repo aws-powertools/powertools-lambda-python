@@ -1992,13 +1992,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudwatch"
-version = "1.34.75"
-description = "Type annotations for boto3.CloudWatch 1.34.75 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.83"
+description = "Type annotations for boto3.CloudWatch 1.34.83 service generated with mypy-boto3-builder 7.23.2"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-cloudwatch-1.34.75.tar.gz", hash = "sha256:434433f34f68e8570de4e568b4b2c5ddf81e6edfb699b16785f04229364ed1a5"},
-    {file = "mypy_boto3_cloudwatch-1.34.75-py3-none-any.whl", hash = "sha256:5954e58b0f929863e8468a158d01a604e641f6d6f0510a9eba6912436e0a4abf"},
+    {file = "mypy-boto3-cloudwatch-1.34.83.tar.gz", hash = "sha256:766e166c5b463d9885a5929dc16bb592e0fa7d7beaf569aa4f501d85a848bc13"},
+    {file = "mypy_boto3_cloudwatch-1.34.83-py3-none-any.whl", hash = "sha256:6af4fff0ec7c09e423df5a69fff4df8a74044462686e8679b4fe73c106787854"},
 ]
 
 [package.dependencies]
@@ -3515,4 +3515,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c717dab0514cbbfa0f807a2f7a70b79861127beabe8e13ac9c119da3e18e1cf4"
+content-hash = "3a0916e3b5592d44804da7586874e8c465b1b16f74ce10229391c75330ccc310"
