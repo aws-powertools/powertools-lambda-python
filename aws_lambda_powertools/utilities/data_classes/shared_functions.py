@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, overload
 
 
 def base64_decode(value: str) -> str:
@@ -21,12 +21,30 @@ def base64_decode(value: str) -> str:
     return base64.b64decode(value).decode("UTF-8")
 
 
+@overload
 def get_header_value(
     headers: dict[str, Any],
     name: str,
-    default_value: str | None,
-    case_sensitive: bool | None,
-) -> str | None:
+    default_value: str,
+    case_sensitive: bool,
+) -> str: ...
+
+
+@overload
+def get_header_value(
+    headers: dict[str, Any],
+    name: str,
+    default_value: Optional[str],
+    case_sensitive: bool,
+) -> Optional[str]: ...
+
+
+def get_header_value(
+    headers: dict[str, Any],
+    name: str,
+    default_value: Optional[str],
+    case_sensitive: bool,
+) -> Optional[str]:
     """
     Get the value of a header by its name.
 
@@ -62,11 +80,27 @@ def get_header_value(
     )
 
 
+@overload
 def get_query_string_value(
     query_string_parameters: Dict[str, str] | None,
     name: str,
-    default_value: str | None = None,
-) -> str | None:
+    default_value: str,
+) -> str: ...
+
+
+@overload
+def get_query_string_value(
+    query_string_parameters: Dict[str, str] | None,
+    name: str,
+    default_value: Optional[str] = None,
+) -> Optional[str]: ...
+
+
+def get_query_string_value(
+    query_string_parameters: Dict[str, str] | None,
+    name: str,
+    default_value: Optional[str] = None,
+) -> Optional[str]:
     """
     Retrieves the value of a query string parameter specified by the given name.
 
@@ -87,10 +121,10 @@ def get_query_string_value(
 
 
 def get_multi_value_query_string_values(
-    multi_value_query_string_parameters: Dict[str, list[str]] | None,
+    multi_value_query_string_parameters: Dict[str, List[str]] | None,
     name: str,
-    default_values: list[str] | None = None,
-) -> list[str]:
+    default_values: Optional[List[str]] = None,
+) -> List[str]:
     """
     Retrieves the values of a multi-value string parameters specified by the given name.
 
@@ -98,7 +132,7 @@ def get_multi_value_query_string_values(
     ----------
     name: str
         The name of the query string parameter to retrieve.
-    default_value: list[str], optional
+    default_value: List[str], optional
         The default value to return if the parameter is not found. Defaults to None.
 
     Returns

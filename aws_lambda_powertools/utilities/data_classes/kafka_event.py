@@ -1,6 +1,6 @@
 import base64
 from functools import cached_property
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Optional, overload
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -69,10 +69,26 @@ class KafkaEventRecord(DictWrapper):
         """Decodes the headers as a single dictionary."""
         return {k: bytes(v) for chunk in self.headers for k, v in chunk.items()}
 
+    @overload
     def get_header_value(
         self,
         name: str,
-        default_value: Optional[Any] = None,
+        default_value: str,
+        case_sensitive: bool = False,
+    ) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: bool = False,
+    ) -> Optional[str]: ...
+
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
         case_sensitive: bool = True,
     ) -> Optional[str]:
         """Get a decoded header value by name."""

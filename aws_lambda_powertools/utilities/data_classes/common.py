@@ -2,7 +2,7 @@ import base64
 import json
 from collections.abc import Mapping
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Optional, overload
+from typing import Any, Callable, Dict, Iterator, List, Optional, TypeVar, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -10,6 +10,8 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_multi_value_query_string_values,
     get_query_string_value,
 )
+
+T = TypeVar("T")
 
 
 class DictWrapper(Mapping):
@@ -86,7 +88,13 @@ class DictWrapper(Mapping):
     def _properties(self) -> List[str]:
         return [p for p in dir(self.__class__) if isinstance(getattr(self.__class__, p), property)]
 
-    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
+    @overload
+    def get(self, key: str, default: T) -> T: ...
+
+    @overload
+    def get(self, key: str, default: Optional[T] = None) -> Optional[T]: ...
+
+    def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
         return self._data.get(key, default)
 
     @property
@@ -171,6 +179,12 @@ class BaseProxyEvent(DictWrapper):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
