@@ -19,13 +19,13 @@ class S3RequestParameters(DictWrapper):
         return self["requestParameters"]["sourceIPAddress"]
 
 
-class S3EventNotificationEventBridgeBucket(DictWrapper):
+class S3EventNotificationEventBridgeBucket(EventWrapper):
     @property
     def name(self) -> str:
         return self["name"]
 
 
-class S3EventBridgeNotificationObject(DictWrapper):
+class S3EventBridgeNotificationObject(EventWrapper):
     @property
     def key(self) -> str:
         """Object key"""
@@ -52,7 +52,7 @@ class S3EventBridgeNotificationObject(DictWrapper):
         return self["sequencer"]
 
 
-class S3EventBridgeNotificationDetail(DictWrapper):
+class S3EventBridgeNotificationDetail(EventWrapper):
     @property
     def version(self) -> str:
         """Get the detail version"""

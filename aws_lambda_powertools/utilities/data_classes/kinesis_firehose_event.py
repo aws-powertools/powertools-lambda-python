@@ -208,7 +208,7 @@ class KinesisFirehoseRecordMetadata(DictWrapper):
         return self._metadata["subsequenceNumber"]
 
 
-class KinesisFirehoseRecord(DictWrapper):
+class KinesisFirehoseRecord(EventWrapper):
     @property
     def approximate_arrival_timestamp(self) -> int:
         """The approximate time that the record was inserted into the delivery stream"""
@@ -307,4 +307,5 @@ class KinesisFirehoseEvent(EventWrapper):
     def nested_event_contents(self):
         for record in self.get("records"):
             body = record.get("data")
+            body = base64.b64decode(body).decode('utf-8') #TODO: should we decode for them?
             yield body

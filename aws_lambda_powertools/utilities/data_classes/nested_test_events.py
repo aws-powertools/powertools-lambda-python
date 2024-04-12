@@ -10,7 +10,7 @@ firehose_sns_event = {
     {
       "recordId": "49650562840674497170060081706384853755200261109279883266000000",
       "approximateArrivalTimestamp": 1711562009882,
-      "data": "eyJUeXBlIjoiTm90aWZpY2F0aW9uIiwiTWVzc2FnZUlkIjoiMWIzZTEyNDQtZWNjOS01NmFiLTliODUtNGMzYWIzOTA4ZWU5IiwiVG9waWNBcm4iOiJhcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZSIsIlN1YmplY3QiOiJkZGRkZGRkZGRkZGRkZGRkZGQiLCJNZXNzYWdlIjoiZXdyZXdycXdyZXdyXG5zZGFkXG5hc2RcbmFzZFxuYXNcbmR4IiwiVGltZXN0YW1wIjoiMjAyNC0wMy0yN1QxNzo1MzoyOS44MDRaIiwiVW5zdWJzY3JpYmVVUkwiOiJodHRwczovL3Nucy51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS8/QWN0aW9uPVVuc3Vic2NyaWJlJlN1YnNjcmlwdGlvbkFybj1hcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZTo2OTZlMzRhNS1mZDBiLTRhYjQtYjEyMi05ZmZhNzEwYjg5OTUifQo="
+      "data": "eyJUeXBlIjoiTm90aWZpY2F0aW9uIiwiTWVzc2FnZUlkIjoiMWIzZTEyNDQtZWNjOS01NmFiLTliODUtNGMzYWIzOTA4ZWU5IiwiVG9waWNBcm4iOiJhcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZSIsIlN1YmplY3QiOiJzbnMgc3ViamVjdCIsIk1lc3NhZ2UiOiJtZXNzYWdlIGZyb20gc25zIiwiVGltZXN0YW1wIjoiMjAyNC0wMy0yN1QxNzo1MzoyOS44MDRaIiwiVW5zdWJzY3JpYmVVUkwiOiJodHRwczovL3Nucy51cy1lYXN0LTEuYW1hem9uYXdzLmNvbS8/QWN0aW9uPVVuc3Vic2NyaWJlJlN1YnNjcmlwdGlvbkFybj1hcm46YXdzOnNuczp1cy1lYXN0LTE6MjAwOTg0MTEyMzg2OnNucy10by1maXJlaG9zZTo2OTZlMzRhNS1mZDBiLTRhYjQtYjEyMi05ZmZhNzEwYjg5OTUifQ=="
     }
   ]
 }
@@ -172,14 +172,14 @@ sqs_s3_multi_event = {
       "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
       "receiptHandle": "MessageReceiptHandle",
       "body": "{\"Records\":[" +
-        "{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2023-01-03T00:00:00.000Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:123456789012:example-user\"},\"requestParameters\":{\"sourceIPAddress\":\"127.0.0.1\"},\"responseElements\":{\"x-amz-request-id\":\"example-request-id-3\",\"x-amz-id-2\":\"example-id-3\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"testConfigRule\",\"bucket\":{\"name\":\"example-bucket11\",\"ownerIdentity\":{\"principalId\":\"EXAMPLE\"},\"arn\":\"arn:aws:s3:::example-bucket\"},\"object\":{\"key\":\"example-object-3.txt\",\"size\":3072,\"eTag\":\"example-tag-3\",\"versionId\":\"3\",\"sequencer\":\"example-sequencer-3\"}}}" +
+        "{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2023-01-03T00:00:00.000Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:123456789012:example-user\"},\"requestParameters\":{\"sourceIPAddress\":\"127.0.0.1\"},\"responseElements\":{\"x-amz-request-id\":\"example-request-id-3\",\"x-amz-id-2\":\"example-id-3\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"testConfigRule\",\"bucket\":{\"name\":\"example-bucket1\",\"ownerIdentity\":{\"principalId\":\"EXAMPLE\"},\"arn\":\"arn:aws:s3:::example-bucket\"},\"object\":{\"key\":\"example-object-3.txt\",\"size\":3072,\"eTag\":\"example-tag-3\",\"versionId\":\"3\",\"sequencer\":\"example-sequencer-3\"}}}" +
       "]}"
     },
     {
       "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
       "receiptHandle": "MessageReceiptHandle",
       "body": "{\"Records\":[" +
-        "{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2023-01-03T00:00:00.000Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:123456789012:example-user\"},\"requestParameters\":{\"sourceIPAddress\":\"127.0.0.1\"},\"responseElements\":{\"x-amz-request-id\":\"example-request-id-3\",\"x-amz-id-2\":\"example-id-3\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"testConfigRule\",\"bucket\":{\"name\":\"example-bucket22\",\"ownerIdentity\":{\"principalId\":\"EXAMPLE\"},\"arn\":\"arn:aws:s3:::example-bucket\"},\"object\":{\"key\":\"example-object-3.txt\",\"size\":3072,\"eTag\":\"example-tag-3\",\"versionId\":\"3\",\"sequencer\":\"example-sequencer-3\"}}}" +
+        "{\"eventVersion\":\"2.1\",\"eventSource\":\"aws:s3\",\"awsRegion\":\"us-east-1\",\"eventTime\":\"2023-01-03T00:00:00.000Z\",\"eventName\":\"ObjectCreated:Put\",\"userIdentity\":{\"principalId\":\"AWS:123456789012:example-user\"},\"requestParameters\":{\"sourceIPAddress\":\"127.0.0.1\"},\"responseElements\":{\"x-amz-request-id\":\"example-request-id-3\",\"x-amz-id-2\":\"example-id-3\"},\"s3\":{\"s3SchemaVersion\":\"1.0\",\"configurationId\":\"testConfigRule\",\"bucket\":{\"name\":\"example-bucket2\",\"ownerIdentity\":{\"principalId\":\"EXAMPLE\"},\"arn\":\"arn:aws:s3:::example-bucket\"},\"object\":{\"key\":\"example-object-3.txt\",\"size\":3072,\"eTag\":\"example-tag-3\",\"versionId\":\"3\",\"sequencer\":\"example-sequencer-3\"}}}" +
       "]}"
     }
   ],

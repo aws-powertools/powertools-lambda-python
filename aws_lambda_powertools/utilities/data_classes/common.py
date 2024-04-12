@@ -10,7 +10,6 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_multi_value_query_string_values,
     get_query_string_value,
 )
-from aws_lambda_powertools.utilities.data_classes.exceptions import ClassTransformationException
 
 
 class DictWrapper(Mapping):
@@ -118,12 +117,12 @@ class EventWrapper(DictWrapper):
             raise KeyError("No 'Records' key found in the event data.")
         for record in records:
             if not isinstance(record, dict):
-                raise TypeError(f"Expected each record to be a dictionary, but got {type(record)}.")
+                raise TypeError(f"Expected 'Records' to be a dictionary, but got {type(record)}.")
             body = record.get('body')
             if body is not None:
                 yield body
             else:
-                raise KeyError("No 'body' key found in the record.")
+                raise KeyError("No 'body' key found in the 'Records' dict.")
 
     def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
         if nested_event_content_deserializer is None:
