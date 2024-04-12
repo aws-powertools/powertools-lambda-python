@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, Dict, List, Optional, overload
+from typing import Any, overload
 
 
 def base64_decode(value: str) -> str:
@@ -26,7 +26,7 @@ def get_header_value(
     headers: dict[str, Any],
     name: str,
     default_value: str,
-    case_sensitive: bool,
+    case_sensitive: bool | None = None,
 ) -> str: ...
 
 
@@ -34,23 +34,23 @@ def get_header_value(
 def get_header_value(
     headers: dict[str, Any],
     name: str,
-    default_value: Optional[str],
-    case_sensitive: bool,
-) -> Optional[str]: ...
+    default_value: str | None = None,
+    case_sensitive: bool | None = None,
+) -> str | None: ...
 
 
 def get_header_value(
     headers: dict[str, Any],
     name: str,
-    default_value: Optional[str],
-    case_sensitive: bool,
-) -> Optional[str]:
+    default_value: str | None = None,
+    case_sensitive: bool | None = None,
+) -> str | None:
     """
     Get the value of a header by its name.
 
     Parameters
     ----------
-    headers: Dict[str, str]
+    headers: dict[str, str]
         The dictionary of headers.
     name: str
         The name of the header to retrieve.
@@ -82,7 +82,7 @@ def get_header_value(
 
 @overload
 def get_query_string_value(
-    query_string_parameters: Dict[str, str] | None,
+    query_string_parameters: dict[str, str] | None,
     name: str,
     default_value: str,
 ) -> str: ...
@@ -90,17 +90,17 @@ def get_query_string_value(
 
 @overload
 def get_query_string_value(
-    query_string_parameters: Dict[str, str] | None,
+    query_string_parameters: dict[str, str] | None,
     name: str,
-    default_value: Optional[str] = None,
-) -> Optional[str]: ...
+    default_value: str | None = None,
+) -> str | None: ...
 
 
 def get_query_string_value(
-    query_string_parameters: Dict[str, str] | None,
+    query_string_parameters: dict[str, str] | None,
     name: str,
-    default_value: Optional[str] = None,
-) -> Optional[str]:
+    default_value: str | None = None,
+) -> str | None:
     """
     Retrieves the value of a query string parameter specified by the given name.
 
@@ -121,10 +121,10 @@ def get_query_string_value(
 
 
 def get_multi_value_query_string_values(
-    multi_value_query_string_parameters: Dict[str, List[str]] | None,
+    multi_value_query_string_parameters: dict[str, list[str]] | None,
     name: str,
-    default_values: Optional[List[str]] = None,
-) -> List[str]:
+    default_values: list[str] | None = None,
+) -> list[str]:
     """
     Retrieves the values of a multi-value string parameters specified by the given name.
 
@@ -132,12 +132,12 @@ def get_multi_value_query_string_values(
     ----------
     name: str
         The name of the query string parameter to retrieve.
-    default_value: List[str], optional
+    default_value: list[str], optional
         The default value to return if the parameter is not found. Defaults to None.
 
     Returns
     -------
-    List[str]. optional
+    list[str]. optional
         The values of the query string parameter if found, or the default values if not found.
     """
 
