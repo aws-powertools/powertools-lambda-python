@@ -274,6 +274,16 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
     --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
 
+### Accessing currently configured keys
+
+You can view all currently configured keys from the Logger state using the `get_current_keys()` method. This method is useful when you need to avoid overwriting keys that are already configured.
+
+=== "get_current_keys.py"
+
+    ```python hl_lines="4 11"
+    --8<-- "examples/logger/src/get_current_keys.py"
+    ```
+
 ### Log levels
 
 The default log level is `INFO`. It can be set using the `level` constructor option, `setLevel()` method or by using the `POWERTOOLS_LOG_LEVEL` environment variable.
@@ -732,7 +742,7 @@ The `log` argument is the final log record containing [our standard keys](#stand
 For exceptional cases where you want to completely replace our formatter logic, you can subclass `BasePowertoolsFormatter`.
 
 ???+ warning
-    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means keeping state of logging keys added.
+    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `get_current_keys`, and `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means tracking the added logging keys.
 
 === "bring_your_own_formatter_from_scratch.py"
 
