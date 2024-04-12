@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, overload
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -213,6 +213,22 @@ class AppSyncResolverEvent(DictWrapper):
         stash to pass arbitrary data across request and response mapping templates, and across functions in
         a pipeline resolver."""
         return self.get("stash")
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: str,
+        case_sensitive: Optional[bool] = False,
+    ) -> str: ...
+
+    @overload
+    def get_header_value(
+        self,
+        name: str,
+        default_value: Optional[str] = None,
+        case_sensitive: Optional[bool] = False,
+    ) -> Optional[str]: ...
 
     def get_header_value(
         self,
