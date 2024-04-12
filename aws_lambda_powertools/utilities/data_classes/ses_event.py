@@ -3,7 +3,7 @@ from typing import Iterator, List, Optional
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
-class SESMailHeader(DictWrapper):
+class SESMailHeader(EventWrapper):
     @property
     def name(self) -> str:
         return self["name"]
@@ -13,7 +13,7 @@ class SESMailHeader(DictWrapper):
         return self["value"]
 
 
-class SESMailCommonHeaders(DictWrapper):
+class SESMailCommonHeaders(EventWrapper):
     @property
     def return_path(self) -> str:
         """The values in the Return-Path header of the email."""
@@ -111,7 +111,7 @@ class SESMail(EventWrapper):
         return SESMailCommonHeaders(self["commonHeaders"])
 
 
-class SESReceiptStatus(DictWrapper):
+class SESReceiptStatus(EventWrapper):
     @property
     def status(self) -> str:
         """Receipt status
@@ -120,7 +120,7 @@ class SESReceiptStatus(DictWrapper):
         return str(self["status"])
 
 
-class SESReceiptAction(DictWrapper):
+class SESReceiptAction(EventWrapper):
     @property
     def get_type(self) -> str:
         """String that indicates the type of action that was executed.
@@ -149,7 +149,7 @@ class SESReceiptAction(DictWrapper):
         return self["invocationType"]
 
 
-class SESReceipt(DictWrapper):
+class SESReceipt(EventWrapper):
     @property
     def timestamp(self) -> str:
         """String that specifies the date and time at which the action was triggered, in ISO 8601 format."""
