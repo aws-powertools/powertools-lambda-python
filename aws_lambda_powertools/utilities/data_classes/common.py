@@ -172,6 +172,12 @@ class BaseProxyEvent(DictWrapper):
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
 
+    @overload
+    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
+
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
 
