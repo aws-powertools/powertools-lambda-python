@@ -2,7 +2,7 @@ import base64
 import json
 from collections.abc import Mapping
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Optional, TypeVar, overload
+from typing import Any, Callable, Dict, Iterator, List, Optional, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -10,8 +10,6 @@ from aws_lambda_powertools.utilities.data_classes.shared_functions import (
     get_multi_value_query_string_values,
     get_query_string_value,
 )
-
-T = TypeVar("T")
 
 
 class DictWrapper(Mapping):
