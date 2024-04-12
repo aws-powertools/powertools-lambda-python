@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
-from typing import Any, AsyncGenerator, Generator, Sequence, Union
+from typing import Any, AsyncGenerator, Generator, Literal, Sequence, Union
 
 from ....shared import constants
 from ....shared.lazy_import import LazyLoader
@@ -21,11 +21,47 @@ class XraySpan(BaseSpan):
         self.add_exception = self.subsegment.add_exception
         self.close = self.subsegment.close
 
-    def set_attribute(self, key: str, value: Any, **kwargs) -> None:
-        if kwargs.get("namespace", "") != "":
-            self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
-        else:
+    def set_attribute(
+        self,
+        key: str,
+        value: Any,
+        category: Literal["Annotation", "Metadata", "Auto"] = "Auto",
+        **kwargs,
+    ) -> None:
+        """
+        Set attribute on this span with a key-value pair.
+
+        Parameters
+        ----------
+        key : str
+            attribute key
+        value : Any
+            Value for attribute
+        category : Literal["Annotation","Metadata","Auto"] = "Auto"
+            This parameter specifies the category of attribute to set.
+            - **"Annotation"**: Sets the attribute as an Annotation.
+            - **"Metadata"**: Sets the attribute as Metadata.
+            - **"Auto" (default)**: Automatically determines the attribute
+            type based on its value.
+
+        kwargs: Optional[dict]
+            Optional parameters to be passed to provider.set_attributes
+        """
+        if category == "Annotation":
             self.put_annotation(key=key, value=value)
+            return
+
+        if category == "Metadata":
+            self.put_metadata(key=key, value=value, namespace=kwargs.get("namespace", "dafault"))
+            return
+
+        # Auto
+        if isinstance(value, (str, Number, bool)):
+            self.put_annotation(key=key, value=value)
+            return
+
+        # Auto & not in (str, Number, bool)
+        self.put_metadata(key=key, value=value, namespace=kwargs.get("namespace", "dafault"))
 
     def record_exception(self, exception: BaseException, **kwargs):
         stack = aws_xray_sdk.core.utils.stacktrace.get_stacktrace()
@@ -50,13 +86,47 @@ class XrayProvider(BaseProvider):
         async with self.in_subsegment_async(name=name, **kwargs) as subsegment:
             yield XraySpan(subsegment=subsegment)
 
-    def set_attribute(self, key: str, value: Any, **kwargs) -> None:
-        # for x_ray, put annotation support str, Number, bool
-        # we use put_metadata if any unsupported values are provided
+    def set_attribute(
+        self,
+        key: str,
+        value: Any,
+        category: Literal["Annotation", "Metadata", "Auto"] = "Auto",
+        **kwargs,
+    ) -> None:
+        """
+        Set attribute on the current active span with a key-value pair.
+
+        Parameters
+        ----------
+        key : str
+            attribute key
+        value : Any
+            Value for attribute
+        category : Literal["Annotation","Metadata","Auto"] = "Auto"
+            This parameter specifies the type of attribute to set.
+            - **"Annotation"**: Sets the attribute as an Annotation.
+            - **"Metadata"**: Sets the attribute as Metadata.
+            - **"Auto" (default)**: Automatically determines the attribute
+            type based on its value.
+
+        kwargs: Optional[dict]
+            Optional parameters to be passed to provider.set_attributes
+        """
+        if category == "Annotation":
+            self.put_annotation(key=key, value=value)
+            return
+
+        if category == "Metadata":
+            self.put_metadata(key=key, value=value, namespace=kwargs.get("namespace", "dafault"))
+            return
+
+        # Auto
         if isinstance(value, (str, Number, bool)):
             self.put_annotation(key=key, value=value)
-        else:
-            self.put_metadata(key=key, value=value, namespace=kwargs["namespace"])
+            return
+
+        # Auto & not in (str, Number, bool)
+        self.put_metadata(key=key, value=value, namespace=kwargs.get("namespace", "dafault"))
 
     def put_annotation(self, key: str, value: Union[str, Number, bool]) -> None:
         return self.recorder.put_annotation(key=key, value=value)

@@ -179,7 +179,7 @@ class Tracer:
             self._disable_xray_trace_batching()
 
     def set_attribute(self, key: str, value: Any, **kwargs):
-        """Set attribute on current active trace entity with a key-value pair.
+        """Set attribute on current active span with a key-value pair.
 
         Parameters
         ----------
@@ -231,10 +231,7 @@ class Tracer:
 
         logger.debug(f"Annotating on key '{key}' with '{value}'")
 
-        if self._is_custom_provider():
-            self.provider.set_attribute(key=key, value=value)
-        else:
-            self.provider.put_annotation(key=key, value=value)  # type: ignore
+        self.provider.set_attribute(key=key, value=value, category="Annotation")
 
     def put_metadata(self, key: str, value: Any, namespace: Optional[str] = None):
         """Adds metadata to existing segment or subsegment
@@ -262,10 +259,8 @@ class Tracer:
 
         namespace = namespace or self.service
         logger.debug(f"Adding metadata on key '{key}' with '{value}' at namespace '{namespace}'")
-        if self._is_custom_provider():
-            self.provider.set_attribute(key=f"{namespace}.{key}", value=value)
-        else:
-            self.provider.put_metadata(key=key, value=value, namespace=namespace)  # type: ignore
+
+        self.provider.set_attribute(key=key, value=value, namespace=namespace, category="Metadata")
 
     def patch(self, modules: Optional[Sequence[str]] = None):
         """Patch modules for instrumentation.
@@ -373,19 +368,13 @@ class Tracer:
                 finally:
                     global is_cold_start
                     logger.debug("Annotating cold start")
-                    if self._is_custom_provider():
-                        subsegment.set_attribute(key="ColdStart", value=is_cold_start)
-                    else:
-                        subsegment.put_annotation(key="ColdStart", value=is_cold_start)
+                    subsegment.set_attribute(key="ColdStart", value=is_cold_start)
 
                     if is_cold_start:
                         is_cold_start = False
 
                     if self.service:
-                        if self._is_custom_provider():
-                            subsegment.set_attribute(key="Service", value=self.service)
-                        else:
-                            subsegment.put_annotation(key="Service", value=self.service)
+                        subsegment.set_attribute(key="Service", value=self.service)
 
                 return response
 
@@ -765,10 +754,7 @@ class Tracer:
         """
         if data is None or not capture_response or subsegment is None:
             return
-        if self._is_custom_provider():
-            subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service)
-        else:
-            subsegment.put_metadata(key=f"{method_name} response", value=data, namespace=self.service)  # type: ignore
+        subsegment.set_attribute(key=f"{method_name} response", value=data, namespace=self.service, category="Metadata")
 
     def _add_full_exception_as_metadata(
         self,
@@ -793,14 +779,12 @@ class Tracer:
         if not capture_error:
             return
 
-        if self._is_custom_provider():
-            subsegment.set_attribute(
-                key=f"{self.service}.{method_name} error",
-                value=str(error),
-                namespace=self.service,
-            )
-        else:
-            subsegment.put_metadata(key=f"{method_name} error", value=error, namespace=self.service)  # type: ignore
+        subsegment.set_attribute(
+            key=f"{method_name} error",
+            value=error,
+            namespace=self.service,
+            category="Metadata",
+        )
 
     @staticmethod
     def _disable_tracer_provider():
@@ -882,10 +866,6 @@ class Tracer:
 
     def _is_xray_provider(self):
         return isinstance(self.provider, XrayProvider)
-
-    def _is_custom_provider(self):
-        # check if provider is not default xray_provider. Avoid test conflits
-        return not self._is_xray_provider() and isinstance(self.provider, BaseProvider)
 
     def ignore_endpoint(self, hostname: Optional[str] = None, urls: Optional[List[str]] = None):
         """If you want to ignore certain httplib requests you can do so based on the hostname or URL that is being
