@@ -89,18 +89,16 @@ def in_subsegment_mock(mocker):
             return self.__exit__(*args, **kwargs)
 
     class InSubsegment(NamedTuple):
-        in_subsegment: mocker.MagicMock = AsyncContextManager()
-        put_annotation: mocker.MagicMock = mocker.MagicMock()
-        put_metadata: mocker.MagicMock = mocker.MagicMock()
+        in_subsegment: mock.MagicMock = AsyncContextManager()
+        put_annotation: mock.MagicMock = mock.MagicMock()
+        put_metadata: mock.MagicMock = mock.MagicMock()
 
         def set_attribute(self, *args, **kwargs):
             if kwargs.get("category") == "Metadata":
-                print("meta")
                 kwargs.pop("category")
                 return self.put_metadata(*args, **kwargs)
 
             if kwargs.get("category") == "Annotation":
-                print("anno")
                 kwargs.pop("category")
                 return self.put_annotation(*args, **kwargs)
 
