@@ -88,13 +88,7 @@ class DictWrapper(Mapping):
     def _properties(self) -> List[str]:
         return [p for p in dir(self.__class__) if isinstance(getattr(self.__class__, p), property)]
 
-    @overload
-    def get(self, key: str, default: T) -> T: ...
-
-    @overload
-    def get(self, key: str, default: Optional[T] = None) -> Optional[T]: ...
-
-    def get(self, key: str, default: Optional[T] = None) -> Optional[T]:
+    def get(self, key: str, default: Optional[Any] = None) -> Optional[Any]:
         return self._data.get(key, default)
 
     @property
