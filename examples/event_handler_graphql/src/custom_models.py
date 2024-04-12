@@ -26,11 +26,11 @@ class Location(TypedDict, total=False):
 class MyCustomModel(AppSyncResolverEvent):
     @property
     def country_viewer(self) -> str:
-        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)  # type: ignore[return-value] # sentinel typing # noqa: E501
+        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)
 
     @property
     def api_key(self) -> str:
-        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)  # type: ignore[return-value] # sentinel typing # noqa: E501
+        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)
 
 
 @app.resolver(type_name="Query", field_name="listLocations")
