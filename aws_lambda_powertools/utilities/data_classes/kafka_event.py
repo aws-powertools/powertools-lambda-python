@@ -74,7 +74,7 @@ class KafkaEventRecord(DictWrapper):
         self,
         name: str,
         default_value: str,
-        case_sensitive: bool = False,
+        case_sensitive: bool = True,
     ) -> str: ...
 
     @overload
@@ -82,7 +82,7 @@ class KafkaEventRecord(DictWrapper):
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: bool = False,
+        case_sensitive: bool = True,
     ) -> Optional[str]: ...
 
     def get_header_value(
