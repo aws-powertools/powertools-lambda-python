@@ -16,7 +16,7 @@ class OAuth2Config(BaseModel):
     clientId: str = Field(alias="client_id")
 
     # The realm in which the OAuth2 application is registered. Optional.
-    realm: Optional[str]
+    realm: Optional[str] = Field(default=None)
 
     # The name of the OAuth2 application
     appName: str = Field(alias="app_name")
