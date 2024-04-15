@@ -58,6 +58,8 @@ class OAuth2UnsafeConfig(OAuth2Config):
 def generate_oauth2_redirect_html() -> str:
     """
     Generates the HTML content for the OAuth2 redirect page.
+
+    Source: https://github.com/swagger-api/swagger-ui/blob/master/dist/oauth2-redirect.html
     """
     return """
 <!doctype html>
