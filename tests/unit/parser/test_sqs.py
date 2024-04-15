@@ -119,5 +119,5 @@ def test_sqs_dlq_trigger_event():
 
     assert (
         attributes.DeadLetterQueueSourceArn
-        == "arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleQueue-RNvLCpwGmLi7"
+        == raw_record["attributes"]["DeadLetterQueueSourceArn"]
     )

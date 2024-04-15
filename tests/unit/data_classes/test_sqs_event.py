@@ -67,7 +67,7 @@ def test_sqs_dlq_trigger_event():
     assert attributes.message_deduplication_id is None
     assert (
         attributes.dead_letter_queue_source_arn
-        == "arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleQueue-RNvLCpwGmLi7"
+        == raw_attributes["DeadLetterQueueSourceArn"]
     )
 
 
