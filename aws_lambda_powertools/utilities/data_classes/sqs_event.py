@@ -55,6 +55,13 @@ class SQSRecordAttributes(DictWrapper):
         the 5-minute deduplication interval."""
         return self.get("MessageDeduplicationId")
 
+    @property
+    def dead_letter_queue_source_arn(self) -> Optional[str]:
+        """The SQS queue ARN that sent the record to this DLQ.
+        Only present when a Lambda function is using a DLQ as an event source.
+        """
+        return self.get("DeadLetterQueueSourceArn")
+
 
 class SQSMessageAttribute(DictWrapper):
     """The user-specified message attribute value."""

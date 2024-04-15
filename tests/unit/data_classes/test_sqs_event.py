@@ -44,6 +44,33 @@ def test_seq_trigger_event():
     assert record_2.json_body == {"message": "foo1"}
 
 
+def test_sqs_dlq_trigger_event():
+    raw_event = load_event("sqsDlqTriggerEvent.json")
+    parsed_event = SQSEvent(raw_event)
+
+    records = list(parsed_event.records)
+    record = records[0]
+    attributes = record.attributes
+
+    assert len(records) == 1
+    assert record.message_id == raw_event["Records"][0]["messageId"]
+    assert record.receipt_handle == raw_event["Records"][0]["receiptHandle"]
+    assert record.body == raw_event["Records"][0]["body"]
+    assert attributes.aws_trace_header is None
+    raw_attributes = raw_event["Records"][0]["attributes"]
+    assert attributes.approximate_receive_count == raw_attributes["ApproximateReceiveCount"]
+    assert attributes.sent_timestamp == raw_attributes["SentTimestamp"]
+    assert attributes.sender_id == raw_attributes["SenderId"]
+    assert attributes.approximate_first_receive_timestamp == raw_attributes["ApproximateFirstReceiveTimestamp"]
+    assert attributes.sequence_number is None
+    assert attributes.message_group_id is None
+    assert attributes.message_deduplication_id is None
+    assert (
+        attributes.dead_letter_queue_source_arn
+        == "arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleQueue-RNvLCpwGmLi7"
+    )
+
+
 def test_decode_nested_s3_event():
     raw_event = load_event("s3SqsEvent.json")
     event = SQSEvent(raw_event)
