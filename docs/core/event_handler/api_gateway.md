@@ -991,6 +991,18 @@ To implement these customizations, include extra parameters when defining your r
 --8<-- "examples/event_handler_rest/src/customizing_api_operations.py"
 ```
 
+#### Customizing OpenAPI metadata
+
+--8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
+
+Include extra parameters when exporting your OpenAPI specification to apply these customizations:
+
+=== "customizing_api_metadata.py"
+
+    ```python hl_lines="25-31"
+    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
+    ```
+
 #### Customizing Swagger UI
 
 ???+note "Customizing the Swagger metadata"
@@ -1014,16 +1026,44 @@ Below is an example configuration for serving Swagger UI from a custom path or C
    --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
    ```
 
-#### Customizing OpenAPI metadata
+#### Security schemes
 
---8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
+???-info "Does Powertools implement any of the security schemes?"
+    No. Powertools adds support for generating OpenAPI documentation with security schemes, but it doesn't implement any of the security schemes itself.
 
-Include extra parameters when exporting your OpenAPI specification to apply these customizations:
+OpenAPI uses the term security scheme for [authentication and authorization schemes](https://swagger.io/docs/specification/authentication/){target="_blank"}.
+When you're describing your API, declare security schemes at the top level, and reference them globally or per operation.
 
-=== "customizing_api_metadata.py"
+=== "Global OpenAPI security schemes"
 
-    ```python hl_lines="25-31"
-    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
+    ```python title="security_schemes_global.py" hl_lines="32-42"
+    --8<-- "examples/event_handler_rest/src/security_schemes_global.py"
+    ```
+
+    1. Using the oauth security scheme defined earlier, scoped to the "admin" role.
+
+=== "Per Operation security"
+
+    ```python title="security_schemes_per_operation.py" hl_lines="17 32-41"
+    --8<-- "examples/event_handler_rest/src/security_schemes_per_operation.py"
+    ```
+
+    1. Using the oauth security scheme defined bellow, scoped to the "admin" role.
+
+OpenAPI 3 lets you describe APIs protected using the following security schemes:
+
+| Security Scheme                                                                                                                                                                         | Type            | Description                                                                                                                                                                                                                                                                         |
+|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [HTTP auth](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml){target="_blank"}                                                                                  | `HTTPBase`      | HTTP authentication schemes using the Authorization header (e.g: [Basic auth](https://swagger.io/docs/specification/authentication/basic-authentication/){target="_blank"}, [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/){target="_blank"}) |
+| [API keys](https://swagger.io/docs/specification/authentication/api-keys/https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies) | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
+| [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                                                                                | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
+| [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"}                                                             | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
+
+???-note "Using OAuth2 with the Swagger UI?"
+    You can use the `OAuth2Config` option to configure a default OAuth2 app on the generated Swagger UI.
+
+    ```python hl_lines="10 15-18 22"
+    --8<-- "examples/event_handler_rest/src/swagger_with_oauth2.py"
     ```
 
 ### Custom serializer
