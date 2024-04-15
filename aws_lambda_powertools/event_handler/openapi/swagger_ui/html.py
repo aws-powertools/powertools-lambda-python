@@ -66,6 +66,9 @@ def generate_swagger_html(
 {swagger_js_content}
 
 <script>
+  var currentUrl = new URL(window.location.href);
+  var baseUrl = currentUrl.protocol + "//" + currentUrl.host + currentUrl.pathname;
+
   var swaggerUIOptions = {{
     dom_id: "#swagger-ui",
     docExpansion: "list",
@@ -81,7 +84,9 @@ def generate_swagger_html(
     ],
     plugins: [
       SwaggerUIBundle.plugins.DownloadUrl
-    ]
+    ],
+    withCredentials: true,
+    oauth2RedirectUrl: baseUrl + "?format=oauth2-redirect",
   }}
 
   var ui = SwaggerUIBundle(swaggerUIOptions)

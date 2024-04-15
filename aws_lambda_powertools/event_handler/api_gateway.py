@@ -34,7 +34,6 @@ from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
-from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -88,7 +87,9 @@ if TYPE_CHECKING:
         Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
-    from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import OAuth2Config
+    from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import (
+        OAuth2Config,
+    )
     from aws_lambda_powertools.event_handler.openapi.types import (
         TypeModelOrEnum,
     )
@@ -1738,9 +1739,25 @@ class ApiGatewayResolver(BaseRouter):
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
+        from aws_lambda_powertools.event_handler.openapi.swagger_ui import (
+            generate_oauth2_redirect_html,
+            generate_swagger_html,
+        )
 
         @self.get(path, middlewares=middlewares, include_in_schema=False, compress=compress)
         def swagger_handler():
+            query_params = self.current_event.query_string_parameters or {}
+
+            # Check for query parameters; if "format" is specified as "oauth2-redirect",
+            # send the oauth2-redirect HTML stanza so OAuth2 can be used
+            # Source: https://github.com/swagger-api/swagger-ui/blob/master/dist/oauth2-redirect.html
+            if query_params.get("format") == "oauth2-redirect":
+                return Response(
+                    status_code=200,
+                    content_type="text/html",
+                    body=generate_oauth2_redirect_html(),
+                )
+
             base_path = self._get_base_path()
 
             if swagger_base_url:
@@ -1783,7 +1800,6 @@ class ApiGatewayResolver(BaseRouter):
             # Check for query parameters; if "format" is specified as "json",
             # respond with the JSON used in the OpenAPI spec
             # Example: https://www.example.com/swagger?format=json
-            query_params = self.current_event.query_string_parameters or {}
             if query_params.get("format") == "json":
                 return Response(
                     status_code=200,
