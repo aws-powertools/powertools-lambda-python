@@ -43,7 +43,7 @@ class ALBEvent(BaseProxyEvent):
         return super().resolved_query_string_parameters
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         headers: Dict[str, Any] = {}
 
         if self.multi_value_headers:
