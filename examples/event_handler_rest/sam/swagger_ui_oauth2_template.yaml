@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Sample SAM Template for Oauth2 Cognito User Pool + Swagger UI
+
+Globals:
+  Function:
+    Timeout: 5
+    Runtime: python3.12
+    Tracing: Active
+    Environment:
+      Variables:
+        LOG_LEVEL: INFO
+        POWERTOOLS_LOGGER_SAMPLE_RATE: 0.1
+        POWERTOOLS_LOGGER_LOG_EVENT: true
+        POWERTOOLS_SERVICE_NAME: example
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: hello_world/
+      Handler: swagger_ui_oauth2.lambda_handler
+      Events:
+        AnyApiEvent:
+          Type: Api
+          Properties:
+            Path: /{proxy+} # Send requests on any path to the lambda function
+            Method: ANY # Send requests using any http method to the lambda function

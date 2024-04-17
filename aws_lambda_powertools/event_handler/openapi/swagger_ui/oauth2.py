@@ -1,9 +1,10 @@
 # ruff: noqa: E501
 from typing import Dict, Optional, Sequence
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 
 # Based on https://swagger.io/docs/open-source-tools/swagger-ui/usage/oauth2/
@@ -14,6 +15,10 @@ class OAuth2Config(BaseModel):
 
     # The client ID for the OAuth2 application
     clientId: str = Field(alias="client_id")
+
+    # The client secret for the OAuth2 application. This is sensitive information and requires the explicit presence
+    # of the POWERTOOLS_DEV environment variable.
+    clientSecret: Optional[str] = Field(alias="client_secret", default=None)
 
     # The realm in which the OAuth2 application is registered. Optional.
     realm: Optional[str] = Field(default=None)
@@ -44,15 +49,14 @@ class OAuth2Config(BaseModel):
             extra = "allow"
             allow_population_by_field_name = True
 
-
-class OAuth2UnsafeConfig(OAuth2Config):
-    """
-    This class extends the OAuth2Config class and includes the client secret.
-    This class NEVER BE USED IN PRODUCTION as it will expose sensitive information.
-    """
-
-    # The client secret for the OAuth2 application. This is sensitive information.
-    clientSecret: str = Field(alias="client_secret")
+    @validator("clientSecret", always=True)
+    def client_secret_only_on_dev(cls, v: Optional[str]) -> Optional[str]:
+        if v and not powertools_dev_is_set():
+            raise ValueError(
+                "cannot use client_secret without POWERTOOLS_DEV mode. See "
+                "https://docs.powertools.aws.dev/lambda/python/latest/#optimizing-for-non-production-environments",
+            )
+        return v
 
 
 def generate_oauth2_redirect_html() -> str:

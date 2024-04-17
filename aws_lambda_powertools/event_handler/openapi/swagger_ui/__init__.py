@@ -3,7 +3,6 @@ from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import (
 )
 from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import (
     OAuth2Config,
-    OAuth2UnsafeConfig,
     generate_oauth2_redirect_html,
 )
 
@@ -11,5 +10,4 @@ __all__ = [
     "generate_swagger_html",
     "generate_oauth2_redirect_html",
     "OAuth2Config",
-    "OAuth2UnsafeConfig",
 ]
