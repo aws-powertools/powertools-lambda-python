@@ -1029,7 +1029,7 @@ Below is an example configuration for serving Swagger UI from a custom path or C
 #### Security schemes
 
 ???-info "Does Powertools implement any of the security schemes?"
-    No. Powertools adds support for generating OpenAPI documentation with security schemes, but it doesn't implement any of the security schemes itself.
+    No. Powertools adds support for generating OpenAPI documentation with [security schemes](https://swagger.io/docs/specification/authentication/), but it doesn't implement any of the security schemes itself, so you must implement the security mechanisms separately.
 
 OpenAPI uses the term security scheme for [authentication and authorization schemes](https://swagger.io/docs/specification/authentication/){target="_blank"}.
 When you're describing your API, declare security schemes at the top level, and reference them globally or per operation.
