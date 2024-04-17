@@ -1572,17 +1572,17 @@ class ApiGatewayResolver(BaseRouter):
         security: Optional[List[Dict[str, List[str]]]],
         security_schemes: Optional[Dict[str, "SecurityScheme"]],
     ) -> Optional[List[Dict[str, List[str]]]]:
-        if security:
-            if not security_schemes:
-                raise ValueError("security_schemes must be provided if security is provided")
-
-            # Check if all keys in security are present in the security_schemes
-            if not all(key in security_schemes for sec in security for key in sec):
-                raise ValueError("Some security schemes not found in security_schemes")
-
-            return security
-        else:
+        if not security:
             return None
+
+        if not security_schemes:
+            raise ValueError("security_schemes must be provided if security is provided")
+
+        # Check if all keys in security are present in the security_schemes
+        if any(key not in security_schemes for sec in security for key in sec):
+            raise ValueError("Some security schemes not found in security_schemes")
+
+        return security
 
     @staticmethod
     def _determine_openapi_version(openapi_version):
