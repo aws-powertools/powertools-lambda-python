@@ -179,20 +179,20 @@ class Tracer:
             self._disable_xray_trace_batching()
 
     def set_attribute(self, key: str, value: Any, **kwargs):
-        """Set attribute on current active span with a key-value pair.
+        """Set an attribute on current active span with a key-value pair.
 
         Parameters
         ----------
-        key : str
+        key: str
             attribute key
-        value : Any
+        value: Any
             Value for attribute
         kwargs: Optional[dict]
             Optional parameters to be passed to provider.set_attributes
 
         Example
         -------
-        Set attribute for a pseudo service named payment
+        Set an attribute for a pseudo service named payment
 
             tracer = Tracer(service="payment")
             tracer.set_attribute("PaymentStatus", "CONFIRMED")
@@ -846,13 +846,7 @@ class Tracer:
         cls._config = copy.copy(cls._default_config)
 
     def _patch_xray_provider(self):
-        # Due to Lazy Import, we need to activate `core` attrib via import
-        # we also need to include `patch`, `patch_all` methods
-        # to ensure patch calls are done via the provider
-
-        provider = XrayProvider()
-
-        return provider
+        return XrayProvider()
 
     def _disable_xray_trace_batching(self):
         """Configure X-Ray SDK to send subsegment individually over batching

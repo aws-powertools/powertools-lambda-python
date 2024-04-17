@@ -29,15 +29,15 @@ class XraySpan(BaseSpan):
         **kwargs,
     ) -> None:
         """
-        Set attribute on this span with a key-value pair.
+        Set an attribute on this span with a key-value pair.
 
         Parameters
         ----------
-        key : str
+        key: str
             attribute key
-        value : Any
+        value: Any
             Value for attribute
-        category : Literal["Annotation","Metadata","Auto"] = "Auto"
+        category: Literal["Annotation","Metadata","Auto"] = "Auto"
             This parameter specifies the category of attribute to set.
             - **"Annotation"**: Sets the attribute as an Annotation.
             - **"Metadata"**: Sets the attribute as Metadata.
@@ -94,15 +94,15 @@ class XrayProvider(BaseProvider):
         **kwargs,
     ) -> None:
         """
-        Set attribute on the current active span with a key-value pair.
+        Set an attribute on the current active span with a key-value pair.
 
         Parameters
         ----------
-        key : str
+        key: str
             attribute key
-        value : Any
+        value: Any
             Value for attribute
-        category : Literal["Annotation","Metadata","Auto"] = "Auto"
+        category: Literal["Annotation","Metadata","Auto"] = "Auto"
             This parameter specifies the type of attribute to set.
             - **"Annotation"**: Sets the attribute as an Annotation.
             - **"Metadata"**: Sets the attribute as Metadata.
