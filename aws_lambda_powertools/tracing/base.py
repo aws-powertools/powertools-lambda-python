@@ -10,13 +10,13 @@ class BaseSegment(abc.ABC):
     """Holds common properties and methods on segment and subsegment."""
 
     @abc.abstractmethod
-    def close(self, end_time: Optional[float] = None):
+    def close(self, end_time: Optional[int] = None):
         """Close the trace entity by setting `end_time`
         and flip the in progress flag to False.
 
         Parameters
         ----------
-        end_time: float
+        end_time: int
             Time in epoch seconds, by default current time will be used.
         """
 

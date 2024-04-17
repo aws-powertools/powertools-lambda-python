@@ -747,7 +747,7 @@ class Tracer:
             method name to add as metadata key, by default None
         data : Any, optional
             data to add as subsegment metadata, by default None
-        subsegment : BaseSegment, optional
+        subsegment : BaseSpan, optional
             existing subsegment to add metadata on, by default None
         capture_response : bool, optional
             Do not include response as metadata
@@ -771,7 +771,7 @@ class Tracer:
             method name to add as metadata key, by default None
         error : Exception
             error to add as subsegment metadata, by default None
-        subsegment : BaseSegment
+        subsegment : BaseSpan
             existing subsegment to add metadata on, by default None
         capture_error : bool, optional
             Do not include error as metadata, by default True
