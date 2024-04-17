@@ -1,0 +1,21 @@
+{
+  "Records": [
+    {
+      "messageId": "db37cc61-1bb0-4e77-b6f3-7cf87f44a72a",
+      "receiptHandle": "AQEBl1pqxv+ZHkarVAWZUyWgj2mmqJGLBTo6YFOi/bw1QpBTpJBGJPLOTZrjKztKIbAB8EXkG7zHlbkn+Ze/AHMKKuhST9azHu8LyF4Ffu9uPkZc5xzggXlfFBWH3TUKyV+F5Obaj3esyX8YfM/zfgjbRuu5nc2tfPhvaSYEaTZsdMpzIB5tyKvHxAltLxK7upRHeoT768M9UrFYswarFTBn8piDbnsPsUhi8Q9G4Q4xSI0fLQANmryBsRJIzGQTVxenDad+MJ7XEL+hD3p2DmW+ycvv6WD7bdedqQuroQG8+ca1Dz7s3CBbXw9ZZnUziPa7LH1j1Lky5bAxpNF+BlurRS9pFBnomhwpylrGxtGfaEmUW1G7jnrG97sZNOLOFUykbQgroZPXmjzMBdvtgq9ZmQfCch3LOXN267+PKc56VR4=",
+      "body": "hello world",
+      "attributes": {
+        "DeadLetterQueueSourceArn": "arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleQueue-RNvLCpwGmLi7",
+        "ApproximateReceiveCount": "2",
+        "SentTimestamp": "1713185156609",
+        "SenderId": "AMCXIENQZJOLO23YVJ4VO",
+        "ApproximateFirstReceiveTimestamp": "1713185156612"
+      },
+      "messageAttributes": {},
+      "md5OfBody": "6a204bd89f3c8348afd5c77c717a097a",
+      "eventSource": "aws:sqs",
+      "eventSourceARN": "arn:aws:sqs:eu-central-1:123456789012:sqs-redrive-SampleDLQ-Emgp9MFSLBZm",
+      "awsRegion": "eu-central-1"
+    }
+  ]
+}

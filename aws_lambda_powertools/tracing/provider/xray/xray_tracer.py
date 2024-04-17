@@ -4,9 +4,9 @@ from contextlib import asynccontextmanager, contextmanager
 from numbers import Number
 from typing import Any, AsyncGenerator, Generator, Literal, Sequence, Union
 
-from ....shared import constants
-from ....shared.lazy_import import LazyLoader
-from ..base import BaseProvider, BaseSpan
+from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.lazy_import import LazyLoader
+from aws_lambda_powertools.tracing.provider.base import BaseProvider, BaseSpan
 
 aws_xray_sdk = LazyLoader(constants.XRAY_SDK_MODULE, globals(), constants.XRAY_SDK_MODULE)
 
@@ -72,6 +72,7 @@ class XrayProvider(BaseProvider):
     def __init__(self, xray_recorder=None):
         if not xray_recorder:
             from aws_xray_sdk.core import xray_recorder
+
         self.recorder = xray_recorder
         self.in_subsegment = self.recorder.in_subsegment
         self.in_subsegment_async = self.recorder.in_subsegment_async
