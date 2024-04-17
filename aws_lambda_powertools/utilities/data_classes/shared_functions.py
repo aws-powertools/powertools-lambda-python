@@ -26,7 +26,7 @@ def get_header_value(
     headers: dict[str, Any],
     name: str,
     default_value: str,
-    case_sensitive: bool | None = False,
+    case_sensitive: bool = False,
 ) -> str: ...
 
 
@@ -35,7 +35,7 @@ def get_header_value(
     headers: dict[str, Any],
     name: str,
     default_value: str | None = None,
-    case_sensitive: bool | None = False,
+    case_sensitive: bool = False,
 ) -> str | None: ...
 
 
@@ -43,7 +43,7 @@ def get_header_value(
     headers: dict[str, Any],
     name: str,
     default_value: str | None = None,
-    case_sensitive: bool | None = False,
+    case_sensitive: bool = False,
 ) -> str | None:
     """
     Get the value of a header by its name.

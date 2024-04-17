@@ -274,7 +274,7 @@ class BaseProxyEvent(DictWrapper):
         self,
         name: str,
         default_value: str,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> str: ...
 
     @overload
@@ -282,14 +282,14 @@ class BaseProxyEvent(DictWrapper):
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]: ...
 
     def get_header_value(
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]:
         """Get header value by name
 

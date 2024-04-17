@@ -38,7 +38,7 @@ Using `LambdaContext` typing makes it possible to access information and hints o
 
 === "working_with_context_function.py"
 
-	```python hl_lines="6 16 25 26"
+	```python hl_lines="6 15 22 23"
     --8<-- "examples/typing/src/working_with_context_function.py"
 	```
 
