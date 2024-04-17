@@ -21,9 +21,9 @@ def generate_swagger_html(
     path: str
         The path to the Swagger documentation
     swagger_js: str
-        The URL to the Swagger UI JavaScript file
+       Swagger UI JavaScript source code or URL
     swagger_css: str
-        The URL to the Swagger UI CSS file
+        Swagger UI CSS source code or URL
     swagger_base_url: str
         The base URL for Swagger UI
     oauth2_config: OAuth2Config, optional
