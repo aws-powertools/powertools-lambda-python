@@ -1,4 +1,5 @@
 # ruff: noqa: E501
+import warnings
 from typing import Dict, Optional, Sequence
 
 from pydantic import BaseModel, Field, validator
@@ -56,6 +57,13 @@ class OAuth2Config(BaseModel):
                 "cannot use client_secret without POWERTOOLS_DEV mode. See "
                 "https://docs.powertools.aws.dev/lambda/python/latest/#optimizing-for-non-production-environments",
             )
+        else:
+            warnings.warn(
+                "OAuth2Config is using client_secret and POWERTOOLS_DEV is set. This reveals sensitive information. "
+                "DO NOT USE THIS OUTSIDE LOCAL DEVELOPMENT",
+                stacklevel=2,
+            )
+
         return v
 
 
