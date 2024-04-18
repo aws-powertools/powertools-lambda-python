@@ -18,11 +18,67 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: hello_world/
+      CodeUri: ../src
       Handler: swagger_ui_oauth2.lambda_handler
+      Environment:
+        Variables:
+          COGNITO_USER_POOL_DOMAIN: !Ref UserPoolDomain
       Events:
         AnyApiEvent:
           Type: Api
           Properties:
             Path: /{proxy+} # Send requests on any path to the lambda function
             Method: ANY # Send requests using any http method to the lambda function
+
+  CognitoUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: PowertoolsUserPool
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+
+  CognitoUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: PowertoolsClient
+      UserPoolId: !Ref CognitoUserPool
+      GenerateSecret: true
+      RefreshTokenValidity: 30
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      SupportedIdentityProviders:
+        - COGNITO
+      CallbackURLs:
+        # NOTE: for this to work, your OAuth2 redirect url needs to precisely follow this format:
+        # https://<your_api_id>.execute-api.<region>.amazonaws.com/<stage>/swagger?format=oauth2-redirect
+        - !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/swagger?format=oauth2-redirect"
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - openid
+        - email
+        - profile
+        - aws.cognito.signin.user.admin
+      AllowedOAuthFlowsUserPoolClient: true
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: powertools-swagger-oauth2
+      UserPoolId: !Ref CognitoUserPool
+
+Outputs:
+  HelloWorldApiUrl:
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/${ServerlessRestApi.Stage}/swagger"
+
+  CognitoOAuthClientId:
+    Value: !GetAtt CognitoUserPoolClient.ClientId
+
+  CognitoDomain:
+    Value: !Ref UserPoolDomain

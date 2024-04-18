@@ -1,3 +1,5 @@
+import os
+
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import (
     APIGatewayRestResolver,
@@ -13,24 +15,20 @@ from aws_lambda_powertools.event_handler.openapi.swagger_ui import OAuth2Config
 tracer = Tracer()
 logger = Logger()
 
-oauth2 = OAuth2Config(
-    client_id="your_oauth2_client_id",
-    client_secret="your_oauth2_secret",
-    app_name="OAuth2 Test",
-)
+region = os.getenv("AWS_REGION")
+cognito_domain = os.getenv("COGNITO_USER_POOL_DOMAIN")
 
 app = APIGatewayRestResolver(enable_validation=True)
-
-# NOTE: for this to work, your OAuth2 redirect url needs to precisely follow this format:
-# https://<your_api_id>.execute-api.<region>.amazonaws.com/<stage>/swagger?format=oauth2-redirect
 app.enable_swagger(
-    oauth2_config=oauth2,
+    # NOTE: for this to work, your OAuth2 redirect url needs to precisely follow this format:
+    # https://<your_api_id>.execute-api.<region>.amazonaws.com/<stage>/swagger?format=oauth2-redirect
+    oauth2_config=OAuth2Config(app_name="OAuth2 Test"),
     security_schemes={
         "oauth": OAuth2(
             flows=OAuthFlows(
                 authorizationCode=OAuthFlowAuthorizationCode(
-                    authorizationUrl="https://your-cognito-domain.eu-central-1.amazoncognito.com/oauth2/authorize",
-                    tokenUrl="https://your-cognito-domain.eu-central-1.amazoncognito.com/oauth2/token",
+                    authorizationUrl=f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/authorize",
+                    tokenUrl=f"https://{cognito_domain}.auth.{region}.amazoncognito.com/oauth2/token",
                 ),
             ),
         ),
