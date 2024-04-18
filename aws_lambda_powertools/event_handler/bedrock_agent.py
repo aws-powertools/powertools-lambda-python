@@ -102,6 +102,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
+        security = None
+
         return super(BedrockAgentResolver, self).get(
             rule,
             cors,
@@ -114,6 +116,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -134,6 +137,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        security = None
+
         return super().post(
             rule,
             cors,
@@ -146,6 +151,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -166,6 +172,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        security = None
+
         return super().put(
             rule,
             cors,
@@ -178,6 +186,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -198,6 +207,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable]] = None,
     ):
+        security = None
+
         return super().patch(
             rule,
             cors,
@@ -210,6 +221,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -230,6 +242,8 @@ class BedrockAgentResolver(ApiGatewayResolver):
         include_in_schema: bool = True,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
+        security = None
+
         return super().delete(
             rule,
             cors,
@@ -242,6 +256,7 @@ class BedrockAgentResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 

@@ -1,7 +1,11 @@
 import json
+import warnings
 from typing import Dict
 
+import pytest
+
 from aws_lambda_powertools.event_handler import APIGatewayRestResolver
+from aws_lambda_powertools.event_handler.openapi.swagger_ui import OAuth2Config
 from tests.functional.utils import load_event
 
 LOAD_GW_EVENT = load_event("apiGatewayProxyEvent.json")
@@ -112,3 +116,26 @@ def test_openapi_swagger_with_rest_api_stage():
     result = app(event, {})
     assert result["statusCode"] == 200
     assert "ui.specActions.updateUrl('/prod/swagger?format=json')" in result["body"]
+
+
+def test_openapi_swagger_oauth2_without_powertools_dev():
+    with pytest.raises(ValueError) as exc:
+        OAuth2Config(app_name="OAuth2 app", client_id="client_id", client_secret="verysecret")
+
+    assert "cannot use client_secret without POWERTOOLS_DEV mode" in str(exc.value)
+
+
+def test_openapi_swagger_oauth2_with_powertools_dev(monkeypatch):
+    monkeypatch.setenv("POWERTOOLS_DEV", "1")
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("default")
+
+        OAuth2Config(app_name="OAuth2 app", client_id="client_id", client_secret="verysecret")
+
+        assert str(w[-1].message) == (
+            "OAuth2Config is using client_secret and POWERTOOLS_DEV is set. This reveals sensitive information. "
+            "DO NOT USE THIS OUTSIDE LOCAL DEVELOPMENT"
+        )
+
+    monkeypatch.delenv("POWERTOOLS_DEV")
