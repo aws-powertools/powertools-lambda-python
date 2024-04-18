@@ -8,7 +8,7 @@ from aws_lambda_powertools.utilities.idempotency import (
     IdempotencyConfig,
     idempotent_function,
 )
-from aws_lambda_powertools.utilities.idempotency.persistence.base import (
+from aws_lambda_powertools.utilities.idempotency.persistence.datarecord import (
     DataRecord,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
