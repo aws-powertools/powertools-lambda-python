@@ -950,7 +950,7 @@ You can set up a `response_hook` in the `IdempotentConfig` class to manipulate t
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="18 20 23 32"
+    ```python hl_lines="19 21 27 34"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 
