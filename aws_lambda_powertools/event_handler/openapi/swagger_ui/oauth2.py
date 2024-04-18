@@ -14,7 +14,7 @@ class OAuth2Config(BaseModel):
     """
 
     # The client ID for the OAuth2 application
-    clientId: str = Field(alias="client_id")
+    clientId: Optional[str] = Field(alias="client_id", default=None)
 
     # The client secret for the OAuth2 application. This is sensitive information and requires the explicit presence
     # of the POWERTOOLS_DEV environment variable.
