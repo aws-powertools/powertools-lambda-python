@@ -86,17 +86,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-asset-node-proxy-agent-v6"
-version = "2.0.1"
+version = "2.0.3"
 description = "@aws-cdk/asset-node-proxy-agent-v6"
 optional = false
-python-versions = "~=3.7"
+python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.asset-node-proxy-agent-v6-2.0.1.tar.gz", hash = "sha256:42cdbc1de2ed3f845e3eb883a72f58fc7e5554c2e0b6fcdb366c159778dce74d"},
-    {file = "aws_cdk.asset_node_proxy_agent_v6-2.0.1-py3-none-any.whl", hash = "sha256:e442673d4f93137ab165b75386761b1d46eea25fc5015e5145ae3afa9da06b6e"},
+    {file = "aws-cdk.asset-node-proxy-agent-v6-2.0.3.tar.gz", hash = "sha256:b62cb10c69a42cab135e6bc670e3d2d3121fd4f53a0f61e53449da4b12738a6f"},
+    {file = "aws_cdk.asset_node_proxy_agent_v6-2.0.3-py3-none-any.whl", hash = "sha256:ef2ff0634ab037e2ebddbe69d7c92515a847c6c8bb2abdfc85b089f5e87761cb"},
 ]
 
 [package.dependencies]
-jsii = ">=1.86.1,<2.0.0"
+jsii = ">=1.96.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -176,21 +176,21 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.137.0"
+version = "2.138.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.137.0.tar.gz", hash = "sha256:ecdd3aaf6a25cefecb6dd16342013d792e9315798854eb1251a442331e27aef9"},
-    {file = "aws_cdk_lib-2.137.0-py3-none-any.whl", hash = "sha256:0cd861c315e4711dbffbc4ee3afe3cdc18c5154d4ab078a355e92011a6416c59"},
+    {file = "aws-cdk-lib-2.138.0.tar.gz", hash = "sha256:a3f69d1ea22271db4a89a28f3ccf6995c6591586aee0447766933488662a36d1"},
+    {file = "aws_cdk_lib-2.138.0-py3-none-any.whl", hash = "sha256:b528fe909dc0e8686f086369fe38bde6f448efbe9519dc56aef3be35d3da75f7"},
 ]
 
 [package.dependencies]
 "aws-cdk.asset-awscli-v1" = ">=2.2.202,<3.0.0"
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
-"aws-cdk.asset-node-proxy-agent-v6" = ">=2.0.1,<3.0.0"
+"aws-cdk.asset-node-proxy-agent-v6" = ">=2.0.3,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.96.0,<2.0.0"
+jsii = ">=1.97.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -3514,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "2ac9055e10d0ebeec41f77c2ced085f2f03b777f3f55c3b0b41aaeaac9223557"
+content-hash = "8fd15754de08f0e5781de8a6fed282180709b44dd9b1a5d03542e1a8ef480350"
