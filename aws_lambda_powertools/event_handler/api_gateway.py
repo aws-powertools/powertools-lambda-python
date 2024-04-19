@@ -34,7 +34,6 @@ from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
 from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
-from aws_lambda_powertools.event_handler.openapi.swagger_ui.html import generate_swagger_html
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -83,10 +82,14 @@ if TYPE_CHECKING:
         Contact,
         License,
         OpenAPI,
+        SecurityScheme,
         Server,
         Tag,
     )
     from aws_lambda_powertools.event_handler.openapi.params import Dependant
+    from aws_lambda_powertools.event_handler.openapi.swagger_ui.oauth2 import (
+        OAuth2Config,
+    )
     from aws_lambda_powertools.event_handler.openapi.types import (
         TypeModelOrEnum,
     )
@@ -282,6 +285,7 @@ class Route:
         tags: Optional[List[str]],
         operation_id: Optional[str],
         include_in_schema: bool,
+        security: Optional[List[Dict[str, List[str]]]],
         middlewares: Optional[List[Callable[..., Response]]],
     ):
         """
@@ -317,6 +321,8 @@ class Route:
             The OpenAPI operationId for this route
         include_in_schema: bool
             Whether or not to include this route in the OpenAPI schema
+        security: List[Dict[str, List[str]]], optional
+            The OpenAPI security for this route
         middlewares: Optional[List[Callable[..., Response]]]
             The list of route middlewares to be called in order.
         """
@@ -339,6 +345,7 @@ class Route:
         self.response_description = response_description
         self.tags = tags or []
         self.include_in_schema = include_in_schema
+        self.security = security
         self.middlewares = middlewares or []
         self.operation_id = operation_id or self._generate_operation_id()
 
@@ -485,6 +492,10 @@ class Route:
             field_mapping=field_mapping,
         )
         parameters.extend(operation_params)
+
+        # Add security if present
+        if self.security:
+            operation["security"] = self.security
 
         # Add the parameters to the OpenAPI operation
         if parameters:
@@ -885,6 +896,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         raise NotImplementedError()
@@ -943,6 +955,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Get route decorator with GET `method`
@@ -980,6 +993,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -996,6 +1010,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Post route decorator with POST `method`
@@ -1034,6 +1049,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1050,6 +1066,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Put route decorator with PUT `method`
@@ -1088,6 +1105,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1104,6 +1122,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Delete route decorator with DELETE `method`
@@ -1141,6 +1160,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1157,6 +1177,7 @@ class BaseRouter(ABC):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable]] = None,
     ):
         """Patch route decorator with PATCH `method`
@@ -1197,6 +1218,7 @@ class BaseRouter(ABC):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
@@ -1419,6 +1441,8 @@ class ApiGatewayResolver(BaseRouter):
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
     ) -> "OpenAPI":
         """
         Returns the OpenAPI schema as a pydantic model.
@@ -1445,6 +1469,10 @@ class ApiGatewayResolver(BaseRouter):
             The contact information for the exposed API.
         license_info: License, optional
             The license information for the exposed API.
+        security_schemes: Dict[str, "SecurityScheme"]], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
 
         Returns
         -------
@@ -1457,25 +1485,12 @@ class ApiGatewayResolver(BaseRouter):
             get_compat_model_name_map,
             get_definitions,
         )
-        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Server, Tag
-        from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+        from aws_lambda_powertools.event_handler.openapi.models import OpenAPI, PathItem, Tag
         from aws_lambda_powertools.event_handler.openapi.types import (
             COMPONENT_REF_TEMPLATE,
         )
 
-        # Pydantic V2 has no support for OpenAPI schema 3.0
-        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
-            warnings.warn(
-                "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
-                stacklevel=2,
-            )
-            openapi_version = "3.1.0"
-        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
-            warnings.warn(
-                "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
-                stacklevel=2,
-            )
-            openapi_version = "3.0.3"
+        openapi_version = self._determine_openapi_version(openapi_version)
 
         # Start with the bare minimum required for a valid OpenAPI schema
         info: Dict[str, Any] = {"title": title, "version": version}
@@ -1490,13 +1505,12 @@ class ApiGatewayResolver(BaseRouter):
 
         info.update({field: value for field, value in optional_fields.items() if value})
 
-        output: Dict[str, Any] = {"openapi": openapi_version, "info": info}
-        if servers:
-            output["servers"] = servers
-        else:
-            # If the servers property is not provided, or is an empty array, the default value would be a Server Object
-            # with an url value of /.
-            output["servers"] = [Server(url="/")]
+        output: Dict[str, Any] = {
+            "openapi": openapi_version,
+            "info": info,
+            "servers": self._get_openapi_servers(servers),
+            "security": self._get_openapi_security(security, security_schemes),
+        }
 
         components: Dict[str, Dict[str, Any]] = {}
         paths: Dict[str, Dict[str, Any]] = {}
@@ -1534,6 +1548,8 @@ class ApiGatewayResolver(BaseRouter):
 
         if definitions:
             components["schemas"] = {k: definitions[k] for k in sorted(definitions)}
+        if security_schemes:
+            components["securitySchemes"] = security_schemes
         if components:
             output["components"] = components
         if tags:
@@ -1542,6 +1558,50 @@ class ApiGatewayResolver(BaseRouter):
         output["paths"] = {k: PathItem(**v) for k, v in paths.items()}
 
         return OpenAPI(**output)
+
+    @staticmethod
+    def _get_openapi_servers(servers: Optional[List["Server"]]) -> List["Server"]:
+        from aws_lambda_powertools.event_handler.openapi.models import Server
+
+        # If the 'servers' property is not provided or is an empty array,
+        # the default behavior is to return a Server Object with a URL value of "/".
+        return servers if servers else [Server(url="/")]
+
+    @staticmethod
+    def _get_openapi_security(
+        security: Optional[List[Dict[str, List[str]]]],
+        security_schemes: Optional[Dict[str, "SecurityScheme"]],
+    ) -> Optional[List[Dict[str, List[str]]]]:
+        if not security:
+            return None
+
+        if not security_schemes:
+            raise ValueError("security_schemes must be provided if security is provided")
+
+        # Check if all keys in security are present in the security_schemes
+        if any(key not in security_schemes for sec in security for key in sec):
+            raise ValueError("Some security schemes not found in security_schemes")
+
+        return security
+
+    @staticmethod
+    def _determine_openapi_version(openapi_version):
+        from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+
+        # Pydantic V2 has no support for OpenAPI schema 3.0
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+            warnings.warn(
+                "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
+                stacklevel=2,
+            )
+            openapi_version = "3.1.0"
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+            warnings.warn(
+                "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
+                stacklevel=2,
+            )
+            openapi_version = "3.0.3"
+        return openapi_version
 
     def get_openapi_json_schema(
         self,
@@ -1556,6 +1616,8 @@ class ApiGatewayResolver(BaseRouter):
         terms_of_service: Optional[str] = None,
         contact: Optional["Contact"] = None,
         license_info: Optional["License"] = None,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
     ) -> str:
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1582,6 +1644,10 @@ class ApiGatewayResolver(BaseRouter):
             The contact information for the exposed API.
         license_info: License, optional
             The license information for the exposed API.
+        security_schemes: Dict[str, "SecurityScheme"]], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
 
         Returns
         -------
@@ -1602,6 +1668,8 @@ class ApiGatewayResolver(BaseRouter):
                 terms_of_service=terms_of_service,
                 contact=contact,
                 license_info=license_info,
+                security_schemes=security_schemes,
+                security=security,
             ),
             by_alias=True,
             exclude_none=True,
@@ -1625,6 +1693,9 @@ class ApiGatewayResolver(BaseRouter):
         swagger_base_url: Optional[str] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
         compress: bool = False,
+        security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+        security: Optional[List[Dict[str, List[str]]]] = None,
+        oauth2_config: Optional["OAuth2Config"] = None,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1659,12 +1730,34 @@ class ApiGatewayResolver(BaseRouter):
             List of middlewares to be used for the swagger route.
         compress: bool, default = False
             Whether or not to enable gzip compression swagger route.
+        security_schemes: Dict[str, "SecurityScheme"], optional
+            A declaration of the security schemes available to be used in the specification.
+        security: List[Dict[str, List[str]]], optional
+            A declaration of which security mechanisms are applied globally across the API.
+        oauth2_config: OAuth2Config, optional
+            The OAuth2 configuration for the Swagger UI.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
+        from aws_lambda_powertools.event_handler.openapi.swagger_ui import (
+            generate_oauth2_redirect_html,
+            generate_swagger_html,
+        )
 
         @self.get(path, middlewares=middlewares, include_in_schema=False, compress=compress)
         def swagger_handler():
+            query_params = self.current_event.query_string_parameters or {}
+
+            # Check for query parameters; if "format" is specified as "oauth2-redirect",
+            # send the oauth2-redirect HTML stanza so OAuth2 can be used
+            # Source: https://github.com/swagger-api/swagger-ui/blob/master/dist/oauth2-redirect.html
+            if query_params.get("format") == "oauth2-redirect":
+                return Response(
+                    status_code=200,
+                    content_type="text/html",
+                    body=generate_oauth2_redirect_html(),
+                )
+
             base_path = self._get_base_path()
 
             if swagger_base_url:
@@ -1690,6 +1783,8 @@ class ApiGatewayResolver(BaseRouter):
                 terms_of_service=terms_of_service,
                 contact=contact,
                 license_info=license_info,
+                security_schemes=security_schemes,
+                security=security,
             )
 
             # The .replace('</', '<\\/') part is necessary to prevent a potential issue where the JSON string contains
@@ -1705,7 +1800,6 @@ class ApiGatewayResolver(BaseRouter):
             # Check for query parameters; if "format" is specified as "json",
             # respond with the JSON used in the OpenAPI spec
             # Example: https://www.example.com/swagger?format=json
-            query_params = self.current_event.query_string_parameters or {}
             if query_params.get("format") == "json":
                 return Response(
                     status_code=200,
@@ -1719,6 +1813,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_js,
                 swagger_css,
                 swagger_base_url,
+                oauth2_config,
             )
 
             return Response(
@@ -1741,6 +1836,7 @@ class ApiGatewayResolver(BaseRouter):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         """Route decorator includes parameter `method`"""
@@ -1767,6 +1863,7 @@ class ApiGatewayResolver(BaseRouter):
                     tags,
                     operation_id,
                     include_in_schema,
+                    security,
                     middlewares,
                 )
 
@@ -2218,6 +2315,7 @@ class Router(BaseRouter):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         def register_route(func: Callable):
@@ -2239,6 +2337,7 @@ class Router(BaseRouter):
                 frozen_tags,
                 operation_id,
                 include_in_schema,
+                security,
             )
 
             # Collate Middleware for routes
@@ -2318,6 +2417,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
         include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Any]]] = None,
     ):
         # NOTE: see #1552 for more context.
@@ -2334,6 +2434,7 @@ class APIGatewayRestResolver(ApiGatewayResolver):
             tags,
             operation_id,
             include_in_schema,
+            security,
             middlewares,
         )
 
