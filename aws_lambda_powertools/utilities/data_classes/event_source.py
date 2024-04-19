@@ -11,7 +11,7 @@ def event_source(
     event: Dict[str, Any],
     context: LambdaContext,
     data_class: Type[DictWrapper],
-):
+) -> Any:
     """Middleware to create an instance of the passed in event source data class
 
     Parameters
