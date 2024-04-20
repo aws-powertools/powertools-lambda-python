@@ -2,7 +2,7 @@ import base64
 import json
 from collections.abc import Mapping
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Optional, overload, Type, TypeVar
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type, TypeVar, overload
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
 from aws_lambda_powertools.utilities.data_classes.shared_functions import (
@@ -94,8 +94,8 @@ class DictWrapper(Mapping):
         """The original raw event dict"""
         return self._data
 
-class EventWrapper(DictWrapper):
 
+class EventWrapper(DictWrapper):
     NestedEvent = TypeVar("NestedEvent", bound=DictWrapper)
 
     def __init__(self, data: Dict[str, Any], json_deserializer: Optional[Callable] = None):
@@ -105,7 +105,7 @@ class EventWrapper(DictWrapper):
         data : Dict[str, Any]
             Lambda Event Source Event payload
         json_deserializer : Callable, optional
-            function to deserialize `str`, `bytes`, `bytearray` 
+            function to deserialize `str`, `bytes`, `bytearray`
             containing a JSON document to a Python `obj`,
             by default json.loads
         """
@@ -118,13 +118,13 @@ class EventWrapper(DictWrapper):
         for record in records:
             if not isinstance(record, dict):
                 raise TypeError(f"Expected 'Records' to be a dictionary, but got {type(record)}.")
-            body = record.get('body')
+            body = record.get("body")
             if body is not None:
                 yield body
             else:
                 raise KeyError("No 'body' key found in the 'Records' dict.")
 
-    def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
+    def decode_nested_events(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer=None):
         if nested_event_content_deserializer is None:
             nested_event_content_deserializer = self._json_deserializer
 
@@ -132,7 +132,7 @@ class EventWrapper(DictWrapper):
             deserialized_data = nested_event_content_deserializer(content)
             yield nested_event_class(deserialized_data)
 
-    def decode_nested_event(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer = None):
+    def decode_nested_event(self, nested_event_class: Type[NestedEvent], nested_event_content_deserializer=None):
         if nested_event_content_deserializer is None:
             nested_event_content_deserializer = self._json_deserializer
 
@@ -219,10 +219,12 @@ class BaseProxyEvent(DictWrapper):
         return self["httpMethod"]
 
     @overload
-    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+    def get_query_string_value(self, name: str, default_value: str) -> str:
+        ...
 
     @overload
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
+    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
+        ...
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
@@ -275,7 +277,8 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: str,
         case_sensitive: bool = False,
-    ) -> str: ...
+    ) -> str:
+        ...
 
     @overload
     def get_header_value(
@@ -283,7 +286,8 @@ class BaseProxyEvent(DictWrapper):
         name: str,
         default_value: Optional[str] = None,
         case_sensitive: bool = False,
-    ) -> Optional[str]: ...
+    ) -> Optional[str]:
+        ...
 
     def get_header_value(
         self,

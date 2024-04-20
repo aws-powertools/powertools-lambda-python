@@ -307,5 +307,5 @@ class KinesisFirehoseEvent(EventWrapper):
     def nested_event_contents(self):
         for record in self.get("records"):
             body = record.get("data")
-            body = base64.b64decode(body).decode('utf-8') #TODO: should we decode for them?
+            body = base64.b64decode(body).decode("utf-8")
             yield body

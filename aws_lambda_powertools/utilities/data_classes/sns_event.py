@@ -1,4 +1,5 @@
 from typing import Dict, Iterator
+
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
 
 
@@ -126,5 +127,5 @@ class SNSEvent(EventWrapper):
 
     def nested_event_contents(self):
         for record in self.get("Records"):
-            body = record.get('Sns').get('Message')
+            body = record.get("Sns").get("Message")
             yield body

@@ -1,6 +1,6 @@
 from typing import Iterator, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
+from aws_lambda_powertools.utilities.data_classes.common import EventWrapper
 
 
 class SESMailHeader(EventWrapper):
@@ -263,5 +263,5 @@ class SESEvent(EventWrapper):
 
     def nested_event_contents(self):
         for record in self.get("Records"):
-            body = record.get('ses')
+            body = record.get("ses")
             yield body

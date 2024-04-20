@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.utilities.data_classes.common import DictWrapper, EventWrapper
+from aws_lambda_powertools.utilities.data_classes.common import EventWrapper
 
 
 class EventBridgeEvent(EventWrapper):
@@ -70,4 +70,4 @@ class EventBridgeEvent(EventWrapper):
         return self["replay-name"]
 
     def nested_event_contents(self):
-        yield json.dumps(self.get('detail'))
+        yield json.dumps(self.get("detail"))
