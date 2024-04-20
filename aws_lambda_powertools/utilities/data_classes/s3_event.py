@@ -37,9 +37,9 @@ class S3EventBridgeNotificationObject(DictWrapper):
         return self["size"]
 
     @property
-    def etag(self) -> str:
+    def etag(self) -> Optional[str]:
         """Object etag"""
-        return self["etag"]
+        return self.get("etag")
 
     @property
     def version_id(self) -> str:
