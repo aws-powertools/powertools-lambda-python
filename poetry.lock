@@ -158,19 +158,19 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.137.0a0"
+version = "2.138.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.137.0a0.tar.gz", hash = "sha256:6168c6d0394d4c908da921fa8e3822a7a1dda8a7b27c28b597466be598385d05"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.137.0a0-py3-none-any.whl", hash = "sha256:4e58fb736cee3a44ae735edd5b90cadebc6aacb63a58f2baff44d27d0d5a803d"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.138.0a0.tar.gz", hash = "sha256:7f76bb9eafb7286d10dcf3876814a4cb10abc856e14710740af680f9f8128bbf"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.138.0a0-py3-none-any.whl", hash = "sha256:70626e0a3ac992dd44111b4f99584e2fec7d71c7d7c270ab20c85a27c42afcd1"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.137.0,<3.0.0"
+aws-cdk-lib = ">=2.138.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.96.0,<2.0.0"
+jsii = ">=1.97.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.92"
+version = "2.28.96"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.92.tar.gz", hash = "sha256:cdfa6358846226083c0567f37855e4baf7dc6b56235e06a9cf1059f6a12900d7"},
-    {file = "cdk_nag-2.28.92-py3-none-any.whl", hash = "sha256:faa59880e3f5b37962a915906e9ba04984c9883498c43f2488b17c90b758286b"},
+    {file = "cdk-nag-2.28.96.tar.gz", hash = "sha256:95bcd06db0dde0bc1bc38b0a29680e6e6c4c4272009e77a8934d27758b61c1c8"},
+    {file = "cdk_nag-2.28.96-py3-none-any.whl", hash = "sha256:835453c426e8b335fd056b46945566f9fc727043a855c3b0e99d14d6a336ccde"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.121"
+version = "0.1.123"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.121.tar.gz", hash = "sha256:295263bfbea961526ebef90f5bd03342700f688b1e080f81d16cb564e45fb803"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.121-py3-none-any.whl", hash = "sha256:8e28b323af7dc159964346bd8d654884de9be9953e2ee06a61c7ed6a37911a7d"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.123.tar.gz", hash = "sha256:e2cc2d1c43e98e9f3a28a8bf75500f0168f420c6f20821de91ddb48b97681011"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.123-py3-none-any.whl", hash = "sha256:64b10dbad8ae8a1591fa4210ddbbd31633d4158b3778d6541355969a882f8a1b"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.91,<3.0.0"
+cdk-nag = ">=2.28.94,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.97.0,<2.0.0"
 publication = ">=0.0.3"
@@ -3514,4 +3514,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "cf1deba62535b4f1d136c3e09a3fe3edcf19dc5c9a0922e9f775f34bc5435912"
+content-hash = "b98ec194e1e38e47c8e5320bd3dcecd47f8f04f352e28b50d00a7b4340cab421"
