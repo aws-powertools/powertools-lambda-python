@@ -25,6 +25,21 @@ At launch, we will support Datadog since it's [most requested observability prov
 * [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
 * [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
+### Lambda Layer in GovCloud
+
+We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
+
+!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-powertools-maintainers@amazon.com)."
+
+**Major updates**
+
+* [x] Gather agencies and customers name to prioritize it
+* [x] Investigate security requirements for special regions
+* [x] Create additional infrastructure for special regions
+* [x] AppSec review
+* [x] Update CDK Layer construct to include regions
+* [ ] Distribution sign-off
+
 ### Revamp Event Handler
 
 Event Handler provides lightweight routing for both [**REST**: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL](./core/event_handler/api_gateway.md), and [**GraphQL**: AWS AppSync](./core/event_handler/appsync.md).
@@ -82,21 +97,6 @@ We want to make this easier by extending certain utilities to accept a `metrics`
 * [ ] RFC to outline metrics for Feature flags (_e.g., matched rules_)
 * [ ] RFC to outline metrics for Event Handler (_e.g., validation errors_ )
 * [ ] RFC to outline metrics for Idempotency (_e.g., cache hit_)
-
-### Lambda Layer in GovCloud and China region
-
-We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
-
-!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-powertools-maintainers@amazon.com)."
-
-**Major updates**
-
-* [x] Gather agencies and customers name to prioritize it
-* [x] Investigate security requirements for special regions
-* [x] Create additional infrastructure for special regions
-* [ ] AppSec review
-* [ ] Distribution sign-off
-* [ ] Update CDK Layer construct to include regions
 
 ### V3
 
