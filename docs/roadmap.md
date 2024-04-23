@@ -38,7 +38,9 @@ We want to investigate security and scaling requirements for these special regio
 * [x] Create additional infrastructure for special regions
 * [x] AppSec review
 * [x] Update CDK Layer construct to include regions
-* [ ] Distribution sign-off
+* [x] Distribution sign-off
+* [ ] Distribute latest version
+* [ ] Update Layer section with new AWS Accounts
 
 ### V3
 
