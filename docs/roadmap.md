@@ -55,7 +55,6 @@ For example, these are on our mind but not settled yet until we have a public tr
 * **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
 * **Parameters**: Increase default `max_age` for `get_secret`
 * **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
-* **Upgrade tool**: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like `pyupgrade` and `django-upgrade`
 * **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
 
 **Major updates**
