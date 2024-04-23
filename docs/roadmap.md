@@ -200,6 +200,8 @@ As of today, the [Parameters](./utilities/parameters.md){target="_blank"} featur
 
 ### Amazon Bedrock Agent Event Handler
 
+> [Docs](./core/event_handler/bedrock_agents.md)
+
 Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} at re:Invent 2023, we will add a new Event Handler resolver to improve authoring and maintenance of Amazon Bedrock Agents.
 
 **Major updates**
