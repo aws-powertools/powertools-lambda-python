@@ -22,7 +22,7 @@ At launch, we will support Datadog since it's [most requested observability prov
 
 * [x] [Document how customers can use any provider with Logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#observability-providers)
 * [x] [Extend Metrics to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2194)
-* [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
+* [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2342#issuecomment-2061734362)
 * [ ] Investigate alternative solution to OpenTelemetry cold start performance
 
 ### Lambda Layer in GovCloud
@@ -56,6 +56,17 @@ Based on customers feedback, we want to provide [middleware authoring support](h
 * [x] [MVP for OpenAPI and SwaggerUI](https://github.com/aws-powertools/powertools-lambda-python/pull/3109)
 * [ ] [MVP for AppSync Batch invoke and partial failure support](https://github.com/aws-powertools/powertools-lambda-python/pull/1998)
 
+### Authentication (SigV4)
+
+[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html){target="_blank"} could be easier.
+
+Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
+
+**Major updates**
+
+* [x] [Issue to outline challenges](https://github.com/aws-powertools/powertools-lambda-python/issues/2493), alternative solutions and desired experience
+* [ ] [MVP for AWS SigV4](https://github.com/aws-powertools/powertools-lambda-python/pull/2435)
+
 ### Office hours
 
 We heard from [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} that Powertools for AWS Lambda and its community can move faster than they are able to catch up. While documentation and release notes take these into account, they notice they don't always know advanced tricks, or what other customers tend to do in similar situations.
@@ -71,17 +82,6 @@ Timezones being tricky, we plan to experiment with an afternoon slot in Central 
     * [ ] Settle on monthly roadmap review agenda
     * [ ] Invite Discord community
     * [ ] Update roadmap page with Discord event
-
-### Authentication (SigV4)
-
-[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html){target="_blank"} could be easier.
-
-Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
-
-**Major updates**
-
-* [ ] RFC to outline challenges, alternative solutions and desired experience
-* [ ] [MVP for AWS SigV4](https://github.com/aws-powertools/powertools-lambda-python/pull/2435)
 
 ### Enhanced operational metrics
 
