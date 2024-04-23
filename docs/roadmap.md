@@ -10,19 +10,6 @@ Our public roadmap outlines the high level direction we are working towards. We 
 
 Security and operational excellence take precedence above all else. This means bug fixing, stability, customer's support, and internal compliance may delay one or more key areas below.
 
-### Amazon Bedrock Agent Event Handler
-
-Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} at re:Invent 2023, we will add a new Event Handler resolver to improve authoring and maintenance of Amazon Bedrock Agents.
-
-**Major updates**
-
-* [x] [Event Source Data Classes support](https://github.com/aws-powertools/powertools-lambda-python/pull/3262)
-* [x] [Pydantic model _(Parser)_ support](https://github.com/aws-powertools/powertools-lambda-python/pull/3286)
-* [x] [MVP Event Handler](https://github.com/aws-powertools/powertools-lambda-python/pull/3285)
-* [ ] [New feature documentation](https://github.com/aws-powertools/powertools-lambda-python/pull/3602)
-* [ ] Video to walkthrough use cases for anyone new to LLM Agents
-* [ ] Launch amplifier (_e.g., What's New, Blog post_)
-
 ### Setting Parameters and Secrets
 
 As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
@@ -208,6 +195,19 @@ A: Because job zero is security and operational stability, we can't provide spec
 A: For existing features, you can directly comment on issues. For anything else, please open an issue.
 
 ## Launched
+
+### Amazon Bedrock Agent Event Handler
+
+Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} at re:Invent 2023, we will add a new Event Handler resolver to improve authoring and maintenance of Amazon Bedrock Agents.
+
+**Major updates**
+
+* [x] [Event Source Data Classes support](https://github.com/aws-powertools/powertools-lambda-python/pull/3262)
+* [x] [Pydantic model _(Parser)_ support](https://github.com/aws-powertools/powertools-lambda-python/pull/3286)
+* [x] [MVP Event Handler](https://github.com/aws-powertools/powertools-lambda-python/pull/3285)
+* [x] [New feature documentation](https://github.com/aws-powertools/powertools-lambda-python/pull/3602)
+* [x] [Video to walkthrough](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/bedrock_agents/#video-walkthrough) use cases for anyone new to LLM Agents
+* [ ] Launch amplifier (_e.g., What's New, Blog post_)
 
 ### Sensitive Data Masking
 
