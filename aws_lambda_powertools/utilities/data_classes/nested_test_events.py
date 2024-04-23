@@ -168,14 +168,14 @@ sqs_s3_multi_event = {
             "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
             "receiptHandle": "MessageReceiptHandle",
             "body": '{"Records":['
-            + '{"eventVersion":"2.1","eventSource":"aws:s3","awsRegion":"us-east-1","eventTime":"2023-01-03T00:00:00.000Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"AWS:123456789012:example-user"},"requestParameters":{"sourceIPAddress":"127.0.0.1"},"responseElements":{"x-amz-request-id":"example-request-id-3","x-amz-id-2":"example-id-3"},"s3":{"s3SchemaVersion":"1.0","configurationId":"testConfigRule","bucket":{"name":"example-bucket1","ownerIdentity":{"principalId":"EXAMPLE"},"arn":"arn:aws:s3:::example-bucket"},"object":{"key":"example-object-3.txt","size":3072,"eTag":"example-tag-3","versionId":"3","sequencer":"example-sequencer-3"}}}'
+            + '{"eventVersion":"2.1","eventSource":"aws:s3","awsRegion":"us-east-1","eventTime":"2023-01-03T00:00:00.000Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"AWS:123456789012:example-user"},"requestParameters":{"sourceIPAddress":"127.0.0.1"},"responseElements":{"x-amz-request-id":"example-request-id-3","x-amz-id-2":"example-id-3"},"s3":{"s3SchemaVersion":"1.0","configurationId":"testConfigRule","bucket":{"name":"example-bucket0","ownerIdentity":{"principalId":"EXAMPLE"},"arn":"arn:aws:s3:::example-bucket"},"object":{"key":"example-object-3.txt","size":3072,"eTag":"example-tag-3","versionId":"3","sequencer":"example-sequencer-3"}}}'
             + "]}",
         },
         {
             "messageId": "19dd0b57-b21e-4ac1-bd88-01bbb068cb78",
             "receiptHandle": "MessageReceiptHandle",
             "body": '{"Records":['
-            + '{"eventVersion":"2.1","eventSource":"aws:s3","awsRegion":"us-east-1","eventTime":"2023-01-03T00:00:00.000Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"AWS:123456789012:example-user"},"requestParameters":{"sourceIPAddress":"127.0.0.1"},"responseElements":{"x-amz-request-id":"example-request-id-3","x-amz-id-2":"example-id-3"},"s3":{"s3SchemaVersion":"1.0","configurationId":"testConfigRule","bucket":{"name":"example-bucket2","ownerIdentity":{"principalId":"EXAMPLE"},"arn":"arn:aws:s3:::example-bucket"},"object":{"key":"example-object-3.txt","size":3072,"eTag":"example-tag-3","versionId":"3","sequencer":"example-sequencer-3"}}}'
+            + '{"eventVersion":"2.1","eventSource":"aws:s3","awsRegion":"us-east-1","eventTime":"2023-01-03T00:00:00.000Z","eventName":"ObjectCreated:Put","userIdentity":{"principalId":"AWS:123456789012:example-user"},"requestParameters":{"sourceIPAddress":"127.0.0.1"},"responseElements":{"x-amz-request-id":"example-request-id-3","x-amz-id-2":"example-id-3"},"s3":{"s3SchemaVersion":"1.0","configurationId":"testConfigRule","bucket":{"name":"example-bucket1","ownerIdentity":{"principalId":"EXAMPLE"},"arn":"arn:aws:s3:::example-bucket"},"object":{"key":"example-object-3.txt","size":3072,"eTag":"example-tag-3","versionId":"3","sequencer":"example-sequencer-3"}}}'
             + "]}",
         },
     ],

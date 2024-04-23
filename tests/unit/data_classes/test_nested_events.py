@@ -57,8 +57,8 @@ def test_sqs_s3_multiple_events():  # sqs(s3, s3)
     parsed_event = SQSEvent(raw_event)
 
     s3_event = parsed_event.decode_nested_events(S3Event)
-    for rec in s3_event:
-        print("sqs_s3_multi_event bucket:", rec.bucket_name)  # TODO:
+    for idx, rec in enumerate(s3_event):
+        assert rec.bucket_name == "example-bucket"+str(idx)
 
 
 def test_sqs_sns_s3_direct():  # sqs(sns(s3))
@@ -109,7 +109,7 @@ def test_sqs_eb_s3():  # sqs(eventbridge(s3))
             assert r.bucket.name == "s3-eb-unwrap-sourcebucket-7mop1gqlyrzu"
 
 
-def test_firehose_sns_event(event=nested_test_events.firehose_sns_event):  # firehose(sns)
+def test_firehose_sns_event():  # firehose(sns)
     raw_event = nested_test_events.firehose_sns_event
     parsed_event = KinesisFirehoseEvent(raw_event)
 
@@ -122,6 +122,6 @@ def test_firehose_cw_event():  # firehose(cw)
     raw_event = nested_test_events.firehose_cw_event
     parsed_event = KinesisFirehoseEvent(raw_event)
 
-    # cw_event = parsed_event.decode_nested_events(CloudWatchLogsLogEvent) #TODO: gives back encrypted data, and can't be decoded w b64
+    # cw_event = parsed_event.decode_nested_events(CloudWatchLogsLogEvent) #TODO: gives back encrypted data and can't decode w b64
     # for rec in cw_event:
     #     print('type:', type(rec), rec)
