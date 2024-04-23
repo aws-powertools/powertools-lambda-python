@@ -40,6 +40,26 @@ We want to investigate security and scaling requirements for these special regio
 * [x] Update CDK Layer construct to include regions
 * [ ] Distribution sign-off
 
+### V3
+
+We are in the process of planning the roadmap for v3. As always, [our approach](./versioning.md){target="_blank"} includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
+
+For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
+
+* **Parser**: Drop Pydantic v1
+* **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
+* **Parameters**: Increase default `max_age` for `get_secret`
+* **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
+* **Upgrade tool**: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like `pyupgrade` and `django-upgrade`
+* **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
+
+**Major updates**
+
+* [ ] Create an issue to track breaking changes we consider making
+* [ ] Create a v3 branch to allow early experimentation
+* [ ] Create workflows to allow pre-releases
+* [ ] Create a mechanism to keep ideas for breaking change somewhere regardless of v3
+
 ### Revamp Event Handler
 
 Event Handler provides lightweight routing for both [**REST**: Amazon API Gateway, Amazon Elastic Load Balancer and AWS Lambda Function URL](./core/event_handler/api_gateway.md), and [**GraphQL**: AWS AppSync](./core/event_handler/appsync.md).
@@ -97,26 +117,6 @@ We want to make this easier by extending certain utilities to accept a `metrics`
 * [ ] RFC to outline metrics for Feature flags (_e.g., matched rules_)
 * [ ] RFC to outline metrics for Event Handler (_e.g., validation errors_ )
 * [ ] RFC to outline metrics for Idempotency (_e.g., cache hit_)
-
-### V3
-
-We are in the process of planning the roadmap for v3. As always, [our approach](./versioning.md){target="_blank"} includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
-
-For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
-
-* **Parser**: Drop Pydantic v1
-* **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
-* **Parameters**: Increase default `max_age` for `get_secret`
-* **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
-* **Upgrade tool**: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like `pyupgrade` and `django-upgrade`
-* **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
-
-**Major updates**
-
-* [ ] Create an issue to track breaking changes we consider making
-* [ ] Create a v3 branch to allow early experimentation
-* [ ] Create workflows to allow pre-releases
-* [ ] Create a mechanism to keep ideas for breaking change somewhere regardless of v3
 
 ## Roadmap status definition
 
