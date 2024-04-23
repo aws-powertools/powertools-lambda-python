@@ -120,7 +120,7 @@ def lambda_handler_decorator(
     )
 
     @functools.wraps(decorator)
-    def final_decorator(func: Optional[FuncType] = None, *args: Any, **kwargs: Any) -> FuncType:
+    def final_decorator(*args: Any, func: Optional[FuncType] = None, **kwargs: Any) -> FuncType:
         # If called with kwargs return new func with kwargs
         if func is None:
             return cast(FuncType, functools.partial(final_decorator, *args, **kwargs))
