@@ -1,6 +1,5 @@
-<!-- markdownlint-disable MD043 -->
-
-## Overview
+<!-- markdownlint-disable MD043 MD041 -->
+# Overview
 
 Our public roadmap outlines the high level direction we are working towards. We update this document when our priorities change: security and stability are our top priority.
 
@@ -9,6 +8,10 @@ Our public roadmap outlines the high level direction we are working towards. We 
 ## Key areas
 
 Security and operational excellence take precedence above all else. This means bug fixing, stability, customer's support, and internal compliance may delay one or more key areas below.
+
+**Missing something or want us to prioritize an existing area?**
+
+You can help us prioritize by [upvoting existing feature requests](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Afeature-request), leaving a comment on what use cases it could unblock for you, and by joining our discussions on Discord.
 
 ### Observability providers
 
