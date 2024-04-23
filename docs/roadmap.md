@@ -10,15 +10,6 @@ Our public roadmap outlines the high level direction we are working towards. We 
 
 Security and operational excellence take precedence above all else. This means bug fixing, stability, customer's support, and internal compliance may delay one or more key areas below.
 
-### Setting Parameters and Secrets
-
-As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
-
-**Major updates**
-
-* [x] [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/3040)
-* [ ] [MVP](https://github.com/aws-powertools/powertools-lambda-python/pull/2858)
-
 ### Observability providers
 
 We want to extend Tracer, Metrics, and Logger to support any [AWS Lambda certified observability partner](https://go.aws/3HtU6CZ){target="_blank"}, along with OpenTelemetry.
@@ -195,6 +186,17 @@ A: Because job zero is security and operational stability, we can't provide spec
 A: For existing features, you can directly comment on issues. For anything else, please open an issue.
 
 ## Launched
+
+### Setting Parameters and Secrets
+
+> [Docs](./utilities/parameters.md#setting-parameters)
+
+As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
+
+**Major updates**
+
+* [x] [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/3040)
+* [x] [MVP](https://github.com/aws-powertools/powertools-lambda-python/pull/2858)
 
 ### Amazon Bedrock Agent Event Handler
 
