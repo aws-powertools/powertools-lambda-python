@@ -1,6 +1,5 @@
-<!-- markdownlint-disable MD043 -->
-
-## Overview
+<!-- markdownlint-disable MD043 MD041 -->
+# Overview
 
 Our public roadmap outlines the high level direction we are working towards. We update this document when our priorities change: security and stability are our top priority.
 
@@ -10,27 +9,9 @@ Our public roadmap outlines the high level direction we are working towards. We 
 
 Security and operational excellence take precedence above all else. This means bug fixing, stability, customer's support, and internal compliance may delay one or more key areas below.
 
-### Amazon Bedrock Agent Event Handler
+**Missing something or want us to prioritize an existing area?**
 
-Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} at re:Invent 2023, we will add a new Event Handler resolver to improve authoring and maintenance of Amazon Bedrock Agents.
-
-**Major updates**
-
-* [x] [Event Source Data Classes support](https://github.com/aws-powertools/powertools-lambda-python/pull/3262)
-* [x] [Pydantic model _(Parser)_ support](https://github.com/aws-powertools/powertools-lambda-python/pull/3286)
-* [x] [MVP Event Handler](https://github.com/aws-powertools/powertools-lambda-python/pull/3285)
-* [ ] [New feature documentation](https://github.com/aws-powertools/powertools-lambda-python/pull/3602)
-* [ ] Video to walkthrough use cases for anyone new to LLM Agents
-* [ ] Launch amplifier (_e.g., What's New, Blog post_)
-
-### Setting Parameters and Secrets
-
-As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
-
-**Major updates**
-
-* [x] [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/3040)
-* [ ] [MVP](https://github.com/aws-powertools/powertools-lambda-python/pull/2858)
+You can help us prioritize by [upvoting existing feature requests](https://github.com/aws-powertools/powertools-lambda-python/issues?q=is%3Aissue+is%3Aopen+sort%3Aupdated-desc+label%3Afeature-request), leaving a comment on what use cases it could unblock for you, and by joining our discussions on Discord.
 
 ### Observability providers
 
@@ -44,8 +25,44 @@ At launch, we will support Datadog since it's [most requested observability prov
 
 * [x] [Document how customers can use any provider with Logger](https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#observability-providers)
 * [x] [Extend Metrics to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2194)
-* [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/issues/2030)
+* [ ] [Extend Tracer to add support for any Provider](https://github.com/aws-powertools/powertools-lambda-python/pull/2342#issuecomment-2061734362)
 * [ ] Investigate alternative solution to OpenTelemetry cold start performance
+
+### Lambda Layer in GovCloud
+
+We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
+
+!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-powertools-maintainers@amazon.com)."
+
+**Major updates**
+
+* [x] Gather agencies and customers name to prioritize it
+* [x] Investigate security requirements for special regions
+* [x] Create additional infrastructure for special regions
+* [x] AppSec review
+* [x] Update CDK Layer construct to include regions
+* [x] Distribution sign-off
+* [ ] Distribute latest version
+* [ ] Update Layer section with new AWS Accounts
+
+### V3
+
+We are in the process of planning the roadmap for v3. As always, [our approach](./versioning.md){target="_blank"} includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
+
+For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
+
+* **Parser**: Drop Pydantic v1
+* **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
+* **Parameters**: Increase default `max_age` for `get_secret`
+* **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
+* **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
+
+**Major updates**
+
+* [ ] Create an issue to track breaking changes we consider making
+* [ ] Create a v3 branch to allow early experimentation
+* [ ] Create workflows to allow pre-releases
+* [ ] Create a mechanism to keep ideas for breaking change somewhere regardless of v3
 
 ### Revamp Event Handler
 
@@ -63,6 +80,17 @@ Based on customers feedback, we want to provide [middleware authoring support](h
 * [x] [MVP for OpenAPI and SwaggerUI](https://github.com/aws-powertools/powertools-lambda-python/pull/3109)
 * [ ] [MVP for AppSync Batch invoke and partial failure support](https://github.com/aws-powertools/powertools-lambda-python/pull/1998)
 
+### Authentication (SigV4)
+
+[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html){target="_blank"} could be easier.
+
+Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
+
+**Major updates**
+
+* [x] [Issue to outline challenges](https://github.com/aws-powertools/powertools-lambda-python/issues/2493), alternative solutions and desired experience
+* [ ] [MVP for AWS SigV4](https://github.com/aws-powertools/powertools-lambda-python/pull/2435)
+
 ### Office hours
 
 We heard from [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} that Powertools for AWS Lambda and its community can move faster than they are able to catch up. While documentation and release notes take these into account, they notice they don't always know advanced tricks, or what other customers tend to do in similar situations.
@@ -79,17 +107,6 @@ Timezones being tricky, we plan to experiment with an afternoon slot in Central 
     * [ ] Invite Discord community
     * [ ] Update roadmap page with Discord event
 
-### Authentication (SigV4)
-
-[During customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we hear that signing requests using [AWS SigV4](https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-authenticating-requests.html){target="_blank"} could be easier.
-
-Since JWT is a close second, this new utility would cover higher level functions to sign and verify requests more easily.
-
-**Major updates**
-
-* [ ] RFC to outline challenges, alternative solutions and desired experience
-* [ ] [MVP for AWS SigV4](https://github.com/aws-powertools/powertools-lambda-python/pull/2435)
-
 ### Enhanced operational metrics
 
 [Through customers interview](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, [Discord](https://discord.gg/B8zZKbbyET){target="_blank" rel="nofollow"}, and [1:1 customer enablement](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"}, we noticed customers often create the same set of custom operational metrics.
@@ -104,41 +121,6 @@ We want to make this easier by extending certain utilities to accept a `metrics`
 * [ ] RFC to outline metrics for Feature flags (_e.g., matched rules_)
 * [ ] RFC to outline metrics for Event Handler (_e.g., validation errors_ )
 * [ ] RFC to outline metrics for Idempotency (_e.g., cache hit_)
-
-### Lambda Layer in GovCloud and China region
-
-We want to investigate security and scaling requirements for these special regions, so they're in sync for every release.
-
-!!! note "Help us prioritize it by reaching out to your AWS representatives or [via email](mailto:aws-powertools-maintainers@amazon.com)."
-
-**Major updates**
-
-* [x] Gather agencies and customers name to prioritize it
-* [x] Investigate security requirements for special regions
-* [x] Create additional infrastructure for special regions
-* [ ] AppSec review
-* [ ] Distribution sign-off
-* [ ] Update CDK Layer construct to include regions
-
-### V3
-
-We are in the process of planning the roadmap for v3. As always, [our approach](./versioning.md){target="_blank"} includes providing sufficient advance notice, a comprehensive upgrade guide, and minimizing breaking changes to facilitate a smooth transition (e.g., it took ~7 months from v2 to surpass v1 downloads).
-
-For example, these are on our mind but not settled yet until we have a public tracker to discuss what these means in detail.
-
-* **Parser**: Drop Pydantic v1
-* **Parser**: Deserialize Amazon DynamoDB data types automatically (like Event Source Data Classes)
-* **Parameters**: Increase default `max_age` for `get_secret`
-* **Event Source Data Classes**: Return sane defaults for any property that has `Optional[<type>]` returns
-* **Upgrade tool**: Consider building a CST (Concrete Syntax Tree) tool to ease certain upgrade actions like `pyupgrade` and `django-upgrade`
-* **Batch**: Stop at first error for Amazon DynamoDB Streams and Amazon Kinesis Data Streams (e.g., `stop_on_failure=True`)
-
-**Major updates**
-
-* [ ] Create an issue to track breaking changes we consider making
-* [ ] Create a v3 branch to allow early experimentation
-* [ ] Create workflows to allow pre-releases
-* [ ] Create a mechanism to keep ideas for breaking change somewhere regardless of v3
 
 ## Roadmap status definition
 
@@ -208,6 +190,32 @@ A: Because job zero is security and operational stability, we can't provide spec
 A: For existing features, you can directly comment on issues. For anything else, please open an issue.
 
 ## Launched
+
+### Setting Parameters and Secrets
+
+> [Docs](./utilities/parameters.md#setting-parameters)
+
+As of today, the [Parameters](./utilities/parameters.md){target="_blank"} feature is used to retrieve data, not to create or update existing parameters. Based on community feedback, we plan to enhance Parameters to allow set operations.
+
+**Major updates**
+
+* [x] [RFC](https://github.com/aws-powertools/powertools-lambda-python/issues/3040)
+* [x] [MVP](https://github.com/aws-powertools/powertools-lambda-python/pull/2858)
+
+### Amazon Bedrock Agent Event Handler
+
+> [Docs](./core/event_handler/bedrock_agents.md)
+
+Based on [customers](https://github.com/aws-powertools/powertools-lambda-python#connect){target="_blank"} at re:Invent 2023, we will add a new Event Handler resolver to improve authoring and maintenance of Amazon Bedrock Agents.
+
+**Major updates**
+
+* [x] [Event Source Data Classes support](https://github.com/aws-powertools/powertools-lambda-python/pull/3262)
+* [x] [Pydantic model _(Parser)_ support](https://github.com/aws-powertools/powertools-lambda-python/pull/3286)
+* [x] [MVP Event Handler](https://github.com/aws-powertools/powertools-lambda-python/pull/3285)
+* [x] [New feature documentation](https://github.com/aws-powertools/powertools-lambda-python/pull/3602)
+* [x] [Video to walkthrough](https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/bedrock_agents/#video-walkthrough) use cases for anyone new to LLM Agents
+* [ ] Launch amplifier (_e.g., What's New, Blog post_)
 
 ### Sensitive Data Masking
 
