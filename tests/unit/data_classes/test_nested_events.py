@@ -23,7 +23,7 @@ def test_sqs_s3():  # sqs(s3)
 
     s3_event = parsed_event.decode_nested_events(S3Event)
     for rec in s3_event:
-        assert rec.bucket_name == "sqs-s3-unwrap-bucket-683517028648"
+        assert rec.bucket_name == "sqs-s3-unwrap-bucket"
 
 
 def test_sqs_s3_single():  # sqs(s3)
@@ -31,7 +31,7 @@ def test_sqs_s3_single():  # sqs(s3)
     parsed_event = SQSEvent(raw_event)
 
     s3_event = parsed_event.decode_nested_event(S3Event)
-    assert s3_event.bucket_name == "sqs-s3-unwrap-bucket-683517028648"
+    assert s3_event.bucket_name == "sqs-s3-unwrap-bucket"
 
 
 def test_sqs_sns():  # sqs(sns)
@@ -40,7 +40,7 @@ def test_sqs_sns():  # sqs(sns)
 
     sns_event = parsed_event.decode_nested_events(SNSMessage)
     for rec in sns_event:
-        assert rec.message == "from sns"
+        assert rec.message == "From SNS"
 
 
 def test_sns_s3():  # sns(s3)
@@ -49,7 +49,7 @@ def test_sns_s3():  # sns(s3)
 
     s3_event = parsed_event.decode_nested_events(S3Event)
     for rec in s3_event:
-        assert rec.bucket_name == "s3-sns-unwrap-bucket-683517028648"
+        assert rec.bucket_name == "s3-sns-unwrap-bucket"
 
 
 def test_sqs_s3_multiple_events():  # sqs(s3, s3)
@@ -67,7 +67,7 @@ def test_sqs_sns_s3_direct():  # sqs(sns(s3))
 
     sns_event = parsed_event.decode_nested_event(SNSMessage)
     s3_event = sns_event.decode_nested_event(S3Event)
-    assert s3_event.bucket_name == "unwraptestevents-bucket-683517028648"
+    assert s3_event.bucket_name == "unwraptestevents-bucket"
 
 
 def test_sqs_sns_s3():  # sqs(sns(s3))
@@ -78,7 +78,7 @@ def test_sqs_sns_s3():  # sqs(sns(s3))
     for rec in sns_event:
         s3_event = rec.decode_nested_events(S3Event)
         for r in s3_event:
-            assert r.bucket_name == "unwraptestevents-bucket-683517028648"
+            assert r.bucket_name == "unwraptestevents-bucket"
 
 
 def test_sns_ses():  # sns(ses)
@@ -86,7 +86,7 @@ def test_sns_ses():  # sns(ses)
     parsed_event = SNSEvent(raw_event)
     ses_event = parsed_event.decode_nested_events(SESEventRecord)
     for rec in ses_event:
-        assert rec.get("mail").get("source") == "seshub@amazon.com"
+        assert rec.get("mail").get("source") == "jsmith@amazon.com"
         # print('rec:', rec.mail) #but can't do rec.mail bc no "SES" key
 
 
@@ -95,7 +95,7 @@ def test_eb_s3():  # eventbridge(s3)
     parsed_event = EventBridgeEvent(raw_event)
     s3_event = parsed_event.decode_nested_events(S3EventBridgeNotificationDetail)
     for rec in s3_event:
-        assert rec.bucket.name == "s3-eb-unwrap-sourcebucket-7mop1gqlyrzu"
+        assert rec.bucket.name == "s3-eb-unwrap-sourcebucket"
 
 
 def test_sqs_eb_s3():  # sqs(eventbridge(s3))
@@ -106,7 +106,7 @@ def test_sqs_eb_s3():  # sqs(eventbridge(s3))
     for rec in eb_event:
         s3_event = rec.decode_nested_events(S3EventBridgeNotificationDetail)
         for r in s3_event:
-            assert r.bucket.name == "s3-eb-unwrap-sourcebucket-7mop1gqlyrzu"
+            assert r.bucket.name == "s3-eb-unwrap-sourcebucket"
 
 
 def test_firehose_sns_event():  # firehose(sns)
