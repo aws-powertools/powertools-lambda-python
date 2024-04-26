@@ -83,16 +83,17 @@ def event_parser(
         When envelope given does not implement BaseEnvelope
     """
 
-    # The first parameter of a Lambda function is always the event
-    # This line get the model informed in the event_parser function
-    # or the first parameter of the function by using typing.get_type_hints
-    type_hints = typing.get_type_hints(handler)
-    model = model or (list(type_hints.values())[0] if type_hints else None)
     if model is None:
-        raise InvalidModelTypeError(
-            "The model must be provided either as the `model` argument to `event_parser`"
-            "or as the type hint of `event` in the handler that it wraps",
-        )
+        # The first parameter of a Lambda function is always the event.
+        # Get the first parameter's type by using typing.get_type_hints.
+        type_hints = typing.get_type_hints(handler)
+        if type_hints:
+            model = list(type_hints.values())[0]
+        if model is None:
+            raise InvalidModelTypeError(
+                "The model must be provided either as the `model` argument to `event_parser`"
+                "or as the type hint of `event` in the handler that it wraps",
+            )
 
     if envelope:
         parsed_event = parse(event=event, model=model, envelope=envelope)

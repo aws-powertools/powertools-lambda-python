@@ -4,18 +4,39 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Code Refactoring
+
+* **parser:** only infer type hints when necessary ([#4183](https://github.com/aws-powertools/powertools-lambda-python/issues/4183))
+
 ## Documentation
 
 * **idempotency:** fix highlight and import path ([#4154](https://github.com/aws-powertools/powertools-lambda-python/issues/4154))
+* **roadmap:** april updates ([#4181](https://github.com/aws-powertools/powertools-lambda-python/issues/4181))
 
 ## Maintenance
 
-* **deps:** bump actions/upload-artifact from 4.3.1 to 4.3.2 ([#4162](https://github.com/aws-powertools/powertools-lambda-python/issues/4162))
 * **deps:** bump actions/download-artifact from 4.1.4 to 4.1.5 ([#4161](https://github.com/aws-powertools/powertools-lambda-python/issues/4161))
-* **deps-dev:** bump aws-cdk from 2.137.0 to 2.138.0 ([#4157](https://github.com/aws-powertools/powertools-lambda-python/issues/4157))
-* **deps-dev:** bump aws-cdk-lib from 2.137.0 to 2.138.0 ([#4160](https://github.com/aws-powertools/powertools-lambda-python/issues/4160))
+* **deps:** bump actions/upload-artifact from 4.3.1 to 4.3.2 ([#4162](https://github.com/aws-powertools/powertools-lambda-python/issues/4162))
+* **deps:** bump actions/checkout from 4.1.2 to 4.1.3 ([#4168](https://github.com/aws-powertools/powertools-lambda-python/issues/4168))
+* **deps:** bump redis from 5.0.3 to 5.0.4 ([#4187](https://github.com/aws-powertools/powertools-lambda-python/issues/4187))
+* **deps:** bump actions/download-artifact from 4.1.6 to 4.1.7 ([#4205](https://github.com/aws-powertools/powertools-lambda-python/issues/4205))
+* **deps:** bump actions/checkout from 4.1.3 to 4.1.4 ([#4206](https://github.com/aws-powertools/powertools-lambda-python/issues/4206))
+* **deps:** bump actions/download-artifact from 4.1.5 to 4.1.6 ([#4178](https://github.com/aws-powertools/powertools-lambda-python/issues/4178))
+* **deps:** bump actions/upload-artifact from 4.3.2 to 4.3.3 ([#4177](https://github.com/aws-powertools/powertools-lambda-python/issues/4177))
+* **deps-dev:** bump cfn-lint from 0.86.3 to 0.86.4 ([#4180](https://github.com/aws-powertools/powertools-lambda-python/issues/4180))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.121 to 0.1.123 ([#4176](https://github.com/aws-powertools/powertools-lambda-python/issues/4176))
+* **deps-dev:** bump types-redis from 4.6.0.20240417 to 4.6.0.20240423 ([#4185](https://github.com/aws-powertools/powertools-lambda-python/issues/4185))
+* **deps-dev:** bump aws-cdk-aws-lambda-python-alpha from 2.137.0a0 to 2.138.0a0 ([#4169](https://github.com/aws-powertools/powertools-lambda-python/issues/4169))
+* **deps-dev:** bump coverage from 7.4.4 to 7.5.0 ([#4186](https://github.com/aws-powertools/powertools-lambda-python/issues/4186))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.119 to 0.1.121 ([#4167](https://github.com/aws-powertools/powertools-lambda-python/issues/4167))
 * **deps-dev:** bump ruff from 0.3.7 to 0.4.1 ([#4166](https://github.com/aws-powertools/powertools-lambda-python/issues/4166))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.123 to 0.1.126 ([#4188](https://github.com/aws-powertools/powertools-lambda-python/issues/4188))
+* **deps-dev:** bump aws-cdk from 2.137.0 to 2.138.0 ([#4157](https://github.com/aws-powertools/powertools-lambda-python/issues/4157))
+* **deps-dev:** bump aws-cdk-lib from 2.137.0 to 2.138.0 ([#4160](https://github.com/aws-powertools/powertools-lambda-python/issues/4160))
+* **deps-dev:** bump mypy-boto3-ssm from 1.34.61 to 1.34.91 in the boto-typing group ([#4201](https://github.com/aws-powertools/powertools-lambda-python/issues/4201))
+* **deps-dev:** bump mypy from 1.9.0 to 1.10.0 ([#4202](https://github.com/aws-powertools/powertools-lambda-python/issues/4202))
+* **deps-dev:** bump black from 24.4.0 to 24.4.1 ([#4203](https://github.com/aws-powertools/powertools-lambda-python/issues/4203))
+* **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.126 to 0.1.130 ([#4209](https://github.com/aws-powertools/powertools-lambda-python/issues/4209))
 
 
 <a name="v2.37.0"></a>
