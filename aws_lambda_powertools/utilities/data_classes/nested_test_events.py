@@ -161,7 +161,7 @@ sqs_rawsns_s3_event = {
 }
 
 
-# sqs(s3, s3)
+# s3 -> sqs = sqs(s3, s3)
 sqs_s3_multi_event = {
     "Records": [
         {
