@@ -1,12 +1,10 @@
 from __future__ import annotations
 
 import base64
-import json
 from enum import Enum
 from typing import Optional
 
 import botocore.session
-import urllib3
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials, ReadOnlyCredentials
@@ -24,58 +22,9 @@ def _authorization_header(client_id: str, client_secret: str) -> str:
         str: Base64 encoded Authorization header
     """
     auth_string = f"{client_id}:{client_secret}"
-    encoded_auth_string = base64.b64encode(auth_string.encode("utf-8")).decode("utf-8")
+    encoded_auth_bytes = base64.b64encode(auth_string)
+    encoded_auth_string = encoded_auth_bytes.decode("utf-8")
     return f"Basic {encoded_auth_string}"
-
-
-def _get_token(response: dict) -> str:
-    """
-    Gets the token from the response
-
-    Args:
-        response (dict): Response from the authentication endpoint
-
-    Returns:
-        str: Token
-    """
-    if "access_token" in response:
-        return response["access_token"]
-    elif "id_token" in response:
-        return response["id_token"]
-    else:
-        raise Exception("Unable to get token from response")
-
-
-def _request_access_token(auth_endpoint: str, body: dict, headers: dict) -> str:
-    """
-    Gets the token from the Auth0 authentication endpoint
-
-    Args:
-        client_id (str): Client ID
-        client_secret (str): Client Secret
-        audience (str): Audience
-        auth_endpoint (str): Auth0 authentication endpoint
-
-    Returns:
-        str: Token
-    """
-    headers["Content-Type"] = "application/x-www-form-urlencoded"
-
-    http = urllib3.PoolManager()
-
-    if isinstance(body, dict):
-        json_body = json.dumps(body)
-    elif isinstance(body, str):
-        json_body = body
-
-    try:
-        response = http.request("POST", auth_endpoint, headers=headers, body=json_body)
-        response = response.json()
-        return _get_token(response)
-    except (urllib3.exceptions.RequestError, urllib3.exceptions.HTTPError) as error:
-        # If there is an error with the request, handle it here
-        # REVIEW: CREATE A CUSTOM EXCEPTION FOR THIS
-        raise Exception(error) from error
 
 
 class AWSServicePrefix(Enum):
@@ -141,7 +90,6 @@ class AWSSigV4Auth:
         secret_key: Optional[str] = None,
         token: Optional[str] = None,
     ):
-
         self.service = service.value
         self.region = region
         self.method = method
@@ -180,7 +128,6 @@ class AWSSigV4Auth:
 
 
 class JWTAuth:
-
     def __init__(
         self,
         client_id: str,
@@ -190,7 +137,6 @@ class JWTAuth:
         audience: Optional[str] = None,
         scope: Optional[list] = None,
     ):
-
         self.client_id = client_id
         self.client_secret = client_secret
         self.auth_endpoint = auth_endpoint.removesuffix("/")
@@ -205,7 +151,6 @@ class JWTAuth:
         }
 
         if self.provider == AuthProvider.COGNITO.value:
-
             encoded_auth_string = _authorization_header(self.client_id, self.client_secret)
             self.headers["Authorization"] = f"Basic {encoded_auth_string}"
             self.body["grant_type"] = "client_credentials"
@@ -213,14 +158,12 @@ class JWTAuth:
                 self.body["scope"] = " ".join(self.scope)
 
         if self.provider == AuthProvider.AUTH0.value:
-
             self.body["client_id"] = self.client_id
             self.body["client_secret"] = self.client_secret
             self.body["grant_type"] = "client_credentials"
             self.body["audience"] = self.audience
 
         if self.provider == AuthProvider.OKTA.value:
-
             encoded_auth_string = _authorization_header(self.client_id, self.client_secret)
             self.headers["Accept"] = "application/json"
             self.headers["Authorization"] = f"Basic {encoded_auth_string}"
