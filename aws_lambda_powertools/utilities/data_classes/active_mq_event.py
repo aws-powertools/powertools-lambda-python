@@ -59,7 +59,7 @@ class ActiveMQMessage(DictWrapper):
 
     @property
     def destination_physicalname(self) -> str:
-        return self["destination"]["physicalname"]
+        return self["destination"]["physicalName"]
 
     @property
     def delivery_mode(self) -> Optional[int]:

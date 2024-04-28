@@ -15,6 +15,7 @@ class SqsAttributesModel(BaseModel):
     SentTimestamp: datetime
     SequenceNumber: Optional[str] = None
     AWSTraceHeader: Optional[str] = None
+    DeadLetterQueueSourceArn: Optional[str] = None
 
 
 class SqsMsgAttributeModel(BaseModel):

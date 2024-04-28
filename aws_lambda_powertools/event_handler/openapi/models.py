@@ -441,12 +441,13 @@ class SecurityBase(BaseModel):
     description: Optional[str] = None
 
     if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
+        model_config = {"extra": "allow", "populate_by_name": True}
 
     else:
 
         class Config:
             extra = "allow"
+            allow_population_by_field_name = True
 
 
 class APIKeyIn(Enum):

@@ -9,10 +9,9 @@ import secrets
 import string
 import sys
 import warnings
-from ast import Dict
 from collections import namedtuple
 from datetime import datetime, timezone
-from typing import Any, Callable, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import pytest
 
@@ -604,6 +603,45 @@ def test_logger_append_remove_keys(stdout, service_name):
 
     assert extra_keys.items() <= extra_keys_log.items()
     assert (extra_keys.items() <= keys_removed_log.items()) is False
+
+
+def test_logger_append_and_show_current_keys(stdout, service_name):
+    # GIVEN a Logger is initialized
+    logger = Logger(service=service_name, stream=stdout)
+    extra_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN keys are updated
+    logger.append_keys(**extra_keys)
+
+    # THEN appended keys must be present in logger
+    current_keys = logger.get_current_keys()
+    assert "request_id" in current_keys
+    assert "context" in current_keys
+
+
+def test_logger_formatter_without_get_current_keys_method(stdout, service_name):
+    class CustomFormatter(BasePowertoolsFormatter):
+        def append_keys(self, **additional_keys):
+            # Fake method
+            pass
+
+        def clear_state(self) -> None:
+            # Fake method
+            pass
+
+    custom_formater = CustomFormatter()
+
+    # GIVEN a Logger is initialized with a Logger Formatter from scratch
+
+    logger = Logger(service=service_name, stream=stdout, logger_formatter=custom_formater)
+    extra_keys = {"request_id": "id", "context": "value"}
+
+    # WHEN keys are updated
+    logger.append_keys(**extra_keys)
+
+    # THEN the appended keys will not persist
+    # unless the customer implements the required methods and persists the log_format
+    assert logger.get_current_keys() == {}
 
 
 def test_logger_custom_formatter(stdout, service_name, lambda_context):

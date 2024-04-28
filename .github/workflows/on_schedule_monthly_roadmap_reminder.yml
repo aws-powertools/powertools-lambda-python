@@ -1,0 +1,18 @@
+name: Monthly roadmap reminder
+
+on:
+    workflow_dispatch: {}
+#   schedule:
+#     - cron: '0 0 1 * *'
+
+permissions:
+    contents: read
+    pull-requests: read
+    issues: read
+
+
+jobs:
+    call-workflow-passing-data:
+        uses: aws-powertools/actions/.github/workflows/monthly_roadmap_reminder.yml@fd4575466e5c2ac10703ac16f5aa9fb8890f532a
+        with:
+            token: ${{ github.token }}
