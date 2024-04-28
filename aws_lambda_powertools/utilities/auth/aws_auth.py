@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import base64
 from enum import Enum
 from typing import Optional
 
@@ -8,23 +7,6 @@ import botocore.session
 from botocore.auth import SigV4Auth
 from botocore.awsrequest import AWSRequest
 from botocore.credentials import Credentials, ReadOnlyCredentials
-
-
-def _authorization_header(client_id: str, client_secret: str) -> str:
-    """
-    Generates the Authorization header for the request
-
-    Args:
-        client_id (str): Client ID
-        client_secret (str): Client Secret
-
-    Returns:
-        str: Base64 encoded Authorization header
-    """
-    auth_string = f"{client_id}:{client_secret}"
-    encoded_auth_bytes = base64.b64encode(auth_string)
-    encoded_auth_string = encoded_auth_bytes.decode("utf-8")
-    return f"Basic {encoded_auth_string}"
 
 
 class AWSServicePrefix(Enum):
@@ -125,52 +107,3 @@ class AWSSigV4Auth:
 
         def __call__(self):
             return self.signed_request
-
-
-class JWTAuth:
-    def __init__(
-        self,
-        client_id: str,
-        client_secret: str,
-        auth_endpoint: str,
-        provider: Enum = AuthProvider.COGNITO,
-        audience: Optional[str] = None,
-        scope: Optional[list] = None,
-    ):
-        self.client_id = client_id
-        self.client_secret = client_secret
-        self.auth_endpoint = auth_endpoint.removesuffix("/")
-        self.headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        self.provider = provider
-        self.audience = audience
-        self.scope = scope
-
-        self.body = {
-            "client_id": self.client_id,
-            "client_secret": self.client_secret,
-        }
-
-        if self.provider == AuthProvider.COGNITO.value:
-            encoded_auth_string = _authorization_header(self.client_id, self.client_secret)
-            self.headers["Authorization"] = f"Basic {encoded_auth_string}"
-            self.body["grant_type"] = "client_credentials"
-            if self.scope:
-                self.body["scope"] = " ".join(self.scope)
-
-        if self.provider == AuthProvider.AUTH0.value:
-            self.body["client_id"] = self.client_id
-            self.body["client_secret"] = self.client_secret
-            self.body["grant_type"] = "client_credentials"
-            self.body["audience"] = self.audience
-
-        if self.provider == AuthProvider.OKTA.value:
-            encoded_auth_string = _authorization_header(self.client_id, self.client_secret)
-            self.headers["Accept"] = "application/json"
-            self.headers["Authorization"] = f"Basic {encoded_auth_string}"
-            self.headers["Cache-Control"] = "no-cache"
-
-            self.body["grant_type"] = "client_credentials"
-            if scope:
-                self.body["scope"] = " ".join(self.scope)
-
-        # response = _request_access_token(auth_endpoint=self.auth_endpoint, body=self.body, headers=self.headers) # noqa ERA001
