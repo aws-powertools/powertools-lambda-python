@@ -19,6 +19,7 @@ on:
   push:
     branches:
       - develop
+      - v3 # Powertools v3 branch
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
