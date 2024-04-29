@@ -24,8 +24,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - develop
-      - v3
+      - v3 # Powertools v3 branch
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -34,8 +33,7 @@ on:
       - "poetry.lock"
       - "mypy.ini"
     branches:
-      - develop
-      - v3
+      - v3 # Powertools v3 branch
 
 permissions:
   contents: read
