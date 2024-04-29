@@ -195,15 +195,6 @@ markers = [
   "perf: marks perf tests to be deselected (deselect with '-m \"not perf\"')",
 ]
 
-# MAINTENANCE: Remove these lines when drop support to Pydantic v1
-filterwarnings = [
-  "ignore:.*The `parse_obj` method is deprecated*:DeprecationWarning",
-  "ignore:.*The `parse_raw` method is deprecated*:DeprecationWarning",
-  "ignore:.*load_str_bytes is deprecated*:DeprecationWarning",
-  "ignore:.*The `dict` method is deprecated; use `model_dump` instead*:DeprecationWarning",
-  "ignore:.*Pydantic V1 style `@validator` validators are deprecated*:DeprecationWarning",
-]
-
 [build-system]
 requires = ["poetry-core>=1.3.2"]
 build-backend = "poetry.core.masonry.api"
