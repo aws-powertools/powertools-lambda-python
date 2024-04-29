@@ -25,6 +25,7 @@ on:
       - "mypy.ini"
     branches:
       - develop
+      - v3
   push:
     paths:
       - "aws_lambda_powertools/**"
@@ -34,6 +35,7 @@ on:
       - "mypy.ini"
     branches:
       - develop
+      - v3
 
 permissions:
   contents: read
