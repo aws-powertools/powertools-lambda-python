@@ -90,7 +90,7 @@ checksumdir = "^1.2.0"
 mypy-boto3-appconfigdata = "^1.34.24"
 ijson = "^3.2.2"
 typed-ast = { version = "^1.5.5", python = "< 3.8" }
-hvac = "^2.1.0"
+hvac = "^2.2.0"
 aws-requests-auth = "^0.4.3"
 datadog-lambda = "^5.93.0"
 
