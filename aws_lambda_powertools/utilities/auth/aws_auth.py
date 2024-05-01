@@ -22,17 +22,6 @@ class AWSServicePrefix(Enum):
     RESTAPI = "execute-api"
     HTTPAPI = "apigateway"
     APPSYNC = "appsync"
-    S3 = "s3"
-
-
-class AuthProvider(Enum):
-    """
-    Auth Provider - Enumerations of the supported authentication providers
-    """
-
-    AUTH0 = "auth0"
-    COGNITO = "cognito"
-    OKTA = "okta"
 
 
 class AWSSigV4Auth:
