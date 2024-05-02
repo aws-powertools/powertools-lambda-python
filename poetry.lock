@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.99"
+version = "2.28.104"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.99.tar.gz", hash = "sha256:079931ecb3bf834b09c0ae57bebffd96c50c179b7470b44ccba9d9d513b7fe14"},
-    {file = "cdk_nag-2.28.99-py3-none-any.whl", hash = "sha256:6cd51a2c073ea9edc58aa1d2647ebb3392935d44ea42c916883e06278c22c4c9"},
+    {file = "cdk-nag-2.28.104.tar.gz", hash = "sha256:707c2d7e4e5436e9b3df3da9f57c1d3987232ec5b2f08495a0cba203a9e9ac4c"},
+    {file = "cdk_nag-2.28.104-py3-none-any.whl", hash = "sha256:cb1d8446956044dace7f83d7b4036a4ac13b24045d7f237a91bc989eceb52455"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.131"
+version = "0.1.132"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.131.tar.gz", hash = "sha256:6267d38090955f72ff22ef4f0d1c6024ddd374554bb4db13f015aa81618bf38b"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.131-py3-none-any.whl", hash = "sha256:69751a67d7e546c5ab221c92a7b365d2f78348c88afecddd8f4cd083b39ac553"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.132.tar.gz", hash = "sha256:c067508ba0a94adedab3f0a6076ff607326b53fc4a193d17dbb9eaeaea538318"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.132-py3-none-any.whl", hash = "sha256:c5d323d0676aff074feff45f954a905a165528a92a37131a240fbd1d890c6543"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.99,<3.0.0"
+cdk-nag = ">=2.28.102,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.97.0,<2.0.0"
 publication = ">=0.0.3"
@@ -1109,13 +1109,13 @@ devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benc
 
 [[package]]
 name = "filelock"
-version = "3.13.4"
+version = "3.14.0"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "filelock-3.13.4-py3-none-any.whl", hash = "sha256:404e5e9253aa60ad457cae1be07c0f0ca90a63931200a47d9b6a6af84fd7b45f"},
-    {file = "filelock-3.13.4.tar.gz", hash = "sha256:d13f466618bfde72bd2c18255e269f72542c6e70e7bac83a0232d6b1cc5c8cf4"},
+    {file = "filelock-3.14.0-py3-none-any.whl", hash = "sha256:43339835842f110ca7ae60f1e1c160714c5a6afd15a2873419ab185334975c0f"},
+    {file = "filelock-3.14.0.tar.gz", hash = "sha256:6ea72da3be9b8c82afd3edcf99f2fffbb5076335a5ae4d03248bb5b6c3eae78a"},
 ]
 
 [package.extras]
@@ -1229,13 +1229,13 @@ socks = ["socksio (==1.*)"]
 
 [[package]]
 name = "hvac"
-version = "2.1.0"
+version = "2.2.0"
 description = "HashiCorp Vault API client"
 optional = false
-python-versions = ">=3.8,<4.0"
+python-versions = "<4.0,>=3.8"
 files = [
-    {file = "hvac-2.1.0-py3-none-any.whl", hash = "sha256:73bc91e58c3fc7c6b8107cdaca9cb71fa0a893dfd80ffbc1c14e20f24c0c29d7"},
-    {file = "hvac-2.1.0.tar.gz", hash = "sha256:b48bcda11a4ab0a7b6c47232c7ba7c87fda318ae2d4a7662800c465a78742894"},
+    {file = "hvac-2.2.0-py3-none-any.whl", hash = "sha256:f287a19940c6fc518c723f8276cc9927f7400734303ee5872ac2e84539466d8d"},
+    {file = "hvac-2.2.0.tar.gz", hash = "sha256:e4b0248c5672cb9a6f5974e7c8f5271a09c6c663cbf8ab11733a227f3d2db2c2"},
 ]
 
 [package.dependencies]
@@ -1840,13 +1840,13 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.19"
+version = "9.5.20"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.19-py3-none-any.whl", hash = "sha256:ea96e150b6c95f5e4ffe47d78bb712c7bacdd91d2a0bec47f46b6fa0705a86ec"},
-    {file = "mkdocs_material-9.5.19.tar.gz", hash = "sha256:7473e06e17e23af608a30ef583fdde8f36389dd3ef56b1d503eed54c89c9618c"},
+    {file = "mkdocs_material-9.5.20-py3-none-any.whl", hash = "sha256:ad0094a7597bcb5d0cc3e8e543a10927c2581f7f647b9bb4861600f583180f9b"},
+    {file = "mkdocs_material-9.5.20.tar.gz", hash = "sha256:986eef0250d22f70fb06ce0f4eac64cc92bd797a589ec3892ce31fad976fe3da"},
 ]
 
 [package.dependencies]
@@ -2250,13 +2250,13 @@ test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-
 
 [[package]]
 name = "pluggy"
-version = "1.4.0"
+version = "1.5.0"
 description = "plugin and hook calling mechanisms for python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pluggy-1.4.0-py3-none-any.whl", hash = "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981"},
-    {file = "pluggy-1.4.0.tar.gz", hash = "sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be"},
+    {file = "pluggy-1.5.0-py3-none-any.whl", hash = "sha256:44e1ad92c8ca002de6377e165f3e0f1be63266ab4d554740532335b9d75ea669"},
+    {file = "pluggy-1.5.0.tar.gz", hash = "sha256:2cffa88e94fdc978c4c574f15f9e59b7f4201d439195c3715ca9e2486f1d0cf1"},
 ]
 
 [package.extras]
@@ -2414,13 +2414,13 @@ extra = ["pygments (>=2.12)"]
 
 [[package]]
 name = "pytest"
-version = "8.1.1"
+version = "8.2.0"
 description = "pytest: simple powerful testing with Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pytest-8.1.1-py3-none-any.whl", hash = "sha256:2a8386cfc11fa9d2c50ee7b2a57e7d898ef90470a7a34c4b949ff59662bb78b7"},
-    {file = "pytest-8.1.1.tar.gz", hash = "sha256:ac978141a75948948817d360297b7aae0fcb9d6ff6bc9ec6d514b85d5a65c044"},
+    {file = "pytest-8.2.0-py3-none-any.whl", hash = "sha256:1733f0620f6cda4095bbf0d9ff8022486e91892245bb9e7d5542c018f612f233"},
+    {file = "pytest-8.2.0.tar.gz", hash = "sha256:d507d4482197eac0ba2bae2e9babf0672eb333017bcedaa5fb1a3d42c1174b3f"},
 ]
 
 [package.dependencies]
@@ -2428,11 +2428,11 @@ colorama = {version = "*", markers = "sys_platform == \"win32\""}
 exceptiongroup = {version = ">=1.0.0rc8", markers = "python_version < \"3.11\""}
 iniconfig = "*"
 packaging = "*"
-pluggy = ">=1.4,<2.0"
+pluggy = ">=1.5,<2.0"
 tomli = {version = ">=1", markers = "python_version < \"3.11\""}
 
 [package.extras]
-testing = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
+dev = ["argcomplete", "attrs (>=19.2)", "hypothesis (>=3.56)", "mock", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
 name = "pytest-asyncio"
@@ -3606,4 +3606,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "b35174c5fc5b4c6a343728478660c2efaea55693034f852b4f6299af63e2ac7b"
+content-hash = "dea93be1a2fba9fc53624ee485a5dc88f7e2853149e3f2892ee47a2c56bd3127"
