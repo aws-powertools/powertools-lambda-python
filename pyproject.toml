@@ -92,7 +92,7 @@ ijson = "^3.2.2"
 typed-ast = { version = "^1.5.5", python = "< 3.8" }
 hvac = "^2.2.0"
 aws-requests-auth = "^0.4.3"
-datadog-lambda = "^5.93.0"
+datadog-lambda = "^5.94.0"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
