@@ -15,6 +15,8 @@ jobs:
             contents: read
             pull-requests: read
             issues: write  # create monthly roadmap report
-        uses: aws-powertools/actions/.github/workflows/monthly_roadmap_reminder.yml@dd7035996f1813dbc50fe78e523d4c2a074258a9
+
+        # setting to `@main` until we have releases and governance installed
+        uses: aws-powertools/actions/.github/workflows/monthly_roadmap_reminder.yml@main
         secrets:
             token: ${{ secrets.GITHUB_TOKEN }}
