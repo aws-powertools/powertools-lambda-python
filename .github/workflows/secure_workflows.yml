@@ -34,4 +34,6 @@ jobs:
       - name: Ensure 3rd party workflows have SHA pinned
         uses: zgosalvez/github-actions-ensure-sha-pinned-actions@19ebcb0babbd282ae1822a0b9c28f3f1f25cea45 # v3.0.4
         with:
-          allowlist: slsa-framework/slsa-github-generator
+          allowlist: |
+            slsa-framework/slsa-github-generator
+            aws-powertools/actions
