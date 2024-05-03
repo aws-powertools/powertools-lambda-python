@@ -206,7 +206,7 @@ jobs:
     # NOTE: provenance fails if we use action pinning... it's a Github limitation
     # because SLSA needs to trace & attest it came from a given branch; pinning doesn't expose that information
     # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#referencing-the-slsa-generator
-    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v1.10.0
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
     with:
       base64-subjects: ${{ needs.build.outputs.attestation_hashes }}
       upload-assets: false  # we upload its attestation in create_tag job, otherwise it creates a new release
