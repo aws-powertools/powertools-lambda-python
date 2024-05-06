@@ -158,19 +158,19 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.139.1a0"
+version = "2.140.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.139.1a0.tar.gz", hash = "sha256:d141bf6757055e8e26684299eb636a89fd54f4dfee01c28c28ad412070779f5c"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.139.1a0-py3-none-any.whl", hash = "sha256:9e77e310a4648760a9a601fce3b19b137f8235ee0a5a41e2aeaf698a72114b76"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.140.0a0.tar.gz", hash = "sha256:d0d691ac30ed8f17bf90db2ac0dedce2c0f6800daa10fec6ba46c1a2e2e0966d"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.140.0a0-py3-none-any.whl", hash = "sha256:d75b895d2e8b730a9bf04d83e69942c793fca587a1060941232122af8b36ee10"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.139.1,<3.0.0"
+aws-cdk-lib = ">=2.140.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.97.0,<2.0.0"
+jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.134"
+version = "0.1.135"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.134.tar.gz", hash = "sha256:a92e828d3558c1e0eeaf384efd6d7f9dfb542b51e265834c0f99083067df80ef"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.134-py3-none-any.whl", hash = "sha256:45a3d2be627d85f8dbde1320d228afa2035285b4f4095db7ab2f193a7b250c33"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.135.tar.gz", hash = "sha256:9b14fc3620f6c07994670ca8d5fbb86b943fcdc1680fe6d7a06a83800801aafd"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.135-py3-none-any.whl", hash = "sha256:0d8c80d9b23c7f68c4a55ef5c7a10067c58d4e408a7a0e751ba9139d6148b672"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.105,<3.0.0"
+cdk-nag = ">=2.28.106,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -541,13 +541,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.87.0"
+version = "0.87.1"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = "!=4.0,<=4.0,>=3.8"
 files = [
-    {file = "cfn_lint-0.87.0-py3-none-any.whl", hash = "sha256:a374312e906f732141b0fce28c176078f855d3b2ba5d43ef376c86ad14e11d4b"},
-    {file = "cfn_lint-0.87.0.tar.gz", hash = "sha256:749b7e52a2d83f1236e87ef9c244910ffff609bcdf357eab0814ed80c076de11"},
+    {file = "cfn_lint-0.87.1-py3-none-any.whl", hash = "sha256:d450f450635fc223b6f66880ccac52a5fd1a52966fa1705f1ba52b88dfed3071"},
+    {file = "cfn_lint-0.87.1.tar.gz", hash = "sha256:b3ce9d3e5e0eadcea5d584c8ccaa00bf2a990a36a64d7ffd8683bc60b7e4f06f"},
 ]
 
 [package.dependencies]
@@ -1756,13 +1756,13 @@ files = [
 
 [[package]]
 name = "mike"
-version = "2.1.0"
+version = "2.1.1"
 description = "Manage multiple versions of your MkDocs-powered documentation"
 optional = false
 python-versions = "*"
 files = [
-    {file = "mike-2.1.0-py3-none-any.whl", hash = "sha256:b3885f9b9e31fc4b0d61de473750d38ac170a6b291585076effb51a806245608"},
-    {file = "mike-2.1.0.tar.gz", hash = "sha256:f0b8e51cbfae1273d648ffb602a4ab3061e57972ca1cd6836df1c51c01a36eb5"},
+    {file = "mike-2.1.1-py3-none-any.whl", hash = "sha256:0b1d01a397a423284593eeb1b5f3194e37169488f929b860c9bfe95c0d5efb79"},
+    {file = "mike-2.1.1.tar.gz", hash = "sha256:f39ed39f3737da83ad0adc33e9f885092ed27f8c9e7ff0523add0480352a2c22"},
 ]
 
 [package.dependencies]
@@ -1772,6 +1772,7 @@ jinja2 = ">=2.7"
 mkdocs = ">=1.0"
 pyparsing = ">=3.0"
 pyyaml = ">=5.1"
+pyyaml-env-tag = "*"
 verspec = "*"
 
 [package.extras]
@@ -1843,13 +1844,13 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.20"
+version = "9.5.21"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.20-py3-none-any.whl", hash = "sha256:ad0094a7597bcb5d0cc3e8e543a10927c2581f7f647b9bb4861600f583180f9b"},
-    {file = "mkdocs_material-9.5.20.tar.gz", hash = "sha256:986eef0250d22f70fb06ce0f4eac64cc92bd797a589ec3892ce31fad976fe3da"},
+    {file = "mkdocs_material-9.5.21-py3-none-any.whl", hash = "sha256:210e1f179682cd4be17d5c641b2f4559574b9dea2f589c3f0e7c17c5bd1959bc"},
+    {file = "mkdocs_material-9.5.21.tar.gz", hash = "sha256:049f82770f40559d3c2aa2259c562ea7257dbb4aaa9624323b5ef27b2d95a450"},
 ]
 
 [package.dependencies]
@@ -3623,4 +3624,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "25c76bb6728e034be0a2accfa5b5dfba0693673d2d002f2653debffb26aa5c0b"
+content-hash = "42840d0085eaf14d15b3bc599e7fb33852fa47ee2f193a42726462c6c0f74840"
