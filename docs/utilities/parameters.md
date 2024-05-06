@@ -9,7 +9,7 @@ The parameters utility provides high-level functions to retrieve one or multiple
 ## Key features
 
 * Retrieve one or multiple parameters from the underlying provider
-* Cache parameter values for a given amount of time (defaults to 5 seconds)
+* Cache parameter values for a given amount of time (defaults to 5 minutes)
 * Transform parameter values from JSON or base 64 encoded strings
 * Bring Your Own Parameter Store Provider
 
@@ -143,7 +143,7 @@ The following environment variables are available to configure the parameter uti
 
 | Setting               | Description                                                                    | Environment variable                | Default |
 |-----------------------|--------------------------------------------------------------------------------|-------------------------------------|---------|
-| **Max Age**           | Adjusts for how long values are kept in cache (in seconds).                    | `POWERTOOLS_PARAMETERS_MAX_AGE`     | `5`     |
+| **Max Age**           | Adjusts for how long values are kept in cache (in seconds).                    | `POWERTOOLS_PARAMETERS_MAX_AGE`     | `300`   |
 | **Debug Sample Rate** | Sets whether to decrypt or not values retrieved from AWS SSM Parameters Store. | `POWERTOOLS_PARAMETERS_SSM_DECRYPT` | `false` |
 
 You can also use [`POWERTOOLS_PARAMETERS_MAX_AGE`](#adjusting-cache-ttl) through the `max_age` parameter and [`POWERTOOLS_PARAMETERS_SSM_DECRYPT`](#ssmprovider) through the `decrypt` parameter to override the environment variable values.
@@ -155,7 +155,7 @@ You can also use [`POWERTOOLS_PARAMETERS_MAX_AGE`](#adjusting-cache-ttl) through
 ???+ tip
 	`max_age` parameter is also available in underlying provider functions like `get()`, `get_multiple()`, etc.
 
-By default, we cache parameters retrieved in-memory for 5 seconds. If you want to change this default value and set the same TTL for all parameters, you can set the `POWERTOOLS_PARAMETERS_MAX_AGE` environment variable. **You can still set `max_age` for individual parameters**.
+By default, we cache parameters retrieved in-memory for 300 seconds (5 minutes). If you want to change this default value and set the same TTL for all parameters, you can set the `POWERTOOLS_PARAMETERS_MAX_AGE` environment variable. **You can still set `max_age` for individual parameters**.
 
 You can adjust how long we should keep values in cache by using the param `max_age`, when using  `get_parameter()`, `get_parameters()` and `get_secret()` methods across all providers.
 
@@ -446,8 +446,8 @@ Here is the mapping between this utility's functions and methods and the underly
 | SSM Parameter Store | `SSMProvider.get_multiple`      | `ssm`            | [get_parameters_by_path](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ssm.html#SSM.Client.get_parameters_by_path){target="_blank"}                                                                                                                                                                                                                            |
 | Secrets Manager     | `get_secret`                    | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
 | Secrets Manager     | `SecretsProvider.get`           | `secretsmanager` | [get_secret_value](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/secretsmanager.html#SecretsManager.Client.get_secret_value){target="_blank"}                                                                                                                                                                                                                  |
-| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})                                                                                                                                                                                                                                                         | [get_item](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.get_item) |
-| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})                                                                                                                                                                                                                                                         | [query](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#DynamoDB.Table.query)       |
+| DynamoDB            | `DynamoDBProvider.get`          | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})    |
+| DynamoDB            | `DynamoDBProvider.get_multiple` | `dynamodb`       | ([Table resource](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html#table){target="_blank"})    |
 | App Config          | `get_app_config`                | `appconfigdata`  | [start_configuration_session](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.start_configuration_session){target="_blank"} and [get_latest_configuration](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/appconfigdata.html#AppConfigData.Client.get_latest_configuration){target="_blank"} |
 
 ### Bring your own boto client

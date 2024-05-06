@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     from mypy_boto3_ssm import SSMClient
 
 
-DEFAULT_MAX_AGE_SECS = "5"
+DEFAULT_MAX_AGE_SECS = "300"
 
 # These providers will be dynamically initialized on first use of the helper functions
 DEFAULT_PROVIDERS: Dict[str, Any] = {}
