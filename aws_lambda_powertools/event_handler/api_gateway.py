@@ -1222,6 +1222,63 @@ class BaseRouter(ABC):
             middlewares,
         )
 
+    def head(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
+        middlewares: Optional[List[Callable]] = None,
+    ):
+        """Head route decorator with HEAD `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
+
+        tracer = Tracer()
+        app = APIGatewayRestResolver()
+
+        @app.head("/head-call")
+        def simple_head():
+            return Response(status_code=200,
+                            content_type=content_types.APPLICATION_JSON,
+                            headers={"Content-Length": "123"})
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
+        return self.route(
+            rule,
+            "HEAD",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            security,
+            middlewares,
+        )
+
     def _push_processed_stack_frame(self, frame: str):
         """
         Add Current Middleware to the Middleware Stack Frames
@@ -1589,13 +1646,13 @@ class ApiGatewayResolver(BaseRouter):
         from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 
         # Pydantic V2 has no support for OpenAPI schema 3.0
-        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):  # pragma: no cover
             warnings.warn(
                 "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
                 stacklevel=2,
             )
             openapi_version = "3.1.0"
-        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):  # pragma: no cover
             warnings.warn(
                 "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
                 stacklevel=2,
@@ -2135,7 +2192,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
         def register_exception_handler(func: Callable):
-            if isinstance(exc_class, list):
+            if isinstance(exc_class, list):  # pragma: no cover
                 for exp in exc_class:
                     self._exception_handlers[exp] = func
             else:

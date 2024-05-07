@@ -126,7 +126,7 @@ class APIGatewayProxyEvent(BaseProxyEvent):
         return super().resolved_query_string_parameters
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         headers: Dict[str, Any] = {}
 
         if self.multi_value_headers:
@@ -319,7 +319,7 @@ class APIGatewayProxyEventV2(BaseProxyEvent):
         return HttpApiHeadersSerializer()
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         if self.headers is not None:
             headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
             return headers
