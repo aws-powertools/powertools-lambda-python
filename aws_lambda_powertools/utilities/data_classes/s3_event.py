@@ -39,7 +39,7 @@ class S3EventBridgeNotificationObject(DictWrapper):
     @property
     def etag(self) -> str:
         """Object etag. Object deletion event doesn't contain etag; we default to empty string"""
-        return self.get("etag", "")
+        return self.get("etag", "")  # type: ignore[return-value]  # false positive
 
     @property
     def version_id(self) -> str:
