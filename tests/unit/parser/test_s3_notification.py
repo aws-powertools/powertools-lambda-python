@@ -52,8 +52,8 @@ def test_s3_eventbridge_notification_object_deleted_event():
     assert model.detail.version == raw_event["detail"]["version"]
     assert model.detail.bucket.name == raw_event["detail"]["bucket"]["name"]
     assert model.detail.object.key == raw_event["detail"]["object"]["key"]
-    assert model.detail.object.size == raw_event["detail"]["object"]["size"]
-    assert model.detail.object.etag == raw_event["detail"]["object"]["etag"]
+    assert model.detail.object.size == raw_event["detail"]["object"].get("size")
+    assert model.detail.object.etag == raw_event["detail"]["object"].get("etag")
     assert model.detail.object.sequencer == raw_event["detail"]["object"]["sequencer"]
     assert model.detail.request_id == raw_event["detail"]["request-id"]
     assert model.detail.requester == raw_event["detail"]["requester"]
