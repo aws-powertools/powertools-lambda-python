@@ -129,6 +129,7 @@ omit = [
   "aws_lambda_powertools/exceptions/*",
   "aws_lambda_powertools/utilities/parser/types.py",
   "aws_lambda_powertools/utilities/jmespath_utils/envelopes.py",
+  "aws_lambda_powertools/metrics/metric.py"  # barrel import (export-only)
 ]
 branch = true
 
