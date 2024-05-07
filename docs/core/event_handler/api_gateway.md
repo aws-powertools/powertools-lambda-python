@@ -221,7 +221,7 @@ You can use named decorators to specify the HTTP method that should be handled i
     --8<-- "examples/event_handler_rest/src/http_methods.json"
     ```
 
-If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of HTTP methods.
+If you need to accept multiple HTTP methods in a single function, or support a HTTP method for which no decorator exists (e.g. [TRACE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE)), you can use the `route` method and pass a list of HTTP methods.
 
 ```python hl_lines="15" title="Handling multiple HTTP Methods"
 --8<-- "examples/event_handler_rest/src/http_methods_multiple.py"
@@ -524,12 +524,12 @@ Behind the scenes, the [data validation](#data-validation) feature auto-generate
 
 There are some important **caveats** that you should know before enabling it:
 
-| Caveat                                               | Description                                                                                                                                                                              |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Swagger UI is **publicly accessible by default**         | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism. |
-| **No micro-functions support** yet                       | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                     |
-| You need to expose a **new route**                       | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                         |
-| JS and CSS  files are **embedded within Swagger HTML**   | If you are not using an external CDN to serve Swagger UI assets, we embed JS and CSS directly into the HTML. To enhance performance, please consider enabling the `compress` option to minimize the size of HTTP requests. |
+| Caveat                                                 | Description                                                                                                                                                                                                                |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Swagger UI is **publicly accessible by default**       | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism.                                   |
+| **No micro-functions support** yet                     | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                                       |
+| You need to expose a **new route**                     | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                                                                                                                |
+| JS and CSS  files are **embedded within Swagger HTML** | If you are not using an external CDN to serve Swagger UI assets, we embed JS and CSS directly into the HTML. To enhance performance, please consider enabling the `compress` option to minimize the size of HTTP requests. |
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"
@@ -835,8 +835,8 @@ As a practical example, let's refactor our correlation ID middleware so it accep
 
 These are native middlewares that may become native features depending on customer demand.
 
-| Middleware                                                                                                                | Purpose                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Middleware                                                                                                                | Purpose                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | [SchemaValidationMiddleware](/lambda/python/latest/api/event_handler/middlewares/schema_validation.html){target="_blank"} | Validates API request body and response against JSON Schema, using [Validation utility](../../utilities/validation.md){target="_blank"} |
 
 #### Being a good citizen
@@ -991,6 +991,18 @@ To implement these customizations, include extra parameters when defining your r
 --8<-- "examples/event_handler_rest/src/customizing_api_operations.py"
 ```
 
+#### Customizing OpenAPI metadata
+
+--8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
+
+Include extra parameters when exporting your OpenAPI specification to apply these customizations:
+
+=== "customizing_api_metadata.py"
+
+    ```python hl_lines="25-31"
+    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
+    ```
+
 #### Customizing Swagger UI
 
 ???+note "Customizing the Swagger metadata"
@@ -1014,16 +1026,44 @@ Below is an example configuration for serving Swagger UI from a custom path or C
    --8<-- "examples/event_handler_rest/src/customizing_swagger_middlewares.py"
    ```
 
-#### Customizing OpenAPI metadata
+#### Security schemes
 
---8<-- "docs/core/event_handler/_openapi_customization_metadata.md"
+???-info "Does Powertools implement any of the security schemes?"
+    No. Powertools adds support for generating OpenAPI documentation with [security schemes](https://swagger.io/docs/specification/authentication/), but it doesn't implement any of the security schemes itself, so you must implement the security mechanisms separately.
 
-Include extra parameters when exporting your OpenAPI specification to apply these customizations:
+OpenAPI uses the term security scheme for [authentication and authorization schemes](https://swagger.io/docs/specification/authentication/){target="_blank"}.
+When you're describing your API, declare security schemes at the top level, and reference them globally or per operation.
 
-=== "customizing_api_metadata.py"
+=== "Global OpenAPI security schemes"
 
-    ```python hl_lines="25-31"
-    --8<-- "examples/event_handler_rest/src/customizing_api_metadata.py"
+    ```python title="security_schemes_global.py" hl_lines="32-42"
+    --8<-- "examples/event_handler_rest/src/security_schemes_global.py"
+    ```
+
+    1. Using the oauth security scheme defined earlier, scoped to the "admin" role.
+
+=== "Per Operation security"
+
+    ```python title="security_schemes_per_operation.py" hl_lines="17 32-41"
+    --8<-- "examples/event_handler_rest/src/security_schemes_per_operation.py"
+    ```
+
+    1. Using the oauth security scheme defined bellow, scoped to the "admin" role.
+
+OpenAPI 3 lets you describe APIs protected using the following security schemes:
+
+| Security Scheme                                                                                                                                                                         | Type            | Description                                                                                                                                                                                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [HTTP auth](https://www.iana.org/assignments/http-authschemes/http-authschemes.xhtml){target="_blank"}                                                                                  | `HTTPBase`      | HTTP authentication schemes using the Authorization header (e.g: [Basic auth](https://swagger.io/docs/specification/authentication/basic-authentication/){target="_blank"}, [Bearer](https://swagger.io/docs/specification/authentication/bearer-authentication/){target="_blank"}) |
+| [API keys](https://swagger.io/docs/specification/authentication/api-keys/https://swagger.io/docs/specification/authentication/api-keys/){target="_blank"} (e.g: query strings, cookies) | `APIKey`        | API keys in headers, query strings or [cookies](https://swagger.io/docs/specification/authentication/cookie-authentication/){target="_blank"}.                                                                                                                                      |
+| [OAuth 2](https://swagger.io/docs/specification/authentication/oauth2/){target="_blank"}                                                                                                | `OAuth2`        | Authorization protocol that gives an API client limited access to user data on a web server.                                                                                                                                                                                        |
+| [OpenID Connect Discovery](https://swagger.io/docs/specification/authentication/openid-connect-discovery/){target="_blank"}                                                             | `OpenIdConnect` | Identity layer built [on top of the OAuth 2.0 protocol](https://openid.net/developers/how-connect-works/){target="_blank"} and supported by some OAuth 2.0.                                                                                                                         |
+
+???-note "Using OAuth2 with the Swagger UI?"
+    You can use the `OAuth2Config` option to configure a default OAuth2 app on the generated Swagger UI.
+
+    ```python hl_lines="10 15-18 22"
+    --8<-- "examples/event_handler_rest/src/swagger_with_oauth2.py"
     ```
 
 ### Custom serializer
