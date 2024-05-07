@@ -410,7 +410,7 @@ def _normalize_multi_query_string_with_param(
     return resolved_query_string
 
 
-def _normalize_multi_header_values_with_param(headers: Optional[Dict[str, str]], params: Sequence[ModelField]):
+def _normalize_multi_header_values_with_param(headers: Dict[str, Any], params: Sequence[ModelField]):
     """
     Extract and normalize resolved_headers_field
 
