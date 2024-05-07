@@ -233,7 +233,6 @@ class Logger:
         self.child = child
         self.logger_formatter = logger_formatter
         self._stream = stream or sys.stdout
-        self.logger_handler = logger_handler or logging.StreamHandler(self._stream)
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
@@ -241,6 +240,7 @@ class Logger:
         )
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
+        self.logger_handler = self._get_handler(custom_handler=logger_handler)
 
         # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
         # previously, we masked all of them as kwargs thus limiting feature discovery
@@ -278,6 +278,15 @@ class Logger:
             logger_name = f"{self.service}.{_get_caller_filename()}"
 
         return logging.getLogger(logger_name)
+
+    def _get_handler(self, custom_handler: logging.Handler):
+        if self.child:
+            return self._logger.parent.powertools_handler
+
+        if custom_handler:
+            return custom_handler
+
+        return logging.StreamHandler(self._stream)
 
     def _init_logger(
         self,
@@ -317,6 +326,7 @@ class Logger:
         # std logging will return the same Logger with our attribute if name is reused
         logger.debug(f"Marking logger {self.service} as preconfigured")
         self._logger.init = True  # type: ignore[attr-defined]
+        self._logger.powertools_handler = self.logger_handler  # type: ignore[attr-defined]
 
     def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
@@ -672,10 +682,7 @@ class Logger:
     @property
     def registered_handler(self) -> logging.Handler:
         """Convenience property to access the first logger handler"""
-        # We ignore mypy here because self.child encodes whether or not self._logger.parent is
-        # None, mypy can't see this from context but we can
-        handlers = self._logger.parent.handlers if self.child else self._logger.handlers  # type: ignore[union-attr]
-        return handlers[0]
+        return self.logger_handler
 
     @property
     def registered_formatter(self) -> BasePowertoolsFormatter:

@@ -1176,3 +1176,40 @@ def test_logger_json_unicode(stdout, service_name):
 
     assert log["message"] == non_ascii_chars
     assert log[japanese_field] == japanese_string
+
+
+def test_logger_registered_handler_is_custom_handler(service_name):
+    # GIVEN a library or environment pre-setup a logger for us using the same name (see #4277)
+    class ForeignHandler(logging.StreamHandler): ...
+
+    foreign_handler = ForeignHandler()
+    logging.getLogger(service_name).addHandler(foreign_handler)
+
+    # WHEN Logger init with a custom handler
+    custom_handler = logging.StreamHandler()
+    logger = Logger(service=service_name, logger_handler=custom_handler)
+
+    # THEN registered handler should always return what we provided
+    assert logger.registered_handler is not foreign_handler
+    assert logger.registered_handler is custom_handler
+    assert logger.logger_handler is custom_handler
+
+
+def test_child_logger_registered_handler_is_custom_handler(service_name):
+    # GIVEN
+    class ForeignHandler(logging.StreamHandler): ...
+
+    foreign_handler = ForeignHandler()
+    logging.getLogger(service_name).addHandler(foreign_handler)
+
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "CUSTOM HANDLER"
+    parent = Logger(service=service_name, logger_handler=custom_handler)
+
+    # WHEN a child Logger init
+    child = Logger(service=service_name, child=True)
+
+    # THEN child registered handler should always return what we provided in the parent
+    assert child.registered_handler is not foreign_handler
+    assert child.registered_handler is custom_handler
+    assert child.registered_handler is parent.registered_handler
