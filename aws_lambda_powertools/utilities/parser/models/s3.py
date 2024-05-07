@@ -61,7 +61,7 @@ class S3Message(BaseModel):
 class S3EventNotificationObjectModel(BaseModel):
     key: str
     size: Optional[NonNegativeFloat] = None
-    etag: Optional[str]
+    etag: str = Field(default="")
     version_id: str = Field(None, alias="version-id")
     sequencer: Optional[str] = None
 
