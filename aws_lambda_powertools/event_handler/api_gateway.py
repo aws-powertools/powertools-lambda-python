@@ -1646,13 +1646,13 @@ class ApiGatewayResolver(BaseRouter):
         from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 
         # Pydantic V2 has no support for OpenAPI schema 3.0
-        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):
+        if PYDANTIC_V2 and not openapi_version.startswith("3.1"):  # pragma: no cover
             warnings.warn(
                 "You are using Pydantic v2, which is incompatible with OpenAPI schema 3.0. Forcing OpenAPI 3.1",
                 stacklevel=2,
             )
             openapi_version = "3.1.0"
-        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):
+        elif not PYDANTIC_V2 and not openapi_version.startswith("3.0"):  # pragma: no cover
             warnings.warn(
                 "You are using Pydantic v1, which is incompatible with OpenAPI schema 3.1. Forcing OpenAPI 3.0",
                 stacklevel=2,
@@ -2192,7 +2192,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
         def register_exception_handler(func: Callable):
-            if isinstance(exc_class, list):
+            if isinstance(exc_class, list):  # pragma: no cover
                 for exp in exc_class:
                     self._exception_handlers[exp] = func
             else:
