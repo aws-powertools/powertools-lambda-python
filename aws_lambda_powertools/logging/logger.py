@@ -19,6 +19,7 @@ from typing import (
     Optional,
     TypeVar,
     Union,
+    cast,
     overload,
 )
 
@@ -284,14 +285,14 @@ class Logger:
 
         return logging.getLogger(logger_name)
 
-    def _get_handler(self) -> logging.Handler | None:
+    def _get_handler(self) -> logging.Handler:
         # is a logger handler already configured?
         if getattr(self, LOGGER_ATTRIBUTE_HANDLER, None):
             return self.logger_handler
 
         # for children, use parent's handler
         if self.child:
-            return getattr(self._logger.parent, LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER, None)
+            return getattr(self._logger.parent, LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER, None)  # type: ignore[return-value] # always checked in formatting
 
         # otherwise, create a new stream handler (first time init)
         return logging.StreamHandler(self._stream)
@@ -695,15 +696,15 @@ class Logger:
     @property
     def registered_formatter(self) -> BasePowertoolsFormatter:
         """Convenience property to access the first logger formatter"""
-        if self.child:
-            if self._get_handler() is None:
-                raise OrphanedChildLoggerError(
-                    "Orphan child loggers cannot append nor remove keys until a parent is initialized first. "
-                    "To solve this issue, you can A) make sure a parent logger is initialized first, or B) move append/remove keys operations to a later stage."  # noqa: E501
-                    "Reference: https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#reusing-logger-across-your-code",
-                )
+        handler = self.registered_handler
+        if handler is None:
+            raise OrphanedChildLoggerError(
+                "Orphan child loggers cannot append nor remove keys until a parent is initialized first. "
+                "To solve this issue, you can A) make sure a parent logger is initialized first, or B) move append/remove keys operations to a later stage."  # noqa: E501
+                "Reference: https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#reusing-logger-across-your-code",
+            )
 
-        return self.registered_handler.formatter
+        return cast(BasePowertoolsFormatter, handler.formatter)
 
     @property
     def log_level(self) -> int:
