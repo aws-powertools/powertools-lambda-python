@@ -131,8 +131,8 @@ def test_copy_config_to_ext_loggers_include_exclude(stdout, logger, log_level):
     # AND external logger_1 is also in EXCLUDE list
     utils.copy_config_to_registered_loggers(
         source_logger=powertools_logger,
-        include={logger_1.name, logger_2.name},
         exclude={logger_1.name},
+        include={logger_1.name, logger_2.name},
     )
     msg = "test message3"
     logger_2.info(msg)
@@ -175,8 +175,8 @@ def test_copy_config_to_ext_loggers_custom_log_level(stdout, logger, log_level, 
     # AND external logger used with custom log_level
     utils.copy_config_to_registered_loggers(
         source_logger=powertools_logger,
-        include={logger.name},
         log_level=level_to_set,
+        include={logger.name},
     )
     msg = "test message4"
     logger.warning(msg)
@@ -263,7 +263,7 @@ def test_copy_config_to_ext_loggers_no_duplicate_logs(stdout, logger, log_level)
 
     # WHEN configuration copied from Powertools for AWS Lambda (Python) logger
     # AND external logger used with custom log_level
-    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, include={logger.name}, log_level=level)
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, log_level=level, include={logger.name})
     msg = "test message4"
     logger.warning(msg)
 
@@ -294,3 +294,22 @@ def test_logger_name_is_included_during_copy(stdout, logger, log_level):
     assert logger1_log["name"] == logger_1.name
     assert logger2_log["name"] == logger_2.name
     assert pt_log["name"] == powertools_logger.name
+
+
+def test_copy_config_to_ext_loggers_but_preserve_log_levels(stdout, logger, log_level):
+    # GIVEN two external loggers and Powertools for AWS Lambda (Python) logger initialized
+    third_party_log_level = logging.CRITICAL
+
+    logger_1 = logger()
+    logger_2 = logger()
+    logger_1.setLevel(third_party_log_level)
+    logger_2.setLevel(third_party_log_level)
+
+    powertools_logger = Logger(service=service_name(), stream=stdout)
+
+    # WHEN configuration copied from Powertools for AWS Lambda (Python) logger to ALL external loggers
+    utils.copy_config_to_registered_loggers(source_logger=powertools_logger, ignore_log_level=True)
+
+    # THEN external loggers log levels should be preserved
+    assert logger_1.level != powertools_logger.log_level
+    assert logger_2.level != powertools_logger.log_level
