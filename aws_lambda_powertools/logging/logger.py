@@ -270,7 +270,7 @@ class Logger:
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
     # https://github.com/aws-powertools/powertools-lambda-python/issues/1660
-    if not TYPE_CHECKING:
+    if not TYPE_CHECKING:  # pragma: no cover
 
         def __getattr__(self, name):
             # Proxy attributes not found to actual logger to support backward compatibility
