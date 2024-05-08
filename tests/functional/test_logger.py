@@ -1193,6 +1193,7 @@ def test_logger_registered_handler_is_custom_handler(service_name):
     assert logger.registered_handler is not foreign_handler
     assert logger.registered_handler is custom_handler
     assert logger.logger_handler is custom_handler
+    assert logger.handlers == [foreign_handler, custom_handler]
 
 
 def test_child_logger_registered_handler_is_custom_handler(service_name):
@@ -1213,6 +1214,18 @@ def test_child_logger_registered_handler_is_custom_handler(service_name):
     assert child.registered_handler is not foreign_handler
     assert child.registered_handler is custom_handler
     assert child.registered_handler is parent.registered_handler
+
+
+def test_logger_handler_is_created_despite_env_pre_setup(service_name):
+    # GIVEN a library or environment pre-setup a logger for us using the same name
+    environment_handler = logging.StreamHandler()
+    logging.getLogger(service_name).addHandler(environment_handler)
+
+    # WHEN Logger init without a custom handler
+    logger = Logger(service=service_name)
+
+    # THEN registered handler should be Powertools default handler, not env
+    assert logger.registered_handler is not environment_handler
 
 
 def test_child_logger_append_keys_before_parent(stdout, service_name):
