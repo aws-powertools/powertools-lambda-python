@@ -475,9 +475,9 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name will reuse a previous Logger instance.
 
-Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
+Notice in the CloudWatch Logs output how `payment_id` appears as expected when logging in `collect.py`.
 
 === "logger_reuse.py"
 
@@ -496,17 +496,6 @@ Notice in the CloudWatch Logs output how `payment_id` appeared as expected when 
     ```json hl_lines="12"
     --8<-- "examples/logger/src/logger_reuse_output.json"
     ```
-
-???+ note "Note: About Child Loggers"
-    Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
-
-    In Powertools, you can have the same effect by using `child=True` parameter: `Logger(child=True)`. This creates a new Logger instance named after `service.<module>`. All state changes will be propagated bi-directionally between Child and Parent.
-
-    For that reason, there could be side effects depending on the order the Child Logger is instantiated, because Child Loggers don't have a handler.
-
-    For example, if you instantiated a Child Logger and immediately used `logger.append_keys/remove_keys/set_correlation_id` to update logging state, this might fail if the Parent Logger wasn't instantiated.
-
-    In this scenario, you can either ensure any calls manipulating state are only called when a Parent Logger is instantiated (example above), or refrain from using `child=True` parameter altogether.
 
 ### Sampling debug logs
 
@@ -582,7 +571,7 @@ You can use import and use them as any other Logger formatter via `logger_format
 
 ### Migrating from other Loggers
 
-If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Inheriting Loggers](#inheriting-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
+If you're migrating from other Loggers, there are few key points to be aware of: [Service parameter](#the-service-parameter), [Child Loggers](#child-loggers), [Overriding Log records](#overriding-log-records), and [Logging exceptions](#logging-exceptions).
 
 #### The service parameter
 
@@ -590,23 +579,32 @@ Service is what defines the Logger name, including what the Lambda function is r
 
 For Logger, the `service` is the logging key customers can use to search log operations for one or more functions - For example, **search for all errors, or messages like X, where service is payment**.
 
-#### Inheriting Loggers
+#### Child Loggers
 
-??? tip "Tip: Prefer [Logger Reuse feature](#reusing-logger-across-your-code) over inheritance unless strictly necessary, [see caveats.](#reusing-logger-across-your-code)"
+<center>
+```mermaid
+stateDiagram-v2
+    direction LR
+    Parent: Logger()
+    Child: Logger(child=True)
 
-> Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
+    Parent --> Child: bi-directional updates
 
-For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
+    Note right of Child
+        Both have the same service
+    end note
 
-For child Loggers, we introspect the name of your module where `Logger(child=True, service="name")` is called, and we name your Logger as **{service}.{filename}**.
+```
+</center>
 
-???+ danger
-    A common issue when migrating from other Loggers is that `service` might be defined in the parent Logger (no child param), and not defined in the child Logger:
+For inheritance, Logger uses `child` parameter to ensure we don't compete with its parents config. We name child Loggers following Python's convention: _`{service}`.`{filename}`_.
 
-=== "logging_inheritance_bad.py"
+Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same `service` name is important when instantiating them.
+
+=== "logging_inheritance_good.py"
 
     ```python hl_lines="1 9"
-    --8<-- "examples/logger/src/logging_inheritance_bad.py"
+    --8<-- "examples/logger/src/logging_inheritance_good.py"
     ```
 
 === "logging_inheritance_module.py"
@@ -615,17 +613,17 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
 
-In this case, Logger will register a Logger named `payment`, and a Logger named `service_undefined`. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.
+There are two important side effects when using child loggers:
 
-???+ tip
-    This can be fixed by either ensuring both has the `service` value as `payment`, or simply use the environment variable `POWERTOOLS_SERVICE_NAME` to ensure service value will be the same across all Loggers when not explicitly set.
+1. **Service name mismatch**. Logging messages will be dropped as child loggers don't have logging handlers.
+    * Solution: use `POWERTOOLS_SERVICE_NAME` env var. Alternatively, use the same service explicit value.
+2. **Changing state before a parent instantiate**. Using `logger.append_keys` or `logger.remove_keys` without a parent Logger will lead to `OrphanedChildLoggerError` exception.
+    * Solution: always initialize parent Loggers first. Alternatively, move calls to `append_keys`/`remove_keys` from the child at a later stage.
 
-Do this instead:
-
-=== "logging_inheritance_good.py"
+=== "logging_inheritance_bad.py"
 
     ```python hl_lines="1 9"
-    --8<-- "examples/logger/src/logging_inheritance_good.py"
+    --8<-- "examples/logger/src/logging_inheritance_bad.py"
     ```
 
 === "logging_inheritance_module.py"
