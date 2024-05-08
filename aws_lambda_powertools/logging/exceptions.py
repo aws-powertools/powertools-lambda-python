@@ -2,5 +2,5 @@ class InvalidLoggerSamplingRateError(Exception):
     pass
 
 
-class OrphanedChildLoggerError(AttributeError):
+class OrphanedChildLoggerError(Exception):
     pass

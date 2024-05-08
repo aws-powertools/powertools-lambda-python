@@ -631,7 +631,7 @@ class Logger:
 
         # Mode 1
         log_keys = {**self._default_log_keys, **keys}
-        is_logger_preconfigured = getattr(self._logger, "init", False)
+        is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if not is_logger_preconfigured:
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)
             self.registered_handler.setFormatter(formatter)
