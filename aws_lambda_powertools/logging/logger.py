@@ -22,6 +22,11 @@ from typing import (
     overload,
 )
 
+from aws_lambda_powertools.logging.constants import (
+    LOGGER_ATTRIBUTE_HANDLER,
+    LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
+    LOGGER_ATTRIBUTE_PRECONFIGURED,
+)
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
@@ -240,7 +245,7 @@ class Logger:
         )
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
-        self.logger_handler = self._get_handler(custom_handler=logger_handler)
+        self.logger_handler = logger_handler or self._get_handler()
 
         # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
         # previously, we masked all of them as kwargs thus limiting feature discovery
@@ -279,13 +284,16 @@ class Logger:
 
         return logging.getLogger(logger_name)
 
-    def _get_handler(self, custom_handler: logging.Handler):
+    def _get_handler(self) -> logging.Handler | None:
+        # is a logger handler already configured?
+        if getattr(self, LOGGER_ATTRIBUTE_HANDLER, None):
+            return self.logger_handler
+
+        # for children, use parent's handler
         if self.child:
-            return self._logger.parent.powertools_handler
+            return getattr(self._logger.parent, LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER, None)
 
-        if custom_handler:
-            return custom_handler
-
+        # otherwise, create a new stream handler (first time init)
         return logging.StreamHandler(self._stream)
 
     def _init_logger(
@@ -301,7 +309,7 @@ class Logger:
         #   a) multiple handlers being attached
         #   b) different sampling mechanisms
         #   c) multiple messages from being logged as handlers can be duplicated
-        is_logger_preconfigured = getattr(self._logger, "init", False)
+        is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child or is_logger_preconfigured:
             return
 
@@ -682,7 +690,7 @@ class Logger:
     @property
     def registered_handler(self) -> logging.Handler:
         """Convenience property to access the first logger handler"""
-        return self.logger_handler
+        return self._get_handler()
 
     @property
     def registered_formatter(self) -> BasePowertoolsFormatter:

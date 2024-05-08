@@ -9,6 +9,7 @@ MIDDLEWARE_FACTORY_TRACE_ENV: str = "POWERTOOLS_TRACE_MIDDLEWARES"
 INVALID_XRAY_NAME_CHARACTERS = r"[?;*()!$~^<>]"
 
 # Logger constants
+# maintenance: future major version should start having localized `constants.py` to ease future modularization
 LOGGER_LOG_SAMPLING_RATE: str = "POWERTOOLS_LOGGER_SAMPLE_RATE"
 LOGGER_LOG_EVENT_ENV: str = "POWERTOOLS_LOGGER_LOG_EVENT"
 LOGGER_LOG_DEDUPLICATION_ENV: str = "POWERTOOLS_LOG_DEDUPLICATION_DISABLED"

@@ -1213,3 +1213,13 @@ def test_child_logger_registered_handler_is_custom_handler(service_name):
     assert child.registered_handler is not foreign_handler
     assert child.registered_handler is custom_handler
     assert child.registered_handler is parent.registered_handler
+
+
+def test_child_logger_append_keys_before_parent(stdout, service_name):
+    # GIVEN a child Logger is initialized before its/without parent
+    child = Logger(stream=stdout, service=service_name, child=True)
+
+    # WHEN a child Logger append a key
+    # THEN it will raise an AttributeError
+    with pytest.raises(AttributeError):
+        child.append_keys(customer_id="value")
