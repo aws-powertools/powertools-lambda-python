@@ -17,7 +17,7 @@ import pytest
 
 from aws_lambda_powertools import Logger, Tracer, set_package_logger_handler
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
+from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
 from aws_lambda_powertools.logging.formatter import (
     BasePowertoolsFormatter,
     LambdaPowertoolsFormatter,
@@ -1232,7 +1232,7 @@ def test_child_logger_append_keys_before_parent(stdout, service_name):
     # GIVEN a child Logger is initialized before its/without parent
     child = Logger(stream=stdout, service=service_name, child=True)
 
-    # WHEN a child Logger append a key
+    # WHEN a child Logger appends a key
     # THEN it will raise an AttributeError
-    with pytest.raises(AttributeError):
+    with pytest.raises(OrphanedChildLoggerError):
         child.append_keys(customer_id="value")

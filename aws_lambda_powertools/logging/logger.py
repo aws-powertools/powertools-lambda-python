@@ -36,7 +36,7 @@ from aws_lambda_powertools.shared.functions import (
 from aws_lambda_powertools.utilities import jmespath_utils
 
 from ..shared.types import AnyCallableT
-from .exceptions import InvalidLoggerSamplingRateError
+from .exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
 from .filters import SuppressFilter
 from .formatter import (
     RESERVED_FORMATTER_CUSTOM_KEYS,
@@ -695,7 +695,15 @@ class Logger:
     @property
     def registered_formatter(self) -> BasePowertoolsFormatter:
         """Convenience property to access the first logger formatter"""
-        return self.registered_handler.formatter  # type: ignore[return-value]
+        if self.child:
+            if self._get_handler() is None:
+                raise OrphanedChildLoggerError(
+                    "Orphan child loggers cannot append nor remove keys until a parent is initialized first. "
+                    "To solve this issue, you can A) make sure a parent logger is initialized first, or B) move append/remove keys operations to a later stage."  # noqa: E501
+                    "Reference: https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#reusing-logger-across-your-code",
+                )
+
+        return self.registered_handler.formatter
 
     @property
     def log_level(self) -> int:
