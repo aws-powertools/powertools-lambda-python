@@ -315,3 +315,4 @@ examples/**/sam/.aws-sam
 cdk.out
 # NOTE: different accounts will be used for E2E thus creating unnecessary git clutter
 cdk.context.json
+bla.py
