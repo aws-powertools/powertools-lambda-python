@@ -170,7 +170,7 @@ class BaseProxyEvent(DictWrapper):
         return {}
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         """
         This property determines the appropriate header to be used
         as a trusted source for validating OpenAPI.
