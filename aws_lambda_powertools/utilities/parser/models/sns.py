@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Dict, List, Optional, Union
 from typing import Type as TypingType
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 from pydantic.networks import HttpUrl
 
 from aws_lambda_powertools.utilities.parser.types import Literal
@@ -26,7 +26,7 @@ class SnsNotificationModel(BaseModel):
     Timestamp: datetime
     SignatureVersion: Optional[str] = None  # NOTE: FIFO opt-in removes attribute
 
-    @root_validator(pre=True, allow_reuse=True)
+    @model_validator(mode="before")
     def check_sqs_protocol(cls, values):
         sqs_rewritten_keys = ("UnsubscribeURL", "SigningCertURL")
         if any(key in sqs_rewritten_keys for key in values):

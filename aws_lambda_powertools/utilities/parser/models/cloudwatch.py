@@ -5,7 +5,7 @@ import zlib
 from datetime import datetime
 from typing import Optional, Type, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 from aws_lambda_powertools.shared.types import List
 
@@ -31,7 +31,7 @@ class CloudWatchLogsDecode(BaseModel):
 class CloudWatchLogsData(BaseModel):
     decoded_data: CloudWatchLogsDecode = Field(None, alias="data")
 
-    @validator("decoded_data", pre=True, allow_reuse=True)
+    @field_validator("decoded_data", mode="before")
     def prepare_data(cls, value):
         try:
             logger.debug("Decoding base64 cloudwatch log data before parsing")

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 from pydantic.networks import IPvAnyNetwork
 
 from aws_lambda_powertools.utilities.parser.types import Literal
@@ -70,7 +70,7 @@ class APIGatewayEventRequestContext(BaseModel):
     routeKey: Optional[str] = None
     operationName: Optional[str] = None
 
-    @root_validator(allow_reuse=True, skip_on_failure=True)
+    @model_validator(mode="before")
     def check_message_id(cls, values):
         message_id, event_type = values.get("messageId"), values.get("eventType")
         if message_id is not None and event_type != "MESSAGE":

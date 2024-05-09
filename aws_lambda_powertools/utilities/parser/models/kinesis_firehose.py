@@ -1,6 +1,6 @@
 from typing import List, Optional, Type, Union
 
-from pydantic import BaseModel, PositiveInt, validator
+from pydantic import BaseModel, PositiveInt, field_validator
 
 from aws_lambda_powertools.shared.functions import base64_decode
 
@@ -19,7 +19,7 @@ class KinesisFirehoseRecord(BaseModel):
     approximateArrivalTimestamp: PositiveInt
     kinesisRecordMetadata: Optional[KinesisFirehoseRecordMetadata] = None
 
-    @validator("data", pre=True, allow_reuse=True)
+    @field_validator("data", mode="before")
     def data_base64_decode(cls, value):
         return base64_decode(value)
 

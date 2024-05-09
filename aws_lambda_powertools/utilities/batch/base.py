@@ -352,11 +352,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
             # If a model is provided, we assume Pydantic is installed and we need to disable v2 warnings
-            from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
-
-            disable_pydantic_v2_warning()
-
-            return model.parse_obj(record)
+            return model.model_validate(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
 
     def _register_model_validation_error_record(self, record: dict):

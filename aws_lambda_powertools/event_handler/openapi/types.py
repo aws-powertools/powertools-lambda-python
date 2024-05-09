@@ -41,7 +41,7 @@ validation_error_response_definition = {
         "detail": {
             "title": "Detail",
             "type": "array",
-            "items": {"$ref": COMPONENT_REF_PREFIX + "ValidationError"},
+            "items": {"$ref": f"{COMPONENT_REF_PREFIX}ValidationError"},
         },
     },
 }

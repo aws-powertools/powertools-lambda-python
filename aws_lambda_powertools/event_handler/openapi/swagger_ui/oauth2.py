@@ -2,9 +2,8 @@
 import warnings
 from typing import Dict, Optional, Sequence
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
-from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 
 
@@ -42,15 +41,9 @@ class OAuth2Config(BaseModel):
     # Whether to use PKCE with the authorization code grant type. Defaults to False.
     usePkceWithAuthorizationCodeGrant: bool = Field(alias="use_pkce_with_authorization_code_grant", default=False)
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-    else:
+    model_config = {"extra": "allow"}
 
-        class Config:
-            extra = "allow"
-            allow_population_by_field_name = True
-
-    @validator("clientSecret", always=True)
+    @field_validator("clientSecret")
     def client_secret_only_on_dev(cls, v: Optional[str]) -> Optional[str]:
         if not v:
             return None
