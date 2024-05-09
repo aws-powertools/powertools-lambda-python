@@ -89,8 +89,8 @@ def test_api_gateway_proxy_event():
     assert request_context.api_id == request_context_raw["apiId"]
 
     authorizer = request_context.authorizer
-    assert authorizer.claims is None
-    assert authorizer.scopes is None
+    assert authorizer.claims == {}
+    assert authorizer.scopes == []
 
     assert request_context.domain_name == request_context_raw["domainName"]
     assert request_context.domain_prefix == request_context_raw["domainPrefix"]
@@ -144,8 +144,8 @@ def test_api_gateway_proxy_event_with_principal_id():
 
     request_context = parsed_event.request_context
     authorizer = request_context.authorizer
-    assert authorizer.claims is None
-    assert authorizer.scopes is None
+    assert authorizer.claims == {}
+    assert authorizer.scopes == []
     assert authorizer.principal_id == raw_event["requestContext"]["authorizer"]["principalId"]
     assert authorizer.integration_latency == raw_event["requestContext"]["authorizer"]["integrationLatency"]
     assert authorizer.get("integrationStatus", "failed") == "failed"
