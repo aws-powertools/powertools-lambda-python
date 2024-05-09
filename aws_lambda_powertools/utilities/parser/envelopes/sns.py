@@ -34,7 +34,7 @@ class SnsEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with SNS model {SnsModel}")
-        parsed_envelope = SnsModel.parse_obj(data)
+        parsed_envelope = SnsModel.model_validate(data)
         logger.debug(f"Parsing SNS records in `body` with {model}")
         return [self._parse(data=record.Sns.Message, model=model) for record in parsed_envelope.Records]
 
@@ -66,11 +66,11 @@ class SnsSqsEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with SQS model {SqsModel}")
-        parsed_envelope = SqsModel.parse_obj(data)
+        parsed_envelope = SqsModel.model_validate(data)
         output = []
         for record in parsed_envelope.Records:
             # We allow either AWS expected contract (str) or a custom Model, see #943
             body = cast(str, record.body)
-            sns_notification = SnsNotificationModel.parse_raw(body)
+            sns_notification = SnsNotificationModel.model_validate_json(body)
             output.append(self._parse(data=sns_notification.Message, model=model))
         return output

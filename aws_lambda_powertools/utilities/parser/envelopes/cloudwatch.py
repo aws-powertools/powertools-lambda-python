@@ -34,7 +34,7 @@ class CloudWatchLogsEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with SNS model {CloudWatchLogsModel}")
-        parsed_envelope = CloudWatchLogsModel.parse_obj(data)
+        parsed_envelope = CloudWatchLogsModel.model_validate(data)
         logger.debug(f"Parsing CloudWatch records in `body` with {model}")
         return [
             self._parse(data=record.message, model=model) for record in parsed_envelope.awslogs.decoded_data.logEvents

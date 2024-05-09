@@ -27,6 +27,6 @@ class BedrockAgentEnvelope(BaseEnvelope):
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with Bedrock Agent model {BedrockAgentEventModel}")
-        parsed_envelope: BedrockAgentEventModel = BedrockAgentEventModel.parse_obj(data)
+        parsed_envelope: BedrockAgentEventModel = BedrockAgentEventModel.model_validate(data)
         logger.debug(f"Parsing event payload in `input_text` with {model}")
         return self._parse(data=parsed_envelope.input_text, model=model)

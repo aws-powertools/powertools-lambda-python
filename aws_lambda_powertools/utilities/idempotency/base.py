@@ -39,14 +39,22 @@ def _prepare_data(data: Any) -> Any:
     We will convert Python dataclasses, pydantic models or event source data classes to a dict,
     otherwise return data as-is.
     """
+
+    # Convert from dataclasses
     if hasattr(data, "__dataclass_fields__"):
         import dataclasses
 
         return dataclasses.asdict(data)
 
+    # Convert from Pydantic model
+    if callable(getattr(data, "model_dump", None)):
+        return data.model_dump()
+
+    # Convert from event source data class
     if callable(getattr(data, "dict", None)):
         return data.dict()
 
+    # Return raw event
     return getattr(data, "raw_event", data)
 
 

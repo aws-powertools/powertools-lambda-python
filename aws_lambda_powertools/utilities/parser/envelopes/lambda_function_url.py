@@ -27,6 +27,6 @@ class LambdaFunctionUrlEnvelope(BaseEnvelope):
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with Lambda function URL model {LambdaFunctionUrlModel}")
-        parsed_envelope: LambdaFunctionUrlModel = LambdaFunctionUrlModel.parse_obj(data)
+        parsed_envelope: LambdaFunctionUrlModel = LambdaFunctionUrlModel.model_validate(data)
         logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.body, model=model)

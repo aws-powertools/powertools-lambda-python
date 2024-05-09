@@ -27,6 +27,6 @@ class VpcLatticeEnvelope(BaseEnvelope):
             Parsed detail payload with model provided
         """
         logger.debug(f"Parsing incoming data with VPC Lattice model {VpcLatticeModel}")
-        parsed_envelope: VpcLatticeModel = VpcLatticeModel.parse_obj(data)
+        parsed_envelope: VpcLatticeModel = VpcLatticeModel.model_validate(data)
         logger.debug(f"Parsing event payload in `detail` with {model}")
         return self._parse(data=parsed_envelope.body, model=model)

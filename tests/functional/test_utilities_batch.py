@@ -5,6 +5,7 @@ from typing import Any, Awaitable, Callable, Dict, Optional
 
 import pytest
 from botocore.config import Config
+from pydantic import field_validator
 
 from aws_lambda_powertools.utilities.batch import (
     AsyncBatchProcessor,
@@ -24,7 +25,7 @@ from aws_lambda_powertools.utilities.data_classes.kinesis_stream_event import (
     KinesisStreamRecord,
 )
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
-from aws_lambda_powertools.utilities.parser import BaseModel, validator
+from aws_lambda_powertools.utilities.parser import BaseModel
 from aws_lambda_powertools.utilities.parser.models import (
     DynamoDBStreamChangedRecordModel,
     DynamoDBStreamRecordModel,
@@ -523,7 +524,7 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
 
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
-        @validator("Message", pre=True)
+        @field_validator("Message", mode="before")
         def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
             return json.loads(value["S"])
 
@@ -567,7 +568,7 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
 
         # auto transform json string
         # so Pydantic can auto-initialize nested Order model
-        @validator("Message", pre=True)
+        @field_validator("Message", mode="before")
         def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
             return json.loads(value["S"])
 

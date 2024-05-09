@@ -101,7 +101,7 @@ class S3RecordModel(BaseModel):
     s3: S3Message
     glacierEventData: Optional[S3EventRecordGlacierEventData] = None
 
-    @root_validator(allow_reuse=True, skip_on_failure=True)
+    @root_validator(allow_reuse=True, skip_on_failure=True)  # review
     def validate_s3_object(cls, values):
         event_name = values.get("eventName")
         s3_object = values.get("s3").object

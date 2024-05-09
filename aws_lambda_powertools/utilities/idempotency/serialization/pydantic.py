@@ -25,16 +25,10 @@ class PydanticSerializer(BaseIdempotencyModelSerializer):
         self.__model: Type[BaseModel] = model
 
     def to_dict(self, data: BaseModel) -> Dict:
-        if callable(getattr(data, "model_dump", None)):
-            # Support for pydantic V2
-            return data.model_dump()  # type: ignore[unused-ignore,attr-defined]
-        return data.dict()
+        return data.model_dump()
 
     def from_dict(self, data: Dict) -> BaseModel:
-        if callable(getattr(self.__model, "model_validate", None)):
-            # Support for pydantic V2
-            return self.__model.model_validate(data)  # type: ignore[unused-ignore,attr-defined]
-        return self.__model.parse_obj(data)
+        return self.__model.model_validate(data)
 
     @classmethod
     def instantiate(cls, model_type: Any) -> BaseIdempotencySerializer:

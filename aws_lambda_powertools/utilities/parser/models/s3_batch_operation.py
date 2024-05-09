@@ -12,7 +12,7 @@ class S3BatchOperationTaskModel(BaseModel):
     s3BucketArn: Optional[str] = None
     s3Bucket: Optional[str] = None
 
-    @validator("s3Bucket", pre=True, always=True)
+    @validator("s3Bucket", pre=True, always=True)  # review
     def validate_bucket(cls, current_value, values):
         # Get the s3 bucket, either from 's3Bucket' property (invocationSchemaVersion '2.0')
         # or from 's3BucketArn' (invocationSchemaVersion '1.0')

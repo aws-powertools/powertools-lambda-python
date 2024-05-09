@@ -88,7 +88,12 @@ def test_openapi_200_custom_schema():
 
     @app.get(
         "/",
-        responses={200: {"description": "Custom response", "content": {"application/json": {"schema": User.schema()}}}},
+        responses={
+            200: {
+                "description": "Custom response",
+                "content": {"application/json": {"schema": User.model_json_schema()}},
+            },
+        },
     )
     def handler():
         return {"message": "hello world"}

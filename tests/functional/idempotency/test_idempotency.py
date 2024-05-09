@@ -1344,7 +1344,7 @@ def test_idempotent_function_serialization_pydantic(output_serializer_type: str)
         output_serializer=output_serializer,
     )
     def collect_payment(payment: PaymentInput) -> PaymentOutput:
-        return PaymentOutput(**payment.dict())
+        return PaymentOutput(**payment.model_dump())
 
     # WHEN
     payment = PaymentInput(**mock_event)
@@ -1383,7 +1383,7 @@ def test_idempotent_function_serialization_pydantic_failure_no_return_type():
 
         @idempotent_function_decorator
         def collect_payment(payment: PaymentInput):
-            return PaymentOutput(**payment.dict())
+            return PaymentOutput(**payment.model_dump())
 
 
 def test_idempotent_function_serialization_pydantic_failure_bad_type():
@@ -1411,7 +1411,7 @@ def test_idempotent_function_serialization_pydantic_failure_bad_type():
 
         @idempotent_function_decorator
         def collect_payment(payment: PaymentInput) -> dict:
-            return PaymentOutput(**payment.dict())
+            return PaymentOutput(**payment.model_dump())
 
 
 @pytest.mark.parametrize("output_serializer_type", ["explicit", "deduced"])
@@ -1747,7 +1747,7 @@ def test_idempotent_function_pydantic():
     expected_result = {"name": "Bar"}
     data = Foo(name="Bar")
     as_dict = _prepare_data(data)
-    assert as_dict == data.dict()
+    assert as_dict == data.model_dump()
     assert as_dict == expected_result
 
 

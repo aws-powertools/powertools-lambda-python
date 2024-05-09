@@ -35,7 +35,7 @@ class KinesisDataStreamEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with Kinesis model {KinesisDataStreamModel}")
-        parsed_envelope: KinesisDataStreamModel = KinesisDataStreamModel.parse_obj(data)
+        parsed_envelope: KinesisDataStreamModel = KinesisDataStreamModel.model_validate(data)
         logger.debug(f"Parsing Kinesis records in `body` with {model}")
         models = []
         for record in parsed_envelope.Records:
