@@ -4,9 +4,8 @@ from typing import List
 
 import pytest
 from pydantic import BaseModel
-from pydantic.color import Color  # review
 
-from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
+from aws_lambda_powertools.event_handler.openapi.encoders import Color, jsonable_encoder
 
 
 def test_openapi_encode_include():

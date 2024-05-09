@@ -10,8 +10,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from uuid import UUID
 
 from pydantic import BaseModel
-from pydantic.color import Color
 from pydantic.types import SecretBytes, SecretStr
+from pydantic_extra_types.color import Color
 
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
 from aws_lambda_powertools.event_handler.openapi.types import IncEx

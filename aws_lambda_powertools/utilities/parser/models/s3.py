@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, root_validator
+from pydantic import BaseModel, model_validator
 from pydantic.fields import Field
 from pydantic.networks import IPvAnyNetwork
 from pydantic.types import NonNegativeFloat
@@ -101,13 +101,12 @@ class S3RecordModel(BaseModel):
     s3: S3Message
     glacierEventData: Optional[S3EventRecordGlacierEventData] = None
 
-    @root_validator(allow_reuse=True, skip_on_failure=True)  # review
+    @model_validator(mode="before")
     def validate_s3_object(cls, values):
         event_name = values.get("eventName")
-        s3_object = values.get("s3").object
-        if "ObjectRemoved" not in event_name:
-            if s3_object.size is None or s3_object.eTag is None:
-                raise ValueError("S3Object.size and S3Object.eTag are required for non-ObjectRemoved events")
+        s3_object = values.get("s3").get("object")
+        if "ObjectRemoved" not in event_name and (s3_object.get("size") is None or s3_object.get("eTag") is None):
+            raise ValueError("S3Object.size and S3Object.eTag are required for non-ObjectRemoved events")
         return values
 
 

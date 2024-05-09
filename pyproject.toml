@@ -42,6 +42,7 @@ python = ">=3.8,<4.0.0"
 aws-xray-sdk = { version = "^2.8.0", optional = true }
 fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^2.0.3", optional = true }
+pydantic-extra-types = { version = "^2.0.3", optional = true }
 boto3 = { version = "^1.34.32", optional = true }
 redis = { version = ">=4.4,<6.0", optional = true }
 typing-extensions = "^4.11.0"
@@ -95,7 +96,7 @@ aws-requests-auth = "^0.4.3"
 datadog-lambda = "^5.94.0"
 
 [tool.poetry.extras]
-parser = ["pydantic"]
+parser = ["pydantic", "pydantic-extra-types"]
 validation = ["fastjsonschema"]
 tracer = ["aws-xray-sdk"]
 redis = ["redis"]
@@ -103,6 +104,7 @@ all = [
   "pydantic",
   "aws-xray-sdk",
   "fastjsonschema",
+  "pydantic-extra-types"
 ]
 # allow customers to run code locally without emulators (SAM CLI, etc.)
 aws-sdk = ["boto3"]
