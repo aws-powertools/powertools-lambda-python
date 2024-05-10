@@ -221,7 +221,7 @@ You can use named decorators to specify the HTTP method that should be handled i
     --8<-- "examples/event_handler_rest/src/http_methods.json"
     ```
 
-If you need to accept multiple HTTP methods in a single function, you can use the `route` method and pass a list of HTTP methods.
+If you need to accept multiple HTTP methods in a single function, or support a HTTP method for which no decorator exists (e.g. [TRACE](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/TRACE)), you can use the `route` method and pass a list of HTTP methods.
 
 ```python hl_lines="15" title="Handling multiple HTTP Methods"
 --8<-- "examples/event_handler_rest/src/http_methods_multiple.py"
