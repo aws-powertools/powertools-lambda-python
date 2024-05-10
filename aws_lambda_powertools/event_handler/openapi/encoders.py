@@ -10,7 +10,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 from uuid import UUID
 
 from pydantic import BaseModel
-from pydantic.color import Color
 from pydantic.types import SecretBytes, SecretStr
 
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
@@ -318,7 +317,6 @@ def decimal_encoder(dec_value: Decimal) -> Union[int, float]:
 # Encoders for types that are not JSON serializable
 ENCODERS_BY_TYPE: Dict[Type[Any], Callable[[Any], Any]] = {
     bytes: lambda o: o.decode(),
-    Color: str,
     datetime.date: iso_format,
     datetime.datetime: iso_format,
     datetime.time: iso_format,

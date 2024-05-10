@@ -309,7 +309,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
             # we convert to an event source data class...but self.model is still true
             # therefore, we do an additional check on whether the failed message is still a model
             # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
-            if self.model and getattr(msg, "parse_obj", None):
+            if self.model and getattr(msg, "model_validate", None):
                 msg_id = msg.messageId
             else:
                 msg_id = msg.message_id
@@ -320,7 +320,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         failures = []
         for msg in self.fail_messages:
             # # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
-            if self.model and getattr(msg, "parse_obj", None):
+            if self.model and getattr(msg, "model_validate", None):
                 msg_id = msg.kinesis.sequenceNumber
             else:
                 msg_id = msg.kinesis.sequence_number
@@ -331,7 +331,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
         failures = []
         for msg in self.fail_messages:
             # see https://github.com/aws-powertools/powertools-lambda-python/issues/2091
-            if self.model and getattr(msg, "parse_obj", None):
+            if self.model and getattr(msg, "model_validate", None):
                 msg_id = msg.dynamodb.SequenceNumber
             else:
                 msg_id = msg.dynamodb.sequence_number
@@ -352,11 +352,7 @@ class BasePartialBatchProcessor(BasePartialProcessor):  # noqa
     def _to_batch_type(self, record: dict, event_type: EventType, model: Optional["BatchTypeModels"] = None):
         if model is not None:
             # If a model is provided, we assume Pydantic is installed and we need to disable v2 warnings
-            from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
-
-            disable_pydantic_v2_warning()
-
-            return model.parse_obj(record)
+            return model.model_validate(record)
         return self._DATA_CLASS_MAPPING[event_type](record)
 
     def _register_model_validation_error_record(self, record: dict):

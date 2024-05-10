@@ -31,7 +31,7 @@ class DynamoDBStreamEnvelope(BaseEnvelope):
             List of dictionaries with NewImage and OldImage records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with DynamoDB Stream model {DynamoDBStreamModel}")
-        parsed_envelope = DynamoDBStreamModel.parse_obj(data)
+        parsed_envelope = DynamoDBStreamModel.model_validate(data)
         logger.debug(f"Parsing DynamoDB Stream new and old records with {model}")
         return [
             {

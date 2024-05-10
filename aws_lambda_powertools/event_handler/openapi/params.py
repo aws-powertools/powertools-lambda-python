@@ -15,7 +15,6 @@ from aws_lambda_powertools.event_handler.openapi.compat import (
     field_annotation_is_scalar,
     get_annotation_from_field_info,
 )
-from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.event_handler.openapi.types import CacheKey
 from aws_lambda_powertools.shared.types import Annotated, Literal, get_args, get_origin
 
@@ -203,21 +202,18 @@ class Param(FieldInfo):
             kwargs["examples"] = examples
 
         current_json_schema_extra = json_schema_extra or extra
-        if PYDANTIC_V2:
-            kwargs.update(
-                {
-                    "annotation": annotation,
-                    "alias_priority": alias_priority,
-                    "validation_alias": validation_alias,
-                    "serialization_alias": serialization_alias,
-                    "strict": strict,
-                    "json_schema_extra": current_json_schema_extra,
-                    "pattern": pattern,
-                },
-            )
-        else:
-            kwargs["regex"] = pattern
-            kwargs.update(**current_json_schema_extra)
+
+        kwargs.update(
+            {
+                "annotation": annotation,
+                "alias_priority": alias_priority,
+                "validation_alias": validation_alias,
+                "serialization_alias": serialization_alias,
+                "strict": strict,
+                "json_schema_extra": current_json_schema_extra,
+                "pattern": pattern,
+            },
+        )
 
         use_kwargs = {k: v for k, v in kwargs.items() if v is not _Unset}
 
@@ -700,21 +696,18 @@ class Body(FieldInfo):
         if examples is not None:
             kwargs["examples"] = examples
         current_json_schema_extra = json_schema_extra or extra
-        if PYDANTIC_V2:
-            kwargs.update(
-                {
-                    "annotation": annotation,
-                    "alias_priority": alias_priority,
-                    "validation_alias": validation_alias,
-                    "serialization_alias": serialization_alias,
-                    "strict": strict,
-                    "json_schema_extra": current_json_schema_extra,
-                    "pattern": pattern,
-                },
-            )
-        else:
-            kwargs["regex"] = pattern
-            kwargs.update(**current_json_schema_extra)
+
+        kwargs.update(
+            {
+                "annotation": annotation,
+                "alias_priority": alias_priority,
+                "validation_alias": validation_alias,
+                "serialization_alias": serialization_alias,
+                "strict": strict,
+                "json_schema_extra": current_json_schema_extra,
+                "pattern": pattern,
+            },
+        )
 
         use_kwargs = {k: v for k, v in kwargs.items() if v is not _Unset}
 
@@ -943,8 +936,7 @@ def analyze_param(
             raise AssertionError("Cannot use a FieldInfo as a parameter annotation and pass a FieldInfo as a value")
         field_info = value
 
-        if PYDANTIC_V2:
-            field_info.annotation = type_annotation  # type: ignore[attr-defined,unused-ignore]
+        field_info.annotation = type_annotation  # type: ignore[attr-defined,unused-ignore]
 
     # If we didn't determine the FieldInfo yet, we create a default one
     if field_info is None:
@@ -1041,29 +1033,14 @@ def create_response_field(
     """
     Create a new response field. Raises if type_ is invalid.
     """
-    if PYDANTIC_V2:
-        field_info = field_info or FieldInfo(
-            annotation=type_,
-            default=default,
-            alias=alias,
-        )
-    else:
-        field_info = field_info or FieldInfo()
-    kwargs = {"name": name, "field_info": field_info}
+    field_info = field_info or FieldInfo(
+        annotation=type_,
+        default=default,
+        alias=alias,
+    )
 
-    if PYDANTIC_V2:
-        kwargs.update({"mode": mode})
-    else:
-        kwargs.update(
-            {
-                "type_": type_,
-                "class_validators": {},
-                "default": default,
-                "required": required,
-                "model_config": model_config,
-                "alias": alias,
-            },
-        )
+    kwargs = {"name": name, "field_info": field_info, "mode": mode}
+
     return ModelField(**kwargs)  # type: ignore[arg-type]
 
 

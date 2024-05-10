@@ -38,7 +38,7 @@ class KafkaEnvelope(BaseEnvelope):
         )
 
         logger.debug(f"Parsing incoming data with Kafka event model {model_parse_event}")
-        parsed_envelope = model_parse_event.parse_obj(data)
+        parsed_envelope = model_parse_event.model_validate(data)
         logger.debug(f"Parsing Kafka event records in `value` with {model}")
         ret_list = []
         for records in parsed_envelope.records.values():

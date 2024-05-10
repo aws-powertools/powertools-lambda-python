@@ -37,7 +37,7 @@ class KinesisFirehoseEnvelope(BaseEnvelope):
             List of records parsed with model provided
         """
         logger.debug(f"Parsing incoming data with Kinesis Firehose model {KinesisFirehoseModel}")
-        parsed_envelope: KinesisFirehoseModel = KinesisFirehoseModel.parse_obj(data)
+        parsed_envelope: KinesisFirehoseModel = KinesisFirehoseModel.model_validate(data)
         logger.debug(f"Parsing Kinesis Firehose records in `body` with {model}")
         models = []
         for record in parsed_envelope.records:

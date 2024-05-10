@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, model_validator
 
 from aws_lambda_powertools.utilities.parser.types import Literal
 
@@ -12,14 +12,12 @@ class S3BatchOperationTaskModel(BaseModel):
     s3BucketArn: Optional[str] = None
     s3Bucket: Optional[str] = None
 
-    @validator("s3Bucket", pre=True, always=True)
-    def validate_bucket(cls, current_value, values):
-        # Get the s3 bucket, either from 's3Bucket' property (invocationSchemaVersion '2.0')
-        # or from 's3BucketArn' (invocationSchemaVersion '1.0')
-        if values.get("s3BucketArn") and not current_value:
-            # Replace s3Bucket value with the value from s3BucketArn
-            return values["s3BucketArn"].split(":::")[-1]
-        return current_value
+    @model_validator(mode="before")
+    def validate_s3bucket(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get("s3BucketArn") and not values.get("s3Bucket"):
+            values["s3Bucket"] = values["s3BucketArn"].split(":::")[-1]
+
+        return values
 
 
 class S3BatchOperationJobModel(BaseModel):

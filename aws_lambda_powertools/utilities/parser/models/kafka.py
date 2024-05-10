@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Type, Union
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 from aws_lambda_powertools.shared.functions import base64_decode, bytes_to_string
 from aws_lambda_powertools.utilities.parser.types import Literal
@@ -20,14 +20,14 @@ class KafkaRecordModel(BaseModel):
     headers: List[Dict[str, bytes]]
 
     # Added type ignore to keep compatibility between Pydantic v1 and v2
-    _decode_key = validator("key", allow_reuse=True)(base64_decode)  # type: ignore[type-var, unused-ignore]
+    _decode_key = field_validator("key")(base64_decode)  # type: ignore[type-var, unused-ignore]
 
-    @validator("value", pre=True, allow_reuse=True)
+    @field_validator("value", mode="before")
     def data_base64_decode(cls, value):
         as_bytes = base64_decode(value)
         return bytes_to_string(as_bytes)
 
-    @validator("headers", pre=True, allow_reuse=True)
+    @field_validator("headers", mode="before")
     def decode_headers_list(cls, value):
         for header in value:
             for key, values in header.items():
@@ -39,7 +39,7 @@ class KafkaBaseEventModel(BaseModel):
     bootstrapServers: List[str]
     records: Dict[str, List[KafkaRecordModel]]
 
-    @validator("bootstrapServers", pre=True, allow_reuse=True)
+    @field_validator("bootstrapServers", mode="before")
     def split_servers(cls, value):
         return None if not value else value.split(SERVERS_DELIMITER)
 

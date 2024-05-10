@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, Optional, Type, Union
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class VpcLatticeV2RequestContextIdentity(BaseModel):
@@ -26,7 +26,7 @@ class VpcLatticeV2RequestContext(BaseModel):
     time_epoch: float = Field(alias="timeEpoch")
     time_epoch_as_datetime: datetime = Field(alias="timeEpoch")
 
-    @validator("time_epoch_as_datetime", pre=True, allow_reuse=True)
+    @field_validator("time_epoch_as_datetime", mode="before")
     def time_epoch_convert_to_miliseconds(cls, value: int):
         return round(int(value) / 1000)
 

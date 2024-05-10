@@ -3,7 +3,6 @@ from typing import Any, Dict
 
 from aws_lambda_powertools.event_handler import BedrockAgentResolver, Response, content_types
 from aws_lambda_powertools.event_handler.openapi.params import Body
-from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
 from aws_lambda_powertools.shared.types import Annotated
 from aws_lambda_powertools.utilities.data_classes import BedrockAgentEvent
 from tests.functional.utils import load_event
@@ -124,10 +123,7 @@ def test_bedrock_agent_event_with_validation_error():
     assert result["response"]["httpStatusCode"] == 422
 
     body = json.loads(result["response"]["responseBody"]["application/json"]["body"])
-    if PYDANTIC_V2:
-        assert body["detail"][0]["type"] == "dict_type"
-    else:
-        assert body["detail"][0]["type"] == "type_error.dict"
+    assert body["detail"][0]["type"] == "dict_type"
 
 
 def test_bedrock_agent_event_with_exception():

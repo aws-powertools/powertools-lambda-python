@@ -414,7 +414,7 @@ Here's a snippet of how the EventBridge envelope we demonstrated previously is i
             Any
                 Parsed detail payload with model provided
             """
-            parsed_envelope = EventBridgeModel.parse_obj(data)
+            parsed_envelope = EventBridgeModel.model_validate(data)
             return self._parse(data=parsed_envelope.detail, model=model)
     ```
 

@@ -4,7 +4,10 @@ from typing import Any, Dict, List, Optional, Set, Union
 from pydantic import AnyUrl, BaseModel, Field
 
 from aws_lambda_powertools.event_handler.openapi.compat import model_rebuild
-from aws_lambda_powertools.event_handler.openapi.pydantic_loader import PYDANTIC_V2
+from aws_lambda_powertools.event_handler.openapi.constants import (
+    MODEL_CONFIG_ALLOW,
+    MODEL_CONFIG_IGNORE,
+)
 from aws_lambda_powertools.shared.types import Annotated, Literal
 
 """
@@ -19,12 +22,7 @@ class Contact(BaseModel):
     url: Optional[AnyUrl] = None
     email: Optional[str] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#license-object
@@ -33,13 +31,7 @@ class License(BaseModel):
     identifier: Optional[str] = None
     url: Optional[AnyUrl] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#info-object
@@ -50,15 +42,9 @@ class Info(BaseModel):
     contact: Optional[Contact] = None
     license: Optional[License] = None  # noqa: A003
     version: str
+    summary: Optional[str] = None
 
-    if PYDANTIC_V2:
-        summary: Optional[str] = None
-        model_config = {"extra": "ignore"}
-
-    else:
-
-        class Config:
-            extra = "ignore"
+    model_config = MODEL_CONFIG_IGNORE
 
 
 # https://swagger.io/specification/#server-variable-object
@@ -67,13 +53,7 @@ class ServerVariable(BaseModel):
     default: str
     description: Optional[str] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#server-object
@@ -82,13 +62,7 @@ class Server(BaseModel):
     description: Optional[str] = None
     variables: Optional[Dict[str, ServerVariable]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#reference-object
@@ -110,13 +84,7 @@ class XML(BaseModel):
     attribute: Optional[bool] = None
     wrapped: Optional[bool] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#external-documentation-object
@@ -124,13 +92,7 @@ class ExternalDocumentation(BaseModel):
     description: Optional[str] = None
     url: AnyUrl
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#schema-object
@@ -213,13 +175,7 @@ class Schema(BaseModel):
     xml: Optional[XML] = None
     externalDocs: Optional[ExternalDocumentation] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # Ref: https://json-schema.org/draft/2020-12/json-schema-core.html#name-json-schema-documents
@@ -234,13 +190,7 @@ class Example(BaseModel):
     value: Optional[Any] = None
     externalValue: Optional[AnyUrl] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 class ParameterInType(Enum):
@@ -258,13 +208,7 @@ class Encoding(BaseModel):
     explode: Optional[bool] = None
     allowReserved: Optional[bool] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#media-type-object
@@ -273,13 +217,7 @@ class MediaType(BaseModel):
     examples: Optional[Dict[str, Union[Example, Reference]]] = None
     encoding: Optional[Dict[str, Encoding]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#parameter-object
@@ -296,13 +234,7 @@ class ParameterBase(BaseModel):
     # Serialization rules for more complex scenarios
     content: Optional[Dict[str, MediaType]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 class Parameter(ParameterBase):
@@ -320,13 +252,7 @@ class RequestBody(BaseModel):
     content: Dict[str, MediaType]
     required: Optional[bool] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#link-object
@@ -338,13 +264,7 @@ class Link(BaseModel):
     description: Optional[str] = None
     server: Optional[Server] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#response-object
@@ -354,13 +274,7 @@ class Response(BaseModel):
     content: Optional[Dict[str, MediaType]] = None
     links: Optional[Dict[str, Union[Link, Reference]]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#tag-object
@@ -369,13 +283,7 @@ class Tag(BaseModel):
     description: Optional[str] = None
     externalDocs: Optional[ExternalDocumentation] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#operation-object
@@ -394,13 +302,7 @@ class Operation(BaseModel):
     security: Optional[List[Dict[str, List[str]]]] = None
     servers: Optional[List[Server]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#path-item-object
@@ -419,13 +321,7 @@ class PathItem(BaseModel):
     servers: Optional[List[Server]] = None
     parameters: Optional[List[Union[Parameter, Reference]]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#security-scheme-object
@@ -440,14 +336,7 @@ class SecurityBase(BaseModel):
     type_: SecuritySchemeType = Field(alias="type")
     description: Optional[str] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow", "populate_by_name": True}
-
-    else:
-
-        class Config:
-            extra = "allow"
-            allow_population_by_field_name = True
+    model_config = {"extra": "allow", "populate_by_name": True}
 
 
 class APIKeyIn(Enum):
@@ -476,13 +365,7 @@ class OAuthFlow(BaseModel):
     refreshUrl: Optional[str] = None
     scopes: Dict[str, str] = {}
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 class OAuthFlowImplicit(OAuthFlow):
@@ -508,13 +391,7 @@ class OAuthFlows(BaseModel):
     clientCredentials: Optional[OAuthFlowClientCredentials] = None
     authorizationCode: Optional[OAuthFlowAuthorizationCode] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 class OAuth2(SecurityBase):
@@ -547,13 +424,7 @@ class Components(BaseModel):
     callbacks: Optional[Dict[str, Union[Dict[str, PathItem], Reference, Any]]] = None
     pathItems: Optional[Dict[str, Union[PathItem, Reference]]] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 # https://swagger.io/specification/#openapi-object
@@ -570,13 +441,7 @@ class OpenAPI(BaseModel):
     tags: Optional[List[Tag]] = None
     externalDocs: Optional[ExternalDocumentation] = None
 
-    if PYDANTIC_V2:
-        model_config = {"extra": "allow"}
-
-    else:
-
-        class Config:
-            extra = "allow"
+    model_config = MODEL_CONFIG_ALLOW
 
 
 model_rebuild(Schema)

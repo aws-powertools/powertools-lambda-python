@@ -2,13 +2,11 @@ import logging
 import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
-from aws_lambda_powertools.utilities.parser.compat import disable_pydantic_v2_warning
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
+from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
 from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, Model
-
-from ...middleware_factory import lambda_handler_decorator
-from ..typing import LambdaContext
-from .envelopes.base import Envelope
-from .exceptions import InvalidEnvelopeError, InvalidModelTypeError
+from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
 
@@ -175,18 +173,17 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
                 f"Error: {str(exc)}. Please ensure that both the Input model and the Envelope inherits from BaseModel,\n"  # noqa E501
                 "and your payload adheres to the specified Input model structure.\n"
                 f"Envelope={envelope}\nModel={model}",
-            )
+            ) from exc
 
     try:
-        disable_pydantic_v2_warning()
         logger.debug("Parsing and validating event model; no envelope used")
         if isinstance(event, str):
-            return model.parse_raw(event)
+            return model.model_validate_json(event)
 
-        return model.parse_obj(event)
+        return model.model_validate(event)
     except AttributeError as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
             "and your payload adheres to the specified Input model structure.\n"
             f"Model={model}",
-        )
+        ) from exc
