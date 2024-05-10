@@ -26,10 +26,10 @@ def test_s3_eventbridge_notification_detail_parsed(raw_event: Dict):
     assert parsed_event.detail.deletion_type == raw_event["detail"].get("deletion-type")
     assert parsed_event.detail.destination_access_tier == raw_event["detail"].get("destination-access-tier")
     assert parsed_event.detail.destination_storage_class == raw_event["detail"].get("destination-storage-class")
-    assert parsed_event.detail.object.etag == raw_event["detail"]["object"]["etag"]
+    assert parsed_event.detail.object.etag == raw_event["detail"]["object"].get("etag", "")
     assert parsed_event.detail.object.key == raw_event["detail"]["object"]["key"]
     assert parsed_event.detail.object.sequencer == raw_event["detail"]["object"]["sequencer"]
-    assert parsed_event.detail.object.size == raw_event["detail"]["object"]["size"]
+    assert parsed_event.detail.object.size == raw_event["detail"]["object"].get("size")
     assert parsed_event.detail.reason == raw_event["detail"].get("reason")
     assert parsed_event.detail.version == raw_event["detail"].get("version")
     assert parsed_event.detail.request_id == raw_event["detail"]["request-id"]

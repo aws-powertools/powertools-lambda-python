@@ -111,7 +111,7 @@ class BedrockAgentEvent(BaseProxyEvent):
         return {x["name"]: x["value"] for x in self["parameters"]} if self.get("parameters") else None
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         return {}
 
     @cached_property
