@@ -1,11 +1,12 @@
 import math
+from collections import deque
 from dataclasses import dataclass
 from typing import List
 
 import pytest
 from pydantic import BaseModel
 
-from aws_lambda_powertools.event_handler.openapi.encoders import Color, jsonable_encoder
+from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
 
 
 def test_openapi_encode_include():
@@ -169,11 +170,11 @@ def test_openapi_encode_encodable():
 
 
 def test_openapi_encode_subclasses():
-    class MyColor(Color):
+    class MyCustomSubclass(deque):
         pass
 
-    result = jsonable_encoder(MyColor("red"))
-    assert result == "red"
+    result = jsonable_encoder(MyCustomSubclass(["red"]))
+    assert result == ["red"]
 
 
 def test_openapi_encode_other():

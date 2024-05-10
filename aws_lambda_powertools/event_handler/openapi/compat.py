@@ -22,6 +22,10 @@ from aws_lambda_powertools.event_handler.openapi.types import (
 )
 
 from pydantic import TypeAdapter, ValidationError
+
+# Importing from internal libraries in Pydantic may introduce potential risks, as these internal libraries
+# are not part of the public API and may change without notice in future releases.
+# We use this for forward reference, as it allows us to handle forward references in type annotations.
 from pydantic._internal._typing_extra import eval_type_lenient
 from pydantic.fields import FieldInfo
 from pydantic._internal._utils import lenient_issubclass

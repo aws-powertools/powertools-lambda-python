@@ -2,6 +2,7 @@ import base64
 import json
 import re
 import zlib
+from collections import deque
 from copy import deepcopy
 from decimal import Decimal
 from enum import Enum
@@ -1052,23 +1053,16 @@ def test_custom_serializer():
 
     app = ApiGatewayResolver(serializer=custom_serializer)
 
-    class Color(Enum):
-        RED = 1
-        BLUE = 2
-
-    @app.get("/colors")
-    def get_color() -> Dict:
-        return {
-            "color": Color.RED,
-            "variations": {"light", "dark"},
-        }
+    @app.get("/custom_serializer")
+    def get_custom_values() -> Dict:
+        return {"values": deque(["name", "age"])}
 
     # WHEN calling handler
-    response = app({"httpMethod": "GET", "path": "/colors"}, None)
+    response = app({"httpMethod": "GET", "path": "/custom_serializer"}, None)
 
     # THEN then use the custom serializer
     body = response["body"]
-    expected = '{"color": 1, "variations": ["dark", "light"]}'
+    expected = '{"values": ["age", "name"]}'
     assert expected == body
 
 
