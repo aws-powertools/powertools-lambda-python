@@ -118,6 +118,18 @@ def test_openapi_swagger_with_rest_api_stage():
     assert "ui.specActions.updateUrl('/prod/swagger?format=json')" in result["body"]
 
 
+def test_openapi_swagger_with_persist_authorization():
+    app = APIGatewayRestResolver(enable_validation=True)
+    app.enable_swagger(persist_authorization=True)
+
+    event = load_event("apiGatewayProxyEvent.json")
+    event["path"] = "/swagger"
+
+    result = app(event, {})
+    assert result["statusCode"] == 200
+    assert "persistAuthorization: true" in result["body"]
+
+
 def test_openapi_swagger_oauth2_without_powertools_dev():
     with pytest.raises(ValueError) as exc:
         OAuth2Config(app_name="OAuth2 app", client_id="client_id", client_secret="verysecret")

@@ -1696,6 +1696,7 @@ class ApiGatewayResolver(BaseRouter):
         security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
         security: Optional[List[Dict[str, List[str]]]] = None,
         oauth2_config: Optional["OAuth2Config"] = None,
+        persist_authorization: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1736,6 +1737,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of which security mechanisms are applied globally across the API.
         oauth2_config: OAuth2Config, optional
             The OAuth2 configuration for the Swagger UI.
+        persist_authorization: bool, optional
+            Whether to persist authorization data on browser close/refresh.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
@@ -1814,6 +1817,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_css,
                 swagger_base_url,
                 oauth2_config,
+                persist_authorization,
             )
 
             return Response(
