@@ -158,17 +158,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.140.0a0"
+version = "2.141.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.140.0a0.tar.gz", hash = "sha256:d0d691ac30ed8f17bf90db2ac0dedce2c0f6800daa10fec6ba46c1a2e2e0966d"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.140.0a0-py3-none-any.whl", hash = "sha256:d75b895d2e8b730a9bf04d83e69942c793fca587a1060941232122af8b36ee10"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.141.0a0.tar.gz", hash = "sha256:da047d8f46cd188646e15ae21720b5eb25b370c6fd7e31b31064f3d54aea6529"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.141.0a0-py3-none-any.whl", hash = "sha256:c74aa73d0693a464a1e7a7b9b651373dec1efdb522f560d0e9cee82986761000"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.140.0,<3.0.0"
+aws-cdk-lib = ">=2.141.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.142"
+version = "0.1.144"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.142.tar.gz", hash = "sha256:89b6655e868033ade4e827d069fe32f2cd261122ed43c425263ce750f60388d8"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.142-py3-none-any.whl", hash = "sha256:02c5e09bd599a9414d1f5755a5d1f2b6ea75e1ed1d730dc08cd009da08aa3699"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.144.tar.gz", hash = "sha256:ad2d63169733b4ba08333b4084af2773f1a1a2d85fcc985925b1a38bff13ad14"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.144-py3-none-any.whl", hash = "sha256:e213470f1f9c45d624aec92379478ab684d3a5d0ff170bc11bc81bbc898db680"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.111,<3.0.0"
+cdk-nag = ">=2.28.112,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -541,13 +541,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.87.1"
+version = "0.87.2"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = "!=4.0,<=4.0,>=3.8"
 files = [
-    {file = "cfn_lint-0.87.1-py3-none-any.whl", hash = "sha256:d450f450635fc223b6f66880ccac52a5fd1a52966fa1705f1ba52b88dfed3071"},
-    {file = "cfn_lint-0.87.1.tar.gz", hash = "sha256:b3ce9d3e5e0eadcea5d584c8ccaa00bf2a990a36a64d7ffd8683bc60b7e4f06f"},
+    {file = "cfn_lint-0.87.2-py3-none-any.whl", hash = "sha256:773ba1d2f232ffdbe1197cc6ce61ddbf0da1781925e9f4dde4c91b7fcd54cc80"},
+    {file = "cfn_lint-0.87.2.tar.gz", hash = "sha256:00d47406841899c05ab6a0708df3f4e32bd7462be2097c10371d744c0050775e"},
 ]
 
 [package.dependencies]
@@ -3627,4 +3627,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "153ba8c103d98df1daeb4ceaf982eca4d8ece253367552ff8a8a67209d0eeb7c"
+content-hash = "399e7577c74af19e479a874f40d1e8e7bda943f2d07c23eccc9b84d7e633ee63"
