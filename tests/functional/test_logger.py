@@ -17,7 +17,7 @@ import pytest
 
 from aws_lambda_powertools import Logger, Tracer, set_package_logger_handler
 from aws_lambda_powertools.logging import correlation_paths
-from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
+from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
 from aws_lambda_powertools.logging.formatter import (
     BasePowertoolsFormatter,
     LambdaPowertoolsFormatter,
@@ -1176,3 +1176,63 @@ def test_logger_json_unicode(stdout, service_name):
 
     assert log["message"] == non_ascii_chars
     assert log[japanese_field] == japanese_string
+
+
+def test_logger_registered_handler_is_custom_handler(service_name):
+    # GIVEN a library or environment pre-setup a logger for us using the same name (see #4277)
+    class ForeignHandler(logging.StreamHandler): ...
+
+    foreign_handler = ForeignHandler()
+    logging.getLogger(service_name).addHandler(foreign_handler)
+
+    # WHEN Logger init with a custom handler
+    custom_handler = logging.StreamHandler()
+    logger = Logger(service=service_name, logger_handler=custom_handler)
+
+    # THEN registered handler should always return what we provided
+    assert logger.registered_handler is not foreign_handler
+    assert logger.registered_handler is custom_handler
+    assert logger.logger_handler is custom_handler
+    assert logger.handlers == [foreign_handler, custom_handler]
+
+
+def test_child_logger_registered_handler_is_custom_handler(service_name):
+    # GIVEN
+    class ForeignHandler(logging.StreamHandler): ...
+
+    foreign_handler = ForeignHandler()
+    logging.getLogger(service_name).addHandler(foreign_handler)
+
+    custom_handler = logging.StreamHandler()
+    custom_handler.name = "CUSTOM HANDLER"
+    parent = Logger(service=service_name, logger_handler=custom_handler)
+
+    # WHEN a child Logger init
+    child = Logger(service=service_name, child=True)
+
+    # THEN child registered handler should always return what we provided in the parent
+    assert child.registered_handler is not foreign_handler
+    assert child.registered_handler is custom_handler
+    assert child.registered_handler is parent.registered_handler
+
+
+def test_logger_handler_is_created_despite_env_pre_setup(service_name):
+    # GIVEN a library or environment pre-setup a logger for us using the same name
+    environment_handler = logging.StreamHandler()
+    logging.getLogger(service_name).addHandler(environment_handler)
+
+    # WHEN Logger init without a custom handler
+    logger = Logger(service=service_name)
+
+    # THEN registered handler should be Powertools default handler, not env
+    assert logger.registered_handler is not environment_handler
+
+
+def test_child_logger_append_keys_before_parent(stdout, service_name):
+    # GIVEN a child Logger is initialized before its/without parent
+    child = Logger(stream=stdout, service=service_name, child=True)
+
+    # WHEN a child Logger appends a key
+    # THEN it will raise an AttributeError
+    with pytest.raises(OrphanedChildLoggerError):
+        child.append_keys(customer_id="value")
