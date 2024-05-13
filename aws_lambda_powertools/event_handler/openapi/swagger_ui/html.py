@@ -10,6 +10,7 @@ def generate_swagger_html(
     swagger_css: str,
     swagger_base_url: str,
     oauth2_config: Optional[OAuth2Config],
+    persist_authorization: bool = False,
 ) -> str:
     """
     Generate Swagger UI HTML page
@@ -28,6 +29,8 @@ def generate_swagger_html(
         The base URL for Swagger UI
     oauth2_config: OAuth2Config, optional
         The OAuth2 configuration.
+    persist_authorization: bool, optional
+        Whether to persist authorization data on browser close/refresh.
     """
 
     # If Swagger base URL is present, generate HTML content with linked CSS and JavaScript files
@@ -86,6 +89,7 @@ def generate_swagger_html(
       SwaggerUIBundle.plugins.DownloadUrl
     ],
     withCredentials: true,
+    persistAuthorization: {str(persist_authorization).lower()},
     oauth2RedirectUrl: baseUrl + "?format=oauth2-redirect",
   }}
 

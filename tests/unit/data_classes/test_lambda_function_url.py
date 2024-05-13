@@ -1,4 +1,5 @@
 from aws_lambda_powertools.utilities.data_classes import LambdaFunctionUrlEvent
+from aws_lambda_powertools.utilities.data_classes.api_gateway_proxy_event import RequestContextV2Authorizer
 from tests.functional.utils import load_event
 
 
@@ -47,7 +48,7 @@ def test_lambda_function_url_event():
     assert http.source_ip == http_raw["sourceIp"]
     assert http.user_agent == http_raw["userAgent"]
 
-    assert request_context.authorizer is None
+    assert isinstance(request_context.authorizer, RequestContextV2Authorizer)
 
 
 def test_lambda_function_url_event_iam():
@@ -102,9 +103,9 @@ def test_lambda_function_url_event_iam():
 
     authorizer = request_context.authorizer
     assert authorizer is not None
-    assert authorizer.jwt_claim is None
-    assert authorizer.jwt_scopes is None
-    assert authorizer.get_lambda is None
+    assert authorizer.jwt_claim == {}
+    assert authorizer.jwt_scopes == []
+    assert authorizer.get_lambda == {}
 
     iam = authorizer.iam
     iam_raw = raw_event["requestContext"]["authorizer"]["iam"]
@@ -112,9 +113,9 @@ def test_lambda_function_url_event_iam():
     assert iam.access_key == iam_raw["accessKey"]
     assert iam.account_id == iam_raw["accountId"]
     assert iam.caller_id == iam_raw["callerId"]
-    assert iam.cognito_amr is None
-    assert iam.cognito_identity_id is None
-    assert iam.cognito_identity_pool_id is None
-    assert iam.principal_org_id is None
+    assert iam.cognito_amr == []
+    assert iam.cognito_identity_id == ""
+    assert iam.cognito_identity_pool_id == ""
+    assert iam.principal_org_id == ""
     assert iam.user_id == iam_raw["userId"]
     assert iam.user_arn == iam_raw["userArn"]
