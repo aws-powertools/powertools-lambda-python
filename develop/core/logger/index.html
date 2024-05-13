@@ -1017,9 +1017,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inheriting-loggers" class="md-nav__link">
+  <a href="#child-loggers" class="md-nav__link">
     <span class="md-ellipsis">
-      Inheriting Loggers
+      Child Loggers
     </span>
   </a>
   
@@ -2370,9 +2370,9 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#inheriting-loggers" class="md-nav__link">
+  <a href="#child-loggers" class="md-nav__link">
     <span class="md-ellipsis">
-      Inheriting Loggers
+      Child Loggers
     </span>
   </a>
   
@@ -3977,8 +3977,8 @@
 </tbody>
 </table>
 <h3 id="reusing-logger-across-your-code">Reusing Logger across your code<a class="headerlink" href="#reusing-logger-across-your-code" title="Permanent link">&para;</a></h3>
-<p>Similar to <a href="../tracer/#reusing-tracer-across-your-code" target="_blank">Tracer</a>, a new instance that uses the same <code>service</code> name - env var or explicit parameter - will reuse a previous Logger instance. Just like <code>logging.getLogger("logger_name")</code> would in the standard library if called with the same logger name.</p>
-<p>Notice in the CloudWatch Logs output how <code>payment_id</code> appeared as expected when logging in <code>collect.py</code>.</p>
+<p>Similar to <a href="../tracer/#reusing-tracer-across-your-code" target="_blank">Tracer</a>, a new instance that uses the same <code>service</code> name will reuse a previous Logger instance.</p>
+<p>Notice in the CloudWatch Logs output how <code>payment_id</code> appears as expected when logging in <code>collect.py</code>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="16:3"><input checked="checked" id="logger_reusepy" name="__tabbed_16" type="radio" /><input id="logger_reuse_paymentpy" name="__tabbed_16" type="radio" /><input id="logger_reuse_outputjson" name="__tabbed_16" type="radio" /><div class="tabbed-labels"><label for="logger_reusepy">logger_reuse.py</label><label for="logger_reuse_paymentpy">logger_reuse_payment.py</label><label for="logger_reuse_outputjson">logger_reuse_output.json</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -4055,14 +4055,6 @@
 </div>
 </div>
 </div>
-<details class="note" open="open">
-<summary>Note: About Child Loggers</summary>
-<p>Coming from standard library, you might be used to use <code>logging.getLogger(__name__)</code>. This will create a new instance of a Logger with a different name.</p>
-<p>In Powertools, you can have the same effect by using <code>child=True</code> parameter: <code>Logger(child=True)</code>. This creates a new Logger instance named after <code>service.&lt;module&gt;</code>. All state changes will be propagated bi-directionally between Child and Parent.</p>
-<p>For that reason, there could be side effects depending on the order the Child Logger is instantiated, because Child Loggers don't have a handler.</p>
-<p>For example, if you instantiated a Child Logger and immediately used <code>logger.append_keys/remove_keys/set_correlation_id</code> to update logging state, this might fail if the Parent Logger wasn't instantiated.</p>
-<p>In this scenario, you can either ensure any calls manipulating state are only called when a Parent Logger is instantiated (example above), or refrain from using <code>child=True</code> parameter altogether.</p>
-</details>
 <h3 id="sampling-debug-logs">Sampling debug logs<a class="headerlink" href="#sampling-debug-logs" title="Permanent link">&para;</a></h3>
 <p>Use sampling when you want to dynamically change your log level to <strong>DEBUG</strong> based on a <strong>percentage of your concurrent/cold start invocations</strong>.</p>
 <p>You can use values ranging from <code>0.0</code> to <code>1</code> (100%) when setting <code>POWERTOOLS_LOGGER_SAMPLE_RATE</code> env var, or <code>sample_rate</code> parameter in Logger.</p>
@@ -4275,24 +4267,24 @@
 </span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h3 id="migrating-from-other-loggers">Migrating from other Loggers<a class="headerlink" href="#migrating-from-other-loggers" title="Permanent link">&para;</a></h3>
-<p>If you're migrating from other Loggers, there are few key points to be aware of: <a href="#the-service-parameter">Service parameter</a>, <a href="#inheriting-loggers">Inheriting Loggers</a>, <a href="#overriding-log-records">Overriding Log records</a>, and <a href="#logging-exceptions">Logging exceptions</a>.</p>
+<p>If you're migrating from other Loggers, there are few key points to be aware of: <a href="#the-service-parameter">Service parameter</a>, <a href="#child-loggers">Child Loggers</a>, <a href="#overriding-log-records">Overriding Log records</a>, and <a href="#logging-exceptions">Logging exceptions</a>.</p>
 <h4 id="the-service-parameter">The service parameter<a class="headerlink" href="#the-service-parameter" title="Permanent link">&para;</a></h4>
 <p>Service is what defines the Logger name, including what the Lambda function is responsible for, or part of (e.g payment service).</p>
 <p>For Logger, the <code>service</code> is the logging key customers can use to search log operations for one or more functions - For example, <strong>search for all errors, or messages like X, where service is payment</strong>.</p>
-<h4 id="inheriting-loggers">Inheriting Loggers<a class="headerlink" href="#inheriting-loggers" title="Permanent link">&para;</a></h4>
-<details class="tip">
-<summary>Tip: Prefer <a href="#reusing-logger-across-your-code">Logger Reuse feature</a> over inheritance unless strictly necessary, <a href="#reusing-logger-across-your-code">see caveats.</a></summary>
-</details>
-<blockquote>
-<p>Python Logging hierarchy happens via the dot notation: <code>service</code>, <code>service.child</code>, <code>service.child_2</code></p>
-</blockquote>
-<p>For inheritance, Logger uses a <code>child=True</code> parameter along with <code>service</code> being the same value across Loggers.</p>
-<p>For child Loggers, we introspect the name of your module where <code>Logger(child=True, service="name")</code> is called, and we name your Logger as <strong>{service}.{filename}</strong>.</p>
-<details class="danger" open="open">
-<summary>Danger</summary>
-<p>A common issue when migrating from other Loggers is that <code>service</code> might be defined in the parent Logger (no child param), and not defined in the child Logger:</p>
-</details>
-<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="logging_inheritance_badpy" name="__tabbed_18" type="radio" /><input id="logging_inheritance_modulepy" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="logging_inheritance_badpy">logging_inheritance_bad.py</label><label for="logging_inheritance_modulepy">logging_inheritance_module.py</label></div>
+<h4 id="child-loggers">Child Loggers<a class="headerlink" href="#child-loggers" title="Permanent link">&para;</a></h4>
+<p><center>
+<pre class="mermaid"><code>stateDiagram-v2
+    direction LR
+    Parent: Logger()
+    Child: Logger(child=True)
+    Parent --&gt; Child: bi-directional updates
+    Note right of Child
+        Both have the same service
+    end note</code></pre>
+</center></p>
+<p>For inheritance, Logger uses <code>child</code> parameter to ensure we don't compete with its parents config. We name child Loggers following Python's convention: <em><code>{service}</code>.<code>{filename}</code></em>.</p>
+<p>Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same <code>service</code> name is important when instantiating them.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="18:2"><input checked="checked" id="logging_inheritance_goodpy" name="__tabbed_18" type="radio" /><input id="logging_inheritance_modulepy" name="__tabbed_18" type="radio" /><div class="tabbed-labels"><label for="logging_inheritance_goodpy">logging_inheritance_good.py</label><label for="logging_inheritance_modulepy">logging_inheritance_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4315,10 +4307,10 @@
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="c1"># NOTE: explicit service name differs from Child</span>
-<span class="c1"># meaning we will have two Logger instances with different state</span>
-<span class="c1"># and an orphan child logger who won&#39;t be able to manipulate state</span>
-<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">)</span>
+<span class="c1"># NOTE: explicit service name matches any new Logger</span>
+<span class="c1"># because we&#39;re using POWERTOOLS_SERVICE_NAME env var</span>
+<span class="c1"># but we could equally use the same string as service value, e.g. &quot;payment&quot;</span>
+<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
 </span>
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
@@ -4346,13 +4338,18 @@
 </div>
 </div>
 </div>
-<p>In this case, Logger will register a Logger named <code>payment</code>, and a Logger named <code>service_undefined</code>. The latter isn't inheriting from the parent, and will have no handler, resulting in no message being logged to standard output.</p>
-<details class="tip" open="open">
-<summary>Tip</summary>
-<p>This can be fixed by either ensuring both has the <code>service</code> value as <code>payment</code>, or simply use the environment variable <code>POWERTOOLS_SERVICE_NAME</code> to ensure service value will be the same across all Loggers when not explicitly set.</p>
-</details>
-<p>Do this instead:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="logging_inheritance_goodpy" name="__tabbed_19" type="radio" /><input id="logging_inheritance_modulepy_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="logging_inheritance_goodpy">logging_inheritance_good.py</label><label for="logging_inheritance_modulepy_1">logging_inheritance_module.py</label></div>
+<p>There are two important side effects when using child loggers:</p>
+<ol>
+<li><strong>Service name mismatch</strong>. Logging messages will be dropped as child loggers don't have logging handlers.<ul>
+<li>Solution: use <code>POWERTOOLS_SERVICE_NAME</code> env var. Alternatively, use the same service explicit value.</li>
+</ul>
+</li>
+<li><strong>Changing state before a parent instantiate</strong>. Using <code>logger.append_keys</code> or <code>logger.remove_keys</code> without a parent Logger will lead to <code>OrphanedChildLoggerError</code> exception.<ul>
+<li>Solution: always initialize parent Loggers first. Alternatively, move calls to <code>append_keys</code>/<code>remove_keys</code> from the child at a later stage.</li>
+</ul>
+</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="19:2"><input checked="checked" id="logging_inheritance_badpy" name="__tabbed_19" type="radio" /><input id="logging_inheritance_modulepy_1" name="__tabbed_19" type="radio" /><div class="tabbed-labels"><label for="logging_inheritance_badpy">logging_inheritance_bad.py</label><label for="logging_inheritance_modulepy_1">logging_inheritance_module.py</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -4375,10 +4372,10 @@
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools</span> <span class="kn">import</span> <span class="n">Logger</span>
 <span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
 
-<span class="c1"># NOTE: explicit service name matches any new Logger</span>
-<span class="c1"># because we&#39;re using POWERTOOLS_SERVICE_NAME env var</span>
-<span class="c1"># but we could equally use the same string as service value, e.g. &quot;payment&quot;</span>
-<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">()</span>
+<span class="c1"># NOTE: explicit service name differs from Child</span>
+<span class="c1"># meaning we will have two Logger instances with different state</span>
+<span class="c1"># and an orphan child logger who won&#39;t be able to manipulate state</span>
+<span class="hll"><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="n">service</span><span class="o">=</span><span class="s2">&quot;payment&quot;</span><span class="p">)</span>
 </span>
 
 <span class="nd">@logger</span><span class="o">.</span><span class="n">inject_lambda_context</span>
@@ -5301,7 +5298,7 @@ for the given name and level to the logging module. By default, this logs all bo
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-04-12
+    2024-05-13
   </span>
 
     
