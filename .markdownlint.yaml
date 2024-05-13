@@ -73,8 +73,6 @@ MD013:
   tables: false
   # Include headings
   headings: true
-  # Include headings
-  headers: true
   # Strict length checking
   strict: false
   # Stern length checking
@@ -107,8 +105,6 @@ MD023: true
 
 # MD024/no-duplicate-heading/no-duplicate-header - Multiple headings with the same content
 MD024:
-  # Only check sibling headings
-  allow_different_nesting: false
   # Only check sibling headings
   siblings_only: false
 
@@ -182,7 +178,7 @@ MD038: false
 MD039: true
 
 # MD040/fenced-code-language - Fenced code blocks should have a language specified
-MD040: false
+MD040: true
 
 # MD041/first-line-heading/first-line-h1 - First line in a file should be a top-level heading
 MD041:

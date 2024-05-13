@@ -587,13 +587,10 @@ stateDiagram-v2
     direction LR
     Parent: Logger()
     Child: Logger(child=True)
-
     Parent --> Child: bi-directional updates
-
     Note right of Child
         Both have the same service
     end note
-
 ```
 </center>
 
