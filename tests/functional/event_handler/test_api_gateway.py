@@ -292,12 +292,16 @@ def test_no_matches():
     def patch_func():
         raise RuntimeError()
 
+    @app.head("/no_matching_head")
+    def head_func():
+        raise RuntimeError()
+
     def handler(event, context):
         return app.resolve(event, context)
 
     # Also check the route configurations
     routes = app._static_routes
-    assert len(routes) == 5
+    assert len(routes) == 6
     for route in routes:
         if route.func == get_func:
             assert route.method == "GET"
@@ -309,6 +313,8 @@ def test_no_matches():
             assert route.method == "DELETE"
         elif route.func == patch_func:
             assert route.method == "PATCH"
+        elif route.func == head_func:
+            assert route.method == "HEAD"
 
     # WHEN calling the handler
     # THEN return a 404
