@@ -31,7 +31,7 @@ class AgentsCdkStack(Stack):
             foundation_model=BedrockFoundationModel.ANTHROPIC_CLAUDE_INSTANT_V1_2,
             instruction="You are a helpful and friendly agent that answers questions about insurance claims.",
         )
-        agent.add_action_group(
+        agent.add_action_group(  # type: ignore[call-arg]
             action_group_name="InsureClaimsSupport",
             description="Use these functions for insurance claims support",
             action_group_executor=action_group_function,
