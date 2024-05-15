@@ -1224,6 +1224,63 @@ class BaseRouter(ABC):
             middlewares,
         )
 
+    def head(
+        self,
+        rule: str,
+        cors: Optional[bool] = None,
+        compress: bool = False,
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: str = _DEFAULT_OPENAPI_RESPONSE_DESCRIPTION,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
+        middlewares: Optional[List[Callable]] = None,
+    ):
+        """Head route decorator with HEAD `method`
+
+        Examples
+        --------
+        Simple example with a custom lambda handler using the Tracer capture_lambda_handler decorator
+
+        ```python
+        from aws_lambda_powertools import Tracer
+        from aws_lambda_powertools.event_handler import APIGatewayRestResolver, Response, content_types
+
+        tracer = Tracer()
+        app = APIGatewayRestResolver()
+
+        @app.head("/head-call")
+        def simple_head():
+            return Response(status_code=200,
+                            content_type=content_types.APPLICATION_JSON,
+                            headers={"Content-Length": "123"})
+
+        @tracer.capture_lambda_handler
+        def lambda_handler(event, context):
+            return app.resolve(event, context)
+        ```
+        """
+        return self.route(
+            rule,
+            "HEAD",
+            cors,
+            compress,
+            cache_control,
+            summary,
+            description,
+            responses,
+            response_description,
+            tags,
+            operation_id,
+            include_in_schema,
+            security,
+            middlewares,
+        )
+
     def _push_processed_stack_frame(self, frame: str):
         """
         Add Current Middleware to the Middleware Stack Frames
@@ -1596,7 +1653,6 @@ class ApiGatewayResolver(BaseRouter):
                 stacklevel=2,
             )
             openapi_version = "3.1.0"
-
         return openapi_version
 
     def get_openapi_json_schema(
@@ -1692,6 +1748,7 @@ class ApiGatewayResolver(BaseRouter):
         security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
         security: Optional[List[Dict[str, List[str]]]] = None,
         oauth2_config: Optional["OAuth2Config"] = None,
+        persist_authorization: bool = False,
     ):
         """
         Returns the OpenAPI schema as a JSON serializable dict
@@ -1732,6 +1789,8 @@ class ApiGatewayResolver(BaseRouter):
             A declaration of which security mechanisms are applied globally across the API.
         oauth2_config: OAuth2Config, optional
             The OAuth2 configuration for the Swagger UI.
+        persist_authorization: bool, optional
+            Whether to persist authorization data on browser close/refresh.
         """
         from aws_lambda_powertools.event_handler.openapi.compat import model_json
         from aws_lambda_powertools.event_handler.openapi.models import Server
@@ -1810,6 +1869,7 @@ class ApiGatewayResolver(BaseRouter):
                 swagger_css,
                 swagger_base_url,
                 oauth2_config,
+                persist_authorization,
             )
 
             return Response(
@@ -2131,7 +2191,7 @@ class ApiGatewayResolver(BaseRouter):
 
     def exception_handler(self, exc_class: Union[Type[Exception], List[Type[Exception]]]):
         def register_exception_handler(func: Callable):
-            if isinstance(exc_class, list):
+            if isinstance(exc_class, list):  # pragma: no cover
                 for exp in exc_class:
                     self._exception_handlers[exp] = func
             else:

@@ -19,10 +19,6 @@ logger = logging.getLogger(__name__)
 
 class DataMasking:
     """
-    Note: This utility is currently in a Non-General Availability (Non-GA) phase and may have limitations.
-    Please DON'T USE THIS utility in production environments.
-    Keep in mind that when we transition to General Availability (GA), there might be breaking changes introduced.
-
     The DataMasking class orchestrates erasing, encrypting, and decrypting
     for the base provider.
 
