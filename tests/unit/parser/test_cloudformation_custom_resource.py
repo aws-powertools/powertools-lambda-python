@@ -60,6 +60,14 @@ def test_cloudformation_custom_resource_update_event():
     assert model.old_resource_properties == raw_event["OldResourceProperties"]
 
 
+def test_cloudformation_custom_resource_update_event_physical_id_missing():
+    raw_event = load_event("cloudformationCustomResourceUpdate.json")
+    del raw_event["PhysicalResourceId"]
+
+    with pytest.raises(ValidationError):
+        CloudFormationCustomResourceUpdateModel(**raw_event)
+
+
 def test_cloudformation_custom_resource_update_event_invalid():
     raw_event = load_event("cloudformationCustomResourceUpdate.json")
     raw_event["OldResourceProperties"] = ["some_data"]
@@ -80,6 +88,14 @@ def test_cloudformation_custom_resource_delete_event():
     assert model.logical_resource_id == raw_event["LogicalResourceId"]
     assert model.resource_type == raw_event["ResourceType"]
     assert model.resource_properties == raw_event["ResourceProperties"]
+
+
+def test_cloudformation_custom_resource_delete_event_physical_id_missing():
+    raw_event = load_event("cloudformationCustomResourceUpdate.json")
+    del raw_event["PhysicalResourceId"]
+
+    with pytest.raises(ValidationError):
+        CloudFormationCustomResourceUpdateModel(**raw_event)
 
 
 def test_cloudformation_custom_resource_delete_event_invalid():

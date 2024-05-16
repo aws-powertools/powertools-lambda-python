@@ -86,6 +86,7 @@ Log Data Event for Troubleshooting
 | [AppSync Resolver](#appsync-resolver)                                         | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                           | `AWSConfigRuleEvent`                               |
 | [Bedrock Agent](#bedrock-agent)                                               | `BedrockAgent`                                     |
+| [CloudFormation Custom Resource](#cloudformation-custom-resource)             | `CloudFormationCustomResourceEvent`                |
 | [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
@@ -493,6 +494,54 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 
     ```python hl_lines="2 8 10"
     --8<-- "examples/event_sources/src/bedrock_agent_event.py"
+    ```
+
+### CloudFormation Custom Resource
+
+=== "app.py"
+
+    ```python
+    from aws_lambda_powertools.utilities.data_classes import event_source, CloudFormationCustomResourceEvent
+    from aws_lambda_powertools.utilities.data_classes.cloudformation_custom_resource_event import CloudFormationRequestType
+    from aws_lambda_powertools.utilities.typing import LambdaContext
+    from aws_lambda_powertools import Logger
+
+    logger = Logger()
+
+
+    @event_source(data_class=CloudFormationCustomResourceEvent)
+    def lambda_handler(event: CloudFormationCustomResourceEvent, context: LambdaContext):
+        request_type = event.request_type
+
+        if request_type == CloudFormationRequestType.CREATE:
+            return on_create(event)
+        if request_type == CloudFormationRequestType.UPDATE:
+            return on_update(event)
+        if request_type == CloudFormationRequestType.DELETE:
+            return on_delete(event)
+
+
+    def on_create(event: CloudFormationCustomResourceEvent):
+        props = event.resource_properties
+        logger.info(f"Create new resource with props {props}.")
+
+        # Add your create code here ...
+        physical_id = ...
+
+        return {"PhysicalResourceId": physical_id}
+
+
+    def on_update(event: CloudFormationCustomResourceEvent):
+        physical_id = event.physical_resource_id
+        props = event.resource_properties
+        logger.info(f"Update resource {physical_id} with props {props}.")
+        # ...
+
+
+    def on_delete(event: CloudFormationCustomResourceEvent):
+        physical_id = event.physical_resource_id
+        logger.info(f"Delete resource {physical_id}.")
+        # ...
     ```
 
 ### CloudWatch Dashboard Custom Widget
