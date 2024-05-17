@@ -811,10 +811,11 @@ for the given name and level to the logging module. By default, this logs all bo
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
-???+ tip
-    To help differentiate between loggers, we include the standard logger `name` attribute for all loggers we copied configuration to.
+!!! tip "We include the logger `name` attribute for all loggers we copied configuration to help you differentiate them."
 
-By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
+By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes.
+
+You can also provide optional `log_level` attribute external top-level loggers will be configured with, by default it'll use the source logger log level. You can opt-out by using `ignore_log_level=True` parameter.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
 ---8<-- "examples/logger/src/cloning_logger_config.py"

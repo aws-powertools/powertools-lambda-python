@@ -9,6 +9,7 @@ PACKAGE_LOGGER = "aws_lambda_powertools"
 def copy_config_to_registered_loggers(
     source_logger: Logger,
     log_level: Optional[Union[int, str]] = None,
+    ignore_log_level=False,
     exclude: Optional[Set[str]] = None,
     include: Optional[Set[str]] = None,
 ) -> None:
@@ -16,10 +17,13 @@ def copy_config_to_registered_loggers(
 
     Parameters
     ----------
+    ignore_log_level
     source_logger : Logger
         Powertools for AWS Lambda (Python) Logger to copy configuration from
     log_level : Union[int, str], optional
         Logging level to set to registered loggers, by default uses source_logger logging level
+    ignore_log_level: bool
+        Whether to not touch log levels for discovered loggers. log_level param is disregarded when this is set.
     include : Optional[Set[str]], optional
         List of logger names to include, by default all registered loggers are included
     exclude : Optional[Set[str]], optional
@@ -54,7 +58,7 @@ def copy_config_to_registered_loggers(
 
     registered_loggers = _find_registered_loggers(source_logger, loggers, filter_func)
     for logger in registered_loggers:
-        _configure_logger(source_logger, logger, level)
+        _configure_logger(source_logger=source_logger, logger=logger, level=level, ignore_log_level=ignore_log_level)
 
 
 def _include_registered_loggers_filter(loggers: Set[str]):
@@ -78,13 +82,21 @@ def _find_registered_loggers(
     return root_loggers
 
 
-def _configure_logger(source_logger: Logger, logger: logging.Logger, level: Union[int, str]) -> None:
+def _configure_logger(
+    source_logger: Logger,
+    logger: logging.Logger,
+    level: Union[int, str],
+    ignore_log_level: bool = False,
+) -> None:
+    # customers may not want to copy the same log level from Logger to discovered loggers
+    if not ignore_log_level:
+        logger.setLevel(level)
+        source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
+
     logger.handlers = []
-    logger.setLevel(level)
     logger.propagate = False  # ensure we don't propagate logs to existing loggers, #1073
     source_logger.append_keys(name="%(name)s")  # include logger name, see #1267
 
-    source_logger.debug(f"Logger {logger} reconfigured to use logging level {level}")
     for source_handler in source_logger.handlers:
         logger.addHandler(source_handler)
         source_logger.debug(f"Logger {logger} reconfigured to use {source_handler}")
