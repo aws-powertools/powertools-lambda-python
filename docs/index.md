@@ -116,7 +116,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                         )
                         aws_lambda.Function(self,
                             'sample-app-lambda',
-                            runtime=aws_lambda.Runtime.PYTHON_3_9,
+                            runtime=aws_lambda.Runtime.PYTHON_3_12,
                             layers=[powertools_layer],
                             # other props...
                         )
@@ -275,7 +275,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                         )
                         aws_lambda.Function(self,
                             'sample-app-lambda',
-                            runtime=aws_lambda.Runtime.PYTHON_3_9,
+                            runtime=aws_lambda.Runtime.PYTHON_3_12,
                             layers=[powertools_layer],
                             architecture=aws_lambda.Architecture.ARM_64
                             # other props...
