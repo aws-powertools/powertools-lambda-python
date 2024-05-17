@@ -524,12 +524,13 @@ Behind the scenes, the [data validation](#data-validation) feature auto-generate
 
 There are some important **caveats** that you should know before enabling it:
 
-| Caveat                                                 | Description                                                                                                                                                                                                                |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Swagger UI is **publicly accessible by default**       | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism.                                   |
-| **No micro-functions support** yet                     | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                                       |
-| You need to expose a **new route**                     | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                                                                                                                |
-| JS and CSS  files are **embedded within Swagger HTML** | If you are not using an external CDN to serve Swagger UI assets, we embed JS and CSS directly into the HTML. To enhance performance, please consider enabling the `compress` option to minimize the size of HTTP requests. |
+| Caveat                                                  | Description                                                                                                                                                                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Swagger UI is **publicly accessible by default**        | When using `enable_swagger` method, you can [protect sensitive API endpoints by implementing a custom middleware](#customizing-swagger-ui) using your preferred authorization mechanism.                                   |
+| **No micro-functions support** yet                      | Swagger UI is enabled on a per resolver instance which will limit its accuracy here.                                                                                                                                       |
+| You need to expose a **new route**                      | You'll need to expose the following path to Lambda: `/swagger`; ignore if you're routing this path already.                                                                                                                |
+| JS and CSS  files are **embedded within Swagger HTML**  | If you are not using an external CDN to serve Swagger UI assets, we embed JS and CSS directly into the HTML. To enhance performance, please consider enabling the `compress` option to minimize the size of HTTP requests. |
+| Authorization data is **lost** on browser close/refresh | Use `enable_swagger(persist_authorization=True)` to persist authorization data, like OAuath 2.0 access tokens.                                                                                                             |
 
 ```python hl_lines="12-13" title="enabling_swagger.py"
 --8<-- "examples/event_handler_rest/src/enabling_swagger.py"

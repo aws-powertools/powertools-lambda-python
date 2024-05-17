@@ -158,17 +158,17 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-aws-lambda-python-alpha"
-version = "2.140.0a0"
+version = "2.141.0a0"
 description = "The CDK Construct Library for AWS Lambda in Python"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk.aws-lambda-python-alpha-2.140.0a0.tar.gz", hash = "sha256:d0d691ac30ed8f17bf90db2ac0dedce2c0f6800daa10fec6ba46c1a2e2e0966d"},
-    {file = "aws_cdk.aws_lambda_python_alpha-2.140.0a0-py3-none-any.whl", hash = "sha256:d75b895d2e8b730a9bf04d83e69942c793fca587a1060941232122af8b36ee10"},
+    {file = "aws-cdk.aws-lambda-python-alpha-2.141.0a0.tar.gz", hash = "sha256:da047d8f46cd188646e15ae21720b5eb25b370c6fd7e31b31064f3d54aea6529"},
+    {file = "aws_cdk.aws_lambda_python_alpha-2.141.0a0-py3-none-any.whl", hash = "sha256:c74aa73d0693a464a1e7a7b9b651373dec1efdb522f560d0e9cee82986761000"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.140.0,<3.0.0"
+aws-cdk-lib = ">=2.141.0,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -176,13 +176,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.140.0"
+version = "2.142.1"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.140.0.tar.gz", hash = "sha256:2e1a83f1ab205790ca4ae5dc634929ebbb21e61634c468ea6390642b0bf62395"},
-    {file = "aws_cdk_lib-2.140.0-py3-none-any.whl", hash = "sha256:b169d53108807c9492d35f51bdf36b629a43dec8d00bdf66b5df32873e1746b3"},
+    {file = "aws-cdk-lib-2.142.1.tar.gz", hash = "sha256:d24482ed728c93c249badabad68cbf13cc8c26bd40d1e22ede552cc5d1b08b6d"},
+    {file = "aws_cdk_lib-2.142.1-py3-none-any.whl", hash = "sha256:b1148f7685e15584807a115f8ec949b2dd30cdcb53d76db39ef28b2093f1d2d9"},
 ]
 
 [package.dependencies]
@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.110"
+version = "2.28.117"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.110.tar.gz", hash = "sha256:3b56673c2f332750c1839e4e7456f8736a1523ebc453aca9257291cfa82eb0e4"},
-    {file = "cdk_nag-2.28.110-py3-none-any.whl", hash = "sha256:7de0bcfd472ad762a887c27753629242acb80da452fcb963f8fe9ba13913a39e"},
+    {file = "cdk-nag-2.28.117.tar.gz", hash = "sha256:c8052df9e741cb4ce78396c6630d8f4850155f273552f3d04f63e4b2690d883b"},
+    {file = "cdk_nag-2.28.117-py3-none-any.whl", hash = "sha256:998ed995c7f72bc8ec1085477897b1225516c500c52bf94cc78172b182934521"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.139"
+version = "0.1.150"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.139.tar.gz", hash = "sha256:f7df51c61a282973853cb93b5a3d831653748c8c0e483848244fa25912e30692"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.139-py3-none-any.whl", hash = "sha256:d815c8eceb5215a6658f7145995da3a4b25044ddc996a7ba0d817e90199b9032"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.150.tar.gz", hash = "sha256:1d75f747f6b1283f4aa3153ce7f88cc244e2e071e62317efd28a1e78df72107a"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.150-py3-none-any.whl", hash = "sha256:81681ef11e7593b16226cecbaaf1f502286c5146ca3ccc18f6f9ab0030b95f4f"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.122.0,<3.0.0"
-cdk-nag = ">=2.28.109,<3.0.0"
+aws-cdk-lib = ">=2.141.0,<3.0.0"
+cdk-nag = ">=2.28.115,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -541,13 +541,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.87.1"
+version = "0.87.2"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = "!=4.0,<=4.0,>=3.8"
 files = [
-    {file = "cfn_lint-0.87.1-py3-none-any.whl", hash = "sha256:d450f450635fc223b6f66880ccac52a5fd1a52966fa1705f1ba52b88dfed3071"},
-    {file = "cfn_lint-0.87.1.tar.gz", hash = "sha256:b3ce9d3e5e0eadcea5d584c8ccaa00bf2a990a36a64d7ffd8683bc60b7e4f06f"},
+    {file = "cfn_lint-0.87.2-py3-none-any.whl", hash = "sha256:773ba1d2f232ffdbe1197cc6ce61ddbf0da1781925e9f4dde4c91b7fcd54cc80"},
+    {file = "cfn_lint-0.87.2.tar.gz", hash = "sha256:00d47406841899c05ab6a0708df3f4e32bd7462be2097c10371d744c0050775e"},
 ]
 
 [package.dependencies]
@@ -1844,13 +1844,13 @@ mkdocs = ">=0.17"
 
 [[package]]
 name = "mkdocs-material"
-version = "9.5.21"
+version = "9.5.23"
 description = "Documentation that simply works"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mkdocs_material-9.5.21-py3-none-any.whl", hash = "sha256:210e1f179682cd4be17d5c641b2f4559574b9dea2f589c3f0e7c17c5bd1959bc"},
-    {file = "mkdocs_material-9.5.21.tar.gz", hash = "sha256:049f82770f40559d3c2aa2259c562ea7257dbb4aaa9624323b5ef27b2d95a450"},
+    {file = "mkdocs_material-9.5.23-py3-none-any.whl", hash = "sha256:ffd08a5beaef3cd135aceb58ded8b98bbbbf2b70e5b656f6a14a63c917d9b001"},
+    {file = "mkdocs_material-9.5.23.tar.gz", hash = "sha256:4627fc3f15de2cba2bde9debc2fd59b9888ef494beabfe67eb352e23d14bf288"},
 ]
 
 [package.dependencies]
@@ -2070,13 +2070,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-s3"
-version = "1.34.91"
-description = "Type annotations for boto3.S3 1.34.91 service generated with mypy-boto3-builder 7.24.0"
+version = "1.34.105"
+description = "Type annotations for boto3.S3 1.34.105 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_s3-1.34.91-py3-none-any.whl", hash = "sha256:0d37161fd0cd7ebf194cf9ccadb9101bf5c9b2426c2d00677b7e644d6f2298e4"},
-    {file = "mypy_boto3_s3-1.34.91.tar.gz", hash = "sha256:70c8bad00db70704fb7ac0ee1440c7eb0587578ae9a2b00997f29f17f60f45e7"},
+    {file = "mypy_boto3_s3-1.34.105-py3-none-any.whl", hash = "sha256:95fbc6bcba2bb03c20a97cc5cf60ff66c6842c8c4fc4183c49bfa35905d5a1ee"},
+    {file = "mypy_boto3_s3-1.34.105.tar.gz", hash = "sha256:a137bca9bbe86c0fe35bbf36a2d44ab62526f41bb683550dd6cfbb5a10ede832"},
 ]
 
 [package.dependencies]
@@ -2084,13 +2084,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.34.72"
-description = "Type annotations for boto3.SecretsManager 1.34.72 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.107"
+description = "Type annotations for boto3.SecretsManager 1.34.107 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy-boto3-secretsmanager-1.34.72.tar.gz", hash = "sha256:d0733c5b53e8b5e7bda00f4b42ed84af12e36a20c848917e49c173a0422ef03c"},
-    {file = "mypy_boto3_secretsmanager-1.34.72-py3-none-any.whl", hash = "sha256:c5ed74e4a56e345a6396c609d2808fbe64570f90bb76b256d65e1294eaa24c69"},
+    {file = "mypy_boto3_secretsmanager-1.34.107-py3-none-any.whl", hash = "sha256:bca19ae496e9965266ef885578fdb2bc8ee3e84dea7eaaffe030a368f218d207"},
+    {file = "mypy_boto3_secretsmanager-1.34.107.tar.gz", hash = "sha256:cf1b3c66542efd260595baf7dcd69ffe4648e8e813de8ebba455d83fc70eccb4"},
 ]
 
 [package.dependencies]
@@ -2997,28 +2997,28 @@ files = [
 
 [[package]]
 name = "ruff"
-version = "0.4.3"
+version = "0.4.4"
 description = "An extremely fast Python linter and code formatter, written in Rust."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "ruff-0.4.3-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:b70800c290f14ae6fcbb41bbe201cf62dfca024d124a1f373e76371a007454ce"},
-    {file = "ruff-0.4.3-py3-none-macosx_11_0_arm64.whl", hash = "sha256:08a0d6a22918ab2552ace96adeaca308833873a4d7d1d587bb1d37bae8728eb3"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:eba1f14df3c758dd7de5b55fbae7e1c8af238597961e5fb628f3de446c3c40c5"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:819fb06d535cc76dfddbfe8d3068ff602ddeb40e3eacbc90e0d1272bb8d97113"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0bfc9e955e6dc6359eb6f82ea150c4f4e82b660e5b58d9a20a0e42ec3bb6342b"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:510a67d232d2ebe983fddea324dbf9d69b71c4d2dfeb8a862f4a127536dd4cfb"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:dc9ff11cd9a092ee7680a56d21f302bdda14327772cd870d806610a3503d001f"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:29efff25bf9ee685c2c8390563a5b5c006a3fee5230d28ea39f4f75f9d0b6f2f"},
-    {file = "ruff-0.4.3-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:18b00e0bcccf0fc8d7186ed21e311dffd19761cb632241a6e4fe4477cc80ef6e"},
-    {file = "ruff-0.4.3-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:262f5635e2c74d80b7507fbc2fac28fe0d4fef26373bbc62039526f7722bca1b"},
-    {file = "ruff-0.4.3-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:7363691198719c26459e08cc17c6a3dac6f592e9ea3d2fa772f4e561b5fe82a3"},
-    {file = "ruff-0.4.3-py3-none-musllinux_1_2_i686.whl", hash = "sha256:eeb039f8428fcb6725bb63cbae92ad67b0559e68b5d80f840f11914afd8ddf7f"},
-    {file = "ruff-0.4.3-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:927b11c1e4d0727ce1a729eace61cee88a334623ec424c0b1c8fe3e5f9d3c865"},
-    {file = "ruff-0.4.3-py3-none-win32.whl", hash = "sha256:25cacda2155778beb0d064e0ec5a3944dcca9c12715f7c4634fd9d93ac33fd30"},
-    {file = "ruff-0.4.3-py3-none-win_amd64.whl", hash = "sha256:7a1c3a450bc6539ef00da6c819fb1b76b6b065dec585f91456e7c0d6a0bbc725"},
-    {file = "ruff-0.4.3-py3-none-win_arm64.whl", hash = "sha256:71ca5f8ccf1121b95a59649482470c5601c60a416bf189d553955b0338e34614"},
-    {file = "ruff-0.4.3.tar.gz", hash = "sha256:ff0a3ef2e3c4b6d133fbedcf9586abfbe38d076041f2dc18ffb2c7e0485d5a07"},
+    {file = "ruff-0.4.4-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:29d44ef5bb6a08e235c8249294fa8d431adc1426bfda99ed493119e6f9ea1bf6"},
+    {file = "ruff-0.4.4-py3-none-macosx_11_0_arm64.whl", hash = "sha256:c4efe62b5bbb24178c950732ddd40712b878a9b96b1d02b0ff0b08a090cbd891"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4c8e2f1e8fc12d07ab521a9005d68a969e167b589cbcaee354cb61e9d9de9c15"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:60ed88b636a463214905c002fa3eaab19795679ed55529f91e488db3fe8976ab"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:b90fc5e170fc71c712cc4d9ab0e24ea505c6a9e4ebf346787a67e691dfb72e85"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:8e7e6ebc10ef16dcdc77fd5557ee60647512b400e4a60bdc4849468f076f6eef"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:b9ddb2c494fb79fc208cd15ffe08f32b7682519e067413dbaf5f4b01a6087bcd"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:c51c928a14f9f0a871082603e25a1588059b7e08a920f2f9fa7157b5bf08cfe9"},
+    {file = "ruff-0.4.4-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:b5eb0a4bfd6400b7d07c09a7725e1a98c3b838be557fee229ac0f84d9aa49c36"},
+    {file = "ruff-0.4.4-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:b1867ee9bf3acc21778dcb293db504692eda5f7a11a6e6cc40890182a9f9e595"},
+    {file = "ruff-0.4.4-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:1aecced1269481ef2894cc495647392a34b0bf3e28ff53ed95a385b13aa45768"},
+    {file = "ruff-0.4.4-py3-none-musllinux_1_2_i686.whl", hash = "sha256:9da73eb616b3241a307b837f32756dc20a0b07e2bcb694fec73699c93d04a69e"},
+    {file = "ruff-0.4.4-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:958b4ea5589706a81065e2a776237de2ecc3e763342e5cc8e02a4a4d8a5e6f95"},
+    {file = "ruff-0.4.4-py3-none-win32.whl", hash = "sha256:cb53473849f011bca6e754f2cdf47cafc9c4f4ff4570003a0dad0b9b6890e876"},
+    {file = "ruff-0.4.4-py3-none-win_amd64.whl", hash = "sha256:424e5b72597482543b684c11def82669cc6b395aa8cc69acc1858b5ef3e5daae"},
+    {file = "ruff-0.4.4-py3-none-win_arm64.whl", hash = "sha256:39df0537b47d3b597293edbb95baf54ff5b49589eb7ff41926d8243caa995ea6"},
+    {file = "ruff-0.4.4.tar.gz", hash = "sha256:f87ea42d5cdebdc6a69761a9d0bc83ae9b3b30d0ad78952005ba6568d6c022af"},
 ]
 
 [[package]]
@@ -3055,13 +3055,13 @@ pbr = "*"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.1.1"
+version = "2.2.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.1.1-py2.py3-none-any.whl", hash = "sha256:99aeb78fb76771513bd3b2829d12613130152620768d00cd3e45ac00cb17950f"},
-    {file = "sentry_sdk-2.1.1.tar.gz", hash = "sha256:95d8c0bb41c8b0bc37ab202c2c4a295bb84398ee05f4cdce55051cd75b926ec1"},
+    {file = "sentry_sdk-2.2.0-py2.py3-none-any.whl", hash = "sha256:674f58da37835ea7447fe0e34c57b4a4277fad558b0a7cb4a6c83bcb263086be"},
+    {file = "sentry_sdk-2.2.0.tar.gz", hash = "sha256:70eca103cf4c6302365a9d7cf522e7ed7720828910eb23d43ada8e50d1ecda9d"},
 ]
 
 [package.dependencies]
@@ -3627,4 +3627,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "7d7f5f48fc5cf065caba4b5a06286d5fb4f4aa4679ea8d92d6676f15dea5017d"
+content-hash = "667d902beb8032c9fcf8b8cc6f9dcc0d29dcf048623a8f44ae45cc5403d5c815"
