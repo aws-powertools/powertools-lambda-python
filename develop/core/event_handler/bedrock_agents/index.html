@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../../media/aws-logo-light.svg">
-      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.22">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.23">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../../assets/stylesheets/main.732c4fb1.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.6543a935.min.css">
       
         
         <link rel="stylesheet" href="../../../assets/stylesheets/palette.06af60db.min.css">
@@ -2195,11 +2195,7 @@ These constructs abstract the underlying permission setup and code bundling of y
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">aws_cdk.aws_lambda</span> <span class="kn">import</span> <span class="n">Runtime</span>
 <span class="kn">from</span> <span class="nn">aws_cdk.aws_lambda_python_alpha</span> <span class="kn">import</span> <span class="n">PythonFunction</span>
-<span class="kn">from</span> <span class="nn">cdklabs.generative_ai_cdk_constructs.bedrock</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Agent</span><span class="p">,</span>
-    <span class="n">ApiSchema</span><span class="p">,</span>
-    <span class="n">BedrockFoundationModel</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">cdklabs.generative_ai_cdk_constructs.bedrock</span> <span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">AgentActionGroup</span><span class="p">,</span> <span class="n">ApiSchema</span><span class="p">,</span> <span class="n">BedrockFoundationModel</span>
 <span class="kn">from</span> <span class="nn">constructs</span> <span class="kn">import</span> <span class="n">Construct</span>
 
 
@@ -2223,13 +2219,17 @@ These constructs abstract the underlying permission setup and code bundling of y
             <span class="n">foundation_model</span><span class="o">=</span><span class="n">BedrockFoundationModel</span><span class="o">.</span><span class="n">ANTHROPIC_CLAUDE_INSTANT_V1_2</span><span class="p">,</span>
             <span class="n">instruction</span><span class="o">=</span><span class="s2">&quot;You are a helpful and friendly agent that answers questions about insurance claims.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">agent</span><span class="o">.</span><span class="n">add_action_group</span><span class="p">(</span>
+
+        <span class="n">action_group</span> <span class="o">=</span> <span class="n">AgentActionGroup</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="s2">&quot;ActionGroup&quot;</span><span class="p">,</span>
             <span class="n">action_group_name</span><span class="o">=</span><span class="s2">&quot;InsureClaimsSupport&quot;</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Use these functions for insurance claims support&quot;</span><span class="p">,</span>
             <span class="n">action_group_executor</span><span class="o">=</span><span class="n">action_group_function</span><span class="p">,</span>
             <span class="n">action_group_state</span><span class="o">=</span><span class="s2">&quot;ENABLED&quot;</span><span class="p">,</span>
             <span class="n">api_schema</span><span class="o">=</span><span class="n">ApiSchema</span><span class="o">.</span><span class="n">from_asset</span><span class="p">(</span><span class="s2">&quot;./lambda/openapi.json&quot;</span><span class="p">),</span>  <span class="c1"># (2)!</span>
         <span class="p">)</span>
+        <span class="n">agent</span><span class="o">.</span><span class="n">add_action_group</span><span class="p">(</span><span class="n">action_group</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <ol>
 <li>The path to your Lambda function handler</li>
@@ -3985,7 +3985,7 @@ use a combination of <a href="https://docs.pydantic.dev/latest/concepts/models/"
     <script id="__config" type="application/json">{"base": "../../..", "features": ["header.autohide", "navigation.sections", "navigation.top", "navigation.instant", "navigation.indexes", "navigation.tracking", "navigation.tabs", "content.code.annotate", "content.code.copy", "content.tabs.link"], "search": "../../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
     
     
-      <script src="../../../assets/javascripts/bundle.5cfa9459.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.ebd0bdb7.min.js"></script>
       
         <script src="../../../javascript/aws-amplify.min.js"></script>
       
