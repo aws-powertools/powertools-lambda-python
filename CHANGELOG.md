@@ -4,6 +4,11 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Maintenance
+
+* **deps:** bump the layer-balancer group in /layer/scripts/layer-balancer with 3 updates ([#4369](https://github.com/aws-powertools/powertools-lambda-python/issues/4369))
+* **deps-dev:** bump cfn-lint from 0.87.2 to 0.87.3 ([#4370](https://github.com/aws-powertools/powertools-lambda-python/issues/4370))
+
 
 <a name="v2.38.1"></a>
 ## [v2.38.1] - 2024-05-17
