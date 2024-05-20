@@ -1,0 +1,16 @@
+functions:
+    main:
+    handler: lambda_function.lambda_handler
+    layers:
+        - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+
+resources:
+    Transform: AWS::Serverless-2016-10-31
+    Resources:****
+    AwsLambdaPowertoolsPythonLayer:
+        Type: AWS::Serverless::Application
+        Properties:
+            Location:
+                ApplicationId: arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+                # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
+                SemanticVersion: 2.0.0

@@ -1,0 +1,7 @@
+Resources:
+  MyLambdaFunction:
+      Type: AWS::Serverless::Function
+      Properties:
+          Architectures: [arm64]
+          Layers:
+          - !Sub arn:aws:lambda:${AWS::Region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:69

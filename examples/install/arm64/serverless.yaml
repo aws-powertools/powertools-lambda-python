@@ -1,0 +1,6 @@
+functions:
+    hello:
+        handler: lambda_function.lambda_handler
+        architecture: arm64
+        layers:
+        - arn:aws:lambda:${aws:region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:69
