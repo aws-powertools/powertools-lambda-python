@@ -19,13 +19,10 @@ from typing import (
     Optional,
     TypeVar,
     Union,
-    cast,
     overload,
 )
 
 from aws_lambda_powertools.logging.constants import (
-    LOGGER_ATTRIBUTE_HANDLER,
-    LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER,
     LOGGER_ATTRIBUTE_PRECONFIGURED,
 )
 from aws_lambda_powertools.shared import constants
@@ -37,7 +34,7 @@ from aws_lambda_powertools.shared.functions import (
 from aws_lambda_powertools.utilities import jmespath_utils
 
 from ..shared.types import AnyCallableT
-from .exceptions import InvalidLoggerSamplingRateError, OrphanedChildLoggerError
+from .exceptions import InvalidLoggerSamplingRateError
 from .filters import SuppressFilter
 from .formatter import (
     RESERVED_FORMATTER_CUSTOM_KEYS,
@@ -239,6 +236,7 @@ class Logger:
         self.child = child
         self.logger_formatter = logger_formatter
         self._stream = stream or sys.stdout
+        self.logger_handler = logger_handler or logging.StreamHandler(self._stream)
         self.log_uncaught_exceptions = log_uncaught_exceptions
 
         self._is_deduplication_disabled = resolve_truthy_env_var_choice(
@@ -246,7 +244,6 @@ class Logger:
         )
         self._default_log_keys = {"service": self.service, "sampling_rate": self.sampling_rate}
         self._logger = self._get_logger()
-        self.logger_handler = logger_handler or self._get_handler()
 
         # NOTE: This is primarily to improve UX, so IDEs can autocomplete LambdaPowertoolsFormatter options
         # previously, we masked all of them as kwargs thus limiting feature discovery
@@ -284,18 +281,6 @@ class Logger:
             logger_name = f"{self.service}.{_get_caller_filename()}"
 
         return logging.getLogger(logger_name)
-
-    def _get_handler(self) -> logging.Handler:
-        # is a logger handler already configured?
-        if getattr(self, LOGGER_ATTRIBUTE_HANDLER, None):
-            return self.logger_handler
-
-        # for children, use parent's handler
-        if self.child:
-            return getattr(self._logger.parent, LOGGER_ATTRIBUTE_POWERTOOLS_HANDLER, None)  # type: ignore[return-value] # always checked in formatting
-
-        # otherwise, create a new stream handler (first time init)
-        return logging.StreamHandler(self._stream)
 
     def _init_logger(
         self,
@@ -335,7 +320,6 @@ class Logger:
         # std logging will return the same Logger with our attribute if name is reused
         logger.debug(f"Marking logger {self.service} as preconfigured")
         self._logger.init = True  # type: ignore[attr-defined]
-        self._logger.powertools_handler = self.logger_handler  # type: ignore[attr-defined]
 
     def _configure_sampling(self) -> None:
         """Dynamically set log level based on sampling rate
@@ -691,20 +675,15 @@ class Logger:
     @property
     def registered_handler(self) -> logging.Handler:
         """Convenience property to access the first logger handler"""
-        return self._get_handler()
+        # We ignore mypy here because self.child encodes whether or not self._logger.parent is
+        # None, mypy can't see this from context but we can
+        handlers = self._logger.parent.handlers if self.child else self._logger.handlers  # type: ignore[union-attr]
+        return handlers[0]
 
     @property
     def registered_formatter(self) -> BasePowertoolsFormatter:
         """Convenience property to access the first logger formatter"""
-        handler = self.registered_handler
-        if handler is None:
-            raise OrphanedChildLoggerError(
-                "Orphan child loggers cannot append nor remove keys until a parent is initialized first. "
-                "To solve this issue, you can A) make sure a parent logger is initialized first, or B) move append/remove keys operations to a later stage."  # noqa: E501
-                "Reference: https://docs.powertools.aws.dev/lambda/python/latest/core/logger/#reusing-logger-across-your-code",
-            )
-
-        return cast(BasePowertoolsFormatter, handler.formatter)
+        return self.registered_handler.formatter  # type: ignore[return-value]
 
     @property
     def log_level(self) -> int:
