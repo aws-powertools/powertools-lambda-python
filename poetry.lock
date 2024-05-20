@@ -247,13 +247,13 @@ dev = ["black (==23.10.1)", "boto3 (>=1.23,<2)", "boto3-stubs[appconfig,serverle
 
 [[package]]
 name = "aws-xray-sdk"
-version = "2.13.0"
+version = "2.13.1"
 description = "The AWS X-Ray SDK for Python (the SDK) enables Python developers to record and emit information from within their applications to the AWS X-Ray service."
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "aws-xray-sdk-2.13.0.tar.gz", hash = "sha256:816186126917bc35ae4e6e2f304702a43d494ecef34a39e6330f5018bdecc9f5"},
-    {file = "aws_xray_sdk-2.13.0-py2.py3-none-any.whl", hash = "sha256:d18604a8688b4bed03ce4a858cc9acd72b71400e085bf7512fc31cf657ca85f9"},
+    {file = "aws-xray-sdk-2.13.1.tar.gz", hash = "sha256:911d634c23e0693f585c4cab08d43ab5177f872de416fdc8dd0fe3b170b52835"},
+    {file = "aws_xray_sdk-2.13.1-py2.py3-none-any.whl", hash = "sha256:3da9d3b3d63c62f7745b987d80a157a30f4a0cd1db7e340b8f40f4d6aab30e12"},
 ]
 
 [package.dependencies]
