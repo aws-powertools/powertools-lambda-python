@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.117"
+version = "2.28.119"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.117.tar.gz", hash = "sha256:c8052df9e741cb4ce78396c6630d8f4850155f273552f3d04f63e4b2690d883b"},
-    {file = "cdk_nag-2.28.117-py3-none-any.whl", hash = "sha256:998ed995c7f72bc8ec1085477897b1225516c500c52bf94cc78172b182934521"},
+    {file = "cdk-nag-2.28.119.tar.gz", hash = "sha256:928c7b1e3398024dd66f1fb004920950a734f8a39695e8b85c5131f7328b93bc"},
+    {file = "cdk_nag-2.28.119-py3-none-any.whl", hash = "sha256:902e7f0fd361c61b0731e85492801f124e86243d6083fbbb60af200fab9c47c9"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.152"
+version = "0.1.154"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.152.tar.gz", hash = "sha256:f701563f4a65633e209078f44242e069551a0bed8b294375ae43a46730ec64ca"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.152-py3-none-any.whl", hash = "sha256:db0c6bc04fc58dae962d59b621f767c3046b4144ee99eccd24f7a9841e3062af"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.154.tar.gz", hash = "sha256:7bc398b355197e7b816d3df1f6569f4e84ba2ca0f0b911414041ec4a37852a39"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.154-py3-none-any.whl", hash = "sha256:61b4571b7542b602250fdf5b7c84e1a01c9414a3eb3a30cfd7e75d5350e06ed0"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.141.0,<3.0.0"
-cdk-nag = ">=2.28.116,<3.0.0"
+cdk-nag = ">=2.28.118,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -3627,4 +3627,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "9a17b90b547e013aa27b655db83d9fc2a9c785f243051f4f20d86af59351017f"
+content-hash = "6780ba0ed4ad3d75bbbc8df7a18584d65a6003c85ecf52cec3a65c73992f93da"
