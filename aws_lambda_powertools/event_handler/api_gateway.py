@@ -58,6 +58,7 @@ from aws_lambda_powertools.utilities.data_classes import (
     VPCLatticeEventV2,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
+from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -228,12 +229,9 @@ class CORSConfig:
             resolver_headers (Dict): A dictionary containing the headers.
 
         Returns:
-            Union[str, List[str], None]: The value(s) of the 'origin' or 'Origin' header.
-                If the header is a single header, a string is returned.
-                If the header is a multi-header, a list of strings is returned.
-                If the header is not present, None is returned.
+            Optional[str]: The value(s) of the origin header or None.
         """
-        resolved_header = resolver_headers.get("origin") or resolver_headers.get("Origin")
+        resolved_header = get_header_value(resolver_headers, "origin", None, case_sensitive=False)
         if isinstance(resolved_header, str):
             return resolved_header
         if isinstance(resolved_header, list):
