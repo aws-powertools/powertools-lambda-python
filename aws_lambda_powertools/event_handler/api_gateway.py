@@ -217,6 +217,30 @@ class CORSConfig:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
 
+    @staticmethod
+    def extract_origin_header(resolver_headers: Dict):
+        """
+        Extracts the 'origin' or 'Origin' header from the provided resolver headers.
+
+        The 'origin' or 'Origin' header can be either a single header or a multi-header.
+
+        Args:
+            resolver_headers (Dict): A dictionary containing the headers.
+
+        Returns:
+            Union[str, List[str], None]: The value(s) of the 'origin' or 'Origin' header.
+                If the header is a single header, a string is returned.
+                If the header is a multi-header, a list of strings is returned.
+                If the header is not present, None is returned.
+        """
+        resolved_header = resolver_headers.get("origin") or resolver_headers.get("Origin")
+        if isinstance(resolved_header, str):
+            return resolved_header
+        if isinstance(resolved_header, list):
+            return resolved_header[0]
+
+        return resolved_header
+
 
 class Response(Generic[ResponseT]):
     """Response data class that provides greater control over what is returned from the proxy event"""
@@ -782,7 +806,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
-        self.response.headers.update(cors.to_dict(event.get_header_value("Origin")))
+        extracted_origin_header = cors.extract_origin_header(event.resolved_headers_field)
+        self.response.headers.update(cors.to_dict(extracted_origin_header))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -2129,7 +2154,8 @@ class ApiGatewayResolver(BaseRouter):
         headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
-            headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
+            extracted_origin_header = self._cors.extract_origin_header(self.current_event.resolved_headers_field)
+            headers.update(self._cors.to_dict(extracted_origin_header))
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")
