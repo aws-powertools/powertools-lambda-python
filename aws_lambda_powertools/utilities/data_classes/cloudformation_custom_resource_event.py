@@ -1,19 +1,12 @@
-from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Literal
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
 
 
-class CloudFormationRequestType(Enum):
-    CREATE = "Create"
-    UPDATE = "Update"
-    DELETE = "Delete"
-
-
 class CloudFormationCustomResourceEvent(DictWrapper):
     @property
-    def request_type(self) -> CloudFormationRequestType:
-        return CloudFormationRequestType(self["RequestType"])
+    def request_type(self) -> Literal["Create", "Update", "Delete"]:
+        return self["RequestType"]
 
     @property
     def service_token(self) -> str:
@@ -21,7 +14,7 @@ class CloudFormationCustomResourceEvent(DictWrapper):
 
     @property
     def response_url(self) -> str:
-        return self["ResponseUrl"]
+        return self["ResponseURL"]
 
     @property
     def stack_id(self) -> str:
@@ -36,17 +29,17 @@ class CloudFormationCustomResourceEvent(DictWrapper):
         return self["LogicalResourceId"]
 
     @property
-    def physical_resource_id(self) -> Optional[str]:
-        return self.get("PhysicalResourceId")
+    def physical_resource_id(self) -> str:
+        return self.get("PhysicalResourceId") or ""
 
     @property
     def resource_type(self) -> str:
         return self["ResourceType"]
 
     @property
-    def resource_properties(self) -> Optional[Dict[str, Any]]:
-        return self.get("ResourceProperties")
+    def resource_properties(self) -> Dict[str, Any]:
+        return self.get("ResourceProperties") or {}
 
     @property
-    def old_resource_properties(self) -> Optional[Dict[str, Any]]:
-        return self.get("OldResourceProperties")
+    def old_resource_properties(self) -> Dict[str, Any]:
+        return self.get("OldResourceProperties") or {}
