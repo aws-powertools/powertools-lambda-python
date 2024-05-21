@@ -1,3 +1,6 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
 Resources:
   AwsLambdaPowertoolsPythonLayer:
       Type: AWS::Serverless::Application
@@ -9,6 +12,8 @@ Resources:
   MyLambdaFunction:
       Type: AWS::Serverless::Function
       Properties:
-          Layers:
-              # fetch Layer ARN from SAR App stack output
-              - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+        Runtime: python3.12
+        Handler: app.lambda_handler
+        Layers:
+            # fetch Layer ARN from SAR App stack output
+            - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn

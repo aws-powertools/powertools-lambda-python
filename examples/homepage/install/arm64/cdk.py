@@ -1,9 +1,6 @@
-from aws_cdk import (
-    Stack,
-    aws_lambda,
-    Aws
-)
+from aws_cdk import Aws, Stack, aws_lambda
 from constructs import Construct
+
 
 class SampleApp(Stack):
 
@@ -13,12 +10,14 @@ class SampleApp(Stack):
         powertools_layer = aws_lambda.LayerVersion.from_layer_version_arn(
             self,
             id="lambda-powertools",
-            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2:69"
+            layer_version_arn=f"arn:aws:lambda:{Aws.REGION}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:69",
         )
-        aws_lambda.Function(self,
-            'sample-app-lambda',
+        aws_lambda.Function(
+            self,
+            "sample-app-lambda",
             runtime=aws_lambda.Runtime.PYTHON_3_12,
             layers=[powertools_layer],
-            code=aws_lambda.Code.from_asset('lambda'),
-            handler='hello.handler'
+            architecture=aws_lambda.Architecture.ARM_64,
+            code=aws_lambda.Code.from_asset("lambda"),
+            handler="hello.handler",
         )

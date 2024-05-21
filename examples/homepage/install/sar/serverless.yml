@@ -1,0 +1,20 @@
+service: powertools-lambda
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-1
+
+functions:
+    powertools:
+      handler: lambda_function.lambda_handler
+      layers:
+          - !GetAtt AwsLambdaPowertoolsPythonLayer.Outputs.LayerVersionArn
+
+resources:
+  - AwsLambdaPowertoolsPythonLayer:
+      Type: AWS::Serverless::Application
+      Properties:
+        Location:
+          ApplicationId:  arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer
+          SemanticVersion: 2.0.0

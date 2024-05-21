@@ -76,76 +76,76 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
             === "SAM"
 
-                ```yaml hl_lines="6"
-                --8<-- "examples/install/x86_64/sam.yaml"
+                ```yaml hl_lines="11"
+                --8<-- "examples/homepage/install/x86_64/sam.yaml"
                 ```
 
             === "Serverless framework"
 
-                ```yaml hl_lines="5"
-                --8<-- "examples/install/x86_64/serverless.yaml"
+                ```yaml hl_lines="13"
+                --8<-- "examples/homepage/install/x86_64/serverless.yml"
                 ```
 
             === "CDK"
 
-                ```python hl_lines="16 21"
-                --8<-- "examples/install/x86_64/cdk.py"
+                ```python hl_lines="13 19"
+                --8<-- "examples/homepage/install/x86_64/cdk.py"
                 ```
 
             === "Terraform"
 
                 ```terraform hl_lines="9 37"
-                --8<-- "examples/install/x86_64/terraform.tf"
+                --8<-- "examples/homepage/install/x86_64/terraform.tf"
                 ```
 
             === "Pulumi"
 
-                ```python hl_lines="22"
-                --8<-- "examples/install/x86_64/pulumi.py"
+                ```python hl_lines="21-27"
+                --8<-- "examples/homepage/install/x86_64/pulumi.py"
                 ```
 
             === "Amplify"
 
-                ```zsh
-                --8<-- "examples/install/x86_64/amplify.txt"
+                ```zsh hl_lines="9"
+                --8<-- "examples/homepage/install/x86_64/amplify.txt"
                 ```
 
         === "arm64"
 
             === "SAM"
 
-                ```yaml hl_lines="7"
-                --8<-- "examples/install/arm64/sam.yaml"
+                ```yaml hl_lines="12"
+                --8<-- "examples/homepage/install/arm64/sam.yaml"
                 ```
 
             === "Serverless framework"
 
-                ```yaml hl_lines="6"
-                --8<-- "examples/install/arm64/serverless.yaml"
+                ```yaml hl_lines="13"
+                --8<-- "examples/homepage/install/arm64/serverless.yml"
                 ```
 
             === "CDK"
 
-                ```python hl_lines="16 21"
-                --8<-- "examples/install/arm64/cdk.py"
+                ```python hl_lines="13 19"
+                --8<-- "examples/homepage/install/arm64/cdk.py"
                 ```
 
             === "Terraform"
 
                 ```terraform hl_lines="9 37"
-                --8<-- "examples/install/arm64/terraform.tf"
+                --8<-- "examples/homepage/install/arm64/terraform.tf"
                 ```
 
             === "Pulumi"
 
-                ```python
-                --8<-- "examples/install/arm64/pulumi.py"
+                ```python hl_lines="21-27"
+                --8<-- "examples/homepage/install/arm64/pulumi.py"
                 ```
 
             === "Amplify"
 
-                ```zsh
-                --8<-- "examples/install/arm64/amplify.txt"
+                ```zsh hl_lines="9"
+                --8<-- "examples/homepage/install/arm64/amplify.txt"
                 ```
 
 ### Local development
@@ -262,20 +262,20 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
     === "SAM"
 
-        ```yaml hl_lines="6-7 13-14"
-        --8<-- "examples/install/sar/sam.yaml"
+        ```yaml hl_lines="6 9 10 17-19"
+        --8<-- "examples/homepage/install/sar/sam.yaml"
         ```
 
     === "Serverless framework"
 
-        ```yaml hl_lines="5 8 10-11"
-        --8<-- "examples/install/sar/serverless.yaml"
+        ```yaml hl_lines="11 12 19 20"
+        --8<-- "examples/homepage/install/sar/serverless.yml"
         ```
 
     === "CDK"
 
-        ```python hl_lines="19 27-28 36"
-        --8<-- "examples/install/sar/cdk.py"
+        ```python hl_lines="7 16-20 23-27"
+        --8<-- "examples/homepage/install/sar/cdk.py"
         ```
 
     === "Terraform"
@@ -283,13 +283,13 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
     	> Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank" rel="nofollow"} for providing the Terraform equivalent.
 
         ```terraform hl_lines="12-13 15-20 23-25 40"
-        --8<-- "examples/install/sar/terraform.tf"
+        --8<-- "examples/homepage/install/sar/terraform.tf"
         ```
 
     Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank" rel="nofollow"} for providing the scoped down IAM permissions below.
 
     ```yaml hl_lines="21-52" title="Least-privileged IAM permissions SAM example"
-    --8<-- "examples/install/sar/scoped_down_iam.yaml"
+    --8<-- "examples/homepage/install/sar/scoped_down_iam.yaml"
     ```
 
 ## Quick getting started
