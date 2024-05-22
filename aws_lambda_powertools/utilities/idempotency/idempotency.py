@@ -16,6 +16,7 @@ from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
 )
+from aws_lambda_powertools.shared.functions import strtobool
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencyModelSerializer,
     BaseIdempotencySerializer,
@@ -66,7 +67,7 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
+    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "0")):
         return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
@@ -150,7 +151,7 @@ def idempotent_function(
 
     @functools.wraps(function)
     def decorate(*args, **kwargs):
-        if os.getenv(constants.IDEMPOTENCY_DISABLED_ENV):
+        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "0")):
             return function(*args, **kwargs)
 
         if data_keyword_argument not in kwargs:
