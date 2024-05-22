@@ -10,13 +10,13 @@ from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
+from aws_lambda_powertools.shared.functions import strtobool
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
 from aws_lambda_powertools.utilities.idempotency.persistence.base import (
     BasePersistenceLayer,
 )
-from aws_lambda_powertools.shared.functions import strtobool
 from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencyModelSerializer,
     BaseIdempotencySerializer,
@@ -67,7 +67,9 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "0")):
+    # Check if the IDEMPOTENCY_DISABLED_ENV environment variable is set to True
+    # If IDEMPOTENCY_DISABLED_ENV is not set or set to any false value, the function will be idempotent by default
+    if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
         return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
@@ -151,6 +153,8 @@ def idempotent_function(
 
     @functools.wraps(function)
     def decorate(*args, **kwargs):
+        # Check if the IDEMPOTENCY_DISABLED_ENV environment variable is set to True
+        # If IDEMPOTENCY_DISABLED_ENV is not set or set to any false value, the function will be idempotent by default
         if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "0")):
             return function(*args, **kwargs)
 
