@@ -89,7 +89,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             === "CDK"
 
                 ```python hl_lines="13 19"
-                --8<-- "examples/homepage/install/x86_64/cdk.py"
+                --8<-- "examples/homepage/install/x86_64/cdk_x86.py"
                 ```
 
             === "Terraform"
@@ -101,7 +101,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             === "Pulumi"
 
                 ```python hl_lines="21-27"
-                --8<-- "examples/homepage/install/x86_64/pulumi.py"
+                --8<-- "examples/homepage/install/x86_64/pulumi_x86.py"
                 ```
 
             === "Amplify"
@@ -127,7 +127,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             === "CDK"
 
                 ```python hl_lines="13 19"
-                --8<-- "examples/homepage/install/arm64/cdk.py"
+                --8<-- "examples/homepage/install/arm64/cdk_arm64.py"
                 ```
 
             === "Terraform"
@@ -139,7 +139,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
             === "Pulumi"
 
                 ```python hl_lines="21-27"
-                --8<-- "examples/homepage/install/arm64/pulumi.py"
+                --8<-- "examples/homepage/install/arm64/pulumi_arm64.py"
                 ```
 
             === "Amplify"
@@ -275,7 +275,7 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
     === "CDK"
 
         ```python hl_lines="7 16-20 23-27"
-        --8<-- "examples/homepage/install/sar/cdk.py"
+        --8<-- "examples/homepage/install/sar/cdk_sar.py"
         ```
 
     === "Terraform"
