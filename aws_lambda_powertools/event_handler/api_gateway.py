@@ -43,7 +43,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
-from aws_lambda_powertools.event_handler.util import _FrozenDict
+from aws_lambda_powertools.event_handler.util import _FrozenDict, extract_origin_header
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -58,7 +58,6 @@ from aws_lambda_powertools.utilities.data_classes import (
     VPCLatticeEventV2,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent
-from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 logger = logging.getLogger(__name__)
@@ -217,27 +216,6 @@ class CORSConfig:
         if self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
-
-    @staticmethod
-    def extract_origin_header(resolver_headers: Dict):
-        """
-        Extracts the 'origin' or 'Origin' header from the provided resolver headers.
-
-        The 'origin' or 'Origin' header can be either a single header or a multi-header.
-
-        Args:
-            resolver_headers (Dict): A dictionary containing the headers.
-
-        Returns:
-            Optional[str]: The value(s) of the origin header or None.
-        """
-        resolved_header = get_header_value(resolver_headers, "origin", None, case_sensitive=False)
-        if isinstance(resolved_header, str):
-            return resolved_header
-        if isinstance(resolved_header, list):
-            return resolved_header[0]
-
-        return resolved_header
 
 
 class Response(Generic[ResponseT]):
@@ -804,7 +782,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
-        extracted_origin_header = cors.extract_origin_header(event.resolved_headers_field)
+        extracted_origin_header = extract_origin_header(event.resolved_headers_field)
         self.response.headers.update(cors.to_dict(extracted_origin_header))
 
     def _add_cache_control(self, cache_control: str):
@@ -2152,7 +2130,7 @@ class ApiGatewayResolver(BaseRouter):
         headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
-            extracted_origin_header = self._cors.extract_origin_header(self.current_event.resolved_headers_field)
+            extracted_origin_header = extract_origin_header(self.current_event.resolved_headers_field)
             headers.update(self._cors.to_dict(extracted_origin_header))
 
             if method == "OPTIONS":
