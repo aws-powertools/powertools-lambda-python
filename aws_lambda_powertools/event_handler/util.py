@@ -30,9 +30,12 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
     Returns:
         Optional[str]: The value(s) of the origin header or None.
     """
-    resolved_header = get_header_value(resolver_headers, "origin", None, case_sensitive=False)
-    if isinstance(resolved_header, str):
-        return resolved_header
+    resolved_header = get_header_value(
+        headers=resolver_headers,
+        name="origin",
+        default_value=None,
+        case_sensitive=False,
+    )
     if isinstance(resolved_header, list):
         return resolved_header[0]
 
