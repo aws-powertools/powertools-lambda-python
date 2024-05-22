@@ -196,13 +196,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "3.2.0"
+version = "3.3.0"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 files = [
-    {file = "aws-encryption-sdk-3.2.0.tar.gz", hash = "sha256:4304fcf8ce2aa3fa98b1acff7a3bf3cd0528c329c0c437b55e0f456bbf62347e"},
-    {file = "aws_encryption_sdk-3.2.0-py2.py3-none-any.whl", hash = "sha256:4e3208809133b4491a5c6d8f3e6622fceb9d5b7c157c90a0f2a2e3ae4504fa31"},
+    {file = "aws-encryption-sdk-3.3.0.tar.gz", hash = "sha256:eb2adba14f481cd83d7169ab8e642994896d39a4a64e1796904a6b49256613b0"},
+    {file = "aws_encryption_sdk-3.3.0-py2.py3-none-any.whl", hash = "sha256:c2a967ebe70820f64dea1eb7000f60fe54f56b23276a592e1b77ec475e823304"},
 ]
 
 [package.dependencies]
