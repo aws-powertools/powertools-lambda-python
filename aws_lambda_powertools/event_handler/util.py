@@ -1,3 +1,8 @@
+from typing import Any, Dict
+
+from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
+
+
 class _FrozenDict(dict):
     """
     A dictionary that can be used as a key in another dictionary.
@@ -11,3 +16,27 @@ class _FrozenDict(dict):
 
     def __hash__(self):
         return hash(frozenset(self.keys()))
+
+
+def extract_origin_header(resolver_headers: Dict[str, Any]):
+    """
+    Extracts the 'origin' or 'Origin' header from the provided resolver headers.
+
+    The 'origin' or 'Origin' header can be either a single header or a multi-header.
+
+    Args:
+        resolver_headers (Dict): A dictionary containing the headers.
+
+    Returns:
+        Optional[str]: The value(s) of the origin header or None.
+    """
+    resolved_header = get_header_value(
+        headers=resolver_headers,
+        name="origin",
+        default_value=None,
+        case_sensitive=False,
+    )
+    if isinstance(resolved_header, list):
+        return resolved_header[0]
+
+    return resolved_header

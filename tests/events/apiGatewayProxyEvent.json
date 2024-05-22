@@ -12,6 +12,9 @@
     "Header1": [
       "value1"
     ],
+    "Origin": [
+      "https://aws.amazon.com"
+    ],
     "Header2": [
       "value1",
       "value2"
