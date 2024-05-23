@@ -50,8 +50,7 @@ classDiagram
 
 ## Getting started
 
-???+ note
-    This section uses DynamoDB as the default idempotent persistence storage layer. If you are interested in using Redis as the persistence storage layer, check out the [Redis as persistence storage layer](#redis-as-persistent-storage-layer-provider) Section.
+We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-as-persistent-storage-layer-provider).
 
 ### IAM Permissions
 
