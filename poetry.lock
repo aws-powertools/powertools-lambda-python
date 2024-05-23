@@ -196,13 +196,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-encryption-sdk"
-version = "3.2.0"
+version = "3.3.0"
 description = "AWS Encryption SDK implementation for Python"
 optional = true
 python-versions = "*"
 files = [
-    {file = "aws-encryption-sdk-3.2.0.tar.gz", hash = "sha256:4304fcf8ce2aa3fa98b1acff7a3bf3cd0528c329c0c437b55e0f456bbf62347e"},
-    {file = "aws_encryption_sdk-3.2.0-py2.py3-none-any.whl", hash = "sha256:4e3208809133b4491a5c6d8f3e6622fceb9d5b7c157c90a0f2a2e3ae4504fa31"},
+    {file = "aws-encryption-sdk-3.3.0.tar.gz", hash = "sha256:eb2adba14f481cd83d7169ab8e642994896d39a4a64e1796904a6b49256613b0"},
+    {file = "aws_encryption_sdk-3.3.0-py2.py3-none-any.whl", hash = "sha256:c2a967ebe70820f64dea1eb7000f60fe54f56b23276a592e1b77ec475e823304"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.155"
+version = "0.1.157"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.155.tar.gz", hash = "sha256:e2dd157529cf4f7724bbc4ceb30de30aa4302b847be9d7ed40d644dbdfb0221a"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.155-py3-none-any.whl", hash = "sha256:c06b5dfed97e4ec24feebf9ad2190e916318a0dc162b766385834f7d419bc537"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.157.tar.gz", hash = "sha256:756becc6cb5ab991ba48e72d0c14491d7e1191cb747225c746b2a2383d138ca6"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.157-py3-none-any.whl", hash = "sha256:b8d9c554a155b5c1d1609e3ef3fe949f42f03ecdccfab410c4bb3a8d6fd707ba"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.141.0,<3.0.0"
-cdk-nag = ">=2.28.118,<3.0.0"
+cdk-nag = ">=2.28.119,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -2000,13 +2000,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-cloudformation"
-version = "1.34.84"
-description = "Type annotations for boto3.CloudFormation 1.34.84 service generated with mypy-boto3-builder 7.23.2"
+version = "1.34.111"
+description = "Type annotations for boto3.CloudFormation 1.34.111 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_cloudformation-1.34.84-py3-none-any.whl", hash = "sha256:580954031cb3650588b91f592e8f51855b2ff435d763ac0d69cf271c8433315f"},
-    {file = "mypy_boto3_cloudformation-1.34.84.tar.gz", hash = "sha256:82d14df3757f30b5a1d34650839d415d265d4de41cf355d63e10221fcc67f177"},
+    {file = "mypy_boto3_cloudformation-1.34.111-py3-none-any.whl", hash = "sha256:526e928c504fa2880b1774aa10629a04fe0ec70ed2864ab3d3f7772386a1a925"},
+    {file = "mypy_boto3_cloudformation-1.34.111.tar.gz", hash = "sha256:a02e201d1a9d9a8fb4db5b942d5c537a4e8861c611f0d986126674ac557cb9e8"},
 ]
 
 [package.dependencies]
@@ -3627,4 +3627,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "d1f342853e789f7d2118abddfed00488ac6924ec177f5507a645fb9dbf0b8412"
+content-hash = "418c68866d262a1ae062124eb8cde3029017908cb97bbc5ec222081298f15f6f"
