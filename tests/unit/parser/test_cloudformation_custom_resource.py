@@ -91,7 +91,7 @@ def test_cloudformation_custom_resource_delete_event():
 
 
 def test_cloudformation_custom_resource_delete_event_physical_id_missing():
-    raw_event = load_event("cloudformationCustomResourceUpdate.json")
+    raw_event = load_event("cloudformationCustomResourceDelete.json")
     del raw_event["PhysicalResourceId"]
 
     with pytest.raises(ValidationError):
