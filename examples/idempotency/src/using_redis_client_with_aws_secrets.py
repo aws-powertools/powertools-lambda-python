@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from redis import Redis
@@ -8,7 +10,7 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
     RedisCachePersistenceLayer,
 )
 
-redis_values: Any = parameters.get_secret("redis_info", transform="json")  # (1)!
+redis_values: dict[str, Any] = parameters.get_secret("redis_info", transform="json")  # (1)!
 
 redis_client = Redis(
     host=redis_values.get("REDIS_HOST"),

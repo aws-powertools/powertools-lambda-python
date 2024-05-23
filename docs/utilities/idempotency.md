@@ -73,12 +73,18 @@ We currently support Amazon DynamoDB and Redis as a storage layer. The following
 If you're not [changing the default configuration for the DynamoDB persistence layer](#dynamodbpersistencelayer), this is the expected default configuration:
 
 | Configuration      | Value        | Notes                                                                               |
-| ------------------ | ------------ |-------------------------------------------------------------------------------------|
+| ------------------ | ------------ | ----------------------------------------------------------------------------------- |
 | Partition key      | `id`         |                                                                                     |
 | TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
 
-???+ tip "Tip: You can share a single state table for all functions"
-    You can reuse the same DynamoDB table to store idempotency state. We add `module_name` and [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} in addition to the idempotency key as a hash key.
+| Configuration      | Value        | Notes                                                                                                    |
+| ------------------ | ------------ | -------------------------------------------------------------------------------------------------------- |
+| Partition key      | `id`         | Primary key looks like: <br> `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}` |
+| TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console                      |
+
+Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
+
+##### DynamoDB IaC examples
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -109,7 +115,24 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
     On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
 
-    **Note:** While we try to minimize requests to DynamoDB to 1 per invocation, if your boto3 version is lower than `1.26.194`, you may experience 2 requests in every invocation. Ensure to check your boto3 version and review the [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate the cost.
+We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
+
+In both services and self-hosting Redis, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
+
+!!! tip "First time setting it all up? Checkout the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)"
+
+##### Redis IaC examples
+
+=== "AWS CloudFormation example"
+
+    ```yaml hl_lines="5 21"
+    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
+    ```
+
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
+    2. Replace the Security Group ID and Subnet ID to match your VPC settings.
+
+Once setup, you can find quick start and advanced examples for Redis in [the persistent layers section](RedisCachePersistenceLayer).
 
 <!-- markdownlint-enable MD013 -->
 ### Idempotent decorator
@@ -353,6 +376,8 @@ This persistence layer is built-in, allowing you to use an existing DynamoDB tab
     --8<-- "examples/idempotency/src/customize_persistence_layer.py"
     ```
 
+##### DynamoDB defaults
+
 When using DynamoDB as the persistence layer, you can customize the attribute names by passing the following parameters during the initialization of the persistence layer:
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
@@ -369,22 +394,81 @@ When using DynamoDB as the persistence layer, you can customize the attribute na
 
 #### RedisPersistenceLayer
 
-This persistence layer is built-in, allowing you to use an existing Redis service. For optimal performance and compatibility, it is strongly recommended to use a Redis service version 7 or higher.
+!!! info "We recommend Redis version 7 or higher for optimal performance."
+
+For a quick start, initialize `RedisCachePersistenceLayer` and pass your cluster host endpoint along with the port to connect to.
+
+For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
+
+=== "Redis quick start"
+    ```python hl_lines="7-9 12 26"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
+    ```
+
+=== "Using an existing Redis client"
+    ```python hl_lines="4 9-11 14 22 36"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
+
+##### Redis SSL connections
+
+We recommend using AWS Secrets Manager to store and rotate certificates safely, and the [Parameters feature](./parameters.md){target="_blank"} to fetch and cache optimally.
+
+For advanced configurations, we also recommend using an existing Redis client for optimal compatibility like SSL certificates and timeout.
+
+=== "Advanced configuration using AWS Secrets"
+    ```python hl_lines="9-11 13 15 25"
+    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+
+=== "Advanced configuration with local certificates"
+    ```python hl_lines="14 25-27"
+    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+    2. redis_user.crt file stored in the "certs" directory of your Lambda function
+    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
+    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
+
+##### Redis defaults
+
+You can customize attribute names when instantiating `RedisCachePersistenceLayer` with the following parameters:
+
+| Parameter                   | Required | Default                  | Description                                                                                   |
+| --------------------------- | -------- | ------------------------ | --------------------------------------------------------------------------------------------- |
+| **in_progress_expiry_attr** |          | `in_progress_expiration` | Unix timestamp of when record expires while in progress (in case of the invocation times out) |
+| **status_attr**             |          | `status`                 | Stores status of the Lambda execution during and after invocation                             |
+| **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
+| **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
 
 === "Customizing RedisPersistenceLayer to suit your data structure"
 
     ```python hl_lines="9-16"
     --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
     ```
-
-When using Redis as the persistence layer, you can customize the attribute names by providing the following parameters upon initialization of the persistence layer:
-
-| Parameter                   | Required           | Default                              | Description                                                                                              |
-| --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
-| **in_progress_expiry_attr** |                    | `in_progress_expiration`             | Unix timestamp of when record expires while in progress (in case of the invocation times out)            |
-| **status_attr**             |                    | `status`                             | Stores status of the Lambda execution during and after invocation                                        |
-| **data_attr**               |                    | `data`                               | Stores results of successfully executed Lambda handlers                                                  |
-| **validation_key_attr**     |                    | `validation`                         | Hashed representation of the parts of the event used for validation |
 
 ### Idempotency request flow
 
@@ -638,110 +722,21 @@ graph TD;
 <i>Race condition with Redis</i>
 </center>
 
-## Redis as persistent storage layer provider
-
-### Redis resources
-
-Before setting up Redis as the persistent storage layer provider, you must have an existing Redis service. We recommend you to use Redis compatible services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"} as your persistent storage layer provider.
-
-???+ tip "No existing Redis service?"
-    If you don't have an existing Redis service, we recommend using [DynamoDB](#dynamodbpersistencelayer) as the persistent storage layer provider.
-
-=== "AWS CloudFormation example"
-
-    ```yaml hl_lines="5"
-    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
-    ```
-
-    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
-
-### VPC Access
-
-Your Lambda Function must have network access to the Redis endpoint before using it as the idempotency persistent storage layer. In most cases, you will need to [configure VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} for your Lambda Function.
-
-???+ tip "Amazon ElastiCache/MemoryDB for Redis as persistent storage layer provider"
-    If you plan to use Amazon ElastiCache for Redis as the idempotency persistent storage layer, you may find [this AWS tutorial](https://docs.aws.amazon.com/lambda/latest/dg/services-elasticache-tutorial.html){target="_blank"} helpful.
-    For those using Amazon MemoryDB for Redis, refer to [this AWS tutorial](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/){target="_blank"} specifically for the VPC setup guidance.
-
-After completing the VPC setup, you can use the templates provided below to set up Lambda functions with access to VPC internal subnets.
-
-=== "AWS Serverless Application Model (SAM) example"
-
-    ```yaml hl_lines="9"
-    --8<-- "examples/idempotency/templates/sam_redis_vpc.yaml"
-    ```
-
-    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
-
-### Configuring Redis persistence layer
-
-You can quickly get started by initializing the `RedisCachePersistenceLayer` class and applying the `idempotent` decorator to your Lambda handler. For a detailed example of using the `RedisCachePersistenceLayer`, refer to the [Persistence layers section](#redispersistencelayer).
-
-???+ info
-    We enforce security best practices by using SSL connections in the `RedisCachePersistenceLayer`; to disable it, set `ssl=False`
-
-=== "Use Persistence Layer with Redis config variables"
-    ```python hl_lines="7-9 12 26"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
-    ```
-
-=== "Use established Redis Client"
-    ```python hl_lines="4 9-11 14 22 36"
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
-    ```
-
-### Custom advanced settings
-
-For advanced configurations, such as setting up SSL certificates or customizing parameters like a custom timeout, you can utilize the Redis client to tailor these specific settings to your needs.
-
-=== "Advanced configuration using AWS Secrets"
-    ```python hl_lines="7-9 11 13 23"
-    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
-    ```
-
-    1. JSON stored:
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-
-=== "Advanced configuration with local certificates"
-    ```python hl_lines="12 23-25"
-    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
-    ```
-
-    1. JSON stored:
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-    2. redis_user.crt file stored in the "certs" directory of your Lambda function
-    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
-    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
-
 ## Advanced
 
 ### Customizing the default behavior
 
 Idempotent decorator can be further configured with **`IdempotencyConfig`** as seen in the previous example. These are the available options for further configuration
 
-| Parameter                       | Default | Description                                                                                                                                                                                                                                  |
-|---------------------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                                    |
-| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                                                                                                 |
-| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                               |
-| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                                                                                     |
-| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                                 |
-| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                  |
-| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                    |
+| Parameter                       | Default | Description                                                                                                                                                                                                                                |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **event_key_jmespath**          | `""`    | JMESPath expression to extract the idempotency key from the event record using [built-in functions](./jmespath_functions.md#built-in-jmespath-functions){target="_blank"}                                                                  |
+| **payload_validation_jmespath** | `""`    | JMESPath expression to validate whether certain parameters have changed in the event while the event payload                                                                                                                               |
+| **raise_on_no_idempotency_key** | `False` | Raise exception if no idempotency key was found in the request                                                                                                                                                                             |
+| **expires_after_seconds**       | 3600    | The number of seconds to wait before a record is expired                                                                                                                                                                                   |
+| **use_local_cache**             | `False` | Whether to locally cache idempotency results                                                                                                                                                                                               |
+| **local_cache_max_items**       | 256     | Max number of items to store in local cache                                                                                                                                                                                                |
+| **hash_function**               | `md5`   | Function to use for calculating hashes, as provided by [hashlib](https://docs.python.org/3/library/hashlib.html){target="_blank" rel="nofollow"} in the standard library.                                                                  |
 | **response_hook**               | `None`  | Function to use for processing the stored Idempotent response. This function hook is called when an existing idempotent response is found. See [Manipulating The Idempotent Response](idempotency.md#manipulating-the-idempotent-response) |
 
 ### Handling concurrent executions with the same payload
