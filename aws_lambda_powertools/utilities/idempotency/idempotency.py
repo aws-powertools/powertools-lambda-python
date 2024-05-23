@@ -5,12 +5,14 @@ Primary interface for idempotent Lambda functions utility
 import functools
 import logging
 import os
+import warnings
 from inspect import isclass
 from typing import Any, Callable, Dict, Optional, Type, Union, cast
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
-from aws_lambda_powertools.shared.functions import strtobool
+from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
+from aws_lambda_powertools.shared.powertools_warnings import PowertoolsWarning
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -67,9 +69,16 @@ def idempotent(
         >>>     return {"StatusCode": 200}
     """
 
-    # Check if the IDEMPOTENCY_DISABLED_ENV environment variable is set to True
-    # If IDEMPOTENCY_DISABLED_ENV is not set or set to any false value, the function will be idempotent by default
+    # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
+    # Raises a warning if not running in development mode
     if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+        if not powertools_dev_is_set():
+            warnings.warn(
+                message="Disabling idempotency is intended for development environments only "
+                "and should not be used in production.",
+                category=PowertoolsWarning,
+                stacklevel=2,
+            )
         return handler(event, context, **kwargs)
 
     config = config or IdempotencyConfig()
@@ -153,9 +162,16 @@ def idempotent_function(
 
     @functools.wraps(function)
     def decorate(*args, **kwargs):
-        # Check if the IDEMPOTENCY_DISABLED_ENV environment variable is set to True
-        # If IDEMPOTENCY_DISABLED_ENV is not set or set to any false value, the function will be idempotent by default
-        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "0")):
+        # Skip idempotency controls when POWERTOOLS_IDEMPOTENCY_DISABLED has a truthy value
+        # Raises a warning if not running in development mode
+        if strtobool(os.getenv(constants.IDEMPOTENCY_DISABLED_ENV, "false")):
+            if not powertools_dev_is_set():
+                warnings.warn(
+                    message="Disabling idempotency is intended for development environments only "
+                    "and should not be used in production.",
+                    category=PowertoolsWarning,
+                    stacklevel=2,
+                )
             return function(*args, **kwargs)
 
         if data_keyword_argument not in kwargs:

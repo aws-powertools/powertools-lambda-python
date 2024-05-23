@@ -12,6 +12,7 @@ from pydantic import BaseModel
 from pytest import FixtureRequest
 from pytest_mock import MockerFixture
 
+from aws_lambda_powertools.shared.powertools_warnings import PowertoolsWarning
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     event_source,
@@ -1668,7 +1669,36 @@ def test_idempotent_data_sorting():
 
 
 @pytest.mark.parametrize("idempotency_disabled_value", ["1", "y", "yes", "t", "true", "on"])
-def test_idempotency_enabled_envvar(
+def test_idempotency_enabled_envvar_in_dev_environment(
+    monkeypatch,
+    lambda_context,
+    persistence_store: DynamoDBPersistenceLayer,
+    idempotency_disabled_value,
+):
+    # Scenario to validate no requests sent to dynamodb table when 'POWERTOOLS_IDEMPOTENCY_DISABLED' is set
+    mock_event = {"data": "value"}
+
+    persistence_store.client = MagicMock()
+
+    monkeypatch.setenv("POWERTOOLS_IDEMPOTENCY_DISABLED", str(idempotency_disabled_value))
+    monkeypatch.setenv("POWERTOOLS_DEV", "true")
+
+    @idempotent_function(data_keyword_argument="data", persistence_store=persistence_store)
+    def dummy(data):
+        return {"message": "hello"}
+
+    @idempotent(persistence_store=persistence_store)
+    def dummy_handler(event, context):
+        return {"message": "hi"}
+
+    dummy(data=mock_event)
+    dummy_handler(mock_event, lambda_context)
+
+    assert len(persistence_store.client.method_calls) == 0
+
+
+@pytest.mark.parametrize("idempotency_disabled_value", ["1", "y", "yes", "t", "true", "on"])
+def test_idempotency_enabled_envvar_in_non_dev_environment(
     monkeypatch,
     lambda_context,
     persistence_store: DynamoDBPersistenceLayer,
@@ -1689,10 +1719,11 @@ def test_idempotency_enabled_envvar(
     def dummy_handler(event, context):
         return {"message": "hi"}
 
-    dummy(data=mock_event)
-    dummy_handler(mock_event, lambda_context)
+    with pytest.warns(PowertoolsWarning, match="Disabling idempotency is intended for development environments*"):
+        dummy(data=mock_event)
+        dummy_handler(mock_event, lambda_context)
 
-    assert len(persistence_store.client.method_calls) == 0
+        assert len(persistence_store.client.method_calls) == 0
 
 
 @pytest.mark.parametrize("idempotency_disabled_value", ["0", "n", "no", "f", "false", "off"])
