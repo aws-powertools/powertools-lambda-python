@@ -5,16 +5,14 @@ description: Utility
 
 <!-- markdownlint-disable MD051 -->
 
-The idempotency utility provides a simple solution to convert your Lambda functions into idempotent operations which are safe to retry.
+The idempotency utility allows you to retry operations with the same input within a time window, producing the same output.
 
 ## Key features
 
-* Prevent Lambda handler from executing more than once on the same event payload during a time window
-* Ensure Lambda handler returns the same result when called with the same payload
-* Select a subset of the event as the idempotency key using JMESPath expressions
-* Set a time window in which records with the same payload should be considered duplicates
-* Expires in-progress executions if the Lambda function times out halfway through
-* Support Amazon DynamoDB and Redis as persistence layers
+* Produces the same result when a function is called repeatedly with the same idempotency key
+* Choose your idempotency key from one or more fields, or entire payload
+* Safeguard concurrent requests, timeouts, missing idempotency keys, and payload tampering
+* Support for Amazon DynamoDB, Redis, and bring your own persistence layer
 
 ## Terminology
 
@@ -421,86 +419,12 @@ For security, we enforce SSL connections by default; to disable it, set `ssl=Fal
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
-    ```
-
-##### Redis SSL connections
-
-We recommend using AWS Secrets Manager to store and rotate certificates safely, and the [Parameters feature](./parameters.md){target="_blank"} to fetch and cache optimally.
-
-For advanced configurations, we also recommend using an existing Redis client for optimal compatibility like SSL certificates and timeout.
-
-=== "Advanced configuration using AWS Secrets"
-    ```python hl_lines="9-11 13 15 25"
-    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
-    ```
-
-    1. JSON stored:
-    ```json
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-    ```
-
-=== "Advanced configuration with local certificates"
-    ```python hl_lines="14 25-27"
-    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
-    ```
-
-    1. JSON stored:
-    ```json
-    {
-    "REDIS_ENDPOINT": "127.0.0.1",
-    "REDIS_PORT": "6379",
-    "REDIS_PASSWORD": "redis-secret"
-    }
-    ```
-    2. redis_user.crt file stored in the "certs" directory of your Lambda function
-    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
-    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
-
-##### Redis defaults
-
-You can customize attribute names when instantiating `RedisCachePersistenceLayer` with the following parameters:
-
 | Parameter                   | Required | Default                  | Description                                                                                   |
 | --------------------------- | -------- | ------------------------ | --------------------------------------------------------------------------------------------- |
 | **in_progress_expiry_attr** |          | `in_progress_expiration` | Unix timestamp of when record expires while in progress (in case of the invocation times out) |
 | **status_attr**             |          | `status`                 | Stores status of the Lambda execution during and after invocation                             |
 | **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
 | **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
-
-```python title="customize_persistence_layer_redis.py" hl_lines="15-18"
---8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
-```
-
-### Common use cases
-
-#### Batch integration
-
-You can can easily integrate with [Batch](batch.md){target="_blank"} with the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
-
-???+ "Choosing an unique batch record attribute"
-    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
-
-    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
-
-=== "Integration with Batch Processor"
-
-    ```python title="integrate_idempotency_with_batch_processor.py" hl_lines="3 16 19 25 27"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
-    ```
-
-=== "Sample event"
-
-    ```json title="integrate_idempotency_with_batch_processor_payload.json" hl_lines="4"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
-    ```
 
 ### Idempotency request flow
 
