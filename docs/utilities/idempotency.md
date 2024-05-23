@@ -69,18 +69,16 @@ We provide Infrastrucure as Code examples with [AWS Serverless Application Model
 
 ### Required resources
 
-Before getting started, you need to create a persistent storage layer where the idempotency utility can store its state - your lambda functions will need read and write access to it.
+To start, you'll need:
 
-We currently support Amazon DynamoDB and Redis as a storage layer. The following example demonstrates how to create a table in DynamoDB. If you prefer to use Redis, refer go to the section [RedisPersistenceLayer](#redispersistencelayer) section.
+1. A persistent storage layer (DynamoDB or [Redis](#redis-as-persistent-storage-layer-provider))
+2. An AWS Lambda function with [permissions](#iam-permissions) to use your persistent storage layer
 
-**Default table configuration**
+#### DynamoDB table
 
-If you're not [changing the default configuration for the DynamoDB persistence layer](#dynamodbpersistencelayer), this is the expected default configuration:
+!!! tip "You can share a single state table for all functions"
 
-| Configuration      | Value        | Notes                                                                               |
-| ------------------ | ------------ | ----------------------------------------------------------------------------------- |
-| Partition key      | `id`         |                                                                                     |
-| TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console |
+Unless you're looking to use an [existing table or customize each attribute](#dynamodbpersistencelayer), you only need the following:
 
 | Configuration      | Value        | Notes                                                                                                    |
 | ------------------ | ------------ | -------------------------------------------------------------------------------------------------------- |
@@ -89,7 +87,7 @@ If you're not [changing the default configuration for the DynamoDB persistence l
 
 Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
 
-##### DynamoDB IaC examples
+##### IaC examples
 
 === "AWS Serverless Application Model (SAM) example"
 
@@ -108,38 +106,21 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
     --8<-- "examples/idempotency/templates/terraform.tf"
     ```
 
-???+ warning "Warning: Large responses with DynamoDB persistence layer"
-    When using this utility with DynamoDB, your function's responses must be [smaller than 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}.
+##### Limitations
 
-    Larger items cannot be written to DynamoDB and will cause exceptions. If your response exceeds 400kb, consider using Redis as your persistence layer.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-as-persistent-storage-layer-provider) as an alternative.
 
-<!-- markdownlint-disable MD013 -->
-???+ info "Info: DynamoDB"
+* **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"}) to estimate cost.
 
-    During the first invocation with a payload, the Lambda function executes both a `PutItem` and an `UpdateItem` operations to store the data in DynamoDB. If the result returned by your Lambda is less than 1kb, you can expect 2 WCUs per Lambda invocation.
+* **Old boto3 versions can increase costs**. For cost optimization, we use a conditional `PutItem` to always lock a new idempotency record. If locking fails, it means we already have an idempotency record saving us an additional `GetItem` call. However, this is only supported in boto3 `1.26.194` and higher _([June 30th 2023](https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-dynamodb-cost-failed-conditional-writes/){target="_blank"})_.
 
-    On subsequent invocations with the same payload, you can expect just 1 `PutItem` request to DynamoDB.
+#### Redis cluster
 
-We recommend you start with a Redis compatible management services such as [Amazon ElastiCache for Redis](https://aws.amazon.com/elasticache/redis/){target="_blank"} or [Amazon MemoryDB for Redis](https://aws.amazon.com/memorydb/){target="_blank"}.
+**TODO**: Experiment bringing upfront Redis even at the cost of readability, as setup and usage are disconnected today causing further harm.
 
-In both services and self-hosting Redis, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
+##### Constraints
 
-##### Redis IaC examples
-
-=== "AWS CloudFormation example"
-
-    !!! tip inline end "Prefer AWS Console/CLI?"
-
-        Follow the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)
-
-    ```yaml hl_lines="5 21"
-    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
-    ```
-
-    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
-    2. Replace the Security Group ID and Subnet ID to match your VPC settings.
-
-Once setup, you can find a quick start and advanced examples for Redis in [the persistent layers section](RedisCachePersistenceLayer).
+If you'd like to use Redis, please [read here](#redis-as-persistent-storage-layer-provider) on how to setup and access secrets/SSL certs.
 
 <!-- markdownlint-enable MD013 -->
 
