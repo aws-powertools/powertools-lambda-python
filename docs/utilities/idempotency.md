@@ -54,10 +54,18 @@ We use Amazon DynamoDB as the default persistence layer in the documentation. If
 
 ### IAM Permissions
 
-Your Lambda function IAM Role must have `dynamodb:GetItem`, `dynamodb:PutItem`, `dynamodb:UpdateItem` and `dynamodb:DeleteItem` IAM permissions before using this feature.
+When using Amazon DynamoDB as the persistence layer, you will need the following IAM permissions:
 
-???+ note
-    If you're using our example [AWS Serverless Application Model (SAM)](#required-resources), [AWS Cloud Development Kit (CDK)](#required-resources), or [Terraform](#required-resources) it already adds the required permissions.
+| IAM Permission                       | Operation                                                                |
+| ------------------------------------ | ------------------------------------------------------------------------ |
+| **`dynamodb:GetItem`**{: .copyMe}    | Retrieve idempotent record                                               |
+| **`dynamodb:PutItem`**{: .copyMe}    | New idempotent records, replace expired idempotent records               |
+| **`dynamodb:UpdateItem`**{: .copyMe} | Complete idempotency transaction, and/or update idempotent records state |
+| **`dynamodb:DeleteItem`**{: .copyMe} | Delete idempotent records for unsuccessful idempotency transactions      |
+
+**First time setting it up?**
+
+We provide Infrastrucure as Code examples with [AWS Serverless Application Model (SAM)](#aws-serverless-application-model-sam-example), [AWS Cloud Development Kit (CDK)](#aws-cloud-development-kit-cdk), and [Terraform](#terraform) with the required permissions.
 
 ### Required resources
 
