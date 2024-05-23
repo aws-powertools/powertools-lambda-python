@@ -117,7 +117,4 @@ def test_sqs_dlq_trigger_event():
     convert_time = int(round(attributes.SentTimestamp.timestamp() * 1000))
     assert convert_time == int(raw_record["attributes"]["SentTimestamp"])
 
-    assert (
-        attributes.DeadLetterQueueSourceArn
-        == raw_record["attributes"]["DeadLetterQueueSourceArn"]
-    )
+    assert attributes.DeadLetterQueueSourceArn == raw_record["attributes"]["DeadLetterQueueSourceArn"]
