@@ -18,11 +18,13 @@ The idempotency utility allows you to retry operations with the same input withi
 
 The property of idempotency means that an operation does not cause additional side effects if it is called more than once with the same input parameters.
 
-**Idempotent operations will return the same result when they are called multiple times with the same parameters**. This makes idempotent operations safe to retry.
+**Idempotency key** is a combination of **(a)** Lambda function name, **(b)** fully qualified name of your function, and **(c)** a hash of the entire payload or part(s) of the payload you specify.
 
-**Idempotency key** is a hash representation of either the entire event or a specific configured subset of the event, and invocation results are **JSON serialized** and stored in your persistence storage layer.
+**Idempotent request** is an operation with the same input previously processed that is not expired in your persistent storage or in-memory cache.
 
-**Idempotency record** is the data representation of an idempotent request saved in your preferred  storage layer. We use it to coordinate whether a request is idempotent, whether it's still valid or expired based on timestamps, etc.
+**Persistence layer** is a storage we use to read, create, expire, and delete idempotency records.
+
+**Idempotency record** is the data representation of an idempotent request in its various status. We use it to coordinate  whether **(a)** a request is idempotent, **(b)** it's not expired, **(c)** JSON response to return, and more.
 
 <center>
 ```mermaid
