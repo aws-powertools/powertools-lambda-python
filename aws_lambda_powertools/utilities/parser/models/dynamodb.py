@@ -3,11 +3,13 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
-from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import TypeDeserializer
+from aws_lambda_powertools.shared.dynamodb_deserializer import TypeDeserializer
 from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
+    _deserializer = TypeDeserializer()
+
     ApproximateCreationDateTime: Optional[datetime] = None
     Keys: Dict[str, Dict[str, Any]]
     NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
@@ -26,10 +28,6 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: ERA001
     #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: ERA001,E501
     #     return values # noqa: ERA001
-
-    _deserializer = TypeDeserializer()
-
-    _custom_init__ = True
 
     def __init__(self, **data: Any):
         """StreamRecord constructor
@@ -61,13 +59,13 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
         return {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
 
     @property
-    def approximate_creation_date_time(self) -> Optional[int]:
+    def approximate_creation_date_time(self) -> Optional[datetime]:
         """The approximate date and time when the stream record was created, in UNIX epoch time format."""
         item = self.ApproximateCreationDateTime
-        return None if item is None else int(item)
+        return None if item is None else item
 
     @property
-    def keys(self) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+    def keys(self) -> Optional[Dict[str, Any]]:
         """The primary key attribute(s) for the DynamoDB item that was modified."""
         return self._deserialize_dynamodb_dict("Keys")
 
