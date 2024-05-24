@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Type, Union
 
 from pydantic import BaseModel
 
+from aws_lambda_powertools.utilities.data_classes.dynamo_db_stream_event import TypeDeserializer
 from aws_lambda_powertools.utilities.parser.types import Literal
 
 
@@ -25,6 +26,71 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: ERA001
     #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: ERA001,E501
     #     return values # noqa: ERA001
+
+    _deserializer = TypeDeserializer()
+
+    _custom_init__ = True
+
+    def __init__(self, **data: Any):
+        """StreamRecord constructor
+        Parameters
+        ----------
+        data: Dict[str, Any]
+            Represents the dynamodb dict inside DynamoDBStreamEvent's records
+        """
+        super().__init__(**data)
+        self._deserializer = TypeDeserializer()
+
+    def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
+        """Deserialize DynamoDB records available in `Keys`, `NewImage`, and `OldImage`
+
+        Parameters
+        ----------
+        key : str
+            DynamoDB key (e.g., Keys, NewImage, or OldImage)
+
+        Returns
+        -------
+        Optional[Dict[str, Any]]
+            Deserialized records in Python native types
+        """
+        dynamodb_dict = getattr(self, key)
+        if dynamodb_dict is None:
+            return None
+
+        return {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
+
+    @property
+    def approximate_creation_date_time(self) -> Optional[int]:
+        """The approximate date and time when the stream record was created, in UNIX epoch time format."""
+        item = self.ApproximateCreationDateTime
+        return None if item is None else int(item)
+
+    @property
+    def keys(self) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+        """The primary key attribute(s) for the DynamoDB item that was modified."""
+        return self._deserialize_dynamodb_dict("Keys")
+
+    @property
+    def new_image(self) -> Optional[Dict[str, Any]]:
+        """The item in the DynamoDB table as it appeared after it was modified."""
+        return self._deserialize_dynamodb_dict("NewImage")
+
+    @property
+    def old_image(self) -> Optional[Dict[str, Any]]:
+        """The item in the DynamoDB table as it appeared before it was modified."""
+        return self._deserialize_dynamodb_dict("OldImage")
+
+    @property
+    def sequence_number(self) -> Optional[str]:
+        """The sequence number of the stream record."""
+        return self.SequenceNumber
+
+    @property
+    def size_bytes(self) -> Optional[int]:
+        """The size of the stream record, in bytes."""
+        item = self.SizeBytes
+        return None if item is None else int(item)
 
 
 class UserIdentity(BaseModel):
