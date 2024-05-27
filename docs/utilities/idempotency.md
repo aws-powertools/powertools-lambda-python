@@ -188,11 +188,11 @@ By default, `idempotent_function` serializes, stores, and returns your annotated
 
 The output serializer supports any JSON serializable data, **Python Dataclasses** and **Pydantic Models**.
 
-!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON object."
+!!! info "When using the `output_serializer` parameter, the data will continue to be stored in DynamoDB as a JSON string."
 
 === "Pydantic"
 
-    You can use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+    Use `PydanticSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
@@ -212,7 +212,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
 === "Dataclasses"
 
-     You can use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
+     Use `DataclassSerializer` to automatically serialize what's retrieved from the persistent storage based on the return type annotated.
 
     === "Inferring via the return type"
 
@@ -232,7 +232,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
 === "Any type"
 
-    You can use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
+    Use `CustomDictSerializer` to have full control over the serialization process for any type. It expects two functions:
 
     * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
     * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
@@ -245,42 +245,20 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     2. This function does the following <br><br>**1**. Receives the dictionary saved into the persistent storage <br>**1** Serializes to `OrderOutput` before `@idempotent` returns back to the caller.
     3. This serializer receives both functions so it knows who to call when to serialize to and from dictionary.
 
-#### Batch integration
-
-You can can easily integrate with [Batch utility](batch.md){target="_blank"} via context manager. This ensures that you process each record in an idempotent manner, and guard against a [Lambda timeout](#lambda-timeouts) idempotent situation.
-
-???+ "Choosing an unique batch record attribute"
-    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
-
-    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
-
-=== "Integration with Batch Processor"
-
-    ```python hl_lines="2 12 16 20 31 35 37"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
-    ```
-
-=== "Sample event"
-
-    ```json hl_lines="4"
-    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
-    ```
-
 ### Choosing a payload subset for idempotency
 
 ???+ tip "Tip: Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
 
-Use [`IdempotencyConfig`](#customizing-the-default-behavior) to instruct the idempotent decorator to only use a portion of your payload to verify whether a request is idempotent, and therefore it should not be retried.
+Use [`IdempotencyConfig`](#customizing-the-default-behavior)'s **`event_key_jmespath`** parameter to select one or more payload parts as your idempotency key.
 
 > **Payment scenario**
 
 In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure that we don't accidentally charge our customer by subscribing them more than once.
 
-Imagine the function executes successfully, but the client never receives the response due to a connection issue. It is safe to retry in this instance, as the idempotent decorator will return a previously saved response.
+Imagine the function runs successfully, but the client never receives the response due to a connection issue. It is safe to immediately retry in this instance, as the idempotent decorator will return a previously saved response.
 
-**What we want here** is to instruct Idempotency to use `user_id` and `product_id` fields from our incoming payload as our idempotency key.
-If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our customer to be charged twice.
+**We want** to use `user_id` and `product_id` fields as our idempotency key. If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our function to run again.
 
 ???+ tip "Deserializing JSON strings in payloads for increased accuracy."
     The payload extracted by the `event_key_jmespath` is treated as a string by default.
@@ -467,6 +445,29 @@ You can customize attribute names when instantiating `RedisCachePersistenceLayer
 
     ```python hl_lines="9-16"
     --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+    ```
+
+### Common use cases
+
+#### Batch integration
+
+You can can easily integrate with [Batch](batch.md){target="_blank"} with the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
+
+???+ "Choosing an unique batch record attribute"
+    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
+
+    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
+
+=== "Integration with Batch Processor"
+
+    ```python title="integrate_idempotency_with_batch_processor.py" hl_lines="3 16 19 25 27"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
+    ```
+
+=== "Sample event"
+
+    ```json title="integrate_idempotency_with_batch_processor_payload.json" hl_lines="4"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
     ```
 
 ### Idempotency request flow
