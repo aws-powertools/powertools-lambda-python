@@ -160,24 +160,25 @@ It will treat the entire event as an idempotency key. That is, the same event wi
 
 ### Idempotent_function decorator
 
-Similar to [idempotent decorator](#idempotent-decorator), you can use `idempotent_function` decorator for any synchronous Python function.
+For full flexibility, you can use the `idempotent_function` decorator for any synchronous Python function.
 
-When using `idempotent_function`, you must tell us which keyword parameter in your function signature has the data we should use via **`data_keyword_argument`**.
+When using this decorator, you **must** call your decorated function using keyword arguments.
 
-!!! tip "We support JSON serializable data, [Python Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, [Parser/Pydantic Models](parser.md){target="_blank"}, and our [Event Source Data Classes](./data_classes.md){target="_blank"}."
-
-???+ warning "Limitation"
-    Make sure to call your decorated function using keyword arguments.
+You can use `data_keyword_argument` to tell us the argument to extract an idempotency key.  We support JSON serializable data, [Dataclasses](https://docs.python.org/3.12/library/dataclasses.html){target="_blank" rel="nofollow"}, Pydantic Models, and [Event Source Data Classes](./data_classes.md){target="_blank"}
 
 === "Using Dataclasses"
 
-    ```python hl_lines="3-7 11 26 37"
+    ```python title="working_with_idempotent_function_dataclass.py" hl_lines="3-7 11 26 39"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass.py"
     ```
 
+    1. Notice how **`data_keyword_argument`** matches the name of the parameter.
+    <br><br> This allows us to extract one or all fields as idempotency key.
+    2. Different from `idempotent` decorator, we must explicitly register the Lambda context to [protect against timeouts](#lambda-timeouts).
+
 === "Using Pydantic"
 
-    ```python hl_lines="1-5 10 23 34"
+    ```python title="working_with_idempotent_function_pydantic.py" hl_lines="1-5 10 23 34"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 

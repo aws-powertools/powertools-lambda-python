@@ -24,12 +24,14 @@ class Order:
 
 
 @idempotent_function(data_keyword_argument="order", config=config, persistence_store=dynamodb)
-def process_order(order: Order):
+def process_order(order: Order):  # (1)!
     return f"processed order {order.order_id}"
 
 
 def lambda_handler(event: dict, context: LambdaContext):
-    config.register_lambda_context(context)  # see Lambda timeouts section
+    # see Lambda timeouts section
+    config.register_lambda_context(context)  # (2)!
+
     order_item = OrderItem(sku="fake", description="sample")
     order = Order(item=order_item, order_id=1)
 
