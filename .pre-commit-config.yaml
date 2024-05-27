@@ -34,6 +34,7 @@ repos:
         entry: poetry run cfn-lint
         language: system
         types: [yaml]
+        exclude: examples/homepage/install/.*?/serverless\.yml$
         files: examples/.*
   - repo: https://github.com/rhysd/actionlint
     rev: "fd7ba3c382e13dcc0248e425b4cbc3f1185fa3ee" # v1.6.24

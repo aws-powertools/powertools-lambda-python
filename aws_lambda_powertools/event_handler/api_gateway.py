@@ -43,7 +43,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
-from aws_lambda_powertools.event_handler.util import _FrozenDict
+from aws_lambda_powertools.event_handler.util import _FrozenDict, extract_origin_header
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -784,7 +784,8 @@ class ResponseBuilder(Generic[ResponseEventT]):
 
     def _add_cors(self, event: ResponseEventT, cors: CORSConfig):
         """Update headers to include the configured Access-Control headers"""
-        self.response.headers.update(cors.to_dict(event.get_header_value("Origin")))
+        extracted_origin_header = extract_origin_header(event.resolved_headers_field)
+        self.response.headers.update(cors.to_dict(extracted_origin_header))
 
     def _add_cache_control(self, cache_control: str):
         """Set the specified cache control headers for 200 http responses. For non-200 `no-cache` is used."""
@@ -2124,7 +2125,8 @@ class ApiGatewayResolver(BaseRouter):
         headers = {}
         if self._cors:
             logger.debug("CORS is enabled, updating headers.")
-            headers.update(self._cors.to_dict(self.current_event.get_header_value("Origin")))
+            extracted_origin_header = extract_origin_header(self.current_event.resolved_headers_field)
+            headers.update(self._cors.to_dict(extracted_origin_header))
 
             if method == "OPTIONS":
                 logger.debug("Pre-flight request detected. Returning CORS with null response")

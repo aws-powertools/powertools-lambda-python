@@ -86,6 +86,7 @@ Log Data Event for Troubleshooting
 | [AppSync Resolver](#appsync-resolver)                                         | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                           | `AWSConfigRuleEvent`                               |
 | [Bedrock Agent](#bedrock-agent)                                               | `BedrockAgent`                                     |
+| [CloudFormation Custom Resource](#cloudformation-custom-resource)             | `CloudFormationCustomResourceEvent`                |
 | [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
@@ -493,6 +494,14 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
 
     ```python hl_lines="2 8 10"
     --8<-- "examples/event_sources/src/bedrock_agent_event.py"
+    ```
+
+### CloudFormation Custom Resource
+
+=== "app.py"
+
+    ```python hl_lines="11 13 15 17 19"
+    --8<-- "examples/event_sources/src/cloudformation_custom_resource_handler.py"
     ```
 
 ### CloudWatch Dashboard Custom Widget
