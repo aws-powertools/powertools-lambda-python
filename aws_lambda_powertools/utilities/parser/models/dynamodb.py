@@ -30,11 +30,11 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     #     return values # noqa: ERA001
 
     def __init__(self, **data: Any):
-        """StreamRecord constructor
+        """DynamoDBStreamChangedRecordModel constructor
         Parameters
         ----------
-        data: Dict[str, Any]
-            Represents the dynamodb dict inside DynamoDBStreamEvent's records
+        data: Any
+            Represents the model data
         """
         super().__init__(**data)
         self._deserializer = TypeDeserializer()
