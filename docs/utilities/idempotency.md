@@ -335,13 +335,13 @@ You can change this expiration window with the **`expires_after_seconds`** param
 
 ### Lambda timeouts
 
+!!! note "You can skip this section if you are using the [`@idempotent` decorator](#idempotent-decorator)"
+
 By default, we protect against [concurrent executions](#handling-concurrent-executions-with-the-same-payload) with the same payload using a locking mechanism. However, if your Lambda function times out before completing the first invocation it will only accept the same request when the [idempotency record expire](#expiring-idempotency-records).
 
 To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
 
 === "Registering the Lambda context"
-
-    > This is unnecessary for [`@idempotent` decorator](#idempotent-decorator), as it captures the Lambda context from your handler function.
 
     ```python title="working_with_lambda_timeout.py" hl_lines="11 20"
     --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
