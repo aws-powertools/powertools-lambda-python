@@ -497,6 +497,17 @@ Notice in the CloudWatch Logs output how `payment_id` appears as expected when l
     --8<-- "examples/logger/src/logger_reuse_output.json"
     ```
 
+???+ note "Note: About Child Loggers"
+    Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
+
+    In Powertools, you can have the same effect by using `child=True` parameter: `Logger(child=True)`. This creates a new Logger instance named after `service.<module>`. All state changes will be propagated bi-directionally between Child and Parent.
+
+    For that reason, there could be side effects depending on the order the Child Logger is instantiated, because Child Loggers don't have a handler.
+
+    For example, if you instantiated a Child Logger and immediately used `logger.append_keys/remove_keys/set_correlation_id` to update logging state, this might fail if the Parent Logger wasn't instantiated.
+
+    In this scenario, you can either ensure any calls manipulating state are only called when a Parent Logger is instantiated (example above), or refrain from using `child=True` parameter altogether.
+
 ### Sampling debug logs
 
 Use sampling when you want to dynamically change your log level to **DEBUG** based on a **percentage of your concurrent/cold start invocations**.
@@ -594,9 +605,8 @@ stateDiagram-v2
 ```
 </center>
 
-For inheritance, Logger uses `child` parameter to ensure we don't compete with its parents config. We name child Loggers following Python's convention: _`{service}`.`{filename}`_.
-
-Changes are bidirectional between parents and loggers. That is, appending a key in a child or parent will ensure both have them. This means, having the same `service` name is important when instantiating them.
+> Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
+For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
 
 === "logging_inheritance_good.py"
 
@@ -605,7 +615,6 @@ Changes are bidirectional between parents and loggers. That is, appending a key 
     ```
 
 === "logging_inheritance_module.py"
-
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
@@ -811,10 +820,11 @@ for the given name and level to the logging module. By default, this logs all bo
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
-???+ tip
-    To help differentiate between loggers, we include the standard logger `name` attribute for all loggers we copied configuration to.
+!!! tip "We include the logger `name` attribute for all loggers we copied configuration to help you differentiate them."
 
-By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
+By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes.
+
+You can also provide optional `log_level` attribute external top-level loggers will be configured with, by default it'll use the source logger log level. You can opt-out by using `ignore_log_level=True` parameter.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
 ---8<-- "examples/logger/src/cloning_logger_config.py"
