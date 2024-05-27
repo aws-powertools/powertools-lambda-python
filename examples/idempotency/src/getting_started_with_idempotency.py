@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 
@@ -7,7 +8,8 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+table = os.getenv("IDEMPOTENCY_TABLE")
+persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 
 
 @dataclass
@@ -17,8 +19,7 @@ class Payment:
     payment_id: str = field(default_factory=lambda: f"{uuid4()}")
 
 
-class PaymentError(Exception):
-    ...
+class PaymentError(Exception): ...
 
 
 @idempotent(persistence_store=persistence_layer)

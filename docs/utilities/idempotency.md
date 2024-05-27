@@ -119,11 +119,13 @@ We recommend you start with a Redis compatible management services such as [Amaz
 
 In both services and self-hosting Redis, you'll need to configure [VPC access](https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html){target="_blank"} to your AWS Lambda.
 
-!!! tip "First time setting it all up? Checkout the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)"
-
 ##### Redis IaC examples
 
 === "AWS CloudFormation example"
+
+    !!! tip inline end "Prefer AWS Console/CLI?"
+
+        Follow the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)
 
     ```yaml hl_lines="5 21"
     --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
@@ -132,33 +134,29 @@ In both services and self-hosting Redis, you'll need to configure [VPC access](h
     1. Replace the Security Group ID and Subnet ID to match your VPC settings.
     2. Replace the Security Group ID and Subnet ID to match your VPC settings.
 
-Once setup, you can find quick start and advanced examples for Redis in [the persistent layers section](RedisCachePersistenceLayer).
+Once setup, you can find a quick start and advanced examples for Redis in [the persistent layers section](RedisCachePersistenceLayer).
 
 <!-- markdownlint-enable MD013 -->
+
 ### Idempotent decorator
 
-You can quickly start by initializing the `DynamoDBPersistenceLayer` class and using it with the `idempotent` decorator on your lambda handler.
+For simple use cases, you can use the `idempotent` decorator on your Lambda handler function.
 
-???+ note
-    In this example, the entire Lambda handler is treated as a single idempotent operation. If your Lambda handler can cause multiple side effects, or you're only interested in making a specific logic idempotent, use [`idempotent_function`](#idempotent_function-decorator) instead.
-
-!!! tip "See [Choosing a payload subset for idempotency](#choosing-a-payload-subset-for-idempotency) for more elaborate use cases."
+It will treat the entire event as an idempotency key. That is, the same event will return the previously stored result within a [configurable time window](#expiring-idempotency-records) _(1 hour, by default)_.
 
 === "Idempotent decorator"
 
-    ```python hl_lines="4-7 10 24"
+    !!! tip "You can also choose [one or more fields](#choosing-a-payload-subset-for-idempotency) as an idempotency key."
+
+    ```python title="getting_started_with_idempotency.py" hl_lines="5-8 12 25"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency.py"
     ```
 
 === "Sample event"
 
-    ```json
+    ```json title="getting_started_with_idempotency_payload.json"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
     ```
-
-After processing this request successfully, a second request containing the exact same payload above will now return the same response, ensuring our customer isn't charged twice.
-
-!!! question "New to idempotency concept? Please review our [Terminology](#terminology) section if you haven't yet."
 
 ### Idempotent_function decorator
 
