@@ -73,8 +73,24 @@ We provide Infrastrucure as Code examples with [AWS Serverless Application Model
 
 To start, you'll need:
 
-1. A persistent storage layer - DynamoDB or [Redis](#redis-as-persistent-storage-layer-provider)
-2. An AWS Lambda function with [permissions](#iam-permissions) to use your persistent storage layer
+<!-- markdownlint-disable MD030 -->
+
+<div class="grid cards" markdown>
+*   :octicons-database-16:{ .lg .middle } __Persistent storage__
+
+    ---
+
+    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-as-persistent-storage-layer-provider)
+
+*   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
+
+    ---
+
+    With permissions to use your persistent storage
+
+</div>
+
+<!-- markdownlint-enable MD030 -->
 
 #### DynamoDB table
 
