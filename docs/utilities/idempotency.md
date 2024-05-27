@@ -35,7 +35,7 @@ classDiagram
         status Status
         expiry_timestamp int
         in_progress_expiry_timestamp int
-        response_data Json~str~
+        response_data str~JSON~
         payload_hash str
     }
     class Status {
@@ -60,7 +60,7 @@ When using Amazon DynamoDB as the persistence layer, you will need the following
 
 | IAM Permission                       | Operation                                                                |
 | ------------------------------------ | ------------------------------------------------------------------------ |
-| **`dynamodb:GetItem`**{: .copyMe}    | Retrieve idempotent record                                               |
+| **`dynamodb:GetItem`**{: .copyMe}    | Retrieve idempotent record _(strong consistency)_                        |
 | **`dynamodb:PutItem`**{: .copyMe}    | New idempotent records, replace expired idempotent records               |
 | **`dynamodb:UpdateItem`**{: .copyMe} | Complete idempotency transaction, and/or update idempotent records state |
 | **`dynamodb:DeleteItem`**{: .copyMe} | Delete idempotent records for unsuccessful idempotency transactions      |
@@ -73,7 +73,7 @@ We provide Infrastrucure as Code examples with [AWS Serverless Application Model
 
 To start, you'll need:
 
-1. A persistent storage layer (DynamoDB or [Redis](#redis-as-persistent-storage-layer-provider))
+1. A persistent storage layer - DynamoDB or [Redis](#redis-as-persistent-storage-layer-provider)
 2. An AWS Lambda function with [permissions](#iam-permissions) to use your persistent storage layer
 
 #### DynamoDB table
@@ -82,10 +82,10 @@ To start, you'll need:
 
 Unless you're looking to use an [existing table or customize each attribute](#dynamodbpersistencelayer), you only need the following:
 
-| Configuration      | Value        | Notes                                                                                                    |
-| ------------------ | ------------ | -------------------------------------------------------------------------------------------------------- |
-| Partition key      | `id`         | Primary key looks like: <br> `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}` |
-| TTL attribute name | `expiration` | This can only be configured after your table is created if you're using AWS Console                      |
+| Configuration      | Value        | Notes                                                                                    |
+| ------------------ | ------------ | ---------------------------------------------------------------------------------------- |
+| Partition key      | `id`         | Format: <br> `{lambda_fn_name}.{module_name}.{fn_qualified_name}#{idempotency_key_hash}` |
+| TTL attribute name | `expiration` | Using AWS Console? this is configurable after table creation                             |
 
 Note that `fn_qualified_name` means the [qualified name for classes and functions](https://peps.python.org/pep-3155/){target="_blank" rel="nofollow"} defined in PEP-3155.
 
@@ -112,7 +112,7 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 * **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-as-persistent-storage-layer-provider) as an alternative.
 
-* **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"}) to estimate cost.
+* **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
 * **Old boto3 versions can increase costs**. For cost optimization, we use a conditional `PutItem` to always lock a new idempotency record. If locking fails, it means we already have an idempotency record saving us an additional `GetItem` call. However, this is only supported in boto3 `1.26.194` and higher _([June 30th 2023](https://aws.amazon.com/about-aws/whats-new/2023/06/amazon-dynamodb-cost-failed-conditional-writes/){target="_blank"})_.
 
