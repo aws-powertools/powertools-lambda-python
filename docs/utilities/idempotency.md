@@ -319,34 +319,22 @@ You can change this expiration window with the **`expires_after_seconds`** param
 
 ### Lambda timeouts
 
-???+ note
-    This is automatically done when you decorate your Lambda handler with [@idempotent decorator](#idempotent-decorator).
-
-To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
-Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
+By default, we protect against [concurrent executions](#handling-concurrent-executions-with-the-same-payload) with the same payload using a locking mechanism. However, if your Lambda function times out before completing the first invocation it will only accept the same request when the [idempotency record expire](#expiring-idempotency-records).
 
 To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
 
-```python title="working_with_lambda_timeout.py" hl_lines="14 23"
---8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
-```
+=== "Registering the Lambda context"
+
+    > This is unnecessary for [`@idempotent` decorator](#idempotent-decorator), as it captures the Lambda context from your handler function.
+
+    ```python title="working_with_lambda_timeout.py" hl_lines="11 20"
+    --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
+    ```
 
 ???+ example "Mechanics"
     If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will run the invocation again as if it was in the `EXPIRED` state.
 
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
-
-???+ important
-    If you are only using the [@idempotent_function decorator](#idempotent_function-decorator) to guard isolated parts of your code,
-    you must use `register_lambda_context` available in the [idempotency config object](#customizing-the-default-behavior) to benefit from this protection.
-
-Here is an example on how you register the Lambda context in your handler:
-
-=== "Registering the Lambda context"
-
-    ```python hl_lines="11 20"
-    --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
-    ```
 
 ### Handling exceptions
 
