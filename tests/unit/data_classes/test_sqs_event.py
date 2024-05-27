@@ -65,10 +65,7 @@ def test_sqs_dlq_trigger_event():
     assert attributes.sequence_number is None
     assert attributes.message_group_id is None
     assert attributes.message_deduplication_id is None
-    assert (
-        attributes.dead_letter_queue_source_arn
-        == raw_attributes["DeadLetterQueueSourceArn"]
-    )
+    assert attributes.dead_letter_queue_source_arn == raw_attributes["DeadLetterQueueSourceArn"]
 
 
 def test_decode_nested_s3_event():

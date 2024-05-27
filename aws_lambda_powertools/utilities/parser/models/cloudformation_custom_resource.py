@@ -22,8 +22,10 @@ class CloudFormationCustomResourceCreateModel(CloudFormationCustomResourceBaseMo
 
 class CloudFormationCustomResourceDeleteModel(CloudFormationCustomResourceBaseModel):
     request_type: Literal["Delete"] = Field(..., alias="RequestType")
+    physical_resource_id: str = Field(..., alias="PhysicalResourceId")
 
 
 class CloudFormationCustomResourceUpdateModel(CloudFormationCustomResourceBaseModel):
     request_type: Literal["Update"] = Field(..., alias="RequestType")
+    physical_resource_id: str = Field(..., alias="PhysicalResourceId")
     old_resource_properties: Union[Dict[str, Any], BaseModel, None] = Field(None, alias="OldResourceProperties")

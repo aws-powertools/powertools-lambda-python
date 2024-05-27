@@ -68,7 +68,11 @@ from .s3 import (
     S3Model,
     S3RecordModel,
 )
-from .s3_batch_operation import S3BatchOperationJobModel, S3BatchOperationModel, S3BatchOperationTaskModel
+from .s3_batch_operation import (
+    S3BatchOperationJobModel,
+    S3BatchOperationModel,
+    S3BatchOperationTaskModel,
+)
 from .s3_event_notification import (
     S3SqsEventNotificationModel,
     S3SqsEventNotificationRecordModel,
