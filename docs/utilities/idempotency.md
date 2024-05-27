@@ -341,11 +341,9 @@ By default, we protect against [concurrent executions](#handling-concurrent-exec
 
 To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
 
-=== "Registering the Lambda context"
-
-    ```python title="working_with_lambda_timeout.py" hl_lines="11 20"
-    --8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
-    ```
+```python title="working_with_lambda_timeout.py" hl_lines="11 20"
+--8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
+```
 
 ???+ example "Mechanics"
     If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will run the invocation again as if it was in the `EXPIRED` state.
