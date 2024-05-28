@@ -526,7 +526,7 @@ def test_batch_processor_dynamodb_context_model(dynamodb_event_factory, order_ev
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
         def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
-            return json.loads(value["S"])
+            return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
         NewImage: Optional[OrderDynamoDB] = None
@@ -570,7 +570,7 @@ def test_batch_processor_dynamodb_context_model_with_failure(dynamodb_event_fact
         # so Pydantic can auto-initialize nested Order model
         @field_validator("Message", mode="before")
         def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
-            return json.loads(value["S"])
+            return json.loads(value)
 
     class OrderDynamoDBChangeRecord(DynamoDBStreamChangedRecordModel):
         NewImage: Optional[OrderDynamoDB] = None

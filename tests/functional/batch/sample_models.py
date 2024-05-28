@@ -38,7 +38,7 @@ class OrderDynamoDB(BaseModel):
     @field_validator("Message", mode="before")
     def transform_message_to_dict(cls, value: Dict[Literal["S"], str]):
         try:
-            return json.loads(value["S"])
+            return json.loads(value)
         except TypeError:
             raise ValueError
 
