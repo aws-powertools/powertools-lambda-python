@@ -369,17 +369,13 @@ If an exception is handled or raised **outside** your decorated function, then i
 
 This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
 
-```python title="customize_persistence_layer.py" hl_lines="10-18"
+```python title="customize_persistence_layer.py" hl_lines="7-15"
 --8<-- "examples/idempotency/src/customize_persistence_layer.py"
 ```
 
-    ```python hl_lines="7-15"
-    --8<-- "examples/idempotency/src/customize_persistence_layer.py"
-    ```
+##### DynamoDB attributes
 
-##### DynamoDB defaults
-
-When using DynamoDB as the persistence layer, you can customize the attribute names by passing the following parameters during the initialization of the persistence layer:
+You can customize the attribute names during initialization:
 
 | Parameter                   | Required           | Default                              | Description                                                                                              |
 | --------------------------- | ------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------- |
@@ -397,19 +393,66 @@ When using DynamoDB as the persistence layer, you can customize the attribute na
 
 !!! info "We recommend Redis version 7 or higher for optimal performance."
 
-For a quick start, initialize `RedisCachePersistenceLayer` and pass your cluster host endpoint along with the port to connect to.
+For simple setups, initialize `RedisCachePersistenceLayer` with your cluster endpoint and port to connect.
 
 For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
 
 === "Redis quick start"
-    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="8-10 14 27"
+    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="7-9 12 26"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
 === "Using an existing Redis client"
-    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="5 10-11 16 24 38"
+    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="4 9-11 14 22 36"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
+
+=== "Sample event"
+
+    ```json title="getting_started_with_idempotency_payload.json"
+    --8<-- "examples/idempotency/src/getting_started_with_idempotency_payload.json"
+    ```
+
+##### Redis SSL connections
+
+We recommend using AWS Secrets Manager to store and rotate certificates safely, and the [Parameters feature](./parameters.md){target="_blank"} to fetch and cache optimally.
+
+For advanced configurations, we recommend using an existing Redis client for optimal compatibility like SSL certificates and timeout.
+
+=== "Advanced configuration using AWS Secrets"
+    ```python title="using_redis_client_with_aws_secrets.py" hl_lines="9-11 13 15 25"
+    --8<-- "examples/idempotency/src/using_redis_client_with_aws_secrets.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+
+=== "Advanced configuration with local certificates"
+    ```python title="using_redis_client_with_local_certs.py" hl_lines="14 25-27"
+    --8<-- "examples/idempotency/src/using_redis_client_with_local_certs.py"
+    ```
+
+    1. JSON stored:
+    ```json
+    {
+    "REDIS_ENDPOINT": "127.0.0.1",
+    "REDIS_PORT": "6379",
+    "REDIS_PASSWORD": "redis-secret"
+    }
+    ```
+    2. redis_user.crt file stored in the "certs" directory of your Lambda function
+    3. redis_user_private.key file stored in the "certs" directory of your Lambda function
+    4. redis_ca.pem file stored in the "certs" directory of your Lambda function
+
+##### Redis attributes
+
+You can customize the attribute names during initialization:
 
 | Parameter                   | Required | Default                  | Description                                                                                   |
 | --------------------------- | -------- | ------------------------ | --------------------------------------------------------------------------------------------- |
@@ -417,6 +460,33 @@ For security, we enforce SSL connections by default; to disable it, set `ssl=Fal
 | **status_attr**             |          | `status`                 | Stores status of the Lambda execution during and after invocation                             |
 | **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
 | **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
+
+```python title="customize_persistence_layer_redis.py" hl_lines="9-16"
+--8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+```
+
+### Common use cases
+
+#### Batch integration
+
+You can can easily integrate with [Batch](batch.md){target="_blank"} with the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
+
+???+ "Choosing an unique batch record attribute"
+    In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
+
+    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
+
+=== "Integration with Batch Processor"
+
+    ```python title="integrate_idempotency_with_batch_processor.py" hl_lines="3 16 19 25 27"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor.py"
+    ```
+
+=== "Sample event"
+
+    ```json title="integrate_idempotency_with_batch_processor_payload.json" hl_lines="4"
+    --8<-- "examples/idempotency/src/integrate_idempotency_with_batch_processor_payload.json"
+    ```
 
 ### Idempotency request flow
 
