@@ -1,14 +1,17 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
+from aws_lambda_powertools.shared.dynamodb_deserializer import TypeDeserializer
 from aws_lambda_powertools.utilities.parser.types import Literal
+
+_DESERIALIZER = TypeDeserializer()
 
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
     ApproximateCreationDateTime: Optional[datetime] = None
-    Keys: Dict[str, Dict[str, Any]]
+    Keys: Dict[str, Any]
     NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     SequenceNumber: str
@@ -25,6 +28,10 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     #     if stream_type == "NEW_AND_OLD_IMAGES" and not new_img and not old_img: # noqa: ERA001
     #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: ERA001,E501
     #     return values # noqa: ERA001
+
+    @field_validator("Keys", "NewImage", "OldImage", mode="before")
+    def deserialize_field(cls, value):
+        return {k: _DESERIALIZER.deserialize(v) for k, v in value.items()}
 
 
 class UserIdentity(BaseModel):
