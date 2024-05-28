@@ -43,7 +43,7 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
-from aws_lambda_powertools.event_handler.util import _FrozenDict, extract_origin_header
+from aws_lambda_powertools.event_handler.util import _FrozenDict, _FrozenListDict, extract_origin_header
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -2386,6 +2386,7 @@ class Router(BaseRouter):
             methods = (method,) if isinstance(method, str) else tuple(method)
             frozen_responses = _FrozenDict(responses) if responses else None
             frozen_tags = frozenset(tags) if tags else None
+            frozen_security = _FrozenListDict(security) if security else None
 
             route_key = (
                 rule,
@@ -2400,7 +2401,7 @@ class Router(BaseRouter):
                 frozen_tags,
                 operation_id,
                 include_in_schema,
-                security,
+                frozen_security,
             )
 
             # Collate Middleware for routes

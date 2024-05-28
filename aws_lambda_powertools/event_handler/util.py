@@ -18,6 +18,27 @@ class _FrozenDict(dict):
         return hash(frozenset(self.keys()))
 
 
+class _FrozenListDict(list[dict[str, list[str]]]):
+    """
+    Freezes a list of dictionaries containing lists of strings.
+
+    This function takes a list of dictionaries where the values are lists of strings and converts it into
+    a frozen set of frozen sets of frozen dictionaries. This is done by iterating over the input list,
+    converting each dictionary's values (lists of strings) into frozen sets of strings, and then
+    converting the resulting dictionary into a frozen dictionary. Finally, all these frozen dictionaries
+    are collected into a frozen set of frozen sets.
+
+    This operation is useful when you want to ensure the immutability of the data structure and make it
+    hashable, which is required for certain operations like using it as a key in a dictionary or as an
+    element in a set.
+
+    Example: [{"TestAuth": ["test", "test1"]}]
+    """
+
+    def __hash__(self):
+        return hash(frozenset({_FrozenDict({key: frozenset(self) for key, self in item.items()}) for item in self}))
+
+
 def extract_origin_header(resolver_headers: Dict[str, Any]):
     """
     Extracts the 'origin' or 'Origin' header from the provided resolver headers.
