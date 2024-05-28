@@ -1,4 +1,4 @@
-from typing import Any, Dict, FrozenSet, List
+from typing import Any, Dict, List
 
 from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
 
@@ -36,7 +36,7 @@ class _FrozenListDict(List[Dict[str, List[str]]]):
     """
 
     def __hash__(self):
-        return hash(FrozenSet({_FrozenDict({key: FrozenSet(self) for key, self in item.items()}) for item in self}))
+        return hash(frozenset({_FrozenDict({key: frozenset(self) for key, self in item.items()}) for item in self}))
 
 
 def extract_origin_header(resolver_headers: Dict[str, Any]):
