@@ -469,7 +469,7 @@ You can customize the attribute names during initialization:
 
 #### Batch integration
 
-You can can easily integrate with [Batch](batch.md){target="_blank"} with the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
+You can can easily integrate with [Batch](batch.md){target="_blank"} using the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
 
 ???+ "Choosing an unique batch record attribute"
     In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
