@@ -305,41 +305,16 @@ Here is an example on how you register the Lambda context in your handler:
 
 ### Handling exceptions
 
-If you are using the `idempotent` decorator on your Lambda handler, any unhandled exceptions that are raised during the code execution will cause **the record in the persistence layer to be deleted**.
-This means that new invocations will execute your code again despite having the same payload. If you don't want the record to be deleted, you need to catch exceptions within the idempotent function and return a successful response.
+There are two failure modes that can cause new invocations to execute your code again despite having the same payload:
 
-<center>
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Lambda
-    participant Persistence Layer
-    Client->>Lambda: Invoke (event)
-    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
-    activate Persistence Layer
-    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
-    Lambda--xLambda: Call handler (event).<br/>Raises exception
-    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
-    deactivate Persistence Layer
-    Lambda-->>Client: Return error response
+* **Unhandled exception**. We catch them to delete the idempotency record to prevent inconsistencies, then propagate them.
+* **Persistent layer errors**. We raise **`IdempotencyPersistenceLayerError`** for any persistence layer errors _e.g., remove idempotency record_.
+
+If an exception is handled or raised **outside** your decorated function, then idempotency will be maintained.
+
+```python title="working_with_exceptions.py" hl_lines="21 32 38"
+--8<-- "examples/idempotency/src/working_with_exceptions.py"
 ```
-<i>Idempotent sequence exception</i>
-</center>
-
-If you are using `idempotent_function`, any unhandled exceptions that are raised _inside_ the decorated function will cause the record in the persistence layer to be deleted, and allow the function to be executed again if retried.
-
-If an Exception is raised _outside_ the scope of the decorated function and after your function has been called, the persistent record will not be affected. In this case, idempotency will be maintained for your decorated function. Example:
-
-=== "Handling exceptions"
-
-    ```python hl_lines="18-22 28 31"
-    --8<-- "examples/idempotency/src/working_with_exceptions.py"
-    ```
-
-???+ warning
-    **We will raise `IdempotencyPersistenceLayerError`** if any of the calls to the persistence layer fail unexpectedly.
-
-    As this happens outside the scope of your decorated function, you are not able to catch it if you're using the `idempotent` decorator on your Lambda handler.
 
 ### Persistence layers
 
@@ -633,6 +608,26 @@ sequenceDiagram
     Lambda-->>Client: Response sent to client
 ```
 <i>Concurrent identical in-flight requests</i>
+</center>
+
+#### Unhandled exception
+
+<center>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Lambda
+    participant Persistence Layer
+    Client->>Lambda: Invoke (event)
+    Lambda->>Persistence Layer: Get or set (id=event.search(payload))
+    activate Persistence Layer
+    Note right of Persistence Layer: Locked during this time. Prevents multiple<br/>Lambda invocations with the same<br/>payload running concurrently.
+    Lambda--xLambda: Call handler (event).<br/>Raises exception
+    Lambda->>Persistence Layer: Delete record (id=event.search(payload))
+    deactivate Persistence Layer
+    Lambda-->>Client: Return error response
+```
+<i>Idempotent sequence exception</i>
 </center>
 
 #### Lambda request timeout
