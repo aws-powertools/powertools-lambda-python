@@ -21,19 +21,19 @@ def test_dynamo_db_stream_trigger_event():
 
     new_image = parserd_event[0]["NewImage"]
     new_image_raw = raw_event["Records"][0]["dynamodb"]["NewImage"]
-    assert new_image.Message["S"] == new_image_raw["Message"]["S"]
-    assert new_image.Id["N"] == float(new_image_raw["Id"]["N"])
+    assert new_image.Message == new_image_raw["Message"]["S"]
+    assert new_image.Id == float(new_image_raw["Id"]["N"])
 
     # record index 1
     old_image = parserd_event[1]["OldImage"]
     old_image_raw = raw_event["Records"][1]["dynamodb"]["OldImage"]
-    assert old_image.Message["S"] == old_image_raw["Message"]["S"]
-    assert old_image.Id["N"] == float(old_image_raw["Id"]["N"])
+    assert old_image.Message == old_image_raw["Message"]["S"]
+    assert old_image.Id == float(old_image_raw["Id"]["N"])
 
     new_image = parserd_event[1]["NewImage"]
     new_image_raw = raw_event["Records"][1]["dynamodb"]["NewImage"]
-    assert new_image.Message["S"] == new_image_raw["Message"]["S"]
-    assert new_image.Id["N"] == float(new_image_raw["Id"]["N"])
+    assert new_image.Message == new_image_raw["Message"]["S"]
+    assert new_image.Id == float(new_image_raw["Id"]["N"])
 
 
 def test_dynamo_db_stream_trigger_event_no_envelope():
@@ -65,12 +65,12 @@ def test_dynamo_db_stream_trigger_event_no_envelope():
     keys = dynamodb.Keys
     raw_keys = raw_dynamodb["Keys"]
     assert keys is not None
-    id_key = keys["Id"]
-    assert id_key["N"] == raw_keys["Id"]["N"]
+    id_key = keys.get("Id")
+    assert id_key == int(raw_keys["Id"]["N"])
 
     message_key = dynamodb.NewImage.Message
     assert message_key is not None
-    assert message_key["S"] == "New item!"
+    assert message_key == "New item!"
 
 
 def test_validate_event_does_not_conform_with_model_no_envelope():

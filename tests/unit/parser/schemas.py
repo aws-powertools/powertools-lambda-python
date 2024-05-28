@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -13,12 +13,11 @@ from aws_lambda_powertools.utilities.parser.models import (
     SqsModel,
     SqsRecordModel,
 )
-from aws_lambda_powertools.utilities.parser.types import Literal
 
 
 class MyDynamoBusiness(BaseModel):
-    Message: Dict[Literal["S"], str]
-    Id: Dict[Literal["N"], int]
+    Message: str
+    Id: int
 
 
 class MyDynamoScheme(DynamoDBStreamChangedRecordModel):

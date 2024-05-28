@@ -1,17 +1,17 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Type, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 from aws_lambda_powertools.shared.dynamodb_deserializer import TypeDeserializer
 from aws_lambda_powertools.utilities.parser.types import Literal
 
+_DESERIALIZER = TypeDeserializer()
+
 
 class DynamoDBStreamChangedRecordModel(BaseModel):
-    _deserializer = TypeDeserializer()
-
     ApproximateCreationDateTime: Optional[datetime] = None
-    Keys: Dict[str, Dict[str, Any]]
+    Keys: Dict[str, Any]
     NewImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     OldImage: Optional[Union[Dict[str, Any], Type[BaseModel], BaseModel]] = None
     SequenceNumber: str
@@ -29,66 +29,9 @@ class DynamoDBStreamChangedRecordModel(BaseModel):
     #         raise TypeError("DynamoDB streams model failed validation, missing both new & old stream images") # noqa: ERA001,E501
     #     return values # noqa: ERA001
 
-    def __init__(self, **data: Any):
-        """DynamoDBStreamChangedRecordModel constructor
-        Parameters
-        ----------
-        data: Any
-            Represents the model data
-        """
-        super().__init__(**data)
-        self._deserializer = TypeDeserializer()
-
-    def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
-        """Deserialize DynamoDB records available in `Keys`, `NewImage`, and `OldImage`
-
-        Parameters
-        ----------
-        key : str
-            DynamoDB key (e.g., Keys, NewImage, or OldImage)
-
-        Returns
-        -------
-        Optional[Dict[str, Any]]
-            Deserialized records in Python native types
-        """
-        dynamodb_dict = getattr(self, key)
-        if dynamodb_dict is None:
-            return None
-
-        return {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
-
-    @property
-    def approximate_creation_date_time(self) -> Optional[datetime]:
-        """The approximate date and time when the stream record was created, in UNIX epoch time format."""
-        item = self.ApproximateCreationDateTime
-        return None if item is None else item
-
-    @property
-    def keys(self) -> Optional[Dict[str, Any]]:
-        """The primary key attribute(s) for the DynamoDB item that was modified."""
-        return self._deserialize_dynamodb_dict("Keys")
-
-    @property
-    def new_image(self) -> Optional[Dict[str, Any]]:
-        """The item in the DynamoDB table as it appeared after it was modified."""
-        return self._deserialize_dynamodb_dict("NewImage")
-
-    @property
-    def old_image(self) -> Optional[Dict[str, Any]]:
-        """The item in the DynamoDB table as it appeared before it was modified."""
-        return self._deserialize_dynamodb_dict("OldImage")
-
-    @property
-    def sequence_number(self) -> Optional[str]:
-        """The sequence number of the stream record."""
-        return self.SequenceNumber
-
-    @property
-    def size_bytes(self) -> Optional[int]:
-        """The size of the stream record, in bytes."""
-        item = self.SizeBytes
-        return None if item is None else int(item)
+    @field_validator("Keys", "NewImage", "OldImage", mode="before")
+    def deserialize_field(cls, value):
+        return {k: _DESERIALIZER.deserialize(v) for k, v in value.items()}
 
 
 class UserIdentity(BaseModel):
