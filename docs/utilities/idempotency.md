@@ -467,7 +467,7 @@ You can customize the attribute names during initialization:
 
 ### Common use cases
 
-#### Batch integration
+#### Batch processing
 
 You can can easily integrate with [Batch](batch.md){target="_blank"} using the [idempotent_function decorator](#idempotent_function-decorator) to handle idempotency per message/record in a given batch.
 
