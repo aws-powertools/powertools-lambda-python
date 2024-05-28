@@ -703,6 +703,7 @@ class Route:
         from aws_lambda_powertools.event_handler.openapi.params import Param
 
         parameters = []
+        parameter: Dict[str, Any]
         for param in all_route_params:
             field_info = param.field_info
             field_info = cast(Param, field_info)
