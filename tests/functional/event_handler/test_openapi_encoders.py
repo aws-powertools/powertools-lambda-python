@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from pydantic.color import Color
 
 from aws_lambda_powertools.event_handler.openapi.encoders import jsonable_encoder
+from aws_lambda_powertools.event_handler.openapi.exceptions import EncoderError
 
 
 def test_openapi_encode_include():
@@ -184,3 +185,11 @@ def test_openapi_encode_other():
 
     result = jsonable_encoder(User(name="John"))
     assert result == {"name": "John"}
+
+
+def test_openapi_encode_with_error():
+    class MyClass:
+        __slots__ = []
+
+    with pytest.raises(EncoderError, match="Unable to serializer the object*"):
+        jsonable_encoder(MyClass())

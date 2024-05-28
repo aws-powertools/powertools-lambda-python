@@ -21,3 +21,9 @@ class RequestValidationError(ValidationException):
     def __init__(self, errors: Sequence[Any], *, body: Any = None) -> None:
         super().__init__(errors)
         self.body = body
+
+
+class EncoderError(Exception):
+    """
+    Base exception for all encoding errors
+    """

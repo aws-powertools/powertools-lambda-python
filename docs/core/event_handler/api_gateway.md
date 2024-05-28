@@ -458,6 +458,12 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
+#### Serializing objects
+
+We support the serialization of various Python objects, including Pydantic models, dataclasses, enumerations, file paths, scalar types (strings, integers, floats, and None), dictionaries, various sequence types (lists, sets, frozen sets, generators, tuples, and deques), and others defined [here](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/event_handler/openapi/encoders.py#L24).
+
+For objects we do not support, such as SQLAlchemy models, we suggest providing your own [custom serializer](#custom-serializer).
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
