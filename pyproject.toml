@@ -39,12 +39,17 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<4.0.0"
+
+# Required libraries installed by default
+jmespath = "^1.0.1"
+typing-extensions = "^4.11.0"
+
+# Optional libraries installed with extras
 aws-xray-sdk = { version = "^2.8.0", optional = true }
 fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.26.164", optional = true }
 redis = { version = ">=4.4,<6.0", optional = true }
-typing-extensions = "^4.11.0"
 datadog-lambda = { version = ">=4.77,<6.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
 jsonpath-ng = { version = "^1.6.0", optional = true }
