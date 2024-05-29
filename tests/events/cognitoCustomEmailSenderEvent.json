@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "triggerSource": "CustomMessage_AdminCreateUser",
+  "triggerSource": "CustomEmailSender_SignUp",
   "region": "region",
   "userPoolId": "userPoolId",
   "userName": "userName",
@@ -13,9 +13,7 @@
       "phone_number_verified": false,
       "email_verified": true
     },
-    "codeParameter": "####",
-    "linkParameter": "{##Click Here##}",
-    "usernameParameter": "username"
-  },
-  "response": {}
+    "type": "customEmailSenderRequestV1",
+    "code": "someCode"
+  }
 }
