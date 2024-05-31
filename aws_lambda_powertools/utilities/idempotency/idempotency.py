@@ -12,7 +12,6 @@ from typing import Any, Callable, Dict, Optional, Type, Union, cast
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set, strtobool
-from aws_lambda_powertools.shared.powertools_warnings import PowertoolsWarning
 from aws_lambda_powertools.shared.types import AnyCallableT
 from aws_lambda_powertools.utilities.idempotency.base import IdempotencyHandler
 from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
@@ -24,6 +23,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencySerializer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.warnings import PowertoolsWarning
 
 logger = logging.getLogger(__name__)
 

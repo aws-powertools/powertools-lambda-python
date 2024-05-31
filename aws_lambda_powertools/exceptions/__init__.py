@@ -1,4 +1,4 @@
-"""Shared exceptions that don't belong to a single utility"""
+"""Shared warnings that don't belong to a single utility"""
 
 
 class InvalidEnvelopeExpressionError(Exception):

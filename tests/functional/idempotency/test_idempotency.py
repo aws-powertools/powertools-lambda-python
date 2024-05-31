@@ -12,7 +12,6 @@ from pydantic import BaseModel
 from pytest import FixtureRequest
 from pytest_mock import MockerFixture
 
-from aws_lambda_powertools.shared.powertools_warnings import PowertoolsWarning
 from aws_lambda_powertools.utilities.data_classes import (
     APIGatewayProxyEventV2,
     event_source,
@@ -52,6 +51,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import (
     PydanticSerializer,
 )
 from aws_lambda_powertools.utilities.validation import envelopes, validator
+from aws_lambda_powertools.warnings import PowertoolsWarning
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_response_stub,
     build_idempotency_put_item_stub,

@@ -1,3 +1,6 @@
+"""Shared exceptions that don't belong to a single utility"""
+
+
 class PowertoolsWarning(UserWarning):
     """
     This class provides a custom Warning tailored for better clarity when certain situations occur.
