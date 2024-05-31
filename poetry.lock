@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.127"
+version = "2.28.129"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.127.tar.gz", hash = "sha256:4619c26db127f8a4cd273f84044e564edce3d9709ba72d9822467d9c480c8dee"},
-    {file = "cdk_nag-2.28.127-py3-none-any.whl", hash = "sha256:a3608d4b6c5da9f443bb68fa0d533a7e69e68f947e0a7c06c81de743d53abdf0"},
+    {file = "cdk-nag-2.28.129.tar.gz", hash = "sha256:c452c51ce9e2599233a680e297ac93d850bd28cec2754eb27e54e79004b96b51"},
+    {file = "cdk_nag-2.28.129-py3-none-any.whl", hash = "sha256:a04a5c14fb260bd3608a7050f26b711ea7bfdde969b5a22e549e69be03a0a8f8"},
 ]
 
 [package.dependencies]
@@ -447,18 +447,18 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.164"
+version = "0.1.166"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.164.tar.gz", hash = "sha256:a22d28d16a9907aa26d9a47b24ae02ec6b47091632965457618568c7024e2229"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.164-py3-none-any.whl", hash = "sha256:c2f2bf47947f53a8b8793e0defa4231826ba906177b0e27df2f407e43a04aa2c"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.166.tar.gz", hash = "sha256:ecee1a44e11480cd124b31622de58a059c3c051d27b108abff4da407ed4bb1eb"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.166-py3-none-any.whl", hash = "sha256:9a52316601a195c5a32a3c4ac5a08973ab43bd99d999334c049d04c94564f9ee"},
 ]
 
 [package.dependencies]
-aws-cdk-lib = ">=2.141.0,<3.0.0"
-cdk-nag = ">=2.28.127,<3.0.0"
+aws-cdk-lib = ">=2.143.0,<3.0.0"
+cdk-nag = ">=2.28.128,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
 jsii = ">=1.98.0,<2.0.0"
 publication = ">=0.0.3"
@@ -3664,4 +3664,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "2bc74b11f9e486b28cb33e6363d6d59d1689ed493d439fcf98f79f19aecca91b"
+content-hash = "1829bf8996d722bba47242e952137ea8b646c511a057582e70964feb03000a6a"
