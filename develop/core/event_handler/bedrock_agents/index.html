@@ -2190,12 +2190,26 @@ These constructs abstract the underlying permission setup and code bundling of y
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="kn">from</span> <span class="nn">aws_cdk</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Stack</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">aws_cdk.aws_lambda</span> <span class="kn">import</span> <span class="n">Runtime</span>
 <span class="kn">from</span> <span class="nn">aws_cdk.aws_lambda_python_alpha</span> <span class="kn">import</span> <span class="n">PythonFunction</span>
-<span class="kn">from</span> <span class="nn">cdklabs.generative_ai_cdk_constructs.bedrock</span> <span class="kn">import</span> <span class="n">Agent</span><span class="p">,</span> <span class="n">AgentActionGroup</span><span class="p">,</span> <span class="n">ApiSchema</span><span class="p">,</span> <span class="n">BedrockFoundationModel</span>
+<span class="kn">from</span> <span class="nn">cdklabs.generative_ai_cdk_constructs.bedrock</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ActionGroupExecutor</span><span class="p">,</span>
+    <span class="n">Agent</span><span class="p">,</span>
+    <span class="n">AgentActionGroup</span><span class="p">,</span>
+    <span class="n">ApiSchema</span><span class="p">,</span>
+    <span class="n">BedrockFoundationModel</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">constructs</span> <span class="kn">import</span> <span class="n">Construct</span>
 
 
@@ -2220,12 +2234,14 @@ These constructs abstract the underlying permission setup and code bundling of y
             <span class="n">instruction</span><span class="o">=</span><span class="s2">&quot;You are a helpful and friendly agent that answers questions about insurance claims.&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 
+        <span class="n">executor_group</span> <span class="o">=</span> <span class="n">ActionGroupExecutor</span><span class="p">(</span><span class="n">lambda_</span><span class="o">=</span><span class="n">action_group_function</span><span class="p">)</span>
+
         <span class="n">action_group</span> <span class="o">=</span> <span class="n">AgentActionGroup</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="s2">&quot;ActionGroup&quot;</span><span class="p">,</span>
             <span class="n">action_group_name</span><span class="o">=</span><span class="s2">&quot;InsureClaimsSupport&quot;</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Use these functions for insurance claims support&quot;</span><span class="p">,</span>
-            <span class="n">action_group_executor</span><span class="o">=</span><span class="n">action_group_function</span><span class="p">,</span>
+            <span class="n">action_group_executor</span><span class="o">=</span><span class="n">executor_group</span><span class="p">,</span>
             <span class="n">action_group_state</span><span class="o">=</span><span class="s2">&quot;ENABLED&quot;</span><span class="p">,</span>
             <span class="n">api_schema</span><span class="o">=</span><span class="n">ApiSchema</span><span class="o">.</span><span class="n">from_asset</span><span class="p">(</span><span class="s2">&quot;./lambda/openapi.json&quot;</span><span class="p">),</span>  <span class="c1"># (2)!</span>
         <span class="p">)</span>
