@@ -23,7 +23,7 @@ class RequestValidationError(ValidationException):
         self.body = body
 
 
-class EncoderError(Exception):
+class SerializationError(Exception):
     """
     Base exception for all encoding errors
     """

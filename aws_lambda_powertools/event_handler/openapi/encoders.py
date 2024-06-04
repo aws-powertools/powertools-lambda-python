@@ -14,7 +14,7 @@ from pydantic.color import Color
 from pydantic.types import SecretBytes, SecretStr
 
 from aws_lambda_powertools.event_handler.openapi.compat import _model_dump
-from aws_lambda_powertools.event_handler.openapi.exceptions import EncoderError
+from aws_lambda_powertools.event_handler.openapi.exceptions import SerializationError
 from aws_lambda_powertools.event_handler.openapi.types import IncEx
 
 """
@@ -154,7 +154,7 @@ def jsonable_encoder(  # noqa: PLR0911
             exclude_defaults=exclude_defaults,
         )
     except ValueError as exc:
-        raise EncoderError(
+        raise SerializationError(
             f"Unable to serializer the object {obj} as it is not a supported type. Error details: {str(exc)}",
             "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#serializing-objects",
         ) from exc
