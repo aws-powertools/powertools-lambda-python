@@ -51,7 +51,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.pydantic import (
     PydanticSerializer,
 )
 from aws_lambda_powertools.utilities.validation import envelopes, validator
-from aws_lambda_powertools.warnings import PowertoolsWarning
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 from tests.functional.idempotency.utils import (
     build_idempotency_put_item_response_stub,
     build_idempotency_put_item_stub,
@@ -1719,7 +1719,7 @@ def test_idempotency_enabled_envvar_in_non_dev_environment(
     def dummy_handler(event, context):
         return {"message": "hi"}
 
-    with pytest.warns(PowertoolsWarning, match="Disabling idempotency is intended for development environments*"):
+    with pytest.warns(PowertoolsUserWarning, match="Disabling idempotency is intended for development environments*"):
         dummy(data=mock_event)
         dummy_handler(mock_event, lambda_context)
 

@@ -23,7 +23,7 @@ from aws_lambda_powertools.utilities.idempotency.serialization.base import (
     BaseIdempotencySerializer,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
-from aws_lambda_powertools.warnings import PowertoolsWarning
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ def idempotent(
             warnings.warn(
                 message="Disabling idempotency is intended for development environments only "
                 "and should not be used in production.",
-                category=PowertoolsWarning,
+                category=PowertoolsUserWarning,
                 stacklevel=2,
             )
         return handler(event, context, **kwargs)
@@ -169,7 +169,7 @@ def idempotent_function(
                 warnings.warn(
                     message="Disabling idempotency is intended for development environments only "
                     "and should not be used in production.",
-                    category=PowertoolsWarning,
+                    category=PowertoolsUserWarning,
                     stacklevel=2,
                 )
             return function(*args, **kwargs)

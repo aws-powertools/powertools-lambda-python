@@ -1,7 +1,7 @@
 """Shared warnings that don't belong to a single utility"""
 
 
-class PowertoolsWarning(UserWarning):
+class PowertoolsUserWarning(UserWarning):
     """
     This class provides a custom Warning tailored for better clarity when certain situations occur.
     It offers more informative and relevant warning messages, allowing customers to easily suppress
