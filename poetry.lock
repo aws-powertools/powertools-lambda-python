@@ -429,38 +429,38 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.132"
+version = "2.28.134"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.132.tar.gz", hash = "sha256:ecfeb699c85eaab691b0594b711eae4fba92669a927a2ac508b2e5b061c7b154"},
-    {file = "cdk_nag-2.28.132-py3-none-any.whl", hash = "sha256:171d5322ba08b9e82d9f9b2a1d3437d86995d5d0100f11b60b3940546fc8a249"},
+    {file = "cdk-nag-2.28.134.tar.gz", hash = "sha256:fa5c8a392cb9269aaa9d5c7c7eb6733a046e92f0c5a60a6226710d200c29e39f"},
+    {file = "cdk_nag-2.28.134-py3-none-any.whl", hash = "sha256:ffae5cf2bbda970e91498e00f27ed4497d01b1a567278378c4dfafc4ef8eb5aa"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.116.0,<3.0.0"
 constructs = ">=10.0.5,<11.0.0"
-jsii = ">=1.98.0,<2.0.0"
+jsii = ">=1.99.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.169"
+version = "0.1.171"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.169.tar.gz", hash = "sha256:80d95091423460d105e32d4de61548a01e7b98abb53bbead2189d0600d84cea3"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.169-py3-none-any.whl", hash = "sha256:5d8a284ff6165f8fc48af6ed5c0d3c44571d9409eed63c06b768541608732876"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.171.tar.gz", hash = "sha256:06a55451ef4115ec821a78436956be7fb1bbfffdf301cdeb1b3b94c9d282526a"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.171-py3-none-any.whl", hash = "sha256:1a5ccd7300a52bc1e077eff275850cfe2c7499643be31bb296881bba0b19d79f"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.143.0,<3.0.0"
-cdk-nag = ">=2.28.131,<3.0.0"
+cdk-nag = ">=2.28.133,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.98.0,<2.0.0"
+jsii = ">=1.99.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -1470,13 +1470,13 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.98.0"
+version = "1.99.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "jsii-1.98.0-py3-none-any.whl", hash = "sha256:3067d523126ce8178374dd958c60350efc831fc2ef3eb94a0a755d64fa4cc22d"},
-    {file = "jsii-1.98.0.tar.gz", hash = "sha256:64bbaf9c494626bc0afd1b95834f0dba66a2f2ecbb0da97fa3000c4b01d67857"},
+    {file = "jsii-1.99.0-py3-none-any.whl", hash = "sha256:e352232efb2c1994e882aab8c571c764055336b5c97c0f67ac654fbf3caa2411"},
+    {file = "jsii-1.99.0.tar.gz", hash = "sha256:36e4c033d39b962c9d53910aa3e32cd16efa2109e4113fbd9d1be2e595350fe1"},
 ]
 
 [package.dependencies]
@@ -3664,4 +3664,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "4147a212ff28ca228d8adc6fd444f007eaa1978e6a9ce8ba48008bb11f273479"
+content-hash = "247048b9bfc294d4929ad65aac99aff616411211e671627a9d15fa9b9f6972bd"
