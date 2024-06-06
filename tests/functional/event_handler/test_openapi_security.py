@@ -61,15 +61,10 @@ def test_openapi_operation_security():
     )
 
     # THEN the resulting schema should have security defined at the operation level, not the top level
-    security = schema.security
-    assert security is None
-
-    operation = schema.paths["/"].get
-    security = operation.security
-    assert security is not None
-
-    assert len(security) == 1
-    assert security[0] == {"apiKey": []}
+    top_level_security = schema.security
+    path_level_security = schema.paths["/"].get.security
+    assert top_level_security is None
+    assert path_level_security[0] == {"apiKey": []}
 
 
 def test_openapi_operation_security_with_router():
@@ -91,12 +86,7 @@ def test_openapi_operation_security_with_router():
     )
 
     # THEN the resulting schema should have security defined at the operation level
-    security = schema.security
-    assert security is None
-
-    operation = schema.paths["/"].get
-    security = operation.security
-    assert security is not None
-
-    assert len(security) == 1
-    assert security[0] == {"apiKey": []}
+    top_level_security = schema.security
+    path_level_security = schema.paths["/"].get.security
+    assert top_level_security is None
+    assert path_level_security[0] == {"apiKey": []}
