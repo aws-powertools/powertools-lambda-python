@@ -36,7 +36,10 @@ class _FrozenListDict(List[Dict[str, List[str]]]):
     """
 
     def __hash__(self):
-        return hash(frozenset({_FrozenDict({key: frozenset(self) for key, self in item.items()}) for item in self}))
+        hashable_items = []
+        for item in self:
+            hashable_items.extend((key, frozenset(value)) for key, value in item.items())
+        return hash(frozenset(hashable_items))
 
 
 def extract_origin_header(resolver_headers: Dict[str, Any]):
