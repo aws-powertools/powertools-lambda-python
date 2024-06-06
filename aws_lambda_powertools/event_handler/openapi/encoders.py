@@ -155,7 +155,7 @@ def jsonable_encoder(  # noqa: PLR0911
         )
     except ValueError as exc:
         raise SerializationError(
-            f"Unable to serializer the object {obj} as it is not a supported type. Error details: {str(exc)}",
+            f"Unable to serialize the object {obj} as it is not a supported type. Error details: {exc}",
             "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#serializing-objects",
         ) from exc
 

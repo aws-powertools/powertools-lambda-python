@@ -191,5 +191,5 @@ def test_openapi_encode_with_error():
     class MyClass:
         __slots__ = []
 
-    with pytest.raises(SerializationError, match="Unable to serializer the object*"):
+    with pytest.raises(SerializationError, match="Unable to serialize the object*"):
         jsonable_encoder(MyClass())

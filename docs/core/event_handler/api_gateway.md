@@ -460,9 +460,22 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
 #### Serializing objects
 
-We support the serialization of various Python objects, including Pydantic models, dataclasses, enumerations, file paths, scalar types (strings, integers, floats, and None), dictionaries, various sequence types (lists, sets, frozen sets, generators, tuples, and deques), and others defined [here](https://github.com/aws-powertools/powertools-lambda-python/blob/develop/aws_lambda_powertools/event_handler/openapi/encoders.py#L24).
+With data validation enabled, we natively support serializing the following data types to JSON:
 
-For objects we do not support, such as SQLAlchemy models, we suggest providing your own [custom serializer](#custom-serializer).
+| Data type                                                            | Serialized type                                                                  |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Pydantic models**                                                  | `dict`                                                                           |
+| **Python Dataclasses**                                               | `dict`                                                                           |
+| **Enum**                                                             | Enum values                                                                      |
+| **Datetime**                                                         | Datetime ISO format string                                                       |
+| **Decimal**                                                          | `int` if no exponent, or `float`                                                 |
+| **Path**                                                             | `str`                                                                            |
+| **UUID**                                                             | `str`                                                                            |
+| **Set**                                                              | `list`                                                                           |
+| **Python primitives** _(dict, string, sequences, numbers, booleans)_ | [Python's default JSON serializable types](https://docs.python.org/3/library/json.html#encoders-and-decoders){target="_blank" rel="nofollow"} |
+
+???+ info "See [custom serializer section](#custom-serializer) for bringing your own."
+    Otherwise, we will raise `SerializationError` for any unsupported types _e.g., SQLAlchemy models_.
 
 ### Accessing request details
 
