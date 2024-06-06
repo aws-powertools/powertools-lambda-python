@@ -3,6 +3,7 @@ import json
 import fastjsonschema
 import pytest
 
+from aws_lambda_powertools.event_handler.openapi.models import APIKey, APIKeyIn
 from tests.functional.utils import load_event
 
 
@@ -114,3 +115,8 @@ def openapi31_schema():
         data,
         use_formats=False,
     )
+
+
+@pytest.fixture
+def security_scheme():
+    return {"apiKey": APIKey(name="X-API-KEY", description="API Key", in_=APIKeyIn.header)}

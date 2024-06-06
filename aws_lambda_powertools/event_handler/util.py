@@ -1,5 +1,6 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
+from aws_lambda_powertools.event_handler.openapi.models import SecurityScheme
 from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
 
 
@@ -48,11 +49,15 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
 
     The 'origin' or 'Origin' header can be either a single header or a multi-header.
 
-    Args:
-        resolver_headers (Dict): A dictionary containing the headers.
+    Parameters
+    ----------
+    resolver_headers: Dict
+        A dictionary containing the headers.
 
-    Returns:
-        Optional[str]: The value(s) of the origin header or None.
+    Returns
+    -------
+    Optional[str]
+        The value(s) of the origin header or None.
     """
     resolved_header = get_header_value(
         headers=resolver_headers,
@@ -64,3 +69,30 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
         return resolved_header[0]
 
     return resolved_header
+
+
+def validate_openapi_security_parameters(
+    security: List[Dict[str, List[str]]],
+    security_schemes: Optional[Dict[str, "SecurityScheme"]],
+) -> bool:
+    """
+    Validates the security parameters based on the provided security schemes.
+
+    Parameters
+    ----------
+    security: List[Dict[str, List[str]]]
+        A list of security requirements
+    security_schemes: Optional[Dict[str, "SecurityScheme"]]
+        A dictionary mapping security scheme names to their corresponding security scheme objects.
+
+    Returns
+    -------
+    bool
+        True if all security scheme names in the `security` parameter are present in the `security_schemes` parameter,
+        False otherwise.
+
+    """
+
+    return bool(
+        security_schemes and all(key in security_schemes for sec in security for key in sec),
+    )
