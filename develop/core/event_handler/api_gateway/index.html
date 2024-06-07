@@ -8083,8 +8083,7 @@ Some event sources require headers and cookies to be encoded as <code>multiValue
 <summary>Does Powertools implement any of the security schemes?</summary>
 <p>No. Powertools adds support for generating OpenAPI documentation with <a href="https://swagger.io/docs/specification/authentication/">security schemes</a>, but it doesn't implement any of the security schemes itself, so you must implement the security mechanisms separately.</p>
 </details>
-<p>OpenAPI uses the term security scheme for <a href="https://swagger.io/docs/specification/authentication/" target="_blank">authentication and authorization schemes</a>.
-When you're describing your API, declare security schemes at the top level, and reference them globally or per operation.</p>
+<p>Security schemes are declared at the top-level first. You can reference them globally or on a per path <em>(operation)</em> level. <strong>However</strong>, if you reference security schemes that are not defined at the top-level it will lead to a <code>SchemaValidationError</code> <em>(invalid OpenAPI spec)</em>.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="26:2"><input checked="checked" id="global-openapi-security-schemes" name="__tabbed_26" type="radio" /><input id="per-operation-security" name="__tabbed_26" type="radio" /><div class="tabbed-labels"><label for="global-openapi-security-schemes">Global OpenAPI security schemes</label><label for="per-operation-security">Per Operation security</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
@@ -10020,7 +10019,7 @@ it made it impossible for static checkers like Mypy and IDEs IntelliSense to kno
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2024-05-12
+    2024-06-07
   </span>
 
     
