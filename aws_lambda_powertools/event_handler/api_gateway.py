@@ -33,7 +33,7 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -43,7 +43,12 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
-from aws_lambda_powertools.event_handler.util import _FrozenDict, extract_origin_header
+from aws_lambda_powertools.event_handler.util import (
+    _FrozenDict,
+    _FrozenListDict,
+    _validate_openapi_security_parameters,
+    extract_origin_header,
+)
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -703,6 +708,7 @@ class Route:
         from aws_lambda_powertools.event_handler.openapi.params import Param
 
         parameters = []
+        parameter: Dict[str, Any]
         for param in all_route_params:
             field_info = param.field_info
             field_info = cast(Param, field_info)
@@ -1588,6 +1594,16 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
+
+            if route.security and not _validate_openapi_security_parameters(
+                security=route.security,
+                security_schemes=security_schemes,
+            ):
+                raise SchemaValidationError(
+                    "Security configuration was not found in security_schemas or security_schema was not defined. "
+                    "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
+                )
+
             if not route.include_in_schema:
                 continue
 
@@ -1630,15 +1646,15 @@ class ApiGatewayResolver(BaseRouter):
         security: Optional[List[Dict[str, List[str]]]],
         security_schemes: Optional[Dict[str, "SecurityScheme"]],
     ) -> Optional[List[Dict[str, List[str]]]]:
+
         if not security:
             return None
 
-        if not security_schemes:
-            raise ValueError("security_schemes must be provided if security is provided")
-
-        # Check if all keys in security are present in the security_schemes
-        if any(key not in security_schemes for sec in security for key in sec):
-            raise ValueError("Some security schemes not found in security_schemes")
+        if not _validate_openapi_security_parameters(security=security, security_schemes=security_schemes):
+            raise SchemaValidationError(
+                "Security configuration was not found in security_schemas or security_schema was not defined. "
+                "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
+            )
 
         return security
 
@@ -2386,6 +2402,7 @@ class Router(BaseRouter):
             methods = (method,) if isinstance(method, str) else tuple(method)
             frozen_responses = _FrozenDict(responses) if responses else None
             frozen_tags = frozenset(tags) if tags else None
+            frozen_security = _FrozenListDict(security) if security else None
 
             route_key = (
                 rule,
@@ -2400,7 +2417,7 @@ class Router(BaseRouter):
                 frozen_tags,
                 operation_id,
                 include_in_schema,
-                security,
+                frozen_security,
             )
 
             # Collate Middleware for routes
