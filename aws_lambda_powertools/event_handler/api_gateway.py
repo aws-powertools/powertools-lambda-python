@@ -1600,7 +1600,8 @@ class ApiGatewayResolver(BaseRouter):
                 security_schemes=security_schemes,
             ):
                 raise SchemaValidationError(
-                    "Security configuration was not found in security_schemas or security_schema was not defined.",
+                    "Security configuration was not found in security_schemas or security_schema was not defined. "
+                    "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
                 )
 
             if not route.include_in_schema:
@@ -1651,7 +1652,8 @@ class ApiGatewayResolver(BaseRouter):
 
         if not _validate_openapi_security_parameters(security=security, security_schemes=security_schemes):
             raise SchemaValidationError(
-                "Security configuration was not found in security_schemas or security_schema was not defined.",
+                "Security configuration was not found in security_schemas or security_schema was not defined. "
+                "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
             )
 
         return security
