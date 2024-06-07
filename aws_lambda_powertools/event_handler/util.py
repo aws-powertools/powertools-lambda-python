@@ -73,7 +73,7 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
 
 def _validate_openapi_security_parameters(
     security: List[Dict[str, List[str]]],
-    security_schemes: Optional[Dict[str, "SecurityScheme"]],
+    security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
 ) -> bool:
     """
     This function checks if all security requirements listed in the 'security'
