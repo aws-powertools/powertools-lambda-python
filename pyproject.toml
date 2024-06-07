@@ -50,7 +50,7 @@ fastjsonschema = { version = "^2.14.5", optional = true }
 pydantic = { version = "^1.8.2", optional = true }
 boto3 = { version = "^1.26.164", optional = true }
 redis = { version = ">=4.4,<6.0", optional = true }
-datadog-lambda = { version = ">=4.77,<6.0", optional = true }
+datadog-lambda = { version = ">=4.77,<7.0", optional = true }
 aws-encryption-sdk = { version = "^3.1.1", optional = true }
 jsonpath-ng = { version = "^1.6.0", optional = true }
 
@@ -97,7 +97,7 @@ ijson = "^3.3.0"
 typed-ast = { version = "^1.5.5", python = "< 3.8" }
 hvac = "^2.2.0"
 aws-requests-auth = "^0.4.3"
-datadog-lambda = "^5.94.0"
+datadog-lambda = "^6.95.0"
 
 [tool.poetry.extras]
 parser = ["pydantic"]
