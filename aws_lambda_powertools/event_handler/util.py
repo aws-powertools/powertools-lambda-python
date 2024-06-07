@@ -71,12 +71,14 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
     return resolved_header
 
 
-def validate_openapi_security_parameters(
+def _validate_openapi_security_parameters(
     security: List[Dict[str, List[str]]],
     security_schemes: Optional[Dict[str, "SecurityScheme"]],
 ) -> bool:
     """
-    Validates the security parameters based on the provided security schemes.
+    This function checks if all security requirements listed in the 'security'
+    parameter are defined in the 'security_schemes' dictionary, as specified
+    in the OpenAPI schema.
 
     Parameters
     ----------
@@ -88,11 +90,11 @@ def validate_openapi_security_parameters(
     Returns
     -------
     bool
-        True if all security scheme names in the `security` parameter are present in the `security_schemes` parameter,
-        False otherwise.
-
+        Whether list of security schemes match allowed security_schemes.
     """
 
-    return bool(
-        security_schemes and all(key in security_schemes for sec in security for key in sec),
-    )
+    security_schemes = security_schemes or {}
+
+    security_schema_match = all(key in security_schemes for sec in security for key in sec)
+
+    return bool(security_schema_match and security_schemes)

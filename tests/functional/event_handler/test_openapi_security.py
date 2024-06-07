@@ -49,7 +49,7 @@ def test_openapi_top_level_security_mismatch(security_scheme):
         raise NotImplementedError()
 
     # WHEN the get_openapi_schema method is called with security defined security schemes as APIKey
-    # WHEN top level security is defined as HTTPBearer
+    # AND top level security is defined as HTTPBearer
     # THEN a SchemaValidationError should be raised
     with pytest.raises(SchemaValidationError):
         app.get_openapi_schema(
@@ -80,7 +80,7 @@ def test_openapi_operation_level_security_missing():
     # GIVEN an APIGatewayRestResolver instance
     app = APIGatewayRestResolver()
 
-    # WHEN we define a security in operation
+    # AND a route with a security scheme defined
     @app.get("/", security=[{"apiKey": []}])
     def handler():
         raise NotImplementedError()
@@ -95,7 +95,7 @@ def test_openapi_operation_level_security_mismatch(security_scheme):
     # GIVEN an APIGatewayRestResolver instance
     app = APIGatewayRestResolver()
 
-    # WHEN we define a security in operation with value HTTPBearer
+    # AND a route with a security scheme using HTTPBearer
     @app.get("/", security=[{"HTTPBearer": []}])
     def handler():
         raise NotImplementedError()

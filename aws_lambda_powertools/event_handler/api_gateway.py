@@ -46,8 +46,8 @@ from aws_lambda_powertools.event_handler.openapi.types import (
 from aws_lambda_powertools.event_handler.util import (
     _FrozenDict,
     _FrozenListDict,
+    _validate_openapi_security_parameters,
     extract_origin_header,
-    validate_openapi_security_parameters,
 )
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
@@ -1595,7 +1595,7 @@ class ApiGatewayResolver(BaseRouter):
         # Add routes to the OpenAPI schema
         for route in all_routes:
 
-            if route.security and not validate_openapi_security_parameters(
+            if route.security and not _validate_openapi_security_parameters(
                 security=route.security,
                 security_schemes=security_schemes,
             ):
@@ -1649,7 +1649,7 @@ class ApiGatewayResolver(BaseRouter):
         if not security:
             return None
 
-        if not validate_openapi_security_parameters(security=security, security_schemes=security_schemes):
+        if not _validate_openapi_security_parameters(security=security, security_schemes=security_schemes):
             raise SchemaValidationError(
                 "Security configuration was not found in security_schemas or security_schema was not defined.",
             )
