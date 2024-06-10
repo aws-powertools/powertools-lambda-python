@@ -458,7 +458,7 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
-#### Serializing objects
+#### Supported types for response serialization
 
 With data validation enabled, we natively support serializing the following data types to JSON:
 
