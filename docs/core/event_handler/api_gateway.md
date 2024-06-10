@@ -458,6 +458,25 @@ In the following example, we use a new `Header` OpenAPI type to add [one out of 
 
     1. `cloudfront_viewer_country` is a list that must contain values from the `CountriesAllowed` enumeration.
 
+#### Supported types for response serialization
+
+With data validation enabled, we natively support serializing the following data types to JSON:
+
+| Data type                                                            | Serialized type                                                                  |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Pydantic models**                                                  | `dict`                                                                           |
+| **Python Dataclasses**                                               | `dict`                                                                           |
+| **Enum**                                                             | Enum values                                                                      |
+| **Datetime**                                                         | Datetime ISO format string                                                       |
+| **Decimal**                                                          | `int` if no exponent, or `float`                                                 |
+| **Path**                                                             | `str`                                                                            |
+| **UUID**                                                             | `str`                                                                            |
+| **Set**                                                              | `list`                                                                           |
+| **Python primitives** _(dict, string, sequences, numbers, booleans)_ | [Python's default JSON serializable types](https://docs.python.org/3/library/json.html#encoders-and-decoders){target="_blank" rel="nofollow"} |
+
+???+ info "See [custom serializer section](#custom-serializer) for bringing your own."
+    Otherwise, we will raise `SerializationError` for any unsupported types _e.g., SQLAlchemy models_.
+
 ### Accessing request details
 
 Event Handler integrates with [Event Source Data Classes utilities](../../utilities/data_classes.md){target="_blank"}, and it exposes their respective resolver request details and convenient methods under `app.current_event`.
