@@ -27,3 +27,9 @@ class SerializationError(Exception):
     """
     Base exception for all encoding errors
     """
+
+
+class SchemaValidationError(ValidationException):
+    """
+    Raised when the OpenAPI schema validation fails
+    """
