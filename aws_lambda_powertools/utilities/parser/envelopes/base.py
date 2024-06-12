@@ -2,6 +2,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, Type, TypeVar, Union
 
+from pydantic import TypeAdapter
+
 from aws_lambda_powertools.utilities.parser.types import Model
 
 logger = logging.getLogger(__name__)
@@ -30,12 +32,14 @@ class BaseEnvelope(ABC):
             logger.debug("Skipping parsing as event is None")
             return data
 
+        adapter = TypeAdapter(model)
+
         logger.debug("parsing event against model")
         if isinstance(data, str):
             logger.debug("parsing event as string")
-            return model.model_validate_json(data)
+            return adapter.validate_json(data)
 
-        return model.model_validate(data)
+        return adapter.validate_python(data)
 
     @abstractmethod
     def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]):
