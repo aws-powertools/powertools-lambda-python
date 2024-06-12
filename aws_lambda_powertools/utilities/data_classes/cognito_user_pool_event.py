@@ -474,7 +474,7 @@ class PreTokenGenerationTriggerEventRequest(DictWrapper):
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes."""
-        return self["request"]["userAttributes"]
+        return self["request"].get("userAttributes") or {}
 
     @property
     def client_metadata(self) -> Optional[Dict[str, str]]:
@@ -1062,7 +1062,7 @@ class CustomSMSSenderTriggerEventRequest(DictWrapper):
     @property
     def user_attributes(self) -> Dict[str, str]:
         """One or more name-value pairs representing user attributes. The attribute names are the keys."""
-        return self["request"]["userAttributes"]
+        return self["request"].get("userAttributes") or {}
 
     @property
     def client_metadata(self) -> Dict[str, str]:
