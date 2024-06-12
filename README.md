@@ -61,6 +61,7 @@ The following companies, among others, use Powertools:
 * [IMS](https://ims.tech/)
 * [Jit Security](https://www.jit.io/)
 * [Propellor.ai](https://www.propellor.ai/)
+* [Recast](https://getrecast.com/)
 * [TopSport](https://www.topsport.com.au/)
 * [Transformity](https://transformity.tech/)
 * [Trek10](https://www.trek10.com/)
