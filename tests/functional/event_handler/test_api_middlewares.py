@@ -506,3 +506,34 @@ def test_class_based_middleware():
     result = resolver(event, {})
     assert result["statusCode"] == 200
     assert result["multiValueHeaders"]["X-Correlation-Id"][0] == resolver.current_event.request_context.request_id  # type: ignore[attr-defined] # noqa: E501
+
+
+@pytest.mark.parametrize(
+    "app, event",
+    [
+        (ApiGatewayResolver(proxy_type=ProxyEventType.APIGatewayProxyEvent), API_REST_EVENT),
+        (APIGatewayRestResolver(), API_REST_EVENT),
+        (APIGatewayHttpResolver(), API_RESTV2_EVENT),
+    ],
+)
+def test_global_middleware_not_found(app: ApiGatewayResolver, event):
+    # GIVEN global middleware is registered
+
+    def middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
+        # add additional data to Router Context
+        ret = next_middleware(app)
+        ret.body = "middleware works"
+        return ret
+
+    app.use(middlewares=[middleware])
+
+    @app.get("/this/path/does/not/exist")
+    def nope() -> dict: ...
+
+    # WHEN calling the event handler for an unregistered route /my/path
+    result = app(event, {})
+
+    # THEN process event correctly as HTTP 404
+    # AND ensure middlewares are called
+    assert result["statusCode"] == 404
+    assert result["body"] == "middleware works"
