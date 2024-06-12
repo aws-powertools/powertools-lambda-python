@@ -306,7 +306,7 @@ class Route:
         response_description: Optional[str] = None,
         tags: Optional[List[str]] = None,
         operation_id: Optional[str] = None,
-        include_in_schema: bool = None,
+        include_in_schema: bool = True,
         security: Optional[List[Dict[str, List[str]]]] = None,
         middlewares: Optional[List[Callable[..., Response]]] = None,
     ):
