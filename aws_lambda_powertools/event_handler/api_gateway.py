@@ -1983,6 +1983,36 @@ class ApiGatewayResolver(BaseRouter):
     def resolve(self, event, context) -> Dict[str, Any]:
         """Resolves the response based on the provide event and decorator routes
 
+        ## Internals
+
+        Request processing chain is triggered by a Route object being called _(`_call_route` -> `__call__`)_:
+
+        1. **When a route is matched**
+          1.1. Exception handlers _(if any exception bubbled up and caught)_
+          1.2. Global middlewares _(before, and after on the way back)_
+          1.3. Path level middleware _(before, and after on the way back)_
+          1.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          1.5. Run actual route
+        2. **When a route is NOT matched**
+          2.1. Exception handlers _(if any exception bubbled up and caught)_
+          2.2. Global middlewares _(before, and after on the way back)_
+          2.3. Path level middleware _(before, and after on the way back)_
+          2.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          2.5. Run 404 route handler
+        3. **When a route is a pre-flight CORS (often not matched)**
+          3.1. Exception handlers _(if any exception bubbled up and caught)_
+          3.2. Global middlewares _(before, and after on the way back)_
+          3.3. Path level middleware _(before, and after on the way back)_
+          3.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          3.5. Return 204 with appropriate CORS headers
+        4. **When a route is matched with Data Validation enabled**
+          4.1. Exception handlers _(if any exception bubbled up and caught)_
+          4.2. Data Validation middleware _(before, and after on the way back)_
+          4.3. Global middlewares _(before, and after on the way back)_
+          4.4. Path level middleware _(before, and after on the way back)_
+          4.5. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          4.6. Run actual route
+
         Parameters
         ----------
         event: Dict[str, Any]
