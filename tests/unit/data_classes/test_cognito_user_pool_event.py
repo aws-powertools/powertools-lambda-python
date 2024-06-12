@@ -119,7 +119,7 @@ def test_cognito_custom_email_sender_trigger_event():
     assert parsed_event.request.type == raw_event["request"]["type"]
     assert parsed_event.request.code == raw_event["request"]["code"]
     assert parsed_event.request.user_attributes.get("phone_number_verified") is False
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
 
 def test_cognito_custom_sms_sender_trigger_event():
@@ -131,7 +131,7 @@ def test_cognito_custom_sms_sender_trigger_event():
     assert parsed_event.request.type == raw_event["request"]["type"]
     assert parsed_event.request.code == raw_event["request"]["code"]
     assert parsed_event.request.user_attributes.get("phone_number_verified") is False
-    assert parsed_event.request.client_metadata is None
+    assert parsed_event.request.client_metadata == {}
 
 
 def test_cognito_pre_authentication_trigger_event():
@@ -246,14 +246,14 @@ def test_cognito_pre_token_v2_generation_trigger_event():
     assert parsed_event["response"]["claimsAndScopeOverrideDetails"] == {}
 
     claims_scope_override_details.id_token_generation = claims_scope_override_details.access_token_generation = {}
-    assert claims_scope_override_details.id_token_generation.claims_to_add_or_override is None
-    assert claims_scope_override_details.id_token_generation.claims_to_suppress is None
-    assert claims_scope_override_details.id_token_generation.scopes_to_add is None
-    assert claims_scope_override_details.id_token_generation.scopes_to_suppress is None
-    assert claims_scope_override_details.access_token_generation.claims_to_add_or_override is None
-    assert claims_scope_override_details.access_token_generation.claims_to_suppress is None
-    assert claims_scope_override_details.access_token_generation.scopes_to_add is None
-    assert claims_scope_override_details.access_token_generation.scopes_to_suppress is None
+    assert claims_scope_override_details.id_token_generation.claims_to_add_or_override == {}
+    assert claims_scope_override_details.id_token_generation.claims_to_suppress == []
+    assert claims_scope_override_details.id_token_generation.scopes_to_add == []
+    assert claims_scope_override_details.id_token_generation.scopes_to_suppress == []
+    assert claims_scope_override_details.access_token_generation.claims_to_add_or_override == {}
+    assert claims_scope_override_details.access_token_generation.claims_to_suppress == []
+    assert claims_scope_override_details.access_token_generation.scopes_to_add == []
+    assert claims_scope_override_details.access_token_generation.scopes_to_suppress == []
     assert claims_scope_override_details.group_configuration is None
 
     claims_scope_override_details.group_configuration = {}
