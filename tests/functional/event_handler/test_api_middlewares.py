@@ -7,6 +7,7 @@ from aws_lambda_powertools.event_handler.api_gateway import (
     APIGatewayHttpResolver,
     ApiGatewayResolver,
     APIGatewayRestResolver,
+    CORSConfig,
     ProxyEventType,
     Response,
     Router,
@@ -536,4 +537,30 @@ def test_global_middleware_not_found(app: ApiGatewayResolver, event):
     # THEN process event correctly as HTTP 404
     # AND ensure middlewares are called
     assert result["statusCode"] == 404
+    assert result["body"] == "middleware works"
+
+
+def test_global_middleware_not_found_preflight():
+    # GIVEN global middleware is registered
+
+    app = ApiGatewayResolver(cors=CORSConfig(), proxy_type=ProxyEventType.APIGatewayProxyEvent)
+    event = {**API_REST_EVENT, "httpMethod": "OPTIONS"}
+
+    def middleware(app: ApiGatewayResolver, next_middleware: NextMiddleware):
+        # add additional data to Router Context
+        ret = next_middleware(app)
+        ret.body = "middleware works"
+        return ret
+
+    app.use(middlewares=[middleware])
+
+    @app.get("/this/path/does/not/exist")
+    def nope() -> dict: ...
+
+    # WHEN calling the event handler for an unregistered route /my/path OPTIONS
+    result = app(event, {})
+
+    # THEN process event correctly as HTTP 204 (not 404)
+    # AND ensure middlewares are called
+    assert result["statusCode"] == 204
     assert result["body"] == "middleware works"
