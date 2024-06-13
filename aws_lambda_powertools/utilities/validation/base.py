@@ -8,7 +8,9 @@ from .exceptions import InvalidSchemaFormatError, SchemaValidationError
 logger = logging.getLogger(__name__)
 
 
-def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None):
+def validate_data_against_schema(
+    data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None, handlers: Optional[Dict] = None
+):
     """Validate dict data against given JSON Schema
 
     Parameters
@@ -19,6 +21,8 @@ def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: 
         JSON Schema to validate against
     formats: Dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
+    handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
 
     Raises
     ------
@@ -29,7 +33,8 @@ def validate_data_against_schema(data: Union[Dict, str], schema: Dict, formats: 
     """
     try:
         formats = formats or {}
-        fastjsonschema.validate(definition=schema, data=data, formats=formats)
+        handlers = handlers or {}
+        fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
     except fastjsonschema.JsonSchemaValueException as e:

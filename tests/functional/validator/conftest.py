@@ -86,6 +86,53 @@ def schema_response():
 
 
 @pytest.fixture
+def schema_refs():
+    return {
+        "ParentSchema": {
+            "$schema": "http://json-schema.org/draft-07/schema",
+            "$id": "testschema://ParentSchema",
+            "type": "object",
+            "title": "Sample schema",
+            "description": "Sample JSON Schema that references another schema",
+            "examples": [{"parent_object": {"child_string": "hello world"}}],
+            "required": "parent_object",
+            "properties": {
+                "parent_object": {
+                    "$id": "#/properties/parent_object",
+                    "$ref": "testschema://ChildSchema",
+                },
+            },
+        },
+        "ChildSchema": {
+            "$schema": "http://json-schema.org/draft-07/schema",
+            "$id": "testschema://ChildSchema",
+            "type": "object",
+            "title": "Sample schema",
+            "description": "Sample JSON Schema that is referenced by another schema",
+            "examples": [{"child_string": "hello world"}],
+            "required": "child_string",
+            "properties": {
+                "child_string": {
+                    "$id": "#/properties/child_string",
+                    "type": "string",
+                    "title": "The child string",
+                    "examples": ["hello world"],
+                },
+            },
+        },
+    }
+
+
+@pytest.fixture
+def schema_ref_handlers(schema_refs):
+    def handle_test_schema(uri):
+        schema_key = uri.split("://")[1]
+        return schema_refs[schema_key]
+
+    return {"testschema": handle_test_schema}
+
+
+@pytest.fixture
 def raw_event():
     return {"message": "hello hello", "username": "blah blah"}
 
@@ -103,6 +150,11 @@ def wrapped_event_json_string():
 @pytest.fixture
 def wrapped_event_base64_json_string():
     return {"data": "eyJtZXNzYWdlIjogImhlbGxvIGhlbGxvIiwgInVzZXJuYW1lIjogImJsYWggYmxhaCJ9="}
+
+
+@pytest.fixture
+def parent_ref_event():
+    return {"parent_object": {"child_string": "hello world"}}
 
 
 @pytest.fixture

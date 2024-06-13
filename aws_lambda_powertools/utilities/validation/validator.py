@@ -16,8 +16,10 @@ def validator(
     context: Any,
     inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
+    inbound_handlers: Optional[Dict] = None,
     outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
+    outbound_handlers: Optional[Dict] = None,
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
     **kwargs: Any,
@@ -44,6 +46,10 @@ def validator(
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
     outbound_formats: Dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
+    inbound_handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
+    outbound_handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
 
     Example
     -------
@@ -127,13 +133,17 @@ def validator(
 
     if inbound_schema:
         logger.debug("Validating inbound event")
-        validate_data_against_schema(data=event, schema=inbound_schema, formats=inbound_formats)
+        validate_data_against_schema(
+            data=event, schema=inbound_schema, formats=inbound_formats, handlers=inbound_handlers
+        )
 
     response = handler(event, context, **kwargs)
 
     if outbound_schema:
         logger.debug("Validating outbound event")
-        validate_data_against_schema(data=response, schema=outbound_schema, formats=outbound_formats)
+        validate_data_against_schema(
+            data=response, schema=outbound_schema, formats=outbound_formats, handlers=outbound_handlers
+        )
 
     return response
 
@@ -142,6 +152,7 @@ def validate(
     event: Any,
     schema: Dict,
     formats: Optional[Dict] = None,
+    handlers: Optional[Dict] = None,
     envelope: Optional[str] = None,
     jmespath_options: Optional[Dict] = None,
 ):
@@ -161,6 +172,8 @@ def validate(
         Alternative JMESPath options to be included when filtering expr
     formats: Dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
+    handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
 
     Example
     -------
@@ -229,4 +242,4 @@ def validate(
             jmespath_options=jmespath_options,
         )
 
-    validate_data_against_schema(data=event, schema=schema, formats=formats)
+    validate_data_against_schema(data=event, schema=schema, formats=formats, handlers=handlers)
