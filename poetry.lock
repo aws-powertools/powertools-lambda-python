@@ -2099,13 +2099,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.34.109"
-description = "Type annotations for boto3.SecretsManager 1.34.109 service generated with mypy-boto3-builder 7.24.0"
+version = "1.34.125"
+description = "Type annotations for boto3.SecretsManager 1.34.125 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_secretsmanager-1.34.109-py3-none-any.whl", hash = "sha256:18c60597a72ef08bad722f1c2f4507a0cf853c1526b1cffb8c3d2a30f5649d1f"},
-    {file = "mypy_boto3_secretsmanager-1.34.109.tar.gz", hash = "sha256:29898fb1046fed5f83d05f08470d5cf07dfd1656b1da23f2bb875c9ff734ee65"},
+    {file = "mypy_boto3_secretsmanager-1.34.125-py3-none-any.whl", hash = "sha256:a5b50b8e3dcc39959ad5c340b4b5673a0c1e9c869a327747a4ddd1d154c79110"},
+    {file = "mypy_boto3_secretsmanager-1.34.125.tar.gz", hash = "sha256:358020a40ec16f4ca753e5e41472a466e748eb0964a209d3ca7cb598537b2707"},
 ]
 
 [package.dependencies]
@@ -3669,4 +3669,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "039a114f8790fd1e9b52dff6dea1862765ac0a60f19ecc4aa51593f00f7e338f"
+content-hash = "98ad48b693114ff0954291b6b284047297d57cd041ea7d2958bd7164868b6cc3"
