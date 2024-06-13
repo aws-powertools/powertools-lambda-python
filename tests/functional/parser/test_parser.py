@@ -1,5 +1,5 @@
 import json
-from typing import Dict, Union
+from typing import Annotated, Any, Dict, Literal, Union
 
 import pydantic
 import pytest
@@ -75,7 +75,7 @@ def test_pydanticv2_validation():
     assert event_parsed.version == int(event_raw["version"])
 
 
-@pytest.mark.parametrize("invalid_schema", [None, str, bool(), [], (), object])
+@pytest.mark.parametrize("invalid_schema", [str, bool(), [], ()])
 def test_parser_with_invalid_schema_type(dummy_event, invalid_schema):
     @event_parser(model=invalid_schema)
     def handle_no_envelope(event: Dict, _: LambdaContext):
@@ -118,3 +118,36 @@ def test_parser_event_with_type_hint_and_non_default_argument(dummy_event, dummy
         assert evt.message == "hello world"
 
     handler(dummy_event["payload"], LambdaContext())
+
+
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        (
+            {"status": "succeeded", "name": "Clifford", "breed": "Labrador"},
+            "Successfully retrieved Labrador named Clifford",
+        ),
+        ({"status": "failed", "error": "oh some error"}, "Uh oh. Had a problem: oh some error"),
+    ],
+)
+def test_parser_unions(test_input, expected):
+    class SuccessfulCallback(pydantic.BaseModel):
+        status: Literal["succeeded"]
+        name: str
+        breed: Literal["Husky", "Labrador"]
+
+    class FailedCallback(pydantic.BaseModel):
+        status: Literal["failed"]
+        error: str
+
+    DogCallback = Annotated[Union[SuccessfulCallback, FailedCallback], pydantic.Field(discriminator="status")]
+
+    @event_parser(model=DogCallback)
+    def handler(event: test_input, _: Any) -> str:
+        if isinstance(event, FailedCallback):
+            return f"Uh oh. Had a problem: {event.error}"
+
+        return f"Successfully retrieved {event.breed} named {event.name}"
+
+    ret = handler(test_input, None)
+    assert ret == expected

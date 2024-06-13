@@ -2,6 +2,8 @@ import logging
 import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
+from pydantic import TypeAdapter
+
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
 from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
@@ -176,11 +178,14 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
             ) from exc
 
     try:
+        adapter = TypeAdapter(model)
+
         logger.debug("Parsing and validating event model; no envelope used")
         if isinstance(event, str):
-            return model.model_validate_json(event)
+            return adapter.validate_json(event)
 
-        return model.model_validate(event)
+        return adapter.validate_python(event)
+
     except AttributeError as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
