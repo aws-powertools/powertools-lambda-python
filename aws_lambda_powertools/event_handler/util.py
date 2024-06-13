@@ -1,6 +1,5 @@
 from typing import Any, Dict, List, Optional
 
-from aws_lambda_powertools.event_handler.openapi.models import SecurityScheme
 from aws_lambda_powertools.utilities.data_classes.shared_functions import get_header_value
 
 
@@ -73,7 +72,7 @@ def extract_origin_header(resolver_headers: Dict[str, Any]):
 
 def _validate_openapi_security_parameters(
     security: List[Dict[str, List[str]]],
-    security_schemes: Optional[Dict[str, "SecurityScheme"]] = None,
+    security_schemes: Optional[Dict[str, Any]] = None,
 ) -> bool:
     """
     This function checks if all security requirements listed in the 'security'
@@ -84,7 +83,7 @@ def _validate_openapi_security_parameters(
     ----------
     security: List[Dict[str, List[str]]]
         A list of security requirements
-    security_schemes: Optional[Dict[str, "SecurityScheme"]]
+    security_schemes: Optional[Dict[str, Any]]
         A dictionary mapping security scheme names to their corresponding security scheme objects.
 
     Returns
