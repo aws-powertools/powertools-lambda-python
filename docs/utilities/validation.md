@@ -199,3 +199,33 @@ You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
+
+### Validating with external references
+
+JSON schema [allows schemas to reference other schemas](https://json-schema.org/understanding-json-schema/structuring#dollarref) using the `$ref` keyword. The value of `$ref` is a URI reference, but you likely don't want to launch an HTTP request to resolve this URI. Instead, you can pass resolving functions through the `handlers` parameter:
+
+```python title="custom_reference_handlers.py"
+from aws_lambda_powertools.utilities.validation import validate
+
+SCHEMA = {
+    "ParentSchema": {
+        "type": "object",
+        "properties": {
+            "child_object": {"$ref": "testschema://ChildSchema"},
+            ...
+        },
+        ...
+    },
+    "ChildSchema": ...,
+}
+
+def handle_test_schema(uri):
+    schema_key = uri.split("://")[1]
+    return SCHEMA[schema_key]
+
+test_schema_handlers = {"testschema": handle_test_schema}
+
+parent_event = {"child_object": {...}}
+
+validate(event=parent_event, schema=SCHEMA["ParentSchema"], handlers=test_schema_handlers)
+```
