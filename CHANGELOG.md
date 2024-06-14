@@ -4,6 +4,15 @@
 <a name="unreleased"></a>
 # Unreleased
 
+## Bug Fixes
+
+* **event_sources:** change partition and offset field types in KafkaEventRecord ([#4515](https://github.com/aws-powertools/powertools-lambda-python/issues/4515))
+
+## Maintenance
+
+* **deps:** bump codecov/codecov-action from 4.4.1 to 4.5.0 ([#4514](https://github.com/aws-powertools/powertools-lambda-python/issues/4514))
+* **deps-dev:** bump mypy-boto3-secretsmanager from 1.34.109 to 1.34.125 in the boto-typing group ([#4509](https://github.com/aws-powertools/powertools-lambda-python/issues/4509))
+
 
 <a name="v2.39.1"></a>
 ## [v2.39.1] - 2024-06-13
