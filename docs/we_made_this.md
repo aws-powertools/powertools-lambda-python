@@ -41,6 +41,8 @@ A collection of articles explaining in detail how Lambda Powertools helps with a
 
 * [Serverless API Documentation with Powertools for AWS](https://www.ranthebuilder.cloud/post/serverless-open-api-documentation-with-aws-powertools){:target="_blank"}
 
+* [Best practices for accelerating development with serverless blueprints](https://aws.amazon.com/blogs/infrastructure-and-automation/best-practices-for-accelerating-development-with-serverless-blueprints/){:target="_blank"}
+
 ### Making all your APIs idempotent
 
 > **Author: [Michael Walmsley](https://twitter.com/walmsles){target="_blank" rel="nofollow"}** :material-twitter:
