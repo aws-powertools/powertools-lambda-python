@@ -447,20 +447,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.182"
+version = "0.1.184"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.182.tar.gz", hash = "sha256:9962cdad6c6261a2a84d62457820f1a439a0c2cf299e23232bcc012b4bbc0f6e"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.182-py3-none-any.whl", hash = "sha256:3474562f77ca72cc569d6ce25d061f2ca706658865a699902812d9fafec4d995"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.184.tar.gz", hash = "sha256:97983d386fe2cacdb6d9ee7bcfb33cc670a3390f38df73872afd5fba49b99366"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.184-py3-none-any.whl", hash = "sha256:d5c628566b74b08163d3ed7b028ee09636533b0084cde918555580b0c55e844c"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.143.0,<3.0.0"
-cdk-nag = ">=2.28.141,<3.0.0"
+cdk-nag = ">=2.28.142,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.99.0,<2.0.0"
+jsii = ">=1.100.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -1475,13 +1475,13 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.99.0"
+version = "1.100.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "jsii-1.99.0-py3-none-any.whl", hash = "sha256:e352232efb2c1994e882aab8c571c764055336b5c97c0f67ac654fbf3caa2411"},
-    {file = "jsii-1.99.0.tar.gz", hash = "sha256:36e4c033d39b962c9d53910aa3e32cd16efa2109e4113fbd9d1be2e595350fe1"},
+    {file = "jsii-1.100.0-py3-none-any.whl", hash = "sha256:3564188028b5b2ddf7fbd50bb28555125e684a6c4540f591c9be088bc073fdb8"},
+    {file = "jsii-1.100.0.tar.gz", hash = "sha256:b267f651086cbdbb2ba336099361ebfc109dbe86f3c8671636338090c4b4d2f4"},
 ]
 
 [package.dependencies]
@@ -3669,4 +3669,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "d00491dfc076806b092dd737f5f7ab1de6db8e2523087f7280ffa27a7ee9b2ab"
+content-hash = "cdb6e4b5e8b8a2d9d2c6bbf6293b417d59438e79701d96322c8890cfcce3c161"
