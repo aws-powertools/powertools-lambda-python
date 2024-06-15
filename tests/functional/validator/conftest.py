@@ -95,7 +95,7 @@ def schema_refs():
             "title": "Sample schema",
             "description": "Sample JSON Schema that references another schema",
             "examples": [{"parent_object": {"child_string": "hello world"}}],
-            "required": "parent_object",
+            "required": ["parent_object"],
             "properties": {
                 "parent_object": {
                     "$id": "#/properties/parent_object",
@@ -110,7 +110,7 @@ def schema_refs():
             "title": "Sample schema",
             "description": "Sample JSON Schema that is referenced by another schema",
             "examples": [{"child_string": "hello world"}],
-            "required": "child_string",
+            "required": ["child_string"],
             "properties": {
                 "child_string": {
                     "$id": "#/properties/child_string",

@@ -17,9 +17,11 @@ def validator(
     inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
     inbound_handlers: Optional[Dict] = None,
+    inbound_provider_options: Dict = {},
     outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
     outbound_handlers: Optional[Dict] = None,
+    outbound_provider_options: Dict = {},
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
     **kwargs: Any,
@@ -50,6 +52,10 @@ def validator(
         Custom methods to retrieve remote schemes, keyed off of URI scheme
     outbound_handlers: Dict
         Custom methods to retrieve remote schemes, keyed off of URI scheme
+    inbound_provider_options: Dict
+        Arguments that will be passed directly to the underlying validate call for the inbound event
+    outbound_provider_options: Dict
+        Arguments that will be passed directly to the underlying validate call for the outbound event
 
     Example
     -------
@@ -134,7 +140,11 @@ def validator(
     if inbound_schema:
         logger.debug("Validating inbound event")
         validate_data_against_schema(
-            data=event, schema=inbound_schema, formats=inbound_formats, handlers=inbound_handlers
+            data=event,
+            schema=inbound_schema,
+            formats=inbound_formats,
+            handlers=inbound_handlers,
+            **inbound_provider_options,
         )
 
     response = handler(event, context, **kwargs)
@@ -142,7 +152,11 @@ def validator(
     if outbound_schema:
         logger.debug("Validating outbound event")
         validate_data_against_schema(
-            data=response, schema=outbound_schema, formats=outbound_formats, handlers=outbound_handlers
+            data=response,
+            schema=outbound_schema,
+            formats=outbound_formats,
+            handlers=outbound_handlers,
+            **outbound_provider_options,
         )
 
     return response
@@ -153,6 +167,7 @@ def validate(
     schema: Dict,
     formats: Optional[Dict] = None,
     handlers: Optional[Dict] = None,
+    provider_options: Dict = {},
     envelope: Optional[str] = None,
     jmespath_options: Optional[Dict] = None,
 ):
@@ -174,6 +189,8 @@ def validate(
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
     handlers: Dict
         Custom methods to retrieve remote schemes, keyed off of URI scheme
+    provider_options: Dict
+        Arguments that will be passed directly to the underlying validate call
 
     Example
     -------
@@ -242,4 +259,4 @@ def validate(
             jmespath_options=jmespath_options,
         )
 
-    validate_data_against_schema(data=event, schema=schema, formats=formats, handlers=handlers)
+    validate_data_against_schema(data=event, schema=schema, formats=formats, handlers=handlers, **provider_options)

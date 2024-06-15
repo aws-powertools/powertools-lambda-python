@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import fastjsonschema  # type: ignore
 
@@ -9,7 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 def validate_data_against_schema(
-    data: Union[Dict, str], schema: Dict, formats: Optional[Dict] = None, handlers: Optional[Dict] = None
+    data: Union[Dict, str],
+    schema: Dict,
+    formats: Optional[Dict] = None,
+    handlers: Optional[Dict] = None,
+    **provider_options: Any,
 ):
     """Validate dict data against given JSON Schema
 
@@ -23,6 +27,8 @@ def validate_data_against_schema(
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
     handlers: Dict
         Custom methods to retrieve remote schemes, keyed off of URI scheme
+    **provider options: Dict, optional
+        Arguments that will be passed directly to the underlying validate call
 
     Raises
     ------
@@ -34,7 +40,7 @@ def validate_data_against_schema(
     try:
         formats = formats or {}
         handlers = handlers or {}
-        fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers)
+        fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers, **provider_options)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
     except fastjsonschema.JsonSchemaValueException as e:
