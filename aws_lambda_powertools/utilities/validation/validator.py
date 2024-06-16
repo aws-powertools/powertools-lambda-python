@@ -17,11 +17,11 @@ def validator(
     inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
     inbound_handlers: Optional[Dict] = None,
-    inbound_provider_options: Dict = {},
+    inbound_provider_options: Optional[Dict] = None,
     outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
     outbound_handlers: Optional[Dict] = None,
-    outbound_provider_options: Dict = {},
+    outbound_provider_options: Optional[Dict] = None,
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
     **kwargs: Any,
@@ -144,7 +144,7 @@ def validator(
             schema=inbound_schema,
             formats=inbound_formats,
             handlers=inbound_handlers,
-            **inbound_provider_options,
+            provider_options=inbound_provider_options,
         )
 
     response = handler(event, context, **kwargs)
@@ -156,7 +156,7 @@ def validator(
             schema=outbound_schema,
             formats=outbound_formats,
             handlers=outbound_handlers,
-            **outbound_provider_options,
+            provider_options=outbound_provider_options,
         )
 
     return response
@@ -167,7 +167,7 @@ def validate(
     schema: Dict,
     formats: Optional[Dict] = None,
     handlers: Optional[Dict] = None,
-    provider_options: Dict = {},
+    provider_options: Optional[Dict] = None,
     envelope: Optional[str] = None,
     jmespath_options: Optional[Dict] = None,
 ):
@@ -259,4 +259,6 @@ def validate(
             jmespath_options=jmespath_options,
         )
 
-    validate_data_against_schema(data=event, schema=schema, formats=formats, handlers=handlers, **provider_options)
+    validate_data_against_schema(
+        data=event, schema=schema, formats=formats, handlers=handlers, provider_options=provider_options
+    )
