@@ -12,13 +12,14 @@
 
 * **deps:** bump redis from 5.0.5 to 5.0.6 ([#4527](https://github.com/aws-powertools/powertools-lambda-python/issues/4527))
 * **deps:** bump codecov/codecov-action from 4.4.1 to 4.5.0 ([#4514](https://github.com/aws-powertools/powertools-lambda-python/issues/4514))
-* **deps-dev:** bump aws-cdk-lib from 2.145.0 to 2.146.0 ([#4526](https://github.com/aws-powertools/powertools-lambda-python/issues/4526))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.182 to 0.1.184 ([#4529](https://github.com/aws-powertools/powertools-lambda-python/issues/4529))
+* **deps-dev:** bump bandit from 1.7.8 to 1.7.9 ([#4511](https://github.com/aws-powertools/powertools-lambda-python/issues/4511))
+* **deps-dev:** bump aws-cdk-lib from 2.145.0 to 2.146.0 ([#4526](https://github.com/aws-powertools/powertools-lambda-python/issues/4526))
 * **deps-dev:** bump filelock from 3.14.0 to 3.15.1 ([#4512](https://github.com/aws-powertools/powertools-lambda-python/issues/4512))
 * **deps-dev:** bump cdklabs-generative-ai-cdk-constructs from 0.1.179 to 0.1.182 ([#4510](https://github.com/aws-powertools/powertools-lambda-python/issues/4510))
 * **deps-dev:** bump aws-cdk from 2.145.0 to 2.146.0 ([#4525](https://github.com/aws-powertools/powertools-lambda-python/issues/4525))
 * **deps-dev:** bump mypy-boto3-secretsmanager from 1.34.109 to 1.34.125 in the boto-typing group ([#4509](https://github.com/aws-powertools/powertools-lambda-python/issues/4509))
-* **deps-dev:** bump bandit from 1.7.8 to 1.7.9 ([#4511](https://github.com/aws-powertools/powertools-lambda-python/issues/4511))
+* **deps-dev:** bump ruff from 0.4.8 to 0.4.9 ([#4528](https://github.com/aws-powertools/powertools-lambda-python/issues/4528))
 * **deps-dev:** bump cfn-lint from 0.87.6 to 0.87.7 ([#4513](https://github.com/aws-powertools/powertools-lambda-python/issues/4513))
 
 
