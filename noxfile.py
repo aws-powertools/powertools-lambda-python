@@ -12,8 +12,6 @@ import nox
 PREFIX_TESTS_FUNCTIONAL = "tests/functional"
 PREFIX_TESTS_UNIT = "tests/unit"
 
-PYTHON_VERSIONS = ["3.8", "3.9", "3.10", "3.11", "3.12"]
-
 
 def build_and_run_test(session: nox.Session, folders: List, extras: Optional[str] = "") -> None:
     """
@@ -48,7 +46,7 @@ def build_and_run_test(session: nox.Session, folders: List, extras: Optional[str
     session.run("pytest", *folders)
 
 
-@nox.session(python=PYTHON_VERSIONS)
+@nox.session()
 def test_with_only_required_packages(session: nox.Session):
     """Tests that only depends for required libraries"""
     # Logger
