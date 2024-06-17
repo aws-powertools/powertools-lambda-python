@@ -53,11 +53,17 @@ jobs:
         artifact_name: ${{ steps.seal_source_code.outputs.artifact_name }}
         RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
     steps:
+      # NOTE: Different from prod release, we need both poetry and source code available in earlier steps to bump and verify.
+
       # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
       - name: Install poetry
         run: |
           pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
           pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4 # v0.3.1
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
 
       - name: Export release version
         id: release_version
@@ -76,10 +82,6 @@ jobs:
           fi
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
-
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
-        with:
-          ref: ${{ env.RELEASE_COMMIT }}
 
       - name: Bump package version
         id: versioning
