@@ -289,6 +289,16 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
         --8<-- "examples/homepage/install/sar/terraform.tf"
         ```
 
+=== "Alpha releases"
+
+    Every morning _(~8am UTC)_, we publish a `prerelease` to PyPi to accelerate customer feedback on **unstable** releases / bugfixes until they become production ready.
+
+    Here's how you can use them:
+
+    - __Pip__: [**`pip install--pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+    - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}:clipboard:
+    - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+
 ### Local development
 
 !!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
