@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 import fastjsonschema  # type: ignore
 
