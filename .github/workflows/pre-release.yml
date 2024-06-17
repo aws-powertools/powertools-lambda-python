@@ -34,8 +34,8 @@ on:
         type: boolean
         required: false
   schedule:
-    # Note: run daily at 8am UTC time
-    - cron: "0 8 * * *"
+    # Note: run daily on weekdays at 8am UTC time
+    - cron: "0 8 * * 1-5"
 
 permissions:
   contents: read
