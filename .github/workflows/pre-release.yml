@@ -235,7 +235,7 @@ jobs:
   # Creates a PR with the latest version we've just released
   # since our trunk is protected against any direct pushes from automation
   bump_version:
-    needs: [release, seal]
+    needs: [release, seal, provenance]
     permissions:
       contents: write  # create-pr action creates a temporary branch
       pull-requests: write # create-pr action creates a PR using the temporary branch
@@ -252,12 +252,24 @@ jobs:
           integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
           artifact_name: ${{ needs.seal.outputs.artifact_name }}
 
+      - name: Download provenance
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          provenance_name: ${{needs.provenance.outputs.provenance-name}}
+
+      - name: Update provenances
+        run: mkdir -p "${PROVENANCE_DIR}" && mv "${PROVENANCE_FILE}" "${PROVENANCE_DIR}/"
+        env:
+          PROVENANCE_FILE: ${{ needs.provenance.outputs.provenance-name }}
+          PROVENANCE_DIR: provenances/${{ needs.seal.outputs.RELEASE_VERSION}}
+
       - name: Create PR
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml aws_lambda_powertools/shared/version.py"
+          files: "pyproject.toml aws_lambda_powertools/shared/version.py $PROVENANCE_FILE"
           temp_branch_prefix: "ci-bump"
-          pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION
-           }}"
+          pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          PROVENANCE_FILE: provenances/${{needs.seal.outputs.RELEASE_VERSION}}/${{needs.provenance.outputs.provenance-name}}
