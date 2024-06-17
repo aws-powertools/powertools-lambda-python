@@ -260,5 +260,9 @@ def validate(
         )
 
     validate_data_against_schema(
-        data=event, schema=schema, formats=formats, handlers=handlers, provider_options=provider_options
+        data=event,
+        schema=schema,
+        formats=formats,
+        handlers=handlers,
+        provider_options=provider_options,
     )
