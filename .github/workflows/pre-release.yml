@@ -33,7 +33,9 @@ on:
         default: false
         type: boolean
         required: false
-
+  schedule:
+    # Note: run daily at 8am UTC time
+    - cron: "0 8 * * *"
 
 permissions:
   contents: read
@@ -45,6 +47,9 @@ jobs:
   # uploads the artifact with the integrity hash as the key name
   # so subsequent jobs can restore from a trusted point in time to prevent tampering
   seal:
+    # ignore forks
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -267,7 +272,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml aws_lambda_powertools/"
+          files: "pyproject.toml aws_lambda_powertools/shared/version.py provenance/"
           temp_branch_prefix: "ci-bump"
           pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
