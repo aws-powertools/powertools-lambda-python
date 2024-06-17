@@ -134,7 +134,7 @@ def test_parser_unions(test_input, expected):
     class SuccessfulCallback(pydantic.BaseModel):
         status: Literal["succeeded"]
         name: str
-        breed: Literal["Husky", "Labrador"]
+        breed: Literal["Newfoundland", "Labrador"]
 
     class FailedCallback(pydantic.BaseModel):
         status: Literal["failed"]
