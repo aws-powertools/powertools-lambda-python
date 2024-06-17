@@ -2,7 +2,7 @@ import logging
 import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
-from pydantic import TypeAdapter
+from pydantic import TypeAdapter, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
@@ -95,13 +95,16 @@ def event_parser(
                 "or as the type hint of `event` in the handler that it wraps",
             )
 
-    if envelope:
-        parsed_event = parse(event=event, model=model, envelope=envelope)
-    else:
-        parsed_event = parse(event=event, model=model)
+    try:
+        if envelope:
+            parsed_event = parse(event=event, model=model, envelope=envelope)
+        else:
+            parsed_event = parse(event=event, model=model)
 
-    logger.debug(f"Calling handler {handler.__name__}")
-    return handler(parsed_event, context, **kwargs)
+        logger.debug(f"Calling handler {handler.__name__}")
+        return handler(parsed_event, context, **kwargs)
+    except (ValidationError, AttributeError) as exc:
+        raise InvalidModelTypeError(f"Error: {str(exc)}. Please ensure the type you're trying to parse into is correct")
 
 
 @overload
@@ -186,7 +189,7 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
 
         return adapter.validate_python(event)
 
-    except AttributeError as exc:
+    except Exception as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
             "and your payload adheres to the specified Input model structure.\n"
