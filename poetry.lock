@@ -176,13 +176,13 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "aws-cdk-lib"
-version = "2.145.0"
+version = "2.146.0"
 description = "Version 2 of the AWS Cloud Development Kit library"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "aws-cdk-lib-2.145.0.tar.gz", hash = "sha256:be9dc62747e6a2fe6b91f77675fbf8f8daed2c3e10174b860a831128045437dd"},
-    {file = "aws_cdk_lib-2.145.0-py3-none-any.whl", hash = "sha256:92261768346ec02d958978124e474bb41674ee3630580fdbf034a593a1c5bbc7"},
+    {file = "aws-cdk-lib-2.146.0.tar.gz", hash = "sha256:4a4becc173d8b4fad35ba86c5d0b2f52e2c4ebe9e3dc08c9dd276fed3602f689"},
+    {file = "aws_cdk_lib-2.146.0-py3-none-any.whl", hash = "sha256:63e1c3084a49a001f1e6e5399af9b4ac6b1c3566b28a6b2e3f25e0d4c00df0af"},
 ]
 
 [package.dependencies]
@@ -190,7 +190,7 @@ files = [
 "aws-cdk.asset-kubectl-v20" = ">=2.1.2,<3.0.0"
 "aws-cdk.asset-node-proxy-agent-v6" = ">=2.0.3,<3.0.0"
 constructs = ">=10.0.0,<11.0.0"
-jsii = ">=1.98.0,<2.0.0"
+jsii = ">=1.99.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -279,13 +279,13 @@ dev = ["freezegun (>=1.0,<2.0)", "pytest (>=6.0)", "pytest-cov"]
 
 [[package]]
 name = "bandit"
-version = "1.7.8"
+version = "1.7.9"
 description = "Security oriented static analyser for python code."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "bandit-1.7.8-py3-none-any.whl", hash = "sha256:509f7af645bc0cd8fd4587abc1a038fc795636671ee8204d502b933aee44f381"},
-    {file = "bandit-1.7.8.tar.gz", hash = "sha256:36de50f720856ab24a24dbaa5fee2c66050ed97c1477e0a1159deab1775eab6b"},
+    {file = "bandit-1.7.9-py3-none-any.whl", hash = "sha256:52077cb339000f337fb25f7e045995c4ad01511e716e5daac37014b9752de8ec"},
+    {file = "bandit-1.7.9.tar.gz", hash = "sha256:7c395a436743018f7be0a4cbb0a4ea9b902b6d87264ddecf8cfdc73b4f78ff61"},
 ]
 
 [package.dependencies]
@@ -429,13 +429,13 @@ ujson = ["ujson (>=5.7.0)"]
 
 [[package]]
 name = "cdk-nag"
-version = "2.28.140"
+version = "2.28.142"
 description = "Check CDK v2 applications for best practices using a combination on available rule packs."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdk-nag-2.28.140.tar.gz", hash = "sha256:80262ab5f0d2a0de4cebcccdf655458dd36c93493ba39b475623b8decd0f29f6"},
-    {file = "cdk_nag-2.28.140-py3-none-any.whl", hash = "sha256:6da6ce1f01b5fd645815510bbebbcde9e4028f36bbb820fb05a96f5b3093ddcd"},
+    {file = "cdk-nag-2.28.142.tar.gz", hash = "sha256:f4590a977f0887dd5cacdad5544883fa10d5334cf7389a3ced428d846718d196"},
+    {file = "cdk_nag-2.28.142-py3-none-any.whl", hash = "sha256:975875e30e515b0945db6047bf7b5b5954c42497ba8e7a10fb14ac1ca8791503"},
 ]
 
 [package.dependencies]
@@ -447,20 +447,20 @@ typeguard = ">=2.13.3,<2.14.0"
 
 [[package]]
 name = "cdklabs-generative-ai-cdk-constructs"
-version = "0.1.179"
+version = "0.1.184"
 description = "AWS Generative AI CDK Constructs is a library for well-architected generative AI patterns."
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "cdklabs.generative-ai-cdk-constructs-0.1.179.tar.gz", hash = "sha256:60066b67fbee2ed22ccaef041d8b5179c550f0900854c62c46bce9f07e85153e"},
-    {file = "cdklabs.generative_ai_cdk_constructs-0.1.179-py3-none-any.whl", hash = "sha256:e6601cbb754ad5e375429f9abc14db45196c85b10ccc2bde836ebd4285200a73"},
+    {file = "cdklabs.generative-ai-cdk-constructs-0.1.184.tar.gz", hash = "sha256:97983d386fe2cacdb6d9ee7bcfb33cc670a3390f38df73872afd5fba49b99366"},
+    {file = "cdklabs.generative_ai_cdk_constructs-0.1.184-py3-none-any.whl", hash = "sha256:d5c628566b74b08163d3ed7b028ee09636533b0084cde918555580b0c55e844c"},
 ]
 
 [package.dependencies]
 aws-cdk-lib = ">=2.143.0,<3.0.0"
-cdk-nag = ">=2.28.139,<3.0.0"
+cdk-nag = ">=2.28.142,<3.0.0"
 constructs = ">=10.3.0,<11.0.0"
-jsii = ">=1.99.0,<2.0.0"
+jsii = ">=1.100.0,<2.0.0"
 publication = ">=0.0.3"
 typeguard = ">=2.13.3,<2.14.0"
 
@@ -541,13 +541,13 @@ pycparser = "*"
 
 [[package]]
 name = "cfn-lint"
-version = "0.87.6"
+version = "0.87.7"
 description = "Checks CloudFormation templates for practices and behaviour that could potentially be improved"
 optional = false
 python-versions = "!=4.0,<=4.0,>=3.8"
 files = [
-    {file = "cfn_lint-0.87.6-py3-none-any.whl", hash = "sha256:ee889cdc0f76a419efd1c20105ae8675b8af1de8e689928d59ffec33a141c1a6"},
-    {file = "cfn_lint-0.87.6.tar.gz", hash = "sha256:aba311b0dae2be77422e8152974da2047f048d24a287b16d9c78b234d0714592"},
+    {file = "cfn_lint-0.87.7-py3-none-any.whl", hash = "sha256:ac6ac86dde1ba3d0fb0e217a4d329239a98f00af7862e4fa5ace6c416c4e056c"},
+    {file = "cfn_lint-0.87.7.tar.gz", hash = "sha256:85f6b7f32cf155a74d670d53f86b39f99cfc282b02158d98fdab9fc1dba0809e"},
 ]
 
 [package.dependencies]
@@ -1117,18 +1117,18 @@ devel = ["colorama", "json-spec", "jsonschema", "pylint", "pytest", "pytest-benc
 
 [[package]]
 name = "filelock"
-version = "3.14.0"
+version = "3.15.1"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "filelock-3.14.0-py3-none-any.whl", hash = "sha256:43339835842f110ca7ae60f1e1c160714c5a6afd15a2873419ab185334975c0f"},
-    {file = "filelock-3.14.0.tar.gz", hash = "sha256:6ea72da3be9b8c82afd3edcf99f2fffbb5076335a5ae4d03248bb5b6c3eae78a"},
+    {file = "filelock-3.15.1-py3-none-any.whl", hash = "sha256:71b3102950e91dfc1bb4209b64be4dc8854f40e5f534428d8684f953ac847fac"},
+    {file = "filelock-3.15.1.tar.gz", hash = "sha256:58a2549afdf9e02e10720eaa4d4470f56386d7a6f72edd7d0596337af8ed7ad8"},
 ]
 
 [package.extras]
 docs = ["furo (>=2023.9.10)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
-testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)", "pytest-timeout (>=2.2)"]
+testing = ["covdefaults (>=2.3)", "coverage (>=7.3.2)", "diff-cover (>=8.0.1)", "pytest (>=7.4.3)", "pytest-asyncio (>=0.21)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)", "pytest-timeout (>=2.2)"]
 typing = ["typing-extensions (>=4.8)"]
 
 [[package]]
@@ -1475,13 +1475,13 @@ pbr = "*"
 
 [[package]]
 name = "jsii"
-version = "1.99.0"
+version = "1.100.0"
 description = "Python client for jsii runtime"
 optional = false
 python-versions = "~=3.8"
 files = [
-    {file = "jsii-1.99.0-py3-none-any.whl", hash = "sha256:e352232efb2c1994e882aab8c571c764055336b5c97c0f67ac654fbf3caa2411"},
-    {file = "jsii-1.99.0.tar.gz", hash = "sha256:36e4c033d39b962c9d53910aa3e32cd16efa2109e4113fbd9d1be2e595350fe1"},
+    {file = "jsii-1.100.0-py3-none-any.whl", hash = "sha256:3564188028b5b2ddf7fbd50bb28555125e684a6c4540f591c9be088bc073fdb8"},
+    {file = "jsii-1.100.0.tar.gz", hash = "sha256:b267f651086cbdbb2ba336099361ebfc109dbe86f3c8671636338090c4b4d2f4"},
 ]
 
 [package.dependencies]
@@ -2099,13 +2099,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-secretsmanager"
-version = "1.34.109"
-description = "Type annotations for boto3.SecretsManager 1.34.109 service generated with mypy-boto3-builder 7.24.0"
+version = "1.34.125"
+description = "Type annotations for boto3.SecretsManager 1.34.125 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_secretsmanager-1.34.109-py3-none-any.whl", hash = "sha256:18c60597a72ef08bad722f1c2f4507a0cf853c1526b1cffb8c3d2a30f5649d1f"},
-    {file = "mypy_boto3_secretsmanager-1.34.109.tar.gz", hash = "sha256:29898fb1046fed5f83d05f08470d5cf07dfd1656b1da23f2bb875c9ff734ee65"},
+    {file = "mypy_boto3_secretsmanager-1.34.125-py3-none-any.whl", hash = "sha256:a5b50b8e3dcc39959ad5c340b4b5673a0c1e9c869a327747a4ddd1d154c79110"},
+    {file = "mypy_boto3_secretsmanager-1.34.125.tar.gz", hash = "sha256:358020a40ec16f4ca753e5e41472a466e748eb0964a209d3ca7cb598537b2707"},
 ]
 
 [package.dependencies]
@@ -2716,13 +2716,13 @@ toml = ["tomli (>=2.0.1)"]
 
 [[package]]
 name = "redis"
-version = "5.0.5"
+version = "5.0.6"
 description = "Python client for Redis database and key-value store"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "redis-5.0.5-py3-none-any.whl", hash = "sha256:30b47d4ebb6b7a0b9b40c1275a19b87bb6f46b3bed82a89012cf56dea4024ada"},
-    {file = "redis-5.0.5.tar.gz", hash = "sha256:3417688621acf6ee368dec4a04dd95881be24efd34c79f00d31f62bb528800ae"},
+    {file = "redis-5.0.6-py3-none-any.whl", hash = "sha256:c0d6d990850c627bbf7be01c5c4cbaadf67b48593e913bb71c9819c30df37eee"},
+    {file = "redis-5.0.6.tar.gz", hash = "sha256:38473cd7c6389ad3e44a91f4c3eaf6bcb8a9f746007f29bf4fb20824ff0b2197"},
 ]
 
 [package.dependencies]
@@ -2998,28 +2998,28 @@ files = [
 
 [[package]]
 name = "ruff"
-version = "0.4.8"
+version = "0.4.9"
 description = "An extremely fast Python linter and code formatter, written in Rust."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "ruff-0.4.8-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:7663a6d78f6adb0eab270fa9cf1ff2d28618ca3a652b60f2a234d92b9ec89066"},
-    {file = "ruff-0.4.8-py3-none-macosx_11_0_arm64.whl", hash = "sha256:eeceb78da8afb6de0ddada93112869852d04f1cd0f6b80fe464fd4e35c330913"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:aad360893e92486662ef3be0a339c5ca3c1b109e0134fcd37d534d4be9fb8de3"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:284c2e3f3396fb05f5f803c9fffb53ebbe09a3ebe7dda2929ed8d73ded736deb"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:a7354f921e3fbe04d2a62d46707e569f9315e1a613307f7311a935743c51a764"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:72584676164e15a68a15778fd1b17c28a519e7a0622161eb2debdcdabdc71883"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:9678d5c9b43315f323af2233a04d747409d1e3aa6789620083a82d1066a35199"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:704977a658131651a22b5ebeb28b717ef42ac6ee3b11e91dc87b633b5d83142b"},
-    {file = "ruff-0.4.8-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:d05f8d6f0c3cce5026cecd83b7a143dcad503045857bc49662f736437380ad45"},
-    {file = "ruff-0.4.8-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:6ea874950daca5697309d976c9afba830d3bf0ed66887481d6bca1673fc5b66a"},
-    {file = "ruff-0.4.8-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:fc95aac2943ddf360376be9aa3107c8cf9640083940a8c5bd824be692d2216dc"},
-    {file = "ruff-0.4.8-py3-none-musllinux_1_2_i686.whl", hash = "sha256:384154a1c3f4bf537bac69f33720957ee49ac8d484bfc91720cc94172026ceed"},
-    {file = "ruff-0.4.8-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:e9d5ce97cacc99878aa0d084c626a15cd21e6b3d53fd6f9112b7fc485918e1fa"},
-    {file = "ruff-0.4.8-py3-none-win32.whl", hash = "sha256:6d795d7639212c2dfd01991259460101c22aabf420d9b943f153ab9d9706e6a9"},
-    {file = "ruff-0.4.8-py3-none-win_amd64.whl", hash = "sha256:e14a3a095d07560a9d6769a72f781d73259655919d9b396c650fc98a8157555d"},
-    {file = "ruff-0.4.8-py3-none-win_arm64.whl", hash = "sha256:14019a06dbe29b608f6b7cbcec300e3170a8d86efaddb7b23405cb7f7dcaf780"},
-    {file = "ruff-0.4.8.tar.gz", hash = "sha256:16d717b1d57b2e2fd68bd0bf80fb43931b79d05a7131aa477d66fc40fbd86268"},
+    {file = "ruff-0.4.9-py3-none-macosx_10_12_x86_64.whl", hash = "sha256:b262ed08d036ebe162123170b35703aaf9daffecb698cd367a8d585157732991"},
+    {file = "ruff-0.4.9-py3-none-macosx_11_0_arm64.whl", hash = "sha256:98ec2775fd2d856dc405635e5ee4ff177920f2141b8e2d9eb5bd6efd50e80317"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:4555056049d46d8a381f746680db1c46e67ac3b00d714606304077682832998e"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl", hash = "sha256:e91175fbe48f8a2174c9aad70438fe9cb0a5732c4159b2a10a3565fea2d94cde"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:0e8e7b95673f22e0efd3571fb5b0cf71a5eaaa3cc8a776584f3b2cc878e46bff"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_ppc64.manylinux2014_ppc64.whl", hash = "sha256:2d45ddc6d82e1190ea737341326ecbc9a61447ba331b0a8962869fcada758505"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl", hash = "sha256:78de3fdb95c4af084087628132336772b1c5044f6e710739d440fc0bccf4d321"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:06b60f91bfa5514bb689b500a25ba48e897d18fea14dce14b48a0c40d1635893"},
+    {file = "ruff-0.4.9-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:88bffe9c6a454bf8529f9ab9091c99490578a593cc9f9822b7fc065ee0712a06"},
+    {file = "ruff-0.4.9-py3-none-musllinux_1_2_aarch64.whl", hash = "sha256:673bddb893f21ab47a8334c8e0ea7fd6598ecc8e698da75bcd12a7b9d0a3206e"},
+    {file = "ruff-0.4.9-py3-none-musllinux_1_2_armv7l.whl", hash = "sha256:8c1aff58c31948cc66d0b22951aa19edb5af0a3af40c936340cd32a8b1ab7438"},
+    {file = "ruff-0.4.9-py3-none-musllinux_1_2_i686.whl", hash = "sha256:784d3ec9bd6493c3b720a0b76f741e6c2d7d44f6b2be87f5eef1ae8cc1d54c84"},
+    {file = "ruff-0.4.9-py3-none-musllinux_1_2_x86_64.whl", hash = "sha256:732dd550bfa5d85af8c3c6cbc47ba5b67c6aed8a89e2f011b908fc88f87649db"},
+    {file = "ruff-0.4.9-py3-none-win32.whl", hash = "sha256:8064590fd1a50dcf4909c268b0e7c2498253273309ad3d97e4a752bb9df4f521"},
+    {file = "ruff-0.4.9-py3-none-win_amd64.whl", hash = "sha256:e0a22c4157e53d006530c902107c7f550b9233e9706313ab57b892d7197d8e52"},
+    {file = "ruff-0.4.9-py3-none-win_arm64.whl", hash = "sha256:5d5460f789ccf4efd43f265a58538a2c24dbce15dbf560676e430375f20a8198"},
+    {file = "ruff-0.4.9.tar.gz", hash = "sha256:f1cb0828ac9533ba0135d148d214e284711ede33640465e706772645483427e3"},
 ]
 
 [[package]]
@@ -3669,4 +3669,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "039a114f8790fd1e9b52dff6dea1862765ac0a60f19ecc4aa51593f00f7e338f"
+content-hash = "1ef63c50d99b6f139ca65e6fc82b982b95dc6d582318bb3fe762dc653456ebc4"
