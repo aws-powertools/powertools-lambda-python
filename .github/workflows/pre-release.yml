@@ -267,9 +267,7 @@ jobs:
         id: create-pr
         uses: ./.github/actions/create-pr
         with:
-          files: "pyproject.toml aws_lambda_powertools/shared/version.py $PROVENANCE_FILE"
+          files: "pyproject.toml aws_lambda_powertools/"
           temp_branch_prefix: "ci-bump"
           pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION }}"
           github_token: ${{ secrets.GITHUB_TOKEN }}
-        env:
-          PROVENANCE_FILE: provenances/${{needs.seal.outputs.RELEASE_VERSION}}/${{needs.provenance.outputs.provenance-name}}
