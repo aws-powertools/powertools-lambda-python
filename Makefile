@@ -32,6 +32,9 @@ test:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+nox:
+	poetry run nox --error-on-external-run --reuse-venv=yes --non-interactive
+
 test-pydanticv2:
 	poetry run pytest -m "not perf" --ignore tests/e2e
 

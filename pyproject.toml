@@ -126,6 +126,7 @@ pytest-socket = ">=0.6,<0.8"
 types-redis = "^4.6.0.7"
 testcontainers = { extras = ["redis"], version = "^3.7.1" }
 multiprocess = "^0.70.16"
+nox = "^2024.4.15"
 
 [tool.coverage.run]
 source = ["aws_lambda_powertools"]

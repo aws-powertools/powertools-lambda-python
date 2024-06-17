@@ -15,7 +15,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import pytest
 
-from aws_lambda_powertools import Logger, Tracer, set_package_logger_handler
+from aws_lambda_powertools import Logger, Metrics, set_package_logger_handler
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.formatter import (
@@ -219,13 +219,14 @@ def test_package_logger_stream(stdout):
     # GIVEN package logger "aws_lambda_powertools" is explicitly set with no params
     set_package_logger(stream=stdout)
 
-    # WHEN Tracer is initialized in disabled mode
-    Tracer(disabled=True)
+    # WHEN we add a dimension in Metrics feature
+    my_metrics = Metrics(namespace="powertools")
+    my_metrics.add_dimension(name="dimension", value="test")
 
-    # THEN Tracer debug log statement should be logged
+    # THEN Metrics debug log statement should be logged
     output = stdout.getvalue()
     logger = logging.getLogger("aws_lambda_powertools")
-    assert "Tracing has been disabled" in output
+    assert "Adding dimension:" in output
     assert logger.level == logging.DEBUG
 
 
@@ -235,10 +236,11 @@ def test_package_logger_format(capsys):
     formatter = logging.Formatter("message=%(message)s")
     set_package_logger(formatter=formatter)
 
-    # WHEN Tracer is initialized in disabled mode
-    Tracer(disabled=True)
+    # WHEN we add a dimension in Metrics feature
+    my_metrics = Metrics(namespace="powertools")
+    my_metrics.add_dimension(name="dimension", value="test")
 
-    # THEN Tracer debug log statement should be logged using `message=` format
+    # THEN Metrics debug log statement should be logged using `message=` format
     output = capsys.readouterr().out
     logger = logging.getLogger("aws_lambda_powertools")
     assert "message=" in output
@@ -977,13 +979,15 @@ def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkey
     logger = logging.getLogger("aws_lambda_powertools")
 
     # WHEN set_package_logger is used at initialization
-    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Tracer)
+    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Metrics add_dimension)
     set_package_logger_handler(stream=stdout)
-    Tracer(disabled=True)
 
-    # THEN Tracer debug log statement should be logged
+    my_metrics = Metrics(namespace="powertools")
+    my_metrics.add_dimension(name="dimension", value="test")
+
+    # THEN Metrics debug log statement should be logged
     output = stdout.getvalue()
-    assert "Tracing has been disabled" in output
+    assert "Adding dimension:" in output
     assert logger.level == logging.DEBUG
 
 
