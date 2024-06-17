@@ -2,7 +2,7 @@ import logging
 import typing
 from typing import Any, Callable, Dict, Optional, Type, overload
 
-from pydantic import TypeAdapter, ValidationError
+from pydantic import PydanticSchemaGenerationError, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
@@ -189,7 +189,10 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
 
         return adapter.validate_python(event)
 
-    except Exception as exc:
+    # Pydantic raises PydanticSchemaGenerationError when the model is not a Pydantic model
+    # This is seen in the tests where we pass a non-Pydantic model type to the parser or
+    # when we pass a data structure that does not match the model (trying to parse a true/false/etc into a model)
+    except (ValidationError, PydanticSchemaGenerationError) as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
             "and your payload adheres to the specified Input model structure.\n"
