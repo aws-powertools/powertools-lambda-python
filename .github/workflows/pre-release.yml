@@ -48,7 +48,7 @@ jobs:
   # so subsequent jobs can restore from a trusted point in time to prevent tampering
   seal:
     # ignore forks
-    # if: github.repository == 'aws-powertools/powertools-lambda-python'
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
 
     runs-on: ubuntu-latest
     permissions:
@@ -215,7 +215,7 @@ jobs:
   # It uses the sealed build artifact (.whl, .tar.gz) to release it
   release:
     needs: [build, seal, provenance]
-    environment: release
+    environment: pre-release
     runs-on: ubuntu-latest
     permissions:
       id-token: write # OIDC for PyPi Trusted Publisher feature
