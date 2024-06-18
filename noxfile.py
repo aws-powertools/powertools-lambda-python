@@ -60,3 +60,16 @@ def test_with_only_required_packages(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/provider/",
         ],
     )
+
+
+@nox.session()
+def test_with_datadog_as_required_package(session: nox.Session):
+    """Tests that depends on Datadog library"""
+    # Metrics - Datadog
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/datadog/",
+        ],
+        extras="datadog",
+    )

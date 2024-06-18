@@ -3,7 +3,6 @@ import warnings
 from collections import namedtuple
 
 import pytest
-from test_metrics_provider import capture_metrics_output
 
 from aws_lambda_powertools.metrics.exceptions import MetricValueError, SchemaValidationError
 from aws_lambda_powertools.metrics.provider.cold_start import reset_cold_start_flag
@@ -40,7 +39,7 @@ def test_datadog_write_to_log_with_env_variable(capsys, monkeypatch):
     # WHEN we add a metric
     metrics.add_metric(name="item_sold", value=1, product="latte", order="online")
     metrics.flush_metrics()
-    logs = capture_metrics_output(capsys)
+    logs = json.loads(capsys.readouterr().out.strip())
 
     # THEN metrics is flushed to log
     logs["e"] = ""
