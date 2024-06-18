@@ -70,7 +70,7 @@ jobs:
         with:
           ref: ${{ env.RELEASE_COMMIT }}
 
-      - name: Export release version
+      - name: Bump and export release version
         id: release_version
         run: |
           RELEASE_VERSION="$(poetry version prerelease --short | head -n1 | tr -d '\n')"
@@ -85,12 +85,6 @@ jobs:
             echo "Version $VERSION doesn't look like a pre-release version; aborting"
             exit 1
           fi
-        env:
-          RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
-
-      - name: Bump package version
-        id: versioning
-        run: poetry version "${RELEASE_VERSION}"
         env:
           RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
 
