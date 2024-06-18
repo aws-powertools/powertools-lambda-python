@@ -147,10 +147,10 @@ Here is a handy table with built-in envelopes along with their JMESPath expressi
 | **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                       |
 | **`API_GATEWAY_REST`**            | `powertools_json(body)`                                       |
 | **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                      |
-| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]` |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)` or `powertools_json(@).logEvents[*]` |
 | **`EVENTBRIDGE`**                 | `detail`                                                      |
 | **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))` |
-| **`SNS`**                         | `Records[0].Sns.Message                                       | powertools_json(@)`              |
+| **`SNS`**                         | `Records[0].Sns.Message` or `powertools_json(@)`              |
 | **`SQS`**                         | `Records[*].powertools_json(body)`                            |
 
 ## Advanced
@@ -204,28 +204,26 @@ You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_
 
 JSON schema [allows schemas to reference other schemas](https://json-schema.org/understanding-json-schema/structuring#dollarref) using the `$ref` keyword. The value of `$ref` is a URI reference, but you likely don't want to launch an HTTP request to resolve this URI. Instead, you can pass resolving functions through the `handlers` parameter:
 
-```python title="custom_reference_handlers.py"
-from aws_lambda_powertools.utilities.validation import validate
+=== "custom_handlers.py"
 
-SCHEMA = {
-    "ParentSchema": {
-        "type": "object",
-        "properties": {
-            "child_object": {"$ref": "testschema://ChildSchema"},
-            ...
-        },
-        ...
-    },
-    "ChildSchema": ...,
-}
+	```python hl_lines="1 7 8 11"
+    --8<-- "examples/validation/src/custom_handlers.py"
+	```
 
-def handle_test_schema(uri):
-    schema_key = uri.split("://")[1]
-    return SCHEMA[schema_key]
+=== "custom_handlers_parent_schema"
 
-test_schema_handlers = {"testschema": handle_test_schema}
+	```python hl_lines="1 7"
+    --8<-- "examples/validation/src/custom_handlers_schema.py"
+	```
 
-parent_event = {"child_object": {...}}
+=== "custom_handlers_child_schema"
 
-validate(event=parent_event, schema=SCHEMA["ParentSchema"], handlers=test_schema_handlers)
-```
+    ```python hl_lines="12"
+    --8<-- "examples/validation/src/custom_handlers_schema.py"
+    ```
+
+=== "custom_handlers_payload.json"
+
+    ```json hl_lines="2"
+    --8<-- "examples/validation/src/custom_handlers_payload.json"
+    ```

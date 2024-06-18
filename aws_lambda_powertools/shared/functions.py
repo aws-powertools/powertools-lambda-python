@@ -92,6 +92,23 @@ def resolve_env_var_choice(
     return choice if choice is not None else env
 
 
+def get_field_or_empty_dict(field: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Returns the given dictionary field if it is not empty, otherwise returns an empty dictionary.
+
+    Parameters
+    ----------
+    field: Dict[str, Any]
+        The dictionary field to be checked.
+
+    Returns
+    -------
+    Dict[str, Any]
+        The input dictionary field if it is not empty, or an empty dictionary.
+    """
+    return field or {}
+
+
 def base64_decode(value: str) -> bytes:
     try:
         logger.debug("Decoding base64 item to bytes")

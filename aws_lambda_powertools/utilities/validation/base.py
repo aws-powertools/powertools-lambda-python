@@ -3,7 +3,8 @@ from typing import Dict, Optional, Union
 
 import fastjsonschema  # type: ignore
 
-from .exceptions import InvalidSchemaFormatError, SchemaValidationError
+from aws_lambda_powertools.shared.functions import get_field_or_empty_dict
+from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ def validate_data_against_schema(
         When JSON schema provided is invalid
     """
     try:
-        formats = formats or {}
-        handlers = handlers or {}
-        provider_options = provider_options or {}
+        formats = get_field_or_empty_dict(formats)
+        handlers = get_field_or_empty_dict(handlers)
+        provider_options = get_field_or_empty_dict(provider_options)
         fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers, **provider_options)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
