@@ -11,27 +11,13 @@ This utility provides data parsing and deep validation using [Pydantic](https://
 * Defines data in pure Python classes, then parse, validate and extract only what you want
 * Built-in envelopes to unwrap, extend, and validate popular event sources payloads
 * Enforces type hints at runtime with user-friendly errors
-* Support for Pydantic v1 and v2
+* Support for Pydantic v2
 
 ## Getting started
 
 ### Install
 
-Powertools for AWS Lambda (Python) supports Pydantic v1 and v2. Each Pydantic version requires different dependencies before you can use Parser.
-
-#### Using Pydantic v1
-
-!!! info "This is not necessary if you're installing Powertools for AWS Lambda (Python) via [Lambda Layer/SAR](../index.md#lambda-layer){target="_blank"}"
-
-Add `aws-lambda-powertools[parser]` as a dependency in your preferred tool: _e.g._, _requirements.txt_, _pyproject.toml_.
-
-???+ warning
-    This will increase the compressed package size by >10MB due to the Pydantic dependency.
-
-    To reduce the impact on the package size at the expense of 30%-50% of its performance [Pydantic can also be
-    installed without binary files](https://pydantic-docs.helpmanual.io/install/#performance-vs-package-size-trade-off){target="_blank" rel="nofollow"}:
-
-	Pip example: `SKIP_CYTHON=1 pip install --no-binary pydantic aws-lambda-powertools[parser]`
+Powertools for AWS Lambda (Python) supports Pydantic v2. Each Pydantic version requires different dependencies before you can use Parser.
 
 #### Using Pydantic v2
 
@@ -167,6 +153,39 @@ def my_function():
 			"status_code": 400,
 			"message": "Invalid order"
 		}
+```
+
+#### Union parsing
+
+You can parse multiple types using [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union), this gives you control over parsing different event types with the same handler based on an attribute, for example:
+
+```python
+from aws_lambda_powertools.utilities.parser import event_parser
+from pydantic import BaseModel, Field
+from typing import Annotated, Any, Literal, Union
+
+
+class Cat(BaseModel):
+	animal: Literal["cat"]
+	name: str
+	meow: int
+
+class Dog(BaseModel):
+	animal: Literal["dog"]
+	name: str
+	bark: int
+
+Animal = Annotated[
+	Union[Cat, Dog], Field(discriminator="animal")
+]
+
+@event_parser(model=Animal)
+def lambda_handler(event: Animal, _: Any) -> str:
+    if isinstance(event, CatCallback):
+		# we have a cat!
+        return f"🐈: {event.name}"
+
+	return f"🐶: {event.name}"
 ```
 
 ### Built-in models
