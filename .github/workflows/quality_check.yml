@@ -68,6 +68,8 @@ jobs:
         run: make mypy
       - name: Test with pytest
         run: make test
+      - name: Test dependencies with Nox
+        run: make test-dependencies
       - name: Security baseline
         run: make security-baseline
       - name: Complexity baseline
