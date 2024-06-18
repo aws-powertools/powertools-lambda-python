@@ -50,9 +50,13 @@ def build_and_run_test(session: nox.Session, folders: List, extras: Optional[str
 def test_with_only_required_packages(session: nox.Session):
     """Tests that only depends for required libraries"""
     # Logger
+    # Metrics - Amazon CloudWatch EMF
+    # Metrics - Base provider
     build_and_run_test(
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/logger/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/cloudwatch_emf/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/provider/",
         ],
     )
