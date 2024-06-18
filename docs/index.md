@@ -295,7 +295,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
     Here's how you can use them:
 
-    - __Pip__: [**`pip install--pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+    - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
     - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}:clipboard:
     - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
 
