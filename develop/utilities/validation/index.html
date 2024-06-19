@@ -1103,6 +1103,15 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#validating-with-external-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating with external references
+    </span>
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1742,6 +1751,15 @@
   <a href="#built-in-jmespath-functions" class="md-nav__link">
     <span class="md-ellipsis">
       Built-in JMESPath functions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#validating-with-external-references" class="md-nav__link">
+    <span class="md-ellipsis">
+      Validating with external references
     </span>
   </a>
   
@@ -2602,7 +2620,7 @@
 </tr>
 <tr>
 <td><strong><code>CLOUDWATCH_LOGS</code></strong></td>
-<td><code>awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]</code></td>
+<td><code>awslogs.powertools_base64_gzip(data)</code> or <code>powertools_json(@).logEvents[*]</code></td>
 </tr>
 <tr>
 <td><strong><code>EVENTBRIDGE</code></strong></td>
@@ -2614,7 +2632,7 @@
 </tr>
 <tr>
 <td><strong><code>SNS</code></strong></td>
-<td><code>Records[0].Sns.Message                                       | powertools_json(@)</code></td>
+<td><code>Records[0].Sns.Message</code> or <code>powertools_json(@)</code></td>
 </tr>
 <tr>
 <td><strong><code>SQS</code></strong></td>
@@ -2788,6 +2806,149 @@
 <summary>Info</summary>
 <p>We use these for <a href="#built-in-envelopes">built-in envelopes</a> to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.</p>
 </details>
+<h3 id="validating-with-external-references">Validating with external references<a class="headerlink" href="#validating-with-external-references" title="Permanent link">&para;</a></h3>
+<p>JSON Schema <a href="https://json-schema.org/understanding-json-schema/structuring#dollarref">allows schemas to reference other schemas</a> using the <code>$ref</code> keyword with a URI value. By default, <code>fastjsonschema</code> will make a HTTP request to resolve this URI.</p>
+<p>You can use <code>handlers</code> parameter to have full control over how references schemas are fetched. This is useful when you might want to optimize caching, reducing HTTP calls, or fetching them from non-HTTP endpoints.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="custom_handlerspy" name="__tabbed_6" type="radio" /><input id="custom_handlers_parent_schema" name="__tabbed_6" type="radio" /><input id="custom_handlers_child_schema" name="__tabbed_6" type="radio" /><input id="custom_handlers_payloadjson" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="custom_handlerspy">custom_handlers.py</label><label for="custom_handlers_parent_schema">custom_handlers_parent_schema</label><label for="custom_handlers_child_schema">custom_handlers_child_schema</label><label for="custom_handlers_payloadjson">custom_handlers_payload.json</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="kn">from</span> <span class="nn">custom_handlers_schema</span> <span class="kn">import</span> <span class="n">CHILD_SCHEMA</span><span class="p">,</span> <span class="n">PARENT_SCHEMA</span>
+</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.typing</span> <span class="kn">import</span> <span class="n">LambdaContext</span>
+<span class="kn">from</span> <span class="nn">aws_lambda_powertools.utilities.validation</span> <span class="kn">import</span> <span class="n">validator</span>
+
+
+<span class="hll"><span class="c1"># Function to return the child schema</span>
+</span><span class="hll"><span class="k">def</span> <span class="nf">get_child_schema</span><span class="p">(</span><span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span>    <span class="k">return</span> <span class="n">CHILD_SCHEMA</span>
+
+<span class="hll">
+</span><span class="nd">@validator</span><span class="p">(</span><span class="n">inbound_schema</span><span class="o">=</span><span class="n">PARENT_SCHEMA</span><span class="p">,</span> <span class="n">inbound_handlers</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;https&quot;</span><span class="p">:</span> <span class="n">get_child_schema</span><span class="p">})</span>
+<span class="k">def</span> <span class="nf">lambda_handler</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">LambdaContext</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">event</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="hll"><span class="n">PARENT_SCHEMA</span> <span class="o">=</span> <span class="p">{</span>
+</span>    <span class="s2">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/draft-07/schema#&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;$id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/schemas/parent.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ParentSchema&quot;</span><span class="p">:</span> <span class="p">{</span>
+<span class="hll">            <span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="s2">&quot;https://SCHEMA&quot;</span><span class="p">,</span>
+</span>        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">CHILD_SCHEMA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/draft-07/schema#&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;$id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/schemas/child.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="n">PARENT_SCHEMA</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/draft-07/schema#&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;$id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/schemas/parent.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;ParentSchema&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="s2">&quot;https://SCHEMA&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="hll"><span class="n">CHILD_SCHEMA</span> <span class="o">=</span> <span class="p">{</span>
+</span>    <span class="s2">&quot;$schema&quot;</span><span class="p">:</span> <span class="s2">&quot;http://json-schema.org/draft-07/schema#&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;$id&quot;</span><span class="p">:</span> <span class="s2">&quot;https://example.com/schemas/child.json&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;project&quot;</span><span class="p">],</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span>
+<span class="hll"><span class="w">    </span><span class="nt">&quot;ParentSchema&quot;</span><span class="p">:</span>
+</span><span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;project&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;powertools&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+</div>
+</div>
+</div>
 
 
 
@@ -2808,7 +2969,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2023-08-04
+    2024-06-19
   </span>
 
     
