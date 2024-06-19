@@ -89,3 +89,16 @@ def test_with_xray_sdk_as_required_package(session: nox.Session):
         ],
         extras="tracer",
     )
+
+
+@nox.session()
+def test_with_boto3_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on boto3/botocore library"""
+    # Parameters
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/parameters/_boto3/",
+        ],
+        extras="aws-sdk",
+    )
