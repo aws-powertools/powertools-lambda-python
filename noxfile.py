@@ -52,11 +52,13 @@ def test_with_only_required_packages(session: nox.Session):
     # Logger
     # Metrics - Amazon CloudWatch EMF
     # Metrics - Base provider
+    # Middleware factory without tracer
     build_and_run_test(
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/required_dependencies/",
         ],
     )
 
@@ -78,10 +80,12 @@ def test_with_datadog_as_required_package(session: nox.Session):
 def test_with_xray_sdk_as_required_package(session: nox.Session):
     """Tests that depends on AWS XRAY SDK library"""
     # Tracer
+    # Middleware factory with tracer
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/tracing/aws_xray_sdk/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/tracing/_aws_xray_sdk/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/_aws_xray_sdk/",
         ],
         extras="tracer",
     )
