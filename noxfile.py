@@ -113,7 +113,7 @@ def test_with_fastjsonschema_as_required_package(session: nox.Session):
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/validation/_fastjsonschema/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/validator/_fastjsonschema/",
         ],
         extras="validation",
     )
