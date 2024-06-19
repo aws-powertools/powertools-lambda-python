@@ -119,3 +119,17 @@ def test_with_fastjsonschema_as_required_package(session: nox.Session):
         ],
         extras="validation",
     )
+
+
+@nox.session()
+def test_with_aws_encryption_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on aws_encryption_sdk library"""
+    # Data Masking
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/data_masking/_aws_encryption_sdk/",
+            f"{PREFIX_TESTS_UNIT}/data_masking/_aws_encryption_sdk/",
+        ],
+        extras="datamasking",
+    )
