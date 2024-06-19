@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import validator
 
 
-def get_child_schema(uri):
+def get_child_schema(uri: str):
     return CHILD_SCHEMA
 
 

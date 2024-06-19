@@ -52,9 +52,12 @@ def validator(
     outbound_handlers: Dict
         Custom methods to retrieve remote schemes, keyed off of URI scheme
     inbound_provider_options: Dict
-        Arguments that will be passed directly to the underlying validate call for the inbound event
+        Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
+        For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
     outbound_provider_options: Dict
-        Arguments that will be passed directly to the underlying validate call for the outbound event
+        Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
+        For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
+
 
     Example
     -------

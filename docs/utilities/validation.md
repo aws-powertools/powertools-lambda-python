@@ -202,7 +202,9 @@ You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_
 
 ### Validating with external references
 
-JSON schema [allows schemas to reference other schemas](https://json-schema.org/understanding-json-schema/structuring#dollarref) using the `$ref` keyword. The value of `$ref` is a URI reference, but you likely don't want to launch an HTTP request to resolve this URI. Instead, you can pass resolving functions through the `handlers` parameter:
+JSON Schema [allows schemas to reference other schemas](https://json-schema.org/understanding-json-schema/structuring#dollarref) using the `$ref` keyword with a URI value. By default, `fastjsonschema` will make a HTTP request to resolve this URI.
+
+You can use `handlers` parameter to have full control over how references schemas are fetched. This is useful when you might want to optimize caching, reducing HTTP calls, or fetching them from non-HTTP endpoints.
 
 === "custom_handlers.py"
 

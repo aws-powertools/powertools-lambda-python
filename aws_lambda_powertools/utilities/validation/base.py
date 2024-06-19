@@ -3,7 +3,6 @@ from typing import Dict, Optional, Union
 
 import fastjsonschema  # type: ignore
 
-from aws_lambda_powertools.shared.functions import get_field_or_empty_dict
 from aws_lambda_powertools.utilities.validation.exceptions import InvalidSchemaFormatError, SchemaValidationError
 
 logger = logging.getLogger(__name__)
@@ -29,7 +28,8 @@ def validate_data_against_schema(
     handlers: Dict
         Custom methods to retrieve remote schemes, keyed off of URI scheme
     provider_options: Dict
-        Arguments that will be passed directly to the underlying validate call
+        Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
+        For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
 
     Raises
     ------
@@ -39,9 +39,9 @@ def validate_data_against_schema(
         When JSON schema provided is invalid
     """
     try:
-        formats = get_field_or_empty_dict(formats)
-        handlers = get_field_or_empty_dict(handlers)
-        provider_options = get_field_or_empty_dict(provider_options)
+        formats = formats or {}
+        handlers = handlers or {}
+        provider_options = provider_options or {}
         fastjsonschema.validate(definition=schema, data=data, formats=formats, handlers=handlers, **provider_options)
     except (TypeError, AttributeError, fastjsonschema.JsonSchemaDefinitionException) as e:
         raise InvalidSchemaFormatError(f"Schema received: {schema}, Formats: {formats}. Error: {e}")
