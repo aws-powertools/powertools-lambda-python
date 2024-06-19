@@ -72,3 +72,16 @@ def test_with_datadog_as_required_package(session: nox.Session):
         ],
         extras="datadog",
     )
+
+
+@nox.session()
+def test_with_xray_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on AWS XRAY SDK library"""
+    # Tracer
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/tracing/aws_xray_sdk/",
+        ],
+        extras="tracer",
+    )
