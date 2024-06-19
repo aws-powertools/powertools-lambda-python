@@ -61,7 +61,7 @@ from tests.functional.idempotency.utils import (
 from tests.functional.utils import json_serialize, load_event
 
 TABLE_NAME = "TEST_TABLE"
-TESTS_MODULE_PREFIX = "test-func.functional.idempotency.test_idempotency"
+TESTS_MODULE_PREFIX = "test-func.tests.functional.idempotency.test_idempotency"
 
 
 def get_dataclasses_lib():
