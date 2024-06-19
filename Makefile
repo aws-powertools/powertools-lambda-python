@@ -32,6 +32,9 @@ test:
 	poetry run pytest -m "not perf" --ignore tests/e2e --cov=aws_lambda_powertools --cov-report=xml
 	poetry run pytest --cache-clear tests/performance
 
+test-dependencies:
+	poetry run nox --error-on-external-run --reuse-venv=yes --non-interactive
+
 test-pydanticv2:
 	poetry run pytest -m "not perf" --ignore tests/e2e
 
@@ -47,7 +50,7 @@ coverage-html:
 pre-commit:
 	pre-commit run --show-diff-on-failure
 
-pr: lint lint-docs mypy pre-commit test security-baseline complexity-baseline
+pr: lint lint-docs mypy pre-commit test test-dependencies security-baseline complexity-baseline
 
 build: pr
 	poetry build

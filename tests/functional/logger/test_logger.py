@@ -8,21 +8,19 @@ import re
 import secrets
 import string
 import sys
-import warnings
 from collections import namedtuple
 from datetime import datetime, timezone
 from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 import pytest
 
-from aws_lambda_powertools import Logger, Tracer, set_package_logger_handler
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.logging import correlation_paths
 from aws_lambda_powertools.logging.exceptions import InvalidLoggerSamplingRateError
 from aws_lambda_powertools.logging.formatter import (
     BasePowertoolsFormatter,
     LambdaPowertoolsFormatter,
 )
-from aws_lambda_powertools.logging.logger import set_package_logger
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.utilities.data_classes import S3Event, event_source
 
@@ -213,36 +211,6 @@ def test_inject_lambda_cold_start(lambda_context, stdout, service_name):
     first_log, second_log = capture_multiple_logging_statements_output(stdout)
     assert first_log["cold_start"] is True
     assert second_log["cold_start"] is False
-
-
-def test_package_logger_stream(stdout):
-    # GIVEN package logger "aws_lambda_powertools" is explicitly set with no params
-    set_package_logger(stream=stdout)
-
-    # WHEN Tracer is initialized in disabled mode
-    Tracer(disabled=True)
-
-    # THEN Tracer debug log statement should be logged
-    output = stdout.getvalue()
-    logger = logging.getLogger("aws_lambda_powertools")
-    assert "Tracing has been disabled" in output
-    assert logger.level == logging.DEBUG
-
-
-def test_package_logger_format(capsys):
-    # GIVEN package logger "aws_lambda_powertools" is explicitly
-    # with a custom formatter
-    formatter = logging.Formatter("message=%(message)s")
-    set_package_logger(formatter=formatter)
-
-    # WHEN Tracer is initialized in disabled mode
-    Tracer(disabled=True)
-
-    # THEN Tracer debug log statement should be logged using `message=` format
-    output = capsys.readouterr().out
-    logger = logging.getLogger("aws_lambda_powertools")
-    assert "message=" in output
-    assert logger.level == logging.DEBUG
 
 
 def test_logger_append_duplicated(stdout, service_name):
@@ -969,36 +937,6 @@ def test_inject_lambda_context_with_additional_args(lambda_context, stdout, serv
     log = capture_logging_output(stdout)
 
     assert log["message"] == "Hello World!"
-
-
-def test_set_package_logger_handler_with_powertools_debug_env_var(stdout, monkeypatch: pytest.MonkeyPatch):
-    # GIVEN POWERTOOLS_DEBUG is set
-    monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, "1")
-    logger = logging.getLogger("aws_lambda_powertools")
-
-    # WHEN set_package_logger is used at initialization
-    # and any Powertools for AWS Lambda (Python) operation is used (e.g., Tracer)
-    set_package_logger_handler(stream=stdout)
-    Tracer(disabled=True)
-
-    # THEN Tracer debug log statement should be logged
-    output = stdout.getvalue()
-    assert "Tracing has been disabled" in output
-    assert logger.level == logging.DEBUG
-
-
-def test_powertools_debug_env_var_warning(monkeypatch: pytest.MonkeyPatch):
-    # GIVEN POWERTOOLS_DEBUG is set
-    monkeypatch.setenv(constants.POWERTOOLS_DEBUG_ENV, "1")
-    warning_message = "POWERTOOLS_DEBUG environment variable is enabled. Setting logging level to DEBUG."
-
-    # WHEN set_package_logger is used at initialization
-    # THEN a warning should be emitted
-    with warnings.catch_warnings(record=True) as w:
-        warnings.simplefilter("default")
-        set_package_logger_handler()
-        assert len(w) == 1
-        assert str(w[0].message) == warning_message
 
 
 def test_logger_log_uncaught_exceptions(service_name, stdout):

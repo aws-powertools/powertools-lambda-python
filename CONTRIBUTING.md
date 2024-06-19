@@ -67,7 +67,7 @@ timeline
     Pre-Pull Request <br> (make pr)     : Code linting
                                         : Docs linting
                                         : Static typing analysis
-                                        : Tests (unit|functional|perf)
+                                        : Tests (unit|functional|perf|dependencies)
                                         : Security baseline
                                         : Complexity baseline
                                         : +pre-commit checks
