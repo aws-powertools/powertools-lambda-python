@@ -55,9 +55,8 @@ def test_with_only_required_packages(session: nox.Session):
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/logger/",
-            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/cloudwatch_emf/",
-            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/provider/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
         ],
     )
 
