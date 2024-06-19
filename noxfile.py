@@ -50,9 +50,25 @@ def build_and_run_test(session: nox.Session, folders: List, extras: Optional[str
 def test_with_only_required_packages(session: nox.Session):
     """Tests that only depends for required libraries"""
     # Logger
+    # Metrics - Amazon CloudWatch EMF
+    # Metrics - Base provider
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/logger/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
         ],
+    )
+
+
+@nox.session()
+def test_with_datadog_as_required_package(session: nox.Session):
+    """Tests that depends on Datadog library"""
+    # Metrics - Datadog
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/datadog/",
+        ],
+        extras="datadog",
     )
