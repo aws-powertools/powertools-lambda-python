@@ -1,6 +1,6 @@
 from typing import Any, List, Optional
 
-from ...exceptions import InvalidEnvelopeExpressionError
+from aws_lambda_powertools.exceptions import InvalidEnvelopeExpressionError
 
 
 class SchemaValidationError(Exception):

@@ -83,6 +83,10 @@ def test_validate_invalid_custom_format(
         )
 
 
+def test_validate_custom_handlers(schema_refs, schema_ref_handlers, parent_ref_event):
+    validate(event=parent_ref_event, schema=schema_refs["ParentSchema"], handlers=schema_ref_handlers)
+
+
 def test_validate_invalid_envelope_expression(schema, wrapped_event):
     with pytest.raises(exceptions.InvalidEnvelopeExpressionError):
         validate(event=wrapped_event, schema=schema, envelope=True)
