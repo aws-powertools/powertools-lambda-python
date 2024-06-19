@@ -84,7 +84,7 @@ def test_with_xray_sdk_as_required_package(session: nox.Session):
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/tracing/_aws_xray_sdk/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/tracer/_aws_xray_sdk/",
             f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/_aws_xray_sdk/",
         ],
         extras="tracer",
