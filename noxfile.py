@@ -104,3 +104,16 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
         ],
         extras="aws-sdk",
     )
+
+
+@nox.session()
+def test_with_fastjsonschema_as_required_package(session: nox.Session):
+    """Tests that depends on boto3/botocore library"""
+    # Validation
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/validator/_fastjsonschema/",
+        ],
+        extras="validation",
+    )
