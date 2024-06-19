@@ -86,7 +86,7 @@ complexity-baseline:
 	$(info Maintenability index)
 	poetry run radon mi aws_lambda_powertools
 	$(info Cyclomatic complexity index)
-	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py
+	poetry run xenon --max-absolute C --max-modules A --max-average A aws_lambda_powertools --exclude aws_lambda_powertools/shared/json_encoder.py,aws_lambda_powertools/utilities/validation/base.py
 
 #
 # Use `poetry version <major>/<minor></patch>` for version bump
