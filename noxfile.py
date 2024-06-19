@@ -50,9 +50,70 @@ def build_and_run_test(session: nox.Session, folders: List, extras: Optional[str
 def test_with_only_required_packages(session: nox.Session):
     """Tests that only depends for required libraries"""
     # Logger
+    # Metrics - Amazon CloudWatch EMF
+    # Metrics - Base provider
+    # Middleware factory without tracer
     build_and_run_test(
         session,
         folders=[
-            f"{PREFIX_TESTS_FUNCTIONAL}/logger/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/required_dependencies/",
         ],
+    )
+
+
+@nox.session()
+def test_with_datadog_as_required_package(session: nox.Session):
+    """Tests that depends on Datadog library"""
+    # Metrics - Datadog
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/metrics/datadog/",
+        ],
+        extras="datadog",
+    )
+
+
+@nox.session()
+def test_with_xray_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on AWS XRAY SDK library"""
+    # Tracer
+    # Middleware factory with tracer
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/tracer/_aws_xray_sdk/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/_aws_xray_sdk/",
+        ],
+        extras="tracer",
+    )
+
+
+@nox.session()
+def test_with_boto3_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on boto3/botocore library"""
+    # Parameters
+    # Feature Flags
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/parameters/_boto3/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/feature_flags/_boto3/",
+        ],
+        extras="aws-sdk",
+    )
+
+
+@nox.session()
+def test_with_fastjsonschema_as_required_package(session: nox.Session):
+    """Tests that depends on boto3/botocore library"""
+    # Validation
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/validator/_fastjsonschema/",
+        ],
+        extras="validation",
     )
