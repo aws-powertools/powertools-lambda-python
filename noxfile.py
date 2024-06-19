@@ -53,12 +53,14 @@ def test_with_only_required_packages(session: nox.Session):
     # Metrics - Amazon CloudWatch EMF
     # Metrics - Base provider
     # Middleware factory without tracer
+    # Typing
     build_and_run_test(
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/logger/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/typing/required_dependencies/",
         ],
     )
 
