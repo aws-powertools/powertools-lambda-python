@@ -110,6 +110,7 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/feature_flags/_boto3/",
             f"{PREFIX_TESTS_UNIT}/data_classes/_boto3/",
             f"{PREFIX_TESTS_FUNCTIONAL}/streaming/_boto3/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_boto3/",
         ],
         extras="aws-sdk",
     )
@@ -157,4 +158,38 @@ def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
             f"{PREFIX_TESTS_UNIT}/parser/_pydantic/",
         ],
+    )
+
+
+@nox.session()
+@nox.parametrize("pydantic", ["1.10", "2.0"])
+def test_with_boto3_and_pydantic_required_package(session: nox.Session, pydantic: str):
+    """Tests that only depends for Boto3 + Pydantic library v1 and v2"""
+    # Idempotency with custom serializer
+
+    session.install(f"pydantic>={pydantic}")
+
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_pydantic/",
+        ],
+        extras="aws-sdk",
+    )
+
+
+@nox.session()
+def test_with_redis_and_boto3_sdk_as_required_package(session: nox.Session):
+    """Tests that depends on Redis library"""
+    # Idempotency - Redis backend
+
+    # Our Redis tests requires multiprocess library to simulate Race Condition
+    session.run("pip", "install", "multiprocess")
+
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/idempotency/_redis/",
+        ],
+        extras="redis,aws-sdk",
     )
