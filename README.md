@@ -53,6 +53,7 @@ Knowing which companies are using this library is important to help prioritize t
 
 The following companies, among others, use Powertools:
 
+* [Brsk](https://www.brsk.co.uk/)
 * [Capital One](https://www.capitalone.com/)
 * [CPQi (Exadel Financial Services)](https://cpqi.com/)
 * [CloudZero](https://www.cloudzero.com/)
