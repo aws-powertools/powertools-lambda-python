@@ -374,7 +374,7 @@ There are many ways you can help us gain future investments to improve everyone'
 
     Add your company name and logo on our [landing page](https://powertools.aws.dev).
 
-    [:octicons-arrow-right-24: GitHub Issue template]((https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"})
+    [:octicons-arrow-right-24: GitHub Issue template](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=customer-reference&template=support_powertools.yml&title=%5BSupport+Lambda+Powertools%5D%3A+%3Cyour+organization+name%3E){target="_blank"}
 
 - :mega:{ .lg .middle } __Share your work__
 
