@@ -291,7 +291,7 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Alpha releases"
 
-    Every morning _(~8am UTC)_, we publish a `prerelease` to PyPi to accelerate customer feedback on **unstable** releases / bugfixes until they become production ready.
+    Every morning during business days _(~8am UTC)_, we publish a `prerelease` to PyPi to accelerate customer feedback on **unstable** releases / bugfixes until they become production ready.
 
     Here's how you can use them:
 
