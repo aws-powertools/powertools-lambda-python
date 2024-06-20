@@ -1518,6 +1518,15 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#releasing-an-alpha-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Releasing an alpha release
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#run-end-to-end-tests" class="md-nav__link">
     <span class="md-ellipsis">
       Run end to end tests
@@ -2054,6 +2063,15 @@
         
       </ul>
     </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#releasing-an-alpha-release" class="md-nav__link">
+    <span class="md-ellipsis">
+      Releasing an alpha release
+    </span>
+  </a>
   
 </li>
         
@@ -2628,8 +2646,8 @@
 <h3 id="releasing-a-new-version">Releasing a new version<a class="headerlink" href="#releasing-a-new-version" title="Permanent link">&para;</a></h3>
 <p>Firstly, make sure the commit history in the <code>develop</code> branch <strong>(1)</strong> it's up to date, <strong>(2)</strong> commit messages are semantic, and <strong>(3)</strong> commit messages have their respective area, for example <code>feat(logger): &lt;change&gt;</code>, <code>chore(ci): ...</code>).</p>
 <p><strong>Looks good, what's next?</strong></p>
-<p>Kickoff the <code>Release</code> workflow with the intended version - this might take around 25m-30m to complete.</p>
-<p>Once complete, you can start drafting the release notes to let customers know <strong>what changed and what's in it for them (a.k.a why they should care)</strong>. We have guidelines in the release notes section so you know what good looks like.</p>
+<p>Kickoff the <a href="https://github.com/aws-powertools/powertools-lambda-python/blob/6db9079d21698b72f5d36d72c993c1aad7276db6/.github/workflows/release.yml#L3"><code>Release</code> workflow</a> with the intended version - this might take around 25m-30m to complete.</p>
+<p>Once complete, you can start drafting the release notes to let customers know <strong>what changed and what's in it for them (a.k.a why they should care)</strong>. We have guidelines in the <a href="#drafting-release-notes">release notes section</a> so you know what good looks like.</p>
 <blockquote>
 <p><strong>NOTE</strong>: Documentation might take a few minutes to reflect the latest version due to caching and CDN invalidations.</p>
 </blockquote>
@@ -2697,28 +2715,48 @@ section Post-release
 
 Release complete : milestone, m6, 10:31,2m</code></pre>
 <h4 id="drafting-release-notes">Drafting release notes<a class="headerlink" href="#drafting-release-notes" title="Permanent link">&para;</a></h4>
+<div class="admonition info">
+<p class="admonition-title">Make sure the release workflow completed before you edit release notes.</p>
+</div>
 <p>Visit the <a href="https://github.com/aws-powertools/powertools-lambda-python/releases">Releases page</a> and choose the edit pencil button.</p>
 <p>Make sure the <code>tag</code> field reflects the new version you're releasing, the target branch field is set to <code>develop</code>, and <code>release title</code> matches your tag e.g., <code>v1.26.0</code>.</p>
 <p>You'll notice we group all changes based on their <a href="#labels">labels</a> like <code>feature</code>, <code>bug</code>, <code>documentation</code>, etc.</p>
-<p><strong>I spotted a typo or incorrect grouping - how do I fix it?</strong></p>
-<p>Edit the respective PR title and update their <a href="#labels">labels</a>. Then run the <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml">Release Drafter workflow</a> to update the Draft release.</p>
-<blockquote>
-<p><strong>NOTE</strong>: This won't change the CHANGELOG as the merge commit is immutable. Don't worry about it. We'd only rewrite git history only if this can lead to confusion and we'd pair with another maintainer.</p>
-</blockquote>
-<p><strong>All looking good, what's next?</strong></p>
-<p>The best part comes now. Replace the placeholder <code>[Human readable summary of changes]</code> with what you'd like to communicate to customers what this release is all about. Rule of thumb: always put yourself in the customers shoes.</p>
+<div class="admonition question inline end">
+<p class="admonition-title">Spotted a typo?</p>
+<p>Edit the respective PR title/labels and run the <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml">Release Drafter workflow</a>.</p>
+</div>
+<div class="admonition question">
+<p class="admonition-title">All good, what's next?</p>
+</div>
+<p>The best part comes now!</p>
+<p>Replace the placeholder <code>[Human readable summary of changes]</code> with what you'd like to communicate to customers what this release is all about.</p>
+<div class="admonition tip inline end">
+<p class="admonition-title">Always put yourself in the customers shoes. Most read the first sentence only to know whether this is for them.</p>
+</div>
 <p>These are some questions to keep in mind when drafting your first or future release notes:</p>
 <ul>
-<li>Can customers understand at a high level what changed in this release?</li>
-<li>Is there a link to the documentation where they can read more about each main change?</li>
-<li>Are there any graphics or <a href="https://carbon.now.sh/">code snippets</a> that can enhance readability?</li>
-<li>Are we calling out any key contributor(s) to this release?<ul>
-<li>All contributors are automatically credited, use this as an exceptional case to feature them</li>
+<li><strong>Can customers briefly understand the main changes in less than 30s?</strong><ul>
+<li><em>tip: first paragraph is punchy and optimizes for dependabot-like notifications.</em></li>
+</ul>
+</li>
+<li><strong>Are we calling out key contributor(s) to this release?</strong></li>
+<li><strong>Is it clear what each change enables/unlocks and before?</strong><ul>
+<li><em>tip: use present and active voice; lead with the answer.</em></li>
+</ul>
+</li>
+<li><strong>Does it include a link to the documentation for each main change?</strong><ul>
+<li><em>tip: release explains what a change unblocks/enables (before/after), docs go in details</em></li>
+</ul>
+</li>
+<li><strong>Is code snippet better in text or <a href="https://carbon.now.sh">graphic</a>?</strong></li>
+<li><strong>Does code snippet focus on the change only?</strong><ul>
+<li><em>tip: release snippets highlight functionality, no need to be functional (that's docs)</em></li>
 </ul>
 </li>
 </ul>
 <p>Once you're happy, hit <code>Publish release</code> 🎉🎉🎉.</p>
-<p>This will kick off the <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release.yml">Publishing workflow</a> and within a few minutes you should see the latest version in PyPi, and all issues labeled as <code>pending-release</code> will be closed and notified.</p>
+<h3 id="releasing-an-alpha-release">Releasing an alpha release<a class="headerlink" href="#releasing-an-alpha-release" title="Permanent link">&para;</a></h3>
+<p>We publish alpha releases <em>(<code>prerelease</code>)</em> every morning during business days (~8am UTC). You can also manually trigger <code>pre-release</code> workflow when needed.</p>
 <h3 id="run-end-to-end-tests">Run end to end tests<a class="headerlink" href="#run-end-to-end-tests" title="Permanent link">&para;</a></h3>
 <p>E2E tests are run on every push to <code>develop</code> or manually via <a href="https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml">run-e2e-tests workflow</a>.</p>
 <p>To run locally, you need <a href="https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_prerequisites">AWS CDK CLI</a> and an <a href="https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping.html">account bootstrapped</a> (<code>cdk bootstrap</code>). With a default AWS CLI profile configured, or <code>AWS_PROFILE</code> environment variable set, run <code>make e2e tests</code>.</p>
@@ -3164,7 +3202,7 @@ drwxr-xr-x<span class="w">  </span><span class="m">22</span><span class="w"> </s
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    2023-08-04
+    2024-06-20
   </span>
 
     

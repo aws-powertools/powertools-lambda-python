@@ -1536,30 +1536,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#lambda-layer" class="md-nav__link">
-    <span class="md-ellipsis">
-      Lambda Layer
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Lambda Layer">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#sar" class="md-nav__link">
-    <span class="md-ellipsis">
-      SAR
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1706,7 +1682,7 @@
 </div>
 <h2 id="install">Install<a class="headerlink" href="#install" title="Permanent link">&para;</a></h2>
 <p>You can install Powertools for AWS Lambda (Python) using your favorite dependency management, or Lambda Layers:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="pip" name="__tabbed_1" type="radio" /><input id="lambda-layer_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="pip">Pip</label><label for="lambda-layer_1">Lambda Layer</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:4"><input checked="checked" id="pip" name="__tabbed_1" type="radio" /><input id="lambda-layer" name="__tabbed_1" type="radio" /><input id="serverless-application-repository-sar" name="__tabbed_1" type="radio" /><input id="alpha-releases" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="pip">Pip</label><label for="lambda-layer">Lambda Layer</label><label for="serverless-application-repository-sar">Serverless Application Repository (SAR)</label><label for="alpha-releases">Alpha releases</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Most features use Python standard library and the AWS SDK <em>(boto3)</em> that are available in the AWS Lambda runtime.</p>
@@ -1760,18 +1736,366 @@
 </table>
 </div>
 <div class="tabbed-block">
-<p>You can add our layer both in the <a href="https://eu-west-1.console.aws.amazon.com/lambda/home#/add/layer" target="_blank">AWS Lambda Console <em>(under <code>Layers</code>)</em></a>, or via your favorite infrastructure as code framework with the ARN value.</p>
-<p>For the latter, make sure to replace <code>{region}</code> with your AWS region, e.g., <code>eu-west-1</code>.</p>
-<ul>
-<li><u>x86 architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-<li><u>ARM architecture</u>: <strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-</ul>
-<details class="note" open="open">
-<summary>Code snippets for popular infrastructure as code frameworks</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="x86_64" name="__tabbed_2" type="radio" /><input id="arm64" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="x86_64">x86_64</label><label for="arm64">arm64</label></div>
+<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize <a href="#install">all dependencies</a>, and remove duplicate dependencies <a href="https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36" target="_blank">already available in the Lambda runtime</a> to achieve the most optimal size.</p>
+<table>
+<thead>
+<tr>
+<th>Architecture</th>
+<th>Layer ARN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x86</td>
+<td><strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>ARM</td>
+<td><strong class="copyMe">arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+</tbody>
+</table>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:3"><input checked="checked" id="aws-console" name="__tabbed_2" type="radio" /><input id="infrastructure-as-code-iac" name="__tabbed_2" type="radio" /><input id="inspect-lambda-layer-contents" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="aws-console">AWS Console</label><label for="infrastructure-as-code-iac">Infrastructure as Code (IaC)</label><label for="inspect-lambda-layer-contents">Inspect Lambda Layer contents</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="3:6"><input checked="checked" id="sam" name="__tabbed_3" type="radio" /><input id="serverless-framework" name="__tabbed_3" type="radio" /><input id="cdk" name="__tabbed_3" type="radio" /><input id="terraform" name="__tabbed_3" type="radio" /><input id="pulumi" name="__tabbed_3" type="radio" /><input id="amplify" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="sam">SAM</label><label for="serverless-framework">Serverless framework</label><label for="cdk">CDK</label><label for="terraform">Terraform</label><label for="pulumi">Pulumi</label><label for="amplify">Amplify</label></div>
+<p>You can add our layer using the <a href="https://console.aws.amazon.com/lambda/home#/add/layer" target="_blank">AWS Lambda Console <em>(direct link)</em></a>:</p>
+<ul>
+<li>Under Layers, choose <code>Specify an ARN</code></li>
+<li>Click to copy the correct ARN value based on your AWS Lambda function architecture and region</li>
+</ul>
+<details class="info">
+<summary>Click to expand and copy any regional Lambda Layer ARN</summary>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="x86_64" name="__tabbed_3" type="radio" /><input id="arm64" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="x86_64">x86_64</label><label for="arm64">arm64</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Region name</th>
+<th>Region code</th>
+<th>Layer ARN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Africa (Cape Town)</td>
+<td><strong><code>af-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Hong Kong)</td>
+<td><strong><code>ap-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Tokyo)</td>
+<td><strong><code>ap-northeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Seoul)</td>
+<td><strong><code>ap-northeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Osaka)</td>
+<td><strong><code>ap-northeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Mumbai)</td>
+<td><strong><code>ap-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Hyderabad)</td>
+<td><strong><code>ap-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Singapore)</td>
+<td><strong><code>ap-southeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Sydney)</td>
+<td><strong><code>ap-southeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Jakarta)</td>
+<td><strong><code>ap-southeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Melbourne)</td>
+<td><strong><code>ap-southeast-4</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Canada (Central)</td>
+<td><strong><code>ca-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Canada (West)</td>
+<td><strong><code>ca-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Frankfurt)</td>
+<td><strong><code>eu-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Zurich)</td>
+<td><strong><code>eu-central-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Stockholm)</td>
+<td><strong><code>eu-north-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Milan)</td>
+<td><strong><code>eu-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Spain)</td>
+<td><strong><code>eu-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Ireland)</td>
+<td><strong><code>eu-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (London)</td>
+<td><strong><code>eu-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Paris)</td>
+<td><strong><code>eu-west-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (Israel)</td>
+<td><strong><code>il-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (UAE)</td>
+<td><strong><code>me-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (Bahrain)</td>
+<td><strong><code>me-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>South America (São Paulo)</td>
+<td><strong><code>sa-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US East (N. Virginia)</td>
+<td><strong><code>us-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US East (Ohio)</td>
+<td><strong><code>us-east-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US West (N. California)</td>
+<td><strong><code>us-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US West (Oregon)</td>
+<td><strong><code>us-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="tabbed-block">
+<table>
+<thead>
+<tr>
+<th>Region name</th>
+<th>Region code</th>
+<th>Layer ARN</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Africa (Cape Town)</td>
+<td><strong><code>af-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Hong Kong)</td>
+<td><strong><code>ap-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Tokyo)</td>
+<td><strong><code>ap-northeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Seoul)</td>
+<td><strong><code>ap-northeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Osaka)</td>
+<td><strong><code>ap-northeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Mumbai)</td>
+<td><strong><code>ap-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Hyderabad)</td>
+<td><strong><code>ap-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Singapore)</td>
+<td><strong><code>ap-southeast-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Sydney)</td>
+<td><strong><code>ap-southeast-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Jakarta)</td>
+<td><strong><code>ap-southeast-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Asia Pacific (Melbourne)</td>
+<td><strong><code>ap-southeast-4</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Canada (Central)</td>
+<td><strong><code>ca-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Canada (West)</td>
+<td><strong><code>ca-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Frankfurt)</td>
+<td><strong><code>eu-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Zurich)</td>
+<td><strong><code>eu-central-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Stockholm)</td>
+<td><strong><code>eu-north-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Milan)</td>
+<td><strong><code>eu-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Spain)</td>
+<td><strong><code>eu-south-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Ireland)</td>
+<td><strong><code>eu-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (London)</td>
+<td><strong><code>eu-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Europe (Paris)</td>
+<td><strong><code>eu-west-3</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (Israel)</td>
+<td><strong><code>il-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (UAE)</td>
+<td><strong><code>me-central-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>Middle East (Bahrain)</td>
+<td><strong><code>me-south-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>South America (São Paulo)</td>
+<td><strong><code>sa-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US East (N. Virginia)</td>
+<td><strong><code>us-east-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US East (Ohio)</td>
+<td><strong><code>us-east-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US West (N. California)</td>
+<td><strong><code>us-west-1</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+<tr>
+<td>US West (Oregon)</td>
+<td><strong><code>us-west-2</code></strong></td>
+<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</details>
+</div>
+<div class="tabbed-block">
+<blockquote>
+<p>Are we missing a framework? please create <a href="https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&amp;labels=documentation%2Ctriage&amp;projects=&amp;template=documentation_improvements.yml&amp;title=Docs%3A+TITLE" rel="nofollow" target="_blank">a documentation request</a>.</p>
+</blockquote>
+<p>Thanks to the community, we've covered most popular frameworks on how to add a Lambda Layer to an existing function.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="x86_65" name="__tabbed_4" type="radio" /><input id="arm64_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="x86_65">x86_64</label><label for="arm64_1">arm64</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="tabbed-set tabbed-alternate" data-tabs="5:6"><input checked="checked" id="sam" name="__tabbed_5" type="radio" /><input id="serverless-framework" name="__tabbed_5" type="radio" /><input id="cdk" name="__tabbed_5" type="radio" /><input id="terraform" name="__tabbed_5" type="radio" /><input id="pulumi" name="__tabbed_5" type="radio" /><input id="amplify" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="sam">SAM</label><label for="serverless-framework">Serverless framework</label><label for="cdk">CDK</label><label for="terraform">Terraform</label><label for="pulumi">Pulumi</label><label for="amplify">Amplify</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2071,7 +2395,7 @@ General<span class="w"> </span>information
 </div>
 </div>
 <div class="tabbed-block">
-<div class="tabbed-set tabbed-alternate" data-tabs="4:6"><input checked="checked" id="sam_1" name="__tabbed_4" type="radio" /><input id="serverless-framework_1" name="__tabbed_4" type="radio" /><input id="cdk_1" name="__tabbed_4" type="radio" /><input id="terraform_1" name="__tabbed_4" type="radio" /><input id="pulumi_1" name="__tabbed_4" type="radio" /><input id="amplify_1" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="sam_1">SAM</label><label for="serverless-framework_1">Serverless framework</label><label for="cdk_1">CDK</label><label for="terraform_1">Terraform</label><label for="pulumi_1">Pulumi</label><label for="amplify_1">Amplify</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:6"><input checked="checked" id="sam_1" name="__tabbed_6" type="radio" /><input id="serverless-framework_1" name="__tabbed_6" type="radio" /><input id="cdk_1" name="__tabbed_6" type="radio" /><input id="terraform_1" name="__tabbed_6" type="radio" /><input id="pulumi_1" name="__tabbed_6" type="radio" /><input id="amplify_1" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="sam_1">SAM</label><label for="serverless-framework_1">Serverless framework</label><label for="cdk_1">CDK</label><label for="terraform_1">Terraform</label><label for="pulumi_1">Pulumi</label><label for="amplify_1">Amplify</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2378,315 +2702,159 @@ General<span class="w"> </span>information
 </div>
 </div>
 </div>
-</details>
-</div>
-</div>
-</div>
-<h3 id="local-development">Local development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
-<div class="admonition info">
-<p class="admonition-title">Using Lambda Layer? Simply add <a class="copyMe" href="#"><strong><code>"aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /> as a development dependency.</p>
-</div>
-<p>Powertools for AWS Lambda (Python) relies on the <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">AWS SDK bundled in the Lambda runtime</a>. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency to support IDE auto-completion and to run your tests locally:</p>
-<ul>
-<li><strong>Pip</strong>: <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[aws-sdk]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-<li><strong>Poetry</strong>: <a class="copyMe" href="#"><strong><code>poetry add "aws-lambda-powertools[aws-sdk]" --group dev</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-<li><strong>Pdm</strong>: <a class="copyMe" href="#"><strong><code>pdm add -dG "aws-lambda-powertools[aws-sdk]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
-</ul>
-<p><strong>A word about dependency resolution</strong></p>
-<p>In this context, <code>[aws-sdk]</code> is an alias to the <code>boto3</code> package. Due to dependency resolution, it'll either install:</p>
-<ul>
-<li><strong>(A)</strong> the SDK version available in <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">Lambda runtime</a></li>
-<li><strong>(B)</strong> a more up-to-date version if another package you use also depends on <code>boto3</code>, for example <a href="core/tracer/" target="_blank">Powertools for AWS Lambda (Python) Tracer</a></li>
-</ul>
-<h3 id="lambda-layer">Lambda Layer<a class="headerlink" href="#lambda-layer" title="Permanent link">&para;</a></h3>
-<p><a href="https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html" target="_blank">Lambda Layer</a> is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize <a href="#install">all dependencies</a>, and remove duplicate dependencies <a href="https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36" target="_blank">already available in the Lambda runtime</a> to achieve the most optimal size.</p>
-<details class="note">
-<summary>Click to expand and copy any regional Lambda Layer ARN</summary>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="x86_65" name="__tabbed_5" type="radio" /><input id="arm64_1" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="x86_65">x86_64</label><label for="arm64_1">arm64</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Region</th>
-<th>Layer ARN</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><code>af-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-south-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-4</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ca-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ca-west-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-central-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-north-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-south-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>il-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>me-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>me-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>sa-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-east-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-west-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-west-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-</tbody>
-</table>
 </div>
 <div class="tabbed-block">
-<table>
-<thead>
-<tr>
-<th>Region</th>
-<th>Layer ARN</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong><code>af-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-northeast-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-south-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ap-southeast-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>ca-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-central-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-north-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-south-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>eu-west-3</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>il-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>me-central-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>me-south-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>sa-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-east-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-east-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-west-1</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-<tr>
-<td><strong><code>us-west-2</code></strong></td>
-<td><strong class="copyMe">arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</details>
-<p><strong>Want to inspect the contents of the Layer?</strong></p>
-<p>The pre-signed URL to download this Lambda Layer will be within <code>Location</code> key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.</p>
+<p>You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">AWS CLI command to download Lambda Layer content</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>aws<span class="w"> </span>lambda<span class="w"> </span>get-layer-version-by-arn<span class="w"> </span>--arn<span class="w"> </span>arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73<span class="w"> </span>--region<span class="w"> </span>eu-west-1
 </code></pre></div></td></tr></table></div>
-<h4 id="sar">SAR<a class="headerlink" href="#sar" title="Permanent link">&para;</a></h4>
-<p>Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.</p>
-<p>Compared with the <a href="#lambda-layer">public Layer ARN</a> option, SAR allows you to choose a semantic version and deploys a Layer in your target account.</p>
+<p>You'll find the pre-signed URL under <code>Location</code> key as part of the CLI command output.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="tabbed-block">
+<p>We provide a SAR App that deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.</p>
+<p>Compared with the <a href="#lambda-layer">public Layer ARN</a> option, the advantage is being able to use a semantic version.</p>
 <table>
 <thead>
 <tr>
 <th>App</th>
+<th></th>
+<th></th>
 <th>ARN</th>
-<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer" target="_blank"><strong>aws-lambda-powertools-python-layer</strong></a></td>
-<td><a class="copyMe" href="#">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-<td>Contains all extra dependencies (e.g: pydantic).</td>
+<td></td>
+<td></td>
+<td><strong class="copyMe">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 <tr>
 <td><a href="https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64" target="_blank"><strong>aws-lambda-powertools-python-layer-arm64</strong></a></td>
-<td><a class="copyMe" href="#">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64</a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
-<td>Contains all extra dependencies (e.g: pydantic). For arm64 functions.</td>
+<td></td>
+<td></td>
+<td><strong class="copyMe">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64</strong><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></td>
 </tr>
 </tbody>
 </table>
-<details class="note">
-<summary>Click to expand and copy SAR code snippets for popular frameworks</summary>
-<p>You can create a shared Lambda Layers stack and make this along with other account level layers stack.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:4"><input checked="checked" id="sam_2" name="__tabbed_6" type="radio" /><input id="serverless-framework_2" name="__tabbed_6" type="radio" /><input id="cdk_2" name="__tabbed_6" type="radio" /><input id="terraform_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="sam_2">SAM</label><label for="serverless-framework_2">Serverless framework</label><label for="cdk_2">CDK</label><label for="terraform_2">Terraform</label></div>
+<details class="question">
+<summary>Don't have enough permissions? Expand for a least-privilege IAM policy example</summary>
+<p>Credits to <a href="https://github.com/mwarkentin" rel="nofollow" target="_blank">mwarkentin</a> for providing the scoped down IAM permissions.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Least-privileged IAM permissions SAM example</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="w">  </span><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
+<span class="w">  </span><span class="nt">Resources</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">PowertoolsLayerIamRole</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS::IAM::Role&quot;</span>
+<span class="w">        </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">AssumeRolePolicyDocument</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2012-10-17&quot;</span>
+<span class="w">                </span><span class="nt">Statement</span><span class="p">:</span>
+<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Allow&quot;</span>
+<span class="w">                      </span><span class="nt">Principal</span><span class="p">:</span>
+<span class="w">                        </span><span class="nt">Service</span><span class="p">:</span>
+<span class="w">                          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;cloudformation.amazonaws.com&quot;</span>
+<span class="w">                        </span><span class="nt">Action</span><span class="p">:</span>
+<span class="w">                          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;sts:AssumeRole&quot;</span>
+<span class="w">                </span><span class="nt">Path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
+
+<span class="w">      </span><span class="nt">PowertoolsLayerIamPolicy</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS::IAM::Policy&quot;</span>
+<span class="w">        </span><span class="nt">Properties</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">PolicyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PowertoolsLambdaLayerPolicy</span>
+<span class="hll"><span class="w">            </span><span class="nt">PolicyDocument</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                </span><span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2012-10-17&quot;</span>
+</span><span class="hll"><span class="w">                </span><span class="nt">Statement</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CloudFormationTransform</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cloudformation:CreateChangeSet</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31</span>
+</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GetCfnTemplate</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">serverlessrepo:CreateCloudFormationTemplate</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">serverlessrepo:GetCloudFormationTemplate</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="c1"># this is arn of the Powertools for AWS Lambda (Python) SAR app</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
+</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S3AccessLayer</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3:GetObject</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="c1"># AWS publishes to an external S3 bucket locked down to your account ID</span>
+</span><span class="hll"><span class="w">                        </span><span class="c1"># The below example is us publishing Powertools for AWS Lambda (Python)</span>
+</span><span class="hll"><span class="w">                        </span><span class="c1"># Bucket: awsserverlessrepo-changesets-plntc6bfnfj</span>
+</span><span class="hll"><span class="w">                        </span><span class="c1"># Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:s3:::awsserverlessrepo-changesets-*/*</span>
+</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GetLayerVersion</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda:PublishLayerVersion</span>
+</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda:GetLayerVersion</span>
+</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
+</span><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*</span>
+<span class="w">            </span><span class="nt">Roles</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Ref</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PowertoolsLayerIamRole&quot;</span>
+</code></pre></div></td></tr></table></div>
+</details>
+<p>If you're using Infrastructure as Code, here are some excerpts on how to use SAR:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:4"><input checked="checked" id="sam_2" name="__tabbed_7" type="radio" /><input id="serverless-framework_2" name="__tabbed_7" type="radio" /><input id="cdk_2" name="__tabbed_7" type="radio" /><input id="terraform_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="sam_2">SAM</label><label for="serverless-framework_2">Serverless framework</label><label for="cdk_2">CDK</label><label for="terraform_2">Terraform</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -2812,7 +2980,7 @@ General<span class="w"> </span>information
 
 <span class="n">POWERTOOLS_BASE_NAME</span> <span class="o">=</span> <span class="s2">&quot;AWSLambdaPowertools&quot;</span>
 <span class="c1"># Find latest from github.com/aws-powertools/powertools-lambda-python/releases</span>
-<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;2.37.0&quot;</span>
+<span class="n">POWERTOOLS_VER</span> <span class="o">=</span> <span class="s2">&quot;2.39.1&quot;</span>
 <span class="hll"><span class="n">POWERTOOLS_ARN</span> <span class="o">=</span> <span class="s2">&quot;arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer&quot;</span>
 </span>
 
@@ -2935,118 +3103,34 @@ General<span class="w"> </span>information
 </div>
 </div>
 </div>
-<p>Credits to <a href="https://github.com/mwarkentin" rel="nofollow" target="_blank">mwarkentin</a> for providing the scoped down IAM permissions below.</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Least-privileged IAM permissions SAM example</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
-<span class="normal">41</span>
-<span class="normal">42</span>
-<span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="w">  </span><span class="nt">AWSTemplateFormatVersion</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2010-09-09&quot;</span>
-<span class="w">  </span><span class="nt">Resources</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">PowertoolsLayerIamRole</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS::IAM::Role&quot;</span>
-<span class="w">        </span><span class="nt">Properties</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">AssumeRolePolicyDocument</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2012-10-17&quot;</span>
-<span class="w">                </span><span class="nt">Statement</span><span class="p">:</span>
-<span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Allow&quot;</span>
-<span class="w">                      </span><span class="nt">Principal</span><span class="p">:</span>
-<span class="w">                        </span><span class="nt">Service</span><span class="p">:</span>
-<span class="w">                          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;cloudformation.amazonaws.com&quot;</span>
-<span class="w">                        </span><span class="nt">Action</span><span class="p">:</span>
-<span class="w">                          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;sts:AssumeRole&quot;</span>
-<span class="w">                </span><span class="nt">Path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/&quot;</span>
-
-<span class="w">      </span><span class="nt">PowertoolsLayerIamPolicy</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">Type</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;AWS::IAM::Policy&quot;</span>
-<span class="w">        </span><span class="nt">Properties</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">PolicyName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">PowertoolsLambdaLayerPolicy</span>
-<span class="hll"><span class="w">            </span><span class="nt">PolicyDocument</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                </span><span class="nt">Version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2012-10-17&quot;</span>
-</span><span class="hll"><span class="w">                </span><span class="nt">Statement</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">CloudFormationTransform</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cloudformation:CreateChangeSet</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:cloudformation:us-east-1:aws:transform/Serverless-2016-10-31</span>
-</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GetCfnTemplate</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">serverlessrepo:CreateCloudFormationTemplate</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">serverlessrepo:GetCloudFormationTemplate</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="c1"># this is arn of the Powertools for AWS Lambda (Python) SAR app</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer</span>
-</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">S3AccessLayer</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">s3:GetObject</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="c1"># AWS publishes to an external S3 bucket locked down to your account ID</span>
-</span><span class="hll"><span class="w">                        </span><span class="c1"># The below example is us publishing Powertools for AWS Lambda (Python)</span>
-</span><span class="hll"><span class="w">                        </span><span class="c1"># Bucket: awsserverlessrepo-changesets-plntc6bfnfj</span>
-</span><span class="hll"><span class="w">                        </span><span class="c1"># Key: *****/arn:aws:serverlessrepo:eu-west-1:057560766410:applications-aws-lambda-powertools-python-layer-versions-1.10.2/aeeccf50-****-****-****-*********</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:s3:::awsserverlessrepo-changesets-*/*</span>
-</span><span class="hll"><span class="w">                    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Sid</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">GetLayerVersion</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Effect</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Allow</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Action</span><span class="p">:</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda:PublishLayerVersion</span>
-</span><span class="hll"><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">lambda:GetLayerVersion</span>
-</span><span class="hll"><span class="w">                      </span><span class="nt">Resource</span><span class="p">:</span>
-</span><span class="w">                        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="kt">!Sub</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:layer:aws-lambda-powertools-python-layer*</span>
-<span class="w">            </span><span class="nt">Roles</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">Ref</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;PowertoolsLayerIamRole&quot;</span>
-</code></pre></div></td></tr></table></div>
-</details>
+</div>
+<div class="tabbed-block">
+<p>Every morning during business days <em>(~8am UTC)</em>, we publish a <code>prerelease</code> to PyPi to accelerate customer feedback on <strong>unstable</strong> releases / bugfixes until they become production ready.</p>
+<p>Here's how you can use them:</p>
+<ul>
+<li><strong>Pip</strong>: <a class="copyMe" href="#"><strong><code>pip install --pre "aws-lambda-powertools"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>Poetry</strong>: <a class="copyMe" href="#"><strong><code>poetry add --allow-prereleases "aws-lambda-powertools" --group dev</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>Pdm</strong>: <a class="copyMe" href="#"><strong><code>pdm add -dG --prerelease "aws-lambda-powertools"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+</ul>
+</div>
+</div>
+</div>
+<h3 id="local-development">Local development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
+<div class="admonition info">
+<p class="admonition-title">Using Lambda Layer? Simply add <a class="copyMe" href="#"><strong><code>"aws-lambda-powertools[all]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /> as a development dependency.</p>
+</div>
+<p>Powertools for AWS Lambda (Python) relies on the <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">AWS SDK bundled in the Lambda runtime</a>. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency to support IDE auto-completion and to run your tests locally:</p>
+<ul>
+<li><strong>Pip</strong>: <a class="copyMe" href="#"><strong><code>pip install "aws-lambda-powertools[aws-sdk]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>Poetry</strong>: <a class="copyMe" href="#"><strong><code>poetry add "aws-lambda-powertools[aws-sdk]" --group dev</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+<li><strong>Pdm</strong>: <a class="copyMe" href="#"><strong><code>pdm add -dG "aws-lambda-powertools[aws-sdk]"</code></strong></a><img alt="📋" class="twemoji" src="https://cdn.jsdelivr.net/gh/jdecked/twemoji@15.0.3/assets/svg/1f4cb.svg" title=":clipboard:" /></li>
+</ul>
+<p><strong>A word about dependency resolution</strong></p>
+<p>In this context, <code>[aws-sdk]</code> is an alias to the <code>boto3</code> package. Due to dependency resolution, it'll either install:</p>
+<ul>
+<li><strong>(A)</strong> the SDK version available in <a href="https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html" target="_blank">Lambda runtime</a></li>
+<li><strong>(B)</strong> a more up-to-date version if another package you use also depends on <code>boto3</code>, for example <a href="core/tracer/" target="_blank">Powertools for AWS Lambda (Python) Tracer</a></li>
+</ul>
 <h2 id="quick-getting-started">Quick getting started<a class="headerlink" href="#quick-getting-started" title="Permanent link">&para;</a></h2>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Hello world example using SAM CLI</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>sam<span class="w"> </span>init<span class="w"> </span>--app-template<span class="w"> </span>hello-world-powertools-python<span class="w"> </span>--name<span class="w"> </span>sam-app<span class="w"> </span>--package-type<span class="w"> </span>Zip<span class="w"> </span>--runtime<span class="w"> </span>python3.11<span class="w"> </span>--no-tracing
 </code></pre></div></td></tr></table></div>
@@ -3298,7 +3382,11 @@ General<span class="w"> </span>information
 <div class="admonition note">
 <p class="admonition-title">Layers help us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way.</p>
 </div>
+<!-- markdownlint-disable MD051 -->
+
 <p>When <a href="#lambda-layer">using Layers</a>, you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86 and ARM architecture.</p>
+<!-- markdownlint-enable MD051 -->
+
 <h2 id="tenets">Tenets<a class="headerlink" href="#tenets" title="Permanent link">&para;</a></h2>
 <p>These are our core principles to guide our decision making.</p>
 <ul>
