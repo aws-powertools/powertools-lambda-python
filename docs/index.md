@@ -63,14 +63,98 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
 
 === "Lambda Layer"
 
-    You can add our layer both in the [AWS Lambda Console _(under `Layers`)_](https://eu-west-1.console.aws.amazon.com/lambda/home#/add/layer){target="_blank"}, or via your favorite infrastructure as code framework with the ARN value.
+    [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
 
-    For the latter, make sure to replace `{region}` with your AWS region, e.g., `eu-west-1`.
+    | Architecture | Layer ARN                                                                                                 |
+    | ------------ | --------------------------------------------------------------------------------------------------------- |
+    | x86          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:73__{: .copyMe}:clipboard:       |
+    | ARM          | __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73__{: .copyMe}:clipboard: |
 
-    * <u>x86 architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2:73__{: .copyMe}:clipboard:
-    * <u>ARM architecture</u>: __arn:aws:lambda:{region}:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73__{: .copyMe}:clipboard:
+    === "AWS Console"
 
-    ???+ note "Code snippets for popular infrastructure as code frameworks"
+        You can add our layer using the [AWS Lambda Console _(direct link)_](https://console.aws.amazon.com/lambda/home#/add/layer){target="_blank"}:
+
+        * Under Layers, choose `Specify an ARN`
+        * Click to copy the correct ARN value based on your AWS Lambda function architecture and region
+
+        ??? info "Click to expand and copy any regional Lambda Layer ARN"
+
+            === "x86_64"
+
+
+                | Region name               | Region code          | Layer ARN                                                                                                 |
+                | ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------- |
+                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
+                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
+                | Canada (West)             | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
+                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
+                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
+                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
+                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
+                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
+
+
+            === "arm64"
+
+                | Region name               | Region code          | Layer ARN                                                                                                       |
+                | ------------------------- | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+                | Africa (Cape Town)        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hong Kong)  | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Asia Pacific (Tokyo)      | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Seoul)      | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Osaka)      | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Mumbai)     | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Hyderabad)  | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Asia Pacific (Singapore)  | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Sydney)     | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Jakarta)    | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Asia Pacific (Melbourne)  | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
+                | Canada (Central)          | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Canada (West)             | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Europe (Frankfurt)        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Europe (Zurich)           | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Europe (Stockholm)        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Europe (Milan)            | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Europe (Spain)            | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | Europe (Ireland)          | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Europe (London)           | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Europe (Paris)            | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | Middle East (Israel)      | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Middle East (UAE)         | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
+                | Middle East (Bahrain)     | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
+                | South America (São Paulo) | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | US East (N. Virginia)     | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | US East (Ohio)            | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | US West (N. California)   | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+                | US West (Oregon)          | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
+
+
+    === "Infrastructure as Code (IaC)"
+
+        > Are we missing a framework? please create [a documentation request](https://github.com/aws-powertools/powertools-lambda-python/issues/new?assignees=&labels=documentation%2Ctriage&projects=&template=documentation_improvements.yml&title=Docs%3A+TITLE){target="_blank" rel="nofollow"}.
+
+        Thanks to the community, we've covered most popular frameworks on how to add a Lambda Layer to an existing function.
 
         === "x86_64"
 
@@ -148,117 +232,36 @@ You can install Powertools for AWS Lambda (Python) using your favorite dependenc
                 --8<-- "examples/homepage/install/arm64/amplify.txt"
                 ```
 
-### Local development
+    === "Inspect Lambda Layer contents"
 
-!!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
+        You can use AWS CLI to generate a pre-signed URL to download the contents of our Lambda Layer.
 
-Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency to support IDE auto-completion and to run your tests locally:
+        ```bash title="AWS CLI command to download Lambda Layer content"
+        aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73 --region eu-west-1
+        ```
 
-- __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
-- __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
-- __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+        You'll find the pre-signed URL under `Location` key as part of the CLI command output.
 
-__A word about dependency resolution__
+=== "Serverless Application Repository (SAR)"
 
-In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependency resolution, it'll either install:
+    We provide a SAR App that deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
 
-- __(A)__ the SDK version available in [Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}
-- __(B)__ a more up-to-date version if another package you use also depends on `boto3`, for example [Powertools for AWS Lambda (Python) Tracer](core/tracer.md){target="_blank"}
+    Compared with the [public Layer ARN](#lambda-layer) option, the advantage is being able to use a semantic version.
 
-### Lambda Layer
+    | App                                                                                                                                                                                 |     |     | ARN                                                                                                                           |
+    | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | --- | ----------------------------------------------------------------------------------------------------------------------------- |
+    | [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer__{: .copyMe}:clipboard:       |
+    | [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} |     |     | __arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64__{: .copyMe}:clipboard: |
 
-[Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html){target="_blank"} is a .zip file archive that can contain additional code, pre-packaged dependencies, data,  or configuration files. We compile and optimize [all dependencies](#install), and remove duplicate dependencies [already available in the Lambda runtime](https://github.com/aws-powertools/powertools-lambda-layer-cdk/blob/d24716744f7d1f37617b4998c992c4c067e19e64/layer/Python/Dockerfile#L36){target="_blank"} to achieve the most optimal size.
+    ??? question "Don't have enough permissions? Expand for a least-privilege IAM policy example"
 
-??? note "Click to expand and copy any regional Lambda Layer ARN"
+        Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank" rel="nofollow"} for providing the scoped down IAM permissions.
 
-    === "x86_64"
+        ```yaml hl_lines="21-52" title="Least-privileged IAM permissions SAM example"
+        --8<-- "examples/homepage/install/sar/scoped_down_iam.yaml"
+        ```
 
-        | Region               | Layer ARN                                                                                                 |
-        | -------------------- | --------------------------------------------------------------------------------------------------------- |
-        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ap-southeast-4`** | **arn:aws:lambda:ap-southeast-4:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard: |
-        | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-        | **`ca-west-1`**      | **arn:aws:lambda:ca-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-        | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-        | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:   |
-        | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:     |
-        | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-        | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2:73**{: .copyMe}:clipboard:      |
-
-    === "arm64"
-
-        | Region               | Layer ARN                                                                                                       |
-        | -------------------- | --------------------------------------------------------------------------------------------------------------- |
-        | **`af-south-1`**     | **arn:aws:lambda:af-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`ap-east-1`**      | **arn:aws:lambda:ap-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`ap-northeast-1`** | **arn:aws:lambda:ap-northeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ap-northeast-2`** | **arn:aws:lambda:ap-northeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ap-northeast-3`** | **arn:aws:lambda:ap-northeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ap-south-1`**     | **arn:aws:lambda:ap-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`ap-south-2`**     | **arn:aws:lambda:ap-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`ap-southeast-1`** | **arn:aws:lambda:ap-southeast-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ap-southeast-2`** | **arn:aws:lambda:ap-southeast-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ap-southeast-3`** | **arn:aws:lambda:ap-southeast-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard: |
-        | **`ca-central-1`**   | **arn:aws:lambda:ca-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-        | **`eu-central-1`**   | **arn:aws:lambda:eu-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-        | **`eu-central-2`**   | **arn:aws:lambda:eu-central-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-        | **`eu-north-1`**     | **arn:aws:lambda:eu-north-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`eu-south-1`**     | **arn:aws:lambda:eu-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`eu-south-2`**     | **arn:aws:lambda:eu-south-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`eu-west-1`**      | **arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`eu-west-2`**      | **arn:aws:lambda:eu-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`eu-west-3`**      | **arn:aws:lambda:eu-west-3:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`il-central-1`**   | **arn:aws:lambda:il-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-        | **`me-central-1`**   | **arn:aws:lambda:me-central-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:   |
-        | **`me-south-1`**     | **arn:aws:lambda:me-south-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:     |
-        | **`sa-east-1`**      | **arn:aws:lambda:sa-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`us-east-1`**      | **arn:aws:lambda:us-east-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`us-east-2`**      | **arn:aws:lambda:us-east-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`us-west-1`**      | **arn:aws:lambda:us-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-        | **`us-west-2`**      | **arn:aws:lambda:us-west-2:017000801446:layer:AWSLambdaPowertoolsPythonV2-Arm64:73**{: .copyMe}:clipboard:      |
-
-**Want to inspect the contents of the Layer?**
-
-The pre-signed URL to download this Lambda Layer will be within `Location` key in the CLI output. The CLI output will also contain the Powertools for AWS Lambda version it contains.
-
-```bash title="AWS CLI command to download Lambda Layer content"
-aws lambda get-layer-version-by-arn --arn arn:aws:lambda:eu-west-1:017000801446:layer:AWSLambdaPowertoolsPythonV2:73 --region eu-west-1
-```
-
-#### SAR
-
-Serverless Application Repository (SAR) App deploys a CloudFormation stack with a copy of our Lambda Layer in your AWS account and region.
-
-Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to choose a semantic version and deploys a Layer in your target account.
-
-| App                                                                                                                                                                                 | ARN                                                                                                                            | Description                                                           |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| [**aws-lambda-powertools-python-layer**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer){target="_blank"}             | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer](#){: .copyMe}:clipboard:       | Contains all extra dependencies (e.g: pydantic).                      |
-| [**aws-lambda-powertools-python-layer-arm64**](https://serverlessrepo.aws.amazon.com/applications/eu-west-1/057560766410/aws-lambda-powertools-python-layer-arm64){target="_blank"} | [arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer-arm64](#){: .copyMe}:clipboard: | Contains all extra dependencies (e.g: pydantic). For arm64 functions. |
-
-??? note "Click to expand and copy SAR code snippets for popular frameworks"
-
-    You can create a shared Lambda Layers stack and make this along with other account level layers stack.
+    If you're using Infrastructure as Code, here are some excerpts on how to use SAR:
 
     === "SAM"
 
@@ -280,17 +283,38 @@ Compared with the [public Layer ARN](#lambda-layer) option, SAR allows you to ch
 
     === "Terraform"
 
-    	> Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank" rel="nofollow"} for providing the Terraform equivalent.
+        > Credits to [Dani Comnea](https://github.com/DanyC97){target="_blank" rel="nofollow"} for providing the Terraform equivalent.
 
         ```terraform hl_lines="12-13 15-20 23-25 40"
         --8<-- "examples/homepage/install/sar/terraform.tf"
         ```
 
-    Credits to [mwarkentin](https://github.com/mwarkentin){target="_blank" rel="nofollow"} for providing the scoped down IAM permissions below.
+=== "Alpha releases"
 
-    ```yaml hl_lines="21-52" title="Least-privileged IAM permissions SAM example"
-    --8<-- "examples/homepage/install/sar/scoped_down_iam.yaml"
-    ```
+    Every morning during business days _(~8am UTC)_, we publish a `prerelease` to PyPi to accelerate customer feedback on **unstable** releases / bugfixes until they become production ready.
+
+    Here's how you can use them:
+
+    - __Pip__: [**`pip install --pre "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+    - __Poetry__: [**`poetry add --allow-prereleases "aws-lambda-powertools" --group dev`**](#){: .copyMe}:clipboard:
+    - __Pdm__: [**`pdm add -dG --prerelease "aws-lambda-powertools"`**](#){: .copyMe}:clipboard:
+
+### Local development
+
+!!! info "Using Lambda Layer? Simply add [**`"aws-lambda-powertools[all]"`**](#){: .copyMe}:clipboard: as a development dependency."
+
+Powertools for AWS Lambda (Python) relies on the [AWS SDK bundled in the Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}. This helps us achieve an optimal package size and initialization. However, when developing locally, you need to install AWS SDK as a development dependency to support IDE auto-completion and to run your tests locally:
+
+- __Pip__: [**`pip install "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+- __Poetry__: [**`poetry add "aws-lambda-powertools[aws-sdk]" --group dev`**](#){: .copyMe}:clipboard:
+- __Pdm__: [**`pdm add -dG "aws-lambda-powertools[aws-sdk]"`**](#){: .copyMe}:clipboard:
+
+__A word about dependency resolution__
+
+In this context, `[aws-sdk]` is an alias to the `boto3` package. Due to dependency resolution, it'll either install:
+
+- __(A)__ the SDK version available in [Lambda runtime](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html){target="_blank"}
+- __(B)__ a more up-to-date version if another package you use also depends on `boto3`, for example [Powertools for AWS Lambda (Python) Tracer](core/tracer.md){target="_blank"}
 
 ## Quick getting started
 
@@ -448,7 +472,11 @@ Knowing which companies are using this library is important to help prioritize t
 
 !!! note "Layers help us understand who uses Powertools for AWS Lambda (Python) in a non-intrusive way."
 
+<!-- markdownlint-disable MD051 -->
+
 When [using Layers](#lambda-layer), you can add Powertools for AWS Lambda (Python) as a dev dependency to not impact the development process. For Layers, we pre-package all dependencies, compile and optimize for storage and both x86 and ARM architecture.
+
+<!-- markdownlint-enable MD051 -->
 
 ## Tenets
 
