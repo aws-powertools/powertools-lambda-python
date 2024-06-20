@@ -265,6 +265,10 @@ These are some questions to keep in mind when drafting your first or future rele
 
 Once you're happy, hit `Publish release` 🎉🎉🎉.
 
+### Releasing an alpha release
+
+We publish alpha releases _(`prerelease`)_ every morning during business days (~8am UTC). You can also manually trigger `pre-release` workflow when needed.
+
 ### Run end to end tests
 
 E2E tests are run on every push to `develop` or manually via [run-e2e-tests workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/run-e2e-tests.yml).
