@@ -105,6 +105,7 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/parameters/_boto3/",
             f"{PREFIX_TESTS_FUNCTIONAL}/feature_flags/_boto3/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/streaming/_boto3/",
         ],
         extras="aws-sdk",
     )
