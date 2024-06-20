@@ -56,6 +56,7 @@ def test_with_only_required_packages(session: nox.Session):
     # Typing
     # Data Class - without codepipeline dataclass
     # Event Handler without OpenAPI
+    # Batch processor - without pydantic integration
     build_and_run_test(
         session,
         folders=[
@@ -65,6 +66,7 @@ def test_with_only_required_packages(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/typing/required_dependencies/",
             f"{PREFIX_TESTS_UNIT}/data_classes/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/batch/required_dependencies/",
         ],
     )
 
@@ -103,6 +105,8 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
     # Parameters
     # Feature Flags
     # Data Class - only codepipeline dataclass
+    # Streaming
+    # Idempotency - DynamoDB persistent layer
     build_and_run_test(
         session,
         folders=[
@@ -149,6 +153,7 @@ def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
     """Tests that only depends for Pydantic library v1 and v2"""
     # Event Handler OpenAPI
     # Parser
+    # Batch Processor with pydantic integration
 
     session.install(f"pydantic>={pydantic}")
 
@@ -156,6 +161,7 @@ def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/batch/_pydantic/",
             f"{PREFIX_TESTS_UNIT}/parser/_pydantic/",
         ],
     )
