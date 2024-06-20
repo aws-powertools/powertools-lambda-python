@@ -13,7 +13,7 @@ from aws_lambda_powertools.utilities.parser.models.kinesis import (
     extract_cloudwatch_logs_from_record,
 )
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyKinesisBusiness
+from tests.unit.parser._pydantic.schemas import MyKinesisBusiness
 
 
 def test_kinesis_trigger_bad_base64_event():

@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import LambdaFunctionUrlModel
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyALambdaFuncUrlBusiness
+from tests.unit.parser._pydantic.schemas import MyALambdaFuncUrlBusiness
 
 
 def test_lambda_func_url_event_with_envelope():

@@ -117,7 +117,7 @@ def test_with_boto3_sdk_as_required_package(session: nox.Session):
 
 @nox.session()
 def test_with_fastjsonschema_as_required_package(session: nox.Session):
-    """Tests that depends on boto3/botocore library"""
+    """Tests that depends on fastjsonschema library"""
     # Validation
     build_and_run_test(
         session,
@@ -145,8 +145,9 @@ def test_with_aws_encryption_sdk_as_required_package(session: nox.Session):
 @nox.session()
 @nox.parametrize("pydantic", ["1.10", "2.0"])
 def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
-    """Tests that only depends for required libraries"""
+    """Tests that only depends for Pydantic library v1 and v2"""
     # Event Handler OpenAPI
+    # Parser
 
     session.install(f"pydantic>={pydantic}")
 
@@ -154,5 +155,6 @@ def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
         session,
         folders=[
             f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
+            f"{PREFIX_TESTS_UNIT}/parser/_pydantic/",
         ],
     )

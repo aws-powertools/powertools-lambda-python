@@ -5,7 +5,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     RequestContextV2Authorizer,
 )
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyApiGatewayBusiness
+from tests.unit.parser._pydantic.schemas import MyApiGatewayBusiness
 
 
 def test_apigw_v2_event_with_envelope():
