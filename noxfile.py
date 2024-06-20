@@ -54,6 +54,7 @@ def test_with_only_required_packages(session: nox.Session):
     # Metrics - Base provider
     # Middleware factory without tracer
     # Typing
+    # Event Handler without OpenAPI
     build_and_run_test(
         session,
         folders=[
@@ -61,6 +62,7 @@ def test_with_only_required_packages(session: nox.Session):
             f"{PREFIX_TESTS_FUNCTIONAL}/metrics/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/middleware_factory/required_dependencies/",
             f"{PREFIX_TESTS_FUNCTIONAL}/typing/required_dependencies/",
+            f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/required_dependencies/",
         ],
     )
 
@@ -133,4 +135,20 @@ def test_with_aws_encryption_sdk_as_required_package(session: nox.Session):
             f"{PREFIX_TESTS_UNIT}/data_masking/_aws_encryption_sdk/",
         ],
         extras="datamasking",
+    )
+
+
+@nox.session()
+@nox.parametrize("pydantic", ["1.10", "2.0"])
+def test_with_pydantic_required_package(session: nox.Session, pydantic: str):
+    """Tests that only depends for required libraries"""
+    # Event Handler OpenAPI
+
+    session.install(f"pydantic>={pydantic}")
+
+    build_and_run_test(
+        session,
+        folders=[
+            f"{PREFIX_TESTS_FUNCTIONAL}/event_handler/_pydantic/",
+        ],
     )

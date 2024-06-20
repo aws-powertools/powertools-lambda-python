@@ -10,7 +10,7 @@ from tests.functional.utils import load_event
 
 
 def test_base_path_api_gateway_rest():
-    app = APIGatewayRestResolver(enable_validation=True)
+    app = APIGatewayRestResolver()
 
     @app.get("/")
     def handle():
@@ -25,7 +25,7 @@ def test_base_path_api_gateway_rest():
 
 
 def test_base_path_api_gateway_http():
-    app = APIGatewayHttpResolver(enable_validation=True)
+    app = APIGatewayHttpResolver()
 
     @app.get("/")
     def handle():
@@ -42,7 +42,7 @@ def test_base_path_api_gateway_http():
 
 
 def test_base_path_alb():
-    app = ALBResolver(enable_validation=True)
+    app = ALBResolver()
 
     @app.get("/")
     def handle():
@@ -57,7 +57,7 @@ def test_base_path_alb():
 
 
 def test_base_path_lambda_function_url():
-    app = LambdaFunctionUrlResolver(enable_validation=True)
+    app = LambdaFunctionUrlResolver()
 
     @app.get("/")
     def handle():
@@ -74,7 +74,7 @@ def test_base_path_lambda_function_url():
 
 
 def test_vpc_lattice():
-    app = VPCLatticeResolver(enable_validation=True)
+    app = VPCLatticeResolver()
 
     @app.get("/")
     def handle():
@@ -89,7 +89,7 @@ def test_vpc_lattice():
 
 
 def test_vpc_latticev2():
-    app = VPCLatticeV2Resolver(enable_validation=True)
+    app = VPCLatticeV2Resolver()
 
     @app.get("/")
     def handle():
