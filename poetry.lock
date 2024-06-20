@@ -2040,13 +2040,13 @@ typing-extensions = {version = ">=4.1.0", markers = "python_version < \"3.12\""}
 
 [[package]]
 name = "mypy-boto3-dynamodb"
-version = "1.34.114"
-description = "Type annotations for boto3.DynamoDB 1.34.114 service generated with mypy-boto3-builder 7.24.0"
+version = "1.34.131"
+description = "Type annotations for boto3.DynamoDB 1.34.131 service generated with mypy-boto3-builder 7.24.0"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "mypy_boto3_dynamodb-1.34.114-py3-none-any.whl", hash = "sha256:64be1fcd36db0daa354a78a2affdaef048653e4c5116da98f71446eee5db7638"},
-    {file = "mypy_boto3_dynamodb-1.34.114.tar.gz", hash = "sha256:2a1a131587dbf857e5bec56ae84d8f9fb9618966e7a6120fb6c7da12cb73a82c"},
+    {file = "mypy_boto3_dynamodb-1.34.131-py3-none-any.whl", hash = "sha256:62e4fd85c621561f145828de14752a51380182d492cb039043d7f46bef872c34"},
+    {file = "mypy_boto3_dynamodb-1.34.131.tar.gz", hash = "sha256:d23c857568ae7c8c8fc1fbd96709a1dd00c140f917d74e09423fd44677097abf"},
 ]
 
 [package.dependencies]
@@ -3066,6 +3066,7 @@ optional = false
 python-versions = ">=3.6"
 files = [
     {file = "sentry_sdk-2.6.0-py2.py3-none-any.whl", hash = "sha256:422b91cb49378b97e7e8d0e8d5a1069df23689d45262b86f54988a7db264e874"},
+    {file = "sentry_sdk-2.6.0.tar.gz", hash = "sha256:65cc07e9c6995c5e316109f138570b32da3bd7ff8d0d0ee4aaf2628c3dd8127d"},
 ]
 
 [package.dependencies]
@@ -3677,4 +3678,4 @@ validation = ["fastjsonschema"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "3f99def9f76dae60fccfb38e1449fbf530ba41ccf989120ae9fbfbefbc315b99"
+content-hash = "9e889da81f07a0a7eb639dde879bb1d8bdfe77f06ebd6063069694cd279a9f98"
