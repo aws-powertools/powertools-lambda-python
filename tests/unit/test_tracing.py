@@ -9,7 +9,7 @@ from aws_lambda_powertools import Tracer
 
 # Maintenance: This should move to Functional tests and use Fake over mocks.
 
-MODULE_PREFIX = "unit.test_tracing"
+MODULE_PREFIX = "tests.unit.test_tracing"
 
 
 @pytest.fixture

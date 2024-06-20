@@ -147,10 +147,10 @@ Here is a handy table with built-in envelopes along with their JMESPath expressi
 | **`API_GATEWAY_HTTP`**            | `powertools_json(body)`                                       |
 | **`API_GATEWAY_REST`**            | `powertools_json(body)`                                       |
 | **`CLOUDWATCH_EVENTS_SCHEDULED`** | `detail`                                                      |
-| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)                         | powertools_json(@).logEvents[*]` |
+| **`CLOUDWATCH_LOGS`**             | `awslogs.powertools_base64_gzip(data)` or `powertools_json(@).logEvents[*]` |
 | **`EVENTBRIDGE`**                 | `detail`                                                      |
 | **`KINESIS_DATA_STREAM`**         | `Records[*].kinesis.powertools_json(powertools_base64(data))` |
-| **`SNS`**                         | `Records[0].Sns.Message                                       | powertools_json(@)`              |
+| **`SNS`**                         | `Records[0].Sns.Message` or `powertools_json(@)`              |
 | **`SQS`**                         | `Records[*].powertools_json(body)`                            |
 
 ## Advanced
@@ -199,3 +199,33 @@ You can use our built-in [JMESPath functions](./jmespath_functions.md){target="_
 
 ???+ info
     We use these for [built-in envelopes](#built-in-envelopes) to easily to decode and unwrap events from sources like Kinesis, CloudWatch Logs, etc.
+
+### Validating with external references
+
+JSON Schema [allows schemas to reference other schemas](https://json-schema.org/understanding-json-schema/structuring#dollarref) using the `$ref` keyword with a URI value. By default, `fastjsonschema` will make a HTTP request to resolve this URI.
+
+You can use `handlers` parameter to have full control over how references schemas are fetched. This is useful when you might want to optimize caching, reducing HTTP calls, or fetching them from non-HTTP endpoints.
+
+=== "custom_handlers.py"
+
+	```python hl_lines="1 7 8 11"
+    --8<-- "examples/validation/src/custom_handlers.py"
+	```
+
+=== "custom_handlers_parent_schema"
+
+	```python hl_lines="1 7"
+    --8<-- "examples/validation/src/custom_handlers_schema.py"
+	```
+
+=== "custom_handlers_child_schema"
+
+    ```python hl_lines="12"
+    --8<-- "examples/validation/src/custom_handlers_schema.py"
+    ```
+
+=== "custom_handlers_payload.json"
+
+    ```json hl_lines="2"
+    --8<-- "examples/validation/src/custom_handlers_payload.json"
+    ```
