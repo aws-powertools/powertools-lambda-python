@@ -5,7 +5,7 @@ import pytest
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sns_event  # noqa: F401
-from tests.unit.parser.schemas import MyAdvancedSnsBusiness, MySnsBusiness
+from tests.unit.parser._pydantic.schemas import MyAdvancedSnsBusiness, MySnsBusiness
 
 
 def test_handle_sns_trigger_event_json_body(sns_event):  # noqa: F811

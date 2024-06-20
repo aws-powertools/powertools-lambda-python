@@ -2,7 +2,7 @@ import pytest
 
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import (
+from tests.unit.parser._pydantic.schemas import (
     MyAdvancedEventbridgeBusiness,
     MyEventbridgeBusiness,
 )

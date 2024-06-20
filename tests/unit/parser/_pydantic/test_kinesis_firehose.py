@@ -9,7 +9,7 @@ from aws_lambda_powertools.utilities.parser.models import (
     KinesisFirehoseSqsRecord,
 )
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyKinesisFirehoseBusiness
+from tests.unit.parser._pydantic.schemas import MyKinesisFirehoseBusiness
 
 
 def test_firehose_sqs_wrapped_message_event():

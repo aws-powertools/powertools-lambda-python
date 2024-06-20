@@ -1,7 +1,7 @@
 from aws_lambda_powertools.utilities.parser import envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import BedrockAgentEventModel
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyBedrockAgentBusiness
+from tests.unit.parser._pydantic.schemas import MyBedrockAgentBusiness
 
 
 def test_bedrock_agent_event_with_envelope():

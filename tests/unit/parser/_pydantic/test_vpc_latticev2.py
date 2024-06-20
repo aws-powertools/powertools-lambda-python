@@ -3,7 +3,7 @@ import pytest
 from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, parse
 from aws_lambda_powertools.utilities.parser.models import VpcLatticeV2Model
 from tests.functional.utils import load_event
-from tests.unit.parser.schemas import MyVpcLatticeBusiness
+from tests.unit.parser._pydantic.schemas import MyVpcLatticeBusiness
 
 
 def test_vpc_lattice_v2_event_with_envelope():

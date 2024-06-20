@@ -4,7 +4,7 @@ from aws_lambda_powertools.utilities.parser import ValidationError, envelopes, p
 from aws_lambda_powertools.utilities.parser.models import SqsModel
 from tests.functional.utils import load_event
 from tests.functional.validator.conftest import sqs_event  # noqa: F401
-from tests.unit.parser.schemas import MyAdvancedSqsBusiness, MySqsBusiness
+from tests.unit.parser._pydantic.schemas import MyAdvancedSqsBusiness, MySqsBusiness
 
 
 def test_handle_sqs_trigger_event_json_body(sqs_event):  # noqa: F811
