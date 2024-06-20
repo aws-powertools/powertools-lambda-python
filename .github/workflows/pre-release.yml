@@ -80,6 +80,9 @@ jobs:
       - name: Verifies pre-release version semantics
         # verify pre-release semantics before proceeding to avoid versioning pollution
         # e.g., 2.40.0a1 and 2.40.0b2 are valid while 2.40.0 is not
+        # NOTE. we do it in a separate step to handle edge cases like
+        # `poetry` CLI uses immutable install, versioning behaviour could change even in a minor version (we had breaking changes before)
+        # a separate step allows us to pinpoint what happened (before/after)
         run: |
           if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-b].*$ ]]; then
             echo "Version $VERSION doesn't look like a pre-release version; aborting"
