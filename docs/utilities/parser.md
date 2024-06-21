@@ -155,9 +155,9 @@ def my_function():
 		}
 ```
 
-#### Union parsing
+#### Artibrary data model parsing
 
-You can parse multiple types using [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union), this gives you control over parsing different event types with the same handler based on an attribute, for example:
+The parser allows you parse events into arbitary data structures, such as `dict` or classes that don't inherit from BaseModel. The following example shows you how to parse a [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union):
 
 ```python
 --8<-- "examples/parser/src/multiple_model_parsing.py"
