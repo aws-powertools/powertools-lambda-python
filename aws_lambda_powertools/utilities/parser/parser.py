@@ -1,14 +1,18 @@
+from __future__ import annotations
+
 import logging
 import typing
-from typing import Any, Callable, Dict, Optional, Type, overload
+from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 
 from pydantic import PydanticSchemaGenerationError, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
 from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
-from aws_lambda_powertools.utilities.parser.types import EventParserReturnType, Model
+from aws_lambda_powertools.utilities.parser.types import EventParserReturnType
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +22,7 @@ def event_parser(
     handler: Callable[..., EventParserReturnType],
     event: Dict[str, Any],
     context: LambdaContext,
-    model: Optional[Type[Model]] = None,
+    model: Optional[type[T]] = None,
     envelope: Optional[Type[Envelope]] = None,
     **kwargs: Any,
 ) -> EventParserReturnType:
@@ -108,14 +112,14 @@ def event_parser(
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model]) -> Model: ...  # pragma: no cover
+def parse(event: Dict[str, Any], model: type[T]) -> T: ...  # pragma: no cover
 
 
 @overload
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Type[Envelope]) -> Model: ...  # pragma: no cover
+def parse(event: Dict[str, Any], model: type[T], envelope: Type[Envelope]) -> T: ...  # pragma: no cover
 
 
-def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Envelope]] = None):
+def parse(event: Dict[str, Any], model: type[T], envelope: Optional[Type[Envelope]] = None):
     """Standalone function to parse & validate events using Pydantic models
 
     Typically used when you need fine-grained control over error handling compared to event_parser decorator.
@@ -192,7 +196,9 @@ def parse(event: Dict[str, Any], model: Type[Model], envelope: Optional[Type[Env
     # Pydantic raises PydanticSchemaGenerationError when the model is not a Pydantic model
     # This is seen in the tests where we pass a non-Pydantic model type to the parser or
     # when we pass a data structure that does not match the model (trying to parse a true/false/etc into a model)
-    except (ValidationError, PydanticSchemaGenerationError) as exc:
+    except PydanticSchemaGenerationError as exc:
+        raise InvalidModelTypeError(f"The event supplied is unable to be validated into {type(model)}") from exc
+    except ValidationError as exc:
         raise InvalidModelTypeError(
             f"Error: {str(exc)}. Please ensure the Input model inherits from BaseModel,\n"
             "and your payload adheres to the specified Input model structure.\n"

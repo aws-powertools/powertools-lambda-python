@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, Type, TypeVar, Union
+from typing import Any, Dict, Optional, TypeVar, Union
 
 from pydantic import TypeAdapter
 
-from aws_lambda_powertools.utilities.parser.types import Model
+T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ class BaseEnvelope(ABC):
     """ABC implementation for creating a supported Envelope"""
 
     @staticmethod
-    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]) -> Union[Model, None]:
+    def _parse(data: Optional[Union[Dict[str, Any], Any]], model: type[T]) -> Union[T, None]:
         """Parses envelope data against model provided
 
         Parameters
@@ -42,7 +44,7 @@ class BaseEnvelope(ABC):
         return adapter.validate_python(data)
 
     @abstractmethod
-    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: Type[Model]):
+    def parse(self, data: Optional[Union[Dict[str, Any], Any]], model: type[T]):
         """Implementation to parse data against envelope model, then against the data model
 
         NOTE: Call `_parse` method to fully parse data with model provided.
