@@ -160,32 +160,7 @@ def my_function():
 You can parse multiple types using [`Union`](https://docs.pydantic.dev/latest/api/standard_library_types/#union), this gives you control over parsing different event types with the same handler based on an attribute, for example:
 
 ```python
-from aws_lambda_powertools.utilities.parser import event_parser
-from pydantic import BaseModel, Field
-from typing import Annotated, Any, Literal, Union
-
-
-class Cat(BaseModel):
-	animal: Literal["cat"]
-	name: str
-	meow: int
-
-class Dog(BaseModel):
-	animal: Literal["dog"]
-	name: str
-	bark: int
-
-Animal = Annotated[
-	Union[Cat, Dog], Field(discriminator="animal")
-]
-
-@event_parser(model=Animal)
-def lambda_handler(event: Animal, _: Any) -> str:
-    if isinstance(event, CatCallback):
-		# we have a cat!
-        return f"🐈: {event.name}"
-
-	return f"🐶: {event.name}"
+--8<-- "examples/parser/src/multiple_model_parsing.py"
 ```
 
 ### Built-in models
