@@ -1,14 +1,13 @@
 import enum
 import re
-from typing import Any, Dict, List, Optional, overload
+from typing import Any, Dict, List, MutableMapping, Optional
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.utilities.data_classes.common import (
     BaseRequestContext,
     BaseRequestContextV2,
     DictWrapper,
-)
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
 )
 
 
@@ -143,8 +142,8 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
         return self["httpMethod"]
 
     @property
-    def headers(self) -> Dict[str, str]:
-        return self["headers"]
+    def headers(self) -> MutableMapping[str, str]:
+        return CaseInsensitiveDict(self["headers"])
 
     @property
     def query_string_parameters(self) -> Dict[str, str]:
@@ -161,45 +160,6 @@ class APIGatewayAuthorizerRequestEvent(DictWrapper):
     @property
     def request_context(self) -> BaseRequestContext:
         return BaseRequestContext(self._data)
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = False,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
 
 
 class APIGatewayAuthorizerEventV2(DictWrapper):
@@ -234,14 +194,14 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         return parse_api_gateway_arn(self.route_arn)
 
     @property
-    def identity_source(self) -> Optional[List[str]]:
+    def identity_source(self) -> List[str]:
         """The identity source for which authorization is requested.
 
         For a REQUEST authorizer, this is optional. The value is a set of one or more mapping expressions of the
         specified request parameters. The identity source can be headers, query string parameters, stage variables,
         and context parameters.
         """
-        return self.get("identitySource")
+        return self.get("identitySource") or []
 
     @property
     def route_key(self) -> str:
@@ -263,9 +223,9 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         return self["cookies"]
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> MutableMapping[str, str]:
         """Http headers"""
-        return self["headers"]
+        return CaseInsensitiveDict(self["headers"])
 
     @property
     def query_string_parameters(self) -> Dict[str, str]:
@@ -276,46 +236,12 @@ class APIGatewayAuthorizerEventV2(DictWrapper):
         return BaseRequestContextV2(self._data)
 
     @property
-    def path_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("pathParameters")
+    def path_parameters(self) -> Dict[str, str]:
+        return self.get("pathParameters") or {}
 
     @property
-    def stage_variables(self) -> Optional[Dict[str, str]]:
-        return self.get("stageVariables")
-
-    @overload
-    def get_header_value(self, name: str, default_value: str, case_sensitive: bool = False) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+    def stage_variables(self) -> Dict[str, str]:
+        return self.get("stageVariables") or {}
 
 
 class APIGatewayAuthorizerResponseV2:

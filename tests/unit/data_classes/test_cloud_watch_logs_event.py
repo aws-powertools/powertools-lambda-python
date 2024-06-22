@@ -24,7 +24,7 @@ def test_cloud_watch_trigger_event():
     assert log_event.get_id == "eventId1"
     assert log_event.timestamp == 1440442987000
     assert log_event.message == "[ERROR] First test message"
-    assert log_event.extracted_fields is None
+    assert log_event.extracted_fields == {}
 
     event2 = CloudWatchLogsEvent(load_event("cloudWatchLogEvent.json"))
     assert parsed_event.raw_event == event2.raw_event
@@ -52,7 +52,7 @@ def test_cloud_watch_trigger_event_with_policy_level():
     assert log_event.get_id == "eventId1"
     assert log_event.timestamp == 1440442987000
     assert log_event.message == "[ERROR] First test message"
-    assert log_event.extracted_fields is None
+    assert log_event.extracted_fields == {}
 
     event2 = CloudWatchLogsEvent(load_event("cloudWatchLogEventWithPolicyLevel.json"))
     assert parsed_event.raw_event == event2.raw_event

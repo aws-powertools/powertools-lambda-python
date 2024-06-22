@@ -46,24 +46,24 @@ class SESMailCommonHeaders(DictWrapper):
         return str(self["subject"])
 
     @property
-    def cc(self) -> Optional[List[str]]:
+    def cc(self) -> List[str]:
         """The values in the CC header of the email."""
-        return self.get("cc")
+        return self.get("cc") or []
 
     @property
-    def bcc(self) -> Optional[List[str]]:
+    def bcc(self) -> List[str]:
         """The values in the BCC header of the email."""
-        return self.get("bcc")
+        return self.get("bcc") or []
 
     @property
-    def sender(self) -> Optional[List[str]]:
+    def sender(self) -> List[str]:
         """The values in the Sender header of the email."""
-        return self.get("sender")
+        return self.get("sender") or []
 
     @property
-    def reply_to(self) -> Optional[List[str]]:
+    def reply_to(self) -> List[str]:
         """The values in the replyTo header of the email."""
-        return self.get("replyTo")
+        return self.get("replyTo") or []
 
 
 class SESMail(DictWrapper):

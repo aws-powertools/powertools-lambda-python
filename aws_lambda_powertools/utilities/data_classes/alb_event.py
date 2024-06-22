@@ -1,4 +1,6 @@
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, MutableMapping
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
@@ -37,25 +39,15 @@ class ALBEvent(BaseProxyEvent):
 
     @property
     def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
-        if self.multi_value_query_string_parameters:
-            return self.multi_value_query_string_parameters
-
-        return super().resolved_query_string_parameters
+        return self.multi_value_query_string_parameters or super().resolved_query_string_parameters
 
     @property
-    def resolved_headers_field(self) -> Dict[str, Any]:
-        headers: Dict[str, Any] = {}
-
-        if self.multi_value_headers:
-            headers = self.multi_value_headers
-        else:
-            headers = self.headers
-
-        return {key.lower(): value for key, value in headers.items()}
+    def multi_value_headers(self) -> MutableMapping[str, List[str]]:
+        return CaseInsensitiveDict(self.get("multiValueHeaders"))
 
     @property
-    def multi_value_headers(self) -> Optional[Dict[str, List[str]]]:
-        return self.get("multiValueHeaders")
+    def resolved_headers_field(self) -> MutableMapping[str, Any]:
+        return self.multi_value_headers or self.headers
 
     def header_serializer(self) -> BaseHeadersSerializer:
         # When using the ALB integration, the `multiValueHeaders` feature can be disabled (default) or enabled.

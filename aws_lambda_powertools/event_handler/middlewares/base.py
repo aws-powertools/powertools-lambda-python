@@ -47,10 +47,7 @@ class BaseMiddlewareHandler(Generic[EventHandlerInstance], ABC):
         def handler(self, app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:
             # BEFORE logic
             request_id = app.current_event.request_context.request_id
-            correlation_id = app.current_event.get_header_value(
-                name=self.header,
-                default_value=request_id,
-            )
+            correlation_id = app.current_event.headers.get(self.header, request_id)
 
             # Call next middleware or route handler ('/todos')
             response = next_middleware(app)

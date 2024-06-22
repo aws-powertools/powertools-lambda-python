@@ -7,8 +7,8 @@ def test_vpc_lattice_v2_event():
     parsed_event = VPCLatticeEventV2(raw_event)
 
     assert parsed_event.path == raw_event["path"]
-    assert parsed_event.get_query_string_value("order-id") == "1"
-    assert parsed_event.get_header_value("user_agent") == "curl/7.64.1"
+    assert parsed_event.query_string_parameters["order-id"] == "1"
+    assert parsed_event.headers["user_agent"] == "curl/7.64.1"
     assert parsed_event.decoded_body == '{"message": "Hello from Lambda!"}'
     assert parsed_event.json_body == {"message": "Hello from Lambda!"}
     assert parsed_event.method == raw_event["method"]

@@ -22,10 +22,7 @@ class CorrelationIdMiddleware(BaseMiddlewareHandler):
 
     def handler(self, app: APIGatewayRestResolver, next_middleware: NextMiddleware) -> Response:  # (2)!
         request_id = app.current_event.request_context.request_id
-        correlation_id = app.current_event.get_header_value(
-            name=self.header,
-            default_value=request_id,
-        )
+        correlation_id = app.current_event.headers.get(self.header, request_id)
 
         response = next_middleware(app)  # (3)!
         response.headers[self.header] = correlation_id

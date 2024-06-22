@@ -23,9 +23,9 @@ class CloudWatchLogsLogEvent(DictWrapper):
         return self["message"]
 
     @property
-    def extracted_fields(self) -> Optional[Dict[str, str]]:
+    def extracted_fields(self) -> Dict[str, str]:
         """Get the `extractedFields` property"""
-        return self.get("extractedFields")
+        return self.get("extractedFields") or {}
 
 
 class CloudWatchLogsDecodedData(DictWrapper):

@@ -30,7 +30,7 @@ def test_dynamodb_stream_trigger_event():
     assert record.event_source == record_raw["eventSource"]
     assert record.event_source_arn == record_raw["eventSourceARN"]
     assert record.event_version == record_raw["eventVersion"]
-    assert record.user_identity is None
+    assert record.user_identity == {}
     dynamodb = record.dynamodb
     assert dynamodb is not None
     assert dynamodb.approximate_creation_date_time == record_raw["dynamodb"]["ApproximateCreationDateTime"]
@@ -38,7 +38,7 @@ def test_dynamodb_stream_trigger_event():
     assert keys is not None
     assert keys["Id"] == decimal_context.create_decimal(101)
     assert dynamodb.new_image.get("Message") == record_raw["dynamodb"]["NewImage"]["Message"]["S"]
-    assert dynamodb.old_image is None
+    assert dynamodb.old_image == {}
     assert dynamodb.sequence_number == record_raw["dynamodb"]["SequenceNumber"]
     assert dynamodb.size_bytes == record_raw["dynamodb"]["SizeBytes"]
     assert dynamodb.stream_view_type == StreamViewType.NEW_AND_OLD_IMAGES
@@ -94,7 +94,7 @@ def test_dynamodb_stream_record_deserialization():
 
 def test_dynamodb_stream_record_keys_with_no_keys():
     record = StreamRecord({})
-    assert record.keys is None
+    assert record.keys == {}
 
 
 def test_dynamodb_stream_record_keys_overrides_dict_wrapper_keys():

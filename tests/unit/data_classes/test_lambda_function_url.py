@@ -13,17 +13,17 @@ def test_lambda_function_url_event():
     assert parsed_event.path == raw_event["rawPath"]
     assert parsed_event.raw_query_string == raw_event["rawQueryString"]
 
-    assert parsed_event.cookies is None
+    assert parsed_event.cookies == []
 
     headers = parsed_event.headers
     assert len(headers) == 20
 
-    assert parsed_event.query_string_parameters is None
+    assert parsed_event.query_string_parameters == {}
 
     assert parsed_event.is_base64_encoded is False
     assert parsed_event.body is None
-    assert parsed_event.path_parameters is None
-    assert parsed_event.stage_variables is None
+    assert parsed_event.path_parameters == {}
+    assert parsed_event.stage_variables == {}
     assert parsed_event.http_method == raw_event["requestContext"]["http"]["method"]
 
     request_context = parsed_event.request_context
@@ -75,8 +75,8 @@ def test_lambda_function_url_event_iam():
     assert parsed_event.is_base64_encoded is False
     assert parsed_event.body == raw_event["body"]
     assert parsed_event.decoded_body == raw_event["body"]
-    assert parsed_event.path_parameters is None
-    assert parsed_event.stage_variables is None
+    assert parsed_event.path_parameters == {}
+    assert parsed_event.stage_variables == {}
     assert parsed_event.http_method == raw_event["requestContext"]["http"]["method"]
 
     request_context = parsed_event.request_context

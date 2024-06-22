@@ -29,10 +29,10 @@ def test_ses_trigger_event():
     assert common_headers.to == [expected_address]
     assert common_headers.message_id == common_headers_raw["messageId"]
     assert common_headers.subject == common_headers_raw["subject"]
-    assert common_headers.cc is None
-    assert common_headers.bcc is None
-    assert common_headers.sender is None
-    assert common_headers.reply_to is None
+    assert common_headers.cc == []
+    assert common_headers.bcc == []
+    assert common_headers.sender == []
+    assert common_headers.reply_to == []
     receipt = record.ses.receipt
     raw_receipt = raw_event["Records"][0]["ses"]["receipt"]
     assert receipt.timestamp == raw_receipt["timestamp"]

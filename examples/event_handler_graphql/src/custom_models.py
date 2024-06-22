@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.event_handler import AppSyncResolver
@@ -25,12 +25,12 @@ class Location(TypedDict, total=False):
 
 class MyCustomModel(AppSyncResolverEvent):
     @property
-    def country_viewer(self) -> str:
-        return self.get_header_value(name="cloudfront-viewer-country", default_value="", case_sensitive=False)
+    def country_viewer(self) -> Optional[str]:
+        return self.request_headers.get("cloudfront-viewer-country")
 
     @property
-    def api_key(self) -> str:
-        return self.get_header_value(name="x-api-key", default_value="", case_sensitive=False)
+    def api_key(self) -> Optional[str]:
+        return self.request_headers.get("x-api-key")
 
 
 @app.resolver(type_name="Query", field_name="listLocations")

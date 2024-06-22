@@ -61,15 +61,15 @@ class PreSignUpTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def validation_data(self) -> Optional[Dict[str, str]]:
+    def validation_data(self) -> Dict[str, str]:
         """One or more name-value pairs containing the validation data in the request to register a user."""
-        return self["request"].get("validationData")
+        return self["request"].get("validationData") or {}
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre sign-up trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class PreSignUpTriggerEventResponse(DictWrapper):
@@ -133,10 +133,10 @@ class PostConfirmationTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the post confirmation trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class PostConfirmationTriggerEvent(BaseTriggerEvent):
@@ -165,15 +165,15 @@ class UserMigrationTriggerEventRequest(DictWrapper):
         return self["request"]["password"]
 
     @property
-    def validation_data(self) -> Optional[Dict[str, str]]:
+    def validation_data(self) -> Dict[str, str]:
         """One or more name-value pairs containing the validation data in the request to register a user."""
-        return self["request"].get("validationData")
+        return self["request"].get("validationData") or {}
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre sign-up trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class UserMigrationTriggerEventResponse(DictWrapper):
@@ -213,8 +213,8 @@ class UserMigrationTriggerEventResponse(DictWrapper):
         self["response"]["messageAction"] = value
 
     @property
-    def desired_delivery_mediums(self) -> Optional[List[str]]:
-        return self["response"].get("desiredDeliveryMediums")
+    def desired_delivery_mediums(self) -> List[str]:
+        return self["response"].get("desiredDeliveryMediums") or []
 
     @desired_delivery_mediums.setter
     def desired_delivery_mediums(self, value: List[str]):
@@ -281,10 +281,10 @@ class CustomMessageTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre sign-up trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class CustomMessageTriggerEventResponse(DictWrapper):
@@ -361,9 +361,9 @@ class PreAuthenticationTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def validation_data(self) -> Optional[Dict[str, str]]:
+    def validation_data(self) -> Dict[str, str]:
         """One or more key-value pairs containing the validation data in the user's sign-in request."""
-        return self["request"].get("validationData")
+        return self["request"].get("validationData") or {}
 
 
 class PreAuthenticationTriggerEvent(BaseTriggerEvent):
@@ -402,10 +402,10 @@ class PostAuthenticationTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the post authentication trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class PostAuthenticationTriggerEvent(BaseTriggerEvent):
@@ -433,14 +433,14 @@ class PostAuthenticationTriggerEvent(BaseTriggerEvent):
 
 class GroupOverrideDetails(DictWrapper):
     @property
-    def groups_to_override(self) -> Optional[List[str]]:
+    def groups_to_override(self) -> List[str]:
         """A list of the group names that are associated with the user that the identity token is issued for."""
-        return self.get("groupsToOverride")
+        return self.get("groupsToOverride") or []
 
     @property
-    def iam_roles_to_override(self) -> Optional[List[str]]:
+    def iam_roles_to_override(self) -> List[str]:
         """A list of the current IAM roles associated with these groups."""
-        return self.get("iamRolesToOverride")
+        return self.get("iamRolesToOverride") or []
 
     @property
     def preferred_role(self) -> Optional[str]:
@@ -460,16 +460,16 @@ class PreTokenGenerationTriggerEventRequest(DictWrapper):
         return self["request"]["userAttributes"]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function
         that you specify for the pre token generation trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class ClaimsOverrideDetails(DictWrapper):
     @property
-    def claims_to_add_or_override(self) -> Optional[Dict[str, str]]:
-        return self.get("claimsToAddOrOverride")
+    def claims_to_add_or_override(self) -> Dict[str, str]:
+        return self.get("claimsToAddOrOverride") or {}
 
     @claims_to_add_or_override.setter
     def claims_to_add_or_override(self, value: Dict[str, str]):
@@ -478,8 +478,8 @@ class ClaimsOverrideDetails(DictWrapper):
         self._data["claimsToAddOrOverride"] = value
 
     @property
-    def claims_to_suppress(self) -> Optional[List[str]]:
-        return self.get("claimsToSuppress")
+    def claims_to_suppress(self) -> List[str]:
+        return self.get("claimsToSuppress") or []
 
     @claims_to_suppress.setter
     def claims_to_suppress(self, value: List[str]):
@@ -599,10 +599,10 @@ class DefineAuthChallengeTriggerEventRequest(DictWrapper):
         return [ChallengeResult(result) for result in self["request"]["session"]]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you specify
         for the defined auth challenge trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class DefineAuthChallengeTriggerEventResponse(DictWrapper):
@@ -685,10 +685,10 @@ class CreateAuthChallengeTriggerEventRequest(DictWrapper):
         return [ChallengeResult(result) for result in self["request"]["session"]]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that you
         specify for the creation auth challenge trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
 
 class CreateAuthChallengeTriggerEventResponse(DictWrapper):
@@ -773,10 +773,10 @@ class VerifyAuthChallengeResponseTriggerEventRequest(DictWrapper):
         return self["request"]["challengeAnswer"]
 
     @property
-    def client_metadata(self) -> Optional[Dict[str, str]]:
+    def client_metadata(self) -> Dict[str, str]:
         """One or more key-value pairs that you can provide as custom input to the Lambda function that
         you specify for the "Verify Auth Challenge" trigger."""
-        return self["request"].get("clientMetadata")
+        return self["request"].get("clientMetadata") or {}
 
     @property
     def user_not_found(self) -> Optional[bool]:

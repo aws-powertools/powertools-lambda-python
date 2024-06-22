@@ -14,6 +14,7 @@
 
 ## Features
 
+* **data_classes:** return empty dict or list in Event Source Data Classes instead of None, and return case-insensitive dict for headrs. ([#2605](https://github.com/aws-powertools/powertools-lambda-python/issues/2605))
 * **event_source:** add CloudFormationCustomResourceEvent data class. ([#4342](https://github.com/aws-powertools/powertools-lambda-python/issues/4342))
 
 ## Maintenance

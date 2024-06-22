@@ -17,19 +17,19 @@ def test_appsync_resolver_event():
     assert parsed_event.arguments.get("name") == raw_event["arguments"]["name"]
     assert parsed_event.identity.claims.get("token_use") == raw_event["identity"]["claims"]["token_use"]
     assert parsed_event.source.get("name") == raw_event["source"]["name"]
-    assert parsed_event.get_header_value("X-amzn-trace-id") == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
-    assert parsed_event.get_header_value("X-amzn-trace-id", case_sensitive=True) is None
-    assert parsed_event.get_header_value("missing", default_value="Foo") == "Foo"
+    assert parsed_event.request_headers["X-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert parsed_event.request_headers["x-amzn-trace-id"] == "Root=1-60488877-0b0c4e6727ab2a1c545babd0"
+    assert parsed_event.request_headers.get("missing", "Foo") == "Foo"
     assert parsed_event.prev_result == {}
-    assert parsed_event.stash is None
+    assert parsed_event.stash == {}
 
     info = parsed_event.info
     assert info is not None
     assert isinstance(info, AppSyncResolverEventInfo)
     assert info.field_name == raw_event["fieldName"]
     assert info.parent_type_name == raw_event["typeName"]
-    assert info.variables is None
-    assert info.selection_set_list is None
+    assert info.variables == {}
+    assert info.selection_set_list == []
     assert info.selection_set_graphql is None
 
     assert isinstance(parsed_event.identity, AppSyncIdentityCognito)
@@ -80,17 +80,16 @@ def test_appsync_resolver_direct():
     raw_event = load_event("appSyncDirectResolver.json")
     parsed_event = AppSyncResolverEvent(raw_event)
 
-    assert parsed_event.source is None
+    assert parsed_event.source == {}
     assert parsed_event.arguments.get("id") == raw_event["arguments"]["id"]
     assert parsed_event.stash == {}
-    assert parsed_event.prev_result is None
+    assert parsed_event.prev_result == {}
     assert isinstance(parsed_event.identity, AppSyncIdentityCognito)
 
     info = parsed_event.info
     info_raw = raw_event["info"]
     assert info is not None
     assert isinstance(info, AppSyncResolverEventInfo)
-    assert info.selection_set_list is not None
     assert info.selection_set_list == info["selectionSetList"]
     assert info.selection_set_graphql == info_raw["selectionSetGraphQL"]
     assert info.parent_type_name == info_raw["parentTypeName"]
@@ -112,7 +111,7 @@ def test_appsync_resolver_event_info():
 
     event = AppSyncResolverEvent(event)
 
-    assert event.source is None
+    assert event.source == {}
     assert event.identity is None
     assert event.info is not None
     assert isinstance(event.info, AppSyncResolverEventInfo)

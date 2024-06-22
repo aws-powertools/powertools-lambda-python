@@ -466,7 +466,7 @@ That is why you see `app.resolve(event, context)` in every example. This allows 
 
 #### Query strings and payload
 
-Within `app.current_event` property, you can access all available query strings as a dictionary via `query_string_parameters`, or a specific one via  `get_query_string_value` method.
+Within `app.current_event` property, you can access all available query strings as a dictionary via `query_string_parameters`.
 
 You can access the raw payload via `body` property, or if it's a JSON string you can quickly deserialize it via `json_body` property - like the earlier example in the [HTTP Methods](#http-methods) section.
 
@@ -476,7 +476,7 @@ You can access the raw payload via `body` property, or if it's a JSON string you
 
 #### Headers
 
-Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`, or by name via `get_header_value`. If you prefer a case-insensitive lookup of the header value, the `app.current_event.get_header_value` function automatically handles it.
+Similarly to [Query strings](#query-strings-and-payload), you can access headers as dictionary via `app.current_event.headers`. Specifically for headers, it's a case-insensitive dictionary, so all lookups are case-insensitive.
 
 ```python hl_lines="19" title="Accessing HTTP Headers"
 --8<-- "examples/event_handler_rest/src/accessing_request_details_headers.py"

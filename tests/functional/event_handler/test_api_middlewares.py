@@ -484,10 +484,7 @@ def test_class_based_middleware():
 
         def handler(self, app: ApiGatewayResolver, get_response: NextMiddleware, **kwargs) -> Response:
             request_id = app.current_event.request_context.request_id  # type: ignore[attr-defined] # using REST event in a base Resolver # noqa: E501
-            correlation_id = app.current_event.get_header_value(
-                name=self.header,
-                default_value=request_id,
-            )  # noqa: E501
+            correlation_id = app.current_event.headers.get(self.header, request_id)
 
             response = get_response(app, **kwargs)
             response.headers[self.header] = correlation_id

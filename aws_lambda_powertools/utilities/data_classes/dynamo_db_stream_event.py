@@ -1,4 +1,5 @@
 from enum import Enum
+from functools import cached_property
 from typing import Any, Dict, Iterator, Optional
 
 from aws_lambda_powertools.shared.dynamodb_deserializer import TypeDeserializer
@@ -27,7 +28,7 @@ class StreamRecord(DictWrapper):
         super().__init__(data)
         self._deserializer = TypeDeserializer()
 
-    def _deserialize_dynamodb_dict(self, key: str) -> Optional[Dict[str, Any]]:
+    def _deserialize_dynamodb_dict(self, key: str) -> Dict[str, Any]:
         """Deserialize DynamoDB records available in `Keys`, `NewImage`, and `OldImage`
 
         Parameters
@@ -37,13 +38,10 @@ class StreamRecord(DictWrapper):
 
         Returns
         -------
-        Optional[Dict[str, Any]]
+        Dict[str, Any]
             Deserialized records in Python native types
         """
-        dynamodb_dict = self._data.get(key)
-        if dynamodb_dict is None:
-            return None
-
+        dynamodb_dict = self._data.get(key) or {}
         return {k: self._deserializer.deserialize(v) for k, v in dynamodb_dict.items()}
 
     @property
@@ -52,18 +50,18 @@ class StreamRecord(DictWrapper):
         item = self.get("ApproximateCreationDateTime")
         return None if item is None else int(item)
 
-    @property
-    def keys(self) -> Optional[Dict[str, Any]]:  # type: ignore[override]
+    @cached_property
+    def keys(self) -> Dict[str, Any]:  # type: ignore[override]
         """The primary key attribute(s) for the DynamoDB item that was modified."""
         return self._deserialize_dynamodb_dict("Keys")
 
-    @property
-    def new_image(self) -> Optional[Dict[str, Any]]:
+    @cached_property
+    def new_image(self) -> Dict[str, Any]:
         """The item in the DynamoDB table as it appeared after it was modified."""
         return self._deserialize_dynamodb_dict("NewImage")
 
-    @property
-    def old_image(self) -> Optional[Dict[str, Any]]:
+    @cached_property
+    def old_image(self) -> Dict[str, Any]:
         """The item in the DynamoDB table as it appeared before it was modified."""
         return self._deserialize_dynamodb_dict("OldImage")
 
@@ -132,9 +130,9 @@ class DynamoDBRecord(DictWrapper):
         return self.get("eventVersion")
 
     @property
-    def user_identity(self) -> Optional[dict]:
+    def user_identity(self) -> dict:
         """Contains details about the type of identity that made the request"""
-        return self.get("userIdentity")
+        return self.get("userIdentity") or {}
 
 
 class DynamoDBStreamEvent(DictWrapper):

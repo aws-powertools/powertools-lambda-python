@@ -1,15 +1,11 @@
 import base64
 import json
-from collections.abc import Mapping
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterator, List, Optional, overload
+from typing import Any, Callable, Dict, Iterator, List, Mapping, MutableMapping, Optional
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.shared.headers_serializer import BaseHeadersSerializer
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
-    get_multi_value_query_string_values,
-    get_query_string_value,
-)
 
 
 class DictWrapper(Mapping):
@@ -97,18 +93,18 @@ class DictWrapper(Mapping):
 
 class BaseProxyEvent(DictWrapper):
     @property
-    def headers(self) -> Dict[str, str]:
-        return self.get("headers") or {}
+    def headers(self) -> MutableMapping[str, str]:
+        return CaseInsensitiveDict(self.get("headers"))
 
     @property
-    def query_string_parameters(self) -> Optional[Dict[str, str]]:
-        return self.get("queryStringParameters")
+    def query_string_parameters(self) -> Dict[str, str]:
+        return self.get("queryStringParameters") or {}
 
     @property
     def multi_value_query_string_parameters(self) -> Dict[str, List[str]]:
         return self.get("multiValueQueryStringParameters") or {}
 
-    @property
+    @cached_property
     def resolved_query_string_parameters(self) -> Dict[str, List[str]]:
         """
         This property determines the appropriate query string parameter to be used
@@ -117,14 +113,10 @@ class BaseProxyEvent(DictWrapper):
         This is necessary because different resolvers use different formats to encode
         multi query string parameters.
         """
-        if self.query_string_parameters is not None:
-            query_string = {key: value.split(",") for key, value in self.query_string_parameters.items()}
-            return query_string
-
-        return {}
+        return {k: v.split(",") for k, v in self.query_string_parameters.items()}
 
     @property
-    def resolved_headers_field(self) -> Dict[str, Any]:
+    def resolved_headers_field(self) -> MutableMapping[str, str]:
         """
         This property determines the appropriate header to be used
         as a trusted source for validating OpenAPI.
@@ -171,101 +163,6 @@ class BaseProxyEvent(DictWrapper):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
-
-    @overload
-    def get_query_string_value(self, name: str, default_value: str) -> str: ...
-
-    @overload
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
-
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get query string value by name
-
-        Parameters
-        ----------
-        name: str
-            Query string parameter name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Query string parameter value
-        """
-        return get_query_string_value(
-            query_string_parameters=self.query_string_parameters,
-            name=name,
-            default_value=default_value,
-        )
-
-    def get_multi_value_query_string_values(
-        self,
-        name: str,
-        default_values: Optional[List[str]] = None,
-    ) -> List[str]:
-        """Get multi-value query string parameter values by name
-
-        Parameters
-        ----------
-        name: str
-            Multi-Value query string parameter name
-        default_values: List[str], optional
-            Default values is no values are found by name
-        Returns
-        -------
-        List[str], optional
-            List of query string values
-
-        """
-        return get_multi_value_query_string_values(
-            multi_value_query_string_parameters=self.multi_value_query_string_parameters,
-            name=name,
-            default_values=default_values,
-        )
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = False,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up. By default we make a case-insensitive lookup.
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(
-            headers=self.headers,
-            name=name,
-            default_value=default_value,
-            case_sensitive=case_sensitive,
-        )
 
     def header_serializer(self) -> BaseHeadersSerializer:
         raise NotImplementedError()

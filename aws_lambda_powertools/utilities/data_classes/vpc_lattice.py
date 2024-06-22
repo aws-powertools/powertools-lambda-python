@@ -1,16 +1,14 @@
 from functools import cached_property
-from typing import Any, Dict, Optional, overload
+from typing import Any, Dict, MutableMapping, Optional
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.shared.headers_serializer import (
     BaseHeadersSerializer,
     HttpApiHeadersSerializer,
 )
 from aws_lambda_powertools.utilities.data_classes.common import BaseProxyEvent, DictWrapper
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    base64_decode,
-    get_header_value,
-    get_query_string_value,
-)
+from aws_lambda_powertools.utilities.data_classes.shared_functions import base64_decode
 
 
 class VPCLatticeEventBase(BaseProxyEvent):
@@ -25,9 +23,9 @@ class VPCLatticeEventBase(BaseProxyEvent):
         return self._json_deserializer(self.decoded_body)
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> MutableMapping[str, str]:
         """The VPC Lattice event headers."""
-        return self["headers"]
+        return CaseInsensitiveDict(self["headers"])
 
     @property
     def decoded_body(self) -> str:
@@ -46,76 +44,6 @@ class VPCLatticeEventBase(BaseProxyEvent):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["method"]
-
-    @overload
-    def get_query_string_value(self, name: str, default_value: str) -> str: ...
-
-    @overload
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
-
-    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
-        """Get query string value by name
-
-        Parameters
-        ----------
-        name: str
-            Query string parameter name
-        default_value: str, optional
-            Default value if no value was found by name
-        Returns
-        -------
-        str, optional
-            Query string parameter value
-        """
-        return get_query_string_value(
-            query_string_parameters=self.query_string_parameters,
-            name=name,
-            default_value=default_value,
-        )
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = False,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(
-            headers=self.headers,
-            name=name,
-            default_value=default_value,
-            case_sensitive=case_sensitive,
-        )
 
     def header_serializer(self) -> BaseHeadersSerializer:
         # When using the VPC Lattice integration, we have multiple HTTP Headers.
@@ -144,13 +72,9 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         """The request query string parameters."""
         return self["query_string_parameters"]
 
-    @property
-    def resolved_headers_field(self) -> Dict[str, Any]:
-        if self.headers is not None:
-            headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
-            return headers
-
-        return {}
+    @cached_property
+    def resolved_headers_field(self) -> MutableMapping[str, Any]:
+        return CaseInsensitiveDict({k: v.split(",") if "," in v else v for k, v in self.headers.items()})
 
 
 class vpcLatticeEventV2Identity(DictWrapper):
@@ -258,22 +182,12 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
         """The VPC Lattice v2 Event request context."""
         return vpcLatticeEventV2RequestContext(self["requestContext"])
 
-    @property
-    def query_string_parameters(self) -> Optional[Dict[str, str]]:
+    @cached_property
+    def query_string_parameters(self) -> Dict[str, str]:
         """The request query string parameters.
 
         For VPC Lattice V2, the queryStringParameters will contain a Dict[str, List[str]]
         so to keep compatibility with existing utilities, we merge all the values with a comma.
         """
-        params = self.get("queryStringParameters")
-        if params:
-            return {key: ",".join(value) for key, value in params.items()}
-        else:
-            return None
-
-    @property
-    def resolved_headers_field(self) -> Dict[str, str]:
-        if self.headers is not None:
-            return {key.lower(): value for key, value in self.headers.items()}
-
-        return {}
+        params = self.get("queryStringParameters") or {}
+        return {k: ",".join(v) for k, v in params.items()}

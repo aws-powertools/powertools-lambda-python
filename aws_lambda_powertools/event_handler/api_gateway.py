@@ -817,11 +817,7 @@ class ResponseBuilder(Generic[ResponseEventT]):
         bool
             True if compression is enabled and the "gzip" encoding is accepted, False otherwise.
         """
-        encoding: str = event.get_header_value(
-            name="accept-encoding",
-            default_value="",
-            case_sensitive=False,
-        )  # noqa: E501
+        encoding = event.headers.get("accept-encoding", "")
         if "gzip" in encoding:
             if response_compression is not None:
                 return response_compression  # e.g., Response(compress=False/True))

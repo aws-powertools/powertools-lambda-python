@@ -1,11 +1,10 @@
 import base64
 from functools import cached_property
-from typing import Any, Dict, Iterator, List, Optional, overload
+from typing import Any, Dict, Iterator, List, MutableMapping, Optional
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
-)
 
 
 class KafkaEventRecord(DictWrapper):
@@ -64,40 +63,10 @@ class KafkaEventRecord(DictWrapper):
         """The raw Kafka record headers."""
         return self["headers"]
 
-    @property
-    def decoded_headers(self) -> Dict[str, bytes]:
+    @cached_property
+    def decoded_headers(self) -> MutableMapping[str, bytes]:
         """Decodes the headers as a single dictionary."""
-        return {k: bytes(v) for chunk in self.headers for k, v in chunk.items()}
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = True,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = True,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = True,
-    ) -> Optional[str]:
-        """Get a decoded header value by name."""
-        return get_header_value(
-            headers=self.decoded_headers,
-            name=name,
-            default_value=default_value,
-            case_sensitive=case_sensitive,
-        )
+        return CaseInsensitiveDict({k: bytes(v) for chunk in self.headers for k, v in chunk.items()})
 
 
 class KafkaEvent(DictWrapper):

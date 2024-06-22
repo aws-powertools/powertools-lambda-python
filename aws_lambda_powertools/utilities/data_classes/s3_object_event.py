@@ -1,9 +1,8 @@
-from typing import Dict, Optional, overload
+from typing import MutableMapping, Optional
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
-)
 
 
 class S3ObjectContext(DictWrapper):
@@ -65,52 +64,13 @@ class S3ObjectUserRequest(DictWrapper):
         return self["url"]
 
     @property
-    def headers(self) -> Dict[str, str]:
+    def headers(self) -> MutableMapping[str, str]:
         """A map of string to strings containing the HTTP headers and their values from the original call,
         excluding any authorization-related headers.
 
         If the same header appears multiple times, their values are combined into a comma-delimited list.
         The case of the original headers is retained in this map."""
-        return self["headers"]
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = False,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(self.headers, name, default_value, case_sensitive)
+        return CaseInsensitiveDict(self["headers"])
 
 
 class S3ObjectSessionIssuer(DictWrapper):

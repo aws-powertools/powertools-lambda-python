@@ -1,9 +1,8 @@
-from typing import Any, Dict, List, Optional, Union, overload
+from typing import Any, Dict, List, MutableMapping, Optional, Union
+
+from requests.structures import CaseInsensitiveDict
 
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
-from aws_lambda_powertools.utilities.data_classes.shared_functions import (
-    get_header_value,
-)
 
 
 def get_identity_object(identity: Optional[dict]) -> Any:
@@ -118,15 +117,15 @@ class AppSyncResolverEventInfo(DictWrapper):
         return self["parentTypeName"]
 
     @property
-    def variables(self) -> Optional[Dict[str, str]]:
+    def variables(self) -> Dict[str, str]:
         """A map which holds all variables that are passed into the GraphQL request."""
-        return self.get("variables")
+        return self.get("variables") or {}
 
     @property
-    def selection_set_list(self) -> Optional[List[str]]:
+    def selection_set_list(self) -> List[str]:
         """A list representation of the fields in the GraphQL selection set. Fields that are aliased will
         only be referenced by the alias name, not the field name."""
-        return self.get("selectionSetList")
+        return self.get("selectionSetList") or []
 
     @property
     def selection_set_graphql(self) -> Optional[str]:
@@ -184,22 +183,22 @@ class AppSyncResolverEvent(DictWrapper):
         return get_identity_object(self.get("identity"))
 
     @property
-    def source(self) -> Optional[Dict[str, Any]]:
+    def source(self) -> Dict[str, Any]:
         """A map that contains the resolution of the parent field."""
-        return self.get("source")
+        return self.get("source") or {}
 
     @property
-    def request_headers(self) -> Dict[str, str]:
+    def request_headers(self) -> MutableMapping[str, str]:
         """Request headers"""
-        return self["request"]["headers"]
+        return CaseInsensitiveDict(self["request"]["headers"])
 
     @property
-    def prev_result(self) -> Optional[Dict[str, Any]]:
+    def prev_result(self) -> Dict[str, Any]:
         """It represents the result of whatever previous operation was executed in a pipeline resolver."""
         prev = self.get("prev")
         if not prev:
-            return None
-        return prev.get("result")
+            return {}
+        return prev.get("result") or {}
 
     @property
     def info(self) -> AppSyncResolverEventInfo:
@@ -207,48 +206,9 @@ class AppSyncResolverEvent(DictWrapper):
         return self._info
 
     @property
-    def stash(self) -> Optional[dict]:
+    def stash(self) -> dict:
         """The stash is a map that is made available inside each resolver and function mapping template.
         The same stash instance lives through a single resolver execution. This means that you can use the
         stash to pass arbitrary data across request and response mapping templates, and across functions in
         a pipeline resolver."""
-        return self.get("stash")
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: str,
-        case_sensitive: bool = False,
-    ) -> str: ...
-
-    @overload
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]: ...
-
-    def get_header_value(
-        self,
-        name: str,
-        default_value: Optional[str] = None,
-        case_sensitive: bool = False,
-    ) -> Optional[str]:
-        """Get header value by name
-
-        Parameters
-        ----------
-        name: str
-            Header name
-        default_value: str, optional
-            Default value if no value was found by name
-        case_sensitive: bool
-            Whether to use a case-sensitive look up
-        Returns
-        -------
-        str, optional
-            Header value
-        """
-        return get_header_value(self.request_headers, name, default_value, case_sensitive)
+        return self.get("stash") or {}

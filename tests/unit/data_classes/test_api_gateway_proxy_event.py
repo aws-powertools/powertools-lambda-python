@@ -54,8 +54,8 @@ def test_default_api_gateway_proxy_event():
     assert identity.user_arn == identity_raw["userArn"]
     assert identity.client_cert.subject_dn == "www.example.com"
 
-    assert parsed_event.path_parameters == raw_event["pathParameters"]
-    assert parsed_event.stage_variables == raw_event["stageVariables"]
+    assert parsed_event.path_parameters == (raw_event["pathParameters"] or {})
+    assert parsed_event.stage_variables == (raw_event["stageVariables"] or {})
     assert parsed_event.body == raw_event["body"]
     assert parsed_event.is_base64_encoded == raw_event["isBase64Encoded"]
 
@@ -121,8 +121,8 @@ def test_api_gateway_proxy_event():
     assert identity.user_arn == identity_raw["userArn"]
     assert identity.client_cert.subject_dn == "www.example.com"
 
-    assert parsed_event.path_parameters == raw_event["pathParameters"]
-    assert parsed_event.stage_variables == raw_event["stageVariables"]
+    assert parsed_event.path_parameters == (raw_event["pathParameters"] or {})
+    assert parsed_event.stage_variables == (raw_event["stageVariables"] or {})
     assert parsed_event.body == raw_event["body"]
     assert parsed_event.is_base64_encoded == raw_event["isBase64Encoded"]
 
