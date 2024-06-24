@@ -47,6 +47,12 @@ class VPCLatticeEventBase(BaseProxyEvent):
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["method"]
 
+    @overload
+    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
+
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
 
@@ -72,7 +78,7 @@ class VPCLatticeEventBase(BaseProxyEvent):
         self,
         name: str,
         default_value: str,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> str: ...
 
     @overload
@@ -80,14 +86,14 @@ class VPCLatticeEventBase(BaseProxyEvent):
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]: ...
 
     def get_header_value(
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]:
         """Get header value by name
 
@@ -139,7 +145,7 @@ class VPCLatticeEvent(VPCLatticeEventBase):
         return self["query_string_parameters"]
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         if self.headers is not None:
             headers = {key.lower(): value.split(",") if "," in value else value for key, value in self.headers.items()}
             return headers
@@ -266,7 +272,7 @@ class VPCLatticeEventV2(VPCLatticeEventBase):
             return None
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, str]]:
+    def resolved_headers_field(self) -> Dict[str, str]:
         if self.headers is not None:
             return {key.lower(): value for key, value in self.headers.items()}
 

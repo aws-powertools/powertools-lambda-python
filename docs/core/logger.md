@@ -274,6 +274,16 @@ Logger is commonly initialized in the global scope. Due to [Lambda Execution Con
     --8<-- "examples/logger/src/clear_state_event_two.json"
     ```
 
+### Accessing currently configured keys
+
+You can view all currently configured keys from the Logger state using the `get_current_keys()` method. This method is useful when you need to avoid overwriting keys that are already configured.
+
+=== "get_current_keys.py"
+
+    ```python hl_lines="4 11"
+    --8<-- "examples/logger/src/get_current_keys.py"
+    ```
+
 ### Log levels
 
 The default log level is `INFO`. It can be set using the `level` constructor option, `setLevel()` method or by using the `POWERTOOLS_LOG_LEVEL` environment variable.
@@ -465,9 +475,9 @@ You can use any of the following built-in JMESPath expressions as part of [injec
 
 ### Reusing Logger across your code
 
-Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name - env var or explicit parameter - will reuse a previous Logger instance. Just like `logging.getLogger("logger_name")` would in the standard library if called with the same logger name.
+Similar to [Tracer](./tracer.md#reusing-tracer-across-your-code){target="_blank"}, a new instance that uses the same `service` name will reuse a previous Logger instance.
 
-Notice in the CloudWatch Logs output how `payment_id` appeared as expected when logging in `collect.py`.
+Notice in the CloudWatch Logs output how `payment_id` appears as expected when logging in `collect.py`.
 
 === "logger_reuse.py"
 
@@ -486,7 +496,6 @@ Notice in the CloudWatch Logs output how `payment_id` appeared as expected when 
     ```json hl_lines="12"
     --8<-- "examples/logger/src/logger_reuse_output.json"
     ```
-
 ???+ note "Note: About Child Loggers"
     Coming from standard library, you might be used to use `logging.getLogger(__name__)`. This will create a new instance of a Logger with a different name.
 
@@ -585,7 +594,6 @@ For Logger, the `service` is the logging key customers can use to search log ope
 ??? tip "Tip: Prefer [Logger Reuse feature](#reusing-logger-across-your-code) over inheritance unless strictly necessary, [see caveats.](#reusing-logger-across-your-code)"
 
 > Python Logging hierarchy happens via the dot notation: `service`, `service.child`, `service.child_2`
-
 For inheritance, Logger uses a `child=True` parameter along with `service` being the same value across Loggers.
 
 For child Loggers, we introspect the name of your module where `Logger(child=True, service="name")` is called, and we name your Logger as **{service}.{filename}**.
@@ -600,7 +608,6 @@ For child Loggers, we introspect the name of your module where `Logger(child=Tru
     ```
 
 === "logging_inheritance_module.py"
-
     ```python hl_lines="1 9"
     --8<-- "examples/logger/src/logging_inheritance_module.py"
     ```
@@ -732,7 +739,7 @@ The `log` argument is the final log record containing [our standard keys](#stand
 For exceptional cases where you want to completely replace our formatter logic, you can subclass `BasePowertoolsFormatter`.
 
 ???+ warning
-    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means keeping state of logging keys added.
+    You will need to implement `append_keys`, `clear_state`, override `format`, and optionally `get_current_keys`, and `remove_keys` to keep the same feature set Powertools for AWS Lambda (Python) Logger provides. This also means tracking the added logging keys.
 
 === "bring_your_own_formatter_from_scratch.py"
 
@@ -806,10 +813,11 @@ for the given name and level to the logging module. By default, this logs all bo
 
 You can copy the Logger setup to all or sub-sets of registered external loggers. Use the `copy_config_to_registered_logger` method to do this.
 
-???+ tip
-    To help differentiate between loggers, we include the standard logger `name` attribute for all loggers we copied configuration to.
+!!! tip "We include the logger `name` attribute for all loggers we copied configuration to help you differentiate them."
 
-By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes. You can also provide optional `log_level` attribute external loggers will be configured with.
+By default all registered loggers will be modified. You can change this behavior by providing `include` and `exclude` attributes.
+
+You can also provide optional `log_level` attribute external top-level loggers will be configured with, by default it'll use the source logger log level. You can opt-out by using `ignore_log_level=True` parameter.
 
 ```python hl_lines="10" title="Cloning Logger config to all other registered standard loggers"
 ---8<-- "examples/logger/src/cloning_logger_config.py"

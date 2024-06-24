@@ -15,6 +15,7 @@ from aws_lambda_powertools.shared.functions import (
     resolve_env_var_choice,
     resolve_max_age,
     resolve_truthy_env_var_choice,
+    sanitize_xray_segment_name,
     strtobool,
 )
 from aws_lambda_powertools.utilities.data_classes.common import DictWrapper
@@ -175,3 +176,27 @@ def test_abs_lambda_path_w_filename_envvar(default_lambda_path):
     os.environ["LAMBDA_TASK_ROOT"] = default_lambda_path
     # Then path = env + relative_path
     assert abs_lambda_path(relative_path="cert/pub.cert") == str(Path(os.environ["LAMBDA_TASK_ROOT"], relative_path))
+
+
+def test_sanitize_xray_segment_name():
+    # GIVEN a name with invalid characters
+    invalid_name = "app?;*.lambda_function.(<locals>).get_todos!$~^<>"
+
+    # WHEN we sanitize this name by removing invalid characters
+    sanitized_name = sanitize_xray_segment_name(invalid_name)
+
+    # THEN the sanitized name should not contain invalid characters
+    expected_name = "app.lambda_function.locals.get_todos"
+    assert sanitized_name == expected_name
+
+
+def test_sanitize_xray_segment_name_with_no_special_characters():
+    # GIVEN a name without any invalid characters
+    valid_name = "app#lambda_function"
+
+    # WHEN we sanitize this name
+    sanitized_name = sanitize_xray_segment_name(valid_name)
+
+    # THEN the sanitized name remains the same as the original name
+    expected_name = valid_name
+    assert sanitized_name == expected_name

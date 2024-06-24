@@ -3,7 +3,9 @@ import logging
 from copy import deepcopy
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from aws_lambda_powertools.utilities.idempotency.config import IdempotencyConfig
+from aws_lambda_powertools.utilities.idempotency.config import (
+    IdempotencyConfig,
+)
 from aws_lambda_powertools.utilities.idempotency.exceptions import (
     IdempotencyAlreadyInProgressError,
     IdempotencyInconsistentStateError,
@@ -227,7 +229,15 @@ class IdempotencyHandler:
             )
         response_dict: Optional[dict] = data_record.response_json_as_dict()
         if response_dict is not None:
-            return self.output_serializer.from_dict(response_dict)
+            serialized_response = self.output_serializer.from_dict(response_dict)
+            if self.config.response_hook is not None:
+                logger.debug("Response hook configured, invoking function")
+                return self.config.response_hook(
+                    serialized_response,
+                    data_record,
+                )
+            return serialized_response
+
         return None
 
     def _get_function_response(self):

@@ -86,6 +86,7 @@ Log Data Event for Troubleshooting
 | [AppSync Resolver](#appsync-resolver)                                         | `AppSyncResolverEvent`                             |
 | [AWS Config Rule](#aws-config-rule)                                           | `AWSConfigRuleEvent`                               |
 | [Bedrock Agent](#bedrock-agent)                                               | `BedrockAgent`                                     |
+| [CloudFormation Custom Resource](#cloudformation-custom-resource)             | `CloudFormationCustomResourceEvent`                |
 | [CloudWatch Alarm State Change Action](#cloudwatch-alarm-state-change-action) | `CloudWatchAlarmEvent`                             |
 | [CloudWatch Dashboard Custom Widget](#cloudwatch-dashboard-custom-widget)     | `CloudWatchDashboardCustomWidgetEvent`             |
 | [CloudWatch Logs](#cloudwatch-logs)                                           | `CloudWatchLogsEvent`                              |
@@ -495,6 +496,14 @@ In this example, we also use the new Logger `correlation_id` and built-in `corre
     --8<-- "examples/event_sources/src/bedrock_agent_event.py"
     ```
 
+### CloudFormation Custom Resource
+
+=== "app.py"
+
+    ```python hl_lines="11 13 15 17 19"
+    --8<-- "examples/event_sources/src/cloudformation_custom_resource_handler.py"
+    ```
+
 ### CloudWatch Dashboard Custom Widget
 
 === "app.py"
@@ -662,18 +671,21 @@ Data classes and utility functions to help create continuous delivery pipelines 
 Cognito User Pools have several [different Lambda trigger sources](https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-identity-pools-working-with-aws-lambda-triggers.html#cognito-user-identity-pools-working-with-aws-lambda-trigger-sources){target="_blank"}, all of which map to a different data class, which
 can be imported from `aws_lambda_powertools.data_classes.cognito_user_pool_event`:
 
-| Trigger/Event Source  | Data Class                                                                     |
-| --------------------- | ------------------------------------------------------------------------------ |
-| Custom message event  | `data_classes.cognito_user_pool_event.CustomMessageTriggerEvent`               |
-| Post authentication   | `data_classes.cognito_user_pool_event.PostAuthenticationTriggerEvent`          |
-| Post confirmation     | `data_classes.cognito_user_pool_event.PostConfirmationTriggerEvent`            |
-| Pre authentication    | `data_classes.cognito_user_pool_event.PreAuthenticationTriggerEvent`           |
-| Pre sign-up           | `data_classes.cognito_user_pool_event.PreSignUpTriggerEvent`                   |
-| Pre token generation  | `data_classes.cognito_user_pool_event.PreTokenGenerationTriggerEvent`          |
-| User migration        | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent`               |
-| Define Auth Challenge | `data_classes.cognito_user_pool_event.DefineAuthChallengeTriggerEvent`         |
-| Create Auth Challenge | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`         |
-| Verify Auth Challenge | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent` |
+| Trigger/Event Source    | Data Class                                                                     |
+| ---------------------   | ------------------------------------------------------------------------------ |
+| Custom message event    | `data_classes.cognito_user_pool_event.CustomMessageTriggerEvent`               |
+| Post authentication     | `data_classes.cognito_user_pool_event.PostAuthenticationTriggerEvent`          |
+| Post confirmation       | `data_classes.cognito_user_pool_event.PostConfirmationTriggerEvent`            |
+| Pre authentication      | `data_classes.cognito_user_pool_event.PreAuthenticationTriggerEvent`           |
+| Pre sign-up             | `data_classes.cognito_user_pool_event.PreSignUpTriggerEvent`                   |
+| Pre token generation    | `data_classes.cognito_user_pool_event.PreTokenGenerationTriggerEvent`          |
+| Pre token generation V2 | `data_classes.cognito_user_pool_event.PreTokenGenerationV2TriggerEvent`        |
+| User migration          | `data_classes.cognito_user_pool_event.UserMigrationTriggerEvent`               |
+| Define Auth Challenge   | `data_classes.cognito_user_pool_event.DefineAuthChallengeTriggerEvent`         |
+| Create Auth Challenge   | `data_classes.cognito_user_pool_event.CreateAuthChallengeTriggerEvent`         |
+| Verify Auth Challenge   | `data_classes.cognito_user_pool_event.VerifyAuthChallengeResponseTriggerEvent` |
+| Custom Email Sender     | `data_classes.cognito_user_pool_event.CustomEmailSenderTriggerEvent`           |
+| Custom SMS Sender       | `data_classes.cognito_user_pool_event.CustomSMSSenderTriggerEvent`             |
 
 #### Post Confirmation Example
 

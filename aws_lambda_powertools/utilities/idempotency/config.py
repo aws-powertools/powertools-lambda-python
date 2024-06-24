@@ -1,5 +1,6 @@
 from typing import Dict, Optional
 
+from aws_lambda_powertools.utilities.idempotency import IdempotentHookFunction
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
 
@@ -15,6 +16,7 @@ class IdempotencyConfig:
         local_cache_max_items: int = 256,
         hash_function: str = "md5",
         lambda_context: Optional[LambdaContext] = None,
+        response_hook: Optional[IdempotentHookFunction] = None,
     ):
         """
         Initialize the base persistence layer
@@ -37,6 +39,8 @@ class IdempotencyConfig:
             Function to use for calculating hashes, by default md5.
         lambda_context: LambdaContext, optional
             Lambda Context containing information about the invocation, function and execution environment.
+        response_hook: IdempotentHookFunction, optional
+            Hook function to be called when an idempotent response is returned from the idempotent store.
         """
         self.event_key_jmespath = event_key_jmespath
         self.payload_validation_jmespath = payload_validation_jmespath
@@ -47,6 +51,7 @@ class IdempotencyConfig:
         self.local_cache_max_items = local_cache_max_items
         self.hash_function = hash_function
         self.lambda_context: Optional[LambdaContext] = lambda_context
+        self.response_hook: Optional[IdempotentHookFunction] = response_hook
 
     def register_lambda_context(self, lambda_context: LambdaContext):
         """Captures the Lambda context, to calculate the remaining time before the invocation times out"""

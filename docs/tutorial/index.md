@@ -727,7 +727,7 @@ Cross-cutting concerns like filtering traces by Cold Start, including response a
 We can simplify our previous patterns by using [Powertools for AWS Lambda (Python) Tracer](../core/tracer.md){target="_blank"}; a thin wrapper on top of X-Ray SDK.
 
 ???+ note
-    You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools` only.
+    You can now safely remove `aws-xray-sdk` from `requirements.txt`; keep `aws-lambda-powertools[tracer]` only.
 
 ```python title="Refactoring with Powertools for AWS Lambda (Python) Tracer" hl_lines="1 6 11 13 19 21 27"
 from aws_lambda_powertools import Logger, Tracer

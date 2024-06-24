@@ -48,6 +48,9 @@ class BasePowertoolsFormatter(logging.Formatter, metaclass=ABCMeta):
     def append_keys(self, **additional_keys) -> None:
         raise NotImplementedError()
 
+    def get_current_keys(self) -> Dict[str, Any]:
+        return {}
+
     def remove_keys(self, keys: Iterable[str]) -> None:
         raise NotImplementedError()
 
@@ -230,6 +233,9 @@ class LambdaPowertoolsFormatter(BasePowertoolsFormatter):
 
     def append_keys(self, **additional_keys) -> None:
         self.log_format.update(additional_keys)
+
+    def get_current_keys(self) -> Dict[str, Any]:
+        return self.log_format
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         for key in keys:

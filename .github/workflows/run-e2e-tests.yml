@@ -19,6 +19,7 @@ on:
   push:
     branches:
       - develop
+      - v3
     paths:
       - "aws_lambda_powertools/**"
       - "tests/e2e/**"
@@ -51,11 +52,11 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' && github.repository == 'aws-powertools/powertools-lambda-python' }}
     steps:
       - name: "Checkout"
-        uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
       - name: Install poetry
         run: pipx install poetry
       - name: "Use Python"
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
           python-version: ${{ matrix.version }}
           architecture: "x64"

@@ -124,7 +124,7 @@ class BaseProxyEvent(DictWrapper):
         return {}
 
     @property
-    def resolved_headers_field(self) -> Optional[Dict[str, Any]]:
+    def resolved_headers_field(self) -> Dict[str, Any]:
         """
         This property determines the appropriate header to be used
         as a trusted source for validating OpenAPI.
@@ -171,6 +171,12 @@ class BaseProxyEvent(DictWrapper):
     def http_method(self) -> str:
         """The HTTP method used. Valid values include: DELETE, GET, HEAD, OPTIONS, PATCH, POST, and PUT."""
         return self["httpMethod"]
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: str) -> str: ...
+
+    @overload
+    def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]: ...
 
     def get_query_string_value(self, name: str, default_value: Optional[str] = None) -> Optional[str]:
         """Get query string value by name
@@ -222,7 +228,7 @@ class BaseProxyEvent(DictWrapper):
         self,
         name: str,
         default_value: str,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> str: ...
 
     @overload
@@ -230,14 +236,14 @@ class BaseProxyEvent(DictWrapper):
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]: ...
 
     def get_header_value(
         self,
         name: str,
         default_value: Optional[str] = None,
-        case_sensitive: Optional[bool] = False,
+        case_sensitive: bool = False,
     ) -> Optional[str]:
         """Get header value by name
 

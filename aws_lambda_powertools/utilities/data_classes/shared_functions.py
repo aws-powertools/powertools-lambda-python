@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import base64
-from typing import Any, Dict
+from typing import Any, Dict, overload
 
 
 def base64_decode(value: str) -> str:
@@ -21,11 +21,29 @@ def base64_decode(value: str) -> str:
     return base64.b64decode(value).decode("UTF-8")
 
 
+@overload
 def get_header_value(
     headers: dict[str, Any],
     name: str,
-    default_value: str | None,
-    case_sensitive: bool | None,
+    default_value: str,
+    case_sensitive: bool = False,
+) -> str: ...
+
+
+@overload
+def get_header_value(
+    headers: dict[str, Any],
+    name: str,
+    default_value: str | None = None,
+    case_sensitive: bool = False,
+) -> str | None: ...
+
+
+def get_header_value(
+    headers: dict[str, Any],
+    name: str,
+    default_value: str | None = None,
+    case_sensitive: bool = False,
 ) -> str | None:
     """
     Get the value of a header by its name.
@@ -39,7 +57,7 @@ def get_header_value(
     default_value: str, optional
         The default value to return if the header is not found. Default is None.
     case_sensitive: bool, optional
-        Indicates whether the header name should be case-sensitive. Default is None.
+        Indicates whether the header name should be case-sensitive. Default is False.
 
     Returns
     -------
@@ -60,6 +78,22 @@ def get_header_value(
         # Default value is returned if no matches was found
         default_value,
     )
+
+
+@overload
+def get_query_string_value(
+    query_string_parameters: Dict[str, str] | None,
+    name: str,
+    default_value: str,
+) -> str: ...
+
+
+@overload
+def get_query_string_value(
+    query_string_parameters: Dict[str, str] | None,
+    name: str,
+    default_value: str | None = None,
+) -> str | None: ...
 
 
 def get_query_string_value(

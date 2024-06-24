@@ -19,7 +19,7 @@ def build_idempotency_put_item_stub(
     data: Dict,
     function_name: str = "test-func",
     function_qualified_name: str = "test_idempotent_lambda_first_execution_event_mutation.<locals>",
-    module_name: str = "functional.idempotency.test_idempotency",
+    module_name: str = "tests.functional.idempotency._boto3.test_idempotency",
     handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = (
@@ -57,7 +57,7 @@ def build_idempotency_update_item_stub(
     handler_response: Dict,
     function_name: str = "test-func",
     function_qualified_name: str = "test_idempotent_lambda_first_execution_event_mutation.<locals>",
-    module_name: str = "functional.idempotency.test_idempotency",
+    module_name: str = "tests.functional.idempotency._boto3.test_idempotency",
     handler_name: str = "lambda_handler",
 ) -> Dict:
     idempotency_key_hash = (

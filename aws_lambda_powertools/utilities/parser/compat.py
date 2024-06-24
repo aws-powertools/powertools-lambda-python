@@ -22,7 +22,7 @@ def disable_pydantic_v2_warning():
 
         version = __version__.split(".")
 
-        if int(version[0]) == 2:
+        if int(version[0]) == 2:  # pragma: no cover  # dropping in v3
             import warnings
 
             from pydantic import PydanticDeprecatedSince20, PydanticDeprecationWarning
@@ -30,5 +30,5 @@ def disable_pydantic_v2_warning():
             warnings.filterwarnings("ignore", category=PydanticDeprecationWarning)
             warnings.filterwarnings("ignore", category=PydanticDeprecatedSince20)
 
-    except ImportError:
+    except ImportError:  # pragma: no cover # false positive; dropping in v3
         pass

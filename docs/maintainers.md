@@ -154,9 +154,9 @@ Firstly, make sure the commit history in the `develop` branch **(1)** it's up to
 
 **Looks good, what's next?**
 
-Kickoff the `Release` workflow with the intended version - this might take around 25m-30m to complete.
+Kickoff the [`Release` workflow](https://github.com/aws-powertools/powertools-lambda-python/blob/6db9079d21698b72f5d36d72c993c1aad7276db6/.github/workflows/release.yml#L3) with the intended version - this might take around 25m-30m to complete.
 
-Once complete, you can start drafting the release notes to let customers know **what changed and what's in it for them (a.k.a why they should care)**. We have guidelines in the release notes section so you know what good looks like.
+Once complete, you can start drafting the release notes to let customers know **what changed and what's in it for them (a.k.a why they should care)**. We have guidelines in the [release notes section](#drafting-release-notes) so you know what good looks like.
 
 > **NOTE**: Documentation might take a few minutes to reflect the latest version due to caching and CDN invalidations.
 
@@ -231,33 +231,43 @@ Release complete : milestone, m6, 10:31,2m
 
 #### Drafting release notes
 
+!!! info "Make sure the release workflow completed before you edit release notes."
+
 Visit the [Releases page](https://github.com/aws-powertools/powertools-lambda-python/releases) and choose the edit pencil button.
 
 Make sure the `tag` field reflects the new version you're releasing, the target branch field is set to `develop`, and `release title` matches your tag e.g., `v1.26.0`.
 
 You'll notice we group all changes based on their [labels](#labels) like `feature`, `bug`, `documentation`, etc.
+!!! question inline end "Spotted a typo?"
 
-**I spotted a typo or incorrect grouping - how do I fix it?**
+    Edit the respective PR title/labels and run the [Release Drafter workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml).
 
-Edit the respective PR title and update their [labels](#labels). Then run the [Release Drafter workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release-drafter.yml) to update the Draft release.
+!!! question "All good, what's next?"
 
-> **NOTE**: This won't change the CHANGELOG as the merge commit is immutable. Don't worry about it. We'd only rewrite git history only if this can lead to confusion and we'd pair with another maintainer.
+The best part comes now!
 
-**All looking good, what's next?**
+Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about.
 
-The best part comes now. Replace the placeholder `[Human readable summary of changes]` with what you'd like to communicate to customers what this release is all about. Rule of thumb: always put yourself in the customers shoes.
+!!! tip inline end "Always put yourself in the customers shoes. Most read the first sentence only to know whether this is for them."
 
 These are some questions to keep in mind when drafting your first or future release notes:
 
-- Can customers understand at a high level what changed in this release?
-- Is there a link to the documentation where they can read more about each main change?
-- Are there any graphics or [code snippets](https://carbon.now.sh/) that can enhance readability?
-- Are we calling out any key contributor(s) to this release?
-    - All contributors are automatically credited, use this as an exceptional case to feature them
+- **Can customers briefly understand the main changes in less than 30s?**
+    - _tip: first paragraph is punchy and optimizes for dependabot-like notifications._
+- **Are we calling out key contributor(s) to this release?**
+- **Is it clear what each change enables/unlocks and before?**
+    - _tip: use present and active voice; lead with the answer._
+- **Does it include a link to the documentation for each main change?**
+    - _tip: release explains what a change unblocks/enables (before/after), docs go in details_
+- **Is code snippet better in text or [graphic](https://carbon.now.sh)?**
+- **Does code snippet focus on the change only?**
+    - _tip: release snippets highlight functionality, no need to be functional (that's docs)_
 
 Once you're happy, hit `Publish release` 🎉🎉🎉.
 
-This will kick off the [Publishing workflow](https://github.com/aws-powertools/powertools-lambda-python/actions/workflows/release.yml) and within a few minutes you should see the latest version in PyPi, and all issues labeled as `pending-release` will be closed and notified.
+### Releasing an alpha release
+
+We publish alpha releases _(`prerelease`)_ every morning during business days (~8am UTC). You can also manually trigger `pre-release` workflow when needed.
 
 ### Run end to end tests
 

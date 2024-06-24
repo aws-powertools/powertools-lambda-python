@@ -32,14 +32,14 @@ class S3EventBridgeNotificationObject(DictWrapper):
         return unquote_plus(self["key"])
 
     @property
-    def size(self) -> str:
-        """Object size"""
-        return self["size"]
+    def size(self) -> Optional[int]:
+        """Object size. Object deletion event doesn't contain size."""
+        return self.get("size")
 
     @property
     def etag(self) -> str:
-        """Object etag"""
-        return self["etag"]
+        """Object etag. Object deletion event doesn't contain etag; we default to empty string"""
+        return self.get("etag", "")  # type: ignore[return-value]  # false positive
 
     @property
     def version_id(self) -> str:
@@ -178,8 +178,8 @@ class S3Object(DictWrapper):
 
     @property
     def etag(self) -> str:
-        """object eTag"""
-        return self["s3"]["object"]["eTag"]
+        """Object eTag. Object deletion event doesn't contain eTag; we default to empty string"""
+        return self["s3"]["object"].get("eTag", "")
 
     @property
     def version_id(self) -> Optional[str]:

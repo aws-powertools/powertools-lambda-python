@@ -22,6 +22,9 @@ from typing import (
     overload,
 )
 
+from aws_lambda_powertools.logging.constants import (
+    LOGGER_ATTRIBUTE_PRECONFIGURED,
+)
 from aws_lambda_powertools.shared import constants
 from aws_lambda_powertools.shared.functions import (
     extract_event_from_common_models,
@@ -264,7 +267,7 @@ class Logger:
 
     # Prevent __getattr__ from shielding unknown attribute errors in type checkers
     # https://github.com/aws-powertools/powertools-lambda-python/issues/1660
-    if not TYPE_CHECKING:
+    if not TYPE_CHECKING:  # pragma: no cover
 
         def __getattr__(self, name):
             # Proxy attributes not found to actual logger to support backward compatibility
@@ -292,7 +295,7 @@ class Logger:
         #   a) multiple handlers being attached
         #   b) different sampling mechanisms
         #   c) multiple messages from being logged as handlers can be duplicated
-        is_logger_preconfigured = getattr(self._logger, "init", False)
+        is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if self.child or is_logger_preconfigured:
             return
 
@@ -580,8 +583,11 @@ class Logger:
             extra=extra,
         )
 
-    def append_keys(self, **additional_keys) -> None:
+    def append_keys(self, **additional_keys: object) -> None:
         self.registered_formatter.append_keys(**additional_keys)
+
+    def get_current_keys(self) -> Dict[str, Any]:
+        return self.registered_formatter.get_current_keys()
 
     def remove_keys(self, keys: Iterable[str]) -> None:
         self.registered_formatter.remove_keys(keys)
@@ -610,7 +616,7 @@ class Logger:
 
         # Mode 1
         log_keys = {**self._default_log_keys, **keys}
-        is_logger_preconfigured = getattr(self._logger, "init", False)
+        is_logger_preconfigured = getattr(self._logger, LOGGER_ATTRIBUTE_PRECONFIGURED, False)
         if not is_logger_preconfigured:
             formatter = self.logger_formatter or LambdaPowertoolsFormatter(**formatter_options, **log_keys)
             self.registered_handler.setFormatter(formatter)

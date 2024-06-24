@@ -44,14 +44,14 @@ jobs:
       id-token: write  # trade JWT token for AWS credentials in AWS Docs account
       pages: write     # uncomment if mike fails as we migrated to S3 hosting
     steps:
-      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633  # v4.1.2
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
         with:
           fetch-depth: 0
           ref: ${{ inputs.git_ref }}
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python
-        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
         with:
           python-version: "3.12"
           cache: "poetry"
