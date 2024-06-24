@@ -147,3 +147,13 @@ extra:
   version:
     provider: mike
     default: latest
+  social:
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/B8zZKbbyET
+      name: Discord Server for Powertools for AWS
+    - icon: material/web
+      link: https://powertools.aws.dev/
+      name: Official website for Powertools for AWS
+    - icon: simple/python
+      link: https://pypi.org/project/aws-lambda-powertools/
+      name: PyPi package
