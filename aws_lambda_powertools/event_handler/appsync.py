@@ -7,6 +7,7 @@ from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import Resol
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
+from aws_lambda_powertools.warnings import PowertoolsUserWarning
 
 logger = logging.getLogger(__name__)
 
@@ -280,6 +281,7 @@ class AppSyncResolver(Router):
                 f"Both synchronous and asynchronous resolvers found for the same event and field."
                 f"The synchronous resolver takes precedence. Executing: {resolver['func'].__name__}",
                 stacklevel=2,
+                category=PowertoolsUserWarning,
             )
 
         if resolver:
