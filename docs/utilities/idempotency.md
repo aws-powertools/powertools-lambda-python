@@ -278,13 +278,13 @@ By default, caching is disabled since we don't know how big your response could 
 
 Use [`IdempotencyConfig`](#customizing-the-default-behavior)'s **`event_key_jmespath`** parameter to select one or more payload parts as your idempotency key.
 
-> **Payment scenario**
+> **Example scenario**
 
 In this example, we have a Lambda handler that creates a payment for a user subscribing to a product. We want to ensure that we don't accidentally charge our customer by subscribing them more than once.
 
 Imagine the function runs successfully, but the client never receives the response due to a connection issue. It is safe to immediately retry in this instance, as the idempotent decorator will return a previously saved response.
 
-**We want** to use `user_id` and `product_id` fields as our idempotency key. If we were to treat the entire request as our idempotency key, a simple HTTP header change would cause our function to run again.
+We want to use `user_id` and `product_id` fields as our idempotency key. **If we were** to treat the entire request as our idempotency key, a simple HTTP header change would cause our function to run again.
 
 ???+ tip "Deserializing JSON strings in payloads for increased accuracy."
     The payload extracted by the `event_key_jmespath` is treated as a string by default.
