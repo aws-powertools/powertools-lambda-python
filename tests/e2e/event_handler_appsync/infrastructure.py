@@ -58,5 +58,19 @@ class EventHandlerAppSyncStack(BaseInfrastructure):
             max_batch_size=10,
         )
 
+        lambda_datasource.create_resolver(
+            "QueryGetPostRelatedResolverAggregate",
+            type_name="Post",
+            field_name="relatedPostsAggregate",
+            max_batch_size=10,
+        )
+
+        lambda_datasource.create_resolver(
+            "QueryGetPostRelatedAsyncResolverAggregate",
+            type_name="Post",
+            field_name="relatedPostsAsyncAggregate",
+            max_batch_size=10,
+        )
+
         CfnOutput(self.stack, "GraphQLHTTPUrl", value=api.graphql_url)
         CfnOutput(self.stack, "GraphQLAPIKey", value=api.api_key)

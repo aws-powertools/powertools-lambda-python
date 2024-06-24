@@ -17,4 +17,6 @@ type Post {
     downs: Int
     relatedPosts: [Post]
     relatedPostsAsync: [Post]
+    relatedPostsAggregate: [Post]
+    relatedPostsAsyncAggregate: [Post]
 }

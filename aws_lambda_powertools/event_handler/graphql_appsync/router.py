@@ -21,11 +21,13 @@ class Router(BaseRouter):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         return self._batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
+            aggregate=aggregate,
         )
 
     def async_batch_resolver(
@@ -33,11 +35,13 @@ class Router(BaseRouter):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         return self._async_batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
+            aggregate=aggregate,
         )
 
     def append_context(self, **additional_context):

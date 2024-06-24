@@ -13,6 +13,7 @@ class ResolverRegistry:
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         """Registers the resolver for field_name
 
@@ -25,6 +26,10 @@ class ResolverRegistry:
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
             with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Return
         ----------
@@ -34,7 +39,11 @@ class ResolverRegistry:
 
         def _register(func) -> Callable:
             logger.debug(f"Adding resolver `{func.__name__}` for field `{type_name}.{field_name}`")
-            self.resolvers[f"{type_name}.{field_name}"] = {"func": func, "raise_on_error": raise_on_error}
+            self.resolvers[f"{type_name}.{field_name}"] = {
+                "func": func,
+                "raise_on_error": raise_on_error,
+                "aggregate": aggregate,
+            }
             return func
 
         return _register

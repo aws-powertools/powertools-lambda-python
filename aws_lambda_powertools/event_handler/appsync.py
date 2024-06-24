@@ -3,7 +3,7 @@ import logging
 import warnings
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
-from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import ResolverNotFoundError
+from aws_lambda_powertools.event_handler.graphql_appsync.exceptions import InvalidBatchResponse, ResolverNotFoundError
 from aws_lambda_powertools.event_handler.graphql_appsync.router import Router
 from aws_lambda_powertools.utilities.data_classes import AppSyncResolverEvent
 from aws_lambda_powertools.utilities.typing import LambdaContext
@@ -168,7 +168,12 @@ class AppSyncResolver(Router):
             raise ValueError(f"No resolver found for '{self.current_event.type_name}.{self.current_event.field_name}'")
         return resolver["func"](**self.current_event.arguments)
 
-    def _call_sync_batch_resolver(self, resolver: Callable, raise_on_error: bool = False) -> List[Any]:
+    def _call_sync_batch_resolver(
+        self,
+        resolver: Callable,
+        raise_on_error: bool = False,
+        aggregate: bool = True,
+    ) -> List[Any]:
         """
         Calls a synchronous batch resolver function for each event in the current batch.
 
@@ -179,6 +184,10 @@ class AppSyncResolver(Router):
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
             with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Returns
         -------
@@ -188,6 +197,17 @@ class AppSyncResolver(Router):
 
         logger.debug(f"Graceful error handling flag {raise_on_error=}")
 
+        # Checks whether the entire batch should be processed at once
+        if aggregate:
+            # Process the entire batch
+            response = resolver(event=self.current_batch_event)
+
+            if not isinstance(response, List):
+                raise InvalidBatchResponse("The response must be a List when using batch resolvers")
+
+            return response
+
+        # Non aggregated events, so we call this event list x times
         # Stop on first exception we encounter
         if raise_on_error:
             return [
@@ -206,7 +226,12 @@ class AppSyncResolver(Router):
 
         return results
 
-    async def _call_async_batch_resolver(self, resolver: Callable, raise_on_error: bool = False) -> List[Any]:
+    async def _call_async_batch_resolver(
+        self,
+        resolver: Callable,
+        raise_on_error: bool = False,
+        aggregate: bool = True,
+    ) -> List[Any]:
         """
         Asynchronously call a batch resolver for each event in the current batch.
 
@@ -217,6 +242,10 @@ class AppSyncResolver(Router):
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
             with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Returns
         -------
@@ -225,7 +254,17 @@ class AppSyncResolver(Router):
         """
 
         logger.debug(f"Graceful error handling flag {raise_on_error=}")
-        response = []
+
+        response: List = []
+
+        # Checks whether the entire batch should be processed at once
+        if aggregate:
+            # Process the entire batch
+            response.extend(await asyncio.gather(resolver(event=self.current_batch_event)))
+            if not isinstance(response[0], List):
+                raise InvalidBatchResponse("The response must be a List when using batch resolvers")
+
+            return response[0]
 
         # Prime coroutines
         tasks = [resolver(event=e, **e.arguments) for e in self.current_batch_event]
@@ -286,7 +325,11 @@ class AppSyncResolver(Router):
 
         if resolver:
             logger.debug(f"Found sync resolver. {resolver=}, {field_name=}")
-            return self._call_sync_batch_resolver(resolver=resolver["func"], raise_on_error=resolver["raise_on_error"])
+            return self._call_sync_batch_resolver(
+                resolver=resolver["func"],
+                raise_on_error=resolver["raise_on_error"],
+                aggregate=resolver["aggregate"],
+            )
 
         if async_resolver:
             logger.debug(f"Found async resolver. {resolver=}, {field_name=}")
@@ -294,6 +337,7 @@ class AppSyncResolver(Router):
                 self._call_async_batch_resolver(
                     resolver=async_resolver["func"],
                     raise_on_error=async_resolver["raise_on_error"],
+                    aggregate=async_resolver["aggregate"],
                 ),
             )
 
@@ -371,6 +415,7 @@ class AppSyncResolver(Router):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         """Registers batch resolver function for GraphQL type and field name.
 
@@ -385,6 +430,10 @@ class AppSyncResolver(Router):
             GraphQL field e.g., getTodo, createTodo, by default None
         raise_on_error : bool, optional
             Whether to fail entire batch upon error, or handle errors gracefully (None), by default False
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Returns
         -------
@@ -395,6 +444,7 @@ class AppSyncResolver(Router):
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
+            aggregate=aggregate,
         )
 
     def async_batch_resolver(
@@ -402,9 +452,11 @@ class AppSyncResolver(Router):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         return self._async_batch_resolver_registry.register(
             field_name=field_name,
             type_name=type_name,
             raise_on_error=raise_on_error,
+            aggregate=aggregate,
         )

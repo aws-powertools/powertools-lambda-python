@@ -49,6 +49,7 @@ class BaseRouter(ABC):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         """
         Retrieve a batch resolver function for a specific type and field.
@@ -62,6 +63,10 @@ class BaseRouter(ABC):
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
             with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Examples
         --------
@@ -95,6 +100,7 @@ class BaseRouter(ABC):
         type_name: str = "*",
         field_name: Optional[str] = None,
         raise_on_error: bool = False,
+        aggregate: bool = True,
     ) -> Callable:
         """
         Retrieve a batch resolver function for a specific type and field and runs async.
@@ -108,6 +114,10 @@ class BaseRouter(ABC):
         raise_on_error: bool
             A flag indicating whether to raise an error when processing batches
             with failed items. Defaults to False, which means errors are handled without raising exceptions.
+        aggregate: bool
+            A flag indicating whether the batch items should be processed at once or individually.
+            If True (default), the batch resolver will process all items in the batch as a single event.
+            If False, the batch resolver will process each item in the batch individually.
 
         Examples
         --------

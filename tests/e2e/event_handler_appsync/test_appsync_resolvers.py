@@ -75,7 +75,7 @@ def test_appsync_get_post(appsync_endpoint, appsync_access_key):
 
 
 @pytest.mark.xdist_group(name="event_handler")
-def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
+def test_appsync_get_related_posts_batch_without_aggregate(appsync_endpoint, appsync_access_key):
     # GIVEN
     post_id = "2"
     related_posts_ids = ["3", "5"]
@@ -109,4 +109,42 @@ def test_appsync_get_related_posts_batch(appsync_endpoint, appsync_access_key):
     for post in data["getPost"]["relatedPosts"]:
         assert post["post_id"] in related_posts_ids
     for post in data["getPost"]["relatedPostsAsync"]:
+        assert post["post_id"] in related_posts_ids
+
+
+@pytest.mark.xdist_group(name="event_handler")
+def test_appsync_get_related_posts_batch_with_aggregate(appsync_endpoint, appsync_access_key):
+    # GIVEN
+    post_id = "2"
+    related_posts_ids = ["3", "5"]
+
+    body = {
+        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") \
+              {{ post_id relatedPostsAggregate {{ post_id }} relatedPostsAsyncAggregate {{ post_id }} }} }}',
+        "variables": None,
+        "operationName": "MyQuery",
+    }
+
+    # WHEN
+    response = data_fetcher.get_http_response(
+        Request(
+            method="POST",
+            url=appsync_endpoint,
+            json=body,
+            headers={"x-api-key": appsync_access_key, "Content-Type": "application/json"},
+        ),
+    )
+
+    # THEN expect a HTTP 200 response and content return Post id with dependent Posts id's
+    assert response.status_code == 200
+    assert response.content is not None
+
+    data = json.loads(response.content.decode("ascii"))["data"]
+
+    assert data["getPost"]["post_id"] == post_id
+    assert len(data["getPost"]["relatedPostsAggregate"]) == len(related_posts_ids)
+    assert len(data["getPost"]["relatedPostsAsyncAggregate"]) == len(related_posts_ids)
+    for post in data["getPost"]["relatedPostsAggregate"]:
+        assert post["post_id"] in related_posts_ids
+    for post in data["getPost"]["relatedPostsAsyncAggregate"]:
         assert post["post_id"] in related_posts_ids
