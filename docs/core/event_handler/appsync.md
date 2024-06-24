@@ -290,7 +290,7 @@ You can use `append_context` when you want to share data between your App and Ro
 
 ### Batch processing
 
-We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple events in a batch and prevent multiple lambda executions, configure your Appsync to group events and use the `@batch_resolver` or `@async_batch_resolver` decorators.
+We support AWS Appsync's batching mechanism for Lambda Resolvers. It prevents multiple Lambda executions by grouping events and using the `@batch_resolver` or `@async_batch_resolver` decorators to resolve the entire batch.
 
 ???+ info
     If you want to understand more how to configure batch processing for the AppSync, please follow this [guide](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
@@ -300,28 +300,38 @@ We support Appsync's batching mechanism for Lambda Resolvers. To handle multiple
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver.py"
   	```
 
+    1. The entire batch is sent to the resolver, and you need to iterate through it to process all records.
+
 === "getting_started_with_batch_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
-#### Handling exceptions
+#### Processing Batch items individually
 
-By default, records that fail during Lambda execution return `None` to ensure the entire batch doesn't fail due to processing errors. However, you have the option to actively return exceptions for debugging or troubleshooting.
+You can process each item in the batch individually, and we can handle exceptions for you. However, it's important to note that utilizing this method may increase the execution time of your Lambda function.
 
 ???+ tip
     For better error handling, you may need to configure response mapping templates and specify error keys. Explore more on returning individual errors [here](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}.
 
-=== "enable_exceptions_batch_resolver.py"
-  	```python hl_lines="3 7 21"
-    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver.py"
+=== "getting_started_with_batch_resolver_individual.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_individual.py"
   	```
 
-    1. You can enable the exceptions by setting `raise_on_error` to True.
+    1. You need to disable the aggregated event by using `aggregate` flag.
+        The resolver receives and processes each record one at a time.
 
-=== "enable_exceptions_batch_resolver_payload.json"
+=== "getting_started_with_batch_resolver_handling_error.py"
+  	```python hl_lines="3 7 17"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_handling_error.py"
+  	```
+
+    1. You can enable enable the error handling by using `raise_on_error` flag.
+
+=== "getting_started_with_batch_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"
-    --8<-- "examples/event_handler_graphql/src/enable_exceptions_batch_resolver_payload.json"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
   	```
 
 #### Async

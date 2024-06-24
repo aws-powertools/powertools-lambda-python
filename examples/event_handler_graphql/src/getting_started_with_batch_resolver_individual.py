@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, Dict
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import AppSyncResolver
@@ -16,19 +16,9 @@ posts_related = {
 }
 
 
-@app.batch_resolver(type_name="Query", field_name="relatedPosts")
-def related_posts(event: List[AppSyncResolverEvent]) -> List[Any]:
-    results = []
-
-    for record in event:  # (1)!
-        post_id = record.arguments.get("post_id")
-        try:
-            results.append(posts_related[post_id] if post_id else None)
-            # Add other logic here
-        except Exception:
-            logger.error("Error processing record", post_id=post_id)
-
-    return results
+@app.batch_resolver(type_name="Query", field_name="relatedPosts", aggregate=False)  # (1)!
+def related_posts(event: AppSyncResolverEvent, post_id: str = "") -> Dict[str, Any]:
+    return posts_related[post_id]
 
 
 def lambda_handler(event, context: LambdaContext) -> dict:
