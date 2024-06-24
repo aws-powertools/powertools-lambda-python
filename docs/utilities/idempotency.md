@@ -245,6 +245,28 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     2. This function does the following <br><br>**1**. Receives the dictionary saved into the persistent storage <br>**1** Serializes to `OrderOutput` before `@idempotent` returns back to the caller.
     3. This serializer receives both functions so it knows who to call when to serialize to and from dictionary.
 
+### Using in-memory cache
+
+!!! note "In-memory cache is local to each Lambda execution environment."
+
+You can enable caching with the `use_local_cache` parameter in `IdempotencyConfig`. When enabled, you can adjust cache capacity _(256)_ with `local_cache_max_items`.
+
+By default, caching is disabled since we don't know how big your response could be in relation to your configured memory size.
+
+=== "Enabling cache"
+
+    ```python hl_lines="12"
+    --8<-- "examples/idempotency/src/working_with_local_cache.py"
+    ```
+
+    1. You can adjust cache capacity with [`local_cache_max_items`](#customizing-the-default-behavior) parameter.
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
+    ```
+
 ### Choosing a payload subset for idempotency
 
 ???+ tip "Tip: Dealing with always changing payloads"
@@ -742,27 +764,6 @@ This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if 
     If you receive `IdempotencyAlreadyInProgressError`, you can safely retry the operation.
 
 This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
-
-### Using in-memory cache
-
-**By default, in-memory local caching is disabled**, since we don't know how much memory you consume per invocation compared to the maximum configured in your Lambda function.
-
-???+ note "Note: This in-memory cache is local to each Lambda execution environment"
-    This means it will be effective in cases where your function's concurrency is low in comparison to the number of "retry" invocations with the same payload, because cache might be empty.
-
-You can enable in-memory caching with the **`use_local_cache`** parameter:
-
-=== "Caching idempotent transactions in-memory to prevent multiple calls to storage"
-
-    ```python hl_lines="11"
-    --8<-- "examples/idempotency/src/working_with_local_cache.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
-    ```
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
 
