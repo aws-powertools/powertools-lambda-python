@@ -800,8 +800,6 @@ This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if 
 
 This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
 
-When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
-
 ### Payload validation
 
 ???+ question "Question: What if your function is invoked with the same payload except some outer parameters have changed?"
@@ -813,7 +811,7 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 === "Payload validation"
 
-    ```python hl_lines="16 25 32"
+    ```python hl_lines="20 29 36"
     --8<-- "examples/idempotency/src/working_with_validation_payload.py"
     ```
 

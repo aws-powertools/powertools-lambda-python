@@ -2,12 +2,16 @@ import os
 from dataclasses import dataclass, field
 from uuid import uuid4
 
+from aws_lambda_powertools import Logger
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
     idempotent,
 )
+from aws_lambda_powertools.utilities.idempotency.exceptions import IdempotencyValidationError
 from aws_lambda_powertools.utilities.typing import LambdaContext
+
+logger = Logger()
 
 table = os.getenv("IDEMPOTENCY_TABLE")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table)
@@ -37,6 +41,12 @@ def lambda_handler(event: dict, context: LambdaContext):
             "payment_id": payment.payment_id,
             "message": "success",
             "statusCode": 200,
+        }
+    except IdempotencyValidationError:
+        logger.exception("Payload tampering detected", payment=payment, failure_type="validation")
+        return {
+            "message": "Unable to process payment at this time. Try again later.",
+            "statusCode": 500,
         }
     except Exception as exc:
         raise PaymentError(f"Error creating payment {str(exc)}")
