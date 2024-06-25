@@ -3,7 +3,7 @@ from constructs import Construct
 
 POWERTOOLS_BASE_NAME = "AWSLambdaPowertools"
 # Find latest from github.com/aws-powertools/powertools-lambda-python/releases
-POWERTOOLS_VER = "2.37.0"
+POWERTOOLS_VER = "2.39.1"
 POWERTOOLS_ARN = "arn:aws:serverlessrepo:eu-west-1:057560766410:applications/aws-lambda-powertools-python-layer"
 
 

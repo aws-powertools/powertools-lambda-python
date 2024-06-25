@@ -1,10 +1,9 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Union
 
+from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
 from aws_lambda_powertools.utilities import jmespath_utils
-
-from ...middleware_factory import lambda_handler_decorator
-from .base import validate_data_against_schema
+from aws_lambda_powertools.utilities.validation.base import validate_data_against_schema
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +15,12 @@ def validator(
     context: Any,
     inbound_schema: Optional[Dict] = None,
     inbound_formats: Optional[Dict] = None,
+    inbound_handlers: Optional[Dict] = None,
+    inbound_provider_options: Optional[Dict] = None,
     outbound_schema: Optional[Dict] = None,
     outbound_formats: Optional[Dict] = None,
+    outbound_handlers: Optional[Dict] = None,
+    outbound_provider_options: Optional[Dict] = None,
     envelope: str = "",
     jmespath_options: Optional[Dict] = None,
     **kwargs: Any,
@@ -44,6 +47,17 @@ def validator(
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
     outbound_formats: Dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
+    inbound_handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
+    outbound_handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
+    inbound_provider_options: Dict
+        Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
+        For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
+    outbound_provider_options: Dict
+        Arguments that will be passed directly to the underlying validation call, in this case fastjsonchema.validate.
+        For all supported arguments see: https://horejsek.github.io/python-fastjsonschema/#fastjsonschema.validate
+
 
     Example
     -------
@@ -127,13 +141,25 @@ def validator(
 
     if inbound_schema:
         logger.debug("Validating inbound event")
-        validate_data_against_schema(data=event, schema=inbound_schema, formats=inbound_formats)
+        validate_data_against_schema(
+            data=event,
+            schema=inbound_schema,
+            formats=inbound_formats,
+            handlers=inbound_handlers,
+            provider_options=inbound_provider_options,
+        )
 
     response = handler(event, context, **kwargs)
 
     if outbound_schema:
         logger.debug("Validating outbound event")
-        validate_data_against_schema(data=response, schema=outbound_schema, formats=outbound_formats)
+        validate_data_against_schema(
+            data=response,
+            schema=outbound_schema,
+            formats=outbound_formats,
+            handlers=outbound_handlers,
+            provider_options=outbound_provider_options,
+        )
 
     return response
 
@@ -142,6 +168,8 @@ def validate(
     event: Any,
     schema: Dict,
     formats: Optional[Dict] = None,
+    handlers: Optional[Dict] = None,
+    provider_options: Optional[Dict] = None,
     envelope: Optional[str] = None,
     jmespath_options: Optional[Dict] = None,
 ):
@@ -161,6 +189,10 @@ def validate(
         Alternative JMESPath options to be included when filtering expr
     formats: Dict
         Custom formats containing a key (e.g. int64) and a value expressed as regex or callback returning bool
+    handlers: Dict
+        Custom methods to retrieve remote schemes, keyed off of URI scheme
+    provider_options: Dict
+        Arguments that will be passed directly to the underlying validate call
 
     Example
     -------
@@ -229,4 +261,10 @@ def validate(
             jmespath_options=jmespath_options,
         )
 
-    validate_data_against_schema(data=event, schema=schema, formats=formats)
+    validate_data_against_schema(
+        data=event,
+        schema=schema,
+        formats=formats,
+        handlers=handlers,
+        provider_options=provider_options,
+    )

@@ -33,7 +33,7 @@ from typing import (
 from aws_lambda_powertools.event_handler import content_types
 from aws_lambda_powertools.event_handler.exceptions import NotFoundError, ServiceError
 from aws_lambda_powertools.event_handler.openapi.constants import DEFAULT_API_VERSION, DEFAULT_OPENAPI_VERSION
-from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError
+from aws_lambda_powertools.event_handler.openapi.exceptions import RequestValidationError, SchemaValidationError
 from aws_lambda_powertools.event_handler.openapi.types import (
     COMPONENT_REF_PREFIX,
     METHODS_WITH_BODY,
@@ -43,7 +43,12 @@ from aws_lambda_powertools.event_handler.openapi.types import (
     validation_error_definition,
     validation_error_response_definition,
 )
-from aws_lambda_powertools.event_handler.util import _FrozenDict, extract_origin_header
+from aws_lambda_powertools.event_handler.util import (
+    _FrozenDict,
+    _FrozenListDict,
+    _validate_openapi_security_parameters,
+    extract_origin_header,
+)
 from aws_lambda_powertools.shared.cookies import Cookie
 from aws_lambda_powertools.shared.functions import powertools_dev_is_set
 from aws_lambda_powertools.shared.json_encoder import Encoder
@@ -206,7 +211,7 @@ class CORSConfig:
         # The origin matched an allowed origin, so return the CORS headers
         headers = {
             "Access-Control-Allow-Origin": origin,
-            "Access-Control-Allow-Headers": ",".join(sorted(self.allow_headers)),
+            "Access-Control-Allow-Headers": CORSConfig.build_allow_methods(self.allow_headers),
         }
 
         if self.expose_headers:
@@ -216,6 +221,23 @@ class CORSConfig:
         if self.allow_credentials is True:
             headers["Access-Control-Allow-Credentials"] = "true"
         return headers
+
+    @staticmethod
+    def build_allow_methods(methods: Set[str]) -> str:
+        """Build sorted comma delimited methods for Access-Control-Allow-Methods header
+
+        Parameters
+        ----------
+        methods : set[str]
+            Set of HTTP Methods
+
+        Returns
+        -------
+        set[str]
+            Formatted string with all HTTP Methods allowed for CORS e.g., `GET, OPTIONS`
+
+        """
+        return ",".join(sorted(methods))
 
 
 class Response(Generic[ResponseT]):
@@ -277,16 +299,16 @@ class Route:
         func: Callable,
         cors: bool,
         compress: bool,
-        cache_control: Optional[str],
-        summary: Optional[str],
-        description: Optional[str],
-        responses: Optional[Dict[int, OpenAPIResponse]],
-        response_description: Optional[str],
-        tags: Optional[List[str]],
-        operation_id: Optional[str],
-        include_in_schema: bool,
-        security: Optional[List[Dict[str, List[str]]]],
-        middlewares: Optional[List[Callable[..., Response]]],
+        cache_control: Optional[str] = None,
+        summary: Optional[str] = None,
+        description: Optional[str] = None,
+        responses: Optional[Dict[int, OpenAPIResponse]] = None,
+        response_description: Optional[str] = None,
+        tags: Optional[List[str]] = None,
+        operation_id: Optional[str] = None,
+        include_in_schema: bool = True,
+        security: Optional[List[Dict[str, List[str]]]] = None,
+        middlewares: Optional[List[Callable[..., Response]]] = None,
     ):
         """
 
@@ -703,6 +725,7 @@ class Route:
         from aws_lambda_powertools.event_handler.openapi.params import Param
 
         parameters = []
+        parameter: Dict[str, Any]
         for param in all_route_params:
             field_info = param.field_info
             field_info = cast(Param, field_info)
@@ -1400,7 +1423,6 @@ def _registered_api_adapter(
     """
     route_args: Dict = app.context.get("_route_args", {})
     logger.debug(f"Calling API Route Handler: {route_args}")
-
     return app._to_response(next_middleware(**route_args))
 
 
@@ -1588,6 +1610,16 @@ class ApiGatewayResolver(BaseRouter):
 
         # Add routes to the OpenAPI schema
         for route in all_routes:
+
+            if route.security and not _validate_openapi_security_parameters(
+                security=route.security,
+                security_schemes=security_schemes,
+            ):
+                raise SchemaValidationError(
+                    "Security configuration was not found in security_schemas or security_schema was not defined. "
+                    "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
+                )
+
             if not route.include_in_schema:
                 continue
 
@@ -1630,15 +1662,15 @@ class ApiGatewayResolver(BaseRouter):
         security: Optional[List[Dict[str, List[str]]]],
         security_schemes: Optional[Dict[str, "SecurityScheme"]],
     ) -> Optional[List[Dict[str, List[str]]]]:
+
         if not security:
             return None
 
-        if not security_schemes:
-            raise ValueError("security_schemes must be provided if security is provided")
-
-        # Check if all keys in security are present in the security_schemes
-        if any(key not in security_schemes for sec in security for key in sec):
-            raise ValueError("Some security schemes not found in security_schemes")
+        if not _validate_openapi_security_parameters(security=security, security_schemes=security_schemes):
+            raise SchemaValidationError(
+                "Security configuration was not found in security_schemas or security_schema was not defined. "
+                "See: https://docs.powertools.aws.dev/lambda/python/latest/core/event_handler/api_gateway/#security-schemes",
+            )
 
         return security
 
@@ -1951,6 +1983,36 @@ class ApiGatewayResolver(BaseRouter):
     def resolve(self, event, context) -> Dict[str, Any]:
         """Resolves the response based on the provide event and decorator routes
 
+        ## Internals
+
+        Request processing chain is triggered by a Route object being called _(`_call_route` -> `__call__`)_:
+
+        1. **When a route is matched**
+          1.1. Exception handlers _(if any exception bubbled up and caught)_
+          1.2. Global middlewares _(before, and after on the way back)_
+          1.3. Path level middleware _(before, and after on the way back)_
+          1.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          1.5. Run actual route
+        2. **When a route is NOT matched**
+          2.1. Exception handlers _(if any exception bubbled up and caught)_
+          2.2. Global middlewares _(before, and after on the way back)_
+          2.3. Path level middleware _(before, and after on the way back)_
+          2.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          2.5. Run 404 route handler
+        3. **When a route is a pre-flight CORS (often not matched)**
+          3.1. Exception handlers _(if any exception bubbled up and caught)_
+          3.2. Global middlewares _(before, and after on the way back)_
+          3.3. Path level middleware _(before, and after on the way back)_
+          3.4. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          3.5. Return 204 with appropriate CORS headers
+        4. **When a route is matched with Data Validation enabled**
+          4.1. Exception handlers _(if any exception bubbled up and caught)_
+          4.2. Data Validation middleware _(before, and after on the way back)_
+          4.3. Global middlewares _(before, and after on the way back)_
+          4.4. Path level middleware _(before, and after on the way back)_
+          4.5. Middleware adapter to ensure Response is homogenous (_registered_api_adapter)
+          4.6. Run actual route
+
         Parameters
         ----------
         event: Dict[str, Any]
@@ -2074,7 +2136,9 @@ class ApiGatewayResolver(BaseRouter):
         method = self.current_event.http_method.upper()
         path = self._remove_prefix(self.current_event.path)
 
-        for route in self._static_routes + self._dynamic_routes:
+        registered_routes = self._static_routes + self._dynamic_routes
+
+        for route in registered_routes:
             if method != route.method:
                 continue
             match_results: Optional[Match] = route.rule.match(path)
@@ -2086,8 +2150,7 @@ class ApiGatewayResolver(BaseRouter):
                 route_keys = self._convert_matches_into_route_keys(match_results)
                 return self._call_route(route, route_keys)  # pass fn args
 
-        logger.debug(f"No match found for path {path} and method {method}")
-        return self._not_found(method)
+        return self._handle_not_found(method=method, path=path)
 
     def _remove_prefix(self, path: str) -> str:
         """Remove the configured prefix from the path"""
@@ -2125,35 +2188,64 @@ class ApiGatewayResolver(BaseRouter):
 
         return path.startswith(prefix + "/")
 
-    def _not_found(self, method: str) -> ResponseBuilder:
+    def _handle_not_found(self, method: str, path: str) -> ResponseBuilder:
         """Called when no matching route was found and includes support for the cors preflight response"""
-        headers = {}
-        if self._cors:
-            logger.debug("CORS is enabled, updating headers.")
-            extracted_origin_header = extract_origin_header(self.current_event.resolved_headers_field)
-            headers.update(self._cors.to_dict(extracted_origin_header))
+        logger.debug(f"No match found for path {path} and method {method}")
 
-            if method == "OPTIONS":
-                logger.debug("Pre-flight request detected. Returning CORS with null response")
-                headers["Access-Control-Allow-Methods"] = ",".join(sorted(self._cors_methods))
-                return ResponseBuilder(
-                    response=Response(status_code=204, content_type=None, headers=headers, body=""),
-                    serializer=self._serializer,
-                )
+        def not_found_handler():
+            """Route handler for 404s
 
-        handler = self._lookup_exception_handler(NotFoundError)
-        if handler:
-            return self._response_builder_class(response=handler(NotFoundError()), serializer=self._serializer)
+            It handles in the following order:
 
-        return self._response_builder_class(
-            response=Response(
+            1. Pre-flight CORS requests (OPTIONS)
+            2. Detects and calls custom HTTP 404 handler
+            3. Returns standard 404 along with CORS headers
+
+            Returns
+            -------
+            Response
+                HTTP 404 response
+            """
+            _headers: Dict[str, Any] = {}
+
+            # Pre-flight request? Return immediately to avoid browser error
+            if self._cors and method == "OPTIONS":
+                logger.debug("Pre-flight request detected. Returning CORS with empty response")
+                _headers["Access-Control-Allow-Methods"] = CORSConfig.build_allow_methods(self._cors_methods)
+
+                return Response(status_code=204, content_type=None, headers=_headers, body="")
+
+            # Customer registered 404 route? Call it.
+            custom_not_found_handler = self._lookup_exception_handler(NotFoundError)
+            if custom_not_found_handler:
+                return custom_not_found_handler(NotFoundError())
+
+            # No CORS and no custom 404 fn? Default response
+            return Response(
                 status_code=HTTPStatus.NOT_FOUND.value,
                 content_type=content_types.APPLICATION_JSON,
-                headers=headers,
+                headers=_headers,
                 body={"statusCode": HTTPStatus.NOT_FOUND.value, "message": "Not found"},
-            ),
-            serializer=self._serializer,
+            )
+
+        # We create a route to trigger entire request chain (middleware+exception handlers)
+        route = Route(
+            rule=self._compile_regex(r".*"),
+            method=method,
+            path=path,
+            func=not_found_handler,
+            cors=self._cors_enabled,
+            compress=False,
         )
+
+        # Add matched Route reference into the Resolver context
+        self.append_context(_route=route, _path=path)
+
+        # Kick-off request chain:
+        # -> exception_handlers()
+        # --> middlewares()
+        # ---> not_found_route()
+        return self._call_route(route=route, route_arguments={})
 
     def _call_route(self, route: Route, route_arguments: Dict[str, str]) -> ResponseBuilder:
         """Actually call the matching route with any provided keyword arguments."""
@@ -2386,6 +2478,7 @@ class Router(BaseRouter):
             methods = (method,) if isinstance(method, str) else tuple(method)
             frozen_responses = _FrozenDict(responses) if responses else None
             frozen_tags = frozenset(tags) if tags else None
+            frozen_security = _FrozenListDict(security) if security else None
 
             route_key = (
                 rule,
@@ -2400,7 +2493,7 @@ class Router(BaseRouter):
                 frozen_tags,
                 operation_id,
                 include_in_schema,
-                security,
+                frozen_security,
             )
 
             # Collate Middleware for routes

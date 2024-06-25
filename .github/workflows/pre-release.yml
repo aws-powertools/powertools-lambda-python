@@ -1,0 +1,275 @@
+name: Pre-Release
+
+# PRE-RELEASE PROCESS
+#
+# === Automated activities ===
+#
+# 1.  [Seal] Bump to release version and export source code with integrity hash
+# 2.  [Quality check] Restore sealed source code, run tests, linting, security and complexity base line
+# 3.  [Build] Restore sealed source code, create and export hashed build artifact for PyPi release (wheel, tarball)
+# 4.  [Provenance] Generates provenance for build, signs attestation with GitHub OIDC claims to confirm it came from this release pipeline, commit, org, repo, branch, hash, etc.
+# 5.  [Release] Restore built artifact, and publish package to PyPi prod repository
+# 6.  [PR to bump version] Restore sealed source code, and create a PR to update trunk with latest released project metadata
+
+# NOTE
+#
+# See MAINTAINERS.md "Releasing a new version" for release mechanisms
+#
+# Every job is isolated and starts a new fresh container.
+
+env:
+  RELEASE_COMMIT: ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_code_quality:
+        description: "Skip tests, linting, and baseline. Only use if release fail for reasons beyond our control and you need a quick release."
+        default: false
+        type: boolean
+        required: false
+      skip_pypi:
+        description: "Skip publishing to PyPi. Used for testing release steps."
+        default: false
+        type: boolean
+        required: false
+  schedule:
+    # Note: run daily on weekdays at 8am UTC time
+    - cron: "0 8 * * 1-5"
+
+permissions:
+  contents: read
+
+jobs:
+
+  # This job bumps the package version to the pre-release version
+  # creates an integrity hash from the source code
+  # uploads the artifact with the integrity hash as the key name
+  # so subsequent jobs can restore from a trusted point in time to prevent tampering
+  seal:
+    # ignore forks
+    if: github.repository == 'aws-powertools/powertools-lambda-python'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+        integrity_hash: ${{ steps.seal_source_code.outputs.integrity_hash }}
+        artifact_name: ${{ steps.seal_source_code.outputs.artifact_name }}
+        RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION }}
+    steps:
+      # NOTE: Different from prod release, we need both poetry and source code available in earlier steps to bump and verify.
+
+      # We use a pinned version of Poetry to be certain it won't modify source code before we create a hash
+      - name: Install poetry
+        run: |
+          pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+          pipx inject poetry git+https://github.com/monim67/poetry-bumpversion@315fe3324a699fa12ec20e202eb7375d4327d1c4 # v0.3.1
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Bump and export release version
+        id: release_version
+        run: |
+          RELEASE_VERSION="$(poetry version prerelease --short | head -n1 | tr -d '\n')"
+
+          echo "RELEASE_VERSION=${RELEASE_VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Verifies pre-release version semantics
+        # verify pre-release semantics before proceeding to avoid versioning pollution
+        # e.g., 2.40.0a1 and 2.40.0b2 are valid while 2.40.0 is not
+        # NOTE. we do it in a separate step to handle edge cases like
+        # `poetry` CLI uses immutable install, versioning behaviour could change even in a minor version (we had breaking changes before)
+        # a separate step allows us to pinpoint what happened (before/after)
+        run: |
+          if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+[a-b].*$ ]]; then
+            echo "Version $VERSION doesn't look like a pre-release version; aborting"
+            exit 1
+          fi
+        env:
+          RELEASE_VERSION: ${{ steps.release_version.outputs.RELEASE_VERSION}}
+
+      - name: Seal and upload
+        id: seal_source_code
+        uses: ./.github/actions/seal
+        with:
+          artifact_name_prefix: "source"
+
+  # This job runs our automated test suite, complexity and security baselines
+  # it ensures previously merged have been tested as part of the pull request process
+  #
+  # NOTE
+  #
+  # we don't upload the artifact after testing to prevent any tampering of our source code dependencies
+  quality_check:
+    needs: seal
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+          artifact_name: ${{ needs.seal.outputs.artifact_name }}
+
+      - name: Debug cache restore
+        run: cat pyproject.toml
+
+      - name: Install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+      - name: Install dependencies
+        run: make dev
+      - name: Run all tests, linting and baselines
+        run: make pr
+
+  # This job creates a release artifact (tar.gz, wheel)
+  # it checks out code from release commit for custom actions to work
+  # then restores the sealed source code (overwrites any potential tampering)
+  # it's done separately from release job to enforce least privilege.
+  # We export just the final build artifact for release
+  build:
+    runs-on: ubuntu-latest
+    needs: [quality_check, seal]
+    permissions:
+      contents: read
+    outputs:
+      integrity_hash: ${{ steps.seal_build.outputs.integrity_hash }}
+      artifact_name: ${{ steps.seal_build.outputs.artifact_name }}
+      attestation_hashes: ${{ steps.encoded_hash.outputs.attestation_hashes }}
+    steps:
+      # NOTE: we need actions/checkout to configure git first (pre-commit hooks in make dev)
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+          artifact_name: ${{ needs.seal.outputs.artifact_name }}
+
+      - name: Install poetry
+        run: pipx install git+https://github.com/python-poetry/poetry@68b88e5390720a3dd84f02940ec5200bfce39ac6 # v1.5.0
+      - name: Set up Python
+        uses: actions/setup-python@82c7e631bb3cdc910f68e0081d67478d79c6982d # v5.1.0
+        with:
+          python-version: "3.12"
+          cache: "poetry"
+
+      - name: Build python package and wheel
+        run: poetry build
+
+      - name: Seal and upload
+        id: seal_build
+        uses: ./.github/actions/seal
+        with:
+          artifact_name_prefix: "build"
+          files: "dist/"
+
+      # NOTE: SLSA retraces our build to its artifact to ensure it wasn't tampered
+      # coupled with GitHub OIDC, SLSA can then confidently sign it came from this release pipeline+commit+branch+org+repo+actor+integrity hash
+      - name: Create attestation encoded hash for provenance
+        id: encoded_hash
+        working-directory: dist
+        run: echo "attestation_hashes=$(sha256sum ./* | base64 -w0)" >> "$GITHUB_OUTPUT"
+
+  # This job creates a provenance file that describes how our release was built (all steps)
+  # after it verifies our build is reproducible within the same pipeline
+  # it confirms that its own software and the CI build haven't been tampered with (Trust but verify)
+  # lastly, it creates and sign an attestation (multiple.intoto.jsonl) that confirms
+  # this build artifact came from this GitHub org, branch, actor, commit ID, inputs that triggered this pipeline, and matches its integrity hash
+  # NOTE: supply chain threats review (we protect against all of them now): https://slsa.dev/spec/v1.0/threats-overview
+  provenance:
+    needs: [seal, build]
+    permissions:
+      contents: write # nested job explicitly require despite upload assets being set to false
+      actions: read # To read the workflow path.
+      id-token: write # To sign the provenance.
+    # NOTE: provenance fails if we use action pinning... it's a Github limitation
+    # because SLSA needs to trace & attest it came from a given branch; pinning doesn't expose that information
+    # https://github.com/slsa-framework/slsa-github-generator/blob/main/internal/builders/generic/README.md#referencing-the-slsa-generator
+    uses: slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@v2.0.0
+    with:
+      base64-subjects: ${{ needs.build.outputs.attestation_hashes }}
+      upload-assets: false  # we upload its attestation in create_tag job, otherwise it creates a new release
+
+  # This job uses release artifact to publish to PyPi
+  # it exchanges JWT tokens with GitHub to obtain PyPi credentials
+  # since it's already registered as a Trusted Publisher.
+  # It uses the sealed build artifact (.whl, .tar.gz) to release it
+  release:
+    needs: [build, seal, provenance]
+    environment: pre-release
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # OIDC for PyPi Trusted Publisher feature
+    env:
+      RELEASE_VERSION: ${{ needs.seal.outputs.RELEASE_VERSION }}
+    steps:
+      # NOTE: we need actions/checkout in order to use our local actions (e.g., ./.github/actions)
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ needs.build.outputs.integrity_hash }}
+          artifact_name: ${{ needs.build.outputs.artifact_name }}
+
+      - name: Upload to PyPi prod
+        if: ${{ !inputs.skip_pypi }}
+        uses: pypa/gh-action-pypi-publish@ec4db0b4ddc65acdf4bff5fa45ac92d78b56bdf0 # v1.9.0
+
+  # Creates a PR with the latest version we've just released
+  # since our trunk is protected against any direct pushes from automation
+  bump_version:
+    needs: [release, seal, provenance]
+    permissions:
+      contents: write  # create-pr action creates a temporary branch
+      pull-requests: write # create-pr action creates a PR using the temporary branch
+    runs-on: ubuntu-latest
+    steps:
+      # NOTE: we need actions/checkout to authenticate and configure git first
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
+        with:
+          ref: ${{ env.RELEASE_COMMIT }}
+
+      - name: Restore sealed source code
+        uses: ./.github/actions/seal-restore
+        with:
+          integrity_hash: ${{ needs.seal.outputs.integrity_hash }}
+          artifact_name: ${{ needs.seal.outputs.artifact_name }}
+
+      - name: Download provenance
+        uses: actions/download-artifact@65a9edc5881444af0b9093a5e628f2fe47ea3b2e # v4.1.7
+        with:
+          name: ${{needs.provenance.outputs.provenance-name}}
+
+      - name: Update provenance
+        run: mkdir -p "${PROVENANCE_DIR}" && mv "${PROVENANCE_FILE}" "${PROVENANCE_DIR}/"
+        env:
+          PROVENANCE_FILE: ${{ needs.provenance.outputs.provenance-name }}
+          PROVENANCE_DIR: provenance/${{ needs.seal.outputs.RELEASE_VERSION}}
+
+      - name: Create PR
+        id: create-pr
+        uses: ./.github/actions/create-pr
+        with:
+          files: "pyproject.toml aws_lambda_powertools/shared/version.py provenance/"
+          temp_branch_prefix: "ci-bump"
+          pull_request_title: "chore(ci): new pre-release ${{ needs.seal.outputs.RELEASE_VERSION }}"
+          github_token: ${{ secrets.GITHUB_TOKEN }}

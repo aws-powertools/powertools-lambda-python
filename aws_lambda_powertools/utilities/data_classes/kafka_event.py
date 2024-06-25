@@ -15,12 +15,12 @@ class KafkaEventRecord(DictWrapper):
         return self["topic"]
 
     @property
-    def partition(self) -> str:
+    def partition(self) -> int:
         """The Kafka record parition."""
         return self["partition"]
 
     @property
-    def offset(self) -> str:
+    def offset(self) -> int:
         """The Kafka record offset."""
         return self["offset"]
 

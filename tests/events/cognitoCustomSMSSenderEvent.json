@@ -1,0 +1,19 @@
+{
+  "version": "1",
+  "triggerSource": "CustomSMSSender_SignUp",
+  "region": "region",
+  "userPoolId": "userPoolId",
+  "userName": "userName",
+  "callerContext": {
+    "awsSdk": "awsSdkVersion",
+    "clientId": "clientId"
+  },
+  "request": {
+    "userAttributes": {
+      "phone_number_verified": false,
+      "email_verified": true
+    },
+    "type": "customEmailSenderRequestV1",
+    "code": "someCode"
+  }
+}

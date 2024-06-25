@@ -52,7 +52,7 @@ jobs:
     permissions:
       contents: read  # checkout code only
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29  # v4.1.6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332  # v4.1.7
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
@@ -68,12 +68,14 @@ jobs:
         run: make mypy
       - name: Test with pytest
         run: make test
+      - name: Test dependencies with Nox
+        run: make test-dependencies
       - name: Security baseline
         run: make security-baseline
       - name: Complexity baseline
         run: make complexity-baseline
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@125fc84a9a348dbcf27191600683ec096ec9021c # 4.4.1
+        uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673 # 4.5.0
         with:
           file: ./coverage.xml
           env_vars: PYTHON
