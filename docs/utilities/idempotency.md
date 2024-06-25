@@ -276,7 +276,7 @@ By default, caching is disabled since we don't know how big your response could 
 ???+ tip "Tip: Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
 
-Use [`IdempotencyConfig`](#customizing-the-default-behavior)'s **`event_key_jmespath`** parameter to select one or more payload parts as your idempotency key.
+Use **`event_key_jmespath`** parameter in [`IdempotencyConfig`](#customizing-the-default-behavior) to select one or more payload parts as your idempotency key.
 
 > **Example scenario**
 
