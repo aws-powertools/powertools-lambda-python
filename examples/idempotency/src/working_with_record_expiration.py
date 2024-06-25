@@ -11,7 +11,7 @@ table = os.getenv("IDEMPOTENCY_TABLE")
 persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(
     event_key_jmespath="body",
-    expires_after_seconds=5 * 60,  # 5 minutes
+    expires_after_seconds=24 * 60 * 60,  # 24 hours
 )
 
 

@@ -300,6 +300,35 @@ Imagine the function runs successfully, but the client never receives the respon
     --8<-- "examples/idempotency/src/working_with_payload_subset_payload.json"
     ```
 
+### Adjusting expiration window
+
+!!! note "We expire idempotency records after **an hour** (3600 seconds). After that, a transaction with the same payload [will not be considered idempotent](#expired-idempotency-records)."
+
+You can change this expiration window with the **`expires_after_seconds`** parameter. There is no limit on how long this expiration window can be set to.
+
+=== "Adjusting expiration window"
+
+    ```python hl_lines="14"
+    --8<-- "examples/idempotency/src/working_with_record_expiration.py"
+    ```
+
+=== "Sample event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_record_expiration_payload.json"
+    ```
+
+???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
+    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
+
+    We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
+
+    Instead, Idempotency records saved in the storage layer contain timestamps that can be verified upon retrieval and double checked within Idempotency feature.
+
+    **Why?**
+
+    A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
+
 ### Lambda timeouts
 
 ???+ note
@@ -772,39 +801,6 @@ This utility will raise an **`IdempotencyAlreadyInProgressError`** exception if 
 This is a locking mechanism for correctness. Since we don't know the result from the first invocation yet, we can't safely allow another concurrent execution.
 
 When enabled, the default is to cache a maximum of 256 records in each Lambda execution environment - You can change it with the **`local_cache_max_items`** parameter.
-
-### Expiring idempotency records
-
-!!! note "By default, we expire idempotency records after **an hour** (3600 seconds)."
-
-In most cases, it is not desirable to store the idempotency records forever. Rather, you want to guarantee that the same payload won't be executed within a period of time.
-
-You can change this window with the **`expires_after_seconds`** parameter:
-
-=== "Adjusting idempotency record expiration"
-
-    ```python hl_lines="14"
-    --8<-- "examples/idempotency/src/working_with_record_expiration.py"
-    ```
-
-=== "Sample event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_record_expiration_payload.json"
-    ```
-
-This will mark any records older than 5 minutes as expired, and [your function will be executed as normal if it is invoked with a matching payload](#expired-idempotency-records).
-
-???+ important "Idempotency record expiration vs DynamoDB time-to-live (TTL)"
-    [DynamoDB TTL is a feature](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html){target="_blank"} to remove items after a certain period of time, it may occur within 48 hours of expiration.
-
-    We don't rely on DynamoDB or any persistence storage layer to determine whether a record is expired to avoid eventual inconsistency states.
-
-    Instead, Idempotency records saved in the storage layer contain timestamps that can be verified upon retrieval and double checked within Idempotency feature.
-
-    **Why?**
-
-    A record might still be valid (`COMPLETE`) when we retrieved, but in some rare cases it might expire a second later. A record could also be [cached in memory](#using-in-memory-cache). You might also want to have idempotent transactions that should expire in seconds.
 
 ### Payload validation
 
