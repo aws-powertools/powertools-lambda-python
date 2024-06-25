@@ -9,7 +9,7 @@ from aws_lambda_powertools.shared.types import Annotated, Literal, Union
 from aws_lambda_powertools.utilities.parser import parse
 
 # adjusted for slower machines in CI too
-PARSER_VALIDATION_SLA: float = 0.002
+PARSER_VALIDATION_SLA: float = 0.005
 
 
 @contextmanager
