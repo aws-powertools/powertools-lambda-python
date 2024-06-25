@@ -255,16 +255,16 @@ class AppSyncResolver(Router):
 
         logger.debug(f"Graceful error handling flag {raise_on_error=}")
 
-        response: List = []
-
         # Checks whether the entire batch should be processed at once
         if aggregate:
             # Process the entire batch
-            response.extend(await asyncio.gather(resolver(event=self.current_batch_event)))
-            if not isinstance(response[0], List):
+            ret = await resolver(event=self.current_batch_event)
+            if not isinstance(ret, List):
                 raise InvalidBatchResponse("The response must be a List when using batch resolvers")
 
-            return response[0]
+            return ret
+
+        response: List = []
 
         # Prime coroutines
         tasks = [resolver(event=e, **e.arguments) for e in self.current_batch_event]

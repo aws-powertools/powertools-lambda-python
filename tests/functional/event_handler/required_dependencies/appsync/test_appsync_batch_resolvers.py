@@ -694,9 +694,11 @@ def test_resolve_batch_processing_with_simple_queries_with_aggregate():
 
     app = AppSyncResolver()
 
-    # WHEN the batch resolver for the listLocations field is defined
+    # WHEN the sync batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function returns a List
     @app.batch_resolver(field_name="listLocations")
-    def create_something(event: List[AppSyncResolverEvent]) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: List[AppSyncResolverEvent]) -> List:  # noqa AA03 VNE003
         results = []
         for record in event:
             results.append(record.source.get("id") if record.source else None)
@@ -754,9 +756,11 @@ def test_resolve_async_batch_processing_with_simple_queries_with_aggregate():
 
     app = AppSyncResolver()
 
-    # WHEN the batch resolver for the listLocations field is defined
+    # WHEN the async batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function returns a List
     @app.async_batch_resolver(field_name="listLocations")
-    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: List[AppSyncResolverEvent]) -> List:  # noqa AA03 VNE003
         results = []
         for record in event:
             results.append(record.source.get("id") if record.source else None)
@@ -790,12 +794,14 @@ def test_resolve_batch_processing_with_aggregate_and_returning_a_non_list():
 
     app = AppSyncResolver()
 
-    # WHEN the batch resolver for the listLocations field is defined
+    # WHEN the sync batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function return something different than a List
     @app.batch_resolver(field_name="listLocations")
-    def create_something(event: List[AppSyncResolverEvent]) -> Optional[list]:  # noqa AA03 VNE003
+    def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
         return event[0].source.get("id") if event[0].source else None
 
-    # THEN the resolver should raise a RuntimeError when processing the batch of queries
+    # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
     with pytest.raises(InvalidBatchResponse):
         app.resolve(event, LambdaContext())
 
@@ -819,11 +825,85 @@ def test_resolve_async_batch_processing_with_aggregate_and_returning_a_non_list(
 
     app = AppSyncResolver()
 
-    # WHEN the batch resolver for the listLocations field is defined
+    # WHEN the async batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function return something different than a List
     @app.async_batch_resolver(field_name="listLocations")
-    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[list]:  # noqa AA03 VNE003
+    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
         return event[0].source.get("id") if event[0].source else None
 
-    # THEN the resolver should raise a RuntimeError when processing the batch of queries
+    # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
+    with pytest.raises(InvalidBatchResponse):
+        app.resolve(event, LambdaContext())
+
+
+def test_resolve_sync_batch_processing_with_aggregate_and_without_return():
+    # GIVEN a list of events representing GraphQL queries for listing locations
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+
+    app = AppSyncResolver()
+
+    # WHEN the sync batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function there is no return statement
+    @app.batch_resolver(field_name="listLocations")
+    def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+        def do_something_with_post_id(post_id): ...
+
+        post_id = event[0].source.get("id") if event[0].source else None
+        do_something_with_post_id(post_id)
+
+        # No Return statement
+
+    # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
+    with pytest.raises(InvalidBatchResponse):
+        app.resolve(event, LambdaContext())
+
+
+def test_resolve_async_batch_processing_with_aggregate_and_without_return():
+    # GIVEN a list of events representing GraphQL queries for listing locations
+    event = [
+        {
+            "typeName": "Query",
+            "info": {
+                "fieldName": "listLocations",
+                "parentTypeName": "Post",
+            },
+            "fieldName": "listLocations",
+            "arguments": {},
+            "source": {
+                "id": "1",
+            },
+        },
+    ]
+
+    app = AppSyncResolver()
+
+    # WHEN the async batch resolver for the listLocations field is defined
+    # WHEN using an aggregated event
+    # WHEN function there is no return statement
+    @app.async_batch_resolver(field_name="listLocations")
+    async def create_something(event: List[AppSyncResolverEvent]) -> Optional[List]:  # noqa AA03 VNE003
+        def do_something_with_post_id(post_id): ...
+
+        post_id = event[0].source.get("id") if event[0].source else None
+        do_something_with_post_id(post_id)
+
+        # No Return statement
+
+    # THEN the resolver should raise a InvalidBatchResponse when processing the batch of queries
     with pytest.raises(InvalidBatchResponse):
         app.resolve(event, LambdaContext())

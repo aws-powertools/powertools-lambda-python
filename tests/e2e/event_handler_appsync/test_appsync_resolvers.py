@@ -76,18 +76,29 @@ def test_appsync_get_post(appsync_endpoint, appsync_access_key):
 
 @pytest.mark.xdist_group(name="event_handler")
 def test_appsync_get_related_posts_batch_without_aggregate(appsync_endpoint, appsync_access_key):
-    # GIVEN
+    # GIVEN a batch event
     post_id = "2"
     related_posts_ids = ["3", "5"]
 
     body = {
-        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") \
-              {{ post_id relatedPosts {{ post_id }} relatedPostsAsync {{ post_id }} }} }}',
+        "query": f"""
+            query MyQuery {{
+                getPost(post_id: "{post_id}") {{
+                    post_id
+                    relatedPosts {{
+                        post_id
+                    }}
+                    relatedPostsAsync {{
+                        post_id
+                    }}
+                }}
+            }}
+        """,
         "variables": None,
         "operationName": "MyQuery",
     }
 
-    # WHEN
+    # WHEN we invoke the AppSync API with a batch event
     response = data_fetcher.get_http_response(
         Request(
             method="POST",
@@ -104,28 +115,41 @@ def test_appsync_get_related_posts_batch_without_aggregate(appsync_endpoint, app
     data = json.loads(response.content.decode("ascii"))["data"]
 
     assert data["getPost"]["post_id"] == post_id
+
     assert len(data["getPost"]["relatedPosts"]) == len(related_posts_ids)
-    assert len(data["getPost"]["relatedPostsAsync"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPosts"]:
         assert post["post_id"] in related_posts_ids
+
+    assert len(data["getPost"]["relatedPostsAsync"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPostsAsync"]:
         assert post["post_id"] in related_posts_ids
 
 
 @pytest.mark.xdist_group(name="event_handler")
 def test_appsync_get_related_posts_batch_with_aggregate(appsync_endpoint, appsync_access_key):
-    # GIVEN
+    # GIVEN a batch event
     post_id = "2"
     related_posts_ids = ["3", "5"]
 
     body = {
-        "query": f'query MyQuery {{ getPost(post_id: "{post_id}") \
-              {{ post_id relatedPostsAggregate {{ post_id }} relatedPostsAsyncAggregate {{ post_id }} }} }}',
+        "query": f"""
+            query MyQuery {{
+                getPost(post_id: "{post_id}") {{
+                    post_id
+                    relatedPostsAggregate {{
+                        post_id
+                    }}
+                    relatedPostsAsyncAggregate {{
+                        post_id
+                    }}
+                }}
+            }}
+        """,
         "variables": None,
         "operationName": "MyQuery",
     }
 
-    # WHEN
+    # WHEN we invoke the AppSync API with a batch event
     response = data_fetcher.get_http_response(
         Request(
             method="POST",
@@ -142,9 +166,11 @@ def test_appsync_get_related_posts_batch_with_aggregate(appsync_endpoint, appsyn
     data = json.loads(response.content.decode("ascii"))["data"]
 
     assert data["getPost"]["post_id"] == post_id
+
     assert len(data["getPost"]["relatedPostsAggregate"]) == len(related_posts_ids)
-    assert len(data["getPost"]["relatedPostsAsyncAggregate"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPostsAggregate"]:
         assert post["post_id"] in related_posts_ids
+
+    assert len(data["getPost"]["relatedPostsAsyncAggregate"]) == len(related_posts_ids)
     for post in data["getPost"]["relatedPostsAsyncAggregate"]:
         assert post["post_id"] in related_posts_ids
