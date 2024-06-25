@@ -52,7 +52,7 @@ classDiagram
 
 ## Getting started
 
-We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-as-persistent-storage-layer-provider).
+We use Amazon DynamoDB as the default persistence layer in the documentation. If you prefer Redis, you can learn more from [this section](#redis-cluster).
 
 ### IAM Permissions
 
@@ -80,7 +80,7 @@ To start, you'll need:
 
     ---
 
-    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-as-persistent-storage-layer-provider)
+    [Amazon DynamoDB](#dynamodb-table) or [Redis](#redis-cluster)
 
 *   :simple-awslambda:{ .lg .middle } **AWS Lambda function**
 
@@ -126,7 +126,7 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 ##### Limitations
 
-* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-as-persistent-storage-layer-provider) as an alternative.
+* **DynamoDB restricts [item sizes to 400KB](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Limits.html#limits-items){target="_blank"}**. This means that if your annotated function's response must be smaller than 400KB, otherwise your function will fail. Consider [Redis](#redis-cluster) as an alternative.
 
 * **Expect 2 WCU per non-idempotent call**. During the first invocation, we use `PutItem` for locking and `UpdateItem` for completion. Consider reviewing [DynamoDB pricing documentation](https://aws.amazon.com/dynamodb/pricing/){target="_blank"} to estimate cost.
 
@@ -138,7 +138,22 @@ Note that `fn_qualified_name` means the [qualified name for classes and function
 
 ##### Constraints
 
-If you'd like to use Redis, please [read here](#redis-as-persistent-storage-layer-provider) on how to setup and access secrets/SSL certs.
+##### Redis IaC examples
+
+=== "AWS CloudFormation example"
+
+    !!! tip inline end "Prefer AWS Console/CLI?"
+
+        Follow the official tutorials for [Amazon ElastiCache for Redis](https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/LambdaRedis.html) or [Amazon MemoryDB for Redis](https://aws.amazon.com/blogs/database/access-amazon-memorydb-for-redis-from-aws-lambda/)
+
+    ```yaml hl_lines="5 21"
+    --8<-- "examples/idempotency/templates/cfn_redis_serverless.yaml"
+    ```
+
+    1. Replace the Security Group ID and Subnet ID to match your VPC settings.
+    2. Replace the Security Group ID and Subnet ID to match your VPC settings.
+
+Once setup, you can find a quick start and advanced examples for Redis in [the persistent layers section](#redispersistencelayer).
 
 <!-- markdownlint-enable MD013 -->
 
@@ -146,11 +161,11 @@ If you'd like to use Redis, please [read here](#redis-as-persistent-storage-laye
 
 For simple use cases, you can use the `idempotent` decorator on your Lambda handler function.
 
-It will treat the entire event as an idempotency key. That is, the same event will return the previously stored result within a [configurable time window](#expiring-idempotency-records) _(1 hour, by default)_.
+It will treat the entire event as an idempotency key. That is, the same event will return the previously stored result within a [configurable time window](#adjusting-expiration-window) _(1 hour, by default)_.
 
 === "Idempotent decorator"
 
-    !!! tip "You can also choose [one or more fields](#choosing-a-payload-subset-for-idempotency) as an idempotency key."
+    !!! tip "You can also choose [one or more fields](#choosing-a-payload-subset) as an idempotency key."
 
     ```python title="getting_started_with_idempotency.py" hl_lines="5-8 12 25"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency.py"
@@ -337,7 +352,7 @@ You can change this expiration window with the **`expires_after_seconds`** param
 
 !!! note "You can skip this section if you are using the [`@idempotent` decorator](#idempotent-decorator)"
 
-By default, we protect against [concurrent executions](#handling-concurrent-executions-with-the-same-payload) with the same payload using a locking mechanism. However, if your Lambda function times out before completing the first invocation it will only accept the same request when the [idempotency record expire](#expiring-idempotency-records).
+By default, we protect against [concurrent executions](#handling-concurrent-executions-with-the-same-payload) with the same payload using a locking mechanism. However, if your Lambda function times out before completing the first invocation it will only accept the same request when the [idempotency record expire](#adjusting-expiration-window).
 
 To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
 
@@ -502,7 +517,7 @@ You can can easily integrate with [Batch](batch.md){target="_blank"} using the [
 ???+ "Choosing an unique batch record attribute"
     In this example, we choose `messageId` as our idempotency key since we know it'll be unique.
 
-    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset-for-idempotency) your producer intentionally set to define uniqueness.
+    Depending on your use case, it might be more accurate [to choose another field](#choosing-a-payload-subset) your producer intentionally set to define uniqueness.
 
 === "Integration with Batch Processor"
 
@@ -951,10 +966,6 @@ When using response hooks to manipulate returned data from idempotent operations
 
 ## Compatibility with other utilities
 
-### Batch
-
-See [Batch integration](#batch-integration) above.
-
 ### JSON Schema Validation
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
@@ -965,7 +976,7 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 	Make sure to account for this behavior, if you set the `event_key_jmespath`.
 
-=== "Using Idempotency with JSONSchema Validation utility"
+=== "Using Idempotency with validation utility"
 
     ```python hl_lines="16"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
