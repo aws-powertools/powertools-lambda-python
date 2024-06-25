@@ -373,6 +373,34 @@ This persistence layer is built-in, allowing you to use an existing DynamoDB tab
 --8<-- "examples/idempotency/src/customize_persistence_layer.py"
 ```
 
+##### Using a composite primary key
+
+Use `sort_key_attr` parameter when your table is configured with a composite primary key _(hash+range key)_.
+
+When enabled, we will save the idempotency key in the sort key instead. By default, the primary key will now be set to `idempotency#{LAMBDA_FUNCTION_NAME}`.
+
+You can optionally set a static value for the partition key using the `static_pk_value` parameter.
+
+=== "Reusing a DynamoDB table that uses a composite primary key"
+
+    ```python hl_lines="10"
+    --8<-- "examples/idempotency/src/working_with_composite_key.py"
+    ```
+
+=== "Sample Event"
+
+    ```json
+    --8<-- "examples/idempotency/src/working_with_composite_key_payload.json"
+    ```
+
+??? note "Click to expand and learn how table items would look like"
+
+    | id                           | sort_key                         | expiration | status      | data                                      |
+    | ---------------------------- | -------------------------------- | ---------- | ----------- | ----------------------------------------- |
+    | idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"user_id": 12391, "message": "success"}  |
+    | idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"user_id": 527212, "message": "success"} |
+    | idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                           |
+
 ##### DynamoDB attributes
 
 You can customize the attribute names during initialization:
@@ -870,34 +898,6 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
     ```json
     --8<-- "examples/idempotency/src/working_with_custom_config_payload.json"
     ```
-
-### Using a DynamoDB table with a composite primary key
-
-When using a composite primary key table (hash+range key), use `sort_key_attr` parameter when initializing your persistence layer.
-
-With this setting, we will save the idempotency key in the sort key instead of the primary key. By default, the primary key will now be set to `idempotency#{LAMBDA_FUNCTION_NAME}`.
-
-You can optionally set a static value for the partition key using the `static_pk_value` parameter.
-
-=== "Reusing a DynamoDB table that uses a composite primary key"
-
-    ```python hl_lines="10"
-    --8<-- "examples/idempotency/src/working_with_composite_key.py"
-    ```
-
-=== "Sample Event"
-
-    ```json
-    --8<-- "examples/idempotency/src/working_with_composite_key_payload.json"
-    ```
-
-The example function above would cause data to be stored in DynamoDB like this:
-
-| id                           | sort_key                         | expiration | status      | data                                      |
-| ---------------------------- | -------------------------------- | ---------- | ----------- | ----------------------------------------- |
-| idempotency#MyLambdaFunction | 1e956ef7da78d0cb890be999aecc0c9e | 1636549553 | COMPLETED   | {"user_id": 12391, "message": "success"}  |
-| idempotency#MyLambdaFunction | 2b2cdb5f86361e97b4383087c1ffdf27 | 1636549571 | COMPLETED   | {"user_id": 527212, "message": "success"} |
-| idempotency#MyLambdaFunction | f091d2527ad1c78f05d54cc3f363be80 | 1636549585 | IN_PROGRESS |                                           |
 
 ### Bring your own persistent store
 
