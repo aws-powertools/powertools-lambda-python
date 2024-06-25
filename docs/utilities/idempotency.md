@@ -168,7 +168,7 @@ You can use `data_keyword_argument` to tell us the argument to extract an idempo
 
 === "Using Dataclasses"
 
-    ```python title="working_with_idempotent_function_dataclass.py" hl_lines="3-7 11 26 39"
+    ```python title="working_with_idempotent_function_dataclass.py" hl_lines="4-8 12 28 41"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_dataclass.py"
     ```
 
@@ -178,7 +178,7 @@ You can use `data_keyword_argument` to tell us the argument to extract an idempo
 
 === "Using Pydantic"
 
-    ```python title="working_with_idempotent_function_pydantic.py" hl_lines="1-5 10 23 34"
+    ```python title="working_with_idempotent_function_pydantic.py" hl_lines="3-7 12 26 37"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_pydantic.py"
     ```
 
@@ -196,7 +196,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
     === "Inferring via the return type"
 
-        ```python hl_lines="6 24 25 32 36 45"
+        ```python hl_lines="8 27 35 38 48"
         --8<-- "examples/idempotency/src/working_with_pydantic_deduced_output_serializer.py"
         ```
 
@@ -206,7 +206,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
         Alternatively, you can provide an explicit model as an input to `PydanticSerializer`.
 
-        ```python hl_lines="6 24 25 32 35 44"
+        ```python hl_lines="8 27 35 35 47"
         --8<-- "examples/idempotency/src/working_with_pydantic_explicitly_output_serializer.py"
         ```
 
@@ -216,7 +216,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
     === "Inferring via the return type"
 
-        ```python hl_lines="8 27-29 36 40 49"
+        ```python hl_lines="9 30 38 41 51"
         --8<-- "examples/idempotency/src/working_with_dataclass_deduced_output_serializer.py"
         ```
 
@@ -226,7 +226,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
 
         Alternatively, you can provide an explicit model as an input to `DataclassSerializer`.
 
-        ```python hl_lines="8 27-29 36 39 48"
+        ```python hl_lines="8 30 38 40 50"
         --8<-- "examples/idempotency/src/working_with_dataclass_explicitly_output_serializer.py"
         ```
 
@@ -237,7 +237,7 @@ The output serializer supports any JSON serializable data, **Python Dataclasses*
     * **to_dict**. Function to convert any type to a JSON serializable dictionary before it saves into the persistent storage.
     * **from_dict**. Function to convert from a dictionary retrieved from persistent storage and serialize in its original form.
 
-    ```python hl_lines="8 32 36 40 50 53"
+    ```python hl_lines="9 34 38 42 52 54 64"
     --8<-- "examples/idempotency/src/working_with_idempotent_function_custom_output_serializer.py"
     ```
 
@@ -255,7 +255,7 @@ By default, caching is disabled since we don't know how big your response could 
 
 === "Enabling cache"
 
-    ```python hl_lines="12"
+    ```python hl_lines="15"
     --8<-- "examples/idempotency/src/working_with_local_cache.py"
     ```
 
@@ -290,7 +290,7 @@ Imagine the function runs successfully, but the client never receives the respon
 
 === "Payment function"
 
-    ```python hl_lines="5-9 16 30"
+    ```python hl_lines="6-10 18 31"
     --8<-- "examples/idempotency/src/working_with_payload_subset.py"
     ```
 
@@ -308,8 +308,14 @@ Imagine the function runs successfully, but the client never receives the respon
 To prevent against extended failed retries when a [Lambda function times out](https://aws.amazon.com/premiumsupport/knowledge-center/lambda-verify-invocation-timeouts/){target="_blank"},
 Powertools for AWS Lambda (Python) calculates and includes the remaining invocation available time as part of the idempotency record.
 
-???+ example
-    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will execute the invocation again as if it was in the `EXPIRED` state (e.g, `expire_seconds` field elapsed).
+To prevent extended failures, use **`register_lambda_context`** function from your idempotency config to calculate and include the remaining invocation time in your idempotency record.
+
+```python title="working_with_lambda_timeout.py" hl_lines="14 23"
+--8<-- "examples/idempotency/src/working_with_lambda_timeout.py"
+```
+
+???+ example "Mechanics"
+    If a second invocation happens **after** this timestamp, and the record is marked as `INPROGRESS`, we will run the invocation again as if it was in the `EXPIRED` state.
 
     This means that if an invocation expired during execution, it will be quickly executed again on the next retry.
 
@@ -344,7 +350,9 @@ If an exception is handled or raised **outside** your decorated function, then i
 
 This persistence layer is built-in, allowing you to use an existing DynamoDB table or create a new one dedicated to idempotency state (recommended).
 
-=== "Customizing DynamoDBPersistenceLayer to suit your table structure"
+```python title="customize_persistence_layer.py" hl_lines="10-18"
+--8<-- "examples/idempotency/src/customize_persistence_layer.py"
+```
 
     ```python hl_lines="7-15"
     --8<-- "examples/idempotency/src/customize_persistence_layer.py"
@@ -375,12 +383,12 @@ For a quick start, initialize `RedisCachePersistenceLayer` and pass your cluster
 For security, we enforce SSL connections by default; to disable it, set `ssl=False`.
 
 === "Redis quick start"
-    ```python hl_lines="7-9 12 26"
+    ```python title="getting_started_with_idempotency_redis_config.py" hl_lines="8-10 14 27"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_config.py"
     ```
 
 === "Using an existing Redis client"
-    ```python hl_lines="4 9-11 14 22 36"
+    ```python title="getting_started_with_idempotency_redis_client.py" hl_lines="5 10-11 16 24 38"
     --8<-- "examples/idempotency/src/getting_started_with_idempotency_redis_client.py"
     ```
 
@@ -438,11 +446,9 @@ You can customize attribute names when instantiating `RedisCachePersistenceLayer
 | **data_attr**               |          | `data`                   | Stores results of successfully executed Lambda handlers                                       |
 | **validation_key_attr**     |          | `validation`             | Hashed representation of the parts of the event used for validation                           |
 
-=== "Customizing RedisPersistenceLayer to suit your data structure"
-
-    ```python hl_lines="9-16"
-    --8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
-    ```
+```python title="customize_persistence_layer_redis.py" hl_lines="15-18"
+--8<-- "examples/idempotency/src/customize_persistence_layer_redis.py"
+```
 
 ### Common use cases
 
@@ -777,7 +783,7 @@ You can change this window with the **`expires_after_seconds`** parameter:
 
 === "Adjusting idempotency record expiration"
 
-    ```python hl_lines="11"
+    ```python hl_lines="14"
     --8<-- "examples/idempotency/src/working_with_record_expiration.py"
     ```
 
@@ -811,7 +817,7 @@ With **`payload_validation_jmespath`**, you can provide an additional JMESPath e
 
 === "Payload validation"
 
-    ```python hl_lines="12 20 28"
+    ```python hl_lines="16 25 32"
     --8<-- "examples/idempotency/src/working_with_validation_payload.py"
     ```
 
@@ -847,7 +853,7 @@ This means that we will raise **`IdempotencyKeyError`** if the evaluation of **`
 
 === "Idempotency key required"
 
-    ```python hl_lines="11"
+    ```python hl_lines="14"
     --8<-- "examples/idempotency/src/working_with_idempotency_key_required.py"
     ```
 
@@ -869,13 +875,13 @@ The **`boto_config`** and **`boto3_session`** parameters enable you to pass in a
 
 === "Custom session"
 
-    ```python hl_lines="1 11 13"
+    ```python hl_lines="3 13 16"
     --8<-- "examples/idempotency/src/working_with_custom_session.py"
     ```
 
 === "Custom config"
 
-    ```python hl_lines="1 11 13"
+    ```python hl_lines="3 13 16"
     --8<-- "examples/idempotency/src/working_with_custom_config.py"
     ```
 
@@ -895,7 +901,7 @@ You can optionally set a static value for the partition key using the `static_pk
 
 === "Reusing a DynamoDB table that uses a composite primary key"
 
-    ```python hl_lines="7"
+    ```python hl_lines="10"
     --8<-- "examples/idempotency/src/working_with_composite_key.py"
     ```
 
@@ -924,11 +930,9 @@ You can create your own persistent store from scratch by inheriting the `BasePer
 * **`_update_record()`** – Updates an item in the persistence store.
 * **`_delete_record()`** – Removes an item from the persistence store.
 
-=== "Bring your own persistent store"
-
-    ```python hl_lines="8 18 65 74 96 124"
-    --8<-- "examples/idempotency/src/bring_your_own_persistent_store.py"
-    ```
+```python title="bring_your_own_persistent_store.py" hl_lines="8 18 65 74 96 124"
+--8<-- "examples/idempotency/src/bring_your_own_persistent_store.py"
+```
 
 ???+ danger
     Pay attention to the documentation for each - you may need to perform additional checks inside these methods to ensure the idempotency guarantees remain intact.
@@ -941,7 +945,7 @@ You can set up a `response_hook` in the `IdempotentConfig` class to manipulate t
 
 === "Using an Idempotent Response Hook"
 
-    ```python hl_lines="19 21 27 34"
+    ```python hl_lines="20 22 28 36"
     --8<-- "examples/idempotency/src/working_with_response_hook.py"
     ```
 
@@ -971,7 +975,7 @@ When using response hooks to manipulate returned data from idempotent operations
 
 See [Batch integration](#batch-integration) above.
 
-### Validation utility
+### JSON Schema Validation
 
 The idempotency utility can be used with the `validator` decorator. Ensure that idempotency is the innermost decorator.
 
@@ -983,7 +987,7 @@ The idempotency utility can be used with the `validator` decorator. Ensure that 
 
 === "Using Idempotency with JSONSchema Validation utility"
 
-    ```python hl_lines="13"
+    ```python hl_lines="16"
     --8<-- "examples/idempotency/src/integrate_idempotency_with_validator.py"
     ```
 

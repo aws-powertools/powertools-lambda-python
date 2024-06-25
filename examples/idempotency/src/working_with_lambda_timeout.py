@@ -1,3 +1,5 @@
+import os
+
 from aws_lambda_powertools.utilities.data_classes.sqs_event import SQSRecord
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
@@ -6,7 +8,8 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+table = os.getenv("IDEMPOTENCY_TABLE")
+persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 
 config = IdempotencyConfig()
 

@@ -1,3 +1,5 @@
+import os
+
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
@@ -6,8 +8,9 @@ from aws_lambda_powertools.utilities.idempotency import (
 from aws_lambda_powertools.utilities.typing import LambdaContext
 from aws_lambda_powertools.utilities.validation import envelopes, validator
 
+table = os.getenv("IDEMPOTENCY_TABLE")
 config = IdempotencyConfig(event_key_jmespath='["message", "username"]')
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 
 
 @validator(envelope=envelopes.API_GATEWAY_HTTP)

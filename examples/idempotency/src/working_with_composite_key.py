@@ -1,10 +1,13 @@
+import os
+
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     idempotent,
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable", sort_key_attr="sort_key")
+table = os.getenv("IDEMPOTENCY_TABLE")
+persistence_layer = DynamoDBPersistenceLayer(table_name=table, sort_key_attr="sort_key")
 
 
 @idempotent(persistence_store=persistence_layer)

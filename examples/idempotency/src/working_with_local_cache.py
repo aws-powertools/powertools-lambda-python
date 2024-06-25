@@ -1,3 +1,5 @@
+import os
+
 from aws_lambda_powertools.utilities.idempotency import (
     DynamoDBPersistenceLayer,
     IdempotencyConfig,
@@ -5,7 +7,8 @@ from aws_lambda_powertools.utilities.idempotency import (
 )
 from aws_lambda_powertools.utilities.typing import LambdaContext
 
-persistence_layer = DynamoDBPersistenceLayer(table_name="IdempotencyTable")
+table = os.getenv("IDEMPOTENCY_TABLE")
+persistence_layer = DynamoDBPersistenceLayer(table_name=table)
 config = IdempotencyConfig(
     event_key_jmespath="powertools_json(body)",
     # by default, it holds 256 items in a Least-Recently-Used (LRU) manner
