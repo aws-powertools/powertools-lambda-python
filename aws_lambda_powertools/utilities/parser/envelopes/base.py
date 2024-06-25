@@ -4,9 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional, TypeVar, Union
 
-from pydantic import TypeAdapter
-
-T = TypeVar("T")
+from aws_lambda_powertools.utilities.parser.functions import _retrieve_or_set_model_from_cache
+from aws_lambda_powertools.utilities.parser.types import T
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +33,7 @@ class BaseEnvelope(ABC):
             logger.debug("Skipping parsing as event is None")
             return data
 
-        adapter = TypeAdapter(model)
+        adapter = _retrieve_or_set_model_from_cache(model=model)
 
         logger.debug("parsing event against model")
         if isinstance(data, str):
