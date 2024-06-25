@@ -22,7 +22,7 @@ class BaseEnvelope(ABC):
         ----------
         data : Dict
             Data to be parsed and validated
-        model : Type[Model]
+        model : type[T]
             Data model to parse and validate data against
 
         Returns
