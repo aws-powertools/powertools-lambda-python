@@ -271,7 +271,7 @@ By default, caching is disabled since we don't know how big your response could 
     --8<-- "examples/idempotency/src/working_with_local_cache_payload.json"
     ```
 
-### Choosing a payload subset for idempotency
+### Choosing a payload subset
 
 ???+ tip "Tip: Dealing with always changing payloads"
     When dealing with a more elaborate payload, where parts of the payload always change, you should use **`event_key_jmespath`** parameter.
