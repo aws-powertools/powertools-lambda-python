@@ -7,6 +7,7 @@ from typing import Any, Callable, Dict, Optional, Type, TypeVar, overload
 from pydantic import PydanticSchemaGenerationError, TypeAdapter, ValidationError
 
 from aws_lambda_powertools.middleware_factory import lambda_handler_decorator
+from aws_lambda_powertools.shared.cache_dict import LRUDict
 from aws_lambda_powertools.utilities.parser.envelopes.base import Envelope
 from aws_lambda_powertools.utilities.parser.exceptions import InvalidEnvelopeError, InvalidModelTypeError
 from aws_lambda_powertools.utilities.parser.types import EventParserReturnType
@@ -15,6 +16,8 @@ from aws_lambda_powertools.utilities.typing import LambdaContext
 T = TypeVar("T")
 
 logger = logging.getLogger(__name__)
+
+cache = LRUDict(max_items=1024)
 
 
 @lambda_handler_decorator
@@ -186,6 +189,10 @@ def parse(event: Dict[str, Any], model: type[T], envelope: Optional[Type[Envelop
 
     try:
         adapter = TypeAdapter(model)
+        if id(adapter) not in cache:
+            cache[id(adapter)] = adapter
+        else:
+            adapter = cache[id(adapter)]
 
         logger.debug("Parsing and validating event model; no envelope used")
         if isinstance(event, str):
