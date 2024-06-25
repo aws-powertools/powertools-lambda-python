@@ -38,7 +38,7 @@ def event_parser(
     This is useful when you need to confirm event wrapper structure, and
     b) selectively extract a portion of your payload for parsing & validation.
 
-    NOTE: If envelope is omitted, the complete event is parsed to match the model parameter BaseModel definition.
+    NOTE: If envelope is omitted, the complete event is parsed to match the model parameter definition.
 
     Example
     -------
@@ -72,7 +72,7 @@ def event_parser(
         Lambda event to be parsed & validated
     context:  LambdaContext
         Lambda context object
-    model:   Model
+    model:   Optional[type[T]]
         Your data model that will replace the event.
     envelope: Envelope
         Optional envelope to extract the model from
