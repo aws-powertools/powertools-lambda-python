@@ -1,10 +1,11 @@
 import time
 from contextlib import contextmanager
-from typing import Annotated, Generator, Literal, Union
+from typing import Generator
 
 import pytest
 from pydantic import BaseModel, Field
 
+from aws_lambda_powertools.shared.types import Annotated, Literal, Union
 from aws_lambda_powertools.utilities.parser import parse
 
 # adjusted for slower machines in CI too
