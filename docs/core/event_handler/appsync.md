@@ -406,6 +406,65 @@ You can process each item in the batch individually, and we can handle exception
     1. You need to disable the aggregated event by using `aggregate` flag.
         The resolver receives and processes each record one at a time.
 
+=== "getting_started_with_batch_resolver_payload.json"
+  	```json hl_lines="4 16 21 29 41 46"
+    --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_payload.json"
+  	```
+
+##### Raise on error
+
+!!! todo "Explanation about hard failure"
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (getPosts)
+    YourLogic: Call your registered resolver function <strong>N times</strong>
+    EventHandlerResolverErrorHandling: <strong>Error?</strong>
+    EventHandlerResolverHappyPath: <strong>No error?</strong>
+    EventHandlerResolverUnhappyPath: Propagate any exception
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query getPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+    LambdaErrorResponse: <strong>Lambda error</strong>
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverHappyPath
+        YourLogic --> EventHandlerResolverErrorHandling
+        EventHandlerResolverHappyPath --> EventHandlerResolverBuilder
+        EventHandlerResolverErrorHandling --> EventHandlerResolverUnhappyPath
+        EventHandlerResolverUnhappyPath --> LambdaErrorResponse
+
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
+
 === "getting_started_with_batch_resolver_handling_error.py"
   	```python hl_lines="3 7 17"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver_handling_error.py"
