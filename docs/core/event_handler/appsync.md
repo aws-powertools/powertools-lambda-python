@@ -432,7 +432,7 @@ stateDiagram-v2
     AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
     AppSyncBatchAggregate: aggregate batch resolver event
     AppSyncBatchLimit: reached batch size limit
-    LambdaResponse: Lambda response
+    LambdaResponse: <strong>Lambda response</strong>
     LambdaErrorResponse: <strong>Lambda error</strong>
 
     Client --> AppSyncBatchResolverMode
