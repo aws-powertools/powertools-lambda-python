@@ -368,14 +368,15 @@ sequenceDiagram
 
 You can use `@batch_resolver` or `@async_batch_resolver` decorators to receive the entire batch of requests.
 
-In this mode, you must return results in the same order of your batch items, so AppSync can associate the results.
+In this mode, you must return results in the same order of your batch items, so AppSync can associate the results back to the client.
 
 === "getting_started_with_batch_resolver.py"
-  	```python hl_lines="3 7 17"
+  	```python hl_lines="5 9 23"
     --8<-- "examples/event_handler_graphql/src/getting_started_with_batch_resolver.py"
   	```
 
-    1. The entire batch is sent to the resolver, and you need to iterate through it to process all records.
+    1. The entire batch is sent to the resolver. You need to iterate through it to process all records.
+    2. We use `post_id` as our unique identifier of the GraphQL request.
 
 === "getting_started_with_batch_resolver_payload.json"
   	```json hl_lines="4 16 21 29 41 46"
