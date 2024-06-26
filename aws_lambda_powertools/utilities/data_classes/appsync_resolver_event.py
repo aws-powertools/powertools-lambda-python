@@ -184,9 +184,9 @@ class AppSyncResolverEvent(DictWrapper):
         return get_identity_object(self.get("identity"))
 
     @property
-    def source(self) -> Optional[Dict[str, Any]]:
+    def source(self) -> Dict[str, Any]:
         """A map that contains the resolution of the parent field."""
-        return self.get("source")
+        return self.get("source") or {}
 
     @property
     def request_headers(self) -> Dict[str, str]:

@@ -3,32 +3,61 @@ title: GraphQL API
 description: Core utility
 ---
 
-Event handler for AWS AppSync Direct Lambda Resolver and Amplify GraphQL Transformer.
+Event Handler for AWS AppSync and Amplify GraphQL Transformer.
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    EventSource: AWS Lambda Event Sources
+    EventHandlerResolvers: AWS AppSync Direct invocation<br/><br/> AWS AppSync Batch invocation
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Adapts response to Event Source contract
+    LambdaResponse: Lambda response
+
+    state EventSource {
+        EventHandlerResolvers
+    }
+
+    EventHandlerResolvers --> LambdaInit
+
+    LambdaInit --> EventHandler
+    EventHandler --> EventHandlerResolver
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+    }
+
+    EventHandler --> LambdaResponse
+```
 
 ## Key Features
 
-* Automatically parse API arguments to function arguments
 * Choose between strictly match a GraphQL field name or all of them to a function
-* Integrates with [Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
-* Works with both Direct Lambda Resolver and Amplify GraphQL Transformer `@function` directive
-* Support async Python 3.8+ functions, and generators
+* Automatically parse API arguments to function arguments
+* Integrates with [Event Source Data classes utilities](../../utilities/data_classes.md){target="_blank"} to access resolver and identity information
+* Support async Python 3.8+ functions and generators
 
 ## Terminology
 
 **[Direct Lambda Resolver](https://docs.aws.amazon.com/appsync/latest/devguide/direct-lambda-reference.html){target="_blank"}**. A custom AppSync Resolver to bypass the use of Apache Velocity Template (VTL) and automatically map your function's response to a GraphQL field.
 
-**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language (SDL). Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
+**[Amplify GraphQL Transformer](https://docs.amplify.aws/cli/graphql-transformer/function){target="_blank"}**. Custom GraphQL directives to define your application's data model using Schema Definition Language _(SDL)_, _e.g., `@function`_. Amplify CLI uses these directives to convert GraphQL SDL into full descriptive AWS CloudFormation templates.
 
 ## Getting started
 
+???+ tip "Tip: Designing GraphQL Schemas for the first time?"
+    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} to understand how to define types, nesting, and pagination.
+
 ### Required resources
 
-You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use this utility.
+You must have an existing AppSync GraphQL API and IAM permissions to invoke your Lambda function. That said, there is no additional permissions to use Event Handler as routing requires no dependency (_standard library_).
 
 This is the sample infrastructure we are using for the initial examples with a AppSync Direct Lambda Resolver.
-
-???+ tip "Tip: Designing GraphQL Schemas for the first time?"
-    Visit [AWS AppSync schema documentation](https://docs.aws.amazon.com/appsync/latest/devguide/designing-your-schema.html){target="_blank"} for understanding how to define types, nesting, and pagination.
 
 === "getting_started_schema.graphql"
 
@@ -36,7 +65,7 @@ This is the sample infrastructure we are using for the initial examples with a A
     --8<-- "examples/event_handler_graphql/src/getting_started_schema.graphql"
     ```
 
-=== "template.yml"
+=== "template.yaml"
 
     ```yaml hl_lines="59-60 71-72 94-95 104-105 112-113"
     --8<-- "examples/event_handler_graphql/sam/template.yaml"
@@ -258,6 +287,275 @@ You can use `append_context` when you want to share data between your App and Ro
 	```python hl_lines="23"
     --8<-- "examples/event_handler_graphql/src/split_operation_append_context_module.py"
 	```
+
+### Batch processing
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Run your registered resolver function
+    EventHandlerResolverBuilder: Verifies response is a list
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers mechanics: visualizing N+1 in `relatedPosts` field.</center></em>
+
+#### Understanding N+1 problem
+
+When AWS AppSync has [batching enabled for Lambda Resolvers](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#advanced-use-case-batching){target="_blank"}, it will group as many requests as possible before invoking your Lambda invocation. Effectively solving the [N+1 problem in GraphQL](https://aws.amazon.com/blogs/mobile/introducing-configurable-batching-size-for-aws-appsync-lambda-resolvers/){target="_blank"}.
+
+For example, say you have a query named `listPosts`. For each post, you also want `relatedPosts`. **Without batching**, AppSync will:
+
+1. Invoke your Lambda function to get the first post
+2. Invoke your Lambda function for each related post
+3. Repeat 1 until done
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant AppSync
+    participant Lambda
+    participant Database
+
+    Client->>AppSync: GraphQL Query
+    Note over Client,AppSync: query listPosts { <br/>id <br/>title <br/>relatedPosts { id title } <br/> }
+
+    AppSync->>Lambda: Fetch N posts (listPosts)
+    Lambda->>Database: Query
+    Database->>Lambda: Posts
+    Lambda-->>AppSync: Return posts (id, title)
+    loop Fetch N related posts (relatedPosts)
+        AppSync->>Lambda: Invoke function (N times)
+        Lambda->>Database: Query
+        Database-->>Lambda: Return related posts
+        Lambda-->>AppSync: Return related posts
+    end
+    AppSync-->>Client: Return posts and their related posts
+```
+
+#### Batch resolvers
+
+You can use `@batch_resolver` or `@async_batch_resolver` decorators to receive the entire batch of requests.
+
+In this mode, you must return results in the same order of your batch items, so AppSync can associate the results back to the client.
+
+=== "advanced_batch_resolver.py"
+  	```python hl_lines="5 9 23"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver.py"
+  	```
+
+    1. The entire batch is sent to the resolver. You need to iterate through it to process all records.
+    2. We use `post_id` as our unique identifier of the GraphQL request.
+
+=== "advanced_batch_resolver_payload.json"
+  	```json hl_lines="6 16 25 35 44 54"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
+  	```
+
+=== "advanced_batch_query.graphql"
+  	```typescript hl_lines="3 6"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
+  	```
+
+##### Processing items individually
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Call your registered resolver function <strong>N times</strong>
+    EventHandlerResolverErrorHandling: Gracefully <strong>handle errors</strong> with null response
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: Lambda response
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverErrorHandling
+        EventHandlerResolverErrorHandling --> EventHandlerResolverBuilder
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
+
+In rare scenarios, you might want to process each item individually, trading ease of use for increased latency as you handle one batch item at a time.
+
+You can toggle `aggregate` parameter in `@batch_resolver` decorator for your resolver function to be called N times.
+
+!!! note "This does not resolve the N+1 problem, but shifts it to the Lambda runtime."
+
+In this mode, we will:
+
+1. Aggregate each response we receive from your function in the exact order it receives
+2. Gracefully handle errors by adding `None` in the final response for each batch item that failed processing
+    * You can customize `nul` or error responses back to the client in the [AppSync resolver mapping templates](https://docs.aws.amazon.com/appsync/latest/devguide/tutorial-lambda-resolvers.html#returning-individual-errors){target="_blank"}
+
+=== "advanced_batch_resolver_individual.py"
+  	```python hl_lines="5 9 19"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_individual.py"
+  	```
+
+    1. You need to disable the aggregated event by using `aggregate` flag.
+        The resolver receives and processes each record one at a time.
+
+=== "advanced_batch_resolver_payload.json"
+  	```json hl_lines="6 16 25 35 44 54"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
+  	```
+
+=== "advanced_batch_query.graphql"
+  	```typescript hl_lines="3 6"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
+  	```
+
+##### Raise on error
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    LambdaInit: Lambda invocation
+    EventHandler: Event Handler
+    EventHandlerResolver: Route event based on GraphQL type/field keys
+    Client: Client query (listPosts)
+    YourLogic: Call your registered resolver function <strong>N times</strong>
+    EventHandlerResolverErrorHandling: <strong>Error?</strong>
+    EventHandlerResolverHappyPath: <strong>No error?</strong>
+    EventHandlerResolverUnhappyPath: Propagate any exception
+    EventHandlerResolverBuilder: Aggregate responses to match batch size
+    AppSyncBatchPostsResolution: query listPosts
+    AppSyncBatchPostsItems: get all posts data <em>(id, title, relatedPosts)</em>
+    AppSyncBatchRelatedPosts: get related posts <em>(id, title, relatedPosts)</em>
+    AppSyncBatchAggregate: aggregate batch resolver event
+    AppSyncBatchLimit: reached batch size limit
+    LambdaResponse: <strong>Lambda response</strong>
+    LambdaErrorResponse: <strong>Lambda error</strong>
+
+    Client --> AppSyncBatchResolverMode
+    state AppSyncBatchResolverMode {
+        [*] --> AppSyncBatchPostsResolution
+        AppSyncBatchPostsResolution --> AppSyncBatchPostsItems
+        AppSyncBatchPostsItems --> AppSyncBatchRelatedPosts: <strong>N additional queries</strong>
+        AppSyncBatchRelatedPosts --> AppSyncBatchRelatedPosts
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchRelatedPosts --> AppSyncBatchAggregate
+        AppSyncBatchAggregate --> AppSyncBatchLimit
+    }
+
+    AppSyncBatchResolverMode --> LambdaInit: 1x Invoke with N events
+    LambdaInit --> EventHandler
+
+    state EventHandler {
+        [*] --> EventHandlerResolver: app.resolve(event, context)
+        EventHandlerResolver --> YourLogic
+        YourLogic --> EventHandlerResolverHappyPath
+        YourLogic --> EventHandlerResolverErrorHandling
+        EventHandlerResolverHappyPath --> EventHandlerResolverBuilder
+        EventHandlerResolverErrorHandling --> EventHandlerResolverUnhappyPath
+        EventHandlerResolverUnhappyPath --> LambdaErrorResponse
+
+        EventHandlerResolverBuilder --> LambdaResponse
+    }
+```
+
+<em><center>Batch resolvers: reducing Lambda invokes but fetching data N times (similar to single resolver).</center></em>
+
+You can toggle `raise_on_error` parameter in `@batch_resolver` to propagate any exception instead of gracefully returning `None` for a given batch item.
+
+This is useful when you want to stop processing immediately in the event of an unhandled or unrecoverable exception.
+
+=== "advanced_batch_resolver_handling_error.py"
+  	```python hl_lines="5 9 19"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_handling_error.py"
+  	```
+
+    1. You can enable enable the error handling by using `raise_on_error` flag.
+
+=== "advanced_batch_resolver_payload.json"
+  	```json hl_lines="6 16 25 35 44 54"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
+  	```
+
+=== "advanced_batch_query.graphql"
+  	```typescript hl_lines="3 6"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
+  	```
+
+#### Async batch resolver
+
+Similar to `@batch_resolver` explained in [batch resolvers](#batch-resolvers), you can use `async_batch_resolver` to handle async functions.
+
+=== "advanced_batch_async_resolver.py"
+  	```python hl_lines="5 9 23"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_async_resolver.py"
+  	```
+
+    1. `async_batch_resolver` takes care of running and waiting for coroutine completion.
+
+=== "advanced_batch_resolver_payload.json"
+  	```json hl_lines="6 16 25 35 44 54"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_resolver_payload.json"
+  	```
+
+=== "advanced_batch_query.graphql"
+  	```typescript hl_lines="3 6"
+    --8<-- "examples/event_handler_graphql/src/advanced_batch_query.graphql"
+  	```
 
 ## Testing your code
 
