@@ -13,8 +13,8 @@ from aws_lambda_powertools.utilities.idempotency.persistence.redis import (
 redis_values: dict[str, Any] = parameters.get_secret("redis_info", transform="json")  # (1)!
 
 redis_client = Redis(
-    host=redis_values.get("REDIS_HOST"),
-    port=redis_values.get("REDIS_PORT"),
+    host=redis_values.get("REDIS_HOST", "localhost"),
+    port=redis_values.get("REDIS_PORT", 6379),
     password=redis_values.get("REDIS_PASSWORD"),
     decode_responses=True,
     socket_timeout=10.0,
